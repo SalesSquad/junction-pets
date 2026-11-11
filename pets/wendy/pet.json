@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.wendy",
+  "slug": "junction-wendy",
+  "version": "0.1.0",
+  "agentName": "Wendy",
+  "displayName": "Wendy companion",
+  "company": {
+    "name": "Wendy",
+    "slug": "wendy",
+    "role": "technology",
+    "website": "https://wendy.dev/"
+  },
+  "tagline": "Make a physical-AI deployment plan observable and bounded.",
+  "introduction": "A technical companion for Wendy's public physical-AI stack, helping organize setup questions, logs and simulation-to-device handoffs.",
+  "welcome": "What would you like to understand or plan with Wendy? Choose a starter below, or share a small redacted example.",
+  "accent": "#8155a8",
+  "artIndex": 28,
+  "capabilities": [
+    {
+      "id": "system-map",
+      "title": "Map a physical-AI system",
+      "description": "Separate application, device, networking and model responsibilities.",
+      "kind": "planning",
+      "inputs": [
+        "system idea and stated hardware"
+      ],
+      "outputs": [
+        "system map and prerequisites"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "log-triage",
+      "title": "Triage supplied logs",
+      "description": "Organize a redacted log excerpt into subsystem hypotheses.",
+      "kind": "analysis",
+      "inputs": [
+        "redacted logs and versions"
+      ],
+      "outputs": [
+        "diagnostic questions and next checks"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "deployment-plan",
+      "title": "Plan a device handoff",
+      "description": "Create a staged deployment and recovery checklist.",
+      "kind": "planning",
+      "inputs": [
+        "deployment goal and constraints"
+      ],
+      "outputs": [
+        "handoff and recovery checklist"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Map the layers of a Wendy-based edge AI demo and list what I must verify on the device.",
+    "Help interpret these Wendy-related logs and separate network, application and model failures.",
+    "Create a simulation-to-device handoff checklist with a clear stop and recovery procedure."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Wendy physical AI platform",
+      "url": "https://wendy.dev/",
+      "publisher": "Wendy",
+      "checkedAt": "2026-11-11",
+      "summary": "Official platform overview covering physical-AI software, device deployment and observability."
+    },
+    {
+      "id": "official-docs",
+      "title": "Wendy documentation",
+      "url": "https://docs.wendy.dev/",
+      "publisher": "Wendy",
+      "checkedAt": "2026-11-11",
+      "summary": "Official documentation linked from Wendy's website."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_a300bb7e50708191b8a94dcf0a76c883",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

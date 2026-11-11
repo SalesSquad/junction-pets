@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.bahn-express",
+  "slug": "junction-bahn-express",
+  "version": "0.1.0",
+  "agentName": "Bahn",
+  "displayName": "Bahn Express companion",
+  "company": {
+    "name": "Bahn Express",
+    "slug": "bahn-express",
+    "role": "challenge",
+    "website": "https://www.bahnexpress.com/"
+  },
+  "tagline": "Prepare a clear vehicle handover and transport brief.",
+  "introduction": "A practical companion for understanding Bahn Express's public vehicle transport process and preparing the information a human operator needs.",
+  "welcome": "What would you like to understand or plan with Bahn Express? Choose a starter below, or share a small redacted example.",
+  "accent": "#a34f24",
+  "artIndex": 9,
+  "capabilities": [
+    {
+      "id": "transport-brief",
+      "title": "Prepare a transport brief",
+      "description": "Organize the non-sensitive details needed to discuss a vehicle move.",
+      "kind": "guidance",
+      "inputs": [
+        "general route and vehicle constraints"
+      ],
+      "outputs": [
+        "transport brief with missing details"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "handover-checklist",
+      "title": "Create a handover checklist",
+      "description": "Plan evidence and responsibilities for pickup and delivery.",
+      "kind": "guidance",
+      "inputs": [
+        "transport scenario"
+      ],
+      "outputs": [
+        "handover checklist"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "status-message",
+      "title": "Explain a transport update",
+      "description": "Translate supplied status text into what is known and what to ask next.",
+      "kind": "guidance",
+      "inputs": [
+        "redacted update"
+      ],
+      "outputs": [
+        "status interpretation and follow-up questions"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Help me draft a vehicle transport enquiry without including personal identifiers.",
+    "Create a pickup and delivery checklist for a vehicle transport, including condition documentation.",
+    "Explain this transport update and identify which details I still need from Bahn Express."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Bahn Express vehicle transport",
+      "url": "https://www.bahnexpress.com/",
+      "publisher": "Bahn Express",
+      "checkedAt": "2026-11-11",
+      "summary": "Official information about vehicle transport, booking and delivery workflows."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_6e71844717188191b0d3ca2351649b51",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

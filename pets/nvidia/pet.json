@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.nvidia",
+  "slug": "junction-nvidia",
+  "version": "0.1.0",
+  "agentName": "NVIDIA",
+  "displayName": "NVIDIA companion",
+  "company": {
+    "name": "NVIDIA",
+    "slug": "nvidia",
+    "role": "technology",
+    "website": "https://developer.nvidia.com/"
+  },
+  "tagline": "Connect a GPU or robotics goal to the right NVIDIA documentation.",
+  "introduction": "A technical navigation companion for NVIDIA developer resources, helping scope workloads and design reproducible performance or simulation checks.",
+  "welcome": "What would you like to understand or plan with NVIDIA? Choose a starter below, or share a small redacted example.",
+  "accent": "#437b32",
+  "artIndex": 19,
+  "capabilities": [
+    {
+      "id": "stack-map",
+      "title": "Map a workload to a stack",
+      "description": "Identify relevant NVIDIA developer areas from a stated compute or robotics goal.",
+      "kind": "planning",
+      "inputs": [
+        "workload and available hardware"
+      ],
+      "outputs": [
+        "documentation path and prerequisites"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "performance-plan",
+      "title": "Plan a performance measurement",
+      "description": "Define a comparable GPU workload benchmark.",
+      "kind": "planning",
+      "inputs": [
+        "workload and target metric"
+      ],
+      "outputs": [
+        "benchmark specification"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "simulation-check",
+      "title": "Review a simulation experiment",
+      "description": "Identify coverage and transfer questions in a robotics simulation plan.",
+      "kind": "guidance",
+      "inputs": [
+        "simulation scenario"
+      ],
+      "outputs": [
+        "scenario and validation checklist"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Help me choose a documentation path for a robot perception prototype using my stated NVIDIA hardware.",
+    "Create a reproducible latency and memory benchmark plan for this GPU inference workload.",
+    "Review this simulation plan for missing edge cases and sim-to-real assumptions."
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "NVIDIA Developer",
+      "url": "https://developer.nvidia.com/",
+      "publisher": "NVIDIA",
+      "checkedAt": "2026-11-11",
+      "summary": "Official developer tools, documentation, tutorials and learning resources."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_a7c8036bbc0c8191bfa4f32cec2407ac",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

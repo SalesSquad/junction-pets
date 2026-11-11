@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.scailab",
+  "slug": "junction-scailab",
+  "version": "0.1.0",
+  "agentName": "Scailab",
+  "displayName": "Scailab companion",
+  "company": {
+    "name": "Scailab",
+    "slug": "scailab",
+    "role": "technology",
+    "website": "https://www.scailab.se/"
+  },
+  "tagline": "Plan synthetic perception data with measurable coverage.",
+  "introduction": "A physical-AI data companion grounded in Scailab's public description of synthetic environments, perception and sim-to-real evaluation.",
+  "welcome": "What would you like to understand or plan with Scailab? Choose a starter below, or share a small redacted example.",
+  "accent": "#3d7874",
+  "artIndex": 25,
+  "capabilities": [
+    {
+      "id": "scenario-matrix",
+      "title": "Design a scenario matrix",
+      "description": "Turn a perception task into a synthetic-data coverage plan.",
+      "kind": "guidance",
+      "inputs": [
+        "task, environment and sensors"
+      ],
+      "outputs": [
+        "scenario matrix"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "sim-to-real",
+      "title": "Plan sim-to-real validation",
+      "description": "Define evidence needed to compare synthetic and real observations.",
+      "kind": "guidance",
+      "inputs": [
+        "dataset plan and intended deployment"
+      ],
+      "outputs": [
+        "transfer evaluation plan"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "dataset-review",
+      "title": "Review dataset assumptions",
+      "description": "Identify gaps, leakage and unsupported labels in supplied dataset metadata.",
+      "kind": "analysis",
+      "inputs": [
+        "dataset metadata"
+      ],
+      "outputs": [
+        "coverage and quality review"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Design a synthetic-data scenario matrix for warehouse object detection, including rare lighting and occlusion cases.",
+    "How should I test whether a model trained with synthetic images transfers to a real warehouse?",
+    "Review this dataset plan for leakage, missing conditions and ambiguous labels."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Scailab perception intelligence",
+      "url": "https://www.scailab.se/",
+      "publisher": "Scailab",
+      "checkedAt": "2026-11-11",
+      "summary": "Primary indexed site describes synthetic environments and perception infrastructure for physical AI; current API availability is not established."
+    },
+    {
+      "id": "official-mission",
+      "title": "Scailab mission",
+      "url": "https://www.scailab.se/mission",
+      "publisher": "Scailab",
+      "checkedAt": "2026-11-11",
+      "summary": "Primary indexed mission page describes combining real and synthetic data and evaluating sim-to-real transfer."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_8179c0bf9b1481919234bd8377db06a8",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified. Official site and mission content were available through primary-source search indexing; current API documentation and access remain unverified."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

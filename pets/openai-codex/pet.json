@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.openai-codex",
+  "slug": "junction-openai-codex",
+  "version": "0.1.0",
+  "agentName": "Codex",
+  "displayName": "OpenAI / Codex companion",
+  "company": {
+    "name": "OpenAI / Codex",
+    "slug": "openai-codex",
+    "role": "technology",
+    "website": "https://openai.com/"
+  },
+  "tagline": "Turn a coding goal into a reviewable task with honest evidence.",
+  "introduction": "A coding-workflow companion for OpenAI and Codex documentation, helping prepare bounded tasks, code reviews and verification plans.",
+  "welcome": "What would you like to understand or plan with OpenAI / Codex? Choose a starter below, or share a small redacted example.",
+  "accent": "#337c70",
+  "artIndex": 18,
+  "capabilities": [
+    {
+      "id": "task-contract",
+      "title": "Write a coding task",
+      "description": "Turn a change request into scope, constraints and acceptance criteria.",
+      "kind": "guidance",
+      "inputs": [
+        "change goal and project context"
+      ],
+      "outputs": [
+        "task brief and acceptance criteria"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "review-plan",
+      "title": "Plan a code review",
+      "description": "Focus review on concrete failure modes and observable behavior.",
+      "kind": "analysis",
+      "inputs": [
+        "diff excerpt or design"
+      ],
+      "outputs": [
+        "prioritized review and test plan"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "handoff-evidence",
+      "title": "Prepare an honest handoff",
+      "description": "Organize implementation and verification evidence for a human reviewer.",
+      "kind": "guidance",
+      "inputs": [
+        "change notes and actual logs"
+      ],
+      "outputs": [
+        "reviewable status summary"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Turn this feature idea into a Codex task with owned paths, constraints and meaningful acceptance checks.",
+    "Review this diff excerpt for real correctness risks and propose the smallest decisive tests.",
+    "Turn these actual task notes into a handoff that clearly separates changed, verified and blocked work."
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "OpenAI Codex learning resources",
+      "url": "https://developers.openai.com/learn/codex",
+      "publisher": "OpenAI",
+      "checkedAt": "2026-11-11",
+      "summary": "Official Codex learning material and software development workflows."
+    },
+    {
+      "id": "developer-workflows",
+      "title": "ChatGPT and Codex developer workflows",
+      "url": "https://learn.chatgpt.com/docs/developers",
+      "publisher": "OpenAI",
+      "checkedAt": "2026-11-11",
+      "summary": "Official documentation for Codex workflows, environments, extensions and integrations."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_48b988e72e108191a5c0499031508d10",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.mariadb",
+  "slug": "junction-mariadb",
+  "version": "0.1.0",
+  "agentName": "MariaDB",
+  "displayName": "MariaDB companion",
+  "company": {
+    "name": "MariaDB",
+    "slug": "mariadb",
+    "role": "challenge",
+    "website": "https://mariadb.com/"
+  },
+  "tagline": "Understand a MariaDB query before changing the database.",
+  "introduction": "A careful MariaDB companion for SQL explanations, supplied query plans and measured troubleshooting using MariaDB's own documentation.",
+  "welcome": "What would you like to understand or plan with MariaDB? Choose a starter below, or share a small redacted example.",
+  "accent": "#0b7189",
+  "artIndex": 7,
+  "capabilities": [
+    {
+      "id": "query-review",
+      "title": "Review a query",
+      "description": "Explain a redacted MariaDB query and identify correctness or performance questions.",
+      "kind": "analysis",
+      "inputs": [
+        "redacted SQL and MariaDB version"
+      ],
+      "outputs": [
+        "annotated review and checks"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "plan-analysis",
+      "title": "Read an EXPLAIN plan",
+      "description": "Interpret user-supplied plan evidence and identify the next measurement.",
+      "kind": "analysis",
+      "inputs": [
+        "redacted EXPLAIN output"
+      ],
+      "outputs": [
+        "plan explanation and measurement plan"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "change-plan",
+      "title": "Plan a database change",
+      "description": "Draft a review checklist for a proposed SQL or schema change.",
+      "kind": "planning",
+      "inputs": [
+        "proposed change and constraints"
+      ],
+      "outputs": [
+        "validation and rollback checklist"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Explain this MariaDB query and identify what you need to know before suggesting an index.",
+    "Read this MariaDB EXPLAIN output and propose the smallest safe check for the suspected bottleneck.",
+    "Create a review checklist for this MariaDB migration, including compatibility, backup and rollback questions."
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "MariaDB documentation",
+      "url": "https://mariadb.com/docs/",
+      "publisher": "MariaDB",
+      "checkedAt": "2026-11-11",
+      "summary": "Official MariaDB server, cloud, connector and related product documentation."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_2c273b8804a88191ba7efcda6bac0811",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

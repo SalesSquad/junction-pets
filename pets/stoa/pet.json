@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.stoa",
+  "slug": "junction-stoa",
+  "version": "0.1.0",
+  "agentName": "Stoa",
+  "displayName": "Stoa companion",
+  "company": {
+    "name": "Stoa",
+    "slug": "stoa",
+    "role": "challenge",
+    "website": "https://stoabuild.com/"
+  },
+  "tagline": "Turn construction information into a traceable review checklist.",
+  "introduction": "A construction-information companion for organizing supplied project notes, document questions and handoffs around Stoa's public product context.",
+  "welcome": "What would you like to understand or plan with Stoa? Choose a starter below, or share a small redacted example.",
+  "accent": "#7b6549",
+  "artIndex": 11,
+  "capabilities": [
+    {
+      "id": "document-review",
+      "title": "Review supplied project information",
+      "description": "Identify missing context and conflicting statements in supplied construction notes.",
+      "kind": "analysis",
+      "inputs": [
+        "redacted notes or document excerpts"
+      ],
+      "outputs": [
+        "issues and source references"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "handoff-plan",
+      "title": "Plan an information handoff",
+      "description": "Organize what the next project participant needs to know.",
+      "kind": "planning",
+      "inputs": [
+        "handoff scenario"
+      ],
+      "outputs": [
+        "handoff checklist and ownership map"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "source-of-truth",
+      "title": "Map project data ownership",
+      "description": "Describe a simple information model with version and review status.",
+      "kind": "guidance",
+      "inputs": [
+        "sample project workflow"
+      ],
+      "outputs": [
+        "source-of-truth and review plan"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Review these project notes for conflicting dates, missing owners and unclear document versions.",
+    "Create a handoff checklist from design coordination to site delivery for this example project.",
+    "Help me define a project information table with document version, decision owner and approval status."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Stoa construction platform",
+      "url": "https://stoabuild.com/",
+      "publisher": "Stoa",
+      "checkedAt": "2026-11-11",
+      "summary": "Official description of a construction-focused AI platform connecting project information."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_57e6862bd6988191b1fb3aa3258f0e6d",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

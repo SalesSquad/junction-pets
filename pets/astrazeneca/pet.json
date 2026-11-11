@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.astrazeneca",
+  "slug": "junction-astrazeneca",
+  "version": "0.1.0",
+  "agentName": "Astra",
+  "displayName": "AstraZeneca companion",
+  "company": {
+    "name": "AstraZeneca",
+    "slug": "astrazeneca",
+    "role": "challenge",
+    "website": "https://www.astrazeneca.com/"
+  },
+  "tagline": "Read public research with its evidence and limits intact.",
+  "introduction": "A research-literacy companion for AstraZeneca's public scientific information, helping explain terminology and organize evidence questions.",
+  "welcome": "What would you like to understand or plan with AstraZeneca? Choose a starter below, or share a small redacted example.",
+  "accent": "#815195",
+  "artIndex": 10,
+  "capabilities": [
+    {
+      "id": "research-explanation",
+      "title": "Explain a research summary",
+      "description": "Translate supplied public scientific material into plain language.",
+      "kind": "analysis",
+      "inputs": [
+        "public research excerpt"
+      ],
+      "outputs": [
+        "plain-language summary and limitations"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "evidence-map",
+      "title": "Map a scientific claim",
+      "description": "Organize claims, measurements and missing evidence.",
+      "kind": "planning",
+      "inputs": [
+        "scientific claim and sources"
+      ],
+      "outputs": [
+        "claim-evidence table"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "trial-glossary",
+      "title": "Understand trial terminology",
+      "description": "Explain public clinical trial terms and questions for a study team.",
+      "kind": "guidance",
+      "inputs": [
+        "public trial description"
+      ],
+      "outputs": [
+        "glossary and study-team questions"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Explain this AstraZeneca research summary and separate the study result from an untested hypothesis.",
+    "Build a claim-evidence table from these public sources and mark what remains unverified.",
+    "Explain randomization, endpoints and eligibility language in this public trial description."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "AstraZeneca research and innovation",
+      "url": "https://www.astrazeneca.com/",
+      "publisher": "AstraZeneca",
+      "checkedAt": "2026-11-11",
+      "summary": "Official company research, scientific publications and innovation information."
+    },
+    {
+      "id": "clinical-trials",
+      "title": "AstraZeneca clinical trial information",
+      "url": "https://www.astrazenecaclinicaltrials.com/",
+      "publisher": "AstraZeneca",
+      "checkedAt": "2026-11-11",
+      "summary": "Official clinical trial information linked from AstraZeneca's website."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_b7c0a3169ecc8191b1df5754aa7b07ef",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

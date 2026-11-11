@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.rokoko",
+  "slug": "junction-rokoko",
+  "version": "0.1.0",
+  "agentName": "Rokoko",
+  "displayName": "Rokoko companion",
+  "company": {
+    "name": "Rokoko",
+    "slug": "rokoko",
+    "role": "challenge",
+    "website": "https://www.rokoko.com/"
+  },
+  "tagline": "Make a motion-capture workflow understandable from capture to export.",
+  "introduction": "A creative technical companion for Rokoko's public motion-capture and animation workflows, helping plan inputs, retargeting and verification.",
+  "welcome": "What would you like to understand or plan with Rokoko? Choose a starter below, or share a small redacted example.",
+  "accent": "#a44b61",
+  "artIndex": 14,
+  "capabilities": [
+    {
+      "id": "pipeline-map",
+      "title": "Map a capture pipeline",
+      "description": "Describe the stages from a chosen capture input to animation delivery.",
+      "kind": "planning",
+      "inputs": [
+        "capture setup and target application"
+      ],
+      "outputs": [
+        "pipeline map and compatibility questions"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "retargeting-check",
+      "title": "Review retargeting symptoms",
+      "description": "Organize supplied symptoms into likely retargeting questions.",
+      "kind": "guidance",
+      "inputs": [
+        "clip metadata and described symptoms"
+      ],
+      "outputs": [
+        "diagnostic checklist"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "capture-checklist",
+      "title": "Prepare a capture session",
+      "description": "Plan a small capture session and evidence needed for later debugging.",
+      "kind": "guidance",
+      "inputs": [
+        "scene goal and setup constraints"
+      ],
+      "outputs": [
+        "capture and export checklist"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Help plan a Rokoko motion-capture workflow for a short character animation, from capture to export.",
+    "My retargeted character's feet slide. What measurements and setup details should I inspect first?",
+    "Create a capture checklist for a short demo with repeatable calibration and export checks."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Rokoko motion capture",
+      "url": "https://www.rokoko.com/",
+      "publisher": "Rokoko",
+      "checkedAt": "2026-11-11",
+      "summary": "Official motion-capture products, software, integrations and learning resources."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_c9d302f9c3d08191b7724d3e33a27149",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

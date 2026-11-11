@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.intel",
+  "slug": "junction-intel",
+  "version": "0.1.0",
+  "agentName": "Intel",
+  "displayName": "Intel companion",
+  "company": {
+    "name": "Intel",
+    "slug": "intel",
+    "role": "challenge",
+    "website": "https://www.intel.com/"
+  },
+  "tagline": "Choose the right Intel development path and a measurable experiment.",
+  "introduction": "A technical guide to Intel's public developer resources, with a focus on workload requirements and honest performance measurements.",
+  "welcome": "What would you like to understand or plan with Intel? Choose a starter below, or share a small redacted example.",
+  "accent": "#2378ad",
+  "artIndex": 12,
+  "capabilities": [
+    {
+      "id": "toolkit-map",
+      "title": "Map a workload to documentation",
+      "description": "Identify the Intel developer resource relevant to a stated workload.",
+      "kind": "planning",
+      "inputs": [
+        "workload and hardware description"
+      ],
+      "outputs": [
+        "toolkit and documentation map"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "benchmark-plan",
+      "title": "Plan a fair benchmark",
+      "description": "Define a reproducible comparison for a proposed optimization.",
+      "kind": "planning",
+      "inputs": [
+        "workload and performance goal"
+      ],
+      "outputs": [
+        "benchmark protocol and metrics"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "error-review",
+      "title": "Review a developer error",
+      "description": "Interpret redacted tool output and identify the next diagnostic step.",
+      "kind": "analysis",
+      "inputs": [
+        "error text and versions"
+      ],
+      "outputs": [
+        "hypotheses and read-only checks"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Should I investigate OpenVINO or oneAPI for this inference workload, and what should I verify first?",
+    "Design a benchmark comparing latency and throughput for this model on my stated Intel hardware.",
+    "Help interpret this OpenVINO error and list the version details needed to diagnose it."
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "Intel Developer Zone",
+      "url": "https://www.intel.com/content/www/us/en/developer/overview.html",
+      "publisher": "Intel",
+      "checkedAt": "2026-11-11",
+      "summary": "Official entry point for Intel tools, developer documentation and learning resources."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_6348ef9f2bec8191b9d2ac9d3fc93c66",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.atech-dev",
+  "slug": "junction-atech-dev",
+  "version": "0.1.0",
+  "agentName": "Atech",
+  "displayName": "Atech.dev companion",
+  "company": {
+    "name": "Atech.dev",
+    "slug": "atech-dev",
+    "role": "technology",
+    "website": "https://atech.dev/"
+  },
+  "tagline": "Break a small electronics idea into a learnable prototype plan.",
+  "introduction": "A maker companion for Atech.dev's modular electronics and learning context, helping organize components, questions and testable steps.",
+  "welcome": "What would you like to understand or plan with Atech.dev? Choose a starter below, or share a small redacted example.",
+  "accent": "#267d87",
+  "artIndex": 24,
+  "capabilities": [
+    {
+      "id": "prototype-scope",
+      "title": "Scope a small prototype",
+      "description": "Define inputs, outputs and a first low-voltage learning milestone.",
+      "kind": "planning",
+      "inputs": [
+        "maker idea and available parts"
+      ],
+      "outputs": [
+        "prototype outline"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "parts-check",
+      "title": "Review a parts list",
+      "description": "Identify missing compatibility information in a supplied bill of materials.",
+      "kind": "guidance",
+      "inputs": [
+        "component names and documentation"
+      ],
+      "outputs": [
+        "compatibility questions"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "learning-plan",
+      "title": "Plan a learning sequence",
+      "description": "Organize a project into small experiments and explanations.",
+      "kind": "planning",
+      "inputs": [
+        "project goal and experience level"
+      ],
+      "outputs": [
+        "learning steps and checks"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Help me scope a small sensor-and-light learning project using only documented low-voltage components.",
+    "Review this parts list and tell me which voltage, interface and mechanical details need checking.",
+    "Create a learning sequence for my first modular robot project, starting with one safe subsystem."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Atech.dev modular electronics",
+      "url": "https://atech.dev/",
+      "publisher": "Atech.dev",
+      "checkedAt": "2026-11-11",
+      "summary": "Official modular electronics kits, learning projects and design-tool information."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_c24f2379a07481918727bfdf2b80795a",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

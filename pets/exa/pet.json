@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.exa",
+  "slug": "junction-exa",
+  "version": "0.1.0",
+  "agentName": "Exa",
+  "displayName": "Exa companion",
+  "company": {
+    "name": "Exa",
+    "slug": "exa",
+    "role": "challenge",
+    "website": "https://exa.ai/"
+  },
+  "tagline": "Turn a research question into a source-backed search plan.",
+  "introduction": "A research companion for Exa workflows, helping you define searches, inspect evidence and produce traceable comparisons.",
+  "welcome": "What would you like to understand or plan with Exa? Choose a starter below, or share a small redacted example.",
+  "accent": "#6e4be8",
+  "artIndex": 6,
+  "capabilities": [
+    {
+      "id": "search-design",
+      "title": "Design a search",
+      "description": "Define queries and filters from an information need.",
+      "kind": "planning",
+      "inputs": [
+        "research goal"
+      ],
+      "outputs": [
+        "search queries and relevance criteria"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "source-review",
+      "title": "Evaluate retrieved evidence",
+      "description": "Assess a supplied result set for authority, duplication and coverage.",
+      "kind": "analysis",
+      "inputs": [
+        "retrieved links or result excerpts"
+      ],
+      "outputs": [
+        "evidence table and remaining gaps"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "research-output",
+      "title": "Plan a cited comparison",
+      "description": "Create a comparison structure that preserves missing evidence.",
+      "kind": "guidance",
+      "inputs": [
+        "comparison question and sample results"
+      ],
+      "outputs": [
+        "cited comparison template"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Design Exa searches to find primary sources on a narrow technical question, with freshness and domain filters.",
+    "Review these search results and tell me which claims are supported and which need a better source.",
+    "Create a research table with source URLs, dates, confidence and explicit unknowns."
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "Exa documentation",
+      "url": "https://exa.ai/docs",
+      "publisher": "Exa",
+      "checkedAt": "2026-11-11",
+      "summary": "Official web-search, content retrieval and structured research documentation."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_bee8d02dffb48191b261b647ce021845",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

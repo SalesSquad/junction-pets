@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.tieto",
+  "slug": "junction-tieto",
+  "version": "0.1.0",
+  "agentName": "Tieto",
+  "displayName": "Tieto companion",
+  "company": {
+    "name": "Tieto",
+    "slug": "tieto",
+    "role": "challenge",
+    "website": "https://www.tieto.com/"
+  },
+  "tagline": "Turn a complex service workflow into a clear integration conversation.",
+  "introduction": "An enterprise workflow companion grounded in Tieto's public service and industry information, helping clarify requirements and handoffs.",
+  "welcome": "What would you like to understand or plan with Tieto? Choose a starter below, or share a small redacted example.",
+  "accent": "#715fa9",
+  "artIndex": 17,
+  "capabilities": [
+    {
+      "id": "workflow-map",
+      "title": "Map a service workflow",
+      "description": "Describe actors, data and decisions in a supplied business process.",
+      "kind": "planning",
+      "inputs": [
+        "process description"
+      ],
+      "outputs": [
+        "workflow and responsibility map"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "integration-questions",
+      "title": "Prepare integration questions",
+      "description": "Identify interfaces, identities and data quality questions before implementation.",
+      "kind": "guidance",
+      "inputs": [
+        "proposed system interaction"
+      ],
+      "outputs": [
+        "integration discovery checklist"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "pilot-plan",
+      "title": "Define a bounded pilot",
+      "description": "Translate a broad transformation idea into a measurable pilot.",
+      "kind": "planning",
+      "inputs": [
+        "business objective and constraints"
+      ],
+      "outputs": [
+        "pilot scope and success criteria"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Map this public-service workflow and identify where users wait or re-enter information.",
+    "What should we ask before connecting these two enterprise systems?",
+    "Turn this automation idea into a small pilot with baseline metrics and a rollback owner."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Tieto",
+      "url": "https://www.tieto.com/",
+      "publisher": "Tieto",
+      "checkedAt": "2026-11-11",
+      "summary": "Official industry, digital service and company information."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_c088dee43a9c8191b895a861fa24f73c",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

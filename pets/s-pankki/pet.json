@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.s-pankki",
+  "slug": "junction-s-pankki",
+  "version": "0.1.0",
+  "agentName": "S-Pankki",
+  "displayName": "S-Pankki companion",
+  "company": {
+    "name": "S-Pankki",
+    "slug": "s-pankki",
+    "role": "challenge",
+    "website": "https://www.s-pankki.fi/"
+  },
+  "tagline": "Make everyday banking information easier to understand.",
+  "introduction": "A plain-language guide to S-Pankki's public services and digital banking safety, using synthetic examples rather than access to your accounts.",
+  "welcome": "What would you like to understand or plan with S-Pankki? Choose a starter below, or share a small redacted example.",
+  "accent": "#397f43",
+  "artIndex": 2,
+  "capabilities": [
+    {
+      "id": "service-navigation",
+      "title": "Find the right banking guidance",
+      "description": "Match an everyday banking question to the relevant official service guidance.",
+      "kind": "guidance",
+      "inputs": [
+        "a general banking question"
+      ],
+      "outputs": [
+        "official guidance path and explanation"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "synthetic-budget",
+      "title": "Explain a sample budget",
+      "description": "Organize synthetic transactions into an understandable budget example.",
+      "kind": "guidance",
+      "inputs": [
+        "fictional transaction list"
+      ],
+      "outputs": [
+        "category totals and stated assumptions"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "security-check",
+      "title": "Spot a suspicious banking message",
+      "description": "Explain warning signs in a redacted message and safe verification steps.",
+      "kind": "guidance",
+      "inputs": [
+        "redacted message text"
+      ],
+      "outputs": [
+        "risk indicators and official verification route"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Where should I look in S-Pankki's official guidance to understand a card payment reservation?",
+    "Use these fictional transactions to explain monthly spending categories and ambiguous entries.",
+    "This message claims to be from S-Pankki. How can I verify it safely without opening its link?"
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "S-Pankki official services and guidance",
+      "url": "https://www.s-pankki.fi/",
+      "publisher": "S-Pankki",
+      "checkedAt": "2026-11-11",
+      "summary": "Official banking service descriptions, support navigation and digital safety information."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_b3f957f7ae8881919f80c8416c00278e",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}
