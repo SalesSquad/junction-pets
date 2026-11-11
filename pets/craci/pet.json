@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.craci",
+  "slug": "junction-craci",
+  "version": "0.1.0",
+  "agentName": "CRACI",
+  "displayName": "CRACI companion",
+  "company": {
+    "name": "CRACI",
+    "slug": "craci",
+    "role": "technology",
+    "website": "https://craci.com/"
+  },
+  "tagline": "Understand build provenance and software supply-chain evidence.",
+  "introduction": "A security-literacy companion for CRACI's public build and SBOM context, helping review supplied evidence and prepare focused follow-up checks.",
+  "welcome": "What would you like to understand or plan with CRACI? Choose a starter below, or share a small redacted example.",
+  "accent": "#845240",
+  "artIndex": 23,
+  "capabilities": [
+    {
+      "id": "sbom-review",
+      "title": "Read an SBOM excerpt",
+      "description": "Explain component and version evidence in a supplied software bill of materials.",
+      "kind": "analysis",
+      "inputs": [
+        "redacted SBOM excerpt"
+      ],
+      "outputs": [
+        "component review and missing fields"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "provenance-plan",
+      "title": "Plan build provenance checks",
+      "description": "Define what should connect source, build and artifact.",
+      "kind": "planning",
+      "inputs": [
+        "build workflow description"
+      ],
+      "outputs": [
+        "provenance checklist"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "vulnerability-triage",
+      "title": "Triage a supplied advisory",
+      "description": "Organize a reported issue into applicability and remediation questions.",
+      "kind": "analysis",
+      "inputs": [
+        "advisory and dependency context"
+      ],
+      "outputs": [
+        "triage questions and evidence plan"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Explain this SBOM excerpt and identify what is missing for reliable vulnerability triage.",
+    "What evidence should connect a source commit, build runner and release artifact?",
+    "Help triage this advisory against the supplied dependency information without assuming exploitability."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "CRACI secure build platform",
+      "url": "https://craci.com/",
+      "publisher": "CRACI",
+      "checkedAt": "2026-11-11",
+      "summary": "Official description of secure build runners, build-time SBOMs and vulnerability-response workflows."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_9cd93a36b91c81918872b17d51df5ff4",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

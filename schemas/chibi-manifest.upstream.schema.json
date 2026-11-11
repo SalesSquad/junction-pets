@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chibi.pet/schemas/chibi-manifest/v1.json",
+  "title": "Chibi manifest v1",
+  "description": "What a trainer publishes so Chibi.pet can list, sandbox, vet-check and run an agent. Draft — refine in chibi-manifest.",
+  "type": "object",
+  "required": ["manifest_version", "name", "languages", "model", "tools", "privacy"],
+  "additionalProperties": false,
+  "properties": {
+    "manifest_version": { "const": 1 },
+    "name": { "type": "string", "minLength": 1, "maxLength": 12, "description": "Chibi name shown in the UI" },
+    "job": { "$ref": "#/$defs/localized", "description": "Short job title, e.g. {\"en\":\"Inbox butler\"}" },
+    "intro": { "$ref": "#/$defs/localized", "description": "Introduction in the Chibi's own voice, max 160 chars per locale" },
+    "languages": { "type": "array", "items": { "type": "string", "description": "BCP 47" }, "minItems": 1 },
+    "category": { "type": "string", "enum": ["inbox", "meet", "code", "research", "writing", "sales", "support", "money", "travel", "home", "well", "learn", "design"] },
+    "persona": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "system_prompt": { "type": "string", "maxLength": 20000 },
+        "temperament": {
+          "type": "object",
+          "properties": {
+            "chatty": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "bold": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "playful": { "type": "integer", "minimum": 0, "maximum": 100 }
+          }
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "required": ["provider", "id"],
+      "properties": {
+        "provider": { "type": "string", "description": "Must be on the platform allow-list" },
+        "id": { "type": "string" },
+        "region_preference": { "type": "array", "items": { "enum": ["eu", "us", "apac"] } }
+      }
+    },
+    "connectors": {
+      "type": "array",
+      "description": "First-party Chibi.pet connector operations this Chibi uses (preferred over custom tools).",
+      "items": {
+        "type": "object",
+        "required": ["uses"],
+        "properties": {
+          "uses": { "type": "string", "pattern": "^[a-z_]+\\.[a-z_]+$", "examples": ["gmail.read", "gmail.create_draft", "gmail.send", "gcal.create_event"] },
+          "default_leash": { "$ref": "#/$defs/leash" },
+          "trainer_lock": { "$ref": "#/$defs/leash" }
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "description": "Custom tools served by the trainer's MCP server.",
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "risk", "default_leash", "input_schema"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" },
+          "description": { "$ref": "#/$defs/localized" },
+          "risk": { "enum": ["read", "write_private", "organize", "send_external", "destructive", "financial", "share_personal_data"] },
+          "default_leash": { "$ref": "#/$defs/leash" },
+          "trainer_lock": { "$ref": "#/$defs/leash" },
+          "input_schema": { "type": "object", "description": "JSON Schema of arguments" },
+          "preview_template": { "$ref": "#/$defs/localized", "description": "How an approval request is shown, with {placeholders} from arguments" }
+        }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "properties": {
+        "endpoint": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "hosting_region": { "type": "string", "description": "Where the trainer server processes data (shown in passport)" },
+        "auth": { "enum": ["platform_token"] }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "required": ["policy_url", "trains_on_user_data"],
+      "properties": {
+        "policy_url": { "type": "string", "format": "uri" },
+        "trains_on_user_data": { "type": "boolean" },
+        "retention_days": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "look": {
+      "type": "object",
+      "properties": {
+        "palette": { "enum": ["pink", "lilac", "sage", "sky", "sand", "peach", "pistachio", "periwinkle"] },
+        "ears": { "enum": ["antenna", "cat", "bunny", "horn"] },
+        "face": { "enum": ["round", "happy", "visor"] }
+      }
+    },
+    "playpen": {
+      "type": "object",
+      "description": "Scripted scenarios used by vet-check",
+      "properties": {
+        "fixture_set": { "type": "string", "examples": ["inbox_small_business", "calendar_family", "repo_open_source"] },
+        "scenarios": { "type": "array", "items": { "type": "object", "required": ["prompt"], "properties": { "prompt": { "type": "string" }, "expect_tools": { "type": "array", "items": { "type": "string" } } } } }
+      }
+    }
+  },
+  "$defs": {
+    "leash": { "enum": ["never", "ask", "alone"] },
+    "localized": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string" }, "propertyNames": { "pattern": "^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?$" } }
+  }
+}

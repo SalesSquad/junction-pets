@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.google-deepmind",
+  "slug": "junction-google-deepmind",
+  "version": "0.1.0",
+  "agentName": "DeepMind",
+  "displayName": "Google DeepMind companion",
+  "company": {
+    "name": "Google DeepMind",
+    "slug": "google-deepmind",
+    "role": "collaborator",
+    "website": "https://deepmind.google/"
+  },
+  "tagline": "Turn a multimodal idea into a documented, testable experiment.",
+  "introduction": "A research and developer companion for Google DeepMind's public work and the Gemini API documentation, focusing on clear capability boundaries and evaluation.",
+  "welcome": "What would you like to understand or plan with Google DeepMind? Choose a starter below, or share a small redacted example.",
+  "accent": "#4c62b7",
+  "artIndex": 33,
+  "capabilities": [
+    {
+      "id": "capability-map",
+      "title": "Map an AI idea to evidence",
+      "description": "Separate a desired behavior from documented product support and research claims.",
+      "kind": "planning",
+      "inputs": [
+        "multimodal use case"
+      ],
+      "outputs": [
+        "capability and evidence table"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "experiment-plan",
+      "title": "Plan a multimodal evaluation",
+      "description": "Define a small synthetic evaluation for a chosen interaction.",
+      "kind": "planning",
+      "inputs": [
+        "interaction goal and constraints"
+      ],
+      "outputs": [
+        "evaluation cases and measures"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "research-reading",
+      "title": "Read a research claim carefully",
+      "description": "Explain a public research summary and its transfer limits.",
+      "kind": "guidance",
+      "inputs": [
+        "official research excerpt"
+      ],
+      "outputs": [
+        "claim-method-limitations summary"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Map my multimodal demo idea to current Gemini documentation and mark what remains unverified.",
+    "Design a small evaluation for a document-and-image assistant, including uncertainty and contradictory inputs.",
+    "Explain this Google DeepMind research summary and what evidence would be needed before using the idea in a product."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Google DeepMind",
+      "url": "https://deepmind.google/",
+      "publisher": "Google DeepMind",
+      "checkedAt": "2026-11-11",
+      "summary": "Official AI research, model and responsibility information."
+    },
+    {
+      "id": "official-docs",
+      "title": "Gemini API documentation",
+      "url": "https://aistudio.google.com/docs",
+      "publisher": "Google",
+      "checkedAt": "2026-11-11",
+      "summary": "Official Gemini API documentation; ai.google.dev/gemini-api/docs redirects to this location."
+    },
+    {
+      "id": "event-source",
+      "title": "Junction 2026 collaboration",
+      "url": "https://2026.hackjunction.com/",
+      "publisher": "Junction",
+      "checkedAt": "2026-11-11",
+      "summary": "Organizer explicitly describes Google DeepMind teaming up with Junction; collaborator is used as a neutral catalog category rather than a contractual tier."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_6af3b8dc0344819187d978137d64c52d",
+    "roleVerified": true,
+    "notes": "Event participation is corroborated by current public organizer/company sources. Collaborator is a neutral catalog grouping supported by the organizer's collaboration statement. Verda's event article calls DeepMind a main sponsor; exact contractual tier is not asserted."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

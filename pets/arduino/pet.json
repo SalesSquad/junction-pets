@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.arduino",
+  "slug": "junction-arduino",
+  "version": "0.1.0",
+  "agentName": "Arduino",
+  "displayName": "Arduino companion",
+  "company": {
+    "name": "Arduino",
+    "slug": "arduino",
+    "role": "main",
+    "website": "https://www.arduino.cc/"
+  },
+  "tagline": "Build understanding one documented hardware step at a time.",
+  "introduction": "A maker companion for Arduino's official hardware, software and learning documentation, helping turn a small idea into a verifiable prototype plan.",
+  "welcome": "What would you like to understand or plan with Arduino? Choose a starter below, or share a small redacted example.",
+  "accent": "#177b7d",
+  "artIndex": 31,
+  "capabilities": [
+    {
+      "id": "board-guide",
+      "title": "Find the right board guidance",
+      "description": "Identify documentation and constraints for the user's exact Arduino board.",
+      "kind": "guidance",
+      "inputs": [
+        "board model and project goal"
+      ],
+      "outputs": [
+        "documentation and prerequisite checklist"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "sketch-review",
+      "title": "Explain a supplied sketch",
+      "description": "Walk through a sketch and propose observable checks.",
+      "kind": "analysis",
+      "inputs": [
+        "small sketch and board model"
+      ],
+      "outputs": [
+        "annotated explanation and test plan"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "prototype-plan",
+      "title": "Plan a small prototype",
+      "description": "Turn a sensor or display idea into a staged learning plan.",
+      "kind": "planning",
+      "inputs": [
+        "project idea and documented parts"
+      ],
+      "outputs": [
+        "milestones and checks"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "I have this Arduino board. Which official setup and electrical specifications should I check first?",
+    "Explain this Arduino sketch and how I could verify its behavior without connecting motors.",
+    "Plan a small sensor-display demo with a parts checklist and a verification step for each stage."
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "Arduino documentation",
+      "url": "https://docs.arduino.cc/",
+      "publisher": "Arduino",
+      "checkedAt": "2026-11-11",
+      "summary": "Official hardware, software, programming and learning documentation."
+    },
+    {
+      "id": "event-source",
+      "title": "Junction 2026 hardware lab",
+      "url": "https://2026.hackjunction.com/",
+      "publisher": "Junction",
+      "checkedAt": "2026-11-11",
+      "summary": "Organizer information identifies an Arduino hardware lab and hardware track; inventory and availability are not a personal allocation."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_6af3b8dc0344819187d978137d64c52d",
+    "roleVerified": true,
+    "notes": "Event participation is corroborated by current public organizer/company sources."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

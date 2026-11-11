@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.city-of-espoo",
+  "slug": "junction-city-of-espoo",
+  "version": "0.1.0",
+  "agentName": "Espoo",
+  "displayName": "City of Espoo companion",
+  "company": {
+    "name": "City of Espoo",
+    "slug": "city-of-espoo",
+    "role": "challenge",
+    "website": "https://www.espoo.fi/en"
+  },
+  "tagline": "Find the right Espoo service and the next practical step.",
+  "introduction": "A local service companion that helps you navigate Espoo's public information with clear links and plain-language checklists.",
+  "welcome": "What would you like to understand or plan with City of Espoo? Choose a starter below, or share a small redacted example.",
+  "accent": "#2677a0",
+  "artIndex": 5,
+  "capabilities": [
+    {
+      "id": "service-finder",
+      "title": "Locate a service",
+      "description": "Match a resident's general need to an official Espoo service area.",
+      "kind": "guidance",
+      "inputs": [
+        "service need and general context"
+      ],
+      "outputs": [
+        "service links and next-step checklist"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "plain-language",
+      "title": "Explain a service instruction",
+      "description": "Turn supplied municipal guidance into a short action checklist.",
+      "kind": "guidance",
+      "inputs": [
+        "official instruction text"
+      ],
+      "outputs": [
+        "plain-language steps and unanswered questions"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "accessibility-plan",
+      "title": "Plan accessible information",
+      "description": "Review a service information flow for comprehension and accessibility gaps.",
+      "kind": "planning",
+      "inputs": [
+        "service page text or user journey"
+      ],
+      "outputs": [
+        "accessibility and content review"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Help me find Espoo's official guidance for booking a sports facility.",
+    "Explain this Espoo service instruction in plain Finnish and list what I should prepare.",
+    "Review this service journey for a resident who needs simple language and mobile access."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "City of Espoo service information",
+      "url": "https://www.espoo.fi/en",
+      "publisher": "City of Espoo",
+      "checkedAt": "2026-11-11",
+      "summary": "Official city services, events and information for residents and businesses."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_6662dee905f081919bc599c408a359dd",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it. A 2025 profile description must not be represented as the 2026 challenge."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

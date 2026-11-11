@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.modal",
+  "slug": "junction-modal",
+  "version": "0.1.0",
+  "agentName": "Modal",
+  "displayName": "Modal companion",
+  "company": {
+    "name": "Modal",
+    "slug": "modal",
+    "role": "technology",
+    "website": "https://modal.com/"
+  },
+  "tagline": "Shape a compute job with clear inputs, limits and checks.",
+  "introduction": "A serverless compute companion for Modal documentation, helping turn a workload into a bounded execution and verification plan.",
+  "welcome": "What would you like to understand or plan with Modal? Choose a starter below, or share a small redacted example.",
+  "accent": "#4759a3",
+  "artIndex": 21,
+  "capabilities": [
+    {
+      "id": "job-design",
+      "title": "Design a bounded job",
+      "description": "Describe inputs, outputs and resource assumptions for a compute task.",
+      "kind": "planning",
+      "inputs": [
+        "workload and data size estimate"
+      ],
+      "outputs": [
+        "job specification"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "failure-plan",
+      "title": "Plan retries and observability",
+      "description": "Identify failure modes and evidence needed to diagnose a job.",
+      "kind": "planning",
+      "inputs": [
+        "job design"
+      ],
+      "outputs": [
+        "retry and logging plan"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "code-review",
+      "title": "Review a supplied compute script",
+      "description": "Check a script against intended execution boundaries.",
+      "kind": "analysis",
+      "inputs": [
+        "redacted script"
+      ],
+      "outputs": [
+        "review and validation plan"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Design a Modal batch job plan for processing a finite set of synthetic documents.",
+    "How should this Modal job handle retries without duplicating outputs?",
+    "Review this Modal script for unbounded work, hidden downloads and unclear resource assumptions."
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "Modal documentation",
+      "url": "https://modal.com/docs",
+      "publisher": "Modal",
+      "checkedAt": "2026-11-11",
+      "summary": "Official serverless compute guides, examples and API reference."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_9d5e08e7b3e481919129a701ea785656",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

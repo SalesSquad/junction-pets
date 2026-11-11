@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.qualia",
+  "slug": "junction-qualia",
+  "version": "0.1.0",
+  "agentName": "Qualia",
+  "displayName": "Qualia companion",
+  "company": {
+    "name": "Qualia",
+    "slug": "qualia",
+    "role": "technology",
+    "website": "https://qualia.dev/"
+  },
+  "tagline": "Turn robot recording metadata into a useful quality review.",
+  "introduction": "A robotics-data companion informed by Qualia's public work on understanding recordings, task episodes and quality signals.",
+  "welcome": "What would you like to understand or plan with Qualia? Choose a starter below, or share a small redacted example.",
+  "accent": "#ae4e77",
+  "artIndex": 22,
+  "capabilities": [
+    {
+      "id": "episode-schema",
+      "title": "Define an episode schema",
+      "description": "Describe useful metadata for reviewing robot task recordings.",
+      "kind": "planning",
+      "inputs": [
+        "task description"
+      ],
+      "outputs": [
+        "episode metadata schema"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "quality-rubric",
+      "title": "Create a quality rubric",
+      "description": "Define transparent quality criteria for a supplied robotics task.",
+      "kind": "guidance",
+      "inputs": [
+        "task and example annotations"
+      ],
+      "outputs": [
+        "quality rubric and edge cases"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "annotation-review",
+      "title": "Review supplied annotations",
+      "description": "Check annotation consistency and unsupported success labels.",
+      "kind": "analysis",
+      "inputs": [
+        "redacted episode metadata"
+      ],
+      "outputs": [
+        "annotation findings and follow-up questions"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Design an episode metadata schema for a robot pick-and-place recording with explicit success evidence.",
+    "Create a review rubric for pick-and-place episodes that explains why a clip might be unsuitable.",
+    "Review these episode annotations and flag labels that lack evidence."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Qualia robotics data",
+      "url": "https://qualia.dev/",
+      "publisher": "Qualia",
+      "checkedAt": "2026-11-11",
+      "summary": "Official description of robot recording understanding, task episodes and quality review; the former qualiastudios.dev address redirects here."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_66cf82c335648191bc0c9191f888266e",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.aalto-university",
+  "slug": "junction-aalto-university",
+  "version": "0.1.0",
+  "agentName": "Aalto",
+  "displayName": "Aalto University companion",
+  "company": {
+    "name": "Aalto University",
+    "slug": "aalto-university",
+    "role": "challenge",
+    "website": "https://www.aalto.fi/en"
+  },
+  "tagline": "Find the right research and turn it into a testable question.",
+  "introduction": "A research companion for navigating Aalto's public work and planning a small, evidence-based exploration.",
+  "welcome": "What would you like to understand or plan with Aalto University? Choose a starter below, or share a small redacted example.",
+  "accent": "#2767b2",
+  "artIndex": 3,
+  "capabilities": [
+    {
+      "id": "research-map",
+      "title": "Map a research question",
+      "description": "Break a question into concepts and a search path through official Aalto sources.",
+      "kind": "planning",
+      "inputs": [
+        "research interest"
+      ],
+      "outputs": [
+        "concept map and source search plan"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "experiment-outline",
+      "title": "Design a small experiment",
+      "description": "Turn an early idea into a falsifiable, low-risk evaluation plan.",
+      "kind": "guidance",
+      "inputs": [
+        "idea and intended users"
+      ],
+      "outputs": [
+        "hypothesis, measures and study outline"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "paper-review",
+      "title": "Read a supplied paper critically",
+      "description": "Extract the claim, method, limitations and follow-up questions from supplied research.",
+      "kind": "analysis",
+      "inputs": [
+        "paper excerpt or official publication link"
+      ],
+      "outputs": [
+        "claim-evidence-limitations review"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Help me find Aalto research relevant to speech interfaces for older adults, and separate findings from open questions.",
+    "Outline a small usability study for a voice interface, with a measurable hypothesis and consent considerations.",
+    "Review this Aalto paper excerpt: what was measured, what was not, and what should I test next?"
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Aalto University",
+      "url": "https://www.aalto.fi/en",
+      "publisher": "Aalto University",
+      "checkedAt": "2026-11-11",
+      "summary": "Official university research, education and service information."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_aea3062a9d8c8191b08f61280b61c4fd",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

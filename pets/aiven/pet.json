@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.aiven",
+  "slug": "junction-aiven",
+  "version": "0.1.0",
+  "agentName": "Aiven",
+  "displayName": "Aiven companion",
+  "company": {
+    "name": "Aiven",
+    "slug": "aiven",
+    "role": "technology",
+    "website": "https://aiven.io/"
+  },
+  "tagline": "Clarify a managed data workflow before provisioning it.",
+  "introduction": "A data-platform companion for Aiven documentation, helping map requirements, review integration assumptions and plan observable operations.",
+  "welcome": "What would you like to understand or plan with Aiven? Choose a starter below, or share a small redacted example.",
+  "accent": "#467bc1",
+  "artIndex": 29,
+  "capabilities": [
+    {
+      "id": "service-map",
+      "title": "Map data requirements",
+      "description": "Relate an application workload to the appropriate Aiven documentation areas.",
+      "kind": "planning",
+      "inputs": [
+        "application and data requirements"
+      ],
+      "outputs": [
+        "service questions and documentation map"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "integration-review",
+      "title": "Review integration assumptions",
+      "description": "Inspect a proposed data flow for identity, schema and failure gaps.",
+      "kind": "analysis",
+      "inputs": [
+        "system diagram or data-flow description"
+      ],
+      "outputs": [
+        "integration findings"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "operations-plan",
+      "title": "Plan operational evidence",
+      "description": "Define the evidence needed to support a reliability claim.",
+      "kind": "planning",
+      "inputs": [
+        "service goals and current observations"
+      ],
+      "outputs": [
+        "monitoring and recovery plan"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Help map a small event app's transactional and event-stream needs to Aiven documentation.",
+    "Review this proposed Aiven data flow for source-of-truth, retry and schema-evolution problems.",
+    "What should I measure before claiming this managed data pipeline is reliable?"
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "Aiven documentation",
+      "url": "https://aiven.io/docs/",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-11",
+      "summary": "Official managed data services, platform, developer tools and integration documentation."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_9ef79e7362a8819183f3c51a3421e168",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

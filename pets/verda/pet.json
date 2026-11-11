@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.verda",
+  "slug": "junction-verda",
+  "version": "0.1.0",
+  "agentName": "Verda",
+  "displayName": "Verda companion",
+  "company": {
+    "name": "Verda",
+    "slug": "verda",
+    "role": "main",
+    "website": "https://verda.com/"
+  },
+  "tagline": "Choose a bounded compute plan and the evidence to evaluate it.",
+  "introduction": "A cloud-compute companion for Verda documentation, helping compare workload requirements, define limits and understand public event information.",
+  "welcome": "What would you like to understand or plan with Verda? Choose a starter below, or share a small redacted example.",
+  "accent": "#377460",
+  "artIndex": 32,
+  "capabilities": [
+    {
+      "id": "compute-fit",
+      "title": "Map a compute workload",
+      "description": "Translate a workload into requirements to verify against Verda products.",
+      "kind": "guidance",
+      "inputs": [
+        "workload and constraints"
+      ],
+      "outputs": [
+        "compute requirements and questions"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "run-plan",
+      "title": "Define a bounded run",
+      "description": "Prepare a finite experiment with output and shutdown criteria.",
+      "kind": "planning",
+      "inputs": [
+        "experiment goal"
+      ],
+      "outputs": [
+        "run specification and stop conditions"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "event-guidance",
+      "title": "Understand event compute information",
+      "description": "Explain official event information and the remaining personal access checks.",
+      "kind": "guidance",
+      "inputs": [
+        "public event information"
+      ],
+      "outputs": [
+        "access verification checklist"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Help compare inference API and a GPU instance for this bounded demo workload without starting either.",
+    "Design a small Verda experiment with resource limits, expected artifacts and a shutdown checklist.",
+    "What does Verda's Junction announcement establish, and what still needs checking in my account?"
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "Verda documentation",
+      "url": "https://docs.verda.com/",
+      "publisher": "Verda",
+      "checkedAt": "2026-11-11",
+      "summary": "Official cloud compute, inference, cluster, storage and account documentation."
+    },
+    {
+      "id": "event-source",
+      "title": "Meet Verda at Junction 2026",
+      "url": "https://verda.com/blog/junction-2026",
+      "publisher": "Verda",
+      "checkedAt": "2026-11-11",
+      "summary": "Primary company announcement of Junction participation and advertised participant credits; individual eligibility or redemption is not established."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_6af3b8dc0344819187d978137d64c52d",
+    "roleVerified": true,
+    "notes": "Event participation is corroborated by current public organizer/company sources."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

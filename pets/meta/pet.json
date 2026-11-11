@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.meta",
+  "slug": "junction-meta",
+  "version": "0.1.0",
+  "agentName": "Meta",
+  "displayName": "Meta companion",
+  "company": {
+    "name": "Meta",
+    "slug": "meta",
+    "role": "challenge",
+    "website": "https://developers.meta.com/"
+  },
+  "tagline": "Shape a useful wearable or AI experience with clear boundaries.",
+  "introduction": "A product and developer companion for Meta's public developer resources, with careful attention to capability, consent and accessible interaction.",
+  "welcome": "What would you like to understand or plan with Meta? Choose a starter below, or share a small redacted example.",
+  "accent": "#4367b2",
+  "artIndex": 16,
+  "capabilities": [
+    {
+      "id": "wearable-use-case",
+      "title": "Shape a wearable use case",
+      "description": "Define one useful interaction and its evidence requirements.",
+      "kind": "guidance",
+      "inputs": [
+        "user problem and context"
+      ],
+      "outputs": [
+        "interaction outline and constraints"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "sdk-check",
+      "title": "Check a capability assumption",
+      "description": "Map a proposed feature to documented support and unknowns.",
+      "kind": "guidance",
+      "inputs": [
+        "feature idea and platform version"
+      ],
+      "outputs": [
+        "capability verification table"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "interaction-review",
+      "title": "Review privacy and accessibility",
+      "description": "Inspect an interaction for bystander, consent and accessibility problems.",
+      "kind": "analysis",
+      "inputs": [
+        "storyboard or interaction steps"
+      ],
+      "outputs": [
+        "design review and alternatives"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Help me design a hands-free reminder interaction for glasses, with visible user control and a fallback.",
+    "Check what I must verify in Meta's official docs before promising this camera-assisted feature.",
+    "Review this wearable interaction for consent, interruptibility and accessibility."
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "Meta for developers",
+      "url": "https://developers.meta.com/",
+      "publisher": "Meta",
+      "checkedAt": "2026-11-11",
+      "summary": "Official developer entry point covering Meta platforms and technologies."
+    },
+    {
+      "id": "wearables-docs",
+      "title": "Meta wearables developer information",
+      "url": "https://wearables.developer.meta.com/",
+      "publisher": "Meta",
+      "checkedAt": "2026-11-11",
+      "summary": "Official wearables developer documentation linked from Meta's developer portal."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_35990f36c78081919c26ff59ec0dafaf",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

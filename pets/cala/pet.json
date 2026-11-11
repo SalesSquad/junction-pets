@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.cala",
+  "slug": "junction-cala",
+  "version": "0.1.0",
+  "agentName": "Cala",
+  "displayName": "Cala companion",
+  "company": {
+    "name": "Cala",
+    "slug": "cala",
+    "role": "challenge",
+    "website": "https://www.cala.ai/"
+  },
+  "tagline": "Make agent data traceable, typed and time-aware.",
+  "introduction": "A companion for planning structured data questions with Cala, focusing on provenance, data types and what a fact actually establishes.",
+  "welcome": "What would you like to understand or plan with Cala? Choose a starter below, or share a small redacted example.",
+  "accent": "#33716b",
+  "artIndex": 4,
+  "capabilities": [
+    {
+      "id": "data-question",
+      "title": "Frame a structured data question",
+      "description": "Translate a research goal into fields, scope and freshness requirements.",
+      "kind": "guidance",
+      "inputs": [
+        "research question"
+      ],
+      "outputs": [
+        "field requirements and evidence plan"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "provenance-review",
+      "title": "Review provenance",
+      "description": "Inspect a supplied data record for missing evidence and ambiguous dates.",
+      "kind": "analysis",
+      "inputs": [
+        "redacted sample record"
+      ],
+      "outputs": [
+        "provenance gap report"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "query-plan",
+      "title": "Plan a verifiable query",
+      "description": "Describe a query and validation path without executing a service call.",
+      "kind": "planning",
+      "inputs": [
+        "schema excerpt and desired result"
+      ],
+      "outputs": [
+        "query outline and validation cases"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "I want an agent to compare company facts. Help me define typed fields, source provenance and freshness requirements for Cala.",
+    "Review this sample company record and flag missing source, validity and historical-change information.",
+    "Using this supplied Cala schema, outline a query plan and tests for stale or contradictory facts."
+  ],
+  "sources": [
+    {
+      "id": "official-website",
+      "title": "Cala structured data platform",
+      "url": "https://www.cala.ai/",
+      "publisher": "Cala",
+      "checkedAt": "2026-11-11",
+      "summary": "Official description of structured data for agents, with types, provenance and history."
+    },
+    {
+      "id": "official-docs",
+      "title": "Cala documentation",
+      "url": "https://docs.cala.ai/",
+      "publisher": "Cala",
+      "checkedAt": "2026-11-11",
+      "summary": "Official documentation entry point linked from Cala's website."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_95ba92d1e128819198a287c574b4d0af",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "junction.oxylabs",
+  "slug": "junction-oxylabs",
+  "version": "0.1.0",
+  "agentName": "Oxylabs",
+  "displayName": "Oxylabs companion",
+  "company": {
+    "name": "Oxylabs",
+    "slug": "oxylabs",
+    "role": "technology",
+    "website": "https://oxylabs.io/"
+  },
+  "tagline": "Define a bounded, responsible public-web data task.",
+  "introduction": "A web-data companion for Oxylabs documentation, helping plan source scope, extraction quality and transparent evidence handling.",
+  "welcome": "What would you like to understand or plan with Oxylabs? Choose a starter below, or share a small redacted example.",
+  "accent": "#4c7561",
+  "artIndex": 30,
+  "capabilities": [
+    {
+      "id": "collection-plan",
+      "title": "Plan public data collection",
+      "description": "Define an allowed, finite collection scope and output.",
+      "kind": "planning",
+      "inputs": [
+        "public-data goal and permitted domains"
+      ],
+      "outputs": [
+        "collection plan and exclusions"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "quality-check",
+      "title": "Design extraction quality checks",
+      "description": "Define tests for missing, duplicated or stale fields.",
+      "kind": "guidance",
+      "inputs": [
+        "sample extracted records"
+      ],
+      "outputs": [
+        "validation rules and error cases"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "request-triage",
+      "title": "Review a documented request issue",
+      "description": "Explain a redacted request/error and supported next checks.",
+      "kind": "analysis",
+      "inputs": [
+        "redacted request and error"
+      ],
+      "outputs": [
+        "diagnostic checklist"
+      ],
+      "requiresConnection": false
+    }
+  ],
+  "starterPrompts": [
+    "Plan a small public documentation collection with an explicit domain allowlist and page limit.",
+    "Design quality checks for these extracted public product records, including stale and missing values.",
+    "Review this Oxylabs request error and help identify whether the issue is formatting, permissions or target scope."
+  ],
+  "sources": [
+    {
+      "id": "official-docs",
+      "title": "Oxylabs developer documentation",
+      "url": "https://developers.oxylabs.io/",
+      "publisher": "Oxylabs",
+      "checkedAt": "2026-11-11",
+      "summary": "Official documentation for public-web data access products and integration workflows."
+    }
+  ],
+  "sourceEvidence": {
+    "roster": "https://chatgpt.com/space/page_7367c5cc2fe48191a319882578e9ce13",
+    "roleVerified": false,
+    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+  },
+  "availability": {
+    "content": "ready",
+    "runtime": "chibi-host-required",
+    "companyEndorsed": false
+  }
+}
