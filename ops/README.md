@@ -2,8 +2,10 @@
 
 The 34 files in environments/ declare **desired** pet-specific Codex Cloud
 environments. They are separate from the private Chibi runtime and from runtime
-persona instructions. Initial unprovisioned and null IDs are intentional and
-truthful; no environment has been created merely by committing this directory.
+persona instructions. Currently **33** remain unprovisioned and **Aiven** has
+owner-observed published/selectable evidence with an unresolved opaque Cloud
+ID (`published-id-pending`). All 34 IDs remain null; source snapshots never
+claim provider readiness or Chibi runtime authorization.
 
 The ordinary data flow is:
 
@@ -12,8 +14,12 @@ The ordinary data flow is:
 2. It writes dist/mission-control/status.json. The private dashboard reads
    that file. It is a **snapshot**, not a live GitHub/Codex account query.
 3. An authorized owner provisions and publishes a named Codex Cloud
-   environment from the Codex Cloud UI. Record the actual ID, UTC verification
-   time and provider evidence URL in the one pet's declaration on a PR.
+   environment from the Codex Cloud UI. If Settings and the task picker show
+   publication but no opaque environment ID is exposed, record
+   `published-id-pending` with **null ID**, exact observed task URL, UTC owner
+   recording time and pinned source/task SHA; it cannot enter Cloud dispatch.
+   Only after independent provider ID readback may an integrator move a
+   declaration toward an ID-backed state.
 4. Each pet uses its own developer agent ID, one owned path and one task branch.
    A new isolated Codex Cloud task can run within a reusable published
    environment. An environment ID is not a promise of a permanent running VM.
@@ -138,13 +144,33 @@ dist/mission-control is operational output and **must not** be published with
 dist/site, Chibi Maker packages or the Junction submission artifact. The
 control plane can be privately hosted later with explicit deployment authority.
 
+## Aiven Cloud publication — owner observation, not a readiness grant
+
+At source `b8895789e12937be65cd5b49c9705cd9d9716c30`, the owner observed
+`junction-aiven` as **published/selectable** in Codex Cloud Settings and task
+picker. An exact fresh [Codex task](https://chatgpt.com/local/6af63cbd-674c-8191-83e7-d7be6dd6e040)
+fetched that SHA, reported a clean source tree and passed **21/21 submission-gate
+checks**. The registry timestamp `2026-11-12T22:32:40.000Z` is when we recorded
+the owner's handoff, **not** a provider-issued event timestamp. No separate
+opaque Cloud environment ID was exposed. The task URL is evidence of task
+execution, not the immutable environment-ID receipt. The 21 tests are NOT
+model evaluations, Chibi host/recipient acceptance, or verified hosted CI.
+
+The source SHA is pinned independently in the manifest and task evidence. When
+Mission Control is generated for a different/unknown source SHA, the Aiven
+publication observation remains amber `published-id-pending`, but its 21
+historical task checks become `stale-source` and do not qualify current CI,
+model evaluation or Cloud readiness. Editable
+manifest/owner readback never becomes independently provider-attested readiness.
+No new credentials were used to create these records.
+
 ## Optional Codex CLI dispatch planning
 
 node scripts/ops-cloud-dispatch.mjs --pet junction-aiven --branch
 codex/junction-aiven-guidance --source <exact-clean-HEAD> --profile plus
 only generates an argv array and an isolated task prompt. It does not run
 Codex Cloud, provision an environment, access a Mac or change accounts.
-All initial 34 manifests intentionally make it fail because no independent
-provider IDs have been recorded. Even after the owner records a verified
+All 34 manifests still make it fail, including the published-ID-pending
+Aiven declaration, because no independent provider IDs have been recorded. Even after the owner records a verified
 published environment, the plan clearly says a fresh provider and remote
 HEAD check is required before executing through an already authorized CLI.

@@ -25,6 +25,21 @@ export function cloudAssessment(cloud = {}) {
   if (CLAIMED_READY_STATES.has(state)) {
     return {tone: 'critical', label: 'Unverified provider claim', effectiveState: 'unverified'};
   }
+  if (state === 'published-id-pending') {
+    // This is a reported owner UI observation, never a provider-ready state.
+    // The browser does not independently attest even an exact SHA/task URL.
+    const check = cloud.taskCheck;
+    const shapeValid = cloud.environmentId === null && SHA.test(cloud.sourceCommit || '') &&
+      validDate(cloud.verifiedAt) && safeCloudTaskUrl(cloud) !== null &&
+      ['source-matched-reported','stale-source'].includes(check?.binding) &&
+      check?.sourceCommit === cloud.sourceCommit && check?.evidenceUrl === cloud.evidenceUrl &&
+      check?.suite === 'submission-gate' && check?.result === 'pass' &&
+      Number.isSafeInteger(check.executed) && check.executed > 0 && check.passed === check.executed;
+    if (!shapeValid) return {tone: 'critical', label: 'Unverified publication evidence', effectiveState: 'unverified'};
+    return check.binding === 'stale-source'
+      ? {tone: 'warning', label: 'Published reported · task SHA stale', effectiveState: 'published-id-pending'}
+      : {tone: 'warning', label: 'Published reported · ID pending', effectiveState: 'published-id-pending'};
+  }
   if (state === 'provisioning') return {tone: 'active', label: 'Provisioning', effectiveState: state};
   if (state === 'blocked' || state === 'failed') return {tone: 'critical', label: titleCase(state), effectiveState: state};
   if (state === 'stale') return {tone: 'warning', label: 'Evidence stale', effectiveState: state};
@@ -136,6 +151,13 @@ export function pluginAssessment(plugin = {}, petSlug = '') {
 }
 
 /** Only exact canonical plugin-page links, with no query, fragment or redirect. */
+/** An owner-only Cloud task link is evidence of the recorded task, never an environment ID. */
+export function safeCloudTaskUrl(cloud = {}) {
+  const raw = cloud?.evidenceUrl;
+  if (typeof raw !== 'string' || !/^https:\/\/chatgpt\.com\/local\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(raw)) return null;
+  return raw;
+}
+
 export function safePluginPageUrl(plugin = {}) {
   if (!plugin || typeof plugin !== 'object' || Array.isArray(plugin)) return null;
   const id = plugin.pluginId;

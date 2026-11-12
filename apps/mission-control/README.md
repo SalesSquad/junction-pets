@@ -24,7 +24,7 @@ mission-control/
   fleet-projection.json # OPTIONAL owner-private backend-generated sidecar, not bundled
 ```
 
-The integrator must run `npm run ops:build` to regenerate the machine-readable
+The integrator must run `npm run ops:status` to regenerate the machine-readable
 snapshot and copy this app's five runtime files (including
 `server-projection.mjs`) to `dist/mission-control`. The integrator owns this
 build/export mapping. The optional `fleet-projection.json` sidecar must come
@@ -89,6 +89,13 @@ properties created by a JSON flag or static Site publication.
 ## Honest status display
 
 - `204 authored` cases are not treated as model runs.
+- **Aiven is owner-reported published/selectable, ID pending** with an exact
+  Codex Cloud task link and 21/21 reported submission-gate tests for pinned
+  `b8895789e12937be65cd5b49c9705cd9d9716c30`. The amber
+  `published-id-pending` status retains an unresolved null environment ID;
+  after a source change, the historical task checks are explicitly `stale-source`
+  while the publication observation remains recorded. None of this qualifies
+  current hosted CI, model evaluations, Chibi deployment or runtime usage.
 - **No cloud state can be shown green today.** This static UI has no trusted
   provider reader, signing-key trust anchor or source-bound cryptographic
   attestation channel. Even a JSON record claiming `verification:

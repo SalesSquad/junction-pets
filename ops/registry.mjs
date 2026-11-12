@@ -9,11 +9,14 @@ import {buildPlugin} from '../scripts/build-pet-plugins.mjs';
 
 export const REPOSITORY = 'SalesSquad/junction-pets';
 export const CLOUD_PROVIDER = 'codex-cloud';
-export const CLOUD_STATES = Object.freeze(['unprovisioned','provisioning','ready','running','blocked','failed','stale']);
+export const CLOUD_STATES = Object.freeze(['unprovisioned','published-id-pending','provisioning','ready','running','blocked','failed','stale']);
 const shaPattern=/^[a-f0-9]{40}$/;
 const digestPattern=/^[a-f0-9]{64}$/;
 const slugPattern=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const validInstant=value=>typeof value==='string'&&Number.isFinite(Date.parse(value))&&value.endsWith('Z');
+const cloudTaskUrl=/^https:\/\/chatgpt\.com\/local\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const strictInstant=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)&&
+  Number.isFinite(Date.parse(value))&&new Date(value).toISOString()===value;
 const required=(condition,message)=>{if(!condition)throw new Error(message);};
 const jsonFile=async path=>JSON.parse(await readFile(path,'utf8'));
 
@@ -46,6 +49,30 @@ export function validateEnvironment(manifest,companySlug) {
   required(p&&typeof p==='object'&&CLOUD_STATES.includes(p.state),'Invalid cloud state for '+companySlug);
   if(p.state==='unprovisioned') {
     required(p.environmentId===null&&p.verifiedAt===null&&p.evidenceUrl===null,'Unprovisioned environment cannot claim an ID or evidence');
+    required(p.sourceCommit===undefined&&p.publicationObservation===undefined&&p.taskCheck===undefined,
+      'Unprovisioned environment cannot claim published-task provenance');
+  } else if(p.state==='published-id-pending') {
+    // Owner-observed publication and a source-bound test are useful facts, but
+    // neither is an independently rechecked immutable provider environment ID.
+    const pendingKeys=['state','environmentId','verifiedAt','evidenceUrl','sourceCommit','publicationObservation','taskCheck'];
+    required(JSON.stringify(Object.keys(p).sort())===JSON.stringify(pendingKeys.sort()),
+      'Published-ID-pending refuses unknown fields and secrets');
+    required(p.environmentId===null,'Published-ID-pending must not invent an environment ID');
+    const checkKeys=['suite','result','executed','passed','sourceCommit','evidenceUrl'];
+    required(p.taskCheck&&typeof p.taskCheck==='object'&&!Array.isArray(p.taskCheck)&&
+      JSON.stringify(Object.keys(p.taskCheck).sort())===JSON.stringify(checkKeys.sort()),
+      'Published task check refuses unknown fields and secrets');
+    required(strictInstant(p.verifiedAt),'Published observation requires recorded UTC instant');
+    required(cloudTaskUrl.test(p.evidenceUrl??''),'Published observation requires exact Codex task URL without bearer/query');
+    required(shaPattern.test(p.sourceCommit??''),'Published observation requires exact source SHA');
+    required(p.publicationObservation==='owner-observed-settings-and-task-picker',
+      'Published observation must retain limited owner UI provenance');
+    const check=p.taskCheck;
+    required(check&&check.suite==='submission-gate'&&check.result==='pass'&&
+      Number.isSafeInteger(check.executed)&&check.executed>0&&
+      Number.isSafeInteger(check.passed)&&check.passed===check.executed&&
+      check.sourceCommit===p.sourceCommit&&check.evidenceUrl===p.evidenceUrl,
+      'Published task check must bind exact task URL, source SHA and executed counts');
   } else {
     // A failed/provisioning attempt need not have an ID. Ready/running must have a provider ID.
     if(['ready','running','stale'].includes(p.state))required(typeof p.environmentId==='string'&&p.environmentId.length>=5,'Cloud ID requires evidence for '+companySlug);
@@ -299,15 +326,28 @@ export async function buildStatus(root,{now=new Date(),sourceCommit=localSourceC
     const failedEval=!!recordedEval&&recordedEval.passed<recordedEval.executed;
     const noModelRun=!recordedEval||recordedEval.executed===0;
     const declarationState=manifest.provisioning.state;
-    // A manifest is not the cloud provider. Never show provider-ready based on editable JSON.
+    const publishedIdPending=declarationState==='published-id-pending';
+    const cloudSourceMatched=publishedIdPending&&sourceCommit!==null&&
+      manifest.provisioning.sourceCommit===sourceCommit;
+    // Owner UI readback is useful provenance, not a trusted provider-ID receipt.
+    // A task verified for an older SHA is stale as soon as the source changes.
     const reportedState=['ready','running'].includes(declarationState)?'reported-'+declarationState:declarationState;
     const cloud={
       provider:manifest.provider,desiredName:manifest.desiredName,
       environmentId:manifest.provisioning.environmentId,
       state:reportedState,declaredState:declarationState,verifiedAt:manifest.provisioning.verifiedAt,
       evidenceUrl:manifest.provisioning.evidenceUrl,
+      sourceCommit:publishedIdPending?manifest.provisioning.sourceCommit:null,
+      publicationObservation:publishedIdPending?manifest.provisioning.publicationObservation:null,
+      taskCheck:publishedIdPending?{
+        ...manifest.provisioning.taskCheck,
+        binding:cloudSourceMatched?'source-matched-reported':'stale-source',
+        verification:'owner-reported-provider-task-not-independently-rechecked'
+      }:null,
       repository:manifest.repository,
-      verification:declarationState==='unprovisioned'?'not-provisioned':'declaration-not-live-rechecked'
+      verification:declarationState==='unprovisioned'?'not-provisioned':
+        publishedIdPending?(cloudSourceMatched?'owner-observed-id-pending-source-matched':'owner-observed-id-pending-stale-source'):
+          'declaration-not-live-rechecked'
     };
     const blockers=[];
     if(plugin.presence==='missing')blockers.push('No generated plugin source is present for this pet.');
@@ -315,6 +355,9 @@ export async function buildStatus(root,{now=new Date(),sourceCommit=localSourceC
     if(plugin.installationState==='stale-registration')blockers.push('Private plugin registration receipt has stale source bytes; re-register from this exact plugin package.');
     if(plugin.installationState==='malformed-registration')blockers.push('Malformed private plugin registration receipt; provider status is not trusted.');
     if(cloud.state==='unprovisioned')blockers.push('A Codex Cloud environment ID has not been verified or provisioned for this pet.');
+    if(publishedIdPending)blockers.push(cloudSourceMatched
+      ?`Codex Cloud publication/selectability and ${cloud.taskCheck.passed}/${cloud.taskCheck.executed} task checks are owner-recorded; no opaque environment ID or independently authenticated provider readiness receipt exists.`
+      :'Recorded Codex Cloud task checks are stale or source identity unknown; no opaque environment ID or independently authenticated provider readiness receipt exists.');
     if(!reported)blockers.push('No receipt matches the current pet content digest; branch work is unqualified.');
     else {
       if(!receipt.checks.length)blockers.push('Current task receipt has no executable check evidence.');
@@ -328,6 +371,9 @@ export async function buildStatus(root,{now=new Date(),sourceCommit=localSourceC
       ?'Repair the latest source-matched failures, rerun checks, then record a new immutable task receipt.'
       :cloud.state==='unprovisioned'
       ?'Create and publish this pet Codex Cloud environment, then record its actual ID and evidence URL.'
+      :publishedIdPending?(cloudSourceMatched
+        ?'Read back the immutable Codex Cloud environment ID from authenticated provider settings; then verify its exact current source and task evidence.'
+        :'Re-run the Cloud task for the latest source SHA and recheck published environment identity before recording an immutable ID.')
       :!reported?'Run branch-specific CI and behavior evaluations; attach pet digest and exact PR HEAD.':'Recheck provider evidence and the complete Chibi recipient journey.';
     return {
       slug:pet.slug,company:{slug:company.slug,name:company.name,role:company.role},role:company.role,
@@ -367,6 +413,8 @@ export async function buildStatus(root,{now=new Date(),sourceCommit=localSourceC
     total:pets.length,
     cloudReady:pets.filter(p=>p.cloud.state==='ready'||p.cloud.state==='running').length,
     cloudUnprovisioned:pets.filter(p=>p.cloud.state==='unprovisioned').length,
+    cloudPublishedIdPending:pets.filter(p=>p.cloud.state==='published-id-pending').length,
+    cloudPublishedEvidenceStale:pets.filter(p=>p.cloud.declaredState==='published-id-pending'&&p.cloud.taskCheck?.binding==='stale-source').length,
     active:pets.filter(p=>p.development.claim).length,
     blocked:pets.filter(p=>typeof p.blocker==='string'&&p.blocker.length>0).length,
     definedEvalCases:pets.reduce((sum,p)=>sum+p.evaluation.defined,0),

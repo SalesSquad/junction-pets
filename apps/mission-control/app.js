@@ -6,6 +6,7 @@ import {
   petSourceUrl,
   pluginAssessment,
   safeCount,
+  safeCloudTaskUrl,
   safePluginPageUrl,
   snapshotAge,
   sourceCommit,
@@ -74,6 +75,7 @@ function calcCounts() {
   return {
     cloud: registry.pets.filter(pet => ['running', 'ready'].includes(cloudAssessment(pet.cloud).effectiveState)).length,
     needs: registry.pets.filter(pet => cloudAssessment(pet.cloud).effectiveState === 'unprovisioned').length,
+    pendingId: registry.pets.filter(pet => cloudAssessment(pet.cloud).effectiveState === 'published-id-pending').length,
     active: filterPets(registry.pets, {mode: 'active'}).length,
     issues: filterPets(registry.pets, {mode: 'issues'}).length,
     ready: filterPets(registry.pets, {mode: 'ready'}).length,
@@ -88,7 +90,7 @@ function renderMetrics() {
   put('metric-total', registry.pets.length.toString().padStart(2, '0'));
   put('metric-roster', 'One package + developer agent per company');
   put('metric-cloud', c.cloud.toString().padStart(2, '0'));
-  put('metric-unprovisioned', `${c.needs} need environment provisioning`);
+  put('metric-unprovisioned', `${c.needs} need provisioning · ${c.pendingId} published, ID pending`);
   put('metric-evals', `${c.executed}/${c.written}`);
   put('metric-blocked', c.blocked.toString().padStart(2, '0'));
   put('count-all', registry.pets.length);
@@ -117,6 +119,8 @@ function petRow(pet) {
 
   const cloud = make('span', 'cell-detail');
   cloud.append(statusBadge(assessment), make('span', 'subline', text(pet.cloud?.desiredName, 'No Cloud profile')));
+  if (assessment.effectiveState === 'published-id-pending') cloud.append(make('span', 'subline',
+    `${safeCount(pet.cloud?.taskCheck?.passed)}/${safeCount(pet.cloud?.taskCheck?.executed)} submission-gate tests · ${pet.cloud?.taskCheck?.binding === 'stale-source' ? 'historical, stale SHA' : 'source matched, reported'}`));
   if (serverReport) cloud.append(make('span', 'subline', advisoryCloudLabel(serverReport)));
 
   const evals = make('span', 'cell-detail', `${safeCount(pet.evaluation?.executed)} / ${safeCount(pet.evaluation?.defined)} executed`);
@@ -214,7 +218,16 @@ function openDetail(pet) {
       `Evidence: ${text(pet.plugin?.verification)} · Binding: ${text(pet.plugin?.registrationBinding)} · Last reported: ${formatDate(pet.plugin?.observedAt)}`),
     detailRow('Plugin source bundle SHA (advisory)', text(pet.plugin?.sourceBundleSha256, 'None'), true),
     detailRow('Environment ID', assessment.effectiveState === 'unverified' ? 'No verified environment ID' : text(pet.cloud?.environmentId, 'Not assigned'), true),
-    detailRow('Claimed provider timestamp (unverified)', formatDate(pet.cloud?.verifiedAt)),
+    detailRow('Owner publication observation (not independently rechecked)',
+      assessment.effectiveState === 'published-id-pending'
+        ? 'Owner report: published/selectable in Codex Settings + task picker · opaque ID still missing'
+        : 'No recorded owner publication observation'),
+    detailRow('Owner observation recorded at (advisory)', formatDate(pet.cloud?.verifiedAt)),
+    detailRow('Codex task checks (advisory, NOT model evaluations)',
+      assessment.effectiveState === 'published-id-pending'
+        ? `${safeCount(pet.cloud?.taskCheck?.passed)}/${safeCount(pet.cloud?.taskCheck?.executed)} reported pass · ${pet.cloud?.taskCheck?.binding === 'stale-source' ? 'OLD source, rerun needed' : 'source matched'} · not hosted-qualified`
+        : 'No current source-bound Cloud task checks'),
+    detailRow('Codex task source SHA (advisory)', text(pet.cloud?.sourceCommit, 'Not recorded'), true),
     detailRow('Development status', text(pet.development?.state)),
     detailRow('Work branch', text(pet.development?.branch), true),
     detailRow('Recorded work SHA (advisory)', text(pet.development?.sourceCommit), true),
@@ -222,6 +235,19 @@ function openDetail(pet) {
     detailRow('Open blocker', text(pet.blocker, 'No recorded blocker')),
     detailRow('Next action', text(pet.nextAction, 'Assign an evidence-backed next step')),
   );
+
+  const cloudTaskUrl = safeCloudTaskUrl(pet.cloud);
+  if (cloudTaskUrl && assessment.effectiveState === 'published-id-pending') {
+    const row = detailRow('Codex Cloud task evidence · not environment readiness', 'Recorded task');
+    const value = row.querySelector('.detail-row-value');
+    value.replaceChildren();
+    const link = make('a', '', 'Open owner-reported Cloud task ↗');
+    link.href = cloudTaskUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    value.append(link);
+    elements.detailContent.append(row);
+  }
 
   const reportedPluginUrl = safePluginPageUrl(pet.plugin);
   if (reportedPluginUrl) {

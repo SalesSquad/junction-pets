@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   cloudAssessment, filterPets, formatDate, normalizeRegistry,
-  petSourceUrl, pluginAssessment, safePluginPageUrl, safeCount, snapshotAge, sourceCommit,
+  petSourceUrl, pluginAssessment, safePluginPageUrl, safeCloudTaskUrl, safeCount, snapshotAge, sourceCommit,
 } from './status-model.mjs';
 
 function fixture() {
@@ -43,6 +43,40 @@ test('provider readiness without an environment ID or verified date fails closed
   assert.equal(cloudAssessment({state: 'reported-ready', environmentId: 'id', verifiedAt: '2026-11-12T18:00:00Z'}).effectiveState, 'unverified');
   assert.equal(cloudAssessment({state: 'ready', environmentId: 'id', verifiedAt: '2026-11-12T18:00:00Z', verification: 'provider-attested'}).effectiveState, 'unverified');
   assert.equal(cloudAssessment({state: 'unprovisioned'}).effectiveState, 'unprovisioned');
+});
+
+test('Aiven published task is amber pending ID, while forged and stale evidence fails closed', () => {
+  const sha = 'b8895789e12937be65cd5b49c9705cd9d9716c30';
+  const url = 'https://chatgpt.com/local/6af63cbd-674c-8191-83e7-d7be6dd6e040';
+  const pending = {
+    state:'published-id-pending', declaredState:'published-id-pending', environmentId:null,
+    verifiedAt:'2026-11-12T22:32:40.000Z', evidenceUrl:url, sourceCommit:sha,
+    taskCheck:{suite:'submission-gate',result:'pass',executed:21,passed:21,
+      sourceCommit:sha,evidenceUrl:url,binding:'source-matched-reported'},
+    verification:'owner-observed-id-pending-source-matched'
+  };
+  assert.deepEqual(cloudAssessment(pending),{
+    tone:'warning',label:'Published reported · ID pending',effectiveState:'published-id-pending'
+  });
+  assert.equal(safeCloudTaskUrl(pending),url);
+  const roster=[{company:{role:'technology'},cloud:pending}];
+  assert.equal(filterPets(roster,{mode:'ready'}).length,0);
+  assert.equal(filterPets(roster,{mode:'active'}).length,0);
+  assert.equal(filterPets(roster,{mode:'issues'}).length,1);
+  for(const invalid of [
+    {...pending,environmentId:'env_fake'},
+    {...pending,evidenceUrl:url+'?token=secret'},
+    {...pending,taskCheck:{...pending.taskCheck,sourceCommit:'a'.repeat(40)}},
+    {...pending,taskCheck:{...pending.taskCheck,evidenceUrl:'https://chatgpt.com/local/12345678-1234-1234-1234-123456789abc'}},
+    {...pending,taskCheck:{...pending.taskCheck,passed:20}}
+  ]) {
+    assert.equal(cloudAssessment(invalid).effectiveState,'unverified');
+  }
+  assert.deepEqual(cloudAssessment({...pending,taskCheck:{...pending.taskCheck,binding:'stale-source'}}),{
+    tone:'warning',label:'Published reported · task SHA stale',effectiveState:'published-id-pending'
+  });
+  assert.equal(safeCloudTaskUrl({...pending,evidenceUrl:'https://chatgpt.com@evil.invalid/local/6af63cbd-674c-8191-83e7-d7be6dd6e040'}),null);
+  assert.equal(cloudAssessment({...pending,state:'stale'}).effectiveState,'stale');
 });
 
 test('a forged provider-attested marker with plausible source receipt cannot turn a cell green', () => {
