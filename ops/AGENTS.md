@@ -14,8 +14,10 @@ behavior**; they never grant a developer cloud, provider or user permission.
    modifying this pet, coordinate before writing. Chat history and status JSON
    are discovery hints, not authority.
 3. Read ops/environments/<company>.json. An environment definition with
-   environmentId=null means it is **not yet provisioned**. Never fabricate
-   cloud IDs, publish a private repo or transfer credentials to another service.
+   environmentId=null means it is **not dispatch-ready**: most are unprovisioned;
+   Aiven is owner-observed `published-id-pending` without an immutable provider
+   ID. Never fabricate cloud IDs, publish a private repo or transfer
+   credentials to another service.
 4. Claim one work item for one pet. ops-work.mjs provides a **single-workspace
    local lease**; it does not coordinate across isolated clouds. For concurrent
    Codex Cloud tasks use separate task branches, strict path ownership and

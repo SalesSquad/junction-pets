@@ -54,9 +54,14 @@ test('34 individually scoped Codex Cloud declarations cover exact package roster
   assert.equal(validateRegistry(packs,envs),true);
   assert.equal(new Set(envs.map(p=>p.agentId)).size,34);
   assert.equal(new Set(envs.map(p=>p.desiredName)).size,34);
-  assert.ok(envs.every(p=>p.provisioning.state==='unprovisioned'));
+  assert.equal(envs.filter(p=>p.provisioning.state==='unprovisioned').length,33);
+  const aiven=envs.find(p=>p.petSlug==='junction-aiven');
+  assert.equal(aiven.provisioning.state,'published-id-pending');
+  assert.equal(aiven.provisioning.sourceCommit,'b8895789e12937be65cd5b49c9705cd9d9716c30');
+  assert.equal(aiven.provisioning.taskCheck.passed,21);
+  assert.equal(aiven.provisioning.taskCheck.executed,21);
   assert.ok(envs.every(p=>p.provisioning.environmentId===null));
-  assert.ok(envs.every(p=>p.provisioning.verifiedAt===null));
+  assert.equal(envs.filter(p=>p.provisioning.verifiedAt===null).length,33);
   assert.ok(envs.every(p=>p.repository===REPOSITORY));
   assert.ok(envs.every(p=>p.agentInstructions==='ops/AGENTS.md'&&p.runtimeInstructions.includes('/AGENTS.md')));
 });
@@ -69,10 +74,12 @@ test('cloud declaration rejects invented ID for unprovisioned and missing eviden
   assert.throws(()=>validateEnvironment(manifest,'aiven'),/verifiedAt/);
 });
 
-test('cloud dispatch cannot run against an unprovisioned or invented environment',()=>{
+test('cloud dispatch cannot run against an unprovisioned or invented environment',async()=>{
   const manifest=expectedEnvironment('aiven');
   const request={petSlug:'junction-aiven',branch:'codex/junction-aiven-guidance',sourceCommit:sourceA,profile:'plus'};
   assert.throws(()=>planCloudDispatch(manifest,request),/not declared ready/);
+  const pending=(await loadEnvironmentManifests(root)).find(p=>p.petSlug==='junction-aiven');
+  assert.throws(()=>planCloudDispatch(pending,request),/not declared ready/);
   const declaration=structuredClone(manifest);
   declaration.provisioning={
     state:'ready',environmentId:'some_recorded_id',verifiedAt:'2026-11-12T18:00:00.000Z',
@@ -87,6 +94,50 @@ test('cloud dispatch cannot run against an unprovisioned or invented environment
   assert.ok(plan.task.includes('pets/aiven/'));
   assert.throws(()=>planCloudDispatch(declaration,{...request,branch:'codex/junction-mariadb-feature'}),/isolated to this pet/);
   assert.throws(()=>planCloudDispatch(declaration,{...request,profile:'automatic'}),/never rotate accounts/);
+});
+
+test('published-ID-pending evidence is source-bound, ID-less and cannot forge task checks',async()=>{
+  const pending=(await loadEnvironmentManifests(root)).find(p=>p.petSlug==='junction-aiven');
+  assert.equal(validateEnvironment(pending,'aiven'),pending);
+  assert.equal(pending.provisioning.environmentId,null);
+  const mutations=[
+    p=>{p.environmentId='env_forged';},
+    p=>{p.sourceCommit=sourceB;},
+    p=>{p.evidenceUrl+='?token=secret';},
+    p=>{p.verifiedAt='not-a-date';},
+    p=>{p.publicationObservation='self-reported';},
+    p=>{p.taskCheck.sourceCommit=sourceB;},
+    p=>{p.taskCheck.passed=20;},
+    p=>{p.taskCheck.evidenceUrl='https://evil.invalid/task';},
+    p=>{p.apiKey='synthetic-secret';},
+    p=>{p.taskCheck.providerToken='synthetic-secret';}
+  ];
+  for(const mutate of mutations){
+    const forged=structuredClone(pending);
+    mutate(forged.provisioning);
+    assert.throws(()=>validateEnvironment(forged,'aiven'),/Pending|pending|observation|task check|URL|source SHA/);
+  }
+  const recorded=await buildStatus(root,{sourceCommit:pending.provisioning.sourceCommit,now:fixedTime});
+  const aiven=recorded.pets.find(p=>p.slug==='junction-aiven');
+  assert.equal(aiven.cloud.state,'published-id-pending');
+  assert.equal(aiven.cloud.environmentId,null);
+  assert.equal(aiven.cloud.taskCheck.binding,'source-matched-reported');
+  assert.equal(aiven.cloud.taskCheck.executed,21);
+  assert.equal(aiven.cloud.taskCheck.passed,21);
+  assert.equal(aiven.evaluation.executed,0);
+  assert.equal(aiven.runtime.state,'unverified');
+  assert.equal(recorded.summary.cloudReady,0);
+  assert.equal(recorded.summary.cloudPublishedIdPending,1);
+  assert.equal(recorded.summary.cloudUnprovisioned,33);
+  const stale=await buildStatus(root,{sourceCommit:sourceB,now:fixedTime});
+  const staleAiven=stale.pets.find(p=>p.slug==='junction-aiven');
+  assert.equal(staleAiven.cloud.state,'published-id-pending');
+  assert.equal(staleAiven.cloud.taskCheck.binding,'stale-source');
+  assert.match(staleAiven.blocker,/stale or source identity unknown/);
+  assert.equal(stale.summary.cloudPublishedIdPending,1);
+  assert.equal(stale.summary.cloudPublishedEvidenceStale,1);
+  const unknown=await buildStatus(root,{sourceCommit:null,now:fixedTime});
+  assert.equal(unknown.pets.find(p=>p.slug==='junction-aiven').cloud.taskCheck.binding,'stale-source');
 });
 
 test('registry rejects duplicate agent, missing company and extra package drift',async()=>{
@@ -109,8 +160,9 @@ test('status has 34 independently addressable pets and never calls authored case
   assert.equal(status.source.commit,sourceA);
   assert.equal(status.source.hostedCiQualified,false);
   assert.deepEqual(status.summary,{
-    total:34,cloudReady:0,cloudUnprovisioned:34,active:0,blocked:34,
-    definedEvalCases:204,executedEvalCases:0,published:0
+    total:34,cloudReady:0,cloudUnprovisioned:33,
+    cloudPublishedIdPending:1,cloudPublishedEvidenceStale:1,
+    active:0,blocked:34,definedEvalCases:204,executedEvalCases:0,published:0
   });
   assert.equal(status.pets.filter(p=>p.evaluation.defined===6).length,34);
   assert.ok(status.pets.every(p=>p.evaluation.executed===0&&p.runtime.state==='unverified'));
@@ -158,7 +210,7 @@ test('private plugin registration binds exact three generated source files, but 
     assert.equal(p.plugin.releaseId,receipt.releaseId);
     assert.equal(p.plugin.visibility,'USER_PRIVATE');
     assert.equal(p.plugin.verification,'provider-readback-recorded-not-rechecked');
-    assert.equal(p.cloud.state,'unprovisioned');
+    assert.equal(p.cloud.state,'published-id-pending');
     assert.equal(status.summary.published,0);
     assert.equal(status.pets.filter(x=>x.plugin.installationState==='not-registered').length,33);
   }finally{await rm(tmp,{recursive:true,force:true});}
