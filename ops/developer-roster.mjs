@@ -251,7 +251,7 @@ export function buildDeveloperRoster(manifests, {
         agentInstructions: manifest.agentInstructions,
         runtimeInstructions: manifest.runtimeInstructions,
         branchPattern: manifest.branchPattern,
-        sharedPathsOwner: 'W8 integrator (not company writers)',
+        sharedPathsOwner: 'Monorepo integrator (not company writers)',
         companyWriterLeaseDomain: `junction.${slug}.write`
       },
       cloud: {

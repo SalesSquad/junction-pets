@@ -29,7 +29,7 @@ npm test
 npm run build
 ```
 
-`npm run dev` starts the catalog development UI. `npm run test:wave2` runs the focused contract/service/owner UI suites. `npm run ops:status` derives a **private, dated snapshot** from source manifests and receipts. `npm run ops:preview` builds the separate owner-only Mission Control and synthetic Council previews. No command above deploys Chibi, grants user access or executes the 204 model cases.
+`npm run dev` starts the catalog development UI. `npm run test:wave2` runs the focused contract/service/owner UI suites. `npm run ops:status` derives a **private, dated snapshot** from source manifests and receipts. `npm run ops:developers` prints the source-bound, **planning-only** 34-developer/102-role continuity roster from a clean Git checkout. `npm run ops:preview` builds the separate owner-only Mission Control and synthetic Council previews. No command above deploys Chibi, grants user access or executes the 204 model cases.
 
 The optional Python Council test environment is documented in [`services/council/README.md`](services/council/README.md). It needs a separate Python 3.12/3.13 environment and host-injected security dependencies; a passing unit test does not create an authenticated host.
 

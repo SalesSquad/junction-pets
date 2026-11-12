@@ -8,7 +8,7 @@
  *
  * Requires a clean local HEAD. The original manifests and package catalog are
  * validated before the plan is emitted. Provider readiness, distributed leases,
- * host authorization and actual capacity must be checked by a trusted executor.
+ * developer authorization and actual capacity must be checked by a trusted executor.
  */
 import {fileURLToPath} from 'node:url';
 import {EXPECTED_COMPANIES,loadPackages} from '../lib/catalog.mjs';

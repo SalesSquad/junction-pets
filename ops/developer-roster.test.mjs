@@ -91,7 +91,7 @@ test('strict scoped code/test writers and read-only independent reviewer', () =>
   assert.equal(aiven.roles[0].writerLeaseDomain, 'junction.aiven.write');
   assert.equal(aiven.roles[1].writerLeaseDomain, 'junction.aiven.write');
   assert.equal(aiven.roles[2].writerLeaseDomain, null);
-  assert.equal(aiven.ownership.sharedPathsOwner, 'W8 integrator (not company writers)');
+  assert.equal(aiven.ownership.sharedPathsOwner, 'Monorepo integrator (not company writers)');
   assert.ok(aiven.roles.every(role =>
     role.writePaths.every(path => !path.startsWith('services/pet-adapters/'))));
   assert.equal(aiven.roles[0].workIdTemplate, 'junction.aiven.code.<slice>');
