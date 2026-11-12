@@ -1,18 +1,18 @@
 import assert from 'node:assert/strict';
 import {chromium, webkit} from 'playwright';
+import {localPreviewBase, previewSelectionUrl} from './preview-url.mjs';
 
 const baseUrl = process.env.JUNCTION_PREVIEW_URL ?? 'http://127.0.0.1:4173';
-const parsed = new URL(baseUrl);
-if (!['localhost', '127.0.0.1'].includes(parsed.hostname) || parsed.protocol !== 'http:') {
-  throw new Error('Browser smoke must target a local, non-production preview.');
-}
+const parsed = localPreviewBase(baseUrl);
 
 async function run(name, engine, viewport) {
   const browser = await engine.launch({headless: true});
   try {
     const page = await browser.newPage({viewport});
-    const open = path => page.goto(new URL(path, parsed).href, {waitUntil: 'networkidle'});
-    await open('/?pet=junction-aiven');
+    const open = query => page.goto(previewSelectionUrl(parsed, query).href, {waitUntil: 'networkidle'});
+    const assertMount = () => assert.equal(new URL(page.url()).pathname, parsed.pathname, `${name}: mount path changed`);
+    await open('pet=junction-aiven');
+    assertMount();
     await page.locator('.pet-detail .pet-name').waitFor();
     assert.match(await page.locator('.pet-detail .pet-name').textContent(), /Aiven/i);
 
@@ -37,19 +37,24 @@ async function run(name, engine, viewport) {
       await page.locator('.company-list button').filter({hasText: 'Arduino'}).click();
     }
     assert.equal(new URL(page.url()).searchParams.get('pet'), 'junction-arduino');
+    assertMount();
     assert.match(await page.locator('.pet-detail .pet-name').textContent(), /Arduino/i);
 
     await page.goBack({waitUntil: 'domcontentloaded'});
     await page.locator('.pet-detail .pet-name').waitFor();
+    assertMount();
     assert.equal(new URL(page.url()).searchParams.get('pet'), 'junction-aiven');
     assert.match(await page.locator('.pet-detail .pet-name').textContent(), /Aiven/i);
     await page.goForward({waitUntil: 'domcontentloaded'});
+    assertMount();
     assert.match(await page.locator('.pet-detail .pet-name').textContent(), /Arduino/i);
 
-    await open('/?pet=junction-does-not-exist');
+    await open('pet=junction-does-not-exist');
+    assertMount();
     await page.getByRole('heading', {name: 'Companion link not found'}).waitFor();
     assert.equal(await page.locator('article.pet-detail').count(), 0);
-    await open('/?pet=junction-aiven&pet=junction-mariadb');
+    await open('pet=junction-aiven&pet=junction-mariadb');
+    assertMount();
     await page.getByRole('heading', {name: 'Companion link not found'}).waitFor();
     assert.equal(await page.locator('article.pet-detail').count(), 0);
 
@@ -58,6 +63,7 @@ async function run(name, engine, viewport) {
     console.log(JSON.stringify({
       browser: name,
       viewport: `${viewport.width}x${viewport.height}`,
+      mountPath: parsed.pathname,
       deepLink: 'pass',
       history: 'pass',
       qr: 'pass',

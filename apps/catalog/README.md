@@ -59,3 +59,24 @@ horizontal overflow in desktop/mobile Chromium and WebKit.
 WebKit automation is a browser-engine check, not a physical iPhone, Safari
 account/session, VoiceOver, real adoption or provider-backed conversation
 qualification. All real recipient steps remain Chibi host responsibilities.
+
+### Chibi-mounted path regression
+
+The same browser script can check the production-style `/junction/` mount **on
+a local preview**, without contacting the private Chibi Site. Build with the
+mount prefix and preview with the matching base:
+
+```sh
+npm run build --workspace @chibi/junction-catalog -- --base=/junction/
+npm run preview --workspace @chibi/junction-catalog -- --host 127.0.0.1 --port 4174 --strictPort --base=/junction/
+```
+
+In a second terminal:
+
+```sh
+JUNCTION_PREVIEW_URL=http://127.0.0.1:4174/junction/ npm run test:browser
+```
+
+The script now checks that deep links, company selection, Back/Forward and
+invalid selectors never escape the mount. The two mount-URL contract tests also
+run with `npm test`; those do not substitute for browser-engine acceptance.
