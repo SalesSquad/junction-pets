@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-arduino",
+  "agentId": "junction-dev-arduino",
+  "provider": "codex-cloud",
+  "desiredName": "junction-arduino",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-arduino-*",
+  "ownedPath": "pets/arduino/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/arduino/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-rokoko",
+  "agentId": "junction-dev-rokoko",
+  "provider": "codex-cloud",
+  "desiredName": "junction-rokoko",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-rokoko-*",
+  "ownedPath": "pets/rokoko/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/rokoko/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

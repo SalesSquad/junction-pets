@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-craci",
+  "agentId": "junction-dev-craci",
+  "provider": "codex-cloud",
+  "desiredName": "junction-craci",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-craci-*",
+  "ownedPath": "pets/craci/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/craci/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

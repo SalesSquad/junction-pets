@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-stoa",
+  "agentId": "junction-dev-stoa",
+  "provider": "codex-cloud",
+  "desiredName": "junction-stoa",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-stoa-*",
+  "ownedPath": "pets/stoa/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/stoa/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

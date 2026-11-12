@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-featherless",
+  "agentId": "junction-dev-featherless",
+  "provider": "codex-cloud",
+  "desiredName": "junction-featherless",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-featherless-*",
+  "ownedPath": "pets/featherless/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/featherless/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

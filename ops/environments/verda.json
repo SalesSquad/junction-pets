@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-verda",
+  "agentId": "junction-dev-verda",
+  "provider": "codex-cloud",
+  "desiredName": "junction-verda",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-verda-*",
+  "ownedPath": "pets/verda/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/verda/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

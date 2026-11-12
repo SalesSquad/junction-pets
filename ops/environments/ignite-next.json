@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-ignite-next",
+  "agentId": "junction-dev-ignite-next",
+  "provider": "codex-cloud",
+  "desiredName": "junction-ignite-next",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-ignite-next-*",
+  "ownedPath": "pets/ignite-next/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/ignite-next/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

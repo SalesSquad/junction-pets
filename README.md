@@ -36,6 +36,12 @@ Kehitysnäkymä käynnistyy komennolla `npm run dev`. Käyttöliittymän teknise
 
 ## Jokaisella yrityksellä on oma kehityslinja
 
+**Kehitysorkestrointi:** jokaiselle 34 petille on oma kehittäjäagentin määrittely ja tavoiteltu Codex Cloud -ympäristö `ops/environments/`-rekisterissä. Yksityinen [Mission Control](docs/DEVELOPMENT_SYSTEM.md) näyttää pet-kohtaisen lähde-/testinäytön, työtilan, estäjän ja seuraavan toimen. Ympäristömäärittely ei ole sama asia kuin todistetusti julkaistu ympäristö; vahvistamattomat Cloud-ID:t ja malliajot näkyvät puuttuvina.
+
+Jokaisella petillä on myös oma lähteeseen sidottu, **skills-only** [plugin-paketti](docs/PET_PLUGINS.md). Sen olemassaolo ei tarkoita, että plugin olisi jo rekisteröity omalle tilille tai että se voisi suorittaa yksityisiä Chibi-työkaluja. Kehitysnäkymän sekä jäljitettävän, synteettisen petiltä petille -[yhteistyödemon](docs/INTER_PET_COLLABORATION.md) saa omassa Node-ympäristössä komennolla `npm run ops:preview`. Yksityiset näkymät valmistuvat hakemistoihin `dist/mission-control` ja `dist/collaboration-demo`; niitä ei lisätä julkiseen katalogiin.
+
+Junctionin palautettava agenttikoodi pysyy erillään yksityisestä Chibi.pet-tekniikasta. Katso [kehitysjärjestelmä](docs/DEVELOPMENT_SYSTEM.md) ja [palautusraja](docs/JUNCTION_SUBMISSION.md).
+
 Yrityksen oma linja tarkoittaa omaa `pets/<company-slug>/`-hakemistoa, paketin versionumeroa, lähteitä ja arviointitapauksia. Kokonaisuutta ylläpidetään yhtenä monorepona; 34 pysyvää Git-haaraa eivät ole pakettimalli. Muutokset tehdään rajatuilla tehtävähaaroilla ja katselmoidaan yhteisten sopimusten kautta.
 
 | Tiedosto tai hakemisto | Tarkoitus |

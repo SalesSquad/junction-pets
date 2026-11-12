@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-ironshard",
+  "agentId": "junction-dev-ironshard",
+  "provider": "codex-cloud",
+  "desiredName": "junction-ironshard",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-ironshard-*",
+  "ownedPath": "pets/ironshard/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/ironshard/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

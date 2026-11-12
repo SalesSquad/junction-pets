@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-aiven",
+  "agentId": "junction-dev-aiven",
+  "provider": "codex-cloud",
+  "desiredName": "junction-aiven",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-aiven-*",
+  "ownedPath": "pets/aiven/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/aiven/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

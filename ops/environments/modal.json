@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-modal",
+  "agentId": "junction-dev-modal",
+  "provider": "codex-cloud",
+  "desiredName": "junction-modal",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-modal-*",
+  "ownedPath": "pets/modal/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/modal/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

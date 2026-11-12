@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-aalto-university",
+  "agentId": "junction-dev-aalto-university",
+  "provider": "codex-cloud",
+  "desiredName": "junction-aalto-university",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-aalto-university-*",
+  "ownedPath": "pets/aalto-university/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/aalto-university/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

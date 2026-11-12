@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-tieto",
+  "agentId": "junction-dev-tieto",
+  "provider": "codex-cloud",
+  "desiredName": "junction-tieto",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-tieto-*",
+  "ownedPath": "pets/tieto/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/tieto/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

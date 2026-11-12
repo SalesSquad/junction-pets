@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-valio-aimo",
+  "agentId": "junction-dev-valio-aimo",
+  "provider": "codex-cloud",
+  "desiredName": "junction-valio-aimo",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-valio-aimo-*",
+  "ownedPath": "pets/valio-aimo/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/valio-aimo/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

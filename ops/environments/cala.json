@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-cala",
+  "agentId": "junction-dev-cala",
+  "provider": "codex-cloud",
+  "desiredName": "junction-cala",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-cala-*",
+  "ownedPath": "pets/cala/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/cala/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

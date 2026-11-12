@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-exa",
+  "agentId": "junction-dev-exa",
+  "provider": "codex-cloud",
+  "desiredName": "junction-exa",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-exa-*",
+  "ownedPath": "pets/exa/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/exa/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-hostinger",
+  "agentId": "junction-dev-hostinger",
+  "provider": "codex-cloud",
+  "desiredName": "junction-hostinger",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-hostinger-*",
+  "ownedPath": "pets/hostinger/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/hostinger/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "unprovisioned",
+    "environmentId": null,
+    "verifiedAt": null,
+    "evidenceUrl": null
+  }
+}

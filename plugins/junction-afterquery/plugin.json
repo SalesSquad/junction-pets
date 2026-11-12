@@ -1,0 +1,22 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "junction-afterquery",
+  "version": "0.1.0",
+  "description": "Independent AfterQuery topic guidance from official sources and redacted user inputs; no official company affiliation or provider execution.",
+  "author": {
+    "name": "Sales Squad Oy"
+  },
+  "repository": "https://github.com/SalesSquad/junction-pets",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "AfterQuery Chibi companion",
+        "shortDescription": "Independent company guidance",
+        "longDescription": "Independent AfterQuery topic guidance from official sources and redacted user inputs; no official company affiliation or provider execution.",
+        "developerName": "Sales Squad Oy",
+        "capabilities": [],
+        "defaultPrompt": "Analyze this failed agent trace and distinguish a reasoning error, tool error and unclear requirement."
+      }
+    }
+  }
+}
