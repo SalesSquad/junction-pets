@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const out=resolve(root,'dist/mission-control');
 const inDir=resolve(root,'apps/mission-control');
-const files=['index.html','style.css','app.js','status-model.mjs'];
+const files=['index.html','style.css','app.js','status-model.mjs','server-projection.mjs'];
 await mkdir(out,{recursive:true});
 for(const file of files){
   const source=resolve(inDir,file);

@@ -19,11 +19,17 @@ mission-control/
   style.css
   app.js
   status-model.mjs
-  status.json     # generated from source + verified receipts
+  server-projection.mjs # optional backend feed sanitizer (browser: advisory only)
+  status.json     # generated from source + reported receipts
+  fleet-projection.json # OPTIONAL owner-private backend-generated sidecar, not bundled
 ```
 
 The integrator must run `npm run ops:build` to regenerate the machine-readable
-snapshot and copy this app's four runtime files to `dist/mission-control`.
+snapshot and copy this app's five runtime files (including
+`server-projection.mjs`) to `dist/mission-control`. The integrator owns this
+build/export mapping. The optional `fleet-projection.json` sidecar must come
+from an authenticated, owner-private server path; do not publish it in the
+public Junction bundle.
 Serve `dist/mission-control` through an **owner-private, access-controlled**
 static preview. Do not publish this directory to the public event catalogue,
 the Chibi host bundle, or an unauthenticated URL. A `robots` tag is not access
@@ -41,6 +47,7 @@ Use Node's built-in test runner for the presentation model:
 
 ```sh
 node --test apps/mission-control/status-model.test.mjs
+node --test apps/mission-control/server-projection.test.mjs
 ```
 
 For a separate synthetic UI acceptance check (Playwright and a Chromium binary
@@ -53,6 +60,22 @@ node apps/mission-control/browser-smoke.mjs
 This test serves a temporary local fake status source, checks desktop/mobile
 overflow and interaction, and does **not** exercise any provider, adopted pet,
 Junction submission, or remote Codex Cloud instance.
+
+## Optional backend feed (currently advisory)
+
+On each manual Refresh, the browser first reads `status.json`, then optionally
+reads same-origin `fleet-projection.json` with
+`kind: junction-fleet-control/server-projection/v1`. It rejects wrong source
+SHA, incomplete/duplicate 34-row rosters, stale receipt bindings, future clocks
+and any runtime-execution claim. It strips unknown/raw provider, grant, CI and
+secret fields; only allowlisted state labels reach the UI.
+
+**No fetched JSON is a browser-verifiable trust anchor.** Even when a trusted
+server generated it, the page labels the information *backend-reported* and
+does not upgrade Cloud, CI or model-eval counters to green. Missing/invalid
+feeds leave the original static 34-row snapshot intact. A verified owner-private
+auth channel and independent server receipt verifier are rollout gates, not
+properties created by a JSON flag or static Site publication.
 
 ## Honest status display
 

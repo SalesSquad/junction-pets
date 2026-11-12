@@ -6,11 +6,12 @@ import {join} from 'node:path';
 import assert from 'node:assert/strict';
 
 const here = fileURLToPath(new URL('./', import.meta.url));
-const pages = new Set(['/', '/index.html', '/style.css', '/app.js', '/status-model.mjs']);
+const pages = new Set(['/', '/index.html', '/style.css', '/app.js', '/status-model.mjs', '/server-projection.mjs']);
+const SHA = 'a'.repeat(40); // Synthetic source fixture, not hosted source attestation.
 const fixture = {
   schemaVersion: 1,
   generatedAt: new Date().toISOString(),
-  source: {repository: 'SalesSquad/junction-pets', verification: 'unverified', commit: null},
+  source: {repository: 'SalesSquad/junction-pets', verification: 'unverified', commit: SHA},
   pets: Array.from({length: 34}, (_, index) => ({
     slug: `junction-test-${index}`,
     company: {name: index === 0 ? 'Acme Demo' : `Company ${index}`, slug: `test-${index}`, role: index < 18 ? 'challenge' : 'technology'},
@@ -23,8 +24,31 @@ const fixture = {
   })),
 };
 
+const backendFixture = {
+  schemaVersion: 1,
+  kind: 'junction-fleet-control/server-projection/v1',
+  generatedAt: new Date().toISOString(),
+  source: {repository: 'SalesSquad/junction-pets', commit: SHA},
+  summary: {total: 34, cloudReady: 1}, // Deliberately untrusted browser report.
+  pets: fixture.pets.map((pet, i) => ({
+    petSlug: pet.slug,
+    developerAgentId: pet.agent.id,
+    desiredEnvironment: pet.cloud.desiredName,
+    cloud: i === 0
+      ? {state: 'ready', environmentId: 'env.fake.01', sourceCommit: SHA, verifiedAt: new Date().toISOString()}
+      : {state: 'unprovisioned'},
+    ci: {state: 'missing'}, evaluation: {state: 'missing'},
+    grant: {state: 'unverified'}, runtimeExecutionAllowed: false,
+  })),
+};
+
 const server = createServer(async (request, response) => {
   const path = new URL(request.url || '/', 'http://localhost').pathname;
+  if (path === '/fleet-projection.json') {
+    response.setHeader('Content-Type', 'application/json');
+    response.end(JSON.stringify(backendFixture));
+    return;
+  }
   if (path === '/status.json') {
     response.setHeader('Content-Type', 'application/json');
     response.end(JSON.stringify(fixture));
@@ -62,7 +86,9 @@ try {
     await page.getByText('Every companion.').waitFor();
     assert.equal(await page.locator('.pet-row').count(), 34, '34 lanes visible');
     assert.equal(await page.locator('#metric-evals').textContent(), '0/204', 'authored is not executed');
-    assert.equal(await page.locator('#metric-cloud').textContent(), '00', 'unverified ready claim is not green');
+    assert.equal(await page.locator('#metric-cloud').textContent(), '00', 'backend ready claim cannot turn static UI green');
+    assert.match(await page.locator('#projection-status').textContent(), /NOT browser-attested/);
+    assert.match(await page.locator('.pet-row').first().textContent(), /Backend reports ready.*unverified in browser/);
     assert.equal(await page.locator('.pet-row .state-pill.critical').count(), 1, 'unverified provider claim is visible');
     await page.locator('#search').fill('Acme Demo');
     assert.equal(await page.locator('.pet-row').count(), 1, 'search narrows one lane');

@@ -11,6 +11,7 @@ import {
   sourceCommit,
   text,
 } from './status-model.mjs';
+import {advisoryCloudLabel, advisoryEvidenceLabel, normalizeServerProjection} from './server-projection.mjs';
 
 const byId = id => document.getElementById(id);
 const elements = {
@@ -21,6 +22,7 @@ const elements = {
 };
 
 let registry = null;
+let fleetProjection = null; // Browser-received JSON: advisory only, never a trust anchor.
 let activeMode = 'all';
 let activeSearch = '';
 let activeRole = 'all';
@@ -98,6 +100,7 @@ function renderMetrics() {
 
 function petRow(pet) {
   const assessment = cloudAssessment(pet.cloud);
+  const serverReport = fleetProjection?.byPet.get(pet.slug);
   const item = make('div');
   item.setAttribute('role', 'listitem');
   const button = make('button', 'pet-row');
@@ -114,9 +117,11 @@ function petRow(pet) {
 
   const cloud = make('span', 'cell-detail');
   cloud.append(statusBadge(assessment), make('span', 'subline', text(pet.cloud?.desiredName, 'No Cloud profile')));
+  if (serverReport) cloud.append(make('span', 'subline', advisoryCloudLabel(serverReport)));
 
   const evals = make('span', 'cell-detail', `${safeCount(pet.evaluation?.executed)} / ${safeCount(pet.evaluation?.defined)} executed`);
   evals.append(make('span', 'subline', `${safeCount(pet.evaluation?.passed)} reported pass · ${safeCount(pet.evaluation?.failed)} reported fail`));
+  if (serverReport) evals.append(make('span', 'subline', advisoryEvidenceLabel(serverReport.evaluation, 'Model eval')));
 
   const action = make('span', 'cell-action');
   action.append(make('span', 'action-text', text(pet.nextAction, 'Next action unassigned')),
@@ -168,6 +173,7 @@ function kpi(value, label) {
 
 function openDetail(pet) {
   const assessment = cloudAssessment(pet.cloud);
+  const serverReport = fleetProjection?.byPet.get(pet.slug);
   const plugin = pluginAssessment(pet.plugin, pet.slug);
   elements.detailTitle.textContent = pet.company.name;
   elements.detailContent.replaceChildren();
@@ -180,6 +186,20 @@ function openDetail(pet) {
   columns.append(kpi(`${safeCount(pet.evaluation?.executed)} / ${safeCount(pet.evaluation?.defined)}`, 'reported runs / authored cases'),
     kpi(`${safeCount(pet.evaluation?.passed)}`, 'reported passes · not independently qualified'));
   elements.detailContent.append(columns);
+  elements.detailContent.append(
+    detailRow('Backend report / browser attestation', serverReport
+      ? 'Source-bound server claim loaded; not independently browser-attested'
+      : 'No matching backend report · source snapshot only'),
+    detailRow('Backend cloud (advisory)', advisoryCloudLabel(serverReport)),
+    detailRow('Backend CI (advisory)', advisoryEvidenceLabel(serverReport?.ci, 'CI')),
+    detailRow('Backend model evaluations (advisory)', advisoryEvidenceLabel(serverReport?.evaluation, 'Model eval')),
+    detailRow('Backend host grant (not execution permission)', serverReport?.grant === 'revoked'
+      ? 'Backend reports revoked · deny external execution'
+      : serverReport?.grant === 'host-verified'
+        ? 'Backend reports active host receipt · runtime still not authorized by UI'
+        : 'No browser-verifiable host grant'),
+    detailRow('Backend source SHA (advisory)', fleetProjection?.sourceSha || 'No matching backend SHA', true),
+  );
 
   elements.detailContent.append(
     detailRow('Development agent', text(pet.agent?.id), true),
@@ -242,6 +262,8 @@ function openDetail(pet) {
 
 function renderError(message) {
   registry = null;
+  fleetProjection = null;
+  put('projection-status', 'Backend feed unavailable · no Cloud or CI readiness inferred');
   elements.grid.replaceChildren();
   ['metric-total', 'metric-cloud', 'metric-evals', 'metric-blocked', 'visible-count', 'count-all', 'count-needs', 'count-active', 'count-ready', 'count-issues'].forEach(id => put(id, '—'));
   put('grid-label', 'NO VERIFIED SNAPSHOT');
@@ -260,8 +282,35 @@ function renderError(message) {
   elements.list.append(placeholder);
 }
 
+async function readOptionalServerProjection() {
+  fleetProjection = null;
+  let note = 'No server projection connected · source snapshot only';
+  try {
+    // An owner-private server may generate this sidecar. The browser cannot
+    // independently authenticate its provider/host receipts, so status always
+    // remains advisory and the existing non-green Cloud gate is unchanged.
+    const response = await fetch('./fleet-projection.json', {
+      cache: 'no-store', headers: {'Accept': 'application/json'},
+    });
+    if (response.ok) {
+      fleetProjection = normalizeServerProjection(await response.json(), registry);
+      note = fleetProjection.stale
+        ? 'Backend report STALE · not browser-attested · stored snapshot retained'
+        : 'Backend report loaded · source SHA matched · provider claims NOT browser-attested';
+    } else if (response.status !== 404) {
+      note = 'Backend report HTTP ' + response.status + ' · stored snapshot retained';
+    }
+  } catch {
+    note = 'Backend report rejected or unavailable · stored snapshot retained';
+  }
+  put('projection-status', note);
+  renderList();
+}
+
 async function loadSnapshot() {
   elements.reload.disabled = true;
+  fleetProjection = null;
+  put('projection-status', 'Checking optional backend report · no readiness assumed');
   put('snapshot-title', 'Reading source snapshot…');
   try {
     const response = await fetch('./status.json', {cache: 'no-store', headers: {'Accept': 'application/json'}});
@@ -272,6 +321,7 @@ async function loadSnapshot() {
     renderStatusBar();
     renderMetrics();
     renderList();
+    await readOptionalServerProjection();
   } catch (error) {
     renderError(error instanceof Error ? error.message : 'Unknown registry failure');
   } finally {

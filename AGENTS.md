@@ -21,3 +21,25 @@ Preserve unrelated work and current remote HEAD. Commit coherent owned work to a
 task branch, push it and retain exact source/test receipts. Use no GitHub Actions
 workflow or paid executor by default. Never store keys, cookies, private customer
 conversations or personal profiles in this repository.
+
+## Wave 2 multi-agent development
+
+Before taking a Wave 2 task, read [docs/JUNCTION_SWARM_WAVE2_EXECUTION.md](docs/JUNCTION_SWARM_WAVE2_EXECUTION.md).
+Start from a verified source SHA and inspect the current dirty worktree/PR stack.
+Writers own disjoint directories; the integrator alone changes root manifests,
+package scripts, exports, generated files and cross-service contract mappings.
+Every handoff names work ID, source SHA, owned paths, executed checks, failures
+and next owner. A blocked provider or pet lane does not stop independent lanes.
+
+Developer **Codex Cloud environments** are desired per pet, but a manifest or
+private plugin registration is not provider evidence of a published environment.
+Mission Control must distinguish unverified Cloud, authored evals, synthetic
+demo, independently verified model calls and Chibi host deployment. Never put
+private owner receipts or ops registry into the public Junction submission.
+
+The v1 collaboration contract and Aiven/LangGraph Council are not grant issuers.
+Only the private Chibi Rust/Cedar host decides consent, delegated scopes and
+tool access. Recheck on each privileged call; replay, revocation, unknown tenant
+and stale source must fail closed. Run the targeted Wave 2 suites as well as the
+repo baseline checks when changing these paths; report unexecuted PostgreSQL,
+provider, Codex Cloud and signed-host gates explicitly.
