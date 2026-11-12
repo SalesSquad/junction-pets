@@ -109,8 +109,9 @@ recovery. External writes are forbidden.
   Chibi Cedar/PEP status, including revocation. A missing, mismatched, expired,
   re-fenced or write-capable decision always denies execution.
 - `ReplayStore.reserve()` must atomically bind (tenant, user, firstRequestId)
-  to **two independent SHA-256 digests**: the exact canonical public v1
-  request-pair bytes (`envelope_digest`) and the canonical normalized
+  to **two independent SHA-256 digests**: the parsed v1 request pair's
+  canonical sorted-key, whitespace-free UTF-8 JSON encoding (`envelope_digest`,
+  **not** the original HTTP wire bytes) and the canonical normalized
   two-handoff dictionaries stored in LangGraph (`handoffs_digest`).
   At initial execution **and every checkpoint resume**, Council recomputes
   `handoffs_digest` from the actual saved handoffs. The injected host's
@@ -121,7 +122,7 @@ recovery. External writes are forbidden.
   execution until upgraded, not silently ignore `handoffs_digest`.
   One worker claims the deterministic run/thread ID; concurrent/repeated POST
   returns that ID **without another invocation**. Reusing the request ID with
-  different raw or normalized bytes is HTTP 409. The repository contains only
+  different canonical v1 content or normalized handoffs is HTTP 409. The repository contains only
   a locked *ephemeral test fake*, not a durable production ReplayStore or live
   Postgres implementation.
 - `PetExecutor.invoke()` runs only after that decision, and is forbidden from
