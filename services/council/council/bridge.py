@@ -77,8 +77,9 @@ def _decode(request: object, caller: Caller, index: int, now: datetime) -> tuple
     if not isinstance(budget, dict) or set(budget) != _BUDGET_FIELDS:
         raise InvalidRun("Invalid bounded task budget")
     if (type(budget["maxTokens"]) is not int or not 1 <= budget["maxTokens"] <= 4096
-            or type(budget["maxDepth"]) is not int or not 0 <= budget["maxDepth"] <= 2):
-        raise InvalidRun("Task budget exceeds Council pilot limits")
+            or type(budget["maxDepth"]) is not int or not 0 <= budget["maxDepth"] <= 2
+            or request["depth"] > budget["maxDepth"]):
+        raise InvalidRun("Task depth exceeds the request's maxDepth budget")
     created = _time(request["createdAt"], "createdAt")
     expires = _time(request["expiresAt"], "expiresAt")
     if created > now + timedelta(seconds=30) or created < now - timedelta(hours=1):
@@ -95,6 +96,14 @@ def _decode(request: object, caller: Caller, index: int, now: datetime) -> tuple
         authority_ref=request["authorityRef"],
         context_ref=context["ref"],
         source_sha=request["sourceSha"],
+        conversation_id=request["conversationId"],
+        parent_request_id=request.get("parentRequestId"),
+        depth=request["depth"],
+        max_depth=budget["maxDepth"],
+        max_tokens=budget["maxTokens"],
+        requested_effect=request["requestedEffect"],
+        created_at=request["createdAt"],
+        expires_at=request["expiresAt"],
     ), request["conversationId"], request.get("parentRequestId")
 
 
@@ -115,6 +124,8 @@ def handoffs_from_v1(caller: Caller, requests: list[dict], *, now: datetime | No
         raise InvalidRun("Cross-conversation delegation denied")
     if parent_a is not None or parent_b != first.request_id:
         raise InvalidRun("Missing or mismatched parent request")
+    if first.max_depth < second.depth:
+        raise InvalidRun("First pet's maxDepth prohibits delegation")
     if second.context_sha256 != first.context_sha256 or second.context_ref != first.context_ref:
         raise InvalidRun("Unapproved cross-pet context change")
     if second.source_sha != first.source_sha:

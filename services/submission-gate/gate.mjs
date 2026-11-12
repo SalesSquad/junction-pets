@@ -9,6 +9,11 @@ const SHA40 = /^[a-f0-9]{40}$/i;
 const SHA256 = /^[a-f0-9]{64}$/i;
 const SAFE_PATH = /^[A-Za-z0-9._/-]+$/;
 const TEXT_EXT = /\.(?:css|html|js|json|mjs|md|py|rs|sql|toml|ts|tsx|txt|yaml|yml)$/i;
+const LEGAL_TEXT_BASENAMES = new Set([
+  'LICENSE', 'LICENSE-UPSTREAM', 'LICENSE-THIRD-PARTY',
+  'NOTICE', 'NOTICE-UPSTREAM', 'NOTICE-THIRD-PARTY',
+  'COPYING', 'COPYING-UPSTREAM'
+]);
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const PUBLIC_ROOT_FILES = new Set(['README.md', 'LICENSE', 'NOTICE', 'COPYING', 'package.json', 'package-lock.json', 'catalog-contract.md']);
 const PUBLIC_DOCS = new Set(['JUNCTION_SUBMISSION.md', 'BEHAVIOR_EVALS.md', 'INTER_PET_COLLABORATION.md', 'DEMO.md', 'PROVENANCE.md', 'OPEN_SOURCE.md', 'THIRD_PARTY_NOTICES.md']);
@@ -21,7 +26,8 @@ const FORBIDDEN_ROOTS = new Set([
   '.codex', '.claude', '.ssh', 'dist'
 ]);
 const FORBIDDEN_SEGMENTS = new Set([
-  '.env', '.git', '.ssh', '.codex', '.claude', 'node_modules',
+  '.env', '.git', '.gitignore', '.gitattributes', '.gitmodules',
+  '.npmrc', '.pypirc', '.ssh', '.codex', '.claude', 'node_modules',
   'secrets', 'credentials', 'token', 'tokens', 'receipts',
   'passport', 'payments', 'billing', 'customer-data',
   'plugin-registrations', 'worktrees', 'chibi', 'chibi-runtime',
@@ -98,7 +104,7 @@ export function isHardDenied(path, { directory = false } = {}) {
   const segments = lower.split('/');
   if (FORBIDDEN_ROOTS.has(segments[0]) ||
       segments.some((part) => FORBIDDEN_SEGMENTS.has(part)) ||
-      segments.some((part) => part.startsWith('.env'))) return true;
+      segments.some((part) => part.startsWith('.env') || part.startsWith('.git'))) return true;
   if (segments[0] === 'apps' && segments[1] === 'mission-control') return true;
   if (lower.includes('plugin-registration') ||
       lower.includes('oauth-secret') ||
@@ -112,7 +118,8 @@ export function isHardDenied(path, { directory = false } = {}) {
 
 export function inspectText(bytes, path) {
   if (bytes.length > MAX_FILE_BYTES) reject('TOO_LARGE', 'Submission file exceeds 2 MiB: ' + path);
-  if (!TEXT_EXT.test(path) && !/(^|\/)(?:LICENSE|NOTICE|COPYING)$/i.test(path)) {
+  const basename = path.slice(path.lastIndexOf('/') + 1);
+  if (!TEXT_EXT.test(path) && !LEGAL_TEXT_BASENAMES.has(basename)) {
     reject('UNREVIEWED_BINARY', 'Only reviewed UTF-8 source/text is accepted: ' + path);
   }
   let value;

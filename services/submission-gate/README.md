@@ -50,6 +50,11 @@ enter a judge-facing package. See docs/JUNCTION_SUBMISSION.md.
   internal cloud fleet-control, ops/, plugins/, internal Mission Control,
   dist/, nested private Chibi paths, secrets and credentials fail even if
   somebody includes them in the allowlist.
+- Safe upstream license/notice basenames (including LICENSE-UPSTREAM) are
+  explicitly accepted as UTF-8 text so MIT attribution travels with reviewed
+  Council code. Arbitrary license-like names do not receive the exemption.
+  Hidden Git metadata (.gitignore, .gitattributes, .gitmodules) and npm/Python
+  credential configuration files are always excluded.
 - Symlinks, special files, paths with traversal, binary assets, invalid UTF-8,
   Git LFS pointers and files over 2 MiB fail by default. The file-size cap is
   enforced on metadata before loading and again during bounded no-follow reads.

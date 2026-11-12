@@ -30,8 +30,11 @@ python3.12 -m venv /tmp/junction-council-venv
 /tmp/junction-council-venv/bin/python -m pytest -q services/council/tests
 ```
 
-The FastAPI builder deliberately has **no anonymous default**:
-`create_app(graph, authenticator)` requires a host-injected identity resolver.
+The FastAPI builder deliberately has **no anonymous or in-memory replay default**:
+`create_app(graph, authenticator, replay_store)` requires a host-injected identity
+resolver and an **atomic, persistent** replay store. The same host replay store
+must be injected into `build_graph(policy, executor, checkpointer, replay_store)`
+so every delegated call verifies that its monotonic fence remains active.
 `POST /runs` accepts exactly two canonical `pet-collaboration.v1` request
 envelopes under `{"requests":[...,...]}`. `bridge.py` checks the version,
 parentage, tenant, `sourceSha` (exact lowercase 40-hex), effect, TTL, data-class and budget against
@@ -41,11 +44,16 @@ digest to the graph's internal 64-character digest, retaining the opaque
 `authorityRef` and context reference for exact Chibi policy binding.
 A client-provided `sourceSha` is untrusted metadata, not a proof of provenance.
 The injected Chibi host must verify that exact commit against its approved
-source registry and return a decision bound to the same SHA. The read-only
-executor receipt must repeat that host-approved source SHA.
+source registry and return a decision bound to the same SHA **and the complete
+conversation, parent, depth, maxDepth, maxTokens, effect, time window and
+idempotency/fence scope**. A model cannot create or prolong its own grant.
+The host executor receives the bounded maxTokens field, and its metadata-only
+receipt must report tokens used within budget and repeat the approved SHA.
+Both delegated steps re-check the five-minute request TTL at execution/resume.
 The graph builder also requires a trusted `HostPolicy`, an effect-free
-read-only `PetExecutor` and a checkpointer. A real application must inject
-all three through its authenticated Chibi gateway; this directory provides no
+read-only `PetExecutor`, a checkpointer and the durable replay/fence store.
+A real application must inject all four through its authenticated Chibi
+gateway; this directory provides no
 production `uvicorn app:app`, model API keys or permissive demo policy.
 
 ## Execution boundary
@@ -54,9 +62,16 @@ production `uvicorn app:app`, model API keys or permissive demo policy.
   Client-supplied IDs are never treated as authentication.
 - The graph passes only exact task IDs and a digest of the scoped context,
   not private Chibi memory, bearer credentials or open-ended model text.
-- Before **every** delegated read-only operation, `HostPolicy.decide()` must
-  consult current Chibi Cedar/PEP status, including revocation. A missing,
-  mismatched, expired or write-capable decision always denies execution.
+- Before **every** delegated read-only operation, `ReplayStore.is_current()`
+  must validate the durable run fence and `HostPolicy.decide()` must consult
+  Chibi Cedar/PEP status, including revocation. A missing, mismatched, expired,
+  re-fenced or write-capable decision always denies execution.
+- `ReplayStore.reserve()` must atomically bind (tenant, user, firstRequestId) to
+  the exact canonical request-pair digest. One worker claims the deterministic
+  run/thread ID; a concurrent or repeated POST returns that ID **without another
+  invocation**. Reusing the request ID with a different payload is HTTP 409.
+  The repository contains only a locked *ephemeral test fake*, not a durable
+  production ReplayStore or live Postgres implementation.
 - `PetExecutor.invoke()` runs only after that decision, and is forbidden from
   producing write/effect receipts. The host remains responsible for actual tool
   routing, scoped data retrieval, provider timeouts, rate limits and accounting.
@@ -68,11 +83,13 @@ production `uvicorn app:app`, model API keys or permissive demo policy.
   receipt is mandatory and extra response fields are rejected.
 - LangGraph checkpoints support explicit resume after failure and `interrupt`
   supports proposal review. A checkpoint **is not a durable worker queue**.
-  A provider invocation occurring before a checkpoint commit is **at least once**
-  across a crash/retry; this prototype makes **no exactly-once guarantee**.
-  Any future side effects require durable ledger fencing, an idempotent provider
-  request key and a recovery/outbox protocol before an executor can run them.
-  Only read-only/idempotent operations belong in this slice.
+  POST idempotency prevents concurrent re-entry, but a provider invocation may
+  succeed **before** a checkpoint commits. Subsequent crash/retry is thus
+  **at least once** unless an external executor enforces its own idempotency;
+  this prototype makes **no exactly-once guarantee**. Recovery must verify
+  durable lease ownership, fencing, an idempotent provider request key and the
+  ledger/outbox before it is enabled. The Council rejects *all* external writes,
+  including for synthetic context. No live side effects are enabled here.
 - Future production use requires a durable ledger/outbox, policy signature
   verification, cross-language envelope schema, PostgresSaver instance, crash
   replay tests, authenticated Chibi E2E tests and an explicit deployment decision.
@@ -82,8 +99,12 @@ it is *never* a provider write or permission elevation.
 
 ## Current qualification
 
-The tests use an in-memory LangGraph checkpointer, a fake Chibi authorization
-adapter and a deterministic fake pet executor. They verify grant absence,
-grant mismatch, revocation between handoffs, checkpointed recovery and stale
-review rejection. They do not prove a live model call, user connection,
-persistent PostgreSQL deployment, browser/voice behavior, or an installed plugin.
+The tests use an in-memory LangGraph checkpointer, a **locked but not durable**
+ReplayStore fake, a fake Chibi authorization adapter and a deterministic fake
+pet executor. They verify complete request/decision scope, maxDepth and token
+budget, expiry at execution/resume, stale fences, missing grants, revocation,
+checkpointed recovery, secret canaries, double-POST, conflicting replay digests,
+concurrent reservation and stale review rejection. They do not prove a live
+model call, a production atomic replay store, provider idempotency, user
+connection, persistent PostgreSQL deployment, browser/voice behavior or an
+installed plugin.

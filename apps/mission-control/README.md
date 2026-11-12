@@ -57,6 +57,12 @@ are optional development-only prerequisites):
 node apps/mission-control/browser-smoke.mjs
 ```
 
+For the generated single-file owner Page preview after the integrator runs
+`npm run ops:page:build`, use `node apps/mission-control/page-embed-smoke.mjs`
+with Playwright/Chrome available. It opens the file offline at desktop/mobile
+sizes, checks 34 rendered rows and checks hashed Content Security Policy for
+script/style violations. This is neither deployment nor owner-auth verification.
+
 This test serves a temporary local fake status source, checks desktop/mobile
 overflow and interaction, and does **not** exercise any provider, adopted pet,
 Junction submission, or remote Codex Cloud instance.
@@ -73,7 +79,10 @@ secret fields; only allowlisted state labels reach the UI.
 **No fetched JSON is a browser-verifiable trust anchor.** Even when a trusted
 server generated it, the page labels the information *backend-reported* and
 does not upgrade Cloud, CI or model-eval counters to green. Missing/invalid
-feeds leave the original static 34-row snapshot intact. A verified owner-private
+feeds leave the original static 34-row snapshot intact. A report older than
+10 minutes explicitly downgrades backend-reported Cloud ready and CI/model
+verified states to stale, removes its advisory environment ID, and downgrades
+any previously active host grant to unverified. Revoked grants remain revoked. A verified owner-private
 auth channel and independent server receipt verifier are rollout gates, not
 properties created by a JSON flag or static Site publication.
 

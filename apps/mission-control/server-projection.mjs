@@ -46,6 +46,7 @@ export function normalizeServerProjection(payload, registry, nowMs = Date.now())
   if (observedAt === null || !Number.isFinite(nowMs) || observedAt > nowMs + 60_000) {
     throw new Error('Backend projection has invalid timestamp');
   }
+  const stale = nowMs - observedAt > 600_000;
   const canonical = new Set(registry.pets.map(pet => pet.slug));
   const byPet = new Map();
   for (const item of payload.pets) {
@@ -64,18 +65,19 @@ export function normalizeServerProjection(payload, registry, nowMs = Date.now())
       timestamp(item.cloud.verifiedAt) !== null;
     const evidenceState = (field) => {
       const state = safeState(item[field], field);
-      if (state.startsWith('verified-') && (!SHA.test(item[field]?.sourceCommit || '') ||
+      if (state.startsWith('verified-') && (stale || !SHA.test(item[field]?.sourceCommit || '') ||
           item[field].sourceCommit !== expectedSha)) return 'stale';
       return state;
     };
     byPet.set(item.petSlug, Object.freeze({
-      cloud: cloud === 'ready' && !cloudBound ? 'unverified' : cloud,
+      cloud: cloud === 'ready' ? stale ? 'stale' : cloudBound ? 'ready' : 'unverified' : cloud,
       ci: evidenceState('ci'),
       evaluation: evidenceState('evaluation'),
-      grant: safeState(item.grant, 'grant'),
+      grant: stale && safeState(item.grant, 'grant') === 'host-verified'
+        ? 'unverified' : safeState(item.grant, 'grant'),
       // Opaque ID is advisory. Never propagate raw reason/evidence URL/token
       // fields from user-editable or compromised JSON.
-      environmentId: cloudBound ? item.cloud.environmentId : null,
+      environmentId: !stale && cloudBound ? item.cloud.environmentId : null,
     }));
   }
   if (byPet.size !== canonical.size) throw new Error('Backend projection omitted company lanes');
@@ -83,7 +85,7 @@ export function normalizeServerProjection(payload, registry, nowMs = Date.now())
     advisoryOnly: true,
     sourceSha: expectedSha,
     generatedAt: payload.generatedAt,
-    stale: nowMs - observedAt > 600_000,
+    stale,
     byPet,
   });
 }
@@ -91,6 +93,7 @@ export function normalizeServerProjection(payload, registry, nowMs = Date.now())
 export function advisoryCloudLabel(record) {
   if (!record) return 'No backend report';
   if (record.cloud === 'ready') return 'Backend reports ready · unverified in browser';
+  if (record.cloud === 'stale') return 'Backend Cloud evidence stale · recheck provider';
   if (record.cloud === 'blocked') return 'Backend reports cloud blocked';
   if (record.cloud === 'unprovisioned') return 'Backend reports not provisioned';
   return 'Backend Cloud status unverified';

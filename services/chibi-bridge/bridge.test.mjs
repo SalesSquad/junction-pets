@@ -1,7 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {readFileSync} from 'node:fs';
+import Ajv2020 from 'ajv/dist/2020.js';
 import {dispatchPetRequest, receiptSha256, validateReceiptShape} from './bridge.mjs';
 
+const RECEIPT_SCHEMA = JSON.parse(readFileSync(
+  new URL('../../contracts/pet-collaboration/v1/receipt.schema.json', import.meta.url), 'utf8'));
+const ajvReceipt = new Ajv2020({strict: false, validateFormats: false, allErrors: true}).compile(RECEIPT_SCHEMA);
+const idempotencyKey = r => 'sha256:' + createHash('sha256')
+  .update(JSON.stringify([r.tenantId, r.requestId]), 'utf8').digest('hex');
 const SOURCE = '4'.repeat(40);
 const NOW = Date.parse('2026-11-12T15:00:00Z');
 
@@ -39,10 +47,11 @@ function receipt(r, overrides = {}) {
     schemaVersion: 'pet-collaboration.v1', kind: 'receipt',
     requestId: r.requestId, tenantId: r.tenantId,
     actorPetId: r.actorPetId, recipientPetId: r.recipientPetId,
-    decisionRef: 'host.decision.01', status: 'completed',
+    decisionRef: 'host.decision.01', status: 'completed', executionKind: 'model',
     sourceSha: SOURCE, completedAt: '2026-11-12T15:00:10Z',
     outputDigest: 'sha256:' + 'b'.repeat(64),
     providerReceiptRef: 'provider.req.01',
+    hostAttestation: {issuer: 'chibi-host', attestationRef: 'host.attest.01', signatureRef: 'host.sig.01'},
     hostAuthorization: true, externalEffects: false,
     ...overrides,
   };
@@ -57,14 +66,14 @@ function host(r) {
     sourceSha: SOURCE, nowMs: () => NOW, timeoutMs: 500,
     verifyHostGrant: async () => {counters.calls++; return grant(r);},
     reserveReplay: async ({tenantId, requestId}) => {
-      const key = tenantId + '/' + requestId;
+      const key = JSON.stringify([tenantId, requestId]);
       if (used.has(key)) return {reserved: false};
       used.add(key);
       return {reserved: true};
     },
-    transport: async ({idempotencyKey}) => {
+    transport: async ({idempotencyKey: actualKey}) => {
       counters.dispatches++;
-      assert.equal(idempotencyKey, 'tenant.alpha/req.01');
+      assert.equal(actualKey, idempotencyKey(r));
       return receipt(r);
     },
     verifyHostReceipt: async ({receipt: row, receiptSha256: digest, sourceSha, requestId}) => {
@@ -86,6 +95,7 @@ test('valid host-injected read-only receipt can be admitted and attested by inje
   assert.equal(h.counters.attestations, 1);
   assert.ok(h.counters.calls >= 3);
   assert.equal(validateReceiptShape(result.receipt), true);
+  assert.equal(ajvReceipt(result.receipt), true, JSON.stringify(ajvReceipt.errors));
   assert.match(receiptSha256(result.receipt), /^sha256:[a-f0-9]{64}$/);
 });
 
@@ -263,4 +273,113 @@ test('recheck rejects source-scoped grant swapping before provider dispatch', as
   };
   assert.equal((await dispatchPetRequest(r, h.adapters)).code, 'REVOKED_BEFORE_DISPATCH');
   assert.equal(h.counters.dispatches, 0);
+});
+
+test('every successful receipt fixture conforms to actual Ajv Draft 2020-12 schema', () => {
+  const r = request();
+  const model = receipt(r);
+  const tool = receipt(r, {executionKind: 'tool', toolReceiptRef: 'tool.req.01'});
+  delete tool.providerReceiptRef;
+  const combined = receipt(r, {executionKind: 'model-and-tool', toolReceiptRef: 'tool.req.01'});
+  const deterministic = receipt(r, {executionKind: 'none'});
+  delete deterministic.providerReceiptRef;
+  const denied = receipt(r, {status: 'denied', executionKind: 'none', hostAuthorization: false});
+  for (const field of ['outputDigest', 'providerReceiptRef', 'hostAttestation']) delete denied[field];
+  const failed = {...denied, status: 'failed'};
+  for (const [name, row] of Object.entries({model, tool, combined, deterministic, denied, failed})) {
+    assert.equal(ajvReceipt(row), true, name + ': ' + JSON.stringify(ajvReceipt.errors));
+    assert.equal(validateReceiptShape(row), true, name);
+  }
+});
+
+test('conditional receipt gaps reject before even a permissive host verifier is called', async () => {
+  const mutators = {
+    'missing execution kind': row => {delete row.executionKind;},
+    'missing signed host claim': row => {delete row.hostAttestation;},
+    'missing signature reference': row => {delete row.hostAttestation.signatureRef;},
+    'wrong attestation issuer': row => {row.hostAttestation.issuer = 'pet-self-signed';},
+    'unexpected attestation property': row => {row.hostAttestation.privateToken = 'LEAK';},
+    'missing model request evidence': row => {delete row.providerReceiptRef;},
+    'missing tool request evidence': row => {row.executionKind = 'tool'; delete row.providerReceiptRef;},
+    'combined execution missing tool evidence': row => {row.executionKind = 'model-and-tool';},
+    'completed without host authorization': row => {row.hostAuthorization = false;},
+    'denied receipt claims model execution': row => {row.status = 'denied';},
+  };
+  for (const [name, mutate] of Object.entries(mutators)) {
+    const r = request(), h = host(r), row = receipt(r);
+    mutate(row);
+    assert.equal(ajvReceipt(row), false, name + ' must fail schema');
+    assert.equal(validateReceiptShape(row), false, name + ' must fail bridge');
+    h.adapters.transport = async () => row;
+    assert.equal((await dispatchPetRequest(r, h.adapters)).code, 'HOST_RECEIPT_INVALID', name);
+    assert.equal(h.counters.attestations, 0, name + ' reached untrusted verifier');
+  }
+});
+
+test('schema-valid external tool effect still violates read-only bridge policy', async () => {
+  const r = request(), h = host(r);
+  const row = receipt(r, {executionKind: 'model-and-tool', toolReceiptRef: 'tool.req.01', externalEffects: true});
+  assert.equal(ajvReceipt(row), true, JSON.stringify(ajvReceipt.errors));
+  h.adapters.transport = async () => row;
+  assert.equal((await dispatchPetRequest(r, h.adapters)).code, 'HOST_RECEIPT_INVALID');
+  assert.equal(h.counters.attestations, 0);
+});
+
+test('hashing tenant and request as a tuple avoids slash separator collisions', async () => {
+  const a = request(), b = request(), keys = [], reservations = new Set();
+  a.tenantId = 'tenant/a'; a.requestId = 'b';
+  b.tenantId = 'tenant'; b.requestId = 'a/b';
+  assert.equal(a.tenantId + '/' + a.requestId, b.tenantId + '/' + b.requestId,
+    'old separator encoding would collide');
+  const reserveReplay = async ({tenantId, requestId}) => {
+    const tuple = JSON.stringify([tenantId, requestId]);
+    if (reservations.has(tuple)) return {reserved: false};
+    reservations.add(tuple);
+    return {reserved: true};
+  };
+  for (const r of [a, b]) {
+    const h = host(r);
+    h.adapters.reserveReplay = reserveReplay;
+    h.adapters.transport = async ({idempotencyKey: key}) => {
+      keys.push(key);
+      return receipt(r);
+    };
+    assert.equal((await dispatchPetRequest(r, h.adapters)).ok, true);
+  }
+  assert.equal(reservations.size, 2);
+  assert.equal(keys.length, 2);
+  assert.match(keys[0], /^sha256:[a-f0-9]{64}$/);
+  assert.match(keys[1], /^sha256:[a-f0-9]{64}$/);
+  assert.notEqual(keys[0], keys[1]);
+  assert.equal(keys[0], idempotencyKey(a));
+  assert.equal(keys[1], idempotencyKey(b));
+});
+
+test('post-dispatch source-swapped recheck denies before host receipt attestation', async () => {
+  const r = request(), h = host(r);
+  h.adapters.verifyHostGrant = async () => {
+    h.counters.calls++;
+    return grant(r, h.counters.calls >= 3 ? {sourceSha: '5'.repeat(40)} : {});
+  };
+  assert.equal((await dispatchPetRequest(r, h.adapters)).code, 'REVOKED_AFTER_DISPATCH');
+  assert.equal(h.counters.dispatches, 1);
+  assert.equal(h.counters.attestations, 0);
+});
+
+test('grant revoked while waiting on detached receipt verifier is denied before return', async () => {
+  const r = request(), h = host(r);
+  const verify = h.adapters.verifyHostReceipt;
+  h.adapters.verifyHostGrant = async () => {
+    h.counters.calls++;
+    return grant(r, h.counters.calls >= 4 ? {revoked: true} : {});
+  };
+  h.adapters.verifyHostReceipt = async args => {
+    await new Promise(resolve => setTimeout(resolve, 5));
+    return verify(args);
+  };
+  assert.deepEqual(await dispatchPetRequest(r, h.adapters),
+    {ok: false, code: 'REVOKED_AFTER_DISPATCH'});
+  assert.equal(h.counters.dispatches, 1);
+  assert.equal(h.counters.attestations, 1);
+  assert.ok(h.counters.calls >= 4);
 });

@@ -22,7 +22,16 @@ Use collectFleetStatus from a trusted server-side controller only.
   verification. Return true only after successful authenticated readback.
 - ciVerifier, evalVerifier and grantAdapter.verifyReceipt: authenticated
   host-side verifier functions, not self-reported booleans from JSON.
-- grantAdapter: optional read-only Chibi host grant status. Revocation denies.
+- authenticatedTenantId: mandatory for any grant to be shown as host-verified.
+  The server must obtain this identity from an authenticated Chibi session,
+  never a manifest, pet response or raw grant readback. Missing identity leaves
+  the grant unverified.
+- grantAdapter: optional read-only Chibi host grant status. readGrant receives
+  {tenantId, petSlug, sourceCommit}; its signed receipt must echo those exact
+  fields and include a receipt ID. An active grant additionally needs an
+  unexpired UTC expiresAt. verifyReceipt(observed, expectedScope) must
+  independently authenticate the signed scope. Mismatched tenants, pets, SHAs,
+  expired active grants and unverifiable revocations remain unverified.
   Even verified active grant evidence is NOT authorization to execute; the
   private Chibi PEP/PDP decides on each actual runtime action.
 
@@ -33,7 +42,7 @@ must never be committed or serialized into the dashboard.
 
 Import collectFleetStatus from services/fleet-control/index.mjs, then call it
 with manifests, sourceCommit, providerAdapter, ciReceipts, evalReceipts,
-ciVerifier, evalVerifier, and optional grantAdapter.
+ciVerifier, evalVerifier, and optional authenticatedTenantId and grantAdapter.
 
 The result (junction-fleet-control/server-projection/v1) is pure JSON containing
 34 rows, generated timestamp, exact SHA, cloud/CI/eval/grant status and next
@@ -57,7 +66,8 @@ Run from repo root:
 
 Fixtures intentionally use invented Cloud IDs, without real network/model calls
 or credentials. They cover fake readiness, source/ID mismatch, denied provider
-receipt verification, revoked grants, stale CI/eval SHA, provider outage, all 34
+receipt verification, tenant mismatch, missing scope, expired and revoked
+scoped grants, stale CI/eval SHA, provider outage, all 34
 rows and explicit secret stripping.
 
 Rollout blocker: no independently authenticated Codex Cloud environment reader

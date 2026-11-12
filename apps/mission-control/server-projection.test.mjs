@@ -101,6 +101,28 @@ test('backend raw reasons, provider tokens and URLs are never echoed into presen
   assert.doesNotMatch(rendered, /Bearer|secret|accessToken|customer|evidenceUrl|not-for-browser/);
 });
 
+test('realistic 12-minute-old backend feed downgrades Cloud, CI, eval and grant claims', () => {
+  const p = projection();
+  p.generatedAt = new Date(NOW - 12 * 60_000).toISOString();
+  p.pets[0].cloud = {
+    state: 'ready', environmentId: 'env.old.01', sourceCommit: SHA,
+    verifiedAt: new Date(NOW - 13 * 60_000).toISOString(),
+  };
+  p.pets[0].ci = {state: 'verified-pass', sourceCommit: SHA};
+  p.pets[0].evaluation = {state: 'verified-pass', sourceCommit: SHA};
+  p.pets[0].grant = {state: 'host-verified'};
+  const result = normalizeServerProjection(p, registry(), NOW);
+  const record = result.byPet.get(slugs[0]);
+  assert.equal(result.stale, true);
+  assert.equal(record.cloud, 'stale');
+  assert.match(advisoryCloudLabel(record), /stale/);
+  assert.equal(record.environmentId, null);
+  assert.equal(record.ci, 'stale');
+  assert.equal(record.evaluation, 'stale');
+  assert.equal(record.grant, 'unverified');
+  assert.equal(cloudAssessment({state: 'ready'}).effectiveState, 'unverified');
+});
+
 test('stale and future browser snapshots are explicit', () => {
   const p = projection();
   assert.equal(normalizeServerProjection(p, registry(), NOW + 2 * 3600_000).stale, true);

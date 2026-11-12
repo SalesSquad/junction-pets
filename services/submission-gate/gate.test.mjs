@@ -49,6 +49,38 @@ test('passes exact reviewed source bytes and labels result not published', async
   assert.equal(result.files[0].sha256, f.allowlist.files[0].sha256);
 });
 
+test('the actual Aiven Council MIT LICENSE-UPSTREAM survives exact source-bound export', async (t) => {
+  const upstream = await readFile(new URL('../council/LICENSE-UPSTREAM', import.meta.url), 'utf8');
+  assert.match(upstream, /^MIT License\n/);
+  assert.match(upstream, /Copyright \(c\) 2026 Aiven Labs/);
+  const f = await fixture('services/council/LICENSE-UPSTREAM', upstream);
+  t.after(() => rm(f.outer, { recursive: true, force: true }));
+  const result = await verifySubmission({
+    treeDir: f.stage, sourceRepo: f.repo, allowlist: f.allowlist
+  });
+  assert.equal(result.files[0].sha256, sha256(Buffer.from(upstream)));
+  assert.equal(result.status, 'reviewable-not-published');
+});
+
+test('hidden Git metadata is hard-denied even in otherwise public service scope', async (t) => {
+  assert.equal(isHardDenied('services/council/.gitignore'), true);
+  assert.equal(isHardDenied('services/council/.gitattributes'), true);
+  assert.equal(isHardDenied('pets/aiven/.gitmodules'), true);
+  const f = await fixture('services/council/.gitignore', 'private-model-cache/\n');
+  t.after(() => rm(f.outer, { recursive: true, force: true }));
+  await assert.rejects(verifySubmission({
+    treeDir: f.stage, sourceRepo: f.repo, allowlist: f.allowlist
+  }), blocked('HARD_DENY'));
+});
+
+test('arbitrary license-like files are not covered by legal-text exception', async (t) => {
+  const f = await fixture('services/council/LICENSE-PRIVATE', 'Confidential contents\n');
+  t.after(() => rm(f.outer, { recursive: true, force: true }));
+  await assert.rejects(verifySubmission({
+    treeDir: f.stage, sourceRepo: f.repo, allowlist: f.allowlist
+  }), blocked('UNREVIEWED_BINARY'));
+});
+
 test('extra files are rejected even if they appear harmless', async (t) => {
   const f = await fixture();
   t.after(() => rm(f.outer, { recursive: true, force: true }));

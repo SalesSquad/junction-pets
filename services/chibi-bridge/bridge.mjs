@@ -1,16 +1,16 @@
 import {createHash} from 'node:crypto';
+import {readFileSync} from 'node:fs';
+import Ajv2020 from 'ajv/dist/2020.js';
 import {authorizeAndReserve, validateRequestShape} from '../../contracts/pet-collaboration/v1/validate.mjs';
 
 const ID = /^[A-Za-z0-9][A-Za-z0-9_:./-]{0,127}$/;
 const SHA = /^[a-f0-9]{40}$/;
-const DIGEST = /^sha256:[a-f0-9]{64}$/;
-const RECEIPT_KEYS = new Set([
-  'schemaVersion', 'kind', 'requestId', 'tenantId', 'actorPetId',
-  'recipientPetId', 'decisionRef', 'status', 'sourceSha', 'completedAt',
-  'outputDigest', 'providerReceiptRef', 'toolReceiptRef',
-  'hostAuthorization', 'externalEffects',
-]);
-const STATUSES = new Set(['completed', 'denied', 'failed', 'pending-approval']);
+// Pin runtime validation to the same Draft 2020-12 receipt schema used by
+// contracts/pet-collaboration/v1/schema.test.mjs. Ajv handles conditional
+// execution/attestation requirements; validTime below checks calendar validity.
+const receiptSchema = JSON.parse(readFileSync(
+  new URL('../../contracts/pet-collaboration/v1/receipt.schema.json', import.meta.url), 'utf8'));
+const validateReceiptSchema = new Ajv2020({strict: false, validateFormats: false}).compile(receiptSchema);
 const denied = code => Object.freeze({ok: false, code});
 
 function validTime(value) {
@@ -36,21 +36,9 @@ export function receiptSha256(receipt) {
   return 'sha256:' + createHash('sha256').update(canonical(receipt), 'utf8').digest('hex');
 }
 
-/** JSON-schema-shape check, not authenticity, endorsement or authority. */
+/** Exact Draft 2020-12 receipt-shape check, not host signature verification. */
 export function validateReceiptShape(receipt) {
-  if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt)) return false;
-  if (Object.keys(receipt).some(key => !RECEIPT_KEYS.has(key))) return false;
-  if (receipt.schemaVersion !== 'pet-collaboration.v1' || receipt.kind !== 'receipt') return false;
-  if (!['requestId', 'tenantId', 'actorPetId', 'recipientPetId', 'decisionRef']
-    .every(key => typeof receipt[key] === 'string' && ID.test(receipt[key]))) return false;
-  if (!STATUSES.has(receipt.status) || !SHA.test(receipt.sourceSha ?? '')) return false;
-  if (!validTime(receipt.completedAt)) return false;
-  if (typeof receipt.hostAuthorization !== 'boolean' || typeof receipt.externalEffects !== 'boolean') return false;
-  if (receipt.outputDigest !== undefined && !DIGEST.test(receipt.outputDigest)) return false;
-  if (receipt.providerReceiptRef !== undefined && !ID.test(receipt.providerReceiptRef)) return false;
-  if (receipt.toolReceiptRef !== undefined && !ID.test(receipt.toolReceiptRef)) return false;
-  if (receipt.status === 'completed' && (!receipt.hostAuthorization || !DIGEST.test(receipt.outputDigest ?? ''))) return false;
-  return true;
+  return validateReceiptSchema(receipt) === true && validTime(receipt.completedAt);
 }
 
 function grantQuery(request, nowMs) {
@@ -164,7 +152,10 @@ export async function dispatchPetRequest(request, {
   const payload = {
     schemaVersion: request.schemaVersion,
     request, decisionRef: admitted.decisionRef,
-    sourceSha, idempotencyKey: request.tenantId + '/' + request.requestId,
+    // Hash an unambiguous typed tuple. Both IDs permit slashes, so
+    // ('a/b', 'c') and ('a', 'b/c') would collide if slash-joined.
+    sourceSha, idempotencyKey: 'sha256:' + createHash('sha256')
+      .update(canonical([request.tenantId, request.requestId]), 'utf8').digest('hex'),
   };
   // Only a host-owned transport closure can add private auth out-of-band.
   const task = Promise.resolve().then(() => transport(payload, {signal: controller.signal}))
@@ -200,6 +191,12 @@ export async function dispatchPetRequest(request, {
       attestation.requestId !== request.requestId ||
       !ID.test(attestation.verificationRef ?? '')) {
     return denied('HOST_ATTESTATION_INVALID');
+  }
+  if (signal?.aborted) return denied('CANCELLED');
+  // Attestation itself may await a remote private verifier. A grant revoked
+  // during that wait must not release a formerly authorized receipt.
+  if (!await hostStillAllows(request, verifyHostGrant, nowMs(), admitted.decisionRef)) {
+    return denied('REVOKED_AFTER_DISPATCH');
   }
   if (signal?.aborted) return denied('CANCELLED');
   if (receipt.status !== 'completed') {

@@ -12,6 +12,7 @@ export const EXPECTED_PETS = 34;
 const SHA = /^[a-f0-9]{40}$/;
 const DIGEST = /^[a-f0-9]{64}$/;
 const SLUG = /^junction-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const TENANT_ID = /^[A-Za-z0-9][A-Za-z0-9_:./-]{0,127}$/;
 const ENV_ID = /^[A-Za-z0-9_.:-]{5,160}$/;
 const UTC = /^\d{4}-\d{2}-\d{2}T.*Z$/;
 
@@ -128,18 +129,33 @@ async function evidenceStatus(receipt, petSlug, sourceCommit, verifier, kind) {
  * A Chibi host verifier is required; an "active":true field alone is never a grant.
  * An independently confirmed revocation must block runtime readiness.
  */
-async function grantStatus(manifest, grantAdapter, sourceCommit) {
+async function grantStatus(manifest, grantAdapter, sourceCommit, authenticatedTenantId, now) {
+  // This tenant comes from the trusted host session, never from a pet manifest
+  // or a grant readback. Without it no entitlement can become host-verified.
+  if (typeof authenticatedTenantId !== 'string' || !TENANT_ID.test(authenticatedTenantId)) {
+    return status('unverified', 'No authenticated Chibi tenant scope');
+  }
   if (!grantAdapter || typeof grantAdapter.readGrant !== 'function' ||
       typeof grantAdapter.verifyReceipt !== 'function') return status('unverified', 'No Chibi grant verifier');
   try {
-    const observed = await grantAdapter.readGrant({petSlug: manifest.petSlug, sourceCommit});
-    if (observed?.state === 'revoked') return status('revoked', 'Host reports grant revoked; execution denied');
-    if (!isRecord(observed) || observed.state !== 'active' ||
-        observed.petSlug !== manifest.petSlug || observed.sourceCommit !== sourceCommit ||
-        !safeString(observed.receiptId)) return status('unverified', 'No source-bound active Chibi grant');
-    const verified = await grantAdapter.verifyReceipt(observed);
-    return verified === true ? status('host-verified', 'Authenticated active host grant') :
-      status('unverified', 'Host grant receipt failed verification');
+    const expected = {tenantId: authenticatedTenantId, petSlug: manifest.petSlug, sourceCommit};
+    const observed = await grantAdapter.readGrant(expected);
+    // A permissive verifier must never turn an unrelated tenant/source/pet
+    // into a valid entitlement or even a verified revocation.
+    if (!isRecord(observed) || !['active', 'revoked'].includes(observed.state) ||
+        observed.tenantId !== expected.tenantId || observed.petSlug !== expected.petSlug ||
+        observed.sourceCommit !== expected.sourceCommit || !safeString(observed.receiptId)) {
+      return status('unverified', 'Chibi grant is missing exact tenant/pet/source binding');
+    }
+    if (observed.state === 'active' &&
+        (!validUtc(observed.expiresAt) || Date.parse(observed.expiresAt) <= now.valueOf())) {
+      return status('unverified', 'Chibi active grant is missing or past its expiration');
+    }
+    const verified = await grantAdapter.verifyReceipt(observed, expected);
+    if (verified !== true) return status('unverified', 'Host grant receipt failed verification');
+    return observed.state === 'revoked'
+      ? status('revoked', 'Authenticated host grant revocation; execution denied')
+      : status('host-verified', 'Authenticated tenant-scoped unexpired host grant');
   } catch {
     return status('blocked', 'Chibi grant reader unavailable; execution denied');
   }
@@ -151,7 +167,8 @@ async function grantStatus(manifest, grantAdapter, sourceCommit) {
  */
 export async function collectFleetStatus({
   manifests, sourceCommit, providerAdapter, ciReceipts = {}, evalReceipts = {},
-  ciVerifier, evalVerifier, grantAdapter, now = new Date(), maxReceiptAgeMs = 86400000
+  ciVerifier, evalVerifier, grantAdapter, authenticatedTenantId,
+  now = new Date(), maxReceiptAgeMs = 86400000
 }) {
   validateFleet(manifests, sourceCommit);
   if (!(now instanceof Date) || !Number.isFinite(now.valueOf()) ||
@@ -162,7 +179,7 @@ export async function collectFleetStatus({
       providerStatus(manifest, sourceCommit, providerAdapter, now, maxReceiptAgeMs),
       evidenceStatus(ciReceipts[slug], slug, sourceCommit, ciVerifier, 'ci'),
       evidenceStatus(evalReceipts[slug], slug, sourceCommit, evalVerifier, 'model-eval'),
-      grantStatus(manifest, grantAdapter, sourceCommit)
+      grantStatus(manifest, grantAdapter, sourceCommit, authenticatedTenantId, now)
     ]);
     // A development Cloud environment and grant observation are NOT execution permission.
     // Only the private Chibi PEP/PDP can authorize an individual runtime tool call.

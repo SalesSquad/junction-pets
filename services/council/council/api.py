@@ -1,15 +1,17 @@
-"""Authenticated FastAPI adapter. The Chibi host must inject identity resolution."""
+"""Authenticated FastAPI adapter with mandatory host-atomic replay reservation."""
 from __future__ import annotations
 
 from typing import Literal, Protocol
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from langgraph.types import Command
 from pydantic import BaseModel, ConfigDict
 
 from .bridge import handoffs_from_v1
 from .core import Caller, InvalidRun, PolicyDenied, new_run_state
+from .replay import ReplayConflict, ReplayStore, deterministic_run_id, envelope_sha256, valid_reservation
 
 
 class Authenticator(Protocol):
@@ -19,7 +21,6 @@ class Authenticator(Protocol):
 
 class StartInput(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    # Exact canonical request objects; shape and host identity are checked by bridge.
     requests: list[dict]
 
 
@@ -51,17 +52,19 @@ def _project(snapshot) -> dict:
     }
 
 
-def create_app(graph, authenticator: Authenticator) -> FastAPI:
-    """No default authentication, policy or model adapter is ever installed."""
-    if graph is None or authenticator is None:
-        raise ValueError("Council graph and verified host authenticator are required")
-    app = FastAPI(title="Chibi Council (host-integrated only)", version="0.1.0")
+def create_app(graph, authenticator: Authenticator, replay_store: ReplayStore | None = None) -> FastAPI:
+    """Production host MUST inject durable atomic ReplayStore and fence verifier.
+
+    No anonymous identity, replay fallback, grant or model adapter is installed.
+    """
+    if graph is None or authenticator is None or replay_store is None:
+        raise ValueError("Council graph, verified host authenticator and durable ReplayStore are required")
+    app = FastAPI(title="Chibi Council (host-integrated only)", version="0.2.0")
 
     def identity(request: Request) -> Caller:
         try:
             caller = authenticator.identify(request)
         except Exception:
-            # No raw auth/session exception details leave the host.
             raise HTTPException(401, "Host authentication required") from None
         if caller is None or not isinstance(caller, Caller):
             raise HTTPException(401, "Host authentication required")
@@ -70,29 +73,68 @@ def create_app(graph, authenticator: Authenticator) -> FastAPI:
     def owned_run(run_id: UUID, caller: Caller):
         snapshot = graph.get_state(_thread(run_id))
         values = dict(snapshot.values or {})
-        # Do not reveal to another tenant/user whether the run exists.
         if values.get("caller") != vars(caller):
             raise HTTPException(404, "Run not found")
         return snapshot
 
     @app.get("/health/live")
     def live():
-        return {"status": "ok", "host_authorization": "injected-required"}
+        return {"status": "ok", "host_authorization": "injected-required",
+                "replay_reservation": "durable-host-required"}
 
     @app.post("/runs", status_code=201)
     def create_run(body: StartInput, request: Request):
         caller = identity(request)
         try:
             handoffs = handoffs_from_v1(caller, body.requests)
-            state = new_run_state(caller, handoffs)
-        except InvalidRun as exc:
+            digest = envelope_sha256(body.requests)
+        except (InvalidRun, ValueError, TypeError) as exc:
             raise HTTPException(422, str(exc)) from None
-        run_id = uuid4()
+        expected_run_id = deterministic_run_id(caller, handoffs[0].request_id)
+        # Atomic claim happens before any provider invocation. The host store
+        # permanently keys (tenant,user,firstRequestId) to one exact payload.
         try:
-            graph.invoke(state, config=_thread(run_id))
-        except PolicyDenied:
-            raise HTTPException(403, "Chibi host authorization denied") from None
-        return {"id": str(run_id), **_project(graph.get_state(_thread(run_id)))}
+            reservation = replay_store.reserve(caller, handoffs[0].request_id,
+                                               digest, expected_run_id)
+        except ReplayConflict:
+            raise HTTPException(409, "Request ID reused with a different envelope") from None
+        except Exception:
+            raise HTTPException(503, "Durable Chibi replay reservation unavailable") from None
+        if not valid_reservation(reservation, caller, handoffs[0].request_id, digest):
+            raise HTTPException(503, "Host returned an invalid durable replay reservation")
+
+        if not reservation.created:
+            # A replay must NEVER invoke the graph again. If the first worker
+            # has not checkpointed yet, expose its reservation ID as pending.
+            try:
+                snapshot = graph.get_state(_thread(expected_run_id))
+                if not snapshot.values:
+                    return JSONResponse(status_code=200, content={
+                        "id": str(expected_run_id), "status": "reserved",
+                        "review_status": "not-reviewed", "results": [],
+                        "checkpoint_id": None,
+                    })
+                if snapshot.values.get("caller") != vars(caller):
+                    raise HTTPException(404, "Run not found")
+                return JSONResponse(status_code=200, content={
+                    "id": str(expected_run_id), **_project(snapshot),
+                })
+            except HTTPException:
+                raise
+            except Exception:
+                raise HTTPException(503, "Checkpoint read unavailable") from None
+
+        try:
+            state = new_run_state(caller, handoffs, reservation)
+            graph.invoke(state, config=_thread(expected_run_id))
+            result = {"id": str(expected_run_id), **_project(graph.get_state(_thread(expected_run_id)))}
+        except (InvalidRun, PolicyDenied):
+            # The durable reservation remains held even when execution fails.
+            # Never blindly call the provider again on duplicate POST.
+            raise HTTPException(403, "Chibi host execution denied") from None
+        except Exception:
+            raise HTTPException(503, "Chibi Council execution unavailable") from None
+        return result
 
     @app.get("/runs/{run_id}")
     def read_run(run_id: UUID, request: Request):
@@ -112,6 +154,8 @@ def create_app(graph, authenticator: Authenticator) -> FastAPI:
             graph.invoke(Command(resume={"action": body.action}), config=_thread(run_id))
         except PolicyDenied:
             raise HTTPException(403, "Review rejected") from None
+        except Exception:
+            raise HTTPException(503, "Chibi Council review unavailable") from None
         return {"id": str(run_id), **_project(graph.get_state(_thread(run_id)))}
 
     return app
