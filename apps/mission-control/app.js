@@ -4,7 +4,9 @@ import {
   formatDate,
   normalizeRegistry,
   petSourceUrl,
+  pluginAssessment,
   safeCount,
+  safePluginPageUrl,
   snapshotAge,
   sourceCommit,
   text,
@@ -151,6 +153,13 @@ function detailRow(label, value, code = false) {
   return row;
 }
 
+function detailStatusRow(label, assessment, metadata) {
+  const row = make('div', 'detail-row');
+  row.append(make('div', 'detail-row-label', label), statusBadge(assessment),
+    make('div', 'detail-meta', metadata));
+  return row;
+}
+
 function kpi(value, label) {
   const item = make('div', 'detail-kpi');
   item.append(make('strong', '', value), make('span', '', label));
@@ -159,6 +168,7 @@ function kpi(value, label) {
 
 function openDetail(pet) {
   const assessment = cloudAssessment(pet.cloud);
+  const plugin = pluginAssessment(pet.plugin, pet.slug);
   elements.detailTitle.textContent = pet.company.name;
   elements.detailContent.replaceChildren();
   const pillRow = make('div', 'detail-row');
@@ -176,6 +186,13 @@ function openDetail(pet) {
     detailRow('Work item', text(pet.agent?.workItem), true),
     detailRow('Developer instructions', text(pet.agent?.instructions), true),
     detailRow('Company-specific behavior', text(pet.agent?.petInstructions), true),
+    detailStatusRow('Plugin / source manifest', plugin.source,
+      `Desired: ${text(pet.plugin?.desiredName)} · File: ${text(pet.plugin?.sourcePath)}`),
+    detailStatusRow('Plugin / recorded private registration', plugin.registration,
+      `Recorded ID: ${text(pet.plugin?.pluginId, 'None')} · Release: ${text(pet.plugin?.releaseId, 'None')} · Visibility: ${text(pet.plugin?.visibility, 'Not recorded')}`),
+    detailStatusRow('Plugin / verified host installation', plugin.host,
+      `Evidence: ${text(pet.plugin?.verification)} · Binding: ${text(pet.plugin?.registrationBinding)} · Last reported: ${formatDate(pet.plugin?.observedAt)}`),
+    detailRow('Plugin source bundle SHA (advisory)', text(pet.plugin?.sourceBundleSha256, 'None'), true),
     detailRow('Environment ID', assessment.effectiveState === 'unverified' ? 'No verified environment ID' : text(pet.cloud?.environmentId, 'Not assigned'), true),
     detailRow('Claimed provider timestamp (unverified)', formatDate(pet.cloud?.verifiedAt)),
     detailRow('Development status', text(pet.development?.state)),
@@ -185,6 +202,20 @@ function openDetail(pet) {
     detailRow('Open blocker', text(pet.blocker, 'No recorded blocker')),
     detailRow('Next action', text(pet.nextAction, 'Assign an evidence-backed next step')),
   );
+
+  const reportedPluginUrl = safePluginPageUrl(pet.plugin);
+  if (reportedPluginUrl) {
+    const row = make('div', 'detail-row');
+    row.append(make('div', 'detail-row-label', 'Reported plugin page · registration not independently verified'));
+    const content = make('div', 'detail-row-value');
+    const link = make('a', '', 'Open reported private plugin page ↗');
+    link.href = reportedPluginUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    content.append(link);
+    row.append(content);
+    elements.detailContent.append(row);
+  }
 
   if (typeof pet.development?.prUrl === 'string' && /^https:\/\/github\.com\/SalesSquad\/junction-pets\/pull\/\d+$/.test(pet.development.prUrl)) {
     const row = detailRow('Development PR', pet.development.prUrl);
@@ -199,6 +230,13 @@ function openDetail(pet) {
   }
 
   elements.sourceLink.href = petSourceUrl(pet, registry.source);
+  // A dirty/reconstructed local snapshot has no verified PR or hosted HEAD.
+  // Its safe main-branch link is a BASELINE reference, not the package bytes
+  // currently displayed in this private operations snapshot.
+  elements.sourceLink.textContent = sourceCommit(registry.source) &&
+    registry.source?.verification !== 'local-git-only'
+    ? 'Open recorded source claim ↗'
+    : 'Open main baseline (snapshot unverified) ↗';
   elements.dialog.showModal();
 }
 

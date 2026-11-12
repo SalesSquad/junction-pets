@@ -76,6 +76,7 @@ export function normalizeRegistry(value) {
       },
       agent: item.agent || {},
       cloud: item.cloud || {},
+      plugin: item.plugin || {},
       development: item.development || {},
       evaluation: item.evaluation || {},
       runtime: item.runtime || {},
@@ -102,6 +103,49 @@ export function filterPets(pets, {query = '', role = 'all', mode = 'all'} = {}) 
 export function petSourceUrl(pet, source) {
   const ref = source?.verification === 'local-git-only' ? 'main' : (sourceCommit(source) || 'main');
   return `https://github.com/${SOURCE_REPOSITORY}/tree/${ref}/pets/${encodeURIComponent(pet.company.slug)}`;
+}
+
+/** Advisory plugin status, deliberately NOT a hosted-install verification. */
+export function pluginAssessment(plugin = {}, petSlug = '') {
+  if (!plugin || typeof plugin !== 'object' || Array.isArray(plugin)) plugin = {};
+  const exactSource = petSlug && plugin.desiredName === petSlug && plugin.sourcePath === `plugins/${petSlug}/plugin.json`;
+  let source;
+  if (plugin.presence === 'source-present' && exactSource) source = {tone: 'neutral', label: 'Source manifest reported present'};
+  else if (plugin.presence === 'source-drift') source = {tone: 'warning', label: 'Source drift reported'};
+  else if (plugin.presence === 'missing') source = {tone: 'critical', label: 'Source manifest missing'};
+  else source = {tone: 'critical', label: 'Plugin source unverified'};
+
+  let registration;
+  if (plugin.installationState === 'not-registered') {
+    registration = {tone: 'neutral', label: 'No registration recorded'};
+  } else if (plugin.installationState === 'registered-source-matched-reported' && exactSource &&
+    plugin.registrationBinding === 'source-matched-reported' &&
+    /^[A-Za-z0-9_.:-]{5,200}$/.test(plugin.pluginId || '') &&
+    /^[0-9a-f]{64}$/i.test(plugin.sourceBundleSha256 || '') && plugin.visibility === 'USER_PRIVATE') {
+    // An exact source-bound self-report is NOT a provider readback.
+    registration = {tone: 'warning', label: 'Private registration reported'};
+  } else if (plugin.installationState === 'stale-registration' || plugin.registrationBinding === 'stale-source') {
+    registration = {tone: 'warning', label: 'Registration evidence stale'};
+  } else {
+    registration = {tone: 'critical', label: 'Registration not verified'};
+  }
+  // No trusted provider reader or signed readback verifier is available. A
+  // `provider-readback-recorded-not-rechecked` marker is still only a claim.
+  const host = {tone: 'neutral', label: 'Host installation not independently verified'};
+  return {source, registration, host};
+}
+
+/** Only exact canonical plugin-page links, with no query, fragment or redirect. */
+export function safePluginPageUrl(plugin = {}) {
+  if (!plugin || typeof plugin !== 'object' || Array.isArray(plugin)) return null;
+  const id = plugin.pluginId;
+  const raw = plugin.pluginUrl;
+  if (typeof id !== 'string' || typeof raw !== 'string' || !/^plugins_[A-Za-z0-9_-]{5,200}$/.test(id)) return null;
+  try {
+    const u = new URL(raw);
+    if (u.href !== `https://chatgpt.com/plugins/${id}` || u.search || u.hash || u.username || u.password || u.port) return null;
+    return u.href;
+  } catch { return null; }
 }
 
 function titleCase(value) { return value.charAt(0).toUpperCase() + value.slice(1); }

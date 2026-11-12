@@ -86,6 +86,54 @@ Failed checks or model evaluations always create an explicit blocker.
 Actual source and provider verification must occur independently. Do not place
 secrets, bearer URLs, personal information or private Chibi data in any receipt.
 
+## Per-pet Plugin Creator registration (private, source-bound)
+
+Generated plugin packages live under plugins/junction-<company>/, and do not
+prove installation. For each plugin whose actual USER/PRIVATE registration is
+observed through the provider, create exactly one optional registration
+receipt at ops/plugin-registrations/<company>.json:
+
+~~~json
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-mariadb",
+  "pluginName": "junction-mariadb",
+  "provider": "chatgpt-plugin-creator",
+  "pluginId": "exact-opaque-plugin-ID-from-provider",
+  "pluginUrl": "https://chatgpt.com/plugins/actual-private-route",
+  "releaseId": "exact-release-ID-from-provider",
+  "visibility": "USER_PRIVATE",
+  "observedAt": "2026-11-12T20:00:00.000Z",
+  "sourceFiles": {
+    "plugins/junction-mariadb/plugin.json": "SHA256-of-exact-file-bytes",
+    "plugins/junction-mariadb/skills/junction-mariadb-companion/SKILL.md": "SHA256-of-exact-file-bytes",
+    "plugins/junction-mariadb/assets/source-manifest.json": "SHA256-of-exact-file-bytes"
+  },
+  "sourceBundleSha256": "SHA256-of-canonical-JSON-sourceFiles-map",
+  "evidenceUrl": "https://chatgpt.com/plugins/actual-private-route"
+}
+~~~
+
+The example is **not** a real registration. The exported helper
+pluginSourceFingerprint(root,pet) in ops/registry.mjs computes sourceFiles and
+sourceBundleSha256 from the three actual on-disk files. Never invent digests.
+Copy the exact plugin ID, URL, release ID and owner-private scope only from
+actual provider readback; never place auth query strings or bearer links here.
+
+The status generator distinguishes:
+
+- source-present: three files exist and their plugin/provenance identity matches
+  the pet package; **no installation claim**.
+- registered-source-matched-reported: the private receipt matches all exact
+  source bytes. This is still **reported provider evidence, not independent
+  live verification**. ID and release are displayed with that label.
+- stale-registration or malformed-registration: no plugin ID is treated as
+  current; a clear blocker asks for renewed source-bound registration evidence.
+- not-registered: there is no private receipt.
+
+Never publish the owner-private control plane or these registration receipts
+in a public Junction submission bundle.
+
 dist/mission-control is operational output and **must not** be published with
 dist/site, Chibi Maker packages or the Junction submission artifact. The
 control plane can be privately hosted later with explicit deployment authority.

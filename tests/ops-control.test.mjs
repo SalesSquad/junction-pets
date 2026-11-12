@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,symlink,writeFile,rm,readFile} from 'node:fs/promises';
+import {mkdtemp,mkdir,symlink,writeFile,rm,readFile,unlink,cp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -8,14 +8,23 @@ import {loadPackages,packageDigest} from '../lib/catalog.mjs';
 import {
   REPOSITORY,expectedEnvironment,validateEnvironment,validateRegistry,
   validateReceipt,loadEnvironmentManifests,loadPetReceipts,buildStatus,writeStatus,
-  leaseContent,acquireLease,releaseLease,reclaimStaleCriticalLock,enterCriticalLock,leaveCriticalLock
+  leaseContent,acquireLease,releaseLease,reclaimStaleCriticalLock,enterCriticalLock,leaveCriticalLock,
+  pluginSourceFingerprint,validatePluginRegistration
 } from '../ops/registry.mjs';
+import {canonicalJson,sha256} from '../lib/artifact.mjs';
 import {planCloudDispatch} from '../ops/cloud-dispatch.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const fixedTime=new Date('2026-11-12T19:00:00.000Z');
 const sourceA='a'.repeat(40),sourceB='b'.repeat(40);
 const sourceC='c'.repeat(40);
+const registrationFor=(pet,fingerprint)=>({
+  schemaVersion:1,petSlug:pet.slug,pluginName:pet.slug,provider:'chatgpt-plugin-creator',
+  pluginId:'plugins_verified_readback_example',pluginUrl:'https://chatgpt.com/plugins/plugins_verified_readback_example',
+  releaseId:'release_1234',visibility:'USER_PRIVATE',observedAt:fixedTime.toISOString(),
+  sourceFiles:fingerprint.sourceFiles,sourceBundleSha256:fingerprint.sourceBundleSha256,
+  evidenceUrl:'https://chatgpt.com/plugins/plugins_verified_readback_example'
+});
 const receiptFor=(packageSha256,{head=sourceA,work='junction.aiven.analysis-v1',at='2026-11-12T19:00:00.000Z',result='pass',executed=6,passed=6}={})=>({
   schemaVersion:2,petSlug:'junction-aiven',workId:work,taskHeadSha:head,packageSha256,
   recordedAt:at,branch:'codex/junction-aiven-analysis-v1',
@@ -107,20 +116,148 @@ test('status has 34 independently addressable pets and never calls authored case
   assert.ok(status.pets.every(p=>p.evaluation.executed===0&&p.runtime.state==='unverified'));
   assert.ok(status.pets.every(p=>p.development.receiptBinding==='missing'));
   assert.ok(status.pets.every(p=>p.agent.id==='junction-dev-'+p.company.slug));
-  assert.ok(status.pets.every(p=>p.plugin.desiredName===p.slug&&p.plugin.pluginId===null));
-  assert.ok(status.pets.every(p=>p.plugin.installationState==='not-registered'));
+  assert.ok(status.pets.every(p=>p.plugin.desiredName===p.slug&&/^plugins_/.test(p.plugin.pluginId)));
+  assert.ok(status.pets.every(p=>p.plugin.installationState==='registered-source-matched-reported'));
+  assert.equal(new Set(status.pets.map(p=>p.plugin.pluginId)).size,34);
 });
 
 test('generated plugin presence is distinct from host installation and publication',async()=>{
   const status=await buildStatus(root,{now:fixedTime,sourceCommit:sourceA});
   assert.equal(status.pets.filter(p=>p.plugin.presence==='source-present').length,34);
-  assert.ok(status.pets.every(p=>p.plugin.verification==='source-file-only-no-install-proof'));
+  assert.ok(status.pets.every(p=>p.plugin.verification==='provider-readback-recorded-not-rechecked'));
+  assert.ok(status.pets.every(p=>p.plugin.installationState==='registered-source-matched-reported'));
+  assert.ok(status.pets.every(p=>p.runtime.state==='unverified'));
   assert.equal(status.summary.published,0);
   const tmp=await fixtureRoot();
   try{
     const absent=await buildStatus(tmp,{now:fixedTime,sourceCommit:null});
     assert.equal(absent.pets.filter(p=>p.plugin.presence==='missing').length,34);
     assert.match(absent.pets[0].blocker,/No generated plugin source/);
+  }finally{await rm(tmp,{recursive:true,force:true});}
+});
+
+test('private plugin registration binds exact three generated source files, but remains reported',async()=>{
+  const pet=(await loadPackages(root)).find(p=>p.pet.company.slug==='aiven').pet;
+  const fingerprint=await pluginSourceFingerprint(root,pet);
+  assert.equal(Object.keys(fingerprint.sourceFiles).length,3);
+  assert.equal(fingerprint.sourceBundleSha256,sha256(canonicalJson(fingerprint.sourceFiles)));
+  const receipt=registrationFor(pet,fingerprint);
+  const recorded=validatePluginRegistration(receipt,pet,fingerprint);
+  assert.equal(recorded.binding,'source-matched-reported');
+  assert.equal(recorded.verification,'provider-readback-recorded-not-rechecked');
+  const tmp=await fixtureRoot();
+  try{
+    await symlink(resolve(root,'plugins'),join(tmp,'plugins'),'dir');
+    await mkdir(join(tmp,'ops/plugin-registrations'));
+    await writeFile(join(tmp,'ops/plugin-registrations/aiven.json'),JSON.stringify(receipt));
+    const status=await buildStatus(tmp,{now:fixedTime,sourceCommit:sourceA});
+    const p=status.pets.find(x=>x.company.slug==='aiven');
+    assert.equal(p.plugin.presence,'source-present');
+    assert.equal(p.plugin.installationState,'registered-source-matched-reported');
+    assert.equal(p.plugin.pluginId,receipt.pluginId);
+    assert.equal(p.plugin.releaseId,receipt.releaseId);
+    assert.equal(p.plugin.visibility,'USER_PRIVATE');
+    assert.equal(p.plugin.verification,'provider-readback-recorded-not-rechecked');
+    assert.equal(p.cloud.state,'unprovisioned');
+    assert.equal(status.summary.published,0);
+    assert.equal(status.pets.filter(x=>x.plugin.installationState==='not-registered').length,33);
+  }finally{await rm(tmp,{recursive:true,force:true});}
+});
+
+test('plugin source fingerprint ties all four canonical pet input files to deterministic generated bytes',async()=>{
+  const pet=(await loadPackages(root)).find(p=>p.pet.company.slug==='aiven').pet;
+  const canonicalPaths={
+    PET:'pet.json',AGENTS:'AGENTS.md',STORY:'STORY.md',EVALS:'evals.json'
+  };
+  const provenance=JSON.parse(await readFile(join(root,'plugins/junction-aiven/assets/source-manifest.json'),'utf8'));
+  for(const [name,filename] of Object.entries(canonicalPaths)){
+    const content=await readFile(join(root,'pets/aiven',filename),'utf8');
+    assert.equal(provenance.source.paths[name].sha256,sha256(content));
+  }
+  const tmp=await fixtureRoot();
+  try{
+    // Copy, never modify shared canonical pet sources. Keep generated plugin bytes unchanged.
+    await unlink(join(tmp,'pets'));
+    await cp(join(root,'pets'),join(tmp,'pets'),{recursive:true});
+    await symlink(resolve(root,'plugins'),join(tmp,'plugins'),'dir');
+    await writeFile(join(tmp,'pets/aiven/AGENTS.md'),
+      (await readFile(join(tmp,'pets/aiven/AGENTS.md'),'utf8'))+'\nEdited without version bump.\n');
+    await assert.rejects(pluginSourceFingerprint(tmp,pet),/Generated plugin bytes stale/);
+    const status=await buildStatus(tmp,{now:fixedTime,sourceCommit:sourceA});
+    const changed=status.pets.find(p=>p.company.slug==='aiven');
+    assert.equal(changed.plugin.presence,'source-drift');
+    assert.equal(changed.plugin.pluginId,null);
+    assert.match(changed.blocker,/Plugin source manifest does not match/);
+  }finally{await rm(tmp,{recursive:true,force:true});}
+});
+
+test('tampered generated SKILL bytes invalidate fingerprint even when source-manifest claims original hashes',async()=>{
+  const pet=(await loadPackages(root)).find(p=>p.pet.company.slug==='aiven').pet;
+  const tmp=await fixtureRoot();
+  try{
+    await mkdir(join(tmp,'plugins'));
+    await cp(join(root,'plugins/junction-aiven'),join(tmp,'plugins/junction-aiven'),{recursive:true});
+    const file=join(tmp,'plugins/junction-aiven/skills/junction-aiven-companion/SKILL.md');
+    await writeFile(file,(await readFile(file,'utf8'))+'\nTampered execution guidance.\n');
+    await assert.rejects(pluginSourceFingerprint(tmp,pet),/Generated plugin bytes stale/);
+  }finally{await rm(tmp,{recursive:true,force:true});}
+});
+
+test('stale plugin source file hashes suppress plugin ID and require re-registration',async()=>{
+  const pet=(await loadPackages(root)).find(p=>p.pet.company.slug==='aiven').pet;
+  const fingerprint=await pluginSourceFingerprint(root,pet);
+  const receipt=registrationFor(pet,fingerprint);
+  const differentMap={...receipt.sourceFiles,[Object.keys(receipt.sourceFiles)[1]]:'f'.repeat(64)};
+  const stale={...receipt,sourceFiles:differentMap,sourceBundleSha256:sha256(canonicalJson(differentMap))};
+  assert.equal(validatePluginRegistration(stale,pet,fingerprint).binding,'stale-source');
+  const tmp=await fixtureRoot();
+  try{
+    await symlink(resolve(root,'plugins'),join(tmp,'plugins'),'dir');
+    await mkdir(join(tmp,'ops/plugin-registrations'));
+    await writeFile(join(tmp,'ops/plugin-registrations/aiven.json'),JSON.stringify(stale));
+    const status=await buildStatus(tmp,{now:fixedTime,sourceCommit:sourceA});
+    const p=status.pets.find(x=>x.company.slug==='aiven');
+    assert.equal(p.plugin.installationState,'stale-registration');
+    assert.equal(p.plugin.pluginId,null);
+    assert.match(p.blocker,/stale source bytes/);
+  }finally{await rm(tmp,{recursive:true,force:true});}
+});
+
+test('malformed, forged or public-scope plugin registration fails closed per pet',async()=>{
+  const pet=(await loadPackages(root)).find(p=>p.pet.company.slug==='aiven').pet;
+  const fingerprint=await pluginSourceFingerprint(root,pet);
+  const good=registrationFor(pet,fingerprint);
+  for(const bad of [
+    {...good,visibility:'PUBLIC'},
+    {...good,releaseId:''},
+    {...good,pluginId:'x'},
+    {...good,pluginUrl:'https://evil.example/plugins/x'},
+    {...good,evidenceUrl:'https://chatgpt.com/plugins/plugins_verified_readback_example?token=secret'},
+    {...good,pluginUrl:'https://chatgpt.com/space/page_123'},
+    {...good,pluginUrl:'https://chatgpt.com/plugins/arbitrary-path'},
+    {...good,evidenceUrl:'https://chatgpt.com/plugins/plugins_different_plugin'},
+    {...good,pluginUrl:'https://chatgpt.com/plugins/plugins_different_plugin',
+      evidenceUrl:'https://chatgpt.com/plugins/plugins_different_plugin'},
+    {...good,pluginId:'Plugin_wrong_id_prefix'},
+    {...good,sourceBundleSha256:'0'.repeat(64)},
+    {...good,sourceFiles:{...good.sourceFiles,'plugins/junction-aiven/more.txt':'a'.repeat(64)}},
+    {...good,secret:'synthetic-not-a-real-secret'},
+    {...good,authorization:'Bearer synthetic-value'},
+    {...good,ownerEmail:'synthetic@example.invalid'}
+  ])assert.throws(()=>validatePluginRegistration(bad,pet,fingerprint));
+  const tmp=await fixtureRoot();
+  try{
+    await symlink(resolve(root,'plugins'),join(tmp,'plugins'),'dir');
+    await mkdir(join(tmp,'ops/plugin-registrations'));
+    await writeFile(join(tmp,'ops/plugin-registrations/aiven.json'),JSON.stringify({...good,secret:'synthetic-not-a-real-secret'}));
+    const status=await buildStatus(tmp,{now:fixedTime,sourceCommit:sourceA});
+    const affected=status.pets.find(x=>x.company.slug==='aiven');
+    assert.equal(affected.plugin.installationState,'malformed-registration');
+    assert.equal(affected.plugin.pluginId,null);
+    assert.match(affected.blocker,/Malformed private plugin registration/);
+    assert.ok(!JSON.stringify(status).includes('synthetic-not-a-real-secret'));
+    assert.equal(status.pets.length,34);
+    assert.equal(status.pets.filter(x=>x.plugin.installationState==='not-registered').length,33);
   }finally{await rm(tmp,{recursive:true,force:true});}
 });
 

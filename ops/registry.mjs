@@ -4,6 +4,8 @@ import {spawnSync} from 'node:child_process';
 import {hostname} from 'node:os';
 import {randomUUID} from 'node:crypto';
 import {loadPackages,packageDigest,EXPECTED_COMPANIES} from '../lib/catalog.mjs';
+import {canonicalJson,sha256} from '../lib/artifact.mjs';
+import {buildPlugin} from '../scripts/build-pet-plugins.mjs';
 
 export const REPOSITORY = 'SalesSquad/junction-pets';
 export const CLOUD_PROVIDER = 'codex-cloud';
@@ -152,20 +154,113 @@ export async function loadPetReceipts(root,companySlug,expectedPackageDigest,mai
   return receipts.sort((a,b)=>b.recordedAt.localeCompare(a.recordedAt)||a.workId.localeCompare(b.workId));
 }
 
+const pluginFiles=petSlug=>[
+  'plugins/'+petSlug+'/plugin.json',
+  'plugins/'+petSlug+'/skills/'+petSlug+'-companion/SKILL.md',
+  'plugins/'+petSlug+'/assets/source-manifest.json'
+];
+
+export async function pluginSourceFingerprint(root,pet){
+  required(/^junction-[a-z0-9-]+$/.test(pet.slug),'Invalid plugin pet slug');
+  const paths=pluginFiles(pet.slug);
+  const company=pet.company.slug;
+  required(pet.slug==='junction-'+company,'Plugin pet identity mismatch');
+  const sourcePath=resolve(root,'pets',company);
+  const [PET,AGENTS,STORY,EVALS]=await Promise.all(
+    ['pet.json','AGENTS.md','STORY.md','evals.json'].map(name=>readFile(resolve(sourcePath,name),'utf8'))
+  );
+  const canonicalPet=JSON.parse(PET);
+  required(canonicalJson(canonicalPet)===canonicalJson(pet),'Pet package changed during plugin source check');
+  const expected=buildPlugin(canonicalPet,{PET,AGENTS,STORY,EVALS});
+  const expectedBytes={
+    [paths[0]]:JSON.stringify(expected.manifest,null,2)+'\n',
+    [paths[1]]:expected.skill,
+    [paths[2]]:JSON.stringify(expected.provenance,null,2)+'\n'
+  };
+  const files={};
+  for(const path of paths){
+    try{
+      const actual=await readFile(resolve(root,path),'utf8');
+      required(actual===expectedBytes[path],'Generated plugin bytes stale relative to all four current pet sources: '+path);
+      files[path]=sha256(actual);
+    }
+    catch(error){if(error?.code==='ENOENT')return null;throw error;}
+  }
+  return {sourceFiles:files,sourceBundleSha256:sha256(canonicalJson(files))};
+}
+
+const safeProviderUrl=value=>{
+  // Provider-specific immutable private Plugin Creator route; no arbitrary ChatGPT paths.
+  return typeof value==='string'&&
+    /^https:\/\/chatgpt\.com\/plugins\/plugins_[A-Za-z0-9_-]{8,200}$/.test(value);
+};
+
+export function validatePluginRegistration(receipt,pet,fingerprint){
+  required(receipt&&receipt.schemaVersion===1&&receipt.petSlug===pet.slug&&receipt.pluginName===pet.slug,
+    'Plugin registration identity mismatch');
+  const exactKeys=[
+    'schemaVersion','petSlug','pluginName','provider','pluginId','pluginUrl',
+    'releaseId','visibility','observedAt','sourceFiles','sourceBundleSha256','evidenceUrl'
+  ];
+  required(JSON.stringify(Object.keys(receipt).sort())===JSON.stringify(exactKeys.sort()),
+    'Plugin registration contains unknown or missing fields; no secret, owner or authorization fields allowed');
+  required(receipt.provider==='chatgpt-plugin-creator'&&receipt.visibility==='USER_PRIVATE',
+    'Plugin registration requires exact private provider scope');
+  required(typeof receipt.pluginId==='string'&&/^plugins_[A-Za-z0-9_-]{8,200}$/.test(receipt.pluginId),
+    'Plugin registration requires exact opaque plugin ID');
+  required(typeof receipt.releaseId==='string'&&/^[A-Za-z0-9_.:-]{1,200}$/.test(receipt.releaseId),
+    'Plugin registration requires exact release ID');
+  required(safeProviderUrl(receipt.pluginUrl)&&safeProviderUrl(receipt.evidenceUrl)&&
+    receipt.pluginUrl===receipt.evidenceUrl&&
+    receipt.pluginUrl==='https://chatgpt.com/plugins/'+receipt.pluginId,
+    'Plugin registration requires exact matching Plugin Creator private route without query/bearer tokens');
+  required(validInstant(receipt.observedAt),'Plugin registration requires UTC observation time');
+  required(receipt.sourceFiles&&typeof receipt.sourceFiles==='object'&&!Array.isArray(receipt.sourceFiles)&&
+    JSON.stringify(Object.keys(receipt.sourceFiles).sort())===JSON.stringify(pluginFiles(pet.slug).sort())&&
+    Object.values(receipt.sourceFiles).every(value=>digestPattern.test(value)),
+    'Plugin registration requires exact 3-file source digest map');
+  required(digestPattern.test(receipt.sourceBundleSha256)&&
+    receipt.sourceBundleSha256===sha256(canonicalJson(receipt.sourceFiles)),
+    'Plugin registration bundle digest inconsistent with source file map');
+  // Editable registry evidence is never independently provider-attested.
+  const contentMatched=!!fingerprint&&receipt.sourceBundleSha256===fingerprint.sourceBundleSha256&&
+    canonicalJson(receipt.sourceFiles)===canonicalJson(fingerprint.sourceFiles);
+  return {...receipt,binding:contentMatched?'source-matched-reported':'stale-source',
+    verification:'provider-readback-recorded-not-rechecked'};
+}
+
 async function pluginSourceState(root,pet){
   const sourcePath='plugins/'+pet.slug+'/plugin.json';
-  let manifest;
-  try{manifest=await jsonFile(resolve(root,sourcePath));}
-  catch(error){if(error?.code==='ENOENT')return {
-    desiredName:pet.slug,sourcePath,presence:'missing',installationState:'not-registered',pluginId:null,sourceVersion:null,verification:'not-checked-at-host'
-  };throw error;}
-  const matches=manifest.name===pet.slug&&manifest.version===pet.version&&
-    manifest.repository==='https://github.com/SalesSquad/junction-pets';
+  let fingerprint=null,presence='missing',sourceVersion=null;
+  try{
+    fingerprint=await pluginSourceFingerprint(root,pet);
+    if(fingerprint){presence='source-present';sourceVersion=pet.version;}
+  }catch(error){
+    // Isolate one corrupt plugin package; other 33 dashboards still render.
+    presence='source-drift';
+  }
+  let registration=null,registrationError=null;
+  try{
+    const raw=await jsonFile(resolve(root,'ops/plugin-registrations/'+pet.company.slug+'.json'));
+    registration=validatePluginRegistration(raw,pet,fingerprint);
+  }catch(error){
+    if(error?.code!=='ENOENT')registrationError='malformed-registration';
+  }
+  const installationState=registrationError?'malformed-registration':
+    !registration?'not-registered':
+    registration.binding==='source-matched-reported'?'registered-source-matched-reported':'stale-registration';
+  const current=installationState==='registered-source-matched-reported';
   return {
-    desiredName:pet.slug,sourcePath,presence:matches?'source-present':'source-drift',
-    installationState:'not-registered',pluginId:null,
-    sourceVersion:typeof manifest.version==='string'?manifest.version:null,
-    verification:'source-file-only-no-install-proof'
+    desiredName:pet.slug,sourcePath,presence,installationState,
+    pluginId:current?registration.pluginId:null,
+    pluginUrl:current?registration.pluginUrl:null,
+    releaseId:current?registration.releaseId:null,
+    visibility:current?registration.visibility:null,
+    observedAt:current?registration.observedAt:null,
+    evidenceUrl:current?registration.evidenceUrl:null,
+    sourceVersion,sourceBundleSha256:fingerprint?.sourceBundleSha256??null,
+    registrationBinding:registration?.binding??(registrationError??'missing'),
+    verification:current?registration.verification:'source-file-only-no-install-proof'
   };
 }
 
@@ -217,6 +312,8 @@ export async function buildStatus(root,{now=new Date(),sourceCommit=localSourceC
     const blockers=[];
     if(plugin.presence==='missing')blockers.push('No generated plugin source is present for this pet.');
     if(plugin.presence==='source-drift')blockers.push('Plugin source manifest does not match this pet version or identity.');
+    if(plugin.installationState==='stale-registration')blockers.push('Private plugin registration receipt has stale source bytes; re-register from this exact plugin package.');
+    if(plugin.installationState==='malformed-registration')blockers.push('Malformed private plugin registration receipt; provider status is not trusted.');
     if(cloud.state==='unprovisioned')blockers.push('A Codex Cloud environment ID has not been verified or provisioned for this pet.');
     if(!reported)blockers.push('No receipt matches the current pet content digest; branch work is unqualified.');
     else {

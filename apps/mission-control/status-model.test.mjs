@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   cloudAssessment, filterPets, formatDate, normalizeRegistry,
-  petSourceUrl, safeCount, snapshotAge, sourceCommit,
+  petSourceUrl, pluginAssessment, safePluginPageUrl, safeCount, snapshotAge, sourceCommit,
 } from './status-model.mjs';
 
 function fixture() {
@@ -89,4 +89,54 @@ test('timestamp age and counts never fabricate provider evidence', () => {
   assert.match(formatDate(null), /No verified timestamp/);
   assert.equal(safeCount(-5), 0);
   assert.equal(safeCount('204'), 0);
+});
+
+test('plugin source presence is not equivalent to private registration or installed host', () => {
+  const plugin = {
+    desiredName: 'junction-aiven', sourcePath: 'plugins/junction-aiven/plugin.json',
+    presence: 'source-present', installationState: 'not-registered',
+    pluginId: null, registrationBinding: 'missing', verification: 'source-file-only-no-install-proof',
+  };
+  const state = pluginAssessment(plugin, 'junction-aiven');
+  assert.equal(state.source.label, 'Source manifest reported present');
+  assert.equal(state.registration.label, 'No registration recorded');
+  assert.equal(state.host.label, 'Host installation not independently verified');
+  assert.notEqual(state.host.tone, 'good');
+});
+
+test('source-matched private plugin registration remains reported, not host-verified', () => {
+  const plugin = {
+    desiredName: 'junction-aiven', sourcePath: 'plugins/junction-aiven/plugin.json',
+    presence: 'source-present', installationState: 'registered-source-matched-reported',
+    pluginId: 'plugins_aiven_12345', releaseId: 'release-42', visibility: 'USER_PRIVATE',
+    registrationBinding: 'source-matched-reported', verification: 'provider-readback-recorded-not-rechecked',
+    sourceBundleSha256: 'a'.repeat(64), observedAt: new Date().toISOString(),
+    pluginUrl: 'https://chatgpt.com/plugins/plugins_aiven_12345',
+  };
+  const state = pluginAssessment(plugin, 'junction-aiven');
+  assert.equal(state.registration.tone, 'warning');
+  assert.equal(state.registration.label, 'Private registration reported');
+  assert.equal(state.host.tone, 'neutral');
+  assert.equal(safePluginPageUrl(plugin), 'https://chatgpt.com/plugins/plugins_aiven_12345');
+});
+
+test('malformed or cross-pet plugin data and unsafe links never produce a trusted claim or URL', () => {
+  const forged = {
+    desiredName: 'junction-meta', sourcePath: 'plugins/junction-meta/plugin.json',
+    presence: 'source-present', installationState: 'registered-source-matched-reported',
+    registrationBinding: 'source-matched-reported', pluginId: 'plugins_aiven_12345',
+    sourceBundleSha256: 'a'.repeat(64), visibility: 'USER_PRIVATE',
+    pluginUrl: 'https://chatgpt.com/plugins/plugins_aiven_12345?token=secret',
+    verification: 'provider-verified',
+  };
+  const state = pluginAssessment(forged, 'junction-aiven');
+  assert.equal(state.source.tone, 'critical');
+  assert.equal(state.registration.tone, 'critical');
+  assert.equal(state.host.tone, 'neutral');
+  assert.equal(safePluginPageUrl(forged), null);
+  assert.equal(safePluginPageUrl({...forged, pluginUrl: 'https://evil.invalid/plugins/plugins_aiven_12345'}), null);
+  assert.equal(safePluginPageUrl({...forged, pluginUrl: 'javascript:alert(1)'}), null);
+  assert.equal(safePluginPageUrl({...forged, pluginId: '../plugins_different'}), null);
+  assert.equal(safePluginPageUrl({...forged, pluginUrl: 'https://chatgpt.com@evil.invalid/plugins/plugins_aiven_12345'}), null);
+  assert.equal(pluginAssessment({presence: 'source-drift', installationState: 'stale-registration'}, 'junction-aiven').source.tone, 'warning');
 });

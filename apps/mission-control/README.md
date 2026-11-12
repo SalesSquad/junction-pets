@@ -69,6 +69,13 @@ Junction submission, or remote Codex Cloud instance.
   editable marker.
 - Evaluation execution and pass counts are presented as *reported* until a
   separate source/model-bound, independently verified evaluator receipt exists.
+- Each pet's **plugin source**, **recorded private registration**, and
+  **verified host installation** are three different states. A source-matched
+  receipt remains an advisory self-report until an independently verified
+  provider-host readback exists; this dashboard never labels it live.
+- Plugin URLs are rendered as links only when they exactly match the canonical
+  `https://chatgpt.com/plugins/plugins_*` path and its recorded opaque plugin ID,
+  without query parameters, fragments, alternate hostnames or credentials.
 - A source commit is displayed only when it is an exact 40-character SHA.
 - Snapshots two hours old are marked stale; a missing/invalid registry is an
   error state, never a green default.
