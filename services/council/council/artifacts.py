@@ -48,6 +48,33 @@ class ParentArtifactAccess:
     expires_at: datetime
 
 
+@dataclass(frozen=True)
+class ParentConsumptionEvidence:
+    """Opaque host-store read receipt, not a Council-issued signature.
+
+    Only a trusted host implementation may attest that its private read
+    operation happened, by comparing an immutable read event to this scope.
+    """
+    receipt_ref: str
+    artifact_ref: str
+    artifact_digest: str
+    parent_request_id: str
+    child_request_id: str
+    parent_decision_id: str
+    child_decision_id: str
+    tenant_id: str
+    user_id: str
+    run_id: UUID
+    fence_token: int
+    source_sha: str
+    conversation_id: str
+    context_ref: str
+    context_sha256: str
+    max_tokens: int
+    child_output_digest: str
+    consumed_at: datetime
+
+
 class HostArtifactStore(Protocol):
     def authorize_parent_read(
         self, caller: Caller, parent: Handoff, parent_receipt: dict,
@@ -58,6 +85,18 @@ class HostArtifactStore(Protocol):
         Must cross-check the signed producer receipt, authenticated tenant/user,
         current consumer grant and fence, then issue an expiring read binding.
         Return only metadata; never raw content, credentials or memory.
+        """
+
+    def verify_consumption(
+        self, caller: Caller, parent_receipt: dict, child: Handoff,
+        child_decision: Decision, reservation: ReplayReservation,
+        access: ParentArtifactAccess, child_receipt: dict,
+    ) -> ParentConsumptionEvidence | None:
+        """Verify actual host-private read event AND child output binding.
+
+        Must inspect its own durable audit/receipt records, not a model's claim
+        or the mere presence of prior_artifact in executor arguments. A trusted
+        host may verify signatures here; this public protocol does not.
         """
 
 
@@ -139,6 +178,10 @@ def require_parent_access(
     )
     if any(actual != expected for actual, expected in fields):
         raise PolicyDenied("Parent artifact grant does not bind exact host scope")
+    if (type(access.fence_token) is not int or
+            type(access.max_tokens) is not int or
+            type(access.run_id) is not UUID):
+        raise PolicyDenied("Parent artifact grant numeric/run scope has invalid types")
     if (not isinstance(access.expires_at, datetime) or
             access.expires_at.tzinfo is None or
             access.expires_at <= now or
@@ -147,3 +190,48 @@ def require_parent_access(
             access.expires_at > _utc(child.expires_at)):
         raise PolicyDenied("Parent artifact grant expired or exceeds delegated TTL")
     return access
+
+
+def require_consumption_evidence(
+    caller: Caller, parent_receipt: dict, child: Handoff, decision: Decision,
+    reservation: ReplayReservation, access: ParentArtifactAccess,
+    child_receipt: dict, value: object, now: datetime,
+) -> ParentConsumptionEvidence:
+    """Accept only exact trusted host read evidence, never an executor claim."""
+    from .core import PolicyDenied, _utc
+    if not isinstance(value, ParentConsumptionEvidence):
+        raise PolicyDenied("Verified host parent-consumption receipt missing")
+    if not isinstance(value.receipt_ref, str) or not _REF.fullmatch(value.receipt_ref):
+        raise PolicyDenied("Invalid parent-consumption receipt reference")
+    fields = (
+        (value.artifact_ref, access.artifact_ref),
+        (value.artifact_digest, access.output_digest),
+        (value.parent_request_id, access.parent_request_id),
+        (value.child_request_id, child.request_id),
+        (value.parent_decision_id, parent_receipt["host_decision_id"]),
+        (value.child_decision_id, decision.decision_id),
+        (value.tenant_id, caller.tenant_id),
+        (value.user_id, caller.user_id),
+        (value.run_id, reservation.run_id),
+        (value.fence_token, reservation.fence_token),
+        (value.source_sha, decision.source_sha),
+        (value.conversation_id, child.conversation_id),
+        (value.context_ref, child.context_ref),
+        (value.context_sha256, child.context_sha256),
+        (value.max_tokens, child.max_tokens),
+        (value.child_output_digest, child_receipt["execution"]["output_digest"]),
+    )
+    if any(actual != expected for actual, expected in fields):
+        raise PolicyDenied("Host parent-consumption receipt scope mismatch")
+    if (type(value.fence_token) is not int or
+            type(value.max_tokens) is not int or
+            type(value.run_id) is not UUID):
+        raise PolicyDenied("Host parent-consumption receipt invalid numeric scope")
+    if (not isinstance(value.consumed_at, datetime) or
+            value.consumed_at.tzinfo is None or
+            value.consumed_at > now or
+            value.consumed_at > access.expires_at or
+            value.consumed_at >= _utc(child.expires_at) or
+            value.consumed_at < _utc(child.created_at)):
+        raise PolicyDenied("Host parent-consumption receipt stale or out of TTL")
+    return value

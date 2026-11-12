@@ -69,17 +69,34 @@ both decisions, current fencing token, source SHA, context and per-request token
 budget. Council validates those bindings, rechecks policy, TTL and fence, then
 passes `prior_artifact=<trusted metadata>` to the second `PetExecutor.invoke`.
 
-The executor resolves the **actual first result** from its separate private
-artifact store, *rechecking* the current Chibi grant and fence at the moment of
-read. The metadata object is not a bearer grant. Raw parent output is never
-passed to LangGraph, public request envelopes, checkpoint snapshots, API
-responses or logs. Missing/forged artifacts, revoked grants, stale fences,
-expired budgets and mismatched tenant/source deny the second invocation. The
-host remains responsible for immutable producer-output storage, signed receipt
-verification, artifact ACLs and atomic replay fencing; this repo provides a
-protocol plus synthetic fakes, **not** a deployed Chibi adapter or signature
-verification. A pre-checkpoint crash remains at-least-once for provider calls,
-and this extension does not make external writes or model retries safe.
+At the actual read, the **host executor must independently recheck CURRENT**
+producer and consumer consent, source, expiry, fencing token and the immutable
+producer-output digest; Council's preflight is not sufficient against a revoke
+between lookup and read. A changed decision ID triggers a new artifact
+authorization; an old grant is never silently carried to a new decision.
+The metadata object is not a bearer grant. Raw parent output is never passed
+to LangGraph, public request envelopes, checkpoint snapshots, API responses
+or logs.
+
+After the second invocation, Council calls mandatory
+`HostArtifactStore.verify_consumption(...)` and accepts its output **only** if
+a trusted host attests an independently recorded private read event bound to
+the exact producer artifact, current child decision, tenant/user/run, fence,
+source and child output digest. The Council stores only the opaque
+`parent_consumption_ref`; a second executor that merely accepts the optional
+argument or fabricates an answer without reading the parent is **denied**.
+The in-memory test fake demonstrates an actual deterministic content dependency
+and forged/revoked/missing evidence denial. It is **not cryptographic proof**
+that a real model semantically used the context: production must validate
+host-signed read/model-input receipts against its immutable durable store.
+
+This repository supplies the host interface and synthetic tests, **not** a
+deployed private Chibi adapter, signature verifier, provider model call or
+persistent PostgreSQL/artifact ledger. A pre-checkpoint crash remains
+at-least-once for provider calls. Failure after the model ran but before
+consumption verification rejects the result without automatically retrying;
+a real durable outbox/idempotent provider adapter remains mandatory for safe
+recovery. External writes are forbidden.
 
 ## Execution boundary
 

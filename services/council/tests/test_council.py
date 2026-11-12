@@ -1,9 +1,10 @@
 """Synthetic-only security tests: no Chibi, Aiven, provider or private data."""
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
+import json
 from threading import Lock
 from uuid import UUID
 
@@ -13,9 +14,12 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command
 
 from council.api import create_app
-from council.artifacts import ParentArtifactAccess, require_parent_receipt
+from council.artifacts import (
+    ParentArtifactAccess, ParentConsumptionEvidence, require_parent_receipt,
+)
 from council.core import (
-    Caller, Decision, Handoff, InvalidRun, PolicyDenied, build_graph, new_run_state
+    Caller, Decision, Handoff, InvalidRun, PolicyDenied, _require_current_decision,
+    build_graph, new_run_state
 )
 from council.replay import (
     ReplayConflict, ReplayReservation, deterministic_run_id, valid_reservation
@@ -108,6 +112,10 @@ class HostPolicyFake:
         self.expire = False
         self.override_scope = {}
         self.seen = []
+        self.generations = {}
+
+    def rotate(self, request_id):
+        self.generations[request_id] = self.generations.get(request_id, 0) + 1
 
     def decide(self, caller, h, reservation):
         self.seen.append(h.request_id)
@@ -118,7 +126,8 @@ class HostPolicyFake:
         if self.expire:
             expiry = self.clock() - timedelta(seconds=1)
         fields = dict(
-            allowed=True, decision_id="host.grant.mock",
+            allowed=True,
+            decision_id=f"host.grant.{h.request_id}.g{self.generations.get(h.request_id, 0)}",
             tenant_id=caller.tenant_id, user_id=caller.user_id,
             request_id=h.request_id, from_pet=h.from_pet, to_pet=h.to_pet,
             capability_id=h.capability_id, context_sha256=DIGEST if not self.invalid else "c"*64,
@@ -136,45 +145,106 @@ class HostPolicyFake:
         return Decision(**fields)
 
 
+@dataclass(frozen=True)
+class ImmutableProducerRecord:
+    """Ephemeral stand-in for an independently stored, immutable host record."""
+    tenant_id: str
+    user_id: str
+    parent_handoff: Handoff
+    source_sha: str
+    run_id: UUID
+    fence_token: int
+    decision_id: str
+    artifact_ref: str
+    output_digest: str
+    executor_receipt_digest: str
+    private_payload: str
+
+
+@dataclass(frozen=True)
+class ImmutableReadEvent:
+    """Synthetic private-read event; production needs a signed durable audit."""
+    access: ParentArtifactAccess
+    consumed_at: datetime
+
+
 class FakeHostArtifactStore:
     """Ephemeral host-private TEST store. The graph only sees refs + digests."""
     PRIVATE_PARENT = "SENSITIVE_PRIVATE_PARENT_OUTPUT_CANARY: Kafka lag evidence"
 
-    def __init__(self, clock):
+    def __init__(self, clock, policy, replay_store):
         self.clock = clock
+        self.policy = policy
+        self.replay_store = replay_store
         self.records = {}
         self.reads = []
+        self.read_events = []
+        self.authorizations = []
         self.fail = False
+        self.omit_consumption = False
         self.override = {}
+        self.override_consumption = {}
         self.after_authorize = None
+        self.after_save_first = None
+
+    @staticmethod
+    def receipt_digest(receipt):
+        return sha256(json.dumps(
+            receipt, sort_keys=True, separators=(",", ":"), allow_nan=False,
+        ).encode("utf-8")).hexdigest()
 
     def save_first(self, caller, h, decision, reservation, receipt):
-        self.records[receipt["artifact_ref"]] = {
-            "tenant_id": caller.tenant_id, "user_id": caller.user_id,
-            "request_id": h.request_id, "source_sha": h.source_sha,
-            "run_id": reservation.run_id, "fence_token": reservation.fence_token,
-            "decision_id": decision.decision_id,
-            "receipt": deepcopy(receipt), "raw": self.PRIVATE_PARENT,
-        }
+        self.records[receipt["artifact_ref"]] = ImmutableProducerRecord(
+            tenant_id=caller.tenant_id, user_id=caller.user_id,
+            parent_handoff=h, source_sha=h.source_sha,
+            run_id=reservation.run_id, fence_token=reservation.fence_token,
+            decision_id=decision.decision_id,
+            artifact_ref=receipt["artifact_ref"],
+            output_digest=receipt["output_digest"],
+            executor_receipt_digest=self.receipt_digest(receipt),
+            private_payload=self.PRIVATE_PARENT,
+        )
+        if self.after_save_first:
+            self.after_save_first()
 
     def authorize_parent_read(self, caller, parent, receipt, child, decision, reservation):
         if self.fail:
             raise RuntimeError("SENSITIVE_HOST_ARTIFACT_STORE_FAILURE")
         meta = receipt["execution"]
         record = self.records.get(meta["artifact_ref"])
-        # This is an independent host-store verification: checkpoint metadata
-        # alone cannot create or extend a grant or invent producer artifacts.
-        if not record or any((
-            record["tenant_id"] != caller.tenant_id,
-            record["user_id"] != caller.user_id,
-            record["request_id"] != parent.request_id,
-            record["source_sha"] != parent.source_sha,
-            record["run_id"] != reservation.run_id,
-            record["fence_token"] != reservation.fence_token,
-            record["decision_id"] != receipt["host_decision_id"],
-            record["receipt"] != meta,
+        # This ephemeral fake models a separate immutable producer record.
+        # Production MUST use a durable host record and verify its signature.
+        if not isinstance(record, ImmutableProducerRecord) or any((
+            record.tenant_id != caller.tenant_id,
+            record.user_id != caller.user_id,
+            record.parent_handoff != parent,
+            record.source_sha != parent.source_sha,
+            record.run_id != reservation.run_id,
+            record.fence_token != reservation.fence_token,
+            record.decision_id != receipt["host_decision_id"],
+            record.artifact_ref != meta["artifact_ref"],
+            record.output_digest != meta["output_digest"],
+            record.output_digest != "sha256:" + sha256(
+                record.private_payload.encode("utf-8")
+            ).hexdigest(),
+            record.executor_receipt_digest != self.receipt_digest(meta),
             child.parent_request_id != parent.request_id,
         )):
+            return None
+        try:
+            # Producer consent can be revoked after its successful model call.
+            if self.replay_store.is_current(caller, reservation) is not True:
+                return None
+            parent_grant = self.policy.decide(caller, parent, reservation)
+            current_parent = _require_current_decision(
+                caller, parent, reservation, parent_grant, self.clock()
+            )
+            if current_parent.decision_id != record.decision_id:
+                return None
+            _require_current_decision(
+                caller, child, reservation, decision, self.clock()
+            )
+        except Exception:
             return None
         expiry = min(self.clock() + timedelta(seconds=30),
                      decision.expires_at)
@@ -194,29 +264,113 @@ class FakeHostArtifactStore:
         )
         if self.override:
             access = replace(access, **self.override)
+        self.authorizations.append((child.request_id, decision.decision_id))
         if self.after_authorize:
             self.after_authorize()
         return access
 
     def read_private(self, caller, h, decision, reservation, access):
-        # A stand-in for the actual host-private read and its mandatory
-        # independently enforced scope checks at the consumption boundary.
+        """Verify CURRENT parent+child consent and fence at the actual read."""
         record = self.records.get(access.artifact_ref)
-        if not record or any((
-            record["tenant_id"] != caller.tenant_id,
-            record["user_id"] != caller.user_id,
-            record["run_id"] != reservation.run_id,
-            record["fence_token"] != reservation.fence_token,
-            record["request_id"] != h.parent_request_id,
-            record["source_sha"] != decision.source_sha,
+        now = self.clock()
+        if not isinstance(record, ImmutableProducerRecord) or any((
+            record.tenant_id != caller.tenant_id,
+            record.user_id != caller.user_id,
+            record.run_id != reservation.run_id,
+            record.fence_token != reservation.fence_token,
+            record.parent_handoff.request_id != h.parent_request_id,
+            record.source_sha != decision.source_sha,
+            record.artifact_ref != access.artifact_ref,
+            record.output_digest != access.output_digest,
+            record.output_digest != "sha256:" + sha256(
+                record.private_payload.encode("utf-8")
+            ).hexdigest(),
             access.child_decision_id != decision.decision_id,
             access.child_request_id != h.request_id,
             access.max_tokens != h.max_tokens,
-            self.clock() >= access.expires_at,
+            now >= access.expires_at,
         )):
             raise PolicyDenied("Host-private artifact read denied")
+        try:
+            if self.replay_store.is_current(caller, reservation) is not True:
+                raise PolicyDenied("Host-private artifact read fence revoked")
+            parent_decision = _require_current_decision(
+                caller, record.parent_handoff, reservation,
+                self.policy.decide(caller, record.parent_handoff, reservation), now,
+            )
+            child_decision = _require_current_decision(
+                caller, h, reservation,
+                self.policy.decide(caller, h, reservation), now,
+            )
+            if (parent_decision.decision_id != record.decision_id or
+                    child_decision.decision_id != access.child_decision_id):
+                raise PolicyDenied("Host-private artifact grant changed at read")
+        except Exception:
+            raise PolicyDenied("Host-private artifact read denied") from None
         self.reads.append((h.request_id, access.artifact_ref))
-        return record["raw"]
+        self.read_events.append(ImmutableReadEvent(access, now))
+        return record.private_payload
+
+    def verify_consumption(
+        self, caller, parent_receipt, child, decision, reservation,
+        access, child_receipt,
+    ):
+        """Independent host read-event lookup; no self-reported model-use proof."""
+        if self.omit_consumption or self.fail:
+            return None
+        try:
+            if self.replay_store.is_current(caller, reservation) is not True:
+                return None
+            record = self.records.get(access.artifact_ref)
+            if not isinstance(record, ImmutableProducerRecord):
+                return None
+            if (record.tenant_id != caller.tenant_id or
+                    record.user_id != caller.user_id or
+                    record.run_id != reservation.run_id or
+                    record.parent_handoff.request_id != access.parent_request_id or
+                    record.source_sha != decision.source_sha or
+                    record.executor_receipt_digest != self.receipt_digest(
+                        parent_receipt["execution"]
+                    )):
+                return None
+            current_parent = _require_current_decision(
+                caller, record.parent_handoff, reservation,
+                self.policy.decide(caller, record.parent_handoff, reservation),
+                self.clock(),
+            )
+            current_child = _require_current_decision(
+                caller, child, reservation,
+                self.policy.decide(caller, child, reservation), self.clock(),
+            )
+            if (current_parent.decision_id != record.decision_id or
+                    current_child.decision_id != decision.decision_id):
+                return None
+        except Exception:
+            return None
+        matching = [e for e in self.read_events if e.access == access]
+        if len(matching) != 1:
+            return None
+        evidence = ParentConsumptionEvidence(
+            receipt_ref=f"host.consume.{reservation.run_id.hex}.{child.request_id}",
+            artifact_ref=access.artifact_ref,
+            artifact_digest=access.output_digest,
+            parent_request_id=access.parent_request_id,
+            child_request_id=child.request_id,
+            parent_decision_id=access.parent_decision_id,
+            child_decision_id=decision.decision_id,
+            tenant_id=caller.tenant_id, user_id=caller.user_id,
+            run_id=reservation.run_id, fence_token=reservation.fence_token,
+            source_sha=decision.source_sha,
+            conversation_id=child.conversation_id,
+            context_ref=child.context_ref,
+            context_sha256=child.context_sha256,
+            max_tokens=child.max_tokens,
+            child_output_digest=child_receipt["execution"]["output_digest"],
+            consumed_at=matching[0].consumed_at,
+        )
+        if self.override_consumption:
+            evidence = replace(evidence, **self.override_consumption)
+        return evidence
 
 
 class ReadOnlyExecutorFake:
@@ -229,6 +383,8 @@ class ReadOnlyExecutorFake:
         self.raise_secret = False
         self.tokens_override = None
         self.after_first = None
+        self.before_parent_read = None
+        self.skip_private_read = False
         self.artifacts = None
 
     def invoke(self, caller, h, decision, reservation, *, prior_artifact=None):
@@ -244,11 +400,17 @@ class ReadOnlyExecutorFake:
         if self.after_first and h.request_id == FIRST.request_id:
             self.after_first()
         if prior_artifact is not None:
-            private_parent = self.artifacts.read_private(
-                caller, h, decision, reservation, prior_artifact
-            )
-            # The second pet's output actually depends on its predecessor's
-            # host-private content, not merely a second independent invocation.
+            if self.before_parent_read:
+                self.before_parent_read()
+            if self.skip_private_read:
+                # Deliberately malicious/incomplete executor: returning a
+                # plausible digest without consuming parent input MUST fail.
+                private_parent = "unverified independent model response"
+            else:
+                private_parent = self.artifacts.read_private(
+                    caller, h, decision, reservation, prior_artifact
+                )
+            # Only the private host read can supply this original content.
             output_digest = "sha256:" + sha256(
                 ("reviewed:" + private_parent).encode("utf-8")
             ).hexdigest()
@@ -258,7 +420,9 @@ class ReadOnlyExecutorFake:
             ).hexdigest()
         receipt = {
             "kind": "read-only",
-            "artifact_ref": "host.artifact." + h.request_id,
+            "artifact_ref": (
+                "host.artifact." + reservation.run_id.hex + "." + h.request_id
+            ),
             "output_digest": output_digest,
             "provider_receipt_ref": None,
             "source_sha": "c" * 40 if self.tamper_source else h.source_sha,
@@ -277,7 +441,7 @@ def setup(policy=None, executor=None, clock=None, reserve=True):
     store = FakeAtomicReplayStore()
     policy = policy or HostPolicyFake(clock)
     executor = executor or ReadOnlyExecutorFake()
-    artifact_store = FakeHostArtifactStore(clock)
+    artifact_store = FakeHostArtifactStore(clock, policy, store)
     executor.artifacts = artifact_store
     graph = build_graph(
         policy, executor, MemorySaver(), store, clock,
@@ -331,7 +495,10 @@ def test_graph_two_handoffs_review_and_budget_fence_propagation():
     assert [x[0] for x in e.calls] == [FIRST.request_id, SECOND.request_id]
     assert all(x[1:] == (500, reservation.idempotency_key, 1) for x in e.calls)
     # The second pet really consumes the first host-private result.
-    assert e.artifacts.reads == [(SECOND.request_id, "host.artifact.work.step1")]
+    assert e.artifacts.reads == [(
+        SECOND.request_id,
+        "host.artifact." + reservation.run_id.hex + "." + FIRST.request_id,
+    )]
     expected = "sha256:" + sha256(
         ("reviewed:" + e.artifacts.PRIVATE_PARENT).encode("utf-8")
     ).hexdigest()
@@ -652,6 +819,218 @@ def test_parent_receipt_rejects_forgery_or_wrong_canonical_parent():
             FIRST, Handoff(**{**vars(SECOND), "parent_request_id": "work.forged"}),
             [original],
         )
+
+
+def test_host_decision_ids_unique_per_pet_and_refresh_reauthorizes():
+    p, e, graph, store, reservation, clock = setup()
+    def rotate_only_first_authorization():
+        if len(e.artifacts.authorizations) == 1:
+            p.rotate(SECOND.request_id)
+    e.artifacts.after_authorize = rotate_only_first_authorization
+    graph.invoke(state(reservation), config(reservation.run_id))
+    snapshot = graph.get_state(config(reservation.run_id)).values
+    assert len(snapshot["results"]) == 2
+    first_id = snapshot["results"][0]["host_decision_id"]
+    second_id = snapshot["results"][1]["host_decision_id"]
+    assert first_id != second_id
+    assert second_id.endswith(".g1")
+    assert e.artifacts.authorizations == [
+        (SECOND.request_id, "host.grant.work.step2.g0"),
+        (SECOND.request_id, "host.grant.work.step2.g1"),
+    ]
+    assert e.artifacts.read_events[0].access.child_decision_id == second_id
+    assert snapshot["results"][1]["parent_consumption_ref"].startswith("host.consume.")
+
+
+def test_changed_decision_without_parent_reauthorization_denied():
+    p, e, graph, store, reservation, clock = setup()
+    def rotate_and_disable_store():
+        if len(e.artifacts.authorizations) == 1:
+            p.rotate(SECOND.request_id)
+            e.artifacts.fail = True
+    e.artifacts.after_authorize = rotate_and_disable_store
+    with pytest.raises(PolicyDenied, match="reauthorization unavailable"):
+        graph.invoke(state(reservation), config(reservation.run_id))
+    assert [x[0] for x in e.calls] == [FIRST.request_id]
+    assert not e.artifacts.read_events
+
+
+@pytest.mark.parametrize("revoked", ["parent", "child", "fence"])
+def test_revoke_or_rotate_fence_inside_executor_before_private_read(revoked):
+    p, e, graph, store, reservation, clock = setup()
+    if revoked == "parent":
+        e.before_parent_read = lambda: p.revoke.add(FIRST.request_id)
+    elif revoked == "child":
+        e.before_parent_read = lambda: p.revoke.add(SECOND.request_id)
+    else:
+        e.before_parent_read = lambda: setattr(store, "invalid_fence", True)
+    with pytest.raises(PolicyDenied, match="executor failed"):
+        graph.invoke(state(reservation), config(reservation.run_id))
+    assert [x[0] for x in e.calls] == [FIRST.request_id, SECOND.request_id]
+    assert e.artifacts.read_events == []
+    assert len(graph.get_state(config(reservation.run_id)).values["results"]) == 1
+
+
+def test_parent_grant_revoked_after_producer_execution_denied_at_host_lookup():
+    p, e, graph, store, reservation, clock = setup()
+    e.after_first = lambda: p.revoke.add(FIRST.request_id)
+    with pytest.raises(PolicyDenied, match="artifact authorization"):
+        graph.invoke(state(reservation), config(reservation.run_id))
+    assert [x[0] for x in e.calls] == [FIRST.request_id]
+    assert not e.artifacts.read_events
+
+
+def test_checkpoint_result_id_does_not_bypass_fresh_policy_or_fence():
+    p, e, graph, store, reservation, clock = setup()
+    malicious = state(reservation)
+    malicious["results"] = [{"request_id": FIRST.request_id, "execution": {}}]
+    with pytest.raises(PolicyDenied, match="Unexpected first-node checkpoint"):
+        graph.invoke(malicious, config(reservation.run_id))
+    assert e.calls == []
+
+
+@pytest.mark.parametrize("failure", ["skip_read", "missing_host_receipt"])
+def test_executor_argument_alone_never_counts_as_consumption(failure):
+    p, e, graph, store, reservation, clock = setup()
+    if failure == "skip_read":
+        e.skip_private_read = True
+    else:
+        e.artifacts.omit_consumption = True
+    with pytest.raises(PolicyDenied, match="consumption receipt missing"):
+        graph.invoke(state(reservation), config(reservation.run_id))
+    # Provider may have been called but a forged/nonattested result cannot be
+    # checkpointed or surfaced as a completed second-pet collaboration.
+    assert [x[0] for x in e.calls] == [FIRST.request_id, SECOND.request_id]
+    snapshot = graph.get_state(config(reservation.run_id)).values
+    assert len(snapshot["results"]) == 1
+    assert "parent_consumption_ref" not in str(snapshot)
+
+
+@pytest.mark.parametrize("forgery", [
+    {"tenant_id": "tenant.other"},
+    {"user_id": "user.other"},
+    {"run_id": UUID("00000000-0000-0000-0000-000000000000")},
+    {"artifact_ref": "host.artifact.forged"},
+    {"artifact_digest": "sha256:" + "f" * 64},
+    {"parent_request_id": "work.forged"},
+    {"child_request_id": "work.forged"},
+    {"child_decision_id": "host.grant.forged"},
+    {"fence_token": True},
+    {"max_tokens": True},
+    {"source_sha": "c" * 40},
+    {"child_output_digest": "sha256:" + "e" * 64},
+    {"consumed_at": NOW + timedelta(minutes=6)},
+])
+def test_forged_consumption_receipt_never_accepted(forgery):
+    p, e, graph, store, reservation, clock = setup()
+    e.artifacts.override_consumption = forgery
+    with pytest.raises(PolicyDenied, match="consumption receipt"):
+        graph.invoke(state(reservation), config(reservation.run_id))
+    assert len(e.calls) == 2
+    assert len(e.artifacts.read_events) == 1
+    assert len(graph.get_state(config(reservation.run_id)).values["results"]) == 1
+
+
+def test_same_tenant_same_user_cross_run_forged_artifact_denied():
+    p, e, graph, store, reservation, clock = setup()
+    graph.invoke(state(reservation), config(reservation.run_id))
+    original = graph.get_state(config(reservation.run_id)).values["results"][0]
+    alternate_parent = Handoff(**{**vars(FIRST), "request_id": "work.altparent"})
+    alternate_child = Handoff(**{
+        **vars(SECOND), "parent_request_id": alternate_parent.request_id,
+        "request_id": "work.altchild",
+    })
+    other_reservation = store.reserve(
+        CALLER, alternate_parent.request_id, "e" * 64,
+        deterministic_run_id(CALLER, alternate_parent.request_id),
+    )
+    forged = {**deepcopy(original), "request_id": alternate_parent.request_id}
+    assert require_parent_receipt(alternate_parent, alternate_child, [forged])
+    other_child_grant = p.decide(CALLER, alternate_child, other_reservation)
+    assert e.artifacts.authorize_parent_read(
+        CALLER, alternate_parent, forged, alternate_child,
+        other_child_grant, other_reservation,
+    ) is None
+    assert len(e.artifacts.read_events) == 1  # only original verified run
+
+
+@pytest.mark.parametrize("field", ["fence_token", "max_tokens"])
+def test_true_is_not_accepted_as_numeric_host_scope(field):
+    p, e, graph, store, reservation, clock = setup()
+    if field == "fence_token":
+        p.override_scope = {"fence_token": True}  # True == 1 in Python
+        with pytest.raises(PolicyDenied, match="strict integers"):
+            graph.invoke(state(reservation), config(reservation.run_id))
+    else:
+        limited_first = Handoff(**{**vars(FIRST), "max_tokens": 1})
+        limited_second = Handoff(**{**vars(SECOND), "max_tokens": 1})
+        p.override_scope = {"max_tokens": True}  # True == 1
+        with pytest.raises(PolicyDenied, match="strict integers"):
+            graph.invoke(
+                state(reservation, first=limited_first, second=limited_second),
+                config(reservation.run_id),
+            )
+    assert not e.calls
+
+
+def test_parent_private_payload_corruption_rejected_even_with_matching_ref():
+    p, e, graph, store, reservation, clock = setup()
+    def corrupt_host_record():
+        ref = "host.artifact." + reservation.run_id.hex + "." + FIRST.request_id
+        saved = e.artifacts.records[ref]
+        e.artifacts.records[ref] = replace(
+            saved, private_payload="CORRUPTED_SAME_REFERENCE_DIFFERENT_BYTES"
+        )
+    e.artifacts.after_save_first = corrupt_host_record
+    with pytest.raises(PolicyDenied, match="artifact authorization"):
+        graph.invoke(state(reservation), config(reservation.run_id))
+    assert [x[0] for x in e.calls] == [FIRST.request_id]
+    assert not e.artifacts.read_events
+
+
+def test_bool_fence_token_in_parent_access_never_equals_int_one():
+    p, e, graph, store, reservation, clock = setup()
+    e.artifacts.override = {"fence_token": True}
+    with pytest.raises(PolicyDenied, match="numeric/run scope"):
+        graph.invoke(state(reservation), config(reservation.run_id))
+    assert [x[0] for x in e.calls] == [FIRST.request_id]
+
+
+def test_ttl_after_new_decision_reauthorization_fails_closed():
+    clock = FakeClock()
+    p, e, graph, store, reservation, _ = setup(clock=clock)
+    def rotate_then_expire():
+        n = len(e.artifacts.authorizations)
+        if n == 1:
+            p.rotate(SECOND.request_id)
+        elif n == 2:
+            clock.now = NOW + timedelta(minutes=5, seconds=1)
+    e.artifacts.after_authorize = rotate_then_expire
+    with pytest.raises(PolicyDenied, match="Parent artifact grant expired"):
+        graph.invoke(state(reservation), config(reservation.run_id))
+    assert [x[0] for x in e.calls] == [FIRST.request_id]
+    assert not e.artifacts.read_events
+
+
+def test_post_read_pre_attestation_crash_never_replays_provider_or_accepts_result():
+    e = ReadOnlyExecutorFake()
+    app, e, store = app_fixture(executor=e)
+    e.artifacts.omit_consumption = True
+    with TestClient(app) as client:
+        headers = {"X-Test-Identity": "owner"}
+        body = {"requests": [canonical(FIRST), canonical(SECOND)]}
+        first = client.post("/runs", json=body, headers=headers)
+        assert first.status_code == 403
+        assert "SENSITIVE_PRIVATE_PARENT_OUTPUT_CANARY" not in first.text
+        assert len(e.artifacts.read_events) == 1
+        again = client.post("/runs", json=body, headers=headers)
+        assert again.status_code == 200
+        assert again.json()["id"] == str(deterministic_run_id(CALLER, FIRST.request_id))
+        assert len(e.calls) == 2
+        assert store.created_count == 1
+        assert len(again.json()["results"]) == 1
+        # Recovery could still duplicate a model call without a production
+        # outbox/provider idempotency implementation. Never claim exactly once.
 
 
 def test_live_public_context_without_provider_receipt_is_denied():

@@ -15,8 +15,8 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.types import interrupt
 
 from .artifacts import (
-    HostArtifactStore, ParentArtifactAccess, require_parent_access,
-    require_parent_receipt,
+    HostArtifactStore, ParentArtifactAccess, require_consumption_evidence,
+    require_parent_access, require_parent_receipt,
 )
 
 
@@ -263,6 +263,12 @@ def _require_current_decision(caller: Caller, handoff: Handoff, reservation,
     )
     if any(actual != expected for actual, expected in fields):
         raise PolicyDenied("Host decision does not bind the complete requested scope and fence")
+    # bool subclasses int in Python: True == 1 must never authorize a
+    # fencing token or alter delegated depth/budget types.
+    if any(type(number) is not int for number in (
+        value.depth, value.max_depth, value.max_tokens, value.fence_token
+    )):
+        raise PolicyDenied("Host decision numeric scope must contain strict integers")
     if not _id(value.decision_id):
         raise PolicyDenied("Host decision identifier missing")
     if value.allows_external_effects is not False:
@@ -341,8 +347,12 @@ def build_graph(policy: HostPolicy, executor: PetExecutor, checkpointer, replay_
                 raise PolicyDenied("Invalid checkpointed reservation") from None
             if not valid_reservation(reservation, caller, first_id, reservation.envelope_digest):
                 raise PolicyDenied("Invalid checkpointed durable execution fence")
-            if any(r["request_id"] == handoff.request_id for r in state.get("results", [])):
-                return {"results": state["results"]}
+            # Never treat checkpointed result IDs as authorization to skip
+            # fresh fencing/policy checks. LangGraph controls completed-node
+            # resume; an unexpected re-entry fails closed rather than blindly
+            # returning attacker-modified or revoked results.
+            if index == 0 and state.get("results"):
+                raise PolicyDenied("Unexpected first-node checkpoint results")
             # Exact reservation must remain current before each invocation, on
             # every resume. Old leases never authorize calls after takeover.
             try:
@@ -368,17 +378,17 @@ def build_graph(policy: HostPolicy, executor: PetExecutor, checkpointer, replay_
                 try:
                     parent = Handoff(**state["handoffs"][0])
                     _validate_handoff(parent)
-                    receipt = require_parent_receipt(parent, handoff, state.get("results"))
+                    parent_receipt = require_parent_receipt(parent, handoff, state.get("results"))
                 except (TypeError, ValueError, KeyError):
                     raise PolicyDenied("Invalid checkpointed parent handoff") from None
                 try:
                     raw_access = artifact_store.authorize_parent_read(
-                        caller, parent, receipt, handoff, decision, reservation
+                        caller, parent, parent_receipt, handoff, decision, reservation
                     )
                 except Exception:
                     raise PolicyDenied("Host parent artifact authorization unavailable") from None
                 prior_artifact = require_parent_access(
-                    caller, parent, receipt, handoff, decision, reservation,
+                    caller, parent, parent_receipt, handoff, decision, reservation,
                     raw_access, _now(now_fn)
                 )
                 # Lookup and consumption are separate host operations; close
@@ -392,14 +402,32 @@ def build_graph(policy: HostPolicy, executor: PetExecutor, checkpointer, replay_
                     raise
                 except Exception:
                     raise PolicyDenied("Chibi host policy/fence unavailable") from None
-                decision = _require_current_decision(
+                fresh_decision = _require_current_decision(
                     caller, handoff, reservation, refreshed, _now(now_fn)
                 )
                 _require_fresh_request(handoff, _now(now_fn))
-                require_parent_access(
-                    caller, parent, receipt, handoff, decision, reservation,
-                    prior_artifact, _now(now_fn)
-                )
+                if fresh_decision.decision_id != decision.decision_id:
+                    # A valid new decision is NOT the earlier artifact grant.
+                    # Reauthorize the exact parent under this new host decision
+                    # rather than carrying stale cross-decision authority.
+                    try:
+                        raw_access = artifact_store.authorize_parent_read(
+                            caller, parent, parent_receipt, handoff, fresh_decision,
+                            reservation,
+                        )
+                    except Exception:
+                        raise PolicyDenied("Host parent artifact reauthorization unavailable") from None
+                    prior_artifact = require_parent_access(
+                        caller, parent, parent_receipt, handoff, fresh_decision,
+                        reservation, raw_access, _now(now_fn)
+                    )
+                else:
+                    require_parent_access(
+                        caller, parent, parent_receipt, handoff, fresh_decision,
+                        reservation, prior_artifact, _now(now_fn)
+                    )
+                decision = fresh_decision
+                _require_fresh_request(handoff, _now(now_fn))
             try:
                 if prior_artifact is None:
                     result = executor.invoke(caller, handoff, decision, reservation)
@@ -410,8 +438,29 @@ def build_graph(policy: HostPolicy, executor: PetExecutor, checkpointer, replay_
                     )
             except Exception:
                 raise PolicyDenied("Chibi host executor failed") from None
-            receipt = _bounded_receipt(handoff, decision, result)
-            return {"results": [*state.get("results", []), receipt]}
+            result_receipt = _bounded_receipt(handoff, decision, result)
+            if prior_artifact is not None:
+                # A model returning a digest proves nothing about whether it
+                # actually read its parent's output. Require an independent,
+                # host-recorded *private read* event bound to this child output.
+                try:
+                    if replay_store.is_current(caller, reservation) is not True:
+                        raise PolicyDenied("Host durable execution fence is stale")
+                    _require_fresh_request(handoff, _now(now_fn))
+                    evidence = artifact_store.verify_consumption(
+                        caller, parent_receipt, handoff, decision, reservation,
+                        prior_artifact, result_receipt,
+                    )
+                except PolicyDenied:
+                    raise
+                except Exception:
+                    raise PolicyDenied("Host parent-consumption verification unavailable") from None
+                verified = require_consumption_evidence(
+                    caller, parent_receipt, handoff, decision, reservation,
+                    prior_artifact, result_receipt, evidence, _now(now_fn),
+                )
+                result_receipt["parent_consumption_ref"] = verified.receipt_ref
+            return {"results": [*state.get("results", []), result_receipt]}
         return node
 
     def human_review(state: CouncilState) -> dict:
