@@ -14,6 +14,11 @@ from typing import Callable, Protocol, TypedDict
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import interrupt
 
+from .artifacts import (
+    HostArtifactStore, ParentArtifactAccess, require_parent_access,
+    require_parent_receipt,
+)
+
 
 _ID = re.compile(r"^[a-z0-9][a-z0-9._:-]{1,99}$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -116,8 +121,13 @@ class HostPolicy(Protocol):
 
 
 class PetExecutor(Protocol):
-    def invoke(self, caller: Caller, handoff: Handoff, decision: Decision, reservation) -> dict:
-        """Host-injected, read-only, budgeted and idempotently keyed invocation."""
+    def invoke(self, caller: Caller, handoff: Handoff, decision: Decision, reservation,
+               *, prior_artifact: ParentArtifactAccess | None = None) -> dict:
+        """Read-only execution; second pet resolves a host-verified parent artifact.
+
+        The host executor rechecks fence, grant, tenancy and this artifact scope
+        at the moment of reading it. Metadata is never a bearer authorization.
+        """
 
 
 class CouncilState(TypedDict, total=False):
@@ -300,10 +310,12 @@ def _bounded_receipt(handoff: Handoff, decision: Decision, value: object) -> dic
 
 
 def build_graph(policy: HostPolicy, executor: PetExecutor, checkpointer, replay_store,
-                clock: Callable[[], datetime] | None = None):
+                clock: Callable[[], datetime] | None = None, *,
+                artifact_store: HostArtifactStore | None = None):
     """Compile checkpointed LangGraph; all sensitive adapters are host-injected."""
-    if policy is None or executor is None or checkpointer is None or replay_store is None:
-        raise ValueError("Host policy, executor, checkpointer and durable ReplayStore are all required")
+    if (policy is None or executor is None or checkpointer is None or
+            replay_store is None or artifact_store is None):
+        raise ValueError("Host policy, executor, checkpointer, durable ReplayStore and parent artifact store are all required")
     now_fn = clock or (lambda: datetime.now(timezone.utc))
 
     def delegate_at(index: int):
@@ -348,8 +360,54 @@ def build_graph(policy: HostPolicy, executor: PetExecutor, checkpointer, replay_
                 raise PolicyDenied("Chibi host policy unavailable") from None
             decision = _require_current_decision(caller, handoff, reservation, raw_decision, _now(now_fn))
             _require_fresh_request(handoff, _now(now_fn))
+            prior_artifact = None
+            if index == 1:
+                # The sole allowable source is the completed parent's
+                # metadata-only receipt. Never accept artifactRef from HTTP,
+                # model output, or unchecked LangGraph checkpoint bytes.
+                try:
+                    parent = Handoff(**state["handoffs"][0])
+                    _validate_handoff(parent)
+                    receipt = require_parent_receipt(parent, handoff, state.get("results"))
+                except (TypeError, ValueError, KeyError):
+                    raise PolicyDenied("Invalid checkpointed parent handoff") from None
+                try:
+                    raw_access = artifact_store.authorize_parent_read(
+                        caller, parent, receipt, handoff, decision, reservation
+                    )
+                except Exception:
+                    raise PolicyDenied("Host parent artifact authorization unavailable") from None
+                prior_artifact = require_parent_access(
+                    caller, parent, receipt, handoff, decision, reservation,
+                    raw_access, _now(now_fn)
+                )
+                # Lookup and consumption are separate host operations; close
+                # their revocation/fence window here, and require the executor
+                # to revalidate immediately at actual artifact read time.
+                try:
+                    if replay_store.is_current(caller, reservation) is not True:
+                        raise PolicyDenied("Host durable execution fence is stale")
+                    refreshed = policy.decide(caller, handoff, reservation)
+                except PolicyDenied:
+                    raise
+                except Exception:
+                    raise PolicyDenied("Chibi host policy/fence unavailable") from None
+                decision = _require_current_decision(
+                    caller, handoff, reservation, refreshed, _now(now_fn)
+                )
+                _require_fresh_request(handoff, _now(now_fn))
+                require_parent_access(
+                    caller, parent, receipt, handoff, decision, reservation,
+                    prior_artifact, _now(now_fn)
+                )
             try:
-                result = executor.invoke(caller, handoff, decision, reservation)
+                if prior_artifact is None:
+                    result = executor.invoke(caller, handoff, decision, reservation)
+                else:
+                    result = executor.invoke(
+                        caller, handoff, decision, reservation,
+                        prior_artifact=prior_artifact,
+                    )
             except Exception:
                 raise PolicyDenied("Chibi host executor failed") from None
             receipt = _bounded_receipt(handoff, decision, result)

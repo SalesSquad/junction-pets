@@ -51,10 +51,35 @@ The host executor receives the bounded maxTokens field, and its metadata-only
 receipt must report tokens used within budget and repeat the approved SHA.
 Both delegated steps re-check the five-minute request TTL at execution/resume.
 The graph builder also requires a trusted `HostPolicy`, an effect-free
-read-only `PetExecutor`, a checkpointer and the durable replay/fence store.
-A real application must inject all four through its authenticated Chibi
-gateway; this directory provides no
+read-only `PetExecutor`, a checkpointer, the durable replay/fence store
+**and** a host-private `HostArtifactStore`. A real application must inject
+all five through its authenticated Chibi gateway; this directory provides no
 production `uvicorn app:app`, model API keys or permissive demo policy.
+
+### Actual parent-result dependency (Wave 3)
+
+The second pet is **not** an independent invocation. After its fresh Chibi
+policy decision, Council accepts exactly the first completed metadata-only
+receipt, matches its canonical `parentRequestId`, conversation, context and
+approved source, and asks `HostArtifactStore.authorize_parent_read(...)`
+to verify that exact artifact against the *host's own durable producer output*.
+The host must bind the resulting expiring `ParentArtifactAccess` to the
+authenticated tenant/user, deterministic run ID, producer+consumer request IDs,
+both decisions, current fencing token, source SHA, context and per-request token
+budget. Council validates those bindings, rechecks policy, TTL and fence, then
+passes `prior_artifact=<trusted metadata>` to the second `PetExecutor.invoke`.
+
+The executor resolves the **actual first result** from its separate private
+artifact store, *rechecking* the current Chibi grant and fence at the moment of
+read. The metadata object is not a bearer grant. Raw parent output is never
+passed to LangGraph, public request envelopes, checkpoint snapshots, API
+responses or logs. Missing/forged artifacts, revoked grants, stale fences,
+expired budgets and mismatched tenant/source deny the second invocation. The
+host remains responsible for immutable producer-output storage, signed receipt
+verification, artifact ACLs and atomic replay fencing; this repo provides a
+protocol plus synthetic fakes, **not** a deployed Chibi adapter or signature
+verification. A pre-checkpoint crash remains at-least-once for provider calls,
+and this extension does not make external writes or model retries safe.
 
 ## Execution boundary
 
