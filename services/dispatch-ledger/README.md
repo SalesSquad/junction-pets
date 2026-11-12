@@ -44,10 +44,42 @@ plugin packages or public Junction submission bundles.
 `node --test services/dispatch-ledger/*.test.mjs`
 
 Local tests are **fake-adapter contract tests**, not proof of cross-process
-PostgreSQL locking or provider-side idempotency. For the release gate, apply
-`001_dispatch_ledger.sql` to an isolated test database and run concurrent claims,
-revocation, process kill/resume and provider retry fixtures from independent
-clients. Do not apply the migration to a production database without approval.
+PostgreSQL locking or provider-side idempotency. The separate opt-in gate below
+executes the SQL on real PostgreSQL and simulates a worker crash by expiring its
+lease. Chibi revocation, actual OS process-kill recovery and external provider
+idempotency remain separate host/runtime qualification gates.
+
+## Real PostgreSQL release gate (explicitly opt-in)
+
+Run the two-connection integration suite with `psql` 14+ and an **already
+authorized, separate disposable database** whose name begins with
+`junction_dispatch_test_`. The runner uses existing DB access only: it
+does not provision a server, create accounts, install dependencies or connect
+to Chibi production. It adds the migration and synthetic rows only inside
+that explicitly named test DB.
+
+```sh
+node --check services/dispatch-ledger/pg-integration.mjs
+node --test services/dispatch-ledger/ledger.test.mjs
+JUNCTION_DISPATCH_TEST_DATABASE_URL="<owner-provided-test-database-URI>" \
+  node services/dispatch-ledger/pg-integration.mjs
+```
+
+Use an authorized secret store or session environment for the test URI; do not
+paste credentials into GitHub, CI logs or shell history. Remote test databases
+also require `JUNCTION_DISPATCH_TEST_ALLOW_REMOTE=1`. The runner refuses
+non-test database names, excludes inherited libpq credentials, and passes the
+connection through child-process environment variables rather than argv.
+When the test DB is absent it **fails with TEST_DB_UNAVAILABLE (exit 3)**;
+there is no mocked green result or skipped real-DB assertion.
+
+The real suite checks independent PostgreSQL connections, SKIP LOCKED
+contention, a held-row lock blocking effect receipt writes, monotonic fencing,
+lease expiry/recovery, stale worker rejection, and unique outbox/result rows.
+It does not establish Chibi grant enforcement, real provider retry semantics
+or production readiness; those need separate source-bound host tests.
+Synthetic test records are left in the designated disposable database for
+evidence; database cleanup is not performed automatically.
 
 No API keys, model transcripts, private user payloads or provider identities are
 stored. It is intentionally not imported into the public Chibi host runtime.
