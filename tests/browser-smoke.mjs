@@ -11,17 +11,30 @@ async function run(name, engine, viewport) {
     const page = await browser.newPage({viewport});
     const open = query => page.goto(previewSelectionUrl(parsed, query).href, {waitUntil: 'networkidle'});
     const assertMount = () => assert.equal(new URL(page.url()).pathname, parsed.pathname, `${name}: mount path changed`);
+    const detailName = page.locator('.pet-detail .pet-name');
+    const waitForPet = async pattern => {
+      await detailName.filter({hasText: pattern}).waitFor();
+      assert.match(await detailName.textContent(), pattern);
+    };
+    const assertNoOverflow = async state => {
+      const overflow = await page.evaluate(
+        () => Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) - window.innerWidth,
+      );
+      assert.ok(overflow <= 1, `${name} ${viewport.width}x${viewport.height} ${state}: horizontal overflow ${overflow}px`);
+      return overflow;
+    };
     await open('pet=junction-aiven');
     assertMount();
-    await page.locator('.pet-detail .pet-name').waitFor();
-    assert.match(await page.locator('.pet-detail .pet-name').textContent(), /Aiven/i);
+    await waitForPet(/Aiven/i);
+    const aivenOverflow = await assertNoOverflow('Aiven detail');
 
     await page.getByRole('button', {name: /Preview QR code/}).click();
     await page.locator('dialog[open]').waitFor();
-    assert.equal(
-      new URL(await page.locator('dialog input[type=url]').inputValue()).pathname,
-      '/en/chibi/junction-aiven',
-    );
+    const qrDestination = new URL(await page.locator('dialog input[type=url]').inputValue());
+    assert.equal(qrDestination.origin, 'https://chibi-pet.ervamaamikael.chatgpt.site');
+    assert.equal(qrDestination.pathname, '/en/chibi/junction-aiven');
+    assert.equal(qrDestination.search, '');
+    assert.equal(qrDestination.hash, '');
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('dialog[open]').count(), 0);
 
@@ -29,7 +42,7 @@ async function run(name, engine, viewport) {
     await page.getByRole('heading', {name: 'Hidden by your filters'}).waitFor();
     assert.equal(await page.locator('article.pet-detail').count(), 0);
     await page.getByRole('button', {name: 'Clear filters'}).click();
-    assert.match(await page.locator('.pet-detail .pet-name').textContent(), /Aiven/i);
+    await waitForPet(/Aiven/i);
 
     if (viewport.width < 600) {
       await page.locator('.mobile-company-select select').selectOption('junction-arduino');
@@ -38,16 +51,16 @@ async function run(name, engine, viewport) {
     }
     assert.equal(new URL(page.url()).searchParams.get('pet'), 'junction-arduino');
     assertMount();
-    assert.match(await page.locator('.pet-detail .pet-name').textContent(), /Arduino/i);
+    await waitForPet(/Arduino/i);
+    const arduinoOverflow = await assertNoOverflow('Arduino detail');
 
     await page.goBack({waitUntil: 'domcontentloaded'});
-    await page.locator('.pet-detail .pet-name').waitFor();
     assertMount();
     assert.equal(new URL(page.url()).searchParams.get('pet'), 'junction-aiven');
-    assert.match(await page.locator('.pet-detail .pet-name').textContent(), /Aiven/i);
+    await waitForPet(/Aiven/i);
     await page.goForward({waitUntil: 'domcontentloaded'});
     assertMount();
-    assert.match(await page.locator('.pet-detail .pet-name').textContent(), /Arduino/i);
+    await waitForPet(/Arduino/i);
 
     await open('pet=junction-does-not-exist');
     assertMount();
@@ -58,8 +71,7 @@ async function run(name, engine, viewport) {
     await page.getByRole('heading', {name: 'Companion link not found'}).waitFor();
     assert.equal(await page.locator('article.pet-detail').count(), 0);
 
-    const overflow = await page.evaluate(() => document.body.scrollWidth - window.innerWidth);
-    assert.ok(overflow <= 1, `${name}: horizontal overflow ${overflow}px`);
+    const overflow = await assertNoOverflow('invalid selector');
     console.log(JSON.stringify({
       browser: name,
       viewport: `${viewport.width}x${viewport.height}`,
@@ -69,6 +81,7 @@ async function run(name, engine, viewport) {
       qr: 'pass',
       invalid: 'pass',
       overflow,
+      richDetailOverflow: {aiven: aivenOverflow, arduino: arduinoOverflow},
     }));
   } finally {
     await browser.close();
