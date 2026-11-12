@@ -26,6 +26,7 @@ class ReplayConflict(Exception):
 class ReplayReservation:
     run_id: UUID
     envelope_digest: str
+    handoffs_digest: str
     idempotency_key: str
     fence_token: int
     created: bool
@@ -34,16 +35,21 @@ class ReplayReservation:
 
 class ReplayStore(Protocol):
     def reserve(self, caller: Caller, first_request_id: str, envelope_digest: str,
-                proposed_run_id: UUID) -> ReplayReservation:
-        """Atomically reserve (tenant,user,requestId), compare payload digest.
+                proposed_run_id: UUID, handoffs_digest: str) -> ReplayReservation:
+        """Atomically bind the raw v1 envelope AND normalized graph handoffs.
 
-        Return created=True only to the single owner of this execution fence;
-        any replay of the same digest returns created=False, and different
-        digest raises ReplayConflict. This must persist across restarts.
+        A host must persist both digests in an immutable reservation record.
+        Return created=True to one owner; a replay with either digest changed
+        raises ReplayConflict. The host must verify both digests independently
+        of checkpoint-supplied reservation metadata, across restarts.
         """
 
     def is_current(self, caller: Caller, reservation: ReplayReservation) -> bool:
-        """Verify this durable fence and idempotency key still belong to caller."""
+        """Compare the ENTIRE reservation to host-persisted immutable record.
+
+        Include envelope_digest AND handoffs_digest along with run ID,
+        idempotency key and monotonic fence. The checkpoint cannot self-attest.
+        """
 
 
 def deterministic_run_id(caller: Caller, first_request_id: str) -> UUID:
@@ -59,12 +65,17 @@ def envelope_sha256(envelopes: list[dict]) -> str:
 
 
 def valid_reservation(value: object, caller: Caller, first_request_id: str,
-                      envelope_digest: str) -> bool:
+                      envelope_digest: str, handoffs_digest: str) -> bool:
     from re import fullmatch
     return (
         isinstance(value, ReplayReservation)
         and value.run_id == deterministic_run_id(caller, first_request_id)
+        and isinstance(envelope_digest, str)
+        and bool(fullmatch(r"[0-9a-f]{64}", envelope_digest))
         and value.envelope_digest == envelope_digest
+        and isinstance(handoffs_digest, str)
+        and bool(fullmatch(r"[0-9a-f]{64}", handoffs_digest))
+        and value.handoffs_digest == handoffs_digest
         and isinstance(value.idempotency_key, str)
         and bool(fullmatch(r"[a-z0-9][a-z0-9._:-]{1,99}", value.idempotency_key))
         and type(value.fence_token) is int and value.fence_token > 0

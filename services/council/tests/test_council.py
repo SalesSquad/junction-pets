@@ -22,7 +22,8 @@ from council.core import (
     build_graph, new_run_state
 )
 from council.replay import (
-    ReplayConflict, ReplayReservation, deterministic_run_id, valid_reservation
+    ReplayConflict, ReplayReservation, deterministic_run_id, envelope_sha256,
+    valid_reservation
 )
 
 
@@ -71,18 +72,20 @@ class FakeAtomicReplayStore:
         self.invalid_fence = False
         self.unavailable = False
 
-    def reserve(self, caller, first_request_id, envelope_digest, proposed_run_id):
+    def reserve(self, caller, first_request_id, envelope_digest, proposed_run_id, handoffs_digest):
         if self.unavailable:
             raise RuntimeError("SECRET_RESERVATION_STORE_FAILURE")
         key = (caller.tenant_id, caller.user_id, first_request_id)
         with self._lock:
             if key in self._entries:
                 original = self._entries[key]
-                if original.envelope_digest != envelope_digest:
-                    raise ReplayConflict("different envelope")
+                if (original.envelope_digest != envelope_digest or
+                        original.handoffs_digest != handoffs_digest):
+                    raise ReplayConflict("different envelope or handoffs")
                 return ReplayReservation(**{**vars(original), "created": False})
             reservation = ReplayReservation(
                 run_id=proposed_run_id, envelope_digest=envelope_digest,
+                handoffs_digest=handoffs_digest,
                 idempotency_key="host.run." + proposed_run_id.hex,
                 fence_token=1, created=True, durable=True,
             )
@@ -100,6 +103,7 @@ class FakeAtomicReplayStore:
                 and existing.idempotency_key == reservation.idempotency_key
                 and existing.fence_token == reservation.fence_token
                 and existing.envelope_digest == reservation.envelope_digest
+                and existing.handoffs_digest == reservation.handoffs_digest
                 for key, existing in self._entries.items()
             )
 
@@ -436,7 +440,7 @@ class ReadOnlyExecutorFake:
         return receipt
 
 
-def setup(policy=None, executor=None, clock=None, reserve=True):
+def setup(policy=None, executor=None, clock=None, reserve=True, *, first=FIRST, second=SECOND):
     clock = clock or FakeClock()
     store = FakeAtomicReplayStore()
     policy = policy or HostPolicyFake(clock)
@@ -449,8 +453,11 @@ def setup(policy=None, executor=None, clock=None, reserve=True):
     )
     reservation = None
     if reserve:
-        reservation = store.reserve(CALLER, FIRST.request_id, "d" * 64,
-                                    deterministic_run_id(CALLER, FIRST.request_id))
+        reservation = store.reserve(
+            CALLER, FIRST.request_id, "d" * 64,
+            deterministic_run_id(CALLER, FIRST.request_id),
+            envelope_sha256([vars(first), vars(second)]),
+        )
     return policy, executor, graph, store, reservation, clock
 
 
@@ -482,7 +489,10 @@ def test_scope_and_durable_fence_required_before_graph():
         state(reservation, first=Handoff(**{**vars(FIRST), "max_depth": 0}))
     with pytest.raises(InvalidRun, match="Parent/depth"):
         state(reservation, second=Handoff(**{**vars(SECOND), "parent_request_id": None}))
-    assert valid_reservation(reservation, CALLER, FIRST.request_id, "d"*64)
+    assert valid_reservation(
+        reservation, CALLER, FIRST.request_id, "d"*64,
+        envelope_sha256([vars(FIRST), vars(SECOND)]),
+    )
 
 
 def test_graph_two_handoffs_review_and_budget_fence_propagation():
@@ -543,6 +553,66 @@ def test_expired_host_decision_denied():
     with pytest.raises(PolicyDenied, match="Host decision expired"):
         graph.invoke(state(reservation), config(reservation.run_id))
     assert not e.calls
+
+
+@pytest.mark.parametrize("forge_checkpoint_digest", [False, True])
+def test_modified_checkpoint_handoffs_cannot_self_authorize(forge_checkpoint_digest):
+    p, e, graph, store, reservation, clock = setup()
+    candidate = state(reservation)
+    candidate["handoffs"][1]["authority_ref"] = "host.authority.forged"
+    if forge_checkpoint_digest:
+        # Editing both checkpoint fields still cannot change the independent
+        # immutable host record retained by FakeAtomicReplayStore.
+        candidate["reservation"]["handoffs_digest"] = envelope_sha256(candidate["handoffs"])
+    expected = "fence is stale" if forge_checkpoint_digest else "Checkpoint handoffs differ"
+    with pytest.raises(PolicyDenied, match=expected):
+        graph.invoke(candidate, config(reservation.run_id))
+    assert e.calls == []
+    assert p.seen == []
+
+
+@pytest.mark.parametrize("forge_checkpoint_digest", [False, True])
+def test_resume_rejects_mutated_second_handoff_after_parent_checkpoint(forge_checkpoint_digest):
+    clock = FakeClock()
+    p = HostPolicyFake(clock)
+    e = ReadOnlyExecutorFake(policy=p)
+    _, _, graph, store, reservation, _ = setup(p, e, clock)
+    with pytest.raises(PolicyDenied, match="missing or denied"):
+        graph.invoke(state(reservation), config(reservation.run_id))
+    assert [x[0] for x in e.calls] == [FIRST.request_id]
+    assert len(graph.get_state(config(reservation.run_id)).values["results"]) == 1
+    p.revoke.clear()
+    candidate = deepcopy(graph.get_state(config(reservation.run_id)).values["handoffs"])
+    candidate[1]["authority_ref"] = "host.authority.forged"
+    update = {"handoffs": candidate}
+    if forge_checkpoint_digest:
+        fence = deepcopy(graph.get_state(config(reservation.run_id)).values["reservation"])
+        fence["handoffs_digest"] = envelope_sha256(candidate)
+        update["reservation"] = fence
+    # Re-enter the pending second node from a corrupted on-disk checkpoint.
+    graph.update_state(config(reservation.run_id), update, as_node="first_handoff")
+    expected = "fence is stale" if forge_checkpoint_digest else "Checkpoint handoffs differ"
+    with pytest.raises(PolicyDenied, match=expected):
+        graph.invoke(None, config(reservation.run_id))
+    assert [x[0] for x in e.calls] == [FIRST.request_id]
+
+
+def test_replay_reservation_rejects_changed_handoffs_with_identical_envelope_digest():
+    p, e, graph, store, reservation, clock = setup()
+    mutated = [vars(FIRST), {**vars(SECOND), "authority_ref": "host.authority.forged"}]
+    with pytest.raises(ReplayConflict, match="handoffs"):
+        store.reserve(CALLER, FIRST.request_id, reservation.envelope_digest,
+                      reservation.run_id, envelope_sha256(mutated))
+    assert store.created_count == 1
+    assert e.calls == []
+
+
+def test_initial_state_requires_host_pinned_normalized_handoff_digest():
+    p, e, graph, store, reservation, clock = setup()
+    forged = replace(reservation, handoffs_digest="f" * 64)
+    with pytest.raises(InvalidRun, match="durable host reservation"):
+        new_run_state(CALLER, [FIRST, SECOND], forged, now=NOW)
+    assert e.calls == []
 
 
 def test_revocation_between_handoffs_and_explicit_checkpoint_resume():
@@ -943,6 +1013,7 @@ def test_same_tenant_same_user_cross_run_forged_artifact_denied():
     other_reservation = store.reserve(
         CALLER, alternate_parent.request_id, "e" * 64,
         deterministic_run_id(CALLER, alternate_parent.request_id),
+        envelope_sha256([vars(alternate_parent), vars(alternate_child)]),
     )
     forged = {**deepcopy(original), "request_id": alternate_parent.request_id}
     assert require_parent_receipt(alternate_parent, alternate_child, [forged])
@@ -956,14 +1027,15 @@ def test_same_tenant_same_user_cross_run_forged_artifact_denied():
 
 @pytest.mark.parametrize("field", ["fence_token", "max_tokens"])
 def test_true_is_not_accepted_as_numeric_host_scope(field):
-    p, e, graph, store, reservation, clock = setup()
     if field == "fence_token":
+        p, e, graph, store, reservation, clock = setup()
         p.override_scope = {"fence_token": True}  # True == 1 in Python
         with pytest.raises(PolicyDenied, match="strict integers"):
             graph.invoke(state(reservation), config(reservation.run_id))
     else:
         limited_first = Handoff(**{**vars(FIRST), "max_tokens": 1})
         limited_second = Handoff(**{**vars(SECOND), "max_tokens": 1})
+        p, e, graph, store, reservation, clock = setup(first=limited_first, second=limited_second)
         p.override_scope = {"max_tokens": True}  # True == 1
         with pytest.raises(PolicyDenied, match="strict integers"):
             graph.invoke(
@@ -1034,9 +1106,9 @@ def test_post_read_pre_attestation_crash_never_replays_provider_or_accepts_resul
 
 
 def test_live_public_context_without_provider_receipt_is_denied():
-    p, e, graph, store, reservation, clock = setup()
     public_first = Handoff(**{**vars(FIRST), "data_class": "public"})
     public_second = Handoff(**{**vars(SECOND), "data_class": "public"})
+    p, e, graph, store, reservation, clock = setup(first=public_first, second=public_second)
     with pytest.raises(PolicyDenied, match="receipt reference"):
         graph.invoke(state(reservation, first=public_first, second=public_second),
                      config(reservation.run_id))

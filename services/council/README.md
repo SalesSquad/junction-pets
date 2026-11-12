@@ -108,12 +108,22 @@ recovery. External writes are forbidden.
   must validate the durable run fence and `HostPolicy.decide()` must consult
   Chibi Cedar/PEP status, including revocation. A missing, mismatched, expired,
   re-fenced or write-capable decision always denies execution.
-- `ReplayStore.reserve()` must atomically bind (tenant, user, firstRequestId) to
-  the exact canonical request-pair digest. One worker claims the deterministic
-  run/thread ID; a concurrent or repeated POST returns that ID **without another
-  invocation**. Reusing the request ID with a different payload is HTTP 409.
-  The repository contains only a locked *ephemeral test fake*, not a durable
-  production ReplayStore or live Postgres implementation.
+- `ReplayStore.reserve()` must atomically bind (tenant, user, firstRequestId)
+  to **two independent SHA-256 digests**: the exact canonical public v1
+  request-pair bytes (`envelope_digest`) and the canonical normalized
+  two-handoff dictionaries stored in LangGraph (`handoffs_digest`).
+  At initial execution **and every checkpoint resume**, Council recomputes
+  `handoffs_digest` from the actual saved handoffs. The injected host's
+  `is_current()` must independently compare both supplied digests, run ID,
+  owner, idempotency key and fence to its **immutable durable reservation**:
+  changing both a checkpoint handoff and its checkpoint digest cannot create
+  a new grant. A host ReplayStore lacking this revised interface must reject
+  execution until upgraded, not silently ignore `handoffs_digest`.
+  One worker claims the deterministic run/thread ID; concurrent/repeated POST
+  returns that ID **without another invocation**. Reusing the request ID with
+  different raw or normalized bytes is HTTP 409. The repository contains only
+  a locked *ephemeral test fake*, not a durable production ReplayStore or live
+  Postgres implementation.
 - `PetExecutor.invoke()` runs only after that decision, and is forbidden from
   producing write/effect receipts. The host remains responsible for actual tool
   routing, scoped data retrieval, provider timeouts, rate limits and accounting.

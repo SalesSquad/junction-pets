@@ -186,7 +186,7 @@ def new_run_state(caller: Caller, handoffs: list[Handoff], reservation, *,
     reservation. Its durability/fencing remains the responsibility of the
     injected host's atomic ReplayStore.
     """
-    from .replay import ReplayReservation, valid_reservation
+    from .replay import ReplayReservation, envelope_sha256, valid_reservation
     _validate_caller(caller)
     if len(handoffs) != 2 or not all(isinstance(h, Handoff) for h in handoffs):
         raise InvalidRun("Exactly two handoffs are required")
@@ -217,16 +217,20 @@ def new_run_state(caller: Caller, handoffs: list[Handoff], reservation, *,
             _require_fresh_request(h, current)
         except PolicyDenied as exc:
             raise InvalidRun(str(exc)) from None
+    normalized_handoffs = [vars(h).copy() for h in handoffs]
+    handoffs_digest = envelope_sha256(normalized_handoffs)
     if not isinstance(reservation, ReplayReservation) or not valid_reservation(
-        reservation, caller, first.request_id, reservation.envelope_digest
+        reservation, caller, first.request_id, reservation.envelope_digest,
+        handoffs_digest
     ) or reservation.created is not True:
         raise InvalidRun("Missing valid, durable host reservation")
     return {
         "caller": vars(caller).copy(),
-        "handoffs": [vars(h).copy() for h in handoffs],
+        "handoffs": normalized_handoffs,
         "reservation": {
             "run_id": str(reservation.run_id),
             "envelope_digest": reservation.envelope_digest,
+            "handoffs_digest": reservation.handoffs_digest,
             "idempotency_key": reservation.idempotency_key,
             "fence_token": reservation.fence_token,
             "created": reservation.created,
@@ -327,7 +331,7 @@ def build_graph(policy: HostPolicy, executor: PetExecutor, checkpointer, replay_
     def delegate_at(index: int):
         def node(state: CouncilState) -> dict:
             from uuid import UUID
-            from .replay import ReplayReservation, valid_reservation
+            from .replay import ReplayReservation, envelope_sha256, valid_reservation
             caller = Caller(**state["caller"])
             handoff = Handoff(**state["handoffs"][index])
             _validate_caller(caller)
@@ -338,6 +342,7 @@ def build_graph(policy: HostPolicy, executor: PetExecutor, checkpointer, replay_
                 reservation = ReplayReservation(
                     run_id=UUID(raw_fence["run_id"]),
                     envelope_digest=raw_fence["envelope_digest"],
+                    handoffs_digest=raw_fence["handoffs_digest"],
                     idempotency_key=raw_fence["idempotency_key"],
                     fence_token=raw_fence["fence_token"],
                     created=raw_fence["created"],
@@ -345,8 +350,23 @@ def build_graph(policy: HostPolicy, executor: PetExecutor, checkpointer, replay_
                 )
             except Exception:
                 raise PolicyDenied("Invalid checkpointed reservation") from None
-            if not valid_reservation(reservation, caller, first_id, reservation.envelope_digest):
-                raise PolicyDenied("Invalid checkpointed durable execution fence")
+            try:
+                snapshot_handoffs = state["handoffs"]
+                if type(snapshot_handoffs) is not list or len(snapshot_handoffs) != 2 or any(
+                    type(h) is not dict for h in snapshot_handoffs
+                ):
+                    raise TypeError("Malformed checkpointed handoffs")
+                handoffs_digest = envelope_sha256(snapshot_handoffs)
+            except (KeyError, ValueError, TypeError):
+                raise PolicyDenied("Invalid checkpointed handoffs") from None
+            # The checkpoint can change BOTH its handoffs and its saved digest.
+            # Therefore the host must also verify these exact bytes against
+            # the independently persisted, immutable reserve() record.
+            if not valid_reservation(
+                reservation, caller, first_id, reservation.envelope_digest,
+                handoffs_digest
+            ):
+                raise PolicyDenied("Checkpoint handoffs differ from host reservation")
             # Never treat checkpointed result IDs as authorization to skip
             # fresh fencing/policy checks. LangGraph controls completed-node
             # resume; an unexpected re-entry fails closed rather than blindly
