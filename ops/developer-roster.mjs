@@ -156,6 +156,32 @@ function nextAction(state, manifestSourceCurrent) {
   return 'Repair the recorded provisioning failure/state; re-read provider identity and source before dispatch.';
 }
 
+function continuityProposal(company, state, manifestSourceCurrent) {
+  const stage = state === 'unprovisioned' ? 'cloud-environment-publication'
+    : state === 'published-id-pending'
+      ? manifestSourceCurrent ? 'authenticated-cloud-id-readback' : 'current-source-retest-and-id-readback'
+      : state === 'ready' || state === 'running'
+        ? 'provider-readback-and-dispatch-preflight' : 'cloud-provisioning-recovery';
+  return {
+    stage,
+    priority: state === 'published-id-pending' ? 'P1-source-or-provider-identity'
+      : state === 'ready' || state === 'running' ? 'P1-recheck-declared-readiness'
+        : state === 'unprovisioned' ? 'P2-provision-environment' : 'P1-repair-cloud-state',
+    task: `junction.${company}.cloud-bootstrap`,
+    state: 'proposed-not-enqueued',
+    nextAction: nextAction(state, manifestSourceCurrent),
+    acceptance: [
+      'authenticated immutable Cloud environment ID bound to this company',
+      'fresh evidence bound to exact task/PR HEAD, source SHA and current provider state',
+      'verified distributed lease and executor capacity before any code/test writer starts',
+      'code and tests pass for exact task commit; independent reviewer reports evidence',
+      'integrator owns shared paths, PR follow-through and release decision'
+    ],
+    fallback: 'If Cloud is not ready, perform scoped offline/local tests on a clean, pinned source; ' +
+      'record as local-only and never promote that evidence to Cloud-ready.'
+  };
+}
+
 /**
  * Build one deterministic logical developer with three logical roles per pet.
  * Exactly 34 canonical company slugs must come from the catalog, not the input
@@ -259,7 +285,8 @@ export function buildDeveloperRoster(manifests, {
         ],
         localLeaseNotSufficient: true,
         nextAction: nextAction(p.state, manifestSourceCurrent)
-      }
+      },
+      continuity: continuityProposal(slug, p.state, manifestSourceCurrent)
     });
   }
 
