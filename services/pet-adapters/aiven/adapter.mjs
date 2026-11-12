@@ -13,6 +13,11 @@ const MAX_INDEX_BYTES = 96_000;
 const MAX_QUERY_CHARS = 256;
 const MAX_TIMEOUT_MS = 5_000;
 const MIN_SCORE = 5;
+const OUT_OF_SCOPE_ACTIONS = new Set([
+  'delete', 'deleting', 'remove', 'removing', 'drop', 'destroy', 'destroying',
+  'terminate', 'terminating', 'wipe', 'purge', 'truncate', 'erase',
+  'poista', 'poistaminen', 'tuhoa', 'tuhoaminen',
+]);
 
 const SOURCES = Object.freeze([
   Object.freeze({
@@ -48,7 +53,7 @@ const SOURCES = Object.freeze([
 ]);
 
 const failure = code => ({ok: false, code});
-const digest = text => createHash('sha256').update(text, 'utf8').digest('hex');
+const digestBytes = rawBytes => createHash('sha256').update(rawBytes).digest('hex');
 
 function parseQuery(query) {
   if (typeof query !== 'string' || query.length < 3 || query.length > MAX_QUERY_CHARS ||
@@ -82,6 +87,11 @@ function relevance(parsed, source) {
 function rank(query) {
   const parsed = parseQuery(query);
   if (!parsed) return failure('INVALID_QUERY');
+  // This tool is knowledge retrieval, never an operation or workflow authority.
+  // Conservative abstention on destructive intent avoids an action-like citation.
+  if ([...parsed.tokens].some(token => OUT_OF_SCOPE_ACTIONS.has(token))) {
+    return failure('ACTION_INTENT_OUT_OF_SCOPE');
+  }
   const candidates = SOURCES.map(source => ({source, score: relevance(parsed, source)}))
     .filter(row => row.score >= MIN_SCORE)
     .sort((a, b) => b.score - a.score || a.source.id.localeCompare(b.source.id));
@@ -148,7 +158,9 @@ async function boundedRead(response, expectedUrl, maxBytes) {
       content.set(chunk, cursor);
       cursor += chunk.byteLength;
     }
-    return {ok: true, text: new TextDecoder('utf-8', {fatal: true}).decode(content), bytes};
+    // Retain the ORIGINAL response bytes for hashing. TextDecoder strips a
+    // UTF-8 BOM by default, so decoding and re-encoding changes the digest.
+    return {ok: true, text: new TextDecoder('utf-8', {fatal: true}).decode(content), rawBytes: content};
   } catch {
     return failure('INVALID_BODY_STREAM');
   } finally {
@@ -187,25 +199,35 @@ async function fetchBounded(url, {fetchImpl, timeoutMs, maxBytes, signal}) {
 function verifiedDocument(source, score, bytes, bodySha, kind) {
   const synthetic = kind === 'synthetic-fixture';
   return {
-    id: source.id, title: source.title, summary: source.summary, score,
-    citation: {publisher: 'Aiven', url: source.publicUrl, title: source.title,
-      verifiedAgainstUpstream: !synthetic},
+    id: source.id, title: synthetic ? 'Synthetic fixture: ' + source.title : source.title,
+    summary: synthetic ? 'Test-only fixture; no official Aiven documentation verified.' : source.summary,
+    score,
+    citation: {
+      publisher: synthetic ? null : 'Aiven',
+      url: synthetic ? null : source.publicUrl,
+      title: synthetic ? 'Synthetic test fixture' : source.title,
+      syntheticOnly: synthetic,
+      pinnedRawSourceBytesMatched: !synthetic,
+    },
     provenance: {
       kind, repository: synthetic ? null : AIVEN_DOCS_REPOSITORY,
       sourceCommit: synthetic ? null : AIVEN_DOCS_COMMIT,
-      sourcePath: source.path,
+      sourcePath: synthetic ? null : source.path,
       contentSha256: 'sha256:' + bodySha,
       contentBytes: bytes,
       license: synthetic ? null : AIVEN_DOCS_LICENSE,
-      digestMatched: true,
+      pinnedRawBytesSha256Matched: !synthetic,
+      syntheticFixtureSha256Matched: synthetic,
     },
   };
 }
 
 async function searchSelected(query, loadSource, kind, hashes) {
   const shortlist = rank(query);
-  const safeBase = {mode: 'public-read-only-document-search', evidenceKind: kind,
-    hostGrantVerified: false, providerInvocationVerified: false};
+  const synthetic = kind === 'synthetic-fixture';
+  const safeBase = {mode: synthetic ? 'synthetic-test-only-document-search' : 'public-read-only-document-search',
+    evidenceKind: kind,
+    pinnedOfficialDocsVerified: false, hostGrantVerified: false, providerInvocationVerified: false};
   if (!shortlist.ok) return {...safeBase, ok: false, code: shortlist.code, documents: [], failures: []};
   if (!shortlist.candidates.length) {
     return {...safeBase, ok: true, code: 'NO_RELEVANT_DOCUMENTS', documents: [], failures: []};
@@ -214,27 +236,32 @@ async function searchSelected(query, loadSource, kind, hashes) {
     try {
       const loaded = await loadSource(source);
       if (!loaded?.ok) return {error: {id: source.id, code: loaded?.code ?? 'SOURCE_UNAVAILABLE'}};
-      if (typeof loaded.text !== 'string' || loaded.text.length === 0) {
+      if (!(loaded.rawBytes instanceof Uint8Array) || loaded.rawBytes.byteLength === 0) {
         return {error: {id: source.id, code: 'INVALID_BODY'}};
       }
-      const encoded = new TextEncoder().encode(loaded.text);
-      if (encoded.byteLength > MAX_DOCUMENT_BYTES) {
+      if (loaded.rawBytes.byteLength > MAX_DOCUMENT_BYTES) {
         return {error: {id: source.id, code: 'RESPONSE_TOO_LARGE'}};
       }
-      const bodySha = digest(loaded.text);
+      const bodySha = digestBytes(loaded.rawBytes);
       if (bodySha !== hashes[source.id]) {
         return {error: {id: source.id, code: 'SOURCE_DIGEST_MISMATCH'}};
       }
-      return {document: verifiedDocument(source, score, encoded.byteLength, bodySha, kind)};
+      return {document: verifiedDocument(source, score, loaded.rawBytes.byteLength, bodySha, kind)};
     } catch {
       return {error: {id: source.id, code: 'SOURCE_UNAVAILABLE'}};
     }
   }));
   const documents = rows.flatMap(row => row.document ? [row.document] : []);
   const failures = rows.flatMap(row => row.error ? [row.error] : []);
-  const code = documents.length === 0 ? 'DOCUMENTS_UNAVAILABLE'
-    : failures.length ? 'PARTIAL_VERIFIED' : 'VERIFIED_SOURCE_BYTES';
-  return {...safeBase, ok: documents.length > 0, code, documents, failures};
+  // A test fixture may pass its OWN digest without proving any Aiven bytes.
+  // It must never inherit the code/flag reserved for pinned public source data.
+  const code = documents.length === 0
+    ? (synthetic ? 'SYNTHETIC_FIXTURE_UNAVAILABLE' : 'DOCUMENTS_UNAVAILABLE')
+    : failures.length
+      ? (synthetic ? 'SYNTHETIC_FIXTURE_PARTIAL' : 'PARTIAL_VERIFIED')
+      : (synthetic ? 'SYNTHETIC_FIXTURE_DIGEST_MATCHED' : 'VERIFIED_SOURCE_BYTES');
+  return {...safeBase, ok: documents.length > 0, code, documents, failures,
+    pinnedOfficialDocsVerified: !synthetic && code === 'VERIFIED_SOURCE_BYTES'};
 }
 
 /**
@@ -250,13 +277,21 @@ export async function searchAivenPublicDocs(query, {
 }
 
 /**
- * Test-only pure fixture boundary. Cannot fetch URLs, cannot claim official
- * source proof: even matching fixture hashes stay explicitly synthetic.
+ * Test-only fixture boundary. Optional injected fake fetch exercises the same
+ * bounded raw-byte reader; no fixture can claim official source proof.
  */
-export async function searchSyntheticAivenFixture(query, {bodies = {}, hashes = {}} = {}) {
+export async function searchSyntheticAivenFixture(query, {
+  bodies = {}, hashes = {}, fetchImpl, timeoutMs = 3000, signal,
+} = {}) {
   return searchSelected(query, async source => {
-    const text = bodies[source.id];
-    return typeof text === 'string' ? {ok: true, text} : failure('FIXTURE_MISSING');
+    // Optional fake Response transport exercises the identical bounded reader
+    // without giving the fixture any claim over official pinned source bytes.
+    if (fetchImpl !== undefined) return fetchBounded(RAW_ROOT + source.path,
+      {fetchImpl, timeoutMs, maxBytes: MAX_DOCUMENT_BYTES, signal});
+    const body = bodies[source.id];
+    if (typeof body === 'string') return {ok: true, rawBytes: new TextEncoder().encode(body)};
+    if (body instanceof Uint8Array) return {ok: true, rawBytes: body};
+    return failure('FIXTURE_MISSING');
   }, 'synthetic-fixture', hashes);
 }
 
@@ -278,5 +313,5 @@ export async function discoverAivenDocsLinks({
     .map(source => ({id: source.id, url: source.publicUrl}));
   return {ok: true, code: 'INDEX_LINKS_ADVISORY_ONLY', links,
     indexUrl: AIVEN_LLM_INDEX, evidenceKind: 'untrusted-live-index',
-    indexSha256: 'sha256:' + digest(loaded.text)};
+    indexSha256: 'sha256:' + digestBytes(loaded.rawBytes)};
 }

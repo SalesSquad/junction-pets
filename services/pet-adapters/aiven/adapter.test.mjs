@@ -7,6 +7,9 @@ import {
   listAivenPinnedSources, rankAivenDocs, searchAivenPublicDocs,
   searchSyntheticAivenFixture, discoverAivenDocsLinks,
 } from './adapter.mjs';
+import {
+  qualifiesLivePinnedResult, qualifiesNoDocuments, qualifiesOfflineShortlist,
+} from './smoke-gates.mjs';
 
 const ROOT = 'https://raw.githubusercontent.com/aiven/aiven-docs/' + AIVEN_DOCS_COMMIT + '/';
 const KAFKA_RAW = ROOT + 'docs/products/kafka/concepts/monitor-consumer-group.md';
@@ -91,8 +94,9 @@ test('synthetic positive fixtures verify digests but never claim official upstre
   const result = await searchSyntheticAivenFixture('Kafka consumer groups and PostgreSQL slow queries',
     {bodies, hashes});
   assert.equal(result.ok, true);
-  assert.equal(result.code, 'VERIFIED_SOURCE_BYTES');
+  assert.equal(result.code, 'SYNTHETIC_FIXTURE_DIGEST_MATCHED');
   assert.equal(result.evidenceKind, 'synthetic-fixture');
+  assert.equal(result.pinnedOfficialDocsVerified, false);
   assert.equal(result.providerInvocationVerified, false);
   assert.equal(result.hostGrantVerified, false);
   assert.deepEqual(result.documents.map(x => x.id).sort(),
@@ -102,11 +106,16 @@ test('synthetic positive fixtures verify digests but never claim official upstre
     assert.equal(doc.provenance.sourceCommit, null);
     assert.equal(doc.provenance.repository, null);
     assert.equal(doc.provenance.license, null);
-    assert.equal(doc.provenance.digestMatched, true);
+    assert.equal(doc.provenance.pinnedRawBytesSha256Matched, false);
+    assert.equal(doc.provenance.syntheticFixtureSha256Matched, true);
     assert.equal(doc.provenance.contentSha256, 'sha256:' + hashes[doc.id]);
-    assert.equal(doc.citation.verifiedAgainstUpstream, false);
-    assert.equal(doc.citation.publisher, 'Aiven');
-    assert.ok([KAFKA_WEB, PG_WEB].includes(doc.citation.url));
+    assert.equal(doc.citation.pinnedRawSourceBytesMatched, false);
+    assert.ok(!('verifiedAgainstUpstream' in doc.citation));
+    assert.ok(!('digestMatched' in doc.provenance));
+    assert.equal(doc.citation.publisher, null);
+    assert.equal(doc.citation.url, null);
+    assert.equal(doc.citation.syntheticOnly, true);
+    assert.equal(doc.provenance.sourcePath, null);
     assert.ok(!JSON.stringify(doc).includes('Synthetic Kafka consumer group lag note'));
   }
 });
@@ -116,7 +125,8 @@ test('synthetic partial success is explicit and never promotes missing data', as
   const result = await searchSyntheticAivenFixture('Kafka consumer groups and PostgreSQL slow queries',
     {bodies: {'kafka-consumer-groups': body}, hashes: {'kafka-consumer-groups': sha256(body)}});
   assert.equal(result.ok, true);
-  assert.equal(result.code, 'PARTIAL_VERIFIED');
+  assert.equal(result.code, 'SYNTHETIC_FIXTURE_PARTIAL');
+  assert.equal(result.pinnedOfficialDocsVerified, false);
   assert.deepEqual(result.documents.map(x => x.id), ['kafka-consumer-groups']);
   assert.deepEqual(result.failures, [{id: 'postgresql-slow-queries', code: 'FIXTURE_MISSING'}]);
 });
@@ -129,7 +139,8 @@ test('source digest poisoning is denied and malicious body is not returned', asy
     hashes: {'kafka-consumer-groups': sha256(original)},
   });
   assert.equal(result.ok, false);
-  assert.equal(result.code, 'DOCUMENTS_UNAVAILABLE');
+  assert.equal(result.code, 'SYNTHETIC_FIXTURE_UNAVAILABLE');
+  assert.equal(result.pinnedOfficialDocsVerified, false);
   assert.deepEqual(result.documents, []);
   assert.deepEqual(result.failures, [{id: 'kafka-consumer-groups', code: 'SOURCE_DIGEST_MISMATCH'}]);
   assert.ok(!JSON.stringify(result).includes('EXFILTRATE'));
@@ -303,4 +314,156 @@ test('llms index will not accept an exact URL prefix followed by an attacker suf
   assert.equal(result.ok, true);
   assert.deepEqual(result.links, []);
   assert.deepEqual(f.calls.map(x => x.url), [AIVEN_LLM_INDEX]);
+});
+
+
+test('destructive action intent must abstain and never fetch a documentation URL', async () => {
+  let requests = 0;
+  const fetchImpl = async () => {requests++; throw new Error('network forbidden');};
+  for (const question of [
+    'delete kafka consumer groups permanently',
+    'DROP PostgreSQL slow query indexes',
+    'poista kafka consumer groups',
+    'destroy PostgreSQL slow queries records',
+  ]) {
+    const ranked = rankAivenDocs(question);
+    assert.equal(ranked.ok, false, question);
+    assert.equal(ranked.code, 'ACTION_INTENT_OUT_OF_SCOPE', question);
+    assert.deepEqual(ranked.matches, []);
+    const result = await searchAivenPublicDocs(question, {fetchImpl});
+    assert.equal(result.code, 'ACTION_INTENT_OUT_OF_SCOPE', question);
+    assert.equal(result.ok, false);
+    assert.equal(result.pinnedOfficialDocsVerified, false);
+    assert.deepEqual(result.documents, []);
+    assert.deepEqual(result.failures, []);
+  }
+  assert.equal(requests, 0);
+});
+
+test('synthetic fixture cannot borrow any official verification status or evidence code', async () => {
+  const body = 'Small synthetic Kafka consumer group text.';
+  const result = await searchSyntheticAivenFixture('Kafka consumer groups', {
+    bodies: {'kafka-consumer-groups': body},
+    hashes: {'kafka-consumer-groups': sha256(body)},
+  });
+  assert.equal(result.code, 'SYNTHETIC_FIXTURE_DIGEST_MATCHED');
+  assert.equal(result.pinnedOfficialDocsVerified, false);
+  assert.equal(result.mode, 'synthetic-test-only-document-search');
+  const json = JSON.stringify(result);
+  assert.ok(!json.includes('VERIFIED_SOURCE_BYTES'));
+  assert.ok(!json.includes('"pinnedRawBytesSha256Matched":true'));
+  assert.ok(!json.includes('https://aiven.io/docs/'));
+  assert.equal(result.documents[0].provenance.syntheticFixtureSha256Matched, true);
+  assert.equal(result.documents[0].provenance.sourceCommit, null);
+});
+
+test('raw HTTP bytes including a UTF-8 BOM are hashed BEFORE decoder stripping', async () => {
+  const body = Uint8Array.from([0xef, 0xbb, 0xbf,
+    ...new TextEncoder().encode('A compact Kafka corpus fixture.')]);
+  const exact = createHash('sha256').update(body).digest('hex');
+  const afterDecode = sha256(new TextDecoder('utf-8').decode(body));
+  assert.notEqual(exact, afterDecode, 'BOM must change SHA-256');
+  const feed = async url => response(url, body);
+  const options = {fetchImpl: feed, hashes: {'kafka-consumer-groups': exact}};
+  const success = await searchSyntheticAivenFixture('Kafka consumer groups', options);
+  assert.equal(success.ok, true);
+  assert.equal(success.code, 'SYNTHETIC_FIXTURE_DIGEST_MATCHED');
+  assert.equal(success.documents[0].provenance.contentSha256, 'sha256:' + exact);
+  assert.equal(success.documents[0].provenance.contentBytes, body.byteLength);
+  assert.equal(success.pinnedOfficialDocsVerified, false);
+  const normalizedHash = await searchSyntheticAivenFixture('Kafka consumer groups',
+    {fetchImpl: feed, hashes: {'kafka-consumer-groups': afterDecode}});
+  assert.equal(normalizedHash.ok, false);
+  assert.deepEqual(normalizedHash.failures,
+    [{id: 'kafka-consumer-groups', code: 'SOURCE_DIGEST_MISMATCH'}]);
+});
+
+test('advisory llms index hash covers original BOM bytes but carries no pinned proof', async () => {
+  const bytes = Uint8Array.from([0xef, 0xbb, 0xbf,
+    ...new TextEncoder().encode('- [Kafka](' + KAFKA_WEB + '.md)\n')]);
+  const result = await discoverAivenDocsLinks({fetchImpl: async url => response(url, bytes)});
+  assert.equal(result.ok, true);
+  assert.equal(result.indexSha256, 'sha256:' + createHash('sha256').update(bytes).digest('hex'));
+  assert.equal(result.evidenceKind, 'untrusted-live-index');
+  assert.deepEqual(result.links, [{id: 'kafka-consumer-groups', url: KAFKA_WEB}]);
+});
+
+
+test('live sponsor gate rejects truthy partial, wrong document, synthetic and unsigned provenance', () => {
+  const pin = listAivenPinnedSources()[0];
+  const valid = {
+    ok: true, code: 'VERIFIED_SOURCE_BYTES',
+    evidenceKind: 'pinned-public-docs', pinnedOfficialDocsVerified: true,
+    hostGrantVerified: false, providerInvocationVerified: false, failures: [],
+    documents: [{
+      id: pin.id,
+      citation: {url: pin.citationUrl, pinnedRawSourceBytesMatched: true},
+      provenance: {
+        kind: 'pinned-public-docs', repository: AIVEN_DOCS_REPOSITORY,
+        sourceCommit: AIVEN_DOCS_COMMIT, license: AIVEN_DOCS_LICENSE,
+        contentSha256: pin.contentSha256, contentBytes: 1234,
+        pinnedRawBytesSha256Matched: true, syntheticFixtureSha256Matched: false,
+      },
+    }],
+  };
+  assert.equal(qualifiesLivePinnedResult(valid, pin), true);
+  for (const override of [
+    {code: 'PARTIAL_VERIFIED'}, {code: 'SYNTHETIC_FIXTURE_DIGEST_MATCHED'},
+    {evidenceKind: 'synthetic-fixture'}, {pinnedOfficialDocsVerified: false},
+    {failures: [{id: 'postgresql-slow-queries', code: 'TIMEOUT'}]},
+    {documents: []}, {hostGrantVerified: true},
+  ]) {
+    assert.equal(qualifiesLivePinnedResult({...valid, ...override}, pin), false);
+  }
+  assert.equal(qualifiesLivePinnedResult(valid, listAivenPinnedSources()[1]), false);
+  for (const change of [
+    {sourceCommit: 'untrusted-sha'}, {contentSha256: 'sha256:' + '0'.repeat(64)},
+    {pinnedRawBytesSha256Matched: false}, {syntheticFixtureSha256Matched: true},
+    {contentBytes: 0},
+  ]) {
+    const doctored = structuredClone(valid);
+    Object.assign(doctored.documents[0].provenance, change);
+    assert.equal(qualifiesLivePinnedResult(doctored, pin), false);
+  }
+});
+
+test('abstention and offline-shortlist gate require exact expected outputs', () => {
+  assert.equal(qualifiesNoDocuments({code: 'NO_RELEVANT_DOCUMENTS', ok: true,
+    documents: [], failures: [], pinnedOfficialDocsVerified: false}), true);
+  assert.equal(qualifiesNoDocuments({code: 'PARTIAL_VERIFIED', ok: true,
+    documents: [], failures: [], pinnedOfficialDocsVerified: false}), false);
+  assert.equal(qualifiesNoDocuments({code: 'NO_RELEVANT_DOCUMENTS', ok: true,
+    documents: [{id: 'kafka-consumer-groups'}], failures: [], pinnedOfficialDocsVerified: false}), false);
+  assert.equal(qualifiesOfflineShortlist(rankAivenDocs('Kafka consumer group lag'), 'kafka-consumer-groups'), true);
+  assert.equal(qualifiesOfflineShortlist(rankAivenDocs('Kafka consumer group lag'), 'postgresql-slow-queries'), false);
+  assert.equal(qualifiesOfflineShortlist(rankAivenDocs('glittery bicycle soup orchestra'), null), true);
+});
+
+test('live CLI returns nonzero for two missing pinned sources despite truthy irrelevant abstention', () => {
+  const preload = 'data:text/javascript,' + encodeURIComponent(
+    "globalThis.fetch=async(url)=>{const r=new Response('untrusted',{headers:{'content-type':'text/plain'}});Object.defineProperty(r,'url',{value:url});return r;};");
+  const run = spawnSync(process.execPath, [
+    '--import', preload, new URL('./smoke.mjs', import.meta.url).pathname, '--live',
+  ], {encoding: 'utf8', timeout: 5_000, maxBuffer: 5_000});
+  assert.equal(run.status, 1, run.stderr);
+  const rows = run.stdout.trim().split('\n').map(JSON.parse);
+  assert.deepEqual(rows.map(row => row.smokeGatePassed), [false, false, true]);
+  assert.deepEqual(rows.map(row => row.code),
+    ['DOCUMENTS_UNAVAILABLE', 'DOCUMENTS_UNAVAILABLE', 'NO_RELEVANT_DOCUMENTS']);
+  assert.deepEqual(rows.map(row => row.citations.length), [0, 0, 0]);
+  assert.ok(!run.stdout.includes('untrusted'));
+});
+
+test('offline sponsor smoke is default and conflicting CLI modes are rejected', () => {
+  const path = new URL('./smoke.mjs', import.meta.url).pathname;
+  const offline = spawnSync(process.execPath, [path],
+    {encoding: 'utf8', timeout: 5_000, maxBuffer: 5_000});
+  assert.equal(offline.status, 0, offline.stderr);
+  const rows = offline.stdout.trim().split('\n').map(JSON.parse);
+  assert.deepEqual(rows.map(x => x.smokeGatePassed), [true, true, true]);
+  assert.ok(rows.every(x => x.mode === 'OFFLINE_UNVERIFIED_SHORTLIST'));
+  assert.ok(rows.every(x => !JSON.stringify(x).includes('LIVE_PUBLIC_DOCS_READ_ONLY')));
+  const conflict = spawnSync(process.execPath, [path, '--offline', '--live'],
+    {encoding: 'utf8', timeout: 5_000, maxBuffer: 5_000});
+  assert.equal(conflict.status, 2);
 });
