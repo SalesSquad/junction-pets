@@ -6,7 +6,7 @@ import pytest
 
 from council.bridge import handoffs_from_v1
 from council.core import Caller, InvalidRun, new_run_state
-from council.replay import ReplayReservation, deterministic_run_id
+from council.replay import ReplayReservation, deterministic_run_id, envelope_sha256
 
 
 CALLER = Caller("tenant.demo", "user.test", "junction.openai-codex")
@@ -43,7 +43,9 @@ def test_canonical_v1_maps_to_host_checked_handoff_without_private_payload():
     handoffs = handoffs_from_v1(CALLER, pair())
     reservation = ReplayReservation(
         run_id=deterministic_run_id(CALLER, handoffs[0].request_id),
-        envelope_digest="d" * 64, idempotency_key="host.test.reservation",
+        envelope_digest="d" * 64,
+        handoffs_digest=envelope_sha256([vars(h) for h in handoffs]),
+        idempotency_key="host.test.reservation",
         fence_token=1, created=True, durable=True,
     )
     state = new_run_state(CALLER, handoffs, reservation)

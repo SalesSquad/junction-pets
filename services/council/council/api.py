@@ -88,6 +88,7 @@ def create_app(graph, authenticator: Authenticator, replay_store: ReplayStore | 
         try:
             handoffs = handoffs_from_v1(caller, body.requests)
             digest = envelope_sha256(body.requests)
+            handoffs_digest = envelope_sha256([vars(h) for h in handoffs])
         except (InvalidRun, ValueError, TypeError) as exc:
             raise HTTPException(422, str(exc)) from None
         expected_run_id = deterministic_run_id(caller, handoffs[0].request_id)
@@ -95,12 +96,13 @@ def create_app(graph, authenticator: Authenticator, replay_store: ReplayStore | 
         # permanently keys (tenant,user,firstRequestId) to one exact payload.
         try:
             reservation = replay_store.reserve(caller, handoffs[0].request_id,
-                                               digest, expected_run_id)
+                                               digest, expected_run_id, handoffs_digest)
         except ReplayConflict:
             raise HTTPException(409, "Request ID reused with a different envelope") from None
         except Exception:
             raise HTTPException(503, "Durable Chibi replay reservation unavailable") from None
-        if not valid_reservation(reservation, caller, handoffs[0].request_id, digest):
+        if not valid_reservation(reservation, caller, handoffs[0].request_id,
+                                 digest, handoffs_digest):
             raise HTTPException(503, "Host returned an invalid durable replay reservation")
 
         if not reservation.created:
