@@ -11,7 +11,7 @@
 
 ## Ownership and parallelism
 
-- One authorized **writer** per `pets/<company>/` at a time; other independent company lanes may run in parallel with disjoint paths. One integrator owns cross-cutting files: `schemas/`, `contracts/`, `ops/`, `scripts/`, shared `lib/`, root manifests/lockfiles, generated exports and integrations. Assign explicit disjoint shared-module ownership when needed.
+- One authorized **writer** per company at a time; code and test roles share the same exclusive company writer lease. A test role may write only its explicitly assigned `tests/pet-<company>.test.mjs`; the integrator owns all other `tests/` files. Other company lanes may run in parallel on disjoint paths. One integrator owns cross-cutting files: `schemas/`, `contracts/`, `ops/`, `scripts/`, shared `lib/`, root manifests/lockfiles, generated exports and integrations. Assign explicit disjoint shared-module ownership when needed.
 - Each pet has logical `junction-dev-<company>`, desired Cloud name `junction-<company>` and branch pattern `codex/junction-<company>-*` in [`ops/environments/`](ops/environments/). These are **configuration/ownership**, not proof of a running worker. The 34×3 code/test/review roles in the dated [Wave 2 plan](docs/JUNCTION_SWARM_WAVE2_EXECUTION.md) are **planned**; do not silently allocate 102 jobs.
 - Start from a verified immutable SHA. Create a task-owned branch, commit coherent owned changes, push with the expected remote head, and propose an appropriate PR stack; **no direct main/shared-branch push or force-push**. Recheck actual pushed HEAD and review the exact diff. An independent reviewer audits the final bytes; the integrator owns overlapping edits and re-runs decisive gates.
 - [`scripts/ops-work.mjs`](scripts/ops-work.mjs) provides a **local, one-workspace** lease, not a distributed mutex across clouds. Cross-cloud ownership requires explicit task registry, disjoint branches and remote expected-HEAD checks. Never steal a stale lock without inspecting surviving work and its owner.
@@ -23,6 +23,14 @@
 - Private Chibi repo: identity, account adoption, offers/entitlements, tenant isolation, Cedar policy, consent, model/tool execution, provider credentials, real memory/chat and signed execution receipts. A LangGraph Council **proposes and routes**; it never issues grants or bypasses a host refusal. Recheck source, tenant, authority, revocation, effect, expiry and budget at each privileged call.
 - Private `ops/` worker state/receipts, owner-only Mission Control and sensitive data must not leak into public catalog, demo, Plugin Creator content or Junction submission. QR links never carry a grant/token/user ID. A company companion is not endorsed by that company; don't invent challenge requirements, licensing, company facts or provider connectivity.
 - Reuse Aiven/LangGraph public code only with pinned provenance, confirmed license and required notices; start from [`services/council/README.md`](services/council/README.md). Do not copy Chibi/private/customer sources into a public-friendly package. Keep provider-neutral synthetic mode as a portable fallback and explicitly label it test-only.
+
+## Prohibitions and reproducibility
+
+- Do **not** add or re-enable GitHub Actions workflows or new paid CI executors by default; prefer verified existing Codex Cloud, authorized local/cloud runners and project-local scripts. New spending requires the owner's separate authority.
+- Never commit API keys, OAuth/session tokens, cookies, private customer/family conversations, personal profiles or secrets to this repository, generated outputs, tests or logs. Use approved host-side secret storage and redact receipts.
+- Generate `dist/`, catalog snapshots, plugin bundles and notices through their declared producers; do not hand-edit generated files or mutate historical evidence to pass validation.
+- Preserve independent versioning, source references and individual quality gates for all 34 pet packages. Do not silently homogenize or publish them as endorsed company agents.
+- An independent reviewer must differ from the author/executor of the bytes being checked, stay read-only and verify exact reviewed HEAD before advising acceptance.
 
 ## Source-bound quality gates
 

@@ -45,7 +45,7 @@ The optional Python Council test environment is documented in [`services/council
 | [`apps/catalog/`](apps/catalog/) | Public-facing discovery UI, previews and QR link | Catalog owner |
 | [`apps/mission-control/`](apps/mission-control/), [`ops/`](ops/) | Private orchestration UI, desired Cloud fleet, leases and receipts | Orchestration integrator |
 | [`plugins/`](plugins/) | Generated, source-bound skills-only companion plugin packages | Plugin integrator |
-| [`lib/`](lib/), [`scripts/`](scripts/), [`tests/`](tests/) | Shared model, exporters, generators and test gates | Integrator |
+| [`lib/`](lib/), [`scripts/`](scripts/), [`tests/`](tests/) | Shared model, exporters, generators and test gates | Integrator; a pet test writer may own only explicitly leased `tests/pet-<company>.test.mjs` |
 | [`config/host-config.json`](config/host-config.json) | Chibi host address/readiness; no user credentials | Host integrator |
 
 Generated `dist/` outputs are **not** authored source. A pet's `AGENTS.md` is its **runtime persona**; root `AGENTS.md` and [`ops/AGENTS.md`](ops/AGENTS.md) instruct **development workers**. Do not confuse these three roles.
