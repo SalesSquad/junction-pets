@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.nvidia",
   "slug": "junction-nvidia",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "agentName": "NVIDIA",
   "displayName": "NVIDIA companion",
   "company": {
@@ -11,9 +11,9 @@
     "role": "technology",
     "website": "https://developer.nvidia.com/"
   },
-  "tagline": "Connect a GPU or robotics goal to the right NVIDIA documentation.",
-  "introduction": "A technical navigation companion for NVIDIA developer resources, helping scope workloads and design reproducible performance or simulation checks.",
-  "welcome": "What would you like to understand or plan with NVIDIA? Choose a starter below, or share a small redacted example.",
+  "tagline": "Turn visual evidence into tool-backed engineering decisions with Nemotron.",
+  "introduction": "An independent NVIDIA engineering companion for visual workload triage, reproducible benchmark review and evidence-based recommendations. The optional developer workflow uses Nemotron 3.5 Super VL for observation, tool selection and final verification; authenticated Chibi activation remains separate.",
+  "welcome": "Share a public or synthetic workload diagram, a benchmark pair, or a GPU engineering question. I can explain the evidence and, when an authorized Nemotron connection is available, inspect the image, use bounded tools and verify the result.",
   "accent": "#437b32",
   "artIndex": 19,
   "capabilities": [
@@ -55,12 +55,54 @@
         "scenario and validation checklist"
       ],
       "requiresConnection": false
+    },
+    {
+      "id": "visual-evidence-review",
+      "title": "Inspect visual workload evidence",
+      "description": "Use an authorized Nemotron 3.5 Super VL connection to examine supplied public or synthetic images, identify engineering evidence and expose missing measurements.",
+      "kind": "connection-required",
+      "inputs": [
+        "public or synthetic workload image and engineering question"
+      ],
+      "outputs": [
+        "visual observations, uncertainties and next checks"
+      ],
+      "requiresConnection": true
+    },
+    {
+      "id": "nemotron-tool-workflow",
+      "title": "Reason with bounded engineering tools",
+      "description": "Let Nemotron choose read-only official source cards and the existing benchmark comparability checker, then use their actual returned evidence.",
+      "kind": "connection-required",
+      "inputs": [
+        "public or synthetic workload question, image and declared benchmark pair"
+      ],
+      "outputs": [
+        "tool-backed recommendation and execution trace"
+      ],
+      "requiresConnection": true
+    },
+    {
+      "id": "evidence-verification",
+      "title": "Verify the engineering conclusion",
+      "description": "Use a separate Nemotron verification pass to check recommendations against observed tool evidence while preserving unverified performance and source limits.",
+      "kind": "connection-required",
+      "inputs": [
+        "workflow evidence and proposed conclusion"
+      ],
+      "outputs": [
+        "verified-against-evidence conclusion, unknowns and model-call metrics"
+      ],
+      "requiresConnection": true
     }
   ],
   "starterPrompts": [
     "Help me choose a documentation path for a robot perception prototype using my stated NVIDIA hardware.",
     "Create a reproducible latency and memory benchmark plan for this GPU inference workload.",
-    "Review this simulation plan for missing edge cases and sim-to-real assumptions."
+    "Review this simulation plan for missing edge cases and sim-to-real assumptions.",
+    "Use Nemotron 3.5 Super VL to inspect this synthetic workload diagram, select the relevant evidence tools and verify your recommendation.",
+    "Compare these declared benchmark rows with the NVIDIA checker, then use Nemotron to explain exactly what the ratio can support.",
+    "Run the bounded Nemotron visual reasoning demo and show the actual model, tool calls, token usage and remaining evidence gaps."
   ],
   "sources": [
     {
@@ -70,6 +112,22 @@
       "publisher": "NVIDIA",
       "checkedAt": "2026-11-11",
       "summary": "Official developer tools, documentation, tutorials and learning resources."
+    },
+    {
+      "id": "nemotron-super-vl-api",
+      "title": "Nemotron 3.5 Super VL hosted API",
+      "url": "https://build.nvidia.com/nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "publisher": "NVIDIA",
+      "checkedAt": "2026-11-13",
+      "summary": "Official exact model identifier, OpenAI-compatible endpoint, image input example, tool calling, structured output and hosted context specification."
+    },
+    {
+      "id": "nemotron-super-vl-card",
+      "title": "Nemotron 3.5 Super VL model card",
+      "url": "https://build.nvidia.com/nvidia/nemotron-3.5-super-vl-120b-a12b/modelcard",
+      "publisher": "NVIDIA",
+      "checkedAt": "2026-11-13",
+      "summary": "Official early-access multimodal reasoning model card and usage guidance; provider quotas and user-specific access remain separately verified."
     }
   ],
   "sourceEvidence": {
