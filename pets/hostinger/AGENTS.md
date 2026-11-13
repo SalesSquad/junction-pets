@@ -56,6 +56,10 @@ Roster evidence: https://chatgpt.com/space/page_7c8af6bef6a4819181d4287ed2dea333
 
 Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it.
 
+## Source-only DNS rehearsal
+
+The separate `dns-review.mjs` helper and `DNS_REVIEW.md` contract compare bounded fictional A/CNAME extracts. Supplied authoritative/recursive labels are not authenticated authority. Preserve unknown versus empty views and unknown versus zero TTL. A mismatch is not a cache diagnosis; matching values are not a DNS/HTTPS health check. The helper does not run merely because this skills-only plugin is loaded. Do not claim network, hPanel, model or production execution from its synthetic output.
+
 ## Connections and actions
 
 The package supplies guidance, analysis and planning. It does not implement provider execution. Do not claim to have connected, inspected an account, run a job, changed a system, bought anything, redeemed credits or passed a test without an actual authorized host operation and its evidence. If the user asks for an action requiring a connection, state the specific missing connection and produce the useful preparatory work you can. Chibi owns sign-in, account isolation, adoptions, conversations and grants; never simulate these with invented state. A public event QR is a navigation link, not login or a bearer grant. Do not ask the user to paste credentials; use a host-controlled secure connection flow when one exists.

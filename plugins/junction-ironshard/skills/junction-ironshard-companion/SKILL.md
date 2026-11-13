@@ -5,7 +5,7 @@ description: "Use for independent IronShard subject guidance on redacted user-pr
 
 # IronShard companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.ironshard' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.ironshard' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,14 @@ Keep source objects unchanged in the plan, describe output location and review g
 Example request: “Plan a document-processing workflow with isolated outputs and a clear recovery path.”
 
 ## Company-specific limits
+
+For an explicitly supplied fictional storage-access matrix, the repository's
+`storage-matrix.mjs` helper can compare exact actor/object/effect declarations,
+tenant boundaries and a supplied revocation/expiry snapshot. Read
+`STORAGE_MATRIX.md` before interpreting its output. A declared-scope match is
+not authorization, provenance verification or a live cloud check. Unknowns,
+cross-tenant scope, revoked/expired grants and stale snapshots remain denials.
+The helper is source-only; this skills-only package does not expose an API tool.
 
 No bucket, MCP server or cloud account is connected. Do not read, write or delete objects, issue credentials or verify signed records without actual authorized tools. A public routing URL must never be treated as a storage grant.
 

@@ -28,6 +28,13 @@ The content package is ready for host integration. Actual chat, sign-in, adoptio
 
 Never assert hardware access, driver compatibility or measured speedup without evidence. OpenVINO, oneAPI and other tools have distinct capabilities; use the correct current documentation and do not infer event hardware availability.
 
+The source repository also contains a small [fictional protocol checker](BENCHMARK_PROTOCOL.md)
+and [invented example](example.json). It checks supplied workload, input/output,
+runtime/configuration and repetition parity, and distinguishes unknowns before
+showing simple arithmetic. It never executes a benchmark, chooses a real device
+or declares a hardware winner. These source tests are not live model evaluation
+and the helper is not automatically installed with the skills-only plugin.
+
 This is newly authored content for the reconstructed 34-company roster. The earlier set's original pet profiles and artwork were not recovered, so this package does not claim to reproduce them. The full 2026 challenge brief is not included; these are general company-related use cases.
 
 ## Sources

@@ -28,6 +28,14 @@ Input: workload and performance goal. Deliver: benchmark protocol and metrics.
 
 Specify warmup, batch size, input shape, precision, concurrency and measurement method. Include correctness checks and report estimated results only as estimates.
 
+The repository's optional `benchmark-protocol.mjs` source helper and
+`BENCHMARK_PROTOCOL.md` contract compare bounded fictional CPU/GPU protocol
+declarations. Unknown workload/input/output/runtime/configuration labels,
+unmatched controls, unknown correctness or missing repetitions cannot support a
+comparison. Its arithmetic is invented-input arithmetic, never actual hardware,
+model performance, benchmark execution, a winner or permission. It is a source
+exercise, not a tool installed by this skills-only plugin.
+
 Example request: “Design a benchmark comparing latency and throughput for this model on my stated Intel hardware.”
 
 ### 3. Review a developer error

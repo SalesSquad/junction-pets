@@ -22,6 +22,10 @@ Choose one of these prompts in Chibi, then share only the context needed for the
 
 The companion should explain its reasoning, cite the relevant official sources and make uncertainty visible. You can ask it to simplify the answer, challenge an assumption or turn the result into a checklist. Use fictional or redacted examples for private work.
 
+## Source-only diagnostic rehearsal
+
+Developers can run the small `dns-review.mjs` helper against `example.json` using the exact `DNS_REVIEW.md` contract. It compares invented A/CNAME snapshots, preserves missing evidence and zero TTL, and separates supplied-data conflicts from unconfirmed hypotheses. It performs no DNS lookup or account operation; the generated companion plugin contains guidance, not this executable helper.
+
 ## Current limits
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.

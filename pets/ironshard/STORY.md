@@ -24,6 +24,12 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+The source repository now includes a small invented storage-scope rehearsal:
+an exact access matrix with tenant, object, operation, expiry and revocation
+snapshot checks. See `STORAGE_MATRIX.md` and `example.json`. It can expose an
+unsupported write or cross-tenant proposal without touching storage. Its
+declared-scope matches are not real permission or authenticated evidence.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No bucket, MCP server or cloud account is connected. Do not read, write or delete objects, issue credentials or verify signed records without actual authorized tools. A public routing URL must never be treated as a storage grant.
