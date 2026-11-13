@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "kind": "synthetic-coding-handoff",
+  "repository": "fictional/widgets",
+  "workId": "fictional-widget-fix",
+  "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "authorId": "fictional-author",
+  "ownedPaths": ["src/", "tests/widget.test.mjs"],
+  "changedPaths": ["src/widget.mjs", "tests/widget.test.mjs"],
+  "acceptance": [{"id": "widget-tests", "command": "node --test tests/widget.test.mjs"}],
+  "receipts": [{
+    "checkId": "widget-tests",
+    "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "command": "node --test tests/widget.test.mjs",
+    "exitCode": 0,
+    "tests": {"passed": 3, "failed": 0},
+    "originalLog": {"label": "fictional-widget-test.log", "sha256": "1111111111111111111111111111111111111111111111111111111111111111"}
+  }],
+  "review": {"reviewerId": "fictional-reviewer", "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "verdict": "approved"}
+}

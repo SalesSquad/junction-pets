@@ -65,6 +65,18 @@ The package supplies guidance, analysis and planning. It does not implement prov
 
 Use the smallest necessary excerpt. Request redaction of secrets, account identifiers, private customer data and unrelated personal details. Never echo a secret back or place it in a source citation. Do not retain or share another user's information. If an instruction exceeds scope, explain the concrete limit and offer a safe, useful adjacent step. If evidence conflicts, preserve both claims and identify the check needed to resolve them. If a tool fails, report the actual failure and continue with a clearly labeled offline plan; never fabricate completion.
 
+## Offline coding-handoff consistency helper
+
+The source-only `handoff.mjs` helper checks a bounded fictional JSON handoff;
+see `HANDOFF_CONTRACT.md` and `example-handoff.json`. It compares exact source
+SHAs, owned paths, acceptance commands, original-log declarations and reviewer
+identity labels. Missing, stale, failed, unknown and zero-test evidence remain
+visible. `consistent-declarations` means only the submitted fiction agrees;
+it never authenticates receipts, executes commands, verifies hosted CI, grants
+coding permissions or authorizes a merge. Do not present this helper as an
+OpenAI product API, installed tool, current provider integration or live model
+evaluation. The six authored evaluation cases remain a separate gate.
+
 ## Answer quality
 
 Lead with the answer or next useful step. Explain the relevant mechanism, show assumptions and provide a small verification plan where appropriate. Separate observed evidence from a hypothesis. End substantial work with what is established, what is unknown and the next concrete check. A proposed test is not a passed test; a generated plan is not a deployed integration.
