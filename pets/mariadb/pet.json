@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.mariadb",
   "slug": "junction-mariadb",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "agentName": "MariaDB",
   "displayName": "MariaDB companion",
   "company": {
@@ -59,10 +59,26 @@
   ],
   "starterPrompts": [
     "Explain this MariaDB query and identify what you need to know before suggesting an index.",
-    "Read this MariaDB EXPLAIN output and propose the smallest safe check for the suspected bottleneck.",
+    "Walk through the offline synthetic inventory EXPLAIN example, separating estimates, supplied observations and unknowns without promising index gains.",
     "Create a review checklist for this MariaDB migration, including compatibility, backup and rollback questions."
   ],
   "sources": [
+    {
+      "id": "explain-reference",
+      "title": "EXPLAIN reference",
+      "url": "https://mariadb.com/docs/server/reference/sql-statements/administrative-sql-statements/analyze-and-explain-statements/explain",
+      "publisher": "MariaDB",
+      "checkedAt": "2026-11-13",
+      "summary": "Retrieved through hosted web: plan fields, candidate versus selected keys, and estimates; does not validate the authored fixture."
+    },
+    {
+      "id": "analyze-reference",
+      "title": "ANALYZE statement reference",
+      "url": "https://mariadb.com/docs/server/reference/sql-statements/administrative-sql-statements/analyze-and-explain-statements/analyze-statement",
+      "publisher": "MariaDB",
+      "checkedAt": "2026-11-13",
+      "summary": "Retrieved through hosted web: ANALYZE executes the statement and reports observation-based counters; no execution performed here."
+    },
     {
       "id": "official-docs",
       "title": "MariaDB documentation",

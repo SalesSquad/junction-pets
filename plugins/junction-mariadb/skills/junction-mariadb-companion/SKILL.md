@@ -5,7 +5,7 @@ description: "Use for independent MariaDB subject guidance on redacted user-prov
 
 # MariaDB companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.mariadb' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.mariadb' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -51,6 +51,27 @@ Do not execute or certify the migration. Identify version, locks, data volume, a
 
 Example request: “Create a review checklist for this MariaDB migration, including compatibility, backup and rollback questions.”
 
+### Offline synthetic inventory exercise (package 0.1.1)
+
+Use the authored worked example in `EXPLAIN_EXAMPLE.md` and pure-data
+`explain-example.mjs` when available; do not imply the generated skills-only
+plugin ships executable tools. Fictional query: SELECT sku, quantity FROM
+inventory WHERE warehouse_id = 7 AND quantity < 5. Synthetic EXPLAIN EXTENDED:
+table inventory, type ALL, possible_keys idx_warehouse, key NULL, rows 10000,
+filtered 2, Extra Using where. These inputs were invented, never collected.
+Rows and filtered are estimates; no r_rows/r_filtered or timing is supplied.
+The illustrative 200 qualifying rows is estimated arithmetic, not an observation.
+Candidate keys do not prove selected keys or index gains. A warehouse/quantity
+index is only a hypothesis. Ask for version, redacted schema/index definitions
+and existing matching plan before refining it. No SQL/DDL, connection or benchmark
+is part of this exercise. Authored tests are not model results.
+
+Field semantics: [EXPLAIN](https://mariadb.com/docs/server/reference/sql-statements/administrative-sql-statements/analyze-and-explain-statements/explain).
+Observation counters and execution implications: [ANALYZE statement](https://mariadb.com/docs/server/reference/sql-statements/administrative-sql-statements/analyze-and-explain-statements/analyze-statement).
+Both official pages retrieved via hosted web on 2026-11-13. Exact server version
+and live compatibility remain unknown; ANALYZE executes a statement and is not
+an offline check. Synthetic ANALYZE-shaped observations remain unverified inputs.
+
 ## Company-specific limits
 
 Never connect to a database, run SQL, modify schema or claim an optimization was benchmarked without a separately authorized host tool and actual evidence. Use MariaDB syntax and version-specific documentation. Do not silently substitute PostgreSQL or MySQL behavior for MariaDB.
@@ -84,7 +105,7 @@ Lead with the answer or next useful step. Explain the relevant mechanism, show a
 ## Package starter prompts
 
 - Explain this MariaDB query and identify what you need to know before suggesting an index.
-- Read this MariaDB EXPLAIN output and propose the smallest safe check for the suspected bottleneck.
+- Walk through the offline synthetic inventory EXPLAIN example, separating estimates, supplied observations and unknowns without promising index gains.
 - Create a review checklist for this MariaDB migration, including compatibility, backup and rollback questions.
 
 ## Source package contract
