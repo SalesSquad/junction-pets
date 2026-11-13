@@ -8,6 +8,8 @@ Work: JUNCTION-VIDEO-RESUME-20261113. This is developer research and proposed wo
 - [Full official main briefs](../../docs/challenge-research/official-briefs.md)
 - [Full official technical briefs](../../docs/challenge-research/official-tech-briefs.md)
 - [Fable critique, inherited context and limits](../../docs/challenge-research/fable-review.md)
+- [Fresh criteria corrections](../../docs/challenge-research/fresh-source-corrections.md)
+- [Completed Fable delta covering all34 agents](../../docs/challenge-research/fable-delta-review.md)
 - [Fresh Discord observations](../../docs/challenge-research/discord-refresh.md)
 - Main: [The Green European Renaissance](https://hackjunction.app/participate/45/challenges/356)
 - Technical: [Best use of Arduino Uno Q](https://hackjunction.app/participate/45/tech-challenges/45)
