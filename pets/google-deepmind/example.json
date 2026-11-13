@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "kind": "invented-evaluation-plan",
+  "capabilities": [
+    {"id": "visual-grounding", "requiredModalities": ["text", "image"], "minHeldOutGroups": 2},
+    {"id": "sound-cue", "requiredModalities": ["text", "audio"], "minHeldOutGroups": 1}
+  ],
+  "records": [
+    {
+      "id": "training-storyboard",
+      "sourceId": "invented-training-kit",
+      "sceneId": "room-blue",
+      "split": "training",
+      "modalities": ["text", "image"],
+      "capabilityIds": ["visual-grounding"]
+    },
+    {
+      "id": "heldout-storyboard-a",
+      "sourceId": "invented-heldout-kit-a",
+      "sceneId": "room-green",
+      "split": "held-out",
+      "modalities": ["text", "image"],
+      "capabilityIds": ["visual-grounding"]
+    },
+    {
+      "id": "heldout-storyboard-b",
+      "sourceId": "invented-heldout-kit-b",
+      "sceneId": "room-red",
+      "split": "held-out",
+      "modalities": ["text", "image"],
+      "capabilityIds": ["visual-grounding"]
+    }
+  ]
+}

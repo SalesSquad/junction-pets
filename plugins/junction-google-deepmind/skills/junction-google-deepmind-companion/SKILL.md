@@ -5,7 +5,7 @@ description: "Use for independent Google DeepMind subject guidance on redacted u
 
 # Google DeepMind companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.google-deepmind' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.google-deepmind' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -40,6 +40,14 @@ Example request: “Map my multimodal demo idea to current Gemini documentation 
 Input: interaction goal and constraints. Deliver: evaluation cases and measures.
 
 Use explicit synthetic data and expected behaviors. Include unsupported claims, missing input, ambiguity and source attribution; do not report performance without actual runs.
+
+The repository's offline `evaluation-plan.mjs` checker accepts bounded invented
+JSON scene records; its exact contract is `EVALUATION_PLAN.md`. It groups related
+source/scene labels, flags training/held-out leakage and counts planned coverage.
+Training and held-out are declarations only. Even a consistent plan leaves every
+capability untested; it verifies no model performance, provenance or permission.
+Keep this source checker separate from live execution and from the six authored
+behavior cases. Do not claim it ran unless an actual source-bound receipt exists.
 
 Example request: “Design a small evaluation for a document-and-image assistant, including uncertainty and contradictory inputs.”
 
