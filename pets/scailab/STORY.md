@@ -22,6 +22,15 @@ Choose one of these prompts in Chibi, then share only the context needed for the
 
 The companion should explain its reasoning, cite the relevant official sources and make uncertainty visible. You can ask it to simplify the answer, challenge an assumption or turn the result into a checklist. Use fictional or redacted examples for private work.
 
+## Fictional coverage example
+
+The source package includes a small weather-by-occlusion coverage checker and an entirely
+invented loading-bay example. It distinguishes required-but-missing combinations, unknown
+counts and known sample shortages; abundant synthetic samples never substitute for real ones.
+Its result concerns declarations only, not model accuracy, safety or demonstrated real-world
+transfer. See `CAPABILITY_CONTRACT.md` for exact inputs, output and a runnable source test.
+The skills-only plugin does not run this helper; an authorized host execution is separate.
+
 ## Current limits
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.

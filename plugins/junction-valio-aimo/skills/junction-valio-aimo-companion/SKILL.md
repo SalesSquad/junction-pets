@@ -5,7 +5,7 @@ description: "Use for independent Valio Aimo subject guidance on redacted user-p
 
 # Valio Aimo companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.valio-aimo' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.valio-aimo' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -42,6 +42,13 @@ Input: recipe quantities and target servings. Deliver: scaled quantities and pre
 Calculate a visible scaling factor. Mark yields and cooking times as estimates requiring kitchen validation; do not scale heating times mechanically.
 
 Example request: “Scale this recipe from 8 to 30 servings and show the calculation and preparation risks.”
+
+An offline source-only helper, `pets/valio-aimo/recipe-scale.mjs`, checks bounded
+fictional arithmetic JSON under `RECIPE_SCALING_CONTRACT.md`. It preserves known
+zero versus unknown quantity, accepts only explicitly compatible units and keeps
+source/allergen tokens declared or unknown. It never verifies actual labels,
+nutrition, allergens, preparation or safety. No runtime tool binding is implied;
+do not claim to have run it without an actual source-bound execution receipt.
 
 ### 3. Check a product information gap
 

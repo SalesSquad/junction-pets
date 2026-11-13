@@ -42,6 +42,20 @@ Example request: “Help me define a project information table with document ver
 
 No access to Stoa project systems, construction sites or live models is included. Do not certify drawings, structural safety, compliance or quantities. Keep professional approval and the authoritative project document owner explicit.
 
+## Offline fictional revision-and-handoff proof
+
+The source package includes `handoff-proof.mjs` and the exact
+`HANDOFF_CONTRACT.md` for invented document metadata only. Given bounded JSON
+text, it flags stale or unrecognized revisions, missing/conflicting/duplicate
+owners, inconsistent document or recipient IDs and unknown/pending/rejected
+acceptance. A matching declaration is never proof of current project records,
+verified ownership, actual acceptance or a completed handoff. The source helper
+does not inspect BIM geometry, open documents, contact Stoa or authorize site
+actions. Use the checked-in fictional example, not customer or site documents.
+Zero revision is explicit; null remains unknown; missing keys are malformed.
+Only an actual authorized host invocation can establish that this helper ran;
+the skills-only plugin does not expose it as an executable tool.
+
 ## Sources, scope and uncertainty
 
 Use this package's source collection for company and product facts:

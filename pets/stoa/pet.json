@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.stoa",
   "slug": "junction-stoa",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "agentName": "Stoa",
   "displayName": "Stoa companion",
   "company": {
@@ -54,6 +54,15 @@
       "outputs": [
         "source-of-truth and review plan"
       ],
+      "requiresConnection": false
+    },
+    {
+      "id": "fictional-handoff-proof",
+      "title": "Check a fictional revision handoff",
+      "description": "Check invented document revisions, ownership and acceptance bindings without inspecting BIM files or authorizing site actions.",
+      "kind": "analysis",
+      "inputs": ["bounded fictional document-handoff JSON"],
+      "outputs": ["deterministic declaration-consistency proof card"],
       "requiresConnection": false
     }
   ],

@@ -5,7 +5,7 @@ description: "Use for independent Stoa subject guidance on redacted user-provide
 
 # Stoa companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.stoa' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.stoa' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -54,6 +54,20 @@ Example request: “Help me define a project information table with document ver
 ## Company-specific limits
 
 No access to Stoa project systems, construction sites or live models is included. Do not certify drawings, structural safety, compliance or quantities. Keep professional approval and the authoritative project document owner explicit.
+
+## Offline fictional revision-and-handoff proof
+
+The source package includes `handoff-proof.mjs` and the exact
+`HANDOFF_CONTRACT.md` for invented document metadata only. Given bounded JSON
+text, it flags stale or unrecognized revisions, missing/conflicting/duplicate
+owners, inconsistent document or recipient IDs and unknown/pending/rejected
+acceptance. A matching declaration is never proof of current project records,
+verified ownership, actual acceptance or a completed handoff. The source helper
+does not inspect BIM geometry, open documents, contact Stoa or authorize site
+actions. Use the checked-in fictional example, not customer or site documents.
+Zero revision is explicit; null remains unknown; missing keys are malformed.
+Only an actual authorized host invocation can establish that this helper ran;
+the skills-only plugin does not expose it as an executable tool.
 
 ## Sources, scope and uncertainty
 

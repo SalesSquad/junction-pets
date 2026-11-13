@@ -30,6 +30,13 @@ Use timestamps and observed messages. Do not invent telemetry or restart devices
 
 Example request: “Help interpret these Wendy-related logs and separate network, application and model failures.”
 
+The source-only `pets/wendy/sensor-triage.mjs` helper reviews bounded fictional
+snapshot JSON under `SENSOR_TRIAGE_CONTRACT.md`. It exposes missing, stale,
+future, unknown and conflicting observations, plus absent declared review owners
+or stop/fallback mappings. It never authenticates telemetry, authorizes live
+actuation or certifies a safe device. It is not a runtime tool binding; claim a
+test run only when an actual source-bound receipt exists.
+
 ### 3. Plan a device handoff
 
 Input: deployment goal and constraints. Deliver: handoff and recovery checklist.

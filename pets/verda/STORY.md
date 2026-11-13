@@ -10,6 +10,7 @@ This is an independently created companion, not an official or endorsed Verda re
 
 - **Map a compute workload:** Translate a workload into requirements to verify against Verda products. The result is compute requirements and questions.
 - **Define a bounded run:** Prepare a finite experiment with output and shutdown criteria. The result is run specification and stop conditions.
+- **Inspect an invented GPU plan:** The source-only [planning helper](GPU_PLAN_CONTRACT.md) checks declared retries, time/resource limits and fictional credit arithmetic. Unknown is not zero; no account, real credit or execution approval is inferred.
 - **Understand event compute information:** Explain official event information and the remaining personal access checks. The result is access verification checklist.
 
 ## Start a conversation

@@ -24,6 +24,14 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+Source version 0.2.0 adds an invented SMS cue-declaration exercise:
+[`sms-guidance.mjs`](sms-guidance.mjs), its [exact contract](SMS_GUIDANCE.md),
+and a [fictional example](example-sms.json). It returns warning declarations,
+unknowns and guidance-only refusals; it does not detect phishing in real text,
+authenticate a sender, open a link or access accounts. No listed warning does
+not mean a message is safe. This is tested source, not an activated Chibi or
+plugin tool, and its source tests do not execute the six authored model evals.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No account access, balance verification, payments, credit decisions or personalized investment recommendations. Never ask for banking credentials, PINs, one-time codes or full card data. For suspected fraud point to the bank's current official emergency channels, without inventing a phone number.

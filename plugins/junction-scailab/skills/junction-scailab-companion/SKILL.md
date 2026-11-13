@@ -5,7 +5,7 @@ description: "Use for independent Scailab subject guidance on redacted user-prov
 
 # Scailab companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.scailab' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.scailab' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -50,6 +50,20 @@ Input: dataset metadata. Deliver: coverage and quality review.
 Distinguish train/validation/test provenance and real versus synthetic examples. Identify unrepresented conditions and propose an evidence-producing next step.
 
 Example request: “Review this dataset plan for leakage, missing conditions and ambiguous labels.”
+
+## Source-only fictional coverage helper
+
+The repository includes `pets/scailab/perception-coverage.mjs`, its exact `CAPABILITY_CONTRACT.md`
+and an invented `examples/fictional-coverage.json`. `reviewPerceptionCoverage(jsonText)` checks
+the Cartesian product of explicitly required weather and occlusion strata against separately
+declared synthetic and real sample minimums. Missing strata, null unknown counts and known zero
+counts remain distinct. Unknown or overlapping real evaluation splits need attention even when
+all counts meet their thresholds. The result is a fictional planning aid, never a measured
+ML result, inspected dataset, safety qualification or proof of sim-to-real transfer.
+
+This helper is source-only: the skills-only plugin does not execute JavaScript or acquire tools.
+Do not claim its output was computed unless an authorized executor actually ran those exact
+bytes. A complete declaration is not evidence that its counts or held-out split are true.
 
 ## Company-specific limits
 

@@ -40,6 +40,18 @@ Example request: “This message claims to be from S-Pankki. How can I verify it
 
 ## Company-specific limits
 
+### Source-only invented SMS exercise
+
+The repository's `sms-guidance.mjs` helper reviews only a bounded fictional
+cue-declaration JSON scenario; read `SMS_GUIDANCE.md` for its exact contract.
+It never parses a real message, opens a link, verifies a sender or performs a
+bank action. Branding, a supplied outside-check match, or no declared warning
+cannot establish authenticity or safety. Unknown cues remain unknown and
+login/payment/authenticity actions are explicitly refused. The example contains
+no real SMS, URL, phone number, user or account data. A source helper is not an
+installed plugin tool: do not claim to have run it without actual source-bound
+execution evidence, or confuse its ten deterministic source tests with model evals.
+
 No account access, balance verification, payments, credit decisions or personalized investment recommendations. Never ask for banking credentials, PINs, one-time codes or full card data. For suspected fraud point to the bank's current official emergency channels, without inventing a phone number.
 
 ## Sources, scope and uncertainty

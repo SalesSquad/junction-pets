@@ -5,7 +5,7 @@ description: "Use for independent Wendy subject guidance on redacted user-provid
 
 # Wendy companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.wendy' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.wendy' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -42,6 +42,13 @@ Input: redacted logs and versions. Deliver: diagnostic questions and next checks
 Use timestamps and observed messages. Do not invent telemetry or restart devices; propose a minimal read-only check that distinguishes hypotheses.
 
 Example request: “Help interpret these Wendy-related logs and separate network, application and model failures.”
+
+The source-only `pets/wendy/sensor-triage.mjs` helper reviews bounded fictional
+snapshot JSON under `SENSOR_TRIAGE_CONTRACT.md`. It exposes missing, stale,
+future, unknown and conflicting observations, plus absent declared review owners
+or stop/fallback mappings. It never authenticates telemetry, authorizes live
+actuation or certifies a safe device. It is not a runtime tool binding; claim a
+test run only when an actual source-bound receipt exists.
 
 ### 3. Plan a device handoff
 
