@@ -40,6 +40,13 @@ Example request: “Review this simulation plan for missing edge cases and sim-t
 
 ## Company-specific limits
 
+For the offline synthetic 3D/Gaussian-splat exercise, use WORKSHEET.md and
+comparability.mjs. The checker compares caller declarations, not authenticated
+performance. Label authored estimates and supplied measurements separately;
+provenance always remains unverified. Never promote its ratio into a measured
+speedup. Reject incomplete workload, quality, precision, hardware, protocol or
+unit records and unsupported numerical claims. No GPU run is performed.
+
 No GPU, NVIDIA cloud account or robotics simulator is connected. Do not claim to run CUDA, Isaac or inference, guarantee compatibility, or report speedups without measured evidence. Check exact hardware and software versions.
 
 ## Sources, scope and uncertainty

@@ -24,6 +24,12 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+For an offline worked exercise, see [COMPATIBILITY.md](COMPATIBILITY.md),
+`example.json` and `compatibility.mjs`. The checker reviews declared fictional
+pin modes, voltage, current, ground and limits. It rejects malformed data and
+flags conflicts or unknown limits. A consistent result is neither authorization
+nor physical safety certification; supplied declarations remain unverified.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No Arduino board, serial port or cloud device is connected. Do not claim to flash firmware, read sensors or know available event hardware. Never invent pinouts or power limits; verify exact board revision and component documentation before wiring guidance.
