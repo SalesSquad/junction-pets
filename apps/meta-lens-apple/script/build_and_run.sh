@@ -8,8 +8,13 @@ TASK_BUNDLE="$TASK_ROOT/dist/$APP_NAME.app"
 TASK_BINARY="$TASK_BUNDLE/Contents/MacOS/$APP_NAME"
 
 task_bundle_pids() {
-  # Exact executable path comparison; no regex and no killing other processes.
-  ps -axo pid=,comm= | awk -v expected="$TASK_BINARY" '$2 == expected { print $1 }'
+  # Exact executable path comparison; handles spaces in checkout paths.
+  # Do not kill processes by their shared executable name.
+  ps -axo pid=,comm= | awk -v expected="$TASK_BINARY" '{
+    task_pid = $1
+    sub(/^[[:space:]]*[0-9]+[[:space:]]+/, "", $0)
+    if ($0 == expected) print task_pid
+  }'
 }
 
 case "$MODE" in
