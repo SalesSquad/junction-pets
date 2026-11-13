@@ -34,7 +34,7 @@ export function evaluateWearableHistory(input) {
     } else if (event.decision === 'consent') {
       if (!exact(event,['decision','at','scope','id','expiresAt']) || typeof event.id !== 'string' || !/^[a-z0-9-]{1,64}$/.test(event.id) || seen.has(event.id) || !time(event.expiresAt) || event.expiresAt <= event.at || event.expiresAt-event.at > MAX_AGE) return invalid();
       seen.add(event.id);
-      if (!available || permission === 'denied' || bystanders !== 'clear') return invalid();
+      if (!available || permission !== 'granted' || bystanders !== 'clear') return invalid();
       // Explicit consent covers this fictional preview only, never OS permission.
       grant={expiresAt:event.expiresAt}; state='consented';
     } else if (member(event.decision,['cancel','revoke'])) {

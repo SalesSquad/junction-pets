@@ -19,7 +19,7 @@ import {evaluateWearableHistory} from './wearable-permission.mjs';
 const scope = 'synthetic-reminder-preview';
 const events = [
   {decision:'snapshot', scope, at:0, available:true,
-   permission:'unknown', bystanders:'clear'},
+   permission:'granted', bystanders:'clear'},
   {decision:'consent', scope, at:1, id:'consent-1', expiresAt:100},
   {decision:'revoke', scope, at:2},
   {decision:'snapshot', scope, at:3, available:true,
@@ -32,9 +32,10 @@ evaluateWearableHistory({scope,now:10,events});
 An empty history starts unavailable with unknown platform permission. A snapshot
 may report `unknown`, `denied` or `granted`, availability and `clear`, `present` or
 `unknown` bystander context. It cannot create consent. Explicit consent enables
-only a fictional preview when available, not denied and bystander context clear.
-Platform permission may remain unknown: synthetic preview consent does not alter
-it. An unsafe/unknown subsequent snapshot clears consent. Cancel/revoke events
+only a fictional preview when available, platform permission is explicitly
+`granted` and bystander context is clear. Unknown or denied platform permission
+blocks consent even for the synthetic preview. Consent does not alter platform
+permission. An unsafe/unknown subsequent snapshot clears consent. Cancel/revoke events
 clear it immediately; a fresh snapshot cannot resurrect it. Expiry is exclusive
 (`now >= expiresAt` blocks). Only another explicit, unique consent can start a new
 preview after a stop. Reused IDs invalidate the history even after revocation.

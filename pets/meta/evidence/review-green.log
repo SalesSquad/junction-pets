@@ -1,0 +1,21 @@
+command: node --test tests/pet-meta.test.mjs
+exit: 0
+phase: PR16 P2 review repair; assertion-level development receipt
+✔ initial state is unavailable/unknown; explicit scoped consent permits only synthetic preview (1.591077ms)
+✔ cancel survives a fresh granted snapshot (4.456134ms)
+✔ revoke survives a fresh granted snapshot (0.200052ms)
+✔ expiry is exclusive and snapshots cannot renew it (0.281394ms)
+✔ explicit consent cannot override unknown/denied platform permission or revocation (0.340353ms)
+✔ bystander uncertainty, denied/unknown permission and unavailable device clear consent (0.263597ms)
+✔ malformed/unknown fields, decisions and scope fail closed (0.356938ms)
+✔ timestamps distinguish zero from missing/null and reject malformed, stale, future or reversed history (0.385891ms)
+✔ replayed consent, unavailable consent and snapshots alone cannot grant authority (0.416748ms)
+✔ deterministic immutable input/output and accessible fallback in every state (1.28138ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 92.648248
