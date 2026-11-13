@@ -30,6 +30,12 @@ Specify input size, maximum duration, output manifest, cost approval boundary an
 
 Example request: “Design a small Verda experiment with resource limits, expected artifacts and a shutdown checklist.”
 
+Source-only helper: `reviewGpuRunPlan(jsonText)` in `gpu-run-plan.mjs` checks the
+invented serial model in `GPU_PLAN_CONTRACT.md`. It preserves unknown quantities,
+includes bounded retry backoff and refuses execution requests. Use only the
+invented example; consistency never verifies real capacity, credits, spend or
+shutdown. This helper is not a connected runtime tool or a live GPU test.
+
 ### 3. Understand event compute information
 
 Input: public event information. Deliver: access verification checklist.
