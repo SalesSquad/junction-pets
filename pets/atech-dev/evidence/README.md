@@ -14,12 +14,16 @@ writes. Environment/account selection was supplied by the parent; this worker
 does not claim an independently observed Pro quota or Cloud task conversation.
 
 `initial-red.log` records the new test importing an absent module (exit 1,
-1 test / 0 pass / 1 fail). `quantity-mutation-red.log` records a deliberately
+1 test / 0 pass / 1 fail). `quantity-mutation-red.log.b64` records a deliberately
 temporary change from `p.amps * p.quantity` to `p.amps`: exit 1, 19 tests /
 15 pass / 4 fail, proving detection of incorrect totals, missed conflicts and
 overflow. That mutation was reverted before final checks. `restored-green.log`
 records exit 0, 19 tests / 19 pass / 0 fail / 0 skipped after restoration.
 These are local synthetic Node tests, not the six authored model evals.
+The mutation log is base64-encoded to preserve its exact raw output (including
+trailing spaces) while satisfying committed-diff whitespace checks. Decode with
+`base64 --decode quantity-mutation-red.log.b64`; decoded SHA-256 is
+`8c5f1a002e8b7aca639d618dc8da2f614e3061d2ac9ad7a7638980a14e361ea3`.
 
 Two initial incompatible-range test fixtures accidentally had min > max;
 they correctly threw, and the fixtures were corrected to well-formed ranges.
