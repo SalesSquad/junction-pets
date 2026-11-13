@@ -1,14 +1,17 @@
-name: CRACI portable CI pilot
+name: CRACI portable CI
 
 on:
+  pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: craci-pilot-${{ github.ref }}
-  cancel-in-progress: false
+  group: craci-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   portable:
@@ -39,6 +42,8 @@ jobs:
           uname -sm
       - name: Install locked dependencies
         run: npm ci --ignore-scripts
+      - name: Audit dependency vulnerabilities
+        run: npm audit --audit-level=high
       - name: Validate packages
         run: npm run validate
       - name: Run Node tests
