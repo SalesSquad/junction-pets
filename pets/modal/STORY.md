@@ -24,6 +24,14 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+Version 0.2.0 adds a small source-only fictional job-spec checker, documented in
+`CONTRACT.md`. Its invented example accounts for six attempts, 360 aggregate
+attempt-seconds and 30 fictional credits. It flags runaway/inconsistent retries,
+unstable retry keys, resource ceiling violations and unknown budgets/capacity.
+It proposes stable per-item identities without claiming implemented idempotency.
+No Modal function, GPU or real spending is invoked. The generated skill remains
+instructions only; the JavaScript module is not installed in a live host.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 Do not deploy, run functions, allocate GPUs or incur usage. No Modal account or secrets are connected. Validate current SDK behavior from official docs, and mark resource and cost estimates as assumptions.
