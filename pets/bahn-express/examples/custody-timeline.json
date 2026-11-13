@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "scenario": "fictional-redacted",
+  "asOf": "2026-11-13T10:45:00.000Z",
+  "freshnessWindowMinutes": 60,
+  "events": [
+    {
+      "eventId": "fictional-pickup-plan",
+      "kind": "pickup-planned",
+      "observedAt": "2026-11-13T10:00:00.000Z"
+    },
+    {
+      "eventId": "fictional-pickup-record",
+      "kind": "picked-up",
+      "observedAt": "2026-11-13T10:10:00.000Z",
+      "custodyProof": {
+        "fromRole": "origin",
+        "toRole": "carrier",
+        "observedAt": "2026-11-13T10:10:00.000Z",
+        "conditionRecordId": "fictional-pickup-condition",
+        "releasingPartyRecordId": "fictional-origin-acknowledgement",
+        "receivingPartyRecordId": "fictional-carrier-acknowledgement"
+      }
+    },
+    {
+      "eventId": "fictional-handover-plan",
+      "kind": "handover-planned",
+      "observedAt": "2026-11-13T10:20:00.000Z"
+    },
+    {
+      "eventId": "fictional-handover-record",
+      "kind": "handed-over",
+      "observedAt": "2026-11-13T10:30:00.000Z",
+      "custodyProof": {
+        "fromRole": "carrier",
+        "toRole": "recipient",
+        "observedAt": "2026-11-13T10:30:00.000Z",
+        "conditionRecordId": "fictional-handover-condition",
+        "releasingPartyRecordId": "fictional-carrier-release",
+        "receivingPartyRecordId": "fictional-recipient-acknowledgement"
+      }
+    }
+  ]
+}
