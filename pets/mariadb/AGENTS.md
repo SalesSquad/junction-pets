@@ -38,6 +38,27 @@ Do not execute or certify the migration. Identify version, locks, data volume, a
 
 Example request: “Create a review checklist for this MariaDB migration, including compatibility, backup and rollback questions.”
 
+### Offline synthetic inventory exercise (package 0.1.1)
+
+Use the authored worked example in `EXPLAIN_EXAMPLE.md` and pure-data
+`explain-example.mjs` when available; do not imply the generated skills-only
+plugin ships executable tools. Fictional query: SELECT sku, quantity FROM
+inventory WHERE warehouse_id = 7 AND quantity < 5. Synthetic EXPLAIN EXTENDED:
+table inventory, type ALL, possible_keys idx_warehouse, key NULL, rows 10000,
+filtered 2, Extra Using where. These inputs were invented, never collected.
+Rows and filtered are estimates; no r_rows/r_filtered or timing is supplied.
+The illustrative 200 qualifying rows is estimated arithmetic, not an observation.
+Candidate keys do not prove selected keys or index gains. A warehouse/quantity
+index is only a hypothesis. Ask for version, redacted schema/index definitions
+and existing matching plan before refining it. No SQL/DDL, connection or benchmark
+is part of this exercise. Authored tests are not model results.
+
+Field semantics: [EXPLAIN](https://mariadb.com/docs/server/reference/sql-statements/administrative-sql-statements/analyze-and-explain-statements/explain).
+Observation counters and execution implications: [ANALYZE statement](https://mariadb.com/docs/server/reference/sql-statements/administrative-sql-statements/analyze-and-explain-statements/analyze-statement).
+Both official pages retrieved via hosted web on 2026-11-13. Exact server version
+and live compatibility remain unknown; ANALYZE executes a statement and is not
+an offline check. Synthetic ANALYZE-shaped observations remain unverified inputs.
+
 ## Company-specific limits
 
 Never connect to a database, run SQL, modify schema or claim an optimization was benchmarked without a separately authorized host tool and actual evidence. Use MariaDB syntax and version-specific documentation. Do not silently substitute PostgreSQL or MySQL behavior for MariaDB.
