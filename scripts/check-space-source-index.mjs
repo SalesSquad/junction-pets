@@ -45,15 +45,18 @@ export function validateSpaceSources(index, map) {
   }
 
   requireValid(map?.schema === 'junction-spaces-reconciliation/v1', 'invalid Space map schema');
+  const sourcePageURLs = [];
   for (const [name, expected] of [['main_coverage', 19], ['tech_coverage', 19]]) {
     const items = Array.isArray(map?.[name]) ? map[name] : [];
     requireValid(items.length === expected, `${name}: expected ${expected}, found ${items.length}`);
     const seenUrls = new Set();
     for (const item of items) {
-      requireValid(typeof item?.source_url === 'string' && /^https:\/\/hackjunction\.app\/participate\/45\/(?:tech-)?challenges\/\d+$/.test(item.source_url), `invalid ${name} source URL`);
+      const requiredPath = name === 'main_coverage' ? 'challenges' : 'tech-challenges';
+      requireValid(typeof item?.source_url === 'string' && new RegExp(`^https://hackjunction\\.app/participate/45/${requiredPath}/\\d+$`).test(item.source_url), `invalid ${name} source URL`);
       requireValid(!seenUrls.has(item?.source_url), `duplicate ${name} source URL`);
       seenUrls.add(item?.source_url);
       requireValid(Array.isArray(item?.page_urls) && item.page_urls.length > 0, `unmapped ${name} source`);
+      if (Array.isArray(item?.page_urls)) sourcePageURLs.push(...item.page_urls);
     }
   }
 
@@ -66,6 +69,10 @@ export function validateSpaceSources(index, map) {
     seenPages.add(page?.page_id);
     requireValid(page?.url === `https://chatgpt.com/space/${page.page_id}`, `noncanonical card URL: ${page?.page_id}`);
     requireValid(page?.readback_verified === true, `unverified card ${page?.page_id}`);
+  }
+  const canonicalURLs = new Set(pages.map(page => page?.url));
+  for (const url of sourcePageURLs) {
+    requireValid(canonicalURLs.has(url), `source references a missing canonical Page: ${url}`);
   }
   const inventory = map?.canonical_page_inventory;
   requireValid(Boolean(inventory) && typeof inventory === 'object', 'missing live Page inventory');
