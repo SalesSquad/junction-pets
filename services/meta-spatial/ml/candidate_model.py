@@ -152,6 +152,12 @@ def validate_model(model: dict[str, Any]) -> None:
 
 
 def train(seed: int = TRAIN_SEED) -> dict[str, Any]:
+    # The two assessment streams have fixed seeds. Reject an overlapping
+    # training stream rather than silently evaluating examples seen in SGD.
+    if type(seed) is not int or seed < 0 or seed > 2**32 - 1:
+        raise ValueError("training seed must be a 32-bit nonnegative integer")
+    if seed in (VALIDATION_SEED, TEST_SEED):
+        raise ValueError("training seed overlaps a reserved evaluation stream")
     examples = synthetic_examples(seed, TRAIN_COUNT, domain="train")
     means = [sum(ex.features[j] for ex in examples) / len(examples) for j in range(len(FEATURES))]
     scales = [
@@ -252,8 +258,6 @@ def metrics(model: dict[str, Any], examples: list[Example]) -> dict[str, Any]:
         "hardNegativeFalseCandidateRate": round(hard_fp / hard_count, 6) if hard_count else None,
         "abstainFraction": round((tn + fn) / len(examples), 6),
         "brierScore": round(brier / len(examples), 6),
-        "identityVerifications": 0,
-        "authorizations": 0,
     }
 
 
