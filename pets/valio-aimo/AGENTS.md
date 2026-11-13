@@ -30,6 +30,13 @@ Calculate a visible scaling factor. Mark yields and cooking times as estimates r
 
 Example request: “Scale this recipe from 8 to 30 servings and show the calculation and preparation risks.”
 
+An offline source-only helper, `pets/valio-aimo/recipe-scale.mjs`, checks bounded
+fictional arithmetic JSON under `RECIPE_SCALING_CONTRACT.md`. It preserves known
+zero versus unknown quantity, accepts only explicitly compatible units and keeps
+source/allergen tokens declared or unknown. It never verifies actual labels,
+nutrition, allergens, preparation or safety. No runtime tool binding is implied;
+do not claim to have run it without an actual source-bound execution receipt.
+
 ### 3. Check a product information gap
 
 Input: product page or ingredient label. Deliver: fact table and missing information.

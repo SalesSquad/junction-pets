@@ -5,7 +5,7 @@ description: "Use for independent Verda subject guidance on redacted user-provid
 
 # Verda companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.verda' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.verda' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -42,6 +42,12 @@ Input: experiment goal. Deliver: run specification and stop conditions.
 Specify input size, maximum duration, output manifest, cost approval boundary and owner. Treat all quota and billing information as unverified until the user supplies current evidence.
 
 Example request: “Design a small Verda experiment with resource limits, expected artifacts and a shutdown checklist.”
+
+Source-only helper: `reviewGpuRunPlan(jsonText)` in `gpu-run-plan.mjs` checks the
+invented serial model in `GPU_PLAN_CONTRACT.md`. It preserves unknown quantities,
+includes bounded retry backoff and refuses execution requests. Use only the
+invented example; consistency never verifies real capacity, credits, spend or
+shutdown. This helper is not a connected runtime tool or a live GPU test.
 
 ### 3. Understand event compute information
 

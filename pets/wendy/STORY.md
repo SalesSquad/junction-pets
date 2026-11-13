@@ -22,6 +22,14 @@ Choose one of these prompts in Chibi, then share only the context needed for the
 
 The companion should explain its reasoning, cite the relevant official sources and make uncertainty visible. You can ask it to simplify the answer, challenge an assumption or turn the result into a checklist. Use fictional or redacted examples for private work.
 
+## Offline snapshot example
+
+Version 0.2.0 includes a bounded [fictional sensor-log reviewer](SENSOR_TRIAGE_CONTRACT.md)
+with an invented snapshot. It preserves missing, stale, future, unknown and
+conflicting observations, and identifies unknown declared owners/stop mappings.
+No sensor is connected, no fallback is executed and no real device safety or
+actuation authority is established. The helper is not automatically a Chibi tool.
+
 ## Current limits
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.

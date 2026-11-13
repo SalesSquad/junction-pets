@@ -5,7 +5,7 @@ description: "Use for independent Tieto subject guidance on redacted user-provid
 
 # Tieto companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.tieto' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.tieto' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,14 @@ Choose one workflow segment and observable user outcome. Include data minimizati
 Example request: “Turn this automation idea into a small pilot with baseline metrics and a rollback owner.”
 
 ## Company-specific limits
+
+The source package also contains the deterministic `workflow-review.mjs` helper,
+its exact `WORKFLOW_CONTRACT.md` and an invented JSON example. It can review
+declared RACI/failure owners, bounded retries and explicit handoff/transfer
+bindings. Missing and unknown information remains visible; declared approval
+never becomes verified permission. This helper is not automatically installed
+as a plugin tool or a Chibi host action. Do not claim to run it without an
+authorized tool and actual result. Its six authored model evals are unchanged.
 
 Do not claim access to Tieto customer systems, internal architecture, contracts or project teams. Public case studies do not prove a capability exists in the user's environment. The exact Junction challenge brief is still unverified.
 

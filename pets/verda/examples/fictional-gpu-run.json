@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "kind": "fictional-gpu-run-plan",
+  "runId": "fictional-gpu-demo",
+  "mode": "plan-only",
+  "resources": {"gpuCount": 2, "cpuCount": 8, "memoryGiB": 32},
+  "limits": {"gpuCount": 4, "cpuCount": 16, "memoryGiB": 64, "wallTimeSeconds": 2000},
+  "execution": {
+    "timeoutSeconds": 600,
+    "maxRetries": 2,
+    "retryBackoffSeconds": 30,
+    "shutdownOwnerId": "fictional-operator",
+    "stopCondition": "timeout-or-complete"
+  },
+  "credits": {"unit": "fictional-credit", "perAttemptCeiling": 5, "available": 20}
+}
