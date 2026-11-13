@@ -5,7 +5,7 @@ description: "Use for independent Meta subject guidance on redacted user-provide
 
 # Meta companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.meta' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.meta' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,13 @@ Identify who is affected, what information is captured and how capture is signal
 Example request: “Review this wearable interaction for consent, interruptibility and accessibility.”
 
 ## Company-specific limits
+
+For an offline example, use `wearable-permission.mjs` and `PERMISSION_EXAMPLE.md`:
+synthetic reminder previews require explicit scoped consent, with cancellation,
+revocation, expiry, replay rejection and a no-camera text fallback. Snapshots do
+not grant or restore consent. Caller-supplied histories are not authenticated;
+this example never authorizes a real action or proves platform permissions.
+Keep bystander uncertainty visible and offer manual text entry without capture.
 
 No Meta account, camera, microphone, glasses or SDK runtime is connected. Do not infer access to unreleased hardware or undocumented capabilities. Avoid covert recording or identification; design explicit consent and user control.
 

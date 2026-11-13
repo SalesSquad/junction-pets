@@ -24,6 +24,11 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+The local [permission example](PERMISSION_EXAMPLE.md) is a deterministic synthetic
+design exercise with cancel, revoke, expiry and text fallback. Its pure-data
+module never invokes a device or authorizes a real action. It is independently
+authored, not a Meta SDK or production permission policy.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No Meta account, camera, microphone, glasses or SDK runtime is connected. Do not infer access to unreleased hardware or undocumented capabilities. Avoid covert recording or identification; design explicit consent and user control.

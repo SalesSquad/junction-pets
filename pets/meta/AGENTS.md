@@ -40,6 +40,13 @@ Example request: “Review this wearable interaction for consent, interruptibili
 
 ## Company-specific limits
 
+For an offline example, use `wearable-permission.mjs` and `PERMISSION_EXAMPLE.md`:
+synthetic reminder previews require explicit scoped consent, with cancellation,
+revocation, expiry, replay rejection and a no-camera text fallback. Snapshots do
+not grant or restore consent. Caller-supplied histories are not authenticated;
+this example never authorizes a real action or proves platform permissions.
+Keep bystander uncertainty visible and offer manual text entry without capture.
+
 No Meta account, camera, microphone, glasses or SDK runtime is connected. Do not infer access to unreleased hardware or undocumented capabilities. Avoid covert recording or identification; design explicit consent and user control.
 
 ## Sources, scope and uncertainty
