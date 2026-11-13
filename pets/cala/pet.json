@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.cala",
   "slug": "junction-cala",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "agentName": "Cala",
   "displayName": "Cala companion",
   "company": {
@@ -11,8 +11,8 @@
     "role": "challenge",
     "website": "https://www.cala.ai/"
   },
-  "tagline": "Make agent data traceable, typed and time-aware.",
-  "introduction": "A companion for planning structured data questions with Cala, focusing on provenance, data types and what a fact actually establishes.",
+  "tagline": "Use sourced public data to solve one founder or investor need.",
+  "introduction": "Build a focused founder/investor workflow where Cala data is central. Resolve entity ambiguity, source freshness and relevant connections; do not infer a definitive conflict from a single competitor investment or fabricate a completed outreach action.",
   "welcome": "What would you like to understand or plan with Cala? Choose a starter below, or share a small redacted example.",
   "accent": "#33716b",
   "artIndex": 4,
@@ -55,12 +55,26 @@
         "query outline and validation cases"
       ],
       "requiresConnection": false
+    },
+    {
+      "id": "challenge-design",
+      "title": "Design Cala challenge support",
+      "description": "Entity and freshness auditor. Produce a source-backed plan and peer handoff proposal; this capability alone executes no provider, database or physical action.",
+      "kind": "planning",
+      "inputs": [
+        "a scoped public or synthetic task and the exact challenge or integration question"
+      ],
+      "outputs": [
+        "Coverage and identity-conflict accuracy on labelled founder-investor pairs",
+        "source references, dependencies and explicitly unverified actions"
+      ],
+      "requiresConnection": false
     }
   ],
   "starterPrompts": [
-    "I want an agent to compare company facts. Help me define typed fields, source provenance and freshness requirements for Cala.",
-    "Review this sample company record and flag missing source, validity and historical-change information.",
-    "Using this supplied Cala schema, outline a query plan and tests for stale or contradictory facts."
+    "Plan a source-backed entity and freshness auditor task for this challenge.",
+    "Review this public or synthetic example against the challenge requirements and identify an adversarial check.",
+    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns."
   ],
   "sources": [
     {
@@ -78,12 +92,20 @@
       "publisher": "Cala",
       "checkedAt": "2026-11-11",
       "summary": "Official documentation entry point linked from Cala's website."
+    },
+    {
+      "id": "junction-2026-main-350",
+      "title": "Make Unicorns Real",
+      "url": "https://hackjunction.app/participate/45/challenges/350",
+      "publisher": "Junction2026 / Cala",
+      "checkedAt": "2026-11-13",
+      "summary": "Official challenge text captured from the signed-in participant platform on 13 November 2026. Entity and freshness auditor. Required proof and limitations are recorded in the source-bound challenge packet."
     }
   ],
   "sourceEvidence": {
     "roster": "https://chatgpt.com/space/page_95ba92d1e128819198a287c574b4d0af",
-    "roleVerified": false,
-    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+    "roleVerified": true,
+    "notes": "Current main/technical brief titles, requirements and material links were read from the signed-in official Junction platform on 13 November 2026. The independently authored package is not company endorsed. See CHALLENGE_RESEARCH.md and the shared composition contract; source guidance does not establish a live provider or peer connection."
   },
   "availability": {
     "content": "ready",

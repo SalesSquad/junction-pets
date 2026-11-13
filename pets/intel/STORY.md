@@ -46,3 +46,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan valitsemaan Intelin dokumentaatiosta sopivan kehityspolun ja suunnittelemaan vertailukelpoisen mittauksen. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+Support the shared Ignite Next×Intel task with CPU/GPU/NPU execution evidence on permitted hardware. Keep model correctness, anomaly detection, manipulation success and timing controls distinct. A generic protocol comparison is not a robot run.
+
+Proposed peers: junction.ignite-next, junction.nvidia, junction.scailab, junction.qualia. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

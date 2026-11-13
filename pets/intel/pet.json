@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.intel",
   "slug": "junction-intel",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "agentName": "Intel",
   "displayName": "Intel companion",
   "company": {
@@ -11,8 +11,8 @@
     "role": "challenge",
     "website": "https://www.intel.com/"
   },
-  "tagline": "Choose the right Intel development path and a measurable experiment.",
-  "introduction": "A technical guide to Intel's public developer resources, with a focus on workload requirements and honest performance measurements.",
+  "tagline": "Measure OpenVINO execution in the physical inspection task.",
+  "introduction": "Support the shared Ignite Next×Intel task with CPU/GPU/NPU execution evidence on permitted hardware. Keep model correctness, anomaly detection, manipulation success and timing controls distinct. A generic protocol comparison is not a robot run.",
   "welcome": "What would you like to understand or plan with Intel? Choose a starter below, or share a small redacted example.",
   "accent": "#2378ad",
   "artIndex": 12,
@@ -55,12 +55,26 @@
         "hypotheses and read-only checks"
       ],
       "requiresConnection": false
+    },
+    {
+      "id": "challenge-design",
+      "title": "Design Intel challenge support",
+      "description": "OpenVINO execution profiler. Produce a source-backed plan and peer handoff proposal; this capability alone executes no provider, database or physical action.",
+      "kind": "planning",
+      "inputs": [
+        "a scoped public or synthetic task and the exact challenge or integration question"
+      ],
+      "outputs": [
+        "Comparable CPU/GPU/NPU measurements and correctness on actual permitted laptop",
+        "source references, dependencies and explicitly unverified actions"
+      ],
+      "requiresConnection": false
     }
   ],
   "starterPrompts": [
-    "Should I investigate OpenVINO or oneAPI for this inference workload, and what should I verify first?",
-    "Design a benchmark comparing latency and throughput for this model on my stated Intel hardware.",
-    "Help interpret this OpenVINO error and list the version details needed to diagnose it."
+    "Plan a source-backed openvino execution profiler task for this challenge.",
+    "Review this public or synthetic example against the challenge requirements and identify an adversarial check.",
+    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns."
   ],
   "sources": [
     {
@@ -70,12 +84,20 @@
       "publisher": "Intel",
       "checkedAt": "2026-11-11",
       "summary": "Official entry point for Intel tools, developer documentation and learning resources."
+    },
+    {
+      "id": "junction-2026-main-330",
+      "title": "Stop Simulating, Start Moving: See It. Detect It. Act on It. The Intel Physical AI Challenge",
+      "url": "https://hackjunction.app/participate/45/challenges/330",
+      "publisher": "Junction2026 / Intel",
+      "checkedAt": "2026-11-13",
+      "summary": "Official challenge text captured from the signed-in participant platform on 13 November 2026. OpenVINO execution profiler. Required proof and limitations are recorded in the source-bound challenge packet."
     }
   ],
   "sourceEvidence": {
     "roster": "https://chatgpt.com/space/page_6348ef9f2bec8191b9d2ac9d3fc93c66",
-    "roleVerified": false,
-    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+    "roleVerified": true,
+    "notes": "Current main/technical brief titles, requirements and material links were read from the signed-in official Junction platform on 13 November 2026. The independently authored package is not company endorsed. See CHALLENGE_RESEARCH.md and the shared composition contract; source guidance does not establish a live provider or peer connection."
   },
   "availability": {
     "content": "ready",

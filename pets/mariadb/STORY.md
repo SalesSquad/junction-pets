@@ -47,3 +47,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan ymmärtämään MariaDB-kyselyjä ja suunnittelemaan mitattavia tarkistuksia muuttamatta tietokantaa. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+Help design Wikipedia Through Time using actual MariaDB vector search and/or system-versioned tables. Separate retrieved revision evidence from generated explanation. Generic SQL review or local PostgreSQL replay does not prove this challenge workflow.
+
+Proposed peers: junction.google-deepmind, junction.exa, junction.afterquery. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

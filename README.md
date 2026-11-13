@@ -6,7 +6,11 @@ Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS
 
 ## Challenge research —13 November2026
 
-[19 source-bound recordings,19 fresh main briefs,19 technical briefs, Fable critique and Discord refresh](docs/challenge-research/README.md) are indexed per [all34 company developers](ops/challenge-source-routing-20261113.json). Recordings cover16 main briefs; Arduino, Ignite Next×Intel and Aalto Beyond the Clinic have source text without a supplied recording. Each company has `CHALLENGE_RESEARCH.md`; this is research attachment, not34 live challenge products.
+[19 source-bound recordings,19 fresh main briefs,19 technical briefs, Fable critique and Discord refresh](docs/challenge-research/README.md) are indexed per [all 34 company developers](ops/challenge-source-routing-20261113.json). Recordings cover16 main briefs; Arduino, Ignite Next×Intel and Aalto Beyond the Clinic have source text without a supplied recording. Each company has `CHALLENGE_RESEARCH.md`; this is research attachment, not34 live challenge products.
+
+## Current composition knowledge —13 November 2026
+
+[The composition contract](docs/AGENT_COMPOSITION.md) and [34-agent graph](ops/agent-composition-20261113.json) now bind current challenge summaries to actual runtime instruction packages and generated skills. Stoa can propose a bounded NVIDIA drawing-observation handoff through the fixed developer recipe. Run npm run agents:check and npm run demo:stoa-nvidia; the default is offline. New package guidance does not inherit earlier model scores or imply active Chibi/provider connections.
 
 ## Start a new agent
 

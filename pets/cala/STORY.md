@@ -60,3 +60,9 @@ Fiktiivinen offline-esimerkki tarkistaa kenttäkohtaisen arvon, lähdeaineiston
 tiivisteen sekä lähde- ja havaintoajan vastaavuuden. Johdonmukainen lähdeviite ei
 todista tiedon totuutta tai lähteen aitoutta; puuttuva tieto, null ja nolla pysyvät
 erillisinä.
+
+## Current challenge and collaboration
+
+Build a focused founder/investor workflow where Cala data is central. Resolve entity ambiguity, source freshness and relevant connections; do not infer a definitive conflict from a single competitor investment or fabricate a completed outreach action.
+
+Proposed peers: junction.exa, junction.context-dev, junction.aiven. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.
