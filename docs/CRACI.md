@@ -27,6 +27,8 @@ and catalog build. It does not deploy Chibi or execute companion/provider calls.
    coverage/capacity and cancel the pending run rather than repeatedly dispatching.
 5. Require all four stages to pass: dependency installation, validation, tests and
    build. Retain the executor/source log and CRACI findings for this exact attempt.
+   The final step logs the lockfile digest, a sorted SHA-256 manifest of built
+   files and its digest; it does not upload or retain the built files themselves.
 
 The workflow is manual-only, `contents: read`, CRACI-only and bounded to 15 minutes.
 Checkout credentials are not persisted. It requests no provider secrets, cache,
@@ -88,7 +90,7 @@ receipt, authored plan or synthetic example must never be labelled a live CRACI 
 - [Network policy and presets](https://docs.craci.com/guides/setup-action-network/)
 - [SBOM and cache completeness](https://docs.craci.com/guides/cache-sbom-completeness/)
 - [Network troubleshooting](https://docs.craci.com/guides/network-troubleshooting/)
-- [Compute usage](https://docs.craci.com/guides/compute-usage/)
+- [Compute usage](https://docs.craci.com/api/usage/)
 
 References were read on 13 November 2026. Account credit, App installation, actual
 runner pickup, SBOM completeness and vulnerability outcomes require live evidence.

@@ -45,3 +45,12 @@ jobs:
         run: npm test
       - name: Build catalog
         run: npm run build
+      - name: Record lockfile and build digests
+        run: |
+          set -euo pipefail
+          test -d dist/site
+          find dist/site -type f -print0 | LC_ALL=C sort -z | xargs -0 -r sha256sum -- > "$RUNNER_TEMP/craci-build.sha256"
+          test -s "$RUNNER_TEMP/craci-build.sha256"
+          sha256sum package-lock.json
+          cat "$RUNNER_TEMP/craci-build.sha256"
+          sha256sum "$RUNNER_TEMP/craci-build.sha256"
