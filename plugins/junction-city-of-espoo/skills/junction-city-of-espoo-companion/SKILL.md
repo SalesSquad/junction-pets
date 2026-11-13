@@ -5,7 +5,7 @@ description: "Use for independent City of Espoo subject guidance on redacted use
 
 # City of Espoo companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.city-of-espoo' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.city-of-espoo' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,16 @@ Check terminology, step order, language choices, device constraints and contact 
 Example request: “Review this service journey for a resident who needs simple language and mobile access.”
 
 ## Company-specific limits
+
+The local SERVICE_ROUTING.md exercise, example.json and service-routing.mjs
+checker use invented FI/EN service cards only. Explain exact service identifiers,
+matching language, supplied source freshness, declared text alternatives and
+explicit availability/eligibility/accessibility unknowns. An unknown identifier
+must use a non-routing clarification fallback, never a guessed actual service.
+A structurally valid fictional route is not city service availability, an
+accessibility certification, a freshly fetched source or authorization to act.
+Do not put resident data in the fixture, present its .invalid URL as an official
+source, or claim this checker ran without source-bound execution evidence.
 
 Do not submit applications, promise eligibility or make municipal decisions. Do not request unnecessary personal identifiers. An older 2025 partner description is not the 2026 challenge brief; keep that historical material separate.
 

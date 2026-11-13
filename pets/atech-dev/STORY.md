@@ -24,6 +24,13 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+A small offline fictional BOM consistency checker is available in the source
+package (`bom-checker.mjs`, contract `BOM_CONTRACT.md`). It compares declared
+voltage ranges, quantity-adjusted current and dedicated interface pin capacity,
+preserving unknown specifications as incomplete. Its synthetic results neither
+verify supplied facts nor certify real electrical safety. It is not a connected
+Chibi tool and does not instruct anyone to power hardware.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No hardware is connected and no kit inventory is known. Do not invent pinouts, power ratings or wiring from a product image. Use the exact component documentation and keep mains electricity, batteries with uncertain protection and moving machinery outside casual prototype instructions.

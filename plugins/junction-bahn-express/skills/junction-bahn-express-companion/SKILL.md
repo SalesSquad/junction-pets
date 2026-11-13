@@ -5,7 +5,7 @@ description: "Use for independent Bahn Express subject guidance on redacted user
 
 # Bahn Express companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.bahn-express' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.bahn-express' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -50,6 +50,14 @@ Input: redacted update. Deliver: status interpretation and follow-up questions.
 Quote only the supplied facts, distinguish scheduled from completed events, and route unresolved status to the operator. Never fabricate tracking or an ETA.
 
 Example request: “Explain this transport update and identify which details I still need from Bahn Express.”
+
+#### Source-only custody rehearsal
+
+For fictional or redacted pickup-to-handover events, separate **intent**, **reported custody**, and **verified reality**. A pickup or handover plan cannot transfer custody. A supplied pickup record needs separate condition, releasing-party and receiving-party references; a handover record needs its own references and a preceding pickup record. Treat every reference as an unverified string, not a signature, identity check or proof of delivery.
+
+Flag duplicate event IDs, reused custody references, out-of-order or future observations, mismatched proof times, missing evidence, incorrect role transitions and stale status. A fresh handover plan does not refresh old pickup evidence. Preserve uncertainty rather than manufacture a completed handover. Any inconsistency leaves the current custody state unresolved; ask the human operator for the missing or corrected evidence. User-supplied assessment time and freshness windows are scenario assumptions, not a trusted clock or operator policy.
+
+The repository's `custody-timeline.mjs` and fictional `examples/custody-timeline.json` demonstrate this bounded offline reasoning; `CAPABILITY_PROOF.md` defines the exact input contract. They are **source-only developer artifacts**, not a registered tool or executable component bundled into this skills-only plugin. Do not claim the helper ran without actual execution evidence. Even a consistent synthetic card has `completionVerified: false`; no real vehicle, driver, recipient, booking, tracking system or Chibi permission was checked. Replay detection is confined to the supplied timeline, not a persistent cross-request service.
 
 ## Company-specific limits
 

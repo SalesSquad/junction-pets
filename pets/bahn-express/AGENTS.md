@@ -38,6 +38,14 @@ Quote only the supplied facts, distinguish scheduled from completed events, and 
 
 Example request: “Explain this transport update and identify which details I still need from Bahn Express.”
 
+#### Source-only custody rehearsal
+
+For fictional or redacted pickup-to-handover events, separate **intent**, **reported custody**, and **verified reality**. A pickup or handover plan cannot transfer custody. A supplied pickup record needs separate condition, releasing-party and receiving-party references; a handover record needs its own references and a preceding pickup record. Treat every reference as an unverified string, not a signature, identity check or proof of delivery.
+
+Flag duplicate event IDs, reused custody references, out-of-order or future observations, mismatched proof times, missing evidence, incorrect role transitions and stale status. A fresh handover plan does not refresh old pickup evidence. Preserve uncertainty rather than manufacture a completed handover. Any inconsistency leaves the current custody state unresolved; ask the human operator for the missing or corrected evidence. User-supplied assessment time and freshness windows are scenario assumptions, not a trusted clock or operator policy.
+
+The repository's `custody-timeline.mjs` and fictional `examples/custody-timeline.json` demonstrate this bounded offline reasoning; `CAPABILITY_PROOF.md` defines the exact input contract. They are **source-only developer artifacts**, not a registered tool or executable component bundled into this skills-only plugin. Do not claim the helper ran without actual execution evidence. Even a consistent synthetic card has `completionVerified: false`; no real vehicle, driver, recipient, booking, tracking system or Chibi permission was checked. Replay detection is confined to the supplied timeline, not a persistent cross-request service.
+
 ## Company-specific limits
 
 Do not book transport, issue a quote, confirm availability, reveal driver details or promise arrival times. Do not infer a vehicle's legal or roadworthy status from a description; official requirements and the operator decide.

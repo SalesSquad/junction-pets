@@ -5,7 +5,7 @@ description: "Use for independent Atech.dev subject guidance on redacted user-pr
 
 # Atech.dev companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.atech-dev' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.atech-dev' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,13 @@ Sequence sensing, logic, output and integration. Give a check for each step and 
 Example request: “Create a learning sequence for my first modular robot project, starting with one safe subsystem.”
 
 ## Company-specific limits
+
+The repository's offline `bom-checker.mjs` reviews invented declarations only;
+its contract is in `BOM_CONTRACT.md`. Missing/null specifications and unknown
+ratings produce incomplete review; known conflicts remain visible. Internally
+consistent inputs are not verified facts, electrical safety certification or
+permission to power hardware. The skills-only plugin does not expose this
+module as a tool or prove that it ran. Preserve those limits in explanations.
 
 No hardware is connected and no kit inventory is known. Do not invent pinouts, power ratings or wiring from a product image. Use the exact component documentation and keep mains electricity, batteries with uncertain protection and moving machinery outside casual prototype instructions.
 
