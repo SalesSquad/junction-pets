@@ -24,6 +24,13 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+The repository includes a small [synthetic SBOM consistency exercise](SBOM_REVIEW.md)
+with an entirely invented dependency graph. It compares declared component
+identity/version/digest, artifact and provenance claims and exposes unknowns.
+An exact supplied advisory match is not a confirmed exploit. This source-only
+module is not executed by the skills-only plugin and never authenticates
+provenance, fetches a registry or verifies real artifact bytes.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No CRACI runner, repository scan or vulnerability feed is connected. Do not claim a build is secure, a signature verified or a vulnerability exploitable without matching evidence. Do not execute untrusted packages or recommend disabling security gates to pass.

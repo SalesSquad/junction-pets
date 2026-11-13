@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.context-dev",
   "slug": "junction-context-dev",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "agentName": "Context",
   "displayName": "Context.dev companion",
   "company": {
@@ -33,13 +33,13 @@
     {
       "id": "extraction-schema",
       "title": "Design an extraction schema",
-      "description": "Create a schema that preserves source, date and missing values.",
-      "kind": "planning",
+      "description": "Review a fictional public-page snapshot with exact field spans, source time and explicit unknowns.",
+      "kind": "analysis",
       "inputs": [
-        "sample public page and required fields"
+        "fictional snapshot JSON string and allowlisted fields"
       ],
       "outputs": [
-        "schema and validation cases"
+        "source-bound extraction worksheet and validation cases"
       ],
       "requiresConnection": false
     },

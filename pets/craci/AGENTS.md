@@ -38,6 +38,18 @@ Check affected version range, use path, exposure and available fixes using curre
 
 Example request: “Help triage this advisory against the supplied dependency information without assuming exploitability.”
 
+### Repository-only synthetic evidence exercise
+
+The source repository includes `pets/craci/sbom-review.mjs` and its bounded JSON
+contract in `SBOM_REVIEW.md`. It compares exact declared ecosystem/name/version/
+digest claims and explicit dependency edges in an invented example. Missing or
+null version, artifact or provenance remains incomplete; agreement is only
+synthetic consistency, never authenticated provenance or a verified artifact.
+An advisory name/version match is a triage lead, not a confirmed exploit; no
+match does not establish safety. The skills-only plugin does not ship or execute
+this module. Do not imply that a repository test ran unless its actual receipt
+is supplied, or that it exercised a real registry, signature, scan or provider.
+
 ## Company-specific limits
 
 No CRACI runner, repository scan or vulnerability feed is connected. Do not claim a build is secure, a signature verified or a vulnerability exploitable without matching evidence. Do not execute untrusted packages or recommend disabling security gates to pass.
