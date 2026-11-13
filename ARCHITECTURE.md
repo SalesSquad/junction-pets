@@ -87,3 +87,24 @@ All status pages are snapshots; compare their SHA and timestamp with **current**
 - **Controller:** bounded Cloud capacity, work ID, claims and retry owner, no unauthorized spend or account hopping.
 
 Use task-owned branches, disjoint ownership and source-bound handoffs; do not push directly to main or force-push shared work. Any new interface/behavioral/permission decision needs a concise explicit design record or an update to this architecture before implementation. No private repo visibility change, merge, deployment or irreversible change is authorized by this document. Public submission boundaries live in [`docs/JUNCTION_SUBMISSION.md`](docs/JUNCTION_SUBMISSION.md).
+
+## Nemotron visual engineering developer workflow (13 November 2026)
+
+Design record `junction.nvidia.nemotron-vl`: the optional finite
+[`services/nemotron-vl/`](services/nemotron-vl/README.md) harness uses the exact
+NVIDIA-hosted `nvidia/nemotron-3.5-super-vl-120b-a12b` model for visual
+observation, bounded read-only tool selection, evidence synthesis and a separate
+verification pass. It reuses the existing NVIDIA comparability checker; model
+text cannot turn declared timings into measured GPU performance. The NVIDIA
+content package moves to 0.2.0 with explicit connection-required capabilities;
+the generated skills-only plugin contains no execution endpoint.
+
+This is an opt-in developer path for public/synthetic data with fixed provider
+routing, bounded calls and source-bound metrics. Plan mode performs no provider
+call or secret read. Execute mode requires a clean pinned checkout and an
+approved host-side NVIDIA key. Unit tests use injected transport and do not
+qualify the actual provider. This harness is independent of the offline registry
+in PR #56 and does not add a production Chibi route, consent, identity, grant,
+cross-pet memory or host-signed receipt. Actual recipient activation continues
+through the private Chibi host contract above. See the service README for exact
+bounds, reproduction and missing live qualification.
