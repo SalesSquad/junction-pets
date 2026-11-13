@@ -46,3 +46,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan rajaamaan julkisen verkkotiedon keruun ja suunnittelemaan laadun, lähteiden sekä yksityisyyden tarkistukset. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+A web-data companion for Oxylabs documentation, helping plan source scope, extraction quality and transparent evidence handling.
+
+Proposed peers: junction.context-dev, junction.exa, junction.aiven. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

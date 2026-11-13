@@ -21,10 +21,11 @@ const authored = id => {
 test('Aiven retains v1 isolated guidance contract and focused official provenance', () => {
   validatePet(pack.pet);
   assert.equal(pack.pet.schemaVersion, 1);
-  assert.equal(pack.pet.version, '0.1.2');
+  assert.equal(pack.pet.version, '0.1.3');
   assert.equal(pack.pet.slug, 'junction-aiven');
   assert.equal(pack.pet.artIndex, 29);
-  assert.equal(pack.pet.capabilities.length, 3);
+  assert.equal(pack.pet.capabilities.length, 4);
+  assert.equal(pack.pet.capabilities.find(c => c.id === 'integration-design')?.kind, 'planning');
   assert.ok(pack.pet.capabilities.every(c => !c.requiresConnection));
   assert.equal(pack.pet.availability.runtime, 'chibi-host-required');
   assert.equal(pack.pet.availability.companyEndorsed, false);

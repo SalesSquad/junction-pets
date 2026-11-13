@@ -44,3 +44,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan suunnittelemaan Cloudinary-median käsittelyn, metatiedot ja toimituksen tarkistukset. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+A media-workflow companion for Cloudinary documentation, helping plan transformations, asset metadata and delivery validation.
+
+Proposed peers: junction.modal, junction.nvidia, junction.qualia. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

@@ -43,3 +43,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan hahmottamaan Rokokon liikkeenkaappaus- ja animaatioputken sekä suunnittelemaan viennin tarkistukset. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+Design one useful robotic teleoperation task with Rokoko motion capture, measured latency and task success, clutch/hold behavior on dropout and explicit device ownership. Simulation, prerecorded replay and live physical execution must be labelled separately.
+
+Proposed peers: junction.nvidia, junction.qualia, junction.verda, junction.wendy. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

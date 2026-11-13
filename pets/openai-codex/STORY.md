@@ -40,3 +40,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan rajaamaan Codex-työn, määrittämään tarkistukset ja erottamaan suunnitelman toteutetusta tuloksesta. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+A coding-workflow companion for OpenAI and Codex documentation, helping prepare bounded tasks, code reviews and verification plans.
+
+Proposed peers: junction.tieto, junction.craci, junction.afterquery. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.city-of-espoo",
   "slug": "junction-city-of-espoo",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "agentName": "Espoo",
   "displayName": "City of Espoo companion",
   "company": {
@@ -11,8 +11,8 @@
     "role": "challenge",
     "website": "https://www.espoo.fi/en"
   },
-  "tagline": "Find the right Espoo service and the next practical step.",
-  "introduction": "A local service companion that helps you navigate Espoo's public information with clear links and plain-language checklists.",
+  "tagline": "Connect companies and talent through evidence at recruitment events.",
+  "introduction": "Help design recruitment and matchmaking event experiences for City of Espoo where companies and talent can find relevant meetings despite polished AI-generated application materials. Use supplied evidence and transparent matching reasons; avoid invented candidate facts and protected-attribute inferences.",
   "welcome": "What would you like to understand or plan with City of Espoo? Choose a starter below, or share a small redacted example.",
   "accent": "#2677a0",
   "artIndex": 5,
@@ -55,12 +55,26 @@
         "accessibility and content review"
       ],
       "requiresConnection": false
+    },
+    {
+      "id": "challenge-design",
+      "title": "Design City of Espoo challenge support",
+      "description": "Evidence-backed event meeting planner. Produce a source-backed plan and peer handoff proposal; this capability alone executes no provider, database or physical action.",
+      "kind": "planning",
+      "inputs": [
+        "a scoped public or synthetic task and the exact challenge or integration question"
+      ],
+      "outputs": [
+        "Pairing quality on planted polished-empty versus plain-evidenced profiles against keyword/embedding baseline",
+        "source references, dependencies and explicitly unverified actions"
+      ],
+      "requiresConnection": false
     }
   ],
   "starterPrompts": [
-    "Help me find Espoo's official guidance for booking a sports facility.",
-    "Explain this Espoo service instruction in plain Finnish and list what I should prepare.",
-    "Review this service journey for a resident who needs simple language and mobile access."
+    "Plan a source-backed evidence-backed event meeting planner task for this challenge.",
+    "Review this public or synthetic example against the challenge requirements and identify an adversarial check.",
+    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns."
   ],
   "sources": [
     {
@@ -70,12 +84,20 @@
       "publisher": "City of Espoo",
       "checkedAt": "2026-11-11",
       "summary": "Official city services, events and information for residents and businesses."
+    },
+    {
+      "id": "junction-2026-main-319",
+      "title": "Rethinking Recruitment",
+      "url": "https://hackjunction.app/participate/45/challenges/319",
+      "publisher": "Junction2026 / City of Espoo",
+      "checkedAt": "2026-11-13",
+      "summary": "Official challenge text captured from the signed-in participant platform on 13 November 2026. Evidence-backed event meeting planner. Required proof and limitations are recorded in the source-bound challenge packet."
     }
   ],
   "sourceEvidence": {
     "roster": "https://chatgpt.com/space/page_6662dee905f081919bc599c408a359dd",
-    "roleVerified": false,
-    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it. A 2025 profile description must not be represented as the 2026 challenge."
+    "roleVerified": true,
+    "notes": "Current main/technical brief titles, requirements and material links were read from the signed-in official Junction platform on 13 November 2026. The independently authored package is not company endorsed. See CHALLENGE_RESEARCH.md and the shared composition contract; source guidance does not establish a live provider or peer connection."
   },
   "availability": {
     "content": "ready",

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.rokoko",
   "slug": "junction-rokoko",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "agentName": "Rokoko",
   "displayName": "Rokoko companion",
   "company": {
@@ -11,8 +11,8 @@
     "role": "challenge",
     "website": "https://www.rokoko.com/"
   },
-  "tagline": "Make a motion-capture workflow understandable from capture to export.",
-  "introduction": "A creative technical companion for Rokoko's public motion-capture and animation workflows, helping plan inputs, retargeting and verification.",
+  "tagline": "Turn live human motion into a measured teleoperation task.",
+  "introduction": "Design one useful robotic teleoperation task with Rokoko motion capture, measured latency and task success, clutch/hold behavior on dropout and explicit device ownership. Simulation, prerecorded replay and live physical execution must be labelled separately.",
   "welcome": "What would you like to understand or plan with Rokoko? Choose a starter below, or share a small redacted example.",
   "accent": "#a44b61",
   "artIndex": 14,
@@ -55,12 +55,26 @@
         "capture and export checklist"
       ],
       "requiresConnection": false
+    },
+    {
+      "id": "challenge-design",
+      "title": "Design Rokoko challenge support",
+      "description": "Live retargeting and latency observer. Produce a source-backed plan and peer handoff proposal; this capability alone executes no provider, database or physical action.",
+      "kind": "planning",
+      "inputs": [
+        "a scoped public or synthetic task and the exact challenge or integration question"
+      ],
+      "outputs": [
+        "Task success, completion time and input-to-action latency against gamepad baseline",
+        "source references, dependencies and explicitly unverified actions"
+      ],
+      "requiresConnection": false
     }
   ],
   "starterPrompts": [
-    "Help plan a Rokoko motion-capture workflow for a short character animation, from capture to export.",
-    "My retargeted character's feet slide. What measurements and setup details should I inspect first?",
-    "Create a capture checklist for a short demo with repeatable calibration and export checks."
+    "Plan a source-backed live retargeting and latency observer task for this challenge.",
+    "Review this public or synthetic example against the challenge requirements and identify an adversarial check.",
+    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns."
   ],
   "sources": [
     {
@@ -70,12 +84,20 @@
       "publisher": "Rokoko",
       "checkedAt": "2026-11-11",
       "summary": "Official motion-capture products, software, integrations and learning resources."
+    },
+    {
+      "id": "junction-2026-main-326",
+      "title": "The Robot Teleoperation Challenge",
+      "url": "https://hackjunction.app/participate/45/challenges/326",
+      "publisher": "Junction2026 / Rokoko",
+      "checkedAt": "2026-11-13",
+      "summary": "Official challenge text captured from the signed-in participant platform on 13 November 2026. Live retargeting and latency observer. Required proof and limitations are recorded in the source-bound challenge packet."
     }
   ],
   "sourceEvidence": {
     "roster": "https://chatgpt.com/space/page_c9d302f9c3d08191b7724d3e33a27149",
-    "roleVerified": false,
-    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+    "roleVerified": true,
+    "notes": "Current main/technical brief titles, requirements and material links were read from the signed-in official Junction platform on 13 November 2026. The independently authored package is not company endorsed. See CHALLENGE_RESEARCH.md and the shared composition contract; source guidance does not establish a live provider or peer connection."
   },
   "availability": {
     "content": "ready",

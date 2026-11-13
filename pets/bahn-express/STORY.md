@@ -47,3 +47,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 Autan valmistautumaan ajoneuvon kuljetukseen ja luovutukseen sekä kokoamaan selkeän kuljetuskuvauksen. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
 
 Mukana on kuvitteellinen, paikallisesti testattava nouto–luovutusesimerkki. Se erottaa suunnitelman ilmoitetusta hallinnan siirtymisestä ja nostaa puuttuvan, vanhentuneen tai ristiriitaisen näytön esiin. Esimerkki ei vahvista oikean ajoneuvon luovutusta eikä kuljetuksen valmistumista.
+
+## Current challenge and collaboration
+
+Work in the sponsor Spread simulator: choose dealer quotes and driver fees while keeping at least 90 percent of cars on time. Compare policies against the supplied baseline and preserve restart safety. Do not build an unrelated replacement simulator.
+
+Proposed peers: junction.afterquery, junction.aiven, junction.modal. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

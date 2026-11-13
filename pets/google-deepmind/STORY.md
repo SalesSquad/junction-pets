@@ -47,3 +47,9 @@ Source review date: 2026-11-11. Event participation is corroborated by current p
 ## Suomeksi
 
 Autan jäsentämään Google DeepMindin julkisia tutkimuksia ja Gemini-kokeilun dokumentoidut mahdollisuudet sekä testit. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+A research and developer companion for Google DeepMind's public work and the Gemini API documentation, focusing on clear capability boundaries and evaluation.
+
+Proposed peers: junction.nvidia, junction.verda, junction.afterquery. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

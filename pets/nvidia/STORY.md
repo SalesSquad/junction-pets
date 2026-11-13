@@ -64,3 +64,9 @@ Nemotron API and model card checked 2026-11-13; original developer-source review
 ## Suomeksi
 
 Autan löytämään NVIDIA-kehityspolun sekä määrittämään laite-, versio- ja mittausvaatimukset. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+Use the exact Nemotron 3.5 Super VL model for bounded observations, tool evidence and uncertainty. Support peer tasks such as Stoa drawing-region interpretation through the drawing-specific operation; benchmark comparisons remain a distinct workflow. A source adapter is not an active provider connection.
+
+Proposed peers: junction.modal, junction.verda, junction.intel, junction.scailab, junction.qualia. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

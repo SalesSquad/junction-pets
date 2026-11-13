@@ -47,3 +47,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan rajaamaan Modal-laskentatyön syötteet, resurssit ja tarkistukset ilman pilviajon käynnistämistä. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+A serverless compute companion for Modal documentation, helping turn a workload into a bounded execution and verification plan.
+
+Proposed peers: junction.verda, junction.nvidia, junction.ironshard. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.
