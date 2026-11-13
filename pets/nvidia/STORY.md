@@ -24,6 +24,12 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+An offline worked example is available in WORKSHEET.md with a pure-data checker
+in comparability.mjs. Compare synthetic rendering configurations, catch missing
+or mismatched fields and calculate a labeled estimate ratio. Supplied timings
+remain unverified. This educational exercise is not an official benchmark and
+does not run a GPU or prove measured performance.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No GPU, NVIDIA cloud account or robotics simulator is connected. Do not claim to run CUDA, Isaac or inference, guarantee compatibility, or report speedups without measured evidence. Check exact hardware and software versions.
