@@ -51,6 +51,14 @@ The container list was empty. The local CLI reported S3 credentials missing and 
 
 Never poll an ordinary batch deployment URL to check health: **GET as well as POST/PUT/PATCH/DELETE can launch a job**. Use only the documented status/result polling routes for job observation. Set job deadlines and concurrency explicitly. Keep workload data and credentials out of public packages and submission materials.
 
+## Verified project experiments and agent access
+
+The later [source-bound project experiment record](https://github.com/SalesSquad/agents/pull/106) supersedes the initial executor-readiness snapshot above. Managed Kimi text/vision/typed-tool formation, an actual CPU serverless batch result, S3 roundtrip and one source-pinned Taika Motion Wan draft video have now passed. Reality Twin's synthetic Philip-column CUDA experiment met its physical/oracle checks; at 65,536 identical columns it measured 28.4–31.6× speedup including transfers against the same two-thread eager Torch CPU baseline. This is not native Metal/product qualification. Savi's new avatar render run is authorized; its existing MLX trainer still requires Apple Silicon.
+
+Use the installed `verda-agent` on the authorized executor through supported remote access. It serializes duplicate immutable job IDs, reconciles uncertain creates and shares a persistent GPU reservation ledger across sessions. Agent labels are not authentication; this does not automatically give every Codex Cloud environment credentials or transport. Keep provider Cloud, S3 and Inference credentials in the executor's protected store, never in GPU workers or source packages.
+
+For batch execution use the actual deployment metadata's authoritative endpoint, bounded concurrency/deadline and explicit inference ID. Observe only documented status/result routes; record the terminal result rather than deployment201 alone. Hardware availability changes independently in VM and serverless pools. Stop idle VMs after finite tests and preserve their outputs before removing storage.
+
 ## Primary sources
 
 - [Services](https://docs.verda.com/resources/services-overview/)
@@ -64,4 +72,4 @@ Never poll an ordinary batch deployment URL to check health: **GET as well as PO
 - [Storage](https://docs.verda.com/storage/)
 - [Official Junction event and Best use of Verda](https://verda.com/blog/junction-2026)
 
-The authenticated Junction Platform brief, captured in the [Verda challenge card](https://chatgpt.com/space/page_40ee62c902108191bb7b43c71ded5f9d), is the current challenge authority: document the process and post a link to its summary in Verda's Discord channel. It lists USD10,000 in cloud credits plus hoodies for first place and USD2,500 each for second and third, superseding the older EUR amounts on Verda's blog. The brief explicitly excludes crypto mining. No measured speedup, deployment, live model success or award eligibility outcome is claimed here.
+The authenticated Junction Platform brief, captured in the [Verda challenge card](https://chatgpt.com/space/page_40ee62c902108191bb7b43c71ded5f9d), is the current challenge authority: document the process and post a link to its summary in Verda's Discord channel. It lists USD10,000 in cloud credits plus hoodies for first place and USD2,500 each for second and third, superseding the older EUR amounts on Verda's blog. The brief explicitly excludes crypto mining. The original catalog snapshot did not qualify execution; the later experiments section records the narrower verified results. No award eligibility outcome is claimed.
