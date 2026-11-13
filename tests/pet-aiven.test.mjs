@@ -21,7 +21,7 @@ const authored = id => {
 test('Aiven retains v1 isolated guidance contract and focused official provenance', () => {
   validatePet(pack.pet);
   assert.equal(pack.pet.schemaVersion, 1);
-  assert.equal(pack.pet.version, '0.1.1');
+  assert.equal(pack.pet.version, '0.1.2');
   assert.equal(pack.pet.slug, 'junction-aiven');
   assert.equal(pack.pet.artIndex, 29);
   assert.equal(pack.pet.capabilities.length, 3);
