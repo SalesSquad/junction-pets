@@ -135,13 +135,17 @@ class PostgresReplayStore:
             return False
         with self._cursor() as cursor:
             cursor.execute(
-                """SELECT 1 AS current FROM junction_council.replay_reservations
+                """SELECT first_request_id FROM junction_council.replay_reservations
                    WHERE tenant_id=%s AND user_id=%s AND active_pet=%s AND run_id=%s
                      AND envelope_digest=%s AND handoffs_digest=%s AND idempotency_key=%s
                      AND fence_token=%s AND active=true""",
                 self._bindings(caller, reservation),
             )
-            current = cursor.fetchone() is not None
+            row = cursor.fetchone()
+            # A legacy delimiter-derived persisted ID must not bypass the v2
+            # tuple check through direct store use outside the graph validator.
+            current = row is not None and deterministic_run_id(
+                caller, row["first_request_id"]) == reservation.run_id
         return current
 
     def invalidate(self, caller: Caller, reservation: ReplayReservation) -> bool:

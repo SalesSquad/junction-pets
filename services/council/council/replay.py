@@ -53,9 +53,18 @@ class ReplayStore(Protocol):
 
 
 def deterministic_run_id(caller: Caller, first_request_id: str) -> UUID:
-    """Stable, UUID-formatted thread ID; not an authentication token."""
-    return uuid5(_NAMESPACE,
-                 f"chibi-council.v1:{caller.tenant_id}:{caller.user_id}:{first_request_id}")
+    """Version-2 JSON-tuple UUID; not an authentication token.
+
+    Length-delimited JSON strings prevent ':' in one scoped ID from being
+    confused with the next field. The explicit domain/algorithm version is
+    independent of the v1 collaboration envelope schema. Legacy run IDs are
+    not tried as a fallback; existing checkpoints need an explicit migration.
+    """
+    import json
+    name = json.dumps(["chibi-council.run-id", 2, caller.tenant_id,
+                       caller.user_id, first_request_id],
+                      ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+    return uuid5(_NAMESPACE, name)
 
 
 def envelope_sha256(envelopes: list[dict]) -> str:

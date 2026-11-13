@@ -2,7 +2,7 @@
 from contextlib import contextmanager
 from dataclasses import replace
 from types import SimpleNamespace
-from uuid import uuid4
+from uuid import UUID, uuid4, uuid5
 import importlib.util
 from pathlib import Path
 
@@ -151,7 +151,7 @@ def test_invalid_reservation_denied_without_database_access(change):
 
 
 def test_current_query_binds_every_host_scope_and_both_digests():
-    connection = StubConnection([{"current": 1}])
+    connection = StubConnection([{"first_request_id": REQUEST}])
     assert PostgresReplayStore(connection.connection).is_current(CALLER, reservation()) is True
     sql, params = [event for event in connection.events if isinstance(event, tuple)][-1]
     assert "active=true" in sql
@@ -201,3 +201,37 @@ def test_real_gate_rejects_missing_remote_or_implicit_database(dsn):
 def test_real_gate_accepts_explicit_local_synthetic_socket_database():
     dsn = "dbname=junction_council_test_a host=/tmp/isolated-council-socket user=test"
     assert _pg_gate_module().checked_test_dsn(dsn) == dsn
+
+
+def test_run_id_tuple_encoding_separates_colons_in_tenant_and_user():
+    first = Caller("tenant:extra", "user.synthetic", "junction.aiven")
+    second = Caller("tenant", "extra:user.synthetic", "junction.aiven")
+    assert deterministic_run_id(first, REQUEST) != deterministic_run_id(second, REQUEST)
+
+
+def test_run_id_v2_has_stable_public_synthetic_vector():
+    assert deterministic_run_id(CALLER, REQUEST) == UUID("fe5d20ab-f0f2-5d9c-8693-51b038a8d259")
+
+
+def test_run_id_tuple_encoding_separates_colons_in_user_and_request():
+    first = Caller("tenant.synthetic", "user:extra", "junction.aiven")
+    second = Caller("tenant.synthetic", "user", "junction.aiven")
+    assert deterministic_run_id(first, "request.synthetic") != deterministic_run_id(second, "extra:request.synthetic")
+
+
+def test_old_delimited_run_id_is_not_a_new_reservation_identifier():
+    legacy = uuid5(UUID("e46bd5c2-25aa-4da7-bdf8-189f2e85e7a1"),
+                   f"chibi-council.v1:{CALLER.tenant_id}:{CALLER.user_id}:{REQUEST}")
+    assert deterministic_run_id(CALLER, REQUEST) != legacy
+    connection = StubConnection([])
+    with pytest.raises(ValueError):
+        reserve(PostgresReplayStore(connection.connection), proposed_run_id=legacy)
+    assert connection.events == []
+
+
+def test_legacy_persisted_run_is_not_current_through_direct_store_use():
+    legacy = uuid5(UUID("e46bd5c2-25aa-4da7-bdf8-189f2e85e7a1"),
+                   f"chibi-council.v1:{CALLER.tenant_id}:{CALLER.user_id}:{REQUEST}")
+    old = reservation(run_id=legacy, idempotency_key="host.run." + legacy.hex)
+    connection = StubConnection([{"first_request_id": REQUEST}])
+    assert PostgresReplayStore(connection.connection).is_current(CALLER, old) is False

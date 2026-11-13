@@ -50,6 +50,24 @@ must already be authorized; this slice provisions no cloud resources.
   provider idempotency and its durable outbox. This does not promise exactly-once
   model execution. Recheck the fence and policy at the actual privileged read.
 
+## Run-ID compatibility
+
+Run IDs now use UUIDv5 over the compact UTF-8 JSON array
+`["chibi-council.run-id",2,tenant_id,user_id,first_request_id]`, under the
+existing UUID namespace. This is algorithm version **2**, independent of the
+collaboration envelope's schema version. The earlier colon-concatenation could
+map distinct tenant/user tuples to one ID. Delimiter-bearing identifiers remain
+valid; canonical tuple encoding removes that ambiguity.
+
+All generated run IDs consequently change. Existing delimiter-derived
+reservations/checkpoints are **not silently retried or translated**: graph
+reservation validation rejects their old ID, `reserve` reports a conflict for
+the already-bound request, and direct `is_current` rejects its old identifier.
+An operator must either deliberately migrate all dependent checkpoint, artifact,
+idempotency and receipt references together, or leave the legacy run rejected
+and reconcile it explicitly. Automatic fallback to the old algorithm is absent.
+No migration of an existing deployed database is performed by this source slice.
+
 ## Checks
 
 Use the isolated Python environment described in the Council README:

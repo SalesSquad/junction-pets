@@ -12,14 +12,14 @@ import re
 import subprocess
 import sys
 from threading import Barrier
-from uuid import uuid4
+from uuid import UUID, uuid4, uuid5
 
 import psycopg
 from psycopg.conninfo import conninfo_to_dict
 
 from council.core import Caller
 from council.postgres_replay import PostgresReplayStore
-from council.replay import ReplayConflict, deterministic_run_id
+from council.replay import ReplayConflict, ReplayReservation, deterministic_run_id
 
 
 def require(value, label):
@@ -111,6 +111,39 @@ print('durable-replay-ok')
     other_reservation = store.reserve(other, request_id, envelope,
                                      deterministic_run_id(other, request_id), handoffs)
     require(other_reservation.created, "different tenant owns independent reservation")
+    # These tuples collided when ':' was a field delimiter. Both callers must
+    # now own independent durable rows despite the UNIQUE(run_id) constraint.
+    collision_callers = [Caller("tenant:extra", "user.synthetic", "junction.aiven"),
+                         Caller("tenant", "extra:user.synthetic", "junction.aiven")]
+    collision_request_id = "request.colon." + unique
+    collision_results = [store.reserve(value, collision_request_id, envelope,
+        deterministic_run_id(value, collision_request_id), handoffs) for value in collision_callers]
+    require(all(value.created for value in collision_results), "colon-bearing scopes reserve independently")
+    require(collision_results[0].run_id != collision_results[1].run_id, "unambiguous tuple run IDs")
+    require(all(store.is_current(value, result) for value, result in zip(collision_callers, collision_results)),
+            "both colon-bearing scopes remain current")
+    require(not store.is_current(collision_callers[0], collision_results[1]), "colon scopes do not cross-authorize")
+
+    legacy_caller = Caller("legacy." + unique, "user.synthetic", "junction.aiven")
+    legacy_request = "request.legacy"
+    legacy_run = uuid5(UUID("e46bd5c2-25aa-4da7-bdf8-189f2e85e7a1"),
+        f"chibi-council.v1:{legacy_caller.tenant_id}:{legacy_caller.user_id}:{legacy_request}")
+    legacy = ReplayReservation(legacy_run, envelope, handoffs,
+                               "host.run." + legacy_run.hex, 1, False, True)
+    with factory() as connection:
+        connection.execute("""INSERT INTO junction_council.replay_reservations
+            (tenant_id,user_id,first_request_id,active_pet,run_id,envelope_digest,handoffs_digest,idempotency_key)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (legacy_caller.tenant_id,legacy_caller.user_id,legacy_request,legacy_caller.active_pet,
+             legacy_run,envelope,handoffs,legacy.idempotency_key))
+    require(not store.is_current(legacy_caller, legacy), "legacy ID rejected without automatic fallback")
+    try:
+        store.reserve(legacy_caller, legacy_request, envelope,
+                      deterministic_run_id(legacy_caller, legacy_request), handoffs)
+    except ReplayConflict:
+        pass
+    else:
+        raise AssertionError("legacy persisted reservation was silently migrated")
     require(not store.is_current(replace(caller, user_id="user.other"), original), "user isolation")
     require(not store.is_current(replace(caller, active_pet="junction.other"), original), "active pet isolation")
     try:
