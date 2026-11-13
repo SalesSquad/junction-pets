@@ -3,7 +3,9 @@
 Canonical source: **SalesSquad/junction-pets**, private repository. This is the
 common entrypoint for a new Codex, Claude or other authorized developer agent.
 Use [the machine-readable index](docs/AGENT_SOURCE_INDEX.json) to select one of
-the 34 packages and discover pending implementation sources.
+the 34 packages and discover source provenance. For live implementation and PR
+state, read GitHub's current main HEAD and PRs, then follow
+[the sync contract](docs/SPACE_SYNC_CONTRACT.md).
 
 ## Before editing
 
@@ -41,24 +43,42 @@ rough transcripts, analyst proposals and older generic helpers. A recording,
 document, task manifest or review recommendation does not establish a working
 provider connection, a running worker or challenge eligibility.
 
-## Pending implementation sources
+## Source integration status (verified 14 November 2026, 01:28 EET)
 
-The [JSON index](docs/AGENT_SOURCE_INDEX.json) pins the observed PR heads and
-source locations. Recheck their current state: they can change after this snapshot.
+The [JSON index](docs/AGENT_SOURCE_INDEX.json) pins source SHA and last observed
+PR states. They can change; resolve live PR and main HEAD before a task. In
+particular, a still-open origin PR does not mean its code is absent from main.
 
-| Work | Source / boundary |
+| Work | Verified source / boundary |
 | --- | --- |
-| Agent composition and Stoa → NVIDIA drawing workflow | [PR61](https://github.com/SalesSquad/junction-pets/pull/61); its source already contains PR56 and PR58. Proposed graph edges are not runtime grants. |
-| Meta Find & Verify scan kernel | [PR60](https://github.com/SalesSquad/junction-pets/pull/60); research is in main, executable service remains pending. |
+| Agent composition and Stoa → NVIDIA drawing workflow | Original [PR61](https://github.com/SalesSquad/junction-pets/pull/61) still **open**, but implementation source **already in main via merged [PR66](https://github.com/SalesSquad/junction-pets/pull/66)** (commit `cfe5b3ea7107c3f4f4a2422e71e51121fd466471`). Graph edges are proposals, not runtime grants. |
+| Meta Find & Verify scan kernel | Original [PR60](https://github.com/SalesSquad/junction-pets/pull/60) **merged**, source also integrated via [PR68](https://github.com/SalesSquad/junction-pets/pull/68) (commit `92c107468f06ca810ec711480057353ddda3e64c`). Live device/provider behavior is not automatically verified by merged source. |
+| NVIDIA / companion tooling | [PR58](https://github.com/SalesSquad/junction-pets/pull/58) and [PR56](https://github.com/SalesSquad/junction-pets/pull/56) **merged**. Verify the precise resulting code and tests separately from production host wiring. |
 | Provider pilots | [PR57](https://github.com/SalesSquad/junction-pets/pull/57); development observations do not install production routing. |
-| Upstream Aiven provenance | [PR55](https://github.com/SalesSquad/junction-pets/pull/55). |
+| Upstream Aiven provenance | [PR55](https://github.com/SalesSquad/junction-pets/pull/55) **merged**. |
 | Accepted-source progress ledger | [PR54](https://github.com/SalesSquad/junction-pets/pull/54), including PR34; final review disposition remains separate. |
 
+The pinned main at this readback was
+`1774ac8d7b6dcee58d8516fcbf923c52a1f71088`.
 The current main `docs/DEVELOPMENT_QUEUE.md` includes historical checkpoints.
 Do not treat an old running/queued count as the current worker state. The private
 Chibi repository owns production identity, consent, private memory, model/tool
 execution and signed receipts; this repository owns companion sources and
 integration contracts.
+
+## Space sync and machine-readable verification
+
+One Page-managed controller maintains the 53-page Junction Space. Its scheduled
+reconciler polls current GitHub state hourly; a separate PR-event worker reacts
+to supported pull-request lifecycle, new-commit and review events. A PR event
+does not cover unrelated direct pushes to main, so the hourly pass is essential.
+Source status in this file is **not a live monitor**.
+
+After source-map changes, run `npm run source-sync:check` (included in
+`npm run validate`). The offline check covers 34 agent routes, 19 main and
+19 technology brief links, and the current 19+16 canonical Space card IDs.
+It cannot prove Pages API access, a hosted automation run, cloud CI, model
+behavior or a live Junction submission.
 
 ## Source-bound continuation
 
