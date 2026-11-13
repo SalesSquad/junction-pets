@@ -20,7 +20,11 @@
 
 - 53 Pages total: root and first-level Pages plus nested challenge, technology, Discord and evidence pages.
 - 19 main challenge brief URLs mapped to 19 main cards.
-- 19 technology brief URLs mapped to 16 canonical technology cards (some cover multiple briefs).
+- 19 technology brief URLs mapped to 13 distinct cards: 11 technology cards
+  plus 2 shared main-challenge cards (Arduino and Context.dev). There are 16
+  canonical technology cards total; the five additional partner cards
+  (Featherless, Qualia, IronShard, Scailab, Wendy) are supplementary catalog
+  entries, **not** separate official tech briefs.
 - 34 agent packages; the composition graph has 122 **proposed** edges, not automatic live dispatch.
 - Canonical Page inventory: `ops/challenge-spaces-reconciliation-20261113.json#canonical_page_inventory`. Its `outcome.card_pages=30` is **historical** (13 Nov earlier reconciliation); the newly verified inventory is 35.
 
