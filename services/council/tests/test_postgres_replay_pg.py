@@ -18,7 +18,7 @@ import psycopg
 from psycopg.conninfo import conninfo_to_dict
 
 from council.core import Caller
-from council.postgres_replay import PostgresReplayStore
+from council.postgres_replay import PostgresReplayStore, ReplayStoreUnavailable
 from council.replay import ReplayConflict, ReplayReservation, deterministic_run_id
 
 
@@ -144,6 +144,33 @@ print('durable-replay-ok')
         pass
     else:
         raise AssertionError("legacy persisted reservation was silently migrated")
+
+    # A host-admin-seeded foreign row can occupy another scope's derived UUID.
+    # Untargeted conflict handling must never return that row as a target claim.
+    target = Caller("foreign.target." + unique, "user.synthetic", "junction.aiven")
+    target_request = "request.foreign"
+    target_run = deterministic_run_id(target, target_request)
+    foreign_tenant = "foreign.owner." + unique
+    with factory() as connection:
+        connection.execute("""INSERT INTO junction_council.replay_reservations
+            (tenant_id,user_id,first_request_id,active_pet,run_id,envelope_digest,handoffs_digest,idempotency_key)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (foreign_tenant,target.user_id,target_request,target.active_pet,target_run,
+             envelope,handoffs,"host.run." + target_run.hex))
+    try:
+        store.reserve(target, target_request, envelope, target_run, handoffs)
+    except ReplayStoreUnavailable:
+        pass
+    else:
+        raise AssertionError("foreign unique conflict masqueraded as a target claim")
+    target_candidate = ReplayReservation(target_run,envelope,handoffs,
+        "host.run." + target_run.hex,1,False,True)
+    require(not store.is_current(target,target_candidate), "foreign row is not current in target scope")
+    with factory() as connection:
+        target_count = connection.execute("""SELECT count(*) FROM junction_council.replay_reservations
+            WHERE tenant_id=%s AND user_id=%s AND first_request_id=%s""",
+            (target.tenant_id,target.user_id,target_request)).fetchone()[0]
+    require(target_count == 0, "foreign conflict did not insert a target reservation")
     require(not store.is_current(replace(caller, user_id="user.other"), original), "user isolation")
     require(not store.is_current(replace(caller, active_pet="junction.other"), original), "active pet isolation")
     try:

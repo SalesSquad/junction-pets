@@ -100,7 +100,7 @@ class PostgresReplayStore:
                     (tenant_id, user_id, first_request_id, active_pet, run_id,
                      envelope_digest, handoffs_digest, idempotency_key)
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-                    ON CONFLICT (tenant_id,user_id,first_request_id) DO NOTHING
+                    ON CONFLICT DO NOTHING
                     RETURNING {_COLUMNS}""",
                 (caller.tenant_id, caller.user_id, first_request_id, caller.active_pet,
                  proposed_run_id, envelope_digest, handoffs_digest, idempotency_key),

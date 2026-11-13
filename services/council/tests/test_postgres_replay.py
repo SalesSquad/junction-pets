@@ -94,6 +94,33 @@ def test_existing_identical_reservation_does_not_create_an_execution_claim():
     assert result == reservation(created=False)
 
 
+def test_concurrent_run_id_unique_conflict_still_reads_scoped_winner():
+    class ConcurrentUniqueIndexConnection(StubConnection):
+        def execute(self, sql, params=None):
+            # PostgreSQL can discover the run_id/idempotency unique conflict
+            # before the composite primary key during concurrent INSERTs.
+            if "INSERT INTO" in sql and "ON CONFLICT (" in sql:
+                raise psycopg.errors.UniqueViolation("synthetic run_id unique conflict")
+            super().execute(sql, params)
+
+    connection = ConcurrentUniqueIndexConnection([None, stored_row()])
+    result = reserve(PostgresReplayStore(connection.connection))
+    assert result == reservation(created=False)
+    insert_sql = next(
+        event[0] for event in connection.events
+        if isinstance(event, tuple) and "INSERT INTO" in event[0])
+    assert "ON CONFLICT DO NOTHING" in " ".join(insert_sql.split())
+    sql, params = [event for event in connection.events if isinstance(event, tuple)][-1]
+    assert "FOR SHARE" in sql
+    assert params == (CALLER.tenant_id, CALLER.user_id, REQUEST)
+
+
+def test_unique_conflict_without_same_scoped_winner_fails_closed():
+    connection = StubConnection([None, None])
+    with pytest.raises(ReplayStoreUnavailable, match="not readable"):
+        reserve(PostgresReplayStore(connection.connection))
+
+
 @pytest.mark.parametrize("change", [
     {"run_id": uuid4()}, {"envelope_digest": "c" * 64},
     {"handoffs_digest": "c" * 64}, {"active_pet": "junction.other"},

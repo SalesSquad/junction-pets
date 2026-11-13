@@ -31,6 +31,10 @@ must already be authorized; this slice provisions no cloud resources.
   run ID, both exact SHA-256 digests and idempotency key are immutable bindings.
 - An `INSERT ... ON CONFLICT DO NOTHING` followed by a fresh read-committed
   statement gives exactly one `created=True` reservation under contention.
+  Conflict handling covers every unique index, including run ID and idempotency
+  key: PostgreSQL may detect those before the composite primary key. The winner
+  is then read only by the original tenant/user/request scope and every binding
+  is checked; a conflicting unique row in another scope fails closed.
   The transaction commits before `durable=True` reaches the caller; a commit
   failure returns no reservation. Synchronous commit is enabled for this
   transaction; database/WAL/storage guarantees remain host responsibilities.
