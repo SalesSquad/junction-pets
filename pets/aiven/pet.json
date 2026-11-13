@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.aiven",
   "slug": "junction-aiven",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "agentName": "Aiven",
   "displayName": "Aiven companion",
   "company": {
@@ -70,6 +70,30 @@
       "publisher": "Aiven",
       "checkedAt": "2026-11-11",
       "summary": "Official managed data services, platform, developer tools and integration documentation."
+    },
+    {
+      "id": "pg-slow-queries",
+      "title": "Identify PostgreSQL slow queries",
+      "url": "https://aiven.io/docs/products/postgresql/howto/identify-pg-slow-queries",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-13",
+      "summary": "pg_stat_statements supports slow-query investigation; column names vary by PostgreSQL version. Query-plan inspection is a next step, not proof that a particular index helps."
+    },
+    {
+      "id": "pg-index-repair",
+      "title": "Repair PostgreSQL indexes",
+      "url": "https://aiven.io/docs/products/postgresql/howto/repair-pg-index",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-13",
+      "summary": "REINDEX addresses index corruption and can apply locks that interfere with normal database use; this is not general index-selection evidence."
+    },
+    {
+      "id": "kafka-consumer-groups",
+      "title": "Monitor Kafka consumer groups",
+      "url": "https://aiven.io/docs/products/kafka/concepts/monitor-consumer-group",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-13",
+      "summary": "Extra consumers beyond partition count remain idle. Consumer group replication lag is the per-partition high-watermark minus group offset; lag requires investigation, not a single assumed cause."
     }
   ],
   "sourceEvidence": {
