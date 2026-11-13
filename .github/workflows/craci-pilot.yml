@@ -1,0 +1,56 @@
+name: CRACI portable CI pilot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: craci-pilot-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  portable:
+    name: Validate, test and build on CRACI
+    runs-on: craci
+    timeout-minutes: 15
+    steps:
+      - name: Configure monitored CRACI networking
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534 # v1
+        with:
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, npm]
+      - name: Check out the selected commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Set up Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Record source and executor
+        run: |
+          git rev-parse HEAD
+          node --version
+          npm --version
+          uname -sm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Validate packages
+        run: npm run validate
+      - name: Run Node tests
+        run: npm test
+      - name: Build catalog
+        run: npm run build
+      - name: Record lockfile and build digests
+        run: |
+          set -euo pipefail
+          test -d dist/site
+          find dist/site -type f -print0 | LC_ALL=C sort -z | xargs -0 -r sha256sum -- > "$RUNNER_TEMP/craci-build.sha256"
+          test -s "$RUNNER_TEMP/craci-build.sha256"
+          sha256sum package-lock.json
+          cat "$RUNNER_TEMP/craci-build.sha256"
+          sha256sum "$RUNNER_TEMP/craci-build.sha256"
