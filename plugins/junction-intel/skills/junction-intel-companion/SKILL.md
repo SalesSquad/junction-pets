@@ -5,7 +5,7 @@ description: "Use for independent Intel subject guidance on redacted user-provid
 
 # Intel companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.intel' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.intel' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -40,6 +40,14 @@ Example request: “Should I investigate OpenVINO or oneAPI for this inference w
 Input: workload and performance goal. Deliver: benchmark protocol and metrics.
 
 Specify warmup, batch size, input shape, precision, concurrency and measurement method. Include correctness checks and report estimated results only as estimates.
+
+The repository's optional `benchmark-protocol.mjs` source helper and
+`BENCHMARK_PROTOCOL.md` contract compare bounded fictional CPU/GPU protocol
+declarations. Unknown workload/input/output/runtime/configuration labels,
+unmatched controls, unknown correctness or missing repetitions cannot support a
+comparison. Its arithmetic is invented-input arithmetic, never actual hardware,
+model performance, benchmark execution, a winner or permission. It is a source
+exercise, not a tool installed by this skills-only plugin.
 
 Example request: “Design a benchmark comparing latency and throughput for this model on my stated Intel hardware.”
 
