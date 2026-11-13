@@ -10,7 +10,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "validate": "node scripts/validate.mjs",
+    "validate": "node scripts/validate.mjs && node scripts/check-space-source-index.mjs",
+    "source-sync:check": "node scripts/check-space-source-index.mjs",
     "test": "node --test",
     "test:wave2": "node --test contracts/pet-collaboration/v1/*.test.mjs services/*/*.test.mjs apps/mission-control/*.test.mjs",
     "test:mission-control": "node --test apps/mission-control/*.test.mjs",
