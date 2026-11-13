@@ -47,3 +47,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan jäsentämään Valio Aimon reseptejä, tuotetietoja ja keittiön valmistelua lähteisiin tukeutuen. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+Design the fixed-price product lookup, inquiry and order/approval interface for Valio Aimo synthetic mock systems. Bind decisions to the buyer request and exact basket; test partial stock, substitutions and delivery constraints. Do not treat a recipe plan as a placed order.
+
+Proposed peers: junction.aiven, junction.afterquery, junction.tieto, junction.context-dev. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

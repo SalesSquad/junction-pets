@@ -43,3 +43,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan ymmärtämään Hostingerin hostingia ja rajaamaan sivuston ongelman ilman tilisi muuttamista. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+Help design Decode the Noise: evidence-based detection of propaganda, bots or coordinated bad actors, including benign coordination controls and measured false positives. Live deployment on Hostinger is a separate challenge requirement, not implied by this package.
+
+Proposed peers: junction.context-dev, junction.aiven, junction.oxylabs, junction.exa, junction.afterquery. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

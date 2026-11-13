@@ -46,3 +46,9 @@ Source review date: 2026-11-11. Event participation is corroborated by current p
 ## Suomeksi
 
 Autan suunnittelemaan Arduino-prototyypin, löytämään oikean kortin ohjeet ja ymmärtämään koodin toimintaa. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+Design a useful local green solution with Arduino UNO Q, explicit sensor assumptions, offline behavior and measurable resource constraints. Hardware execution and required Arduino Project Hub publication remain separately evidenced.
+
+Proposed peers: junction.scailab, junction.wendy, junction.nvidia, junction.qualia. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

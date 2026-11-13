@@ -52,3 +52,9 @@ tuntemattomaksi; ajantasaisuuden tarkistus koskee vain annettuja aikaleimoja.
 Verkkohakua, oikeita yritystietoja tai palveluyhteyttä ei toteuteta.
 
 Autan suunnittelemaan Context.dev-verkkotiedon keruun rajauksen, rakenteen ja ajantasaisuuden tarkistukset. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+Use Context.dev structured web outputs to drive a visible user decision. Preserve actual observation time, cache age and failed-output status even when transport returns200. Compare meaningful changes with cosmetic noise and distinguish plans from fetched data.
+
+Proposed peers: junction.exa, junction.oxylabs, junction.aiven. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

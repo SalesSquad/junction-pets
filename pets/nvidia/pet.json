@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.nvidia",
   "slug": "junction-nvidia",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "agentName": "NVIDIA",
   "displayName": "NVIDIA companion",
   "company": {
@@ -11,8 +11,8 @@
     "role": "technology",
     "website": "https://developer.nvidia.com/"
   },
-  "tagline": "Turn visual evidence into tool-backed engineering decisions with Nemotron.",
-  "introduction": "An independent NVIDIA engineering companion for visual workload triage, reproducible benchmark review and evidence-based recommendations. The optional developer workflow uses Nemotron 3.5 Super VL for observation, tool selection and final verification; authenticated Chibi activation remains separate.",
+  "tagline": "Use Nemotron 3.5 Super VL for grounded multimodal work.",
+  "introduction": "Use the exact Nemotron 3.5 Super VL model for bounded observations, tool evidence and uncertainty. Support peer tasks such as Stoa drawing-region interpretation through the drawing-specific operation; benchmark comparisons remain a distinct workflow. A source adapter is not an active provider connection.",
   "welcome": "Share a public or synthetic workload diagram, a benchmark pair, or a GPU engineering question. I can explain the evidence and, when an authorized Nemotron connection is available, inspect the image, use bounded tools and verify the result.",
   "accent": "#437b32",
   "artIndex": 19,
@@ -94,15 +94,39 @@
         "verified-against-evidence conclusion, unknowns and model-call metrics"
       ],
       "requiresConnection": true
+    },
+    {
+      "id": "integration-design",
+      "title": "Design NVIDIA challenge support",
+      "description": "Nemotron 3.5 Super VL core multimodal workflow owner. Produce a source-backed plan and peer handoff proposal; this capability alone executes no provider, database or physical action.",
+      "kind": "planning",
+      "inputs": [
+        "a scoped public or synthetic task and the exact challenge or integration question"
+      ],
+      "outputs": [
+        "Actual NVIDIA Nemotron 3.5 Super VL contributes visibly to core task; grounded output, reliable tools/latency and improvement evals; four 25% criteria: meaningful use/execution/output quality/differentiation",
+        "source references, dependencies and explicitly unverified actions"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "drawing-observation",
+      "title": "Observe supplied drawing regions",
+      "description": "Use authorized Nemotron 3.5 Super VL to interpret bounded drawing crops with source/page/region bindings and uncertainty. This task does not require or invent benchmark rows and does not certify geometry or construction safety.",
+      "kind": "connection-required",
+      "inputs": [
+        "public or synthetic drawing regions with image SHA256, normalized bounds, source revision and question"
+      ],
+      "outputs": [
+        "source-bound visual observations, citations, candidate/abstention and model-call receipt"
+      ],
+      "requiresConnection": true
     }
   ],
   "starterPrompts": [
-    "Help me choose a documentation path for a robot perception prototype using my stated NVIDIA hardware.",
-    "Create a reproducible latency and memory benchmark plan for this GPU inference workload.",
-    "Review this simulation plan for missing edge cases and sim-to-real assumptions.",
-    "Use Nemotron 3.5 Super VL to inspect this synthetic workload diagram, select the relevant evidence tools and verify your recommendation.",
-    "Compare these declared benchmark rows with the NVIDIA checker, then use Nemotron to explain exactly what the ratio can support.",
-    "Run the bounded Nemotron visual reasoning demo and show the actual model, tool calls, token usage and remaining evidence gaps."
+    "Plan a source-backed nemotron3.5supervl core multimodal workflow owner task for this challenge.",
+    "Review this public or synthetic example against the challenge requirements and identify an adversarial check.",
+    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns."
   ],
   "sources": [
     {
@@ -128,12 +152,20 @@
       "publisher": "NVIDIA",
       "checkedAt": "2026-11-13",
       "summary": "Official early-access multimodal reasoning model card and usage guidance; provider quotas and user-specific access remain separately verified."
+    },
+    {
+      "id": "junction-2026-tech-46",
+      "title": "Best Use of Nemotron",
+      "url": "https://hackjunction.app/participate/45/tech-challenges/46",
+      "publisher": "Junction2026 / NVIDIA",
+      "checkedAt": "2026-11-13",
+      "summary": "Official challenge text captured from the signed-in participant platform on 13 November 2026. Nemotron 3.5 Super VL core multimodal workflow owner. Required proof and limitations are recorded in the source-bound challenge packet."
     }
   ],
   "sourceEvidence": {
     "roster": "https://chatgpt.com/space/page_a7c8036bbc0c8191bfa4f32cec2407ac",
-    "roleVerified": false,
-    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+    "roleVerified": true,
+    "notes": "Current main/technical brief titles, requirements and material links were read from the signed-in official Junction platform on 13 November 2026. The independently authored package is not company endorsed. See CHALLENGE_RESEARCH.md and the shared composition contract; source guidance does not establish a live provider or peer connection."
   },
   "availability": {
     "content": "ready",

@@ -46,3 +46,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan ymmärtämään buildien alkuperää, SBOM-tietoja ja ohjelmistotoimituksen tarkistuksia. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+A security-literacy companion for CRACI's public build and SBOM context, helping review supplied evidence and prepare focused follow-up checks.
+
+Proposed peers: junction.tieto, junction.openai-codex, junction.afterquery. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

@@ -48,3 +48,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan jäsentämään Wendy-pohjaisen fyysisen tekoälyn ympäristöä, lokien tulkintaa ja hallittua käyttöönottoa. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+A technical companion for Wendy's public physical-AI stack, helping organize setup questions, logs and simulation-to-device handoffs.
+
+Proposed peers: junction.arduino, junction.intel, junction.qualia. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.openai-codex",
   "slug": "junction-openai-codex",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "agentName": "Codex",
   "displayName": "OpenAI / Codex companion",
   "company": {
@@ -55,12 +55,26 @@
         "reviewable status summary"
       ],
       "requiresConnection": false
+    },
+    {
+      "id": "integration-design",
+      "title": "Design OpenAI / Codex challenge support",
+      "description": "Codex development-impact and reproducibility owner. Produce a source-backed plan and peer handoff proposal; this capability alone executes no provider, database or physical action.",
+      "kind": "planning",
+      "inputs": [
+        "a scoped public or synthetic task and the exact challenge or integration question"
+      ],
+      "outputs": [
+        "Document exact Codex-assisted build/iterate/ship decisions during event with commits, tests and meaningful acceleration; clean-checkout reproduction of project result",
+        "source references, dependencies and explicitly unverified actions"
+      ],
+      "requiresConnection": false
     }
   ],
   "starterPrompts": [
-    "Turn this feature idea into a Codex task with owned paths, constraints and meaningful acceptance checks.",
-    "Review this diff excerpt for real correctness risks and propose the smallest decisive tests.",
-    "Turn these actual task notes into a handoff that clearly separates changed, verified and blocked work."
+    "Plan a source-backed codex development-impact and reproducibility owner task for this challenge.",
+    "Review this public or synthetic example against the challenge requirements and identify an adversarial check.",
+    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns."
   ],
   "sources": [
     {
@@ -78,12 +92,20 @@
       "publisher": "OpenAI",
       "checkedAt": "2026-11-11",
       "summary": "Official documentation for Codex workflows, environments, extensions and integrations."
+    },
+    {
+      "id": "junction-2026-tech-49",
+      "title": "Best Use of Codex",
+      "url": "https://hackjunction.app/participate/45/tech-challenges/49",
+      "publisher": "Junction2026 / OpenAI / Codex",
+      "checkedAt": "2026-11-13",
+      "summary": "Official challenge text captured from the signed-in participant platform on 13 November 2026. Codex development-impact and reproducibility owner. Required proof and limitations are recorded in the source-bound challenge packet."
     }
   ],
   "sourceEvidence": {
     "roster": "https://chatgpt.com/space/page_48b988e72e108191a5c0499031508d10",
-    "roleVerified": false,
-    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified."
+    "roleVerified": true,
+    "notes": "Current main/technical brief titles, requirements and material links were read from the signed-in official Junction platform on 13 November 2026. The independently authored package is not company endorsed. See CHALLENGE_RESEARCH.md and the shared composition contract; source guidance does not establish a live provider or peer connection."
   },
   "availability": {
     "content": "ready",

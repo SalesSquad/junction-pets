@@ -108,3 +108,7 @@ in PR #56 and does not add a production Chibi route, consent, identity, grant,
 cross-pet memory or host-signed receipt. Actual recipient activation continues
 through the private Chibi host contract above. See the service README for exact
 bounds, reproduction and missing live qualification.
+
+## Source-bound challenge composition —13 November 2026
+
+Read [AGENT_COMPOSITION.md](docs/AGENT_COMPOSITION.md) for all 34 runtime knowledge summaries, canonical peer routing and the Stoa→NVIDIA drawing-specific recipe. Source and region hashes bind the task and result; production execution stays with existing Chibi HostPolicy/PetExecutor/HostArtifactStore. The source graph is not a grant issuer or running-agent registry. Historical benchmark and offline-registry behavior remain separate from drawing interpretation.

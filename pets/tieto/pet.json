@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.tieto",
   "slug": "junction-tieto",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "agentName": "Tieto",
   "displayName": "Tieto companion",
   "company": {
@@ -11,8 +11,8 @@
     "role": "challenge",
     "website": "https://www.tieto.com/"
   },
-  "tagline": "Turn a complex service workflow into a clear integration conversation.",
-  "introduction": "An enterprise workflow companion grounded in Tieto's public service and industry information, helping clarify requirements and handoffs.",
+  "tagline": "Explain why a named human can trust an AI-written change.",
+  "introduction": "Develop a requirement-linked AI review concept and reference illustration for Earned Trust in AI Code. Connect claims to base/head checks, show uncertainty and human-only decisions, and distinguish measured review results from proposed incident/revert proxies.",
   "welcome": "What would you like to understand or plan with Tieto? Choose a starter below, or share a small redacted example.",
   "accent": "#715fa9",
   "artIndex": 17,
@@ -55,12 +55,26 @@
         "pilot scope and success criteria"
       ],
       "requiresConnection": false
+    },
+    {
+      "id": "challenge-design",
+      "title": "Design Tieto challenge support",
+      "description": "Requirement-linked claim-ledger reviewer. Produce a source-backed plan and peer handoff proposal; this capability alone executes no provider, database or physical action.",
+      "kind": "planning",
+      "inputs": [
+        "a scoped public or synthetic task and the exact challenge or integration question"
+      ],
+      "outputs": [
+        "Discriminating checks on supplied MessagePack base/head branches; unsupported claims route to named human",
+        "source references, dependencies and explicitly unverified actions"
+      ],
+      "requiresConnection": false
     }
   ],
   "starterPrompts": [
-    "Map this public-service workflow and identify where users wait or re-enter information.",
-    "What should we ask before connecting these two enterprise systems?",
-    "Turn this automation idea into a small pilot with baseline metrics and a rollback owner."
+    "Plan a source-backed requirement-linked claim-ledger reviewer task for this challenge.",
+    "Review this public or synthetic example against the challenge requirements and identify an adversarial check.",
+    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns."
   ],
   "sources": [
     {
@@ -70,12 +84,20 @@
       "publisher": "Tieto",
       "checkedAt": "2026-11-11",
       "summary": "Official industry, digital service and company information."
+    },
+    {
+      "id": "junction-2026-main-351",
+      "title": "Earned Trust in AI Code",
+      "url": "https://hackjunction.app/participate/45/challenges/351",
+      "publisher": "Junction2026 / Tieto",
+      "checkedAt": "2026-11-13",
+      "summary": "Official challenge text captured from the signed-in participant platform on 13 November 2026. Requirement-linked claim-ledger reviewer. Required proof and limitations are recorded in the source-bound challenge packet."
     }
   ],
   "sourceEvidence": {
     "roster": "https://chatgpt.com/space/page_c088dee43a9c8191b895a861fa24f73c",
-    "roleVerified": false,
-    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+    "roleVerified": true,
+    "notes": "Current main/technical brief titles, requirements and material links were read from the signed-in official Junction platform on 13 November 2026. The independently authored package is not company endorsed. See CHALLENGE_RESEARCH.md and the shared composition contract; source guidance does not establish a live provider or peer connection."
   },
   "availability": {
     "content": "ready",

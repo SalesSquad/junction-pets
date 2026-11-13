@@ -43,3 +43,9 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan löytämään Aallon julkista tutkimusta ja muuttamaan idean selkeäksi tutkimuskysymykseksi. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+## Current challenge and collaboration
+
+Aalto has two independent briefs: autonomous G1 object sorting through the 30 Hz policy interface, and Beyond the Clinic home support after depression treatment. Select the brief explicitly. Robot sorting needs held-out simulation/real evidence; home-care concepts must avoid unsupported clinical effectiveness claims.
+
+Proposed peers: junction.nvidia, junction.verda, junction.intel, junction.qualia, junction.google-deepmind. Public summaries and source references are packaged; execution still depends on the authorized host and actual connection receipts.

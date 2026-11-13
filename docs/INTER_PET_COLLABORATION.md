@@ -1,3 +1,5 @@
+> Current composition update: [all34 public knowledge packages and the Stoa→NVIDIA drawing recipe](AGENT_COMPOSITION.md). The four-pet deterministic demonstration below remains a dated synthetic example, not the complete current capability graph.
+
 # Chibi Council — interoperable companion collaboration
 
 This work adds a **portable, deterministic simulation** of four existing Junction pet packages delegating to each other's declared competencies. It is a usable interactive demo and an integration contract, **not** a live LLM, Chibi host, Codex Cloud session, voice assistant or provider connection.

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.astrazeneca",
   "slug": "junction-astrazeneca",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "agentName": "Astra",
   "displayName": "AstraZeneca companion",
   "company": {
@@ -11,8 +11,8 @@
     "role": "challenge",
     "website": "https://www.astrazeneca.com/"
   },
-  "tagline": "Read public research with its evidence and limits intact.",
-  "introduction": "A research-literacy companion for AstraZeneca's public scientific information, helping explain terminology and organize evidence questions.",
+  "tagline": "Link cancer-care gaps to evidence-based improvement actions.",
+  "introduction": "For Equal Care Across Finland, connect a reliable public-data gap to a care-pathway stage, actionable proposal, responsible owner and evaluation metric, covering a Goal3 indicator. Suppress unsupported comparisons across small counts or mismatched periods; a demo or mentor opinion is not clinical validation.",
   "welcome": "What would you like to understand or plan with AstraZeneca? Choose a starter below, or share a small redacted example.",
   "accent": "#815195",
   "artIndex": 10,
@@ -55,12 +55,26 @@
         "glossary and study-team questions"
       ],
       "requiresConnection": false
+    },
+    {
+      "id": "challenge-design",
+      "title": "Design AstraZeneca challenge support",
+      "description": "Pathway/source binder. Produce a source-backed plan and peer handoff proposal; this capability alone executes no provider, database or physical action.",
+      "kind": "planning",
+      "inputs": [
+        "a scoped public or synthetic task and the exact challenge or integration question"
+      ],
+      "outputs": [
+        "Every recommendation resolves to evidence or labelled assumption, action owner and evaluation metric",
+        "source references, dependencies and explicitly unverified actions"
+      ],
+      "requiresConnection": false
     }
   ],
   "starterPrompts": [
-    "Explain this AstraZeneca research summary and separate the study result from an untested hypothesis.",
-    "Build a claim-evidence table from these public sources and mark what remains unverified.",
-    "Explain randomization, endpoints and eligibility language in this public trial description."
+    "Plan a source-backed pathway/source binder task for this challenge.",
+    "Review this public or synthetic example against the challenge requirements and identify an adversarial check.",
+    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns."
   ],
   "sources": [
     {
@@ -78,12 +92,20 @@
       "publisher": "AstraZeneca",
       "checkedAt": "2026-11-11",
       "summary": "Official clinical trial information linked from AstraZeneca's website."
+    },
+    {
+      "id": "junction-2026-main-344",
+      "title": "Equal Care Across Finland",
+      "url": "https://hackjunction.app/participate/45/challenges/344",
+      "publisher": "Junction2026 / AstraZeneca",
+      "checkedAt": "2026-11-13",
+      "summary": "Official challenge text captured from the signed-in participant platform on 13 November 2026. Pathway/source binder. Required proof and limitations are recorded in the source-bound challenge packet."
     }
   ],
   "sourceEvidence": {
     "roster": "https://chatgpt.com/space/page_b7c0a3169ecc8191b1df5754aa7b07ef",
-    "roleVerified": false,
-    "notes": "Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it."
+    "roleVerified": true,
+    "notes": "Current main/technical brief titles, requirements and material links were read from the signed-in official Junction platform on 13 November 2026. The independently authored package is not company endorsed. See CHALLENGE_RESEARCH.md and the shared composition contract; source guidance does not establish a live provider or peer connection."
   },
   "availability": {
     "content": "ready",
