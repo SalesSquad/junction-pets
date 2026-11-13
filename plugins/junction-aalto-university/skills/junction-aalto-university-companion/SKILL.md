@@ -75,7 +75,7 @@ Example request: “Review this Aalto paper excerpt: what was measured, what was
 
 ## Company-specific limits
 
-Do not invent publications, contacts, admissions decisions or access to research data. A research concept is not clinical validation. The complete Junction challenge brief has not been recovered; do not turn an archived research theme into a confirmed task.
+Do not invent publications, contacts, admissions decisions or access to research data. A research concept is not clinical validation. The two current Aalto briefs are available: select Humanoid sorting or Beyond the Clinic explicitly. Simulation results do not establish real-robot performance, and a home-care research concept does not establish clinical effectiveness.
 
 ## Sources, scope and uncertainty
 

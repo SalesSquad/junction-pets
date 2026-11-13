@@ -169,7 +169,7 @@ test('the shipped example is synthetic, package version is advanced and six auth
   assert.deepEqual(example.advisoryChecks[0].matchedRefs, ['palette']);
   assert.equal(example.componentChecks.find(c => c.ref === 'unversioned').consistency, 'incomplete');
   const pet = JSON.parse(await readFile(new URL('../pets/craci/pet.json', import.meta.url), 'utf8'));
-  assert.equal(pet.version, '0.2.0');
+  assert.equal(pet.version, '0.2.1');
   const evals = await readFile(new URL('../pets/craci/evals.json', import.meta.url));
   assert.equal(JSON.parse(evals).cases.length, 6);
   assert.equal(createHash('sha256').update(evals).digest('hex'), 'd5eee6ac7afea8a6f90f5554c9cd2544aca3eb1a1cc1e295db320262d823e5c7');
