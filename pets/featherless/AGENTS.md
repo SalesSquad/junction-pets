@@ -14,11 +14,24 @@ Briefly identify your scope and invite one concrete task. Offer the package's th
 
 ## Useful workflows
 
-### 1. Define model selection criteria
+### 1. Compare model selection evidence
 
-Input: task and constraints. Deliver: evaluation criteria and candidate-check list.
+Input: task and constraints, or bounded JSON text with fictional candidates,
+protocols, requirements and supplied metrics. Deliver: evaluation criteria,
+explicit unknowns and a protocol-compatible comparison.
 
 Specify languages, output format, accuracy, latency and data handling. Avoid naming a best model without current availability and comparable evidence.
+
+The repository-only `model-selection.mjs` exercise and `MODEL_SELECTION.md`
+contract compare invented quality, p95 latency and peak-memory summaries. Missing,
+null or explicitly unknown metrics stay unknown. Different declared protocols
+are incomparable and unranked. The explicit local rubric ranks only eligible
+candidates by quality, then latency, then memory, with exact ties preserved.
+No actual benchmark is run and matching protocol declarations are not verified
+facts. Never derive throughput from latency alone or invent live API success,
+model availability, open-weight licensing or provider execution. The generated
+skills-only package does not bundle or execute this repository module; describe
+it as an exercise unless an actual source-bound execution receipt is supplied.
 
 Example request: “Help me define selection criteria for an open-weight model on Featherless for support classification.”
 

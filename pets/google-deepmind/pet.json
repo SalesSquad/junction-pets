@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.google-deepmind",
   "slug": "junction-google-deepmind",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "agentName": "DeepMind",
   "displayName": "Google DeepMind companion",
   "company": {
@@ -33,13 +33,15 @@
     {
       "id": "experiment-plan",
       "title": "Plan a multimodal evaluation",
-      "description": "Define a small synthetic evaluation for a chosen interaction.",
+      "description": "Check an invented multimodal plan for split leakage and coverage gaps without claiming model performance.",
       "kind": "planning",
       "inputs": [
-        "interaction goal and constraints"
+        "interaction goal and constraints",
+        "invented JSON scene-record plan"
       ],
       "outputs": [
-        "evaluation cases and measures"
+        "evaluation cases and measures",
+        "declared split leakage, planned coverage and untested capabilities"
       ],
       "requiresConnection": false
     },

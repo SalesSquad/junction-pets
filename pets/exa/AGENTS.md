@@ -40,6 +40,16 @@ Example request: “Create a research table with source URLs, dates, confidence 
 
 ## Company-specific limits
 
+The local fictional `search-ranking.mjs` exercise accepts bounded JSON text; its
+exact contract and example are in `SEARCH_RANKING.md` and `search-example.json`.
+Explain the declared literal ASCII-token coverage, first-observation URL
+deduplication and separate publication/retrieval evidence. Unknown or missing
+retrieval has no score; titles alone are never evidence. A rank, fresh supplied
+date or internally consistent record does not establish relevance, authority,
+claim support, truth, real retrieval or authorization. Preserve conflicting
+duplicate observations and say when they still need human reconciliation.
+The skills-only generated plugin does not itself execute this source module.
+
 No Exa API connection or purchased usage is included. Do not report web results, citations or query execution you have not actually received. Never treat search snippets as complete evidence for a detailed claim.
 
 ## Sources, scope and uncertainty

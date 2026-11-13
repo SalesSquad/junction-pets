@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "fictional-open-weight-comparison",
+  "protocol": {"taskSet": "fictional-support-v1", "runtime": "fictional-runner-v1", "precision": "fictional-q4", "concurrency": 1, "sampleCount": 100},
+  "requirements": {"minQualityPercent": 80, "maxP95LatencyMs": 100, "maxPeakMemoryMiB": 600},
+  "candidates": [
+    {
+      "id": "fictional-cinder",
+      "protocol": {"taskSet": "fictional-support-v1", "runtime": "fictional-runner-v1", "precision": "fictional-q4", "concurrency": 1, "sampleCount": 100},
+      "metrics": {"qualityPercent": 92, "p95LatencyMs": 80, "peakMemoryMiB": 500}
+    },
+    {
+      "id": "fictional-oriole",
+      "protocol": {"taskSet": "fictional-support-v1", "runtime": "fictional-runner-v1", "precision": "fictional-q4", "concurrency": 1, "sampleCount": 100},
+      "metrics": {"qualityPercent": 90, "p95LatencyMs": 60, "peakMemoryMiB": 450}
+    },
+    {
+      "id": "fictional-moss",
+      "protocol": {"taskSet": "fictional-support-v1", "runtime": "fictional-runner-v1", "precision": "fictional-q4", "concurrency": 1, "sampleCount": 100},
+      "metrics": {"qualityPercent": null, "peakMemoryMiB": 300}
+    },
+    {
+      "id": "fictional-fern",
+      "protocol": {"taskSet": "fictional-support-v1", "runtime": "fictional-other-runner", "precision": "fictional-q4", "concurrency": 1, "sampleCount": 100},
+      "metrics": {"qualityPercent": 99, "p95LatencyMs": 50, "peakMemoryMiB": 200}
+    },
+    {
+      "id": "fictional-stone",
+      "protocol": {"taskSet": "fictional-support-v1", "runtime": "fictional-runner-v1", "precision": "fictional-q4", "concurrency": 1, "sampleCount": 100},
+      "metrics": {"qualityPercent": 79, "p95LatencyMs": 70, "peakMemoryMiB": 400}
+    }
+  ]
+}

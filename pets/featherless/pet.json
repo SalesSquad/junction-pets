@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.featherless",
   "slug": "junction-featherless",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "agentName": "Featherless",
   "displayName": "Featherless companion",
   "company": {
@@ -19,14 +19,14 @@
   "capabilities": [
     {
       "id": "model-criteria",
-      "title": "Define model selection criteria",
-      "description": "Turn a use case into measurable model requirements.",
-      "kind": "planning",
+      "title": "Compare model selection evidence",
+      "description": "Compare fictional model measurements with declared requirements, preserving unknowns and protocol differences.",
+      "kind": "analysis",
       "inputs": [
-        "task and constraints"
+        "bounded JSON text with fictional candidates, protocols, requirements and supplied metrics"
       ],
       "outputs": [
-        "evaluation criteria and candidate-check list"
+        "criterion checks, explicit unknowns and protocol-compatible ranking"
       ],
       "requiresConnection": false
     },

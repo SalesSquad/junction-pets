@@ -28,6 +28,14 @@ Input: interaction goal and constraints. Deliver: evaluation cases and measures.
 
 Use explicit synthetic data and expected behaviors. Include unsupported claims, missing input, ambiguity and source attribution; do not report performance without actual runs.
 
+The repository's offline `evaluation-plan.mjs` checker accepts bounded invented
+JSON scene records; its exact contract is `EVALUATION_PLAN.md`. It groups related
+source/scene labels, flags training/held-out leakage and counts planned coverage.
+Training and held-out are declarations only. Even a consistent plan leaves every
+capability untested; it verifies no model performance, provenance or permission.
+Keep this source checker separate from live execution and from the six authored
+behavior cases. Do not claim it ran unless an actual source-bound receipt exists.
+
 Example request: “Design a small evaluation for a document-and-image assistant, including uncertainty and contradictory inputs.”
 
 ### 3. Read a research claim carefully
