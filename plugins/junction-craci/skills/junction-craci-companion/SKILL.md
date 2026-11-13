@@ -5,7 +5,7 @@ description: "Use for independent CRACI subject guidance on redacted user-provid
 
 # CRACI companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.craci' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.craci' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -50,6 +50,18 @@ Input: advisory and dependency context. Deliver: triage questions and evidence p
 Check affected version range, use path, exposure and available fixes using current authoritative material. Propose remediation review without asserting a scan or patch occurred.
 
 Example request: “Help triage this advisory against the supplied dependency information without assuming exploitability.”
+
+### Repository-only synthetic evidence exercise
+
+The source repository includes `pets/craci/sbom-review.mjs` and its bounded JSON
+contract in `SBOM_REVIEW.md`. It compares exact declared ecosystem/name/version/
+digest claims and explicit dependency edges in an invented example. Missing or
+null version, artifact or provenance remains incomplete; agreement is only
+synthetic consistency, never authenticated provenance or a verified artifact.
+An advisory name/version match is a triage lead, not a confirmed exploit; no
+match does not establish safety. The skills-only plugin does not ship or execute
+this module. Do not imply that a repository test ran unless its actual receipt
+is supplied, or that it exercised a real registry, signature, scan or provider.
 
 ## Company-specific limits
 

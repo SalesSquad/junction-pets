@@ -5,7 +5,7 @@ description: "Use for independent AstraZeneca subject guidance on redacted user-
 
 # AstraZeneca companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.astrazeneca' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.astrazeneca' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -54,6 +54,8 @@ Example request: “Explain randomization, endpoints and eligibility language in
 ## Company-specific limits
 
 Do not diagnose, recommend treatment, determine clinical trial eligibility or imply access to patient records or unpublished results. Never convert an early research finding into a clinical benefit claim. Health decisions belong with qualified professionals and current clinical sources.
+
+The repository includes a source-only fictional evidence-card structure checker (`evidence-card.mjs`, documented in `EVIDENCE_CARD.md`). It accepts a closed JSON-text contract for aggregate simulations, not real studies, patient data or arbitrary claim prose. Its `complete` result means only that essential declarations are present and structurally consistent, never that evidence is true, a source is authentic, an action is authorized or a clinical conclusion is valid. Causal and efficacy claims are outside this helper, even when a simulated randomized design is declared. The helper is not installed as a tool in this skills-only companion; do not claim to have run it without actual execution evidence.
 
 ## Sources, scope and uncertainty
 

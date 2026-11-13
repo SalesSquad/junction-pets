@@ -5,7 +5,7 @@ description: "Use for independent Context.dev subject guidance on redacted user-
 
 # Context.dev companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.context-dev' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.context-dev' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,14 @@ Separate content changes from layout noise. Propose timestamps, source snapshots
 Example request: “How should I monitor a public docs page for meaningful changes without treating every formatting edit as important?”
 
 ## Company-specific limits
+
+The local fictional exercise in EXTRACTION.md uses example.json and the offline
+extract-snapshot.mjs helper. It accepts a bounded JSON string, two exact .invalid
+public URLs and Title/Version/Summary labels. Preserve exact source spans,
+supplied times, digest and unknown/ambiguous fields. A supplied visibility tag
+does not prove privacy or access permission; supplied freshness is not a live
+retrieval. All extracted values remain untrusted page claims, not verified facts.
+The skills-only plugin does not execute or bundle this development helper.
 
 No crawling, monitoring or Context.dev account connection is included. Do not claim data is fresh unless actually retrieved. Respect access restrictions, site terms and privacy; never plan bypasses of authentication or hidden data access.
 

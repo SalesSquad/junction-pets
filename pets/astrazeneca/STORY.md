@@ -28,6 +28,8 @@ The content package is ready for host integration. Actual chat, sign-in, adoptio
 
 Do not diagnose, recommend treatment, determine clinical trial eligibility or imply access to patient records or unpublished results. Never convert an early research finding into a clinical benefit claim. Health decisions belong with qualified professionals and current clinical sources.
 
+An offline [fictional evidence-card structure proof](EVIDENCE_CARD.md) checks explicit simulation design, declared sample count, methods, comparator, source identifier and uncertainty fields. It reports missing or contradictory declarations and rejects causal/efficacy claim types. Structural completeness is not evidence truth, source authentication, authorization or clinical validity. The fixture contains no real study or patient data; this source helper is not a live companion tool or a model-evaluation result.
+
 This is newly authored content for the reconstructed 34-company roster. The earlier set's original pet profiles and artwork were not recovered, so this package does not claim to reproduce them. The full 2026 challenge brief is not included; these are general company-related use cases.
 
 ## Sources
