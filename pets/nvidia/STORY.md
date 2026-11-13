@@ -1,6 +1,6 @@
 # NVIDIA companion
 
-Connect a GPU or robotics goal to the right NVIDIA documentation.
+Turn visual evidence into tool-backed engineering decisions with Nemotron.
 
 A technical navigation companion for NVIDIA developer resources, helping scope workloads and design reproducible performance or simulation checks.
 
@@ -11,6 +11,21 @@ This is an independently created companion, not an official or endorsed NVIDIA r
 - **Map a workload to a stack:** Identify relevant NVIDIA developer areas from a stated compute or robotics goal. The result is documentation path and prerequisites.
 - **Plan a performance measurement:** Define a comparable GPU workload benchmark. The result is benchmark specification.
 - **Review a simulation experiment:** Identify coverage and transfer questions in a robotics simulation plan. The result is scenario and validation checklist.
+
+## Nemotron visual engineering workflow
+
+The optional [developer harness](../../services/nemotron-vl/README.md) makes
+Nemotron 3.5 Super VL central to the work: inspect supplied public/synthetic
+visual evidence, select bounded read-only tools, synthesize their actual results
+and verify the conclusion. It uses the exact NVIDIA-hosted model identifier
+`nvidia/nemotron-3.5-super-vl-120b-a12b` rather than substituting an older model.
+
+The existing benchmark checker supplies deterministic comparability evidence;
+Nemotron explains its implications and unknowns. The workflow records actual
+model/tool counts, usage and source digests when executed. A fixture or unit-test
+pass is not a live model result. No local CUDA run or measured speedup is implied.
+This finite developer path requires an approved provider key; Chibi sign-in,
+consent and recipient activation remain separate host work.
 
 ## Start a conversation
 
@@ -32,15 +47,19 @@ does not run a GPU or prove measured performance.
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
-No GPU, NVIDIA cloud account or robotics simulator is connected. Do not claim to run CUDA, Isaac or inference, guarantee compatibility, or report speedups without measured evidence. Check exact hardware and software versions.
+No default GPU, NVIDIA account or robotics simulator is connected. Actual developer model execution requires its own provider evidence; it does not prove CUDA, Isaac, measured GPU performance or a live Chibi recipient. Check exact hardware and software versions.
 
 This is newly authored content for the reconstructed 34-company roster. The earlier set's original pet profiles and artwork were not recovered, so this package does not claim to reproduce them.
+
+Try: “Inspect this synthetic workload diagram, use the benchmark evidence tool, and verify what your recommendation actually proves.”
 
 ## Sources
 
 - [NVIDIA Developer](https://developer.nvidia.com/) — Official developer tools, documentation, tutorials and learning resources.
+- [Nemotron 3.5 Super VL API](https://build.nvidia.com/nvidia/nemotron-3.5-super-vl-120b-a12b) — Exact hosted model and multimodal/tool capabilities.
+- [Model card](https://build.nvidia.com/nvidia/nemotron-3.5-super-vl-120b-a12b/modelcard) — Official model usage guidance.
 
-Source review date: 2026-11-11. Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified.
+Nemotron API and model card checked 2026-11-13; original developer-source review date: 2026-11-11. Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified.
 
 ## Suomeksi
 
