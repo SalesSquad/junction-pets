@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "scenario": "fictional",
+  "allowedHosts": ["docs.example.invalid"],
+  "limits": {"maxPages": 2, "maxRetries": 1, "timeoutSeconds": 30, "maxAgeHours": 24},
+  "fields": [{"name": "title", "personal": false}],
+  "targets": [{
+    "id": "page-a",
+    "url": "https://docs.example.invalid/guide",
+    "visibility": "public",
+    "permission": "allowed",
+    "robots": "allowed",
+    "sample": {"records": 2, "missingRequired": 0, "duplicates": 0, "ageHours": 1}
+  }]
+}

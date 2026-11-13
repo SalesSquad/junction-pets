@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "scenario": "fictional",
+  "jobId": "invented-documents",
+  "items": [
+    {"id": "doc-a", "inputSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    {"id": "doc-b", "inputSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+  ],
+  "retry": {"maxRetries": 2, "maxAttempts": 3, "keyPolicy": "stable-per-item"},
+  "resources": {"timeoutSeconds": 60, "cpuUnits": 2, "memoryMiB": 512, "gpuUnits": 0, "parallelism": 2},
+  "ceilings": {"timeoutSeconds": 300, "cpuUnits": 4, "memoryMiB": 1024, "gpuUnits": 0, "parallelism": 4},
+  "budget": {"unit": "fictional-credit", "creditsPerAttempt": 5, "maxCredits": 100}
+}

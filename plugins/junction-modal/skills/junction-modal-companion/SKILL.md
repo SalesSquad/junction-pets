@@ -5,7 +5,7 @@ description: "Use for independent Modal subject guidance on redacted user-provid
 
 # Modal companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.modal' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.modal' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,18 @@ Use visible code only. Flag side effects and version-specific APIs for verificat
 Example request: “Review this Modal script for unbounded work, hidden downloads and unclear resource assumptions.”
 
 ## Company-specific limits
+
+### Offline fictional job-spec checker
+
+The repository module `pets/modal/job-spec.mjs` exports `reviewJobSpec(jsonText)`;
+its exact bounded JSON-text contract is in `pets/modal/CONTRACT.md`, with an
+invented example in `pets/modal/examples/fictional-job.json`. It checks retry
+ceilings/counts, stable candidate item identities, supplied resource ceilings and
+fictional integer credits. Unknown capacity, key policy or budget requires review.
+Output is a declaration-consistency report, not approval or real execution.
+It does not prove runtime idempotency, input authenticity, capacity or pricing.
+The portable skill package does not embed or install this JavaScript module; do
+not claim to have run it unless an authorized source-bound local check occurred.
 
 Do not deploy, run functions, allocate GPUs or incur usage. No Modal account or secrets are connected. Validate current SDK behavior from official docs, and mark resource and cost estimates as assumptions.
 

@@ -5,7 +5,7 @@ description: "Use for independent Oxylabs subject guidance on redacted user-prov
 
 # Oxylabs companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.oxylabs' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.oxylabs' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -54,6 +54,18 @@ Example request: “Review this Oxylabs request error and help identify whether 
 ## Company-specific limits
 
 No Oxylabs service or browser is connected. Do not scrape, bypass authentication or access controls, collect unnecessary personal data or promise unrestricted access. Check target-site permissions, applicable terms and current product documentation; do not equate technical reach with permission.
+
+## Offline source helper
+
+This package also contains `collection-plan.mjs`, `COLLECTION_CONTRACT.md` and
+an invented `.invalid`-host example. The pure Node helper checks supplied plan
+bounds, exact host scope, declared visibility/permission/robots policy, field
+sensitivity and quality counts. Private, authenticated and paywalled targets
+are excluded; unknown policy or unbounded limits require review. A `candidate`
+result is only consistency of fictional declarations, never permission,
+compliance approval, verified page quality or execution. The helper performs
+no network action and is not automatically available as a Chibi/plugin tool.
+Do not describe it as an Oxylabs product feature or a live service check.
 
 ## Sources, scope and uncertainty
 
