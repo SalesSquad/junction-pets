@@ -4,7 +4,8 @@ Canonical repository: **SalesSquad/junction-pets**. Work lane:
 `junction.meta.scan-lane-v1`, developer `junction-dev-meta`.
 
 This page lets another Codex/Claude/developer agent resume without this chat or
-access to a Mac. This research/onboarding page is integrated in main. The executable scan service remains in [PR #60](https://github.com/SalesSquad/junction-pets/pull/60), branch `codex/junction-meta-scan-lane-20261113`, until separately integrated. Runtime links below pin its recorded source; recheck the current PR state before writing.
+access to a Mac. This integration branch incorporates the original [PR #60](https://github.com/SalesSquad/junction-pets/pull/60)
+source-only runtime kernel and these research records. Confirm current GitHub main and merged PR before treating runtime as default-branch code; even successful source integration does not grant live Meta-device or Chibi-host access.
 
 ## Read in this order
 
@@ -14,10 +15,10 @@ access to a Mac. This research/onboarding page is integrated in main. The execut
 | Full hardware / SDK / ARKit / spatial research | [Technical deep dive](research/META_GLASSES_ARKIT_20261113.md) |
 | Official Discord posts and original links | [Discord source record](evidence/meta-discord-20261113.json) |
 | Machine-readable discovery | [Source index](evidence/meta-source-index-20261113.json) |
-| Runnable agent and host-port contracts | [Service README](https://github.com/SalesSquad/junction-pets/blob/fb90ab5a6206aac12f96862dbdd486d593656843/services/meta-spatial/README.md) |
-| Runtime behavior and tool meanings | [Agent profile](https://github.com/SalesSquad/junction-pets/blob/fb90ab5a6206aac12f96862dbdd486d593656843/services/meta-spatial/agent-profile.md) |
-| Code, tests and synthetic fixture | [Service directory](https://github.com/SalesSquad/junction-pets/tree/fb90ab5a6206aac12f96862dbdd486d593656843/services/meta-spatial/) |
-| Source hashes, checks and review repairs | [Validation record](https://github.com/SalesSquad/junction-pets/blob/fb90ab5a6206aac12f96862dbdd486d593656843/docs/evidence/meta-scan-validation-20261113.json) |
+| Runnable agent and host-port contracts | [Service README](../services/meta-spatial/README.md) |
+| Runtime behavior and tool meanings | [Agent profile](../services/meta-spatial/agent-profile.md) |
+| Code, tests and synthetic fixture | [Service directory](../services/meta-spatial/) |
+| Source hashes, checks and review repairs | [Validation record](evidence/meta-scan-validation-20261113.json) |
 | Existing Meta subject companion | [Meta package](../pets/meta/) |
 
 ## Official resources confirmed in Discord
@@ -47,8 +48,6 @@ The first kernel implements inspect, find and verify through trusted host ports.
 It preserves historical sightings, uncertainty, source revisions, capture identity
 and registration boundaries. It does not implement the real capture adapter,
 private persistent memory or a production provider route.
-
-The commands below require the PR #60 source checkout; the service is not installed by this main-branch documentation update.
 
 ```sh
 node --test services/meta-spatial/agent.test.mjs

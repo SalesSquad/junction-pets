@@ -1,5 +1,3 @@
-> Integration note: this design record and its research sources are available in main. The executable `services/meta-spatial/` slice remains in [PR #60](https://github.com/SalesSquad/junction-pets/pull/60) until separately integrated; recorded tests qualify that source only.
-
 # Chibi Lens: scalable Meta scanning and spatial-memory lane
 
 Work ID: `junction.meta.scan-lane-v1`. Source base:

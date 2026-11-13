@@ -12,6 +12,10 @@ Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS
 
 [The composition contract](docs/AGENT_COMPOSITION.md) and [34-agent graph](ops/agent-composition-20261113.json) now bind current challenge summaries to actual runtime instruction packages and generated skills. Stoa can propose a bounded NVIDIA drawing-observation handoff through the fixed developer recipe. Run npm run agents:check and npm run demo:stoa-nvidia; the default is offline. New package guidance does not inherit earlier model scores or imply active Chibi/provider connections.
 
+## Meta scanning source-only kernel
+
+The original Meta scanning PR #60 (https://github.com/SalesSquad/junction-pets/pull/60) adds a bounded, host-injected synthetic Chibi Lens kernel in services/meta-spatial/. This integration branch contains the tested source; main availability must be verified at handoff. Real Meta DAT/ARKit, Chibi identity and memory, source rights, live provider inference and device scans are NOT qualified. Start at docs/META_START_HERE.md and use only the authorized HostPolicy for real calls.
+
 ## Start a new agent
 
 Read [START_HERE.md](START_HERE.md) for the common onboarding path, all 34 agent research packets, current source boundaries and pending runtime extensions. [The machine-readable source map](docs/AGENT_SOURCE_INDEX.json) supports Codex/Claude tools. Meta-specific work starts at [META_START_HERE.md](docs/META_START_HERE.md). Fetch current main and open PR heads before editing; dated status paragraphs below are historical checkpoints.
