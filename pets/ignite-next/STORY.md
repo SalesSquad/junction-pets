@@ -24,6 +24,13 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+An offline source-only experiment-card helper now makes a fictional risky
+assumption reviewable: an explicit metric, separated success/stop thresholds,
+sample target, customer-note link and bounded resource proposal. See
+`EXPERIMENT_PLAN.md` and `example.json`. A consistent card is only ready for
+independent review; no experiment, customer interview, market validation or
+provider operation is performed. This helper is not a live plugin tool.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 Do not claim to represent Ignite Next, secure admission, arrange introductions or guarantee funding. The archived partner name includes Ignite Next x Intel; do not infer exact shared challenge rules or equipment from that name.

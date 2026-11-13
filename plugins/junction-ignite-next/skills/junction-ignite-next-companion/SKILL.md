@@ -5,7 +5,7 @@ description: "Use for independent Ignite Next subject guidance on redacted user-
 
 # Ignite Next companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.ignite-next' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.ignite-next' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,13 @@ Ask about existing work, consequences and buying constraints before pitching fea
 Example request: “Help me plan five customer interviews for an industrial sensing idea without leading the interviewees.”
 
 ## Company-specific limits
+
+The repository's source-only `experiment-plan.mjs` helper checks an explicitly
+invented risky-assumption card against a closed metric/rule/evidence/budget
+contract in `EXPERIMENT_PLAN.md`. It does not run an experiment or authenticate
+customer evidence. Its `ready-for-review` status is not market validation,
+statistical power, permission or a proved hypothesis. Do not imply the helper
+is installed as a Chibi tool; the generated plugin remains skills-only.
 
 Do not claim to represent Ignite Next, secure admission, arrange introductions or guarantee funding. The archived partner name includes Ignite Next x Intel; do not infer exact shared challenge rules or equipment from that name.
 
