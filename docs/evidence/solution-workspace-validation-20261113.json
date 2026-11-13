@@ -1,0 +1,125 @@
+{
+  "work_id": "junction.solution-workspaces.bootstrap",
+  "source_base": "5852fa406a7ea38ed02f0f83ab9b904ad427bccc",
+  "tested_code_commit": "b47e0db446130e2c29fffb75518e7ef38b3e63a1",
+  "executor": "authorized isolated MacBook Pro worktree",
+  "node": "v26.13.0",
+  "dirty_baseline": "clean",
+  "checks": [
+    {
+      "name": "install",
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts"
+      ],
+      "exit_code": 0,
+      "seconds": 2.998534
+    },
+    {
+      "name": "workspace",
+      "command": [
+        "node",
+        "scripts/solution-workspace.mjs",
+        "check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.368958
+    },
+    {
+      "name": "focused",
+      "command": [
+        "node",
+        "--test",
+        "tests/solution-workspace.test.mjs"
+      ],
+      "exit_code": 0,
+      "seconds": 0.563364
+    },
+    {
+      "name": "validate",
+      "command": [
+        "npm",
+        "run",
+        "validate"
+      ],
+      "exit_code": 0,
+      "seconds": 1.319416
+    },
+    {
+      "name": "test",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exit_code": 0,
+      "seconds": 20.453665
+    },
+    {
+      "name": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "seconds": 5.575491
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.04614
+    }
+  ],
+  "observed_results": {
+    "root_node_tests": {
+      "passed": 714,
+      "failed": 0,
+      "skipped": 0
+    },
+    "focused": {
+      "passed": 7,
+      "failed": 0
+    },
+    "root_validate": "pass; 34 packages and 1 solution",
+    "catalog_build": "pass; TypeScript and Vite"
+  },
+  "source_file_sha256": {
+    "AGENTS.md": "39e7ea001d4b9cf0beb005b1c561aace7565998740c2ccdad066d99a8c1a557f",
+    "ARCHITECTURE.md": "ed41892c6aaef6133c3e7068d455307aeea75544e6367498dcd28ae3063b53a2",
+    "README.md": "341ce4f7187a9131e6b74e2c627bf0e3b6e1a14d020373e5564fc7140805fb76",
+    "START_HERE.md": "56c6d41d3286c38b0716eaed89dcee44ff74c9bba3145627ca8373f3c6274108",
+    "docs/SOLUTION_WORKSPACES.md": "bd980ccbdff5daf974e36867802c25769a79488517f287f9b7107ee3b535d002",
+    "scripts/solution-workspace.mjs": "41dd770a74f75a0ee7adb8d8f25cb03d32c437da05ce38c6ae7b7e440dac480f",
+    "scripts/validate.mjs": "7dc490329db63c237f7630f2747b685cdb679029316eec7e99d455928988be7c",
+    "solutions/README.md": "ba30f3f97408be25acec56c367ccdf642b1e7ec89de462aa2980dd9e236695b5",
+    "solutions/meta-find-verify/AGENTS.md": "9730db523d8b0007fb5349a3ac2241785b127248e6f2b2c98b32c5354fe44154",
+    "solutions/meta-find-verify/ARCHITECTURE.md": "e78fa83c0ec1ca0d5f372c706da6f8d85fce1aa170f3eb69527e5e47366d95c0",
+    "solutions/meta-find-verify/PROGRESS.md": "14dba2f37234f30a97c4f232e5b7a656b8b3bcd8c8a72267fc184e252df5b612",
+    "solutions/meta-find-verify/README.md": "39576e7851c77666e54a989ec079b6fd438e8a1896c03739a62be361e79eb269",
+    "solutions/meta-find-verify/solution.json": "aea11cca5f8d04db95de00924dbb77e69f4a4870fde35572836f86f5710d2397",
+    "tests/solution-workspace.test.mjs": "083cc84ade930ee541b16ff450b941e6a09b4ef8560809b8933db774edd476fd"
+  },
+  "independent_review": {
+    "tool": "actual Claude Code",
+    "model": "claude-sonnet-5-5",
+    "round1_source": "73917c8139a83fdfae96dba026bec37f443b17b4",
+    "round1_verdict": "READY",
+    "final_source": "b47e0db446130e2c29fffb75518e7ef38b3e63a1",
+    "final_verdict": "READY",
+    "final_review_sha256": "806be06888bd67dfcf89bc042619e7dfd9d5970a201c6f388cb188493a219833",
+    "method": "Read/Glob/Grep only, no shell/network/edits; coordinator ran checks",
+    "coordinator_note": "The final reviewer inaccurately described JS end anchors. Actual trailing-newline rejection is enforced by isSlug trim equality and SHA exact length; regression tests passed."
+  },
+  "not_verified": [
+    "No new cloud executor provisioned",
+    "No live runtime agent collaboration or device capture",
+    "No deployment, merge or competition submission"
+  ],
+  "next_action": "After reviewed integration, assign a developer to the Meta workspace next task or scaffold another solution."
+}
