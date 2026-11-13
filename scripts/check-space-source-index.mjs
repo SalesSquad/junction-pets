@@ -22,8 +22,14 @@ export function validateSpaceSources(index, map) {
     requireValid(typeof agent?.slug === 'string' && agent.id === `junction.${agent.slug}`, 'invalid agent identity');
     requireValid(!seenAgents.has(agent?.id), `duplicate agent ${agent?.id}`);
     seenAgents.add(agent?.id);
-    for (const field of ['manifest', 'runtimeProfile', 'research', 'developerConfiguration']) {
-      requireValid(typeof agent?.[field] === 'string' && agent[field].length > 0, `missing ${field}: ${agent?.id}`);
+    const routes = {
+      manifest: `pets/${agent?.slug}/pet.json`,
+      runtimeProfile: `pets/${agent?.slug}/AGENTS.md`,
+      research: `pets/${agent?.slug}/CHALLENGE_RESEARCH.md`,
+      developerConfiguration: `ops/environments/${agent?.slug}.json`,
+    };
+    for (const [field, expected] of Object.entries(routes)) {
+      requireValid(agent?.[field] === expected, `invalid canonical ${field} route: ${agent?.id}`);
     }
   }
 
@@ -67,7 +73,7 @@ export function validateSpaceSources(index, map) {
     requireValid(PAGE_ID.test(page?.page_id ?? ''), `invalid card page ID: ${page?.page_id}`);
     requireValid(!seenPages.has(page?.page_id), `duplicate card page ID: ${page?.page_id}`);
     seenPages.add(page?.page_id);
-    requireValid(page?.url === `https://chatgpt.com/space/${page.page_id}`, `noncanonical card URL: ${page?.page_id}`);
+    requireValid(page?.url === `https://chatgpt.com/space/${page?.page_id}`, `noncanonical card URL: ${page?.page_id}`);
     requireValid(page?.readback_verified === true, `unverified card ${page?.page_id}`);
   }
   const canonicalURLs = new Set(pages.map(page => page?.url));
