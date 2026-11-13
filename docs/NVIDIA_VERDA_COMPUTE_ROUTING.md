@@ -253,3 +253,8 @@ These original reported capacity observations distinguish requested route, actua
   }
 }
 ~~~
+
+
+## Verda service discovery follow-up
+
+Read [VERDA_SERVICE_MAP.md](VERDA_SERVICE_MAP.md) for the 13 November authenticated GPU catalog versus VM availability, complete service-to-workload map, current CLI credential-setup gaps and primary documentation. This is developer discovery and a proposed implementation sequence; it does not claim a GPU job, endpoint or live inference is running.
