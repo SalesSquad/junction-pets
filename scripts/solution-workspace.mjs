@@ -21,7 +21,7 @@ export function validateSolution(value, agents, expectedId = value?.id) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected solution object');
   const fields = ['schemaVersion', 'id', 'title', 'objective', 'baseCommit', 'challengeSlugs', 'agentIds', 'stage', 'ownedPaths', 'capabilityUses'];
   if (Object.keys(value).some((key) => !fields.includes(key)) || fields.some((key) => !(key in value))) throw new Error('Unexpected or missing solution fields');
-  if (value.schemaVersion !== 1 || !slugPattern.test(value.id) || value.id !== expectedId) throw new Error('Invalid solution identity');
+  if (value.schemaVersion !== 1 || typeof value.id !== 'string' || !slugPattern.test(value.id) || value.id !== expectedId) throw new Error('Invalid solution identity');
   if (!text(value.title) || !text(value.objective) || !shaPattern.test(value.baseCommit)) throw new Error('Title, objective and exact base commit are required');
   if (!['idea', 'building', 'demo', 'submitted', 'paused'].includes(value.stage)) throw new Error('Invalid stage');
   for (const key of ['challengeSlugs', 'agentIds', 'ownedPaths', 'capabilityUses']) if (!Array.isArray(value[key])) throw new Error(`${key} must be an array`);

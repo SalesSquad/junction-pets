@@ -72,6 +72,7 @@ versioned development, not automatic mixing of private user memories.
 | Product implementation | Product's explicit acceptance command | Its tests/demo and root gates relevant to changed paths |
 | Shared agent/service | Owning module's declared tests | Existing root contributor gates and independent review |
 
+The root validator also checks all solution manifests and required handoff files.
 Root checks remain `npm ci --ignore-scripts`, `npm run validate`, `npm test`,
 `npm run build`; use existing authorized runners rather than adding GitHub Actions.
 Record timings as measured, never as an invented SLA. A `stage` is a developer
