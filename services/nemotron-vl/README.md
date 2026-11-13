@@ -40,3 +40,7 @@ The REST body uses top-level `chat_template_kwargs`, not the Python SDK's `extra
 ## Existing portfolio knowledge
 
 For development and the next evidence workflow, read the [source-pinned knowledge reuse audit](../../docs/NVIDIA_KNOWLEDGE_REUSE.md). It records the actual DSH corpus queries, both computer inventories, existing project mechanisms and freshness gaps. Its private developer receipt is not automatically loaded into provider prompts or public plugin exports.
+
+## Drawing observations and fixed Stoa composition
+
+The drawing entrypoint `runDrawingObservation` reuses this exact-model bounded transport but has a separate question/source/page/region input and no benchmark requirement. It returns region-cited model interpretations or abstention after same-model review. `validateDrawingObservationResult` supports structural rechecking at the composing boundary. The fixed [Stoa→NVIDIA developer recipe](../stoa-nvidia/README.md) binds both identities and the parent request; its CLI defaults to zero-network planning. Source classifications and coordinates remain caller declarations, model review is not independent truth, and production uses existing host policy/executor/artifact seams. No live provider or sponsor-drawing qualification is implied.
