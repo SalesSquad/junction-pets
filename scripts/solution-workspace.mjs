@@ -6,6 +6,7 @@ import {execFileSync} from 'node:child_process';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const shaPattern = /^[a-f0-9]{40}$/;
+const isSlug = (value) => typeof value === 'string' && value.trim() === value && slugPattern.test(value);
 const text = (value) => typeof value === 'string' && value.trim().length > 0;
 const readJson = async (file) => JSON.parse(await readFile(file, 'utf8'));
 
@@ -21,8 +22,8 @@ export function validateSolution(value, agents, expectedId = value?.id) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected solution object');
   const fields = ['schemaVersion', 'id', 'title', 'objective', 'baseCommit', 'challengeSlugs', 'agentIds', 'stage', 'ownedPaths', 'capabilityUses'];
   if (Object.keys(value).some((key) => !fields.includes(key)) || fields.some((key) => !(key in value))) throw new Error('Unexpected or missing solution fields');
-  if (value.schemaVersion !== 1 || typeof value.id !== 'string' || !slugPattern.test(value.id) || value.id !== expectedId) throw new Error('Invalid solution identity');
-  if (!text(value.title) || !text(value.objective) || !shaPattern.test(value.baseCommit)) throw new Error('Title, objective and exact base commit are required');
+  if (value.schemaVersion !== 1 || !isSlug(value.id) || value.id !== expectedId) throw new Error('Invalid solution identity');
+  if (!text(value.title) || !text(value.objective) || typeof value.baseCommit !== 'string' || value.baseCommit.length !== 40 || !shaPattern.test(value.baseCommit)) throw new Error('Title, objective and exact base commit are required');
   if (!['idea', 'building', 'demo', 'submitted', 'paused'].includes(value.stage)) throw new Error('Invalid stage');
   for (const key of ['challengeSlugs', 'agentIds', 'ownedPaths', 'capabilityUses']) if (!Array.isArray(value[key])) throw new Error(`${key} must be an array`);
   for (const key of ['challengeSlugs', 'agentIds']) if (new Set(value[key]).size !== value[key].length) throw new Error(`Duplicate ${key}`);
@@ -55,7 +56,7 @@ export async function checkSolutions(repo) {
 }
 
 export async function createSolution(repo, {id, challenge, agent, baseCommit}) {
-  if (!slugPattern.test(id ?? '')) throw new Error('Use a lowercase solution slug');
+  if (!isSlug(id)) throw new Error('Use a lowercase solution slug');
   const agents = await agentCatalog(repo);
   const selected = agents.find((item) => item.company.slug === agent);
   if (!selected) throw new Error('Unknown agent company slug');
@@ -69,12 +70,16 @@ export async function createSolution(repo, {id, challenge, agent, baseCommit}) {
     'ARCHITECTURE.md': `# ${id} architecture\n\n## Components\n\n| Component | Existing source or new owned path | Interface | State |\n| --- | --- | --- | --- |\n| Product UI/service/data | TODO | TODO | planned |\n| Agent | \`pets/${agent}/\` | Existing declared capabilities | content only; execution separately qualified |\n\n## Reuse and dependencies\n\nRecord source SHA, PR/base/dependencies, contract, integration owner and next action for each reused pending implementation. Keep source in its existing location.\n\n## Capability composition\n\nList planned agent capability references in solution.json. That list grants no execution authority. Reuse [existing collaboration contracts](../../docs/INTER_PET_COLLABORATION.md); Chibi owns production identity, consent, memory and model/tool dispatch. Record measured provider/host evidence separately.\n\n## Knowledge and learning\n\nKeep challenge/product findings here with sources. Propose reusable expertise updates to the owning pet/service through a separate bounded PR and evaluation; never silently merge private user memories.\n`,
     'PROGRESS.md': `# ${id} continuation\n\nStage: idea; scaffold only. No worker, runtime, demo or submission is established.\n\n## Next task\n\n- Work ID: junction.solution.${id}.first-slice\n- Base SHA: ${baseCommit}\n- Owner and task/PR URL: unassigned\n- Owned paths: solutions/${id}/\n- Objective: replace the brief TODOs with one demonstrable vertical slice\n- Acceptance command and expected result: TODO before implementation\n- Blocker: product slice has not been specified\n- Next action: assigned developer reads the challenge and defines the smallest user-visible slice\n\n## Evidence\n\nRecord exact tested SHA, commands, observed output, executor and evidence links. Separate planned, synthetic, actual provider, hardware and submitted evidence. At handoff preserve the next executable task here and in the PR.\n`
   };
-  for (const [name, content] of Object.entries(files)) await writeFile(path.join(directory, name), content, {flag: 'wx'});
+  try {
+    for (const [name, content] of Object.entries(files)) await writeFile(path.join(directory, name), content, {flag: 'wx'});
+  } catch (error) {
+    throw new Error(`Incomplete scaffold at ${directory}; preserve existing files and complete missing files from the template before check. Cause: ${error.message}`);
+  }
   return solution;
 }
 
 export async function briefSolution(repo, id) {
-  if (!slugPattern.test(id ?? '')) throw new Error('Invalid solution slug');
+  if (!isSlug(id)) throw new Error('Invalid solution slug');
   const agents = await agentCatalog(repo);
   const solution = validateSolution(await readJson(path.join(repo, 'solutions', id, 'solution.json')), agents, id);
   return {solution, readFirst: ['START_HERE.md', 'AGENTS.md', 'docs/SOLUTION_WORKSPACES.md', `solutions/${id}/AGENTS.md`, `solutions/${id}/README.md`, `solutions/${id}/ARCHITECTURE.md`, `solutions/${id}/PROGRESS.md`, ...solution.challengeSlugs.map((slug) => `pets/${slug}/CHALLENGE_RESEARCH.md`)], execution: 'developer handoff only; no worker or runtime is started'};

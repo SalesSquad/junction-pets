@@ -49,7 +49,7 @@ test('repeated scaffolding preserves all existing product work', async (t) => {
 
 test('unsafe IDs and unknown agents/challenges cannot create a workspace', async (t) => {
   const root = await fixture(t);
-  for (const id of ['../escape', '/tmp/escape', 'Upper', 'bad\nname']) {
+  for (const id of ['../escape', '/tmp/escape', 'Upper', 'bad\nname', 'bad\n']) {
     await assert.rejects(createSolution(root, {id, agent: 'meta', baseCommit: sha}));
   }
   await assert.rejects(createSolution(root, {id: 'unknown', agent: 'missing', baseCommit: sha}), /Unknown agent/);
@@ -81,4 +81,20 @@ test('a workspace cannot silently claim shared source or change its directory id
   assert.throws(() => validateSolution({...value, baseCommit: 'main'}, [agent]), /exact base commit/);
   value.unrecognizedAuthority = true;
   assert.throws(() => validateSolution(value, [agent]), /Unexpected/);
+});
+
+
+test('several agent skills can be composed while incomplete handoffs fail validation', async (t) => {
+  const root = await fixture(t);
+  const other = {id: 'junction.nvidia', company: {slug: 'nvidia'}, capabilities: [{id: 'performance-plan'}]};
+  await mkdir(path.join(root, 'pets/nvidia'));
+  await writeFile(path.join(root, 'pets/nvidia/pet.json'), JSON.stringify(other));
+  const value = await createSolution(root, {id: 'combined', agent: 'meta', baseCommit: sha});
+  value.agentIds.push('junction.nvidia');
+  value.capabilityUses = [{agentId: 'junction.nvidia', capabilityId: 'performance-plan', purpose: 'Plan measured inference', status: 'planned'}];
+  await writeFile(path.join(root, 'solutions/combined/solution.json'), JSON.stringify(value));
+  assert.equal((await checkSolutions(root))[0].agentIds.length, 2);
+  assert.throws(() => validateSolution({...value, baseCommit: sha + '\n'}, [agent, other]), /exact base commit/);
+  await rm(path.join(root, 'solutions/combined/PROGRESS.md'));
+  await assert.rejects(checkSolutions(root), /ENOENT/);
 });
