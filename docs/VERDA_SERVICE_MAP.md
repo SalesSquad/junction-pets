@@ -73,3 +73,17 @@ For batch execution use the actual deployment metadata's authoritative endpoint,
 - [Official Junction event and Best use of Verda](https://verda.com/blog/junction-2026)
 
 The authenticated Junction Platform brief, captured in the [Verda challenge card](https://chatgpt.com/space/page_40ee62c902108191bb7b43c71ded5f9d), is the current challenge authority: document the process and post a link to its summary in Verda's Discord channel. It lists USD10,000 in cloud credits plus hoodies for first place and USD2,500 each for second and third, superseding the older EUR amounts on Verda's blog. The brief explicitly excludes crypto mining. The original catalog snapshot did not qualify execution; the later experiments section records the narrower verified results. No award eligibility outcome is claimed.
+
+
+## 14 November 2026 — executed service and model results
+
+The following source-pinned outcomes supersede the earlier “proposed integrations” and “in progress” statements for these specific trials. Full safe source/receipts: [agents PR #106 at commit 57f55119410d065727dec2c37079195c33fea6f8](https://github.com/SalesSquad/agents/pull/106), under `cloud-services/verda/experiments/services-20261114/` and `nemotron-local-20261114/`.
+
+- NVMe 64 MiB write/fsync/read hash, two-host SFS 64 KiB handoff, two-GPU single-host NCCL/DDP oracle check, and native CLI stdio MCP read-only request all passed.
+- One real H100 serverless CUDA computation passed; its owned deployments were paused afterwards. OCI registry push plus digest/blob readback passed. These do not prove Docker runtime deployment.
+- Instant Clusters returned empty availability arrays for the three queried regions; no cluster was created.
+- Local NVIDIA Nemotron 3.5 Super VL NVFP4 inference on two GPUs passed five bounded text/image/typed-tool probes. This used public local weights; hosted NVIDIA API access was not tested.
+- Savi CUDA V2 improved mean repaired IoU to 0.6967, below the unchanged 0.85 release threshold; 45/256 held-out cases remained at zero IoU. See [Savi PR #52](https://github.com/SalesSquad/savi/pull/52). No product activation.
+- Reality Twin V4 passed 512 synthetic closed reflective-boundary cases as a guarded composite (IoU 0.9384, volume held by the domain projection). Raw weights fail without the guard; this does not qualify open-boundary physics, real rooms, field accuracy or Metal. See [Reality Twin PR #27](https://github.com/SalesSquad/reality-twin/pull/27).
+
+These are finite research/infrastructure checks, not product deployment, multi-node training or hosted CI. The user-authorized Savi and Reality Twin jobs were the only additional training jobs in this window; the other paused project lane was not resumed.
