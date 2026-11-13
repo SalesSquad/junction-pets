@@ -1,4 +1,5 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
+import {flushSync} from 'react-dom';
 import {matches, parseCatalogue, parseHost} from './catalog';
 import {publicAsset} from './paths';
 import {petHref, readSelection, resolveSelection} from './selection.mjs';
@@ -7,6 +8,7 @@ import type {Catalogue, HostConfig, Pet, RoleFilter} from './types';
 import {CompanyList} from './components/CompanyList';
 import {PetDetail} from './components/PetDetail';
 import {QrDialog} from './components/QrDialog';
+import {registerCatalogTools} from './webmcp';
 
 type State = {catalogue: Catalogue; config: HostConfig} | null;
 
@@ -45,6 +47,8 @@ export default function App() {
     ? resolveSelection(data.catalogue.pets, filtered, selection)
     : {pet: null, reason: null};
   const selected = choice.pet;
+  const selectedSlug = useRef<string | null>(null);
+  selectedSlug.current = selected?.slug ?? null;
 
   function select(pet: Pet) {
     const href = petHref(window.location.href, pet.slug);
@@ -52,6 +56,28 @@ export default function App() {
     setQrPet(null);
     if (href !== window.location.href) window.history.pushState(null, '', href);
   }
+
+  useEffect(() => {
+    if (!data) return;
+    const registration = registerCatalogTools({
+      document: document as Parameters<typeof registerCatalogTools>[0]['document'],
+      catalogue: data.catalogue,
+      getSelectedSlug: () => selectedSlug.current,
+      async selectCompanion(slug) {
+        const pet = data.catalogue.pets.find(candidate => candidate.slug === slug);
+        if (!pet) throw new Error('companion_not_found');
+        flushSync(() => {
+          setQuery('');
+          setRole('all');
+          select(pet);
+        });
+        await new Promise<void>(resolve => window.requestAnimationFrame(() => resolve()));
+        document.getElementById('pet-title')?.focus({preventScroll: true});
+      },
+      onError: () => console.warn('Catalog agent tools could not be registered.'),
+    });
+    return () => registration.dispose();
+  }, [data]);
 
   useEffect(() => {
     const onHistory = () => {
