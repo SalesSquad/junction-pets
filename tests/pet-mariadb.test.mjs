@@ -62,3 +62,54 @@ test('classification and claim checks do not mutate or share input data', () => 
   delete input.row.filtered;
   assert.deepEqual(inspectEvidence(input).facts.filtered, { kind: 'unknown', value: null });
 });
+
+test('claim equality rejects serialization collisions and never calls toJSON', () => {
+  for (const value of [NaN, Infinity, -Infinity]) {
+    assert.equal(checkClaim(example, { field: 'r_rows', kind: 'unknown', value }), false);
+    assert.equal(checkClaim(example, { field: 'key', kind: 'supplied-plan', value }), false);
+  }
+  let calls = 0;
+  const value = { toJSON() { calls++; return 10000; } };
+  assert.equal(checkClaim(example, { field: 'rows', kind: 'estimate', value }), false);
+  assert.equal(calls, 0);
+  assert.equal(checkClaim(example, { field: 'rows', kind: 'estimate', value: '10000' }), false);
+  assert.equal(checkClaim(example, { field: 'rows', kind: 'estimate', value: new Number(10000) }), false);
+  assert.equal(checkClaim(example, { field: 'r_rows', kind: 'unknown', value: null }), true);
+  assert.equal(checkClaim(example, { field: 'key', kind: 'supplied-plan', value: null }), true);
+});
+
+test('claim records reject accessors, inherited fields, symbols and hidden extras without reading them', () => {
+  let reads = 0;
+  for (const field of ['field', 'kind', 'value']) {
+    const claim = { field: 'rows', kind: 'estimate', value: 10000 };
+    Object.defineProperty(claim, field, { get() { reads++; return field === 'value' ? 10000 : field === 'field' ? 'rows' : 'estimate'; } });
+    assert.throws(() => checkClaim(example, claim));
+  }
+  const inherited = Object.create({ value: 10000 });
+  Object.assign(inherited, { field: 'rows', kind: 'estimate' });
+  assert.throws(() => checkClaim(example, inherited));
+  for (const key of ['hidden', Symbol('extra')]) {
+    const claim = { field: 'rows', kind: 'estimate', value: 10000 };
+    Object.defineProperty(claim, key, { value: true });
+    assert.throws(() => checkClaim(example, claim));
+  }
+  assert.equal(reads, 0);
+});
+
+test('string arrays require exact data elements without getters or serialization hooks', () => {
+  const claim = value => ({ field: 'possible_keys', kind: 'supplied-plan', value });
+  assert.equal(checkClaim(example, claim(['idx_warehouse'])), true);
+  assert.equal(checkClaim(example, claim(['other'])), false);
+  assert.equal(checkClaim(example, claim(['idx_warehouse', 'other'])), false);
+  assert.equal(checkClaim(example, claim([null])), false);
+  assert.equal(checkClaim(example, claim(new Array(1))), false);
+  let calls = 0;
+  const accessor = [];
+  Object.defineProperty(accessor, '0', { get() { calls++; return 'idx_warehouse'; }, enumerable: true });
+  const hook = ['wrong'];
+  hook.toJSON = () => { calls++; return ['idx_warehouse']; };
+  const hidden = ['idx_warehouse'];
+  Object.defineProperty(hidden, 'extra', { value: true });
+  for (const value of [accessor, hook, hidden]) assert.equal(checkClaim(example, claim(value)), false);
+  assert.equal(calls, 0);
+});

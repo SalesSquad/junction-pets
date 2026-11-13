@@ -52,13 +52,42 @@ export function inspectEvidence(input) {
     executionVerified: false, indexGain: { kind: 'unknown', value: null } };
 }
 
+// Read only own data descriptors: never evaluate claim getters or toJSON hooks.
+function claimData(claim) {
+  if (!claim || typeof claim !== 'object' ||
+      ![Object.prototype, null].includes(Object.getPrototypeOf(claim))) throw Error('unsupported claim record');
+  const keys = Reflect.ownKeys(claim);
+  if (keys.length !== 3 || keys.some(key => !['field', 'kind', 'value'].includes(key))) throw Error('unsupported claim shape');
+  const descriptors = Object.getOwnPropertyDescriptors(claim);
+  if (keys.some(key => !own(descriptors[key], 'value'))) throw Error('claim accessors are unsupported');
+  return { field: descriptors.field.value, kind: descriptors.kind.value, value: descriptors.value.value };
+}
+
+function exactDataValue(expected, actual) {
+  if (Array.isArray(expected)) {
+    if (!Array.isArray(actual) || Object.getPrototypeOf(actual) !== Array.prototype) return false;
+    const descriptors = Object.getOwnPropertyDescriptors(actual);
+    const keys = Reflect.ownKeys(descriptors);
+    if (descriptors.length.value !== expected.length || keys.length !== expected.length + 1) return false;
+    for (let index = 0; index < expected.length; index++) {
+      const descriptor = descriptors[index];
+      if (!descriptor || !own(descriptor, 'value') || typeof descriptor.value !== 'string' ||
+          descriptor.value !== expected[index]) return false;
+    }
+    return true;
+  }
+  if (actual !== null && !['string', 'number'].includes(typeof actual)) return false;
+  if (typeof actual === 'number' && !Number.isFinite(actual)) return false;
+  return Object.is(expected, actual);
+}
+
 /** Structured claims only, not a natural-language truth detector. Fail closed.
  * A caller can claim an exact classified field; gain/execution are unsupported.
  */
 export function checkClaim(input, claim) {
   const evidence = inspectEvidence(input);
-  shape(claim, ['field', 'kind', 'value']);
-  if (Object.keys(claim).length !== 3 || !own(evidence.facts, claim.field)) return false;
-  const fact = evidence.facts[claim.field];
-  return fact.kind === claim.kind && JSON.stringify(fact.value) === JSON.stringify(claim.value);
+  const data = claimData(claim);
+  if (typeof data.field !== 'string' || typeof data.kind !== 'string' || !own(evidence.facts, data.field)) return false;
+  const fact = evidence.facts[data.field];
+  return fact.kind === data.kind && exactDataValue(fact.value, data.value);
 }
