@@ -13,6 +13,7 @@ import {
 } from '../ops/registry.mjs';
 import {canonicalJson,sha256} from '../lib/artifact.mjs';
 import {planCloudDispatch} from '../ops/cloud-dispatch.mjs';
+import {buildAll} from '../scripts/build-pet-plugins.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const fixedTime=new Date('2026-11-12T19:00:00.000Z');
@@ -20,10 +21,10 @@ const sourceA='a'.repeat(40),sourceB='b'.repeat(40);
 const sourceC='c'.repeat(40);
 const registrationFor=(pet,fingerprint)=>({
   schemaVersion:1,petSlug:pet.slug,pluginName:pet.slug,provider:'chatgpt-plugin-creator',
-  pluginId:'plugins_verified_readback_example',pluginUrl:'https://chatgpt.com/plugins/plugins_verified_readback_example',
-  releaseId:'release_1234',visibility:'USER_PRIVATE',observedAt:fixedTime.toISOString(),
+  pluginId:'plugins_synthetic_fixture_'+pet.slug,pluginUrl:'https://chatgpt.com/plugins/plugins_synthetic_fixture_'+pet.slug,
+  releaseId:'synthetic_release_'+pet.slug,visibility:'USER_PRIVATE',observedAt:fixedTime.toISOString(),
   sourceFiles:fingerprint.sourceFiles,sourceBundleSha256:fingerprint.sourceBundleSha256,
-  evidenceUrl:'https://chatgpt.com/plugins/plugins_verified_readback_example'
+  evidenceUrl:'https://chatgpt.com/plugins/plugins_synthetic_fixture_'+pet.slug
 });
 const receiptFor=(packageSha256,{head=sourceA,work='junction.aiven.analysis-v1',at='2026-11-12T19:00:00.000Z',result='pass',executed=6,passed=6}={})=>({
   schemaVersion:2,petSlug:'junction-aiven',workId:work,taskHeadSha:head,packageSha256,
@@ -56,6 +57,34 @@ async function fixtureRoot(){
   }
   await mkdir(join(path,'ops/receipts'));
   return path;
+}
+
+// Fully owned source/output/receipt copies: never update a live registration to
+// make current-source assertions pass. These IDs do not represent provider reads.
+async function registeredFixtureRoot(){
+  const path=await fixtureRoot();
+  try{
+    await unlink(join(path,'pets'));
+    await cp(join(root,'pets'),join(path,'pets'),{recursive:true});
+    await buildAll({root:path,output:join(path,'plugins'),check:false});
+    await mkdir(join(path,'ops/plugin-registrations'));
+    for(const {pet} of await loadPackages(path)){
+      const manifest=expectedEnvironment(pet.company.slug);
+      manifest.provisioning={state:'ready',environmentId:'synthetic-env-'+pet.slug,
+        verifiedAt:fixedTime.toISOString(),evidenceUrl:'https://example.invalid/synthetic-environment'};
+      await writeFile(join(path,'ops/environments',pet.company.slug+'.json'),JSON.stringify(manifest));
+      const receipt=registrationFor(pet,await pluginSourceFingerprint(path,pet));
+      await writeFile(join(path,'ops/plugin-registrations',pet.company.slug+'.json'),JSON.stringify(receipt));
+    }
+    return path;
+  }catch(error){await rm(path,{recursive:true,force:true});throw error;}
+}
+
+function assertSuppressedPluginProof(plugin){
+  for(const field of ['pluginId','pluginUrl','releaseId','visibility','observedAt','evidenceUrl']){
+    assert.equal(plugin[field],null,'must suppress current proof: '+field);
+  }
+  assert.equal(plugin.verification,'source-file-only-no-install-proof');
 }
 
 test('34 individually scoped Codex Cloud declarations cover exact package roster',async()=>{
@@ -184,7 +213,9 @@ test('registry rejects duplicate agent, missing company and extra package drift'
 });
 
 test('status has 34 independently addressable pets and never calls authored cases executed',async()=>{
-  const status=await buildStatus(root,{now:fixedTime,sourceCommit:sourceA});
+  const tmp=await registeredFixtureRoot();
+  try{
+  const status=await buildStatus(tmp,{now:fixedTime,sourceCommit:sourceA});
   assert.equal(status.schemaVersion,1);
   assert.equal(status.generatedAt,fixedTime.toISOString());
   assert.equal(status.source.repository,REPOSITORY);
@@ -203,20 +234,83 @@ test('status has 34 independently addressable pets and never calls authored case
   assert.ok(status.pets.every(p=>p.plugin.desiredName===p.slug&&/^plugins_/.test(p.plugin.pluginId)));
   assert.ok(status.pets.every(p=>p.plugin.installationState==='registered-source-matched-reported'));
   assert.equal(new Set(status.pets.map(p=>p.plugin.pluginId)).size,34);
+  for(const p of status.pets){
+    assert.equal(p.plugin.pluginId,'plugins_synthetic_fixture_'+p.slug);
+    assert.equal(p.plugin.releaseId,'synthetic_release_'+p.slug);
+    assert.equal(p.plugin.registrationBinding,'source-matched-reported');
+  }
+  }finally{await rm(tmp,{recursive:true,force:true});}
 });
 
 test('generated plugin presence is distinct from host installation and publication',async()=>{
-  const status=await buildStatus(root,{now:fixedTime,sourceCommit:sourceA});
+  const registered=await registeredFixtureRoot();
+  try{
+  const status=await buildStatus(registered,{now:fixedTime,sourceCommit:sourceA});
   assert.equal(status.pets.filter(p=>p.plugin.presence==='source-present').length,34);
   assert.ok(status.pets.every(p=>p.plugin.verification==='provider-readback-recorded-not-rechecked'));
   assert.ok(status.pets.every(p=>p.plugin.installationState==='registered-source-matched-reported'));
   assert.ok(status.pets.every(p=>p.runtime.state==='unverified'));
   assert.equal(status.summary.published,0);
+  }finally{await rm(registered,{recursive:true,force:true});}
   const tmp=await fixtureRoot();
   try{
     const absent=await buildStatus(tmp,{now:fixedTime,sourceCommit:null});
     assert.equal(absent.pets.filter(p=>p.plugin.presence==='missing').length,34);
     assert.match(absent.pets[0].blocker,/No generated plugin source/);
+  }finally{await rm(tmp,{recursive:true,force:true});}
+});
+
+test('changed pet and regenerated plugin suppress all old registration proof while other 33 stay addressable',async()=>{
+  const tmp=await registeredFixtureRoot();
+  try{
+    const before=await buildStatus(tmp,{now:fixedTime,sourceCommit:sourceA});
+    const receiptPath=join(tmp,'ops/plugin-registrations/aiven.json');
+    const oldReceipt=await readFile(receiptPath,'utf8');
+    const agentsPath=join(tmp,'pets/aiven/AGENTS.md');
+    await writeFile(agentsPath,(await readFile(agentsPath,'utf8'))+'\nSynthetic changed guidance for regression.\n');
+    await buildAll({root:tmp,output:join(tmp,'plugins'),check:false});
+    const after=await buildStatus(tmp,{now:fixedTime,sourceCommit:sourceB});
+    assert.equal(after.pets.length,34);
+    const changed=after.pets.find(p=>p.slug==='junction-aiven');
+    const original=before.pets.find(p=>p.slug===changed.slug);
+    assert.equal(changed.plugin.presence,'source-present');
+    assert.equal(changed.plugin.installationState,'stale-registration');
+    assert.equal(changed.plugin.registrationBinding,'stale-source');
+    assert.notEqual(changed.plugin.sourceBundleSha256,original.plugin.sourceBundleSha256);
+    assertSuppressedPluginProof(changed.plugin);
+    assert.match(changed.blocker,/stale source bytes/);
+    assert.equal(await readFile(receiptPath,'utf8'),oldReceipt);
+    const unchanged=after.pets.filter(p=>p.slug!==changed.slug);
+    assert.equal(unchanged.length,33);
+    assert.equal(new Set(unchanged.map(p=>p.plugin.pluginId)).size,33);
+    for(const p of unchanged){
+      assert.deepEqual(p.plugin,before.pets.find(old=>old.slug===p.slug).plugin);
+      assert.equal(p.plugin.installationState,'registered-source-matched-reported');
+      assert.equal(p.plugin.pluginId,'plugins_synthetic_fixture_'+p.slug);
+    }
+    assert.equal(after.summary.published,0);
+  }finally{await rm(tmp,{recursive:true,force:true});}
+});
+
+test('source-present unregistered plugin suppresses proof without affecting other registrations',async()=>{
+  const tmp=await registeredFixtureRoot();
+  try{
+    await unlink(join(tmp,'ops/plugin-registrations/aiven.json'));
+    const status=await buildStatus(tmp,{now:fixedTime,sourceCommit:sourceA});
+    const aiven=status.pets.find(p=>p.slug==='junction-aiven');
+    assert.equal(aiven.plugin.presence,'source-present');
+    assert.equal(aiven.plugin.installationState,'not-registered');
+    assert.equal(aiven.plugin.registrationBinding,'missing');
+    assertSuppressedPluginProof(aiven.plugin);
+    assert.equal(status.pets.length,34);
+    const registered=status.pets.filter(p=>p.slug!==aiven.slug);
+    assert.equal(registered.length,33);
+    assert.equal(new Set(registered.map(p=>p.plugin.pluginId)).size,33);
+    for(const p of registered){
+      assert.equal(p.plugin.installationState,'registered-source-matched-reported');
+      assert.equal(p.plugin.pluginId,'plugins_synthetic_fixture_'+p.slug);
+    }
+    assert.equal(status.summary.published,0);
   }finally{await rm(tmp,{recursive:true,force:true});}
 });
 

@@ -22,6 +22,20 @@ Choose one of these prompts in Chibi, then share only the context needed for the
 
 The companion should explain its reasoning, cite the relevant official sources and make uncertainty visible. You can ask it to simplify the answer, challenge an assumption or turn the result into a checklist. Use fictional or redacted examples for private work.
 
+## Performance questions with traceable evidence
+
+For a PostgreSQL slow-query/index question, share redacted SQL, version, existing
+indexes and an existing plan or timing sample. For Kafka consumer-group lag,
+share partition/consumer counts and a per-partition lag trend. The companion
+should cite the exact relevant official page, separate observations from
+hypotheses and propose a bounded next check. An index-repair article does not
+prove which index to add; lag alone does not prove why consumers are behind.
+
+When retrieval is empty, irrelevant or fails, the answer should name that limit
+and still give a useful evidence request. Stored links are references to verify,
+not proof of a fresh retrieval. These are authored expectations, not measured
+model outcomes. Focused source provenance is recorded in SOURCE_REVIEW.md.
+
 ## Current limits
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
