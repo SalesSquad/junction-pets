@@ -8,6 +8,10 @@ Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS
 
 [19 source-bound recordings,19 fresh main briefs,19 technical briefs, Fable critique and Discord refresh](docs/challenge-research/README.md) are indexed per [all34 company developers](ops/challenge-source-routing-20261113.json). Recordings cover16 main briefs; Arduino, Ignite Next×Intel and Aalto Beyond the Clinic have source text without a supplied recording. Each company has `CHALLENGE_RESEARCH.md`; this is research attachment, not34 live challenge products.
 
+## Build a solution
+
+This repo also supports complete challenge products, beyond an agent package. Start with [solution workspaces](docs/SOLUTION_WORKSPACES.md): scaffold a bounded product directory, hand it to any authorized developer executor, and reuse existing agent/service contracts. `node scripts/solution-workspace.mjs list` discovers the current product workspaces.
+
 ## Start a new agent
 
 Read [START_HERE.md](START_HERE.md) for the common onboarding path, all 34 agent research packets, current source boundaries and pending runtime extensions. [The machine-readable source map](docs/AGENT_SOURCE_INDEX.json) supports Codex/Claude tools. Meta-specific work starts at [META_START_HERE.md](docs/META_START_HERE.md). Fetch current main and open PR heads before editing; dated status paragraphs below are historical checkpoints.

@@ -87,3 +87,14 @@ All status pages are snapshots; compare their SHA and timestamp with **current**
 - **Controller:** bounded Cloud capacity, work ID, claims and retry owner, no unauthorized spend or account hopping.
 
 Use task-owned branches, disjoint ownership and source-bound handoffs; do not push directly to main or force-push shared work. Any new interface/behavioral/permission decision needs a concise explicit design record or an update to this architecture before implementation. No private repo visibility change, merge, deployment or irreversible change is authorized by this document. Public submission boundaries live in [`docs/JUNCTION_SUBMISSION.md`](docs/JUNCTION_SUBMISSION.md).
+
+## Product development workspaces (owner scope clarification, 13 November 2026)
+
+A challenge solution can include UI, backend, data, device adapters, research and
+submission assets as well as agents. `solutions/<id>/` holds its bounded source,
+brief, component map and continuation. This is a development organization layer:
+it does not add a production host, replace collaboration protocols or relocate
+existing code. Existing `apps/`, `services/`, `pets/` and pending PRs stay at their
+current paths and under their current owners. Several solutions may reuse the
+same declared expertise through existing contracts. See
+[the workspace guide](docs/SOLUTION_WORKSPACES.md).

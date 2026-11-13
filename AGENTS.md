@@ -17,6 +17,10 @@ Begin at [`START_HERE.md`](START_HERE.md) and [`docs/AGENT_SOURCE_INDEX.json`](d
 
 Before company work, read that company's `pets/<company>/CHALLENGE_RESEARCH.md` and the [source routing index](ops/challenge-source-routing-20261113.json). They bind supplied recordings, fresh official main/technical briefs, Discord observations and Fable critique. Official brief clauses outrank rough ASR and earlier proposed helpers. Research or a planned proof is not an executed model workflow.
 
+## Product solution workspaces
+
+The owner also uses this monorepo for full challenge products: apps, backends, data, device integrations, demos and submissions that may reuse multiple agents. [Solution workspaces](docs/SOLUTION_WORKSPACES.md) define bounded developer entrypoints under `solutions/<id>/`. One assigned solution writer owns that directory; this does not grant ownership of an existing pet/shared service. Reuse current contracts and PR source rather than duplicating implementations. Chibi production trust boundaries remain below.
+
 ## Ownership and parallelism
 
 - One authorized **writer** per company at a time; code and test roles share the same exclusive company writer lease. A test role may write only its explicitly assigned `tests/pet-<company>.test.mjs`; the integrator owns all other `tests/` files. Other company lanes may run in parallel on disjoint paths. One integrator owns cross-cutting files: `schemas/`, `contracts/`, `ops/`, `scripts/`, shared `lib/`, root manifests/lockfiles, generated exports and integrations. Assign explicit disjoint shared-module ownership when needed.
@@ -27,7 +31,7 @@ Before company work, read that company's `pets/<company>/CHALLENGE_RESEARCH.md` 
 
 ## Scope and trust boundaries
 
-- Junction repo: 34 independent company content packs, public-safe source/evidence, catalog, typed collaboration contracts, generated skills-only packages, integration **interfaces**, synthetic examples and bounded development tooling.
+- Junction repo: product-specific solution workspaces (apps/services/data/demos/submissions), 34 independent company content packs, public-safe source/evidence, catalog, typed collaboration contracts, generated skills-only packages, integration **interfaces**, synthetic examples and bounded development tooling.
 - Private Chibi repo: identity, account adoption, offers/entitlements, tenant isolation, Cedar policy, consent, model/tool execution, provider credentials, real memory/chat and signed execution receipts. A LangGraph Council **proposes and routes**; it never issues grants or bypasses a host refusal. Recheck source, tenant, authority, revocation, effect, expiry and budget at each privileged call.
 - Private `ops/` worker state/receipts, owner-only Mission Control and sensitive data must not leak into public catalog, demo, Plugin Creator content or Junction submission. QR links never carry a grant/token/user ID. A company companion is not endorsed by that company; don't invent challenge requirements, licensing, company facts or provider connectivity.
 - Reuse Aiven/LangGraph public code only with pinned provenance, confirmed license and required notices; start from [`services/council/README.md`](services/council/README.md). Do not copy Chibi/private/customer sources into a public-friendly package. Keep provider-neutral synthetic mode as a portable fallback and explicitly label it test-only.

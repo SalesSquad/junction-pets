@@ -5,6 +5,10 @@ common entrypoint for a new Codex, Claude or other authorized developer agent.
 Use [the machine-readable index](docs/AGENT_SOURCE_INDEX.json) to select one of
 the 34 packages and discover pending implementation sources.
 
+## Develop a product or solution
+
+Use [solution workspaces](docs/SOLUTION_WORKSPACES.md) for a complete application, service, data pipeline or challenge demo that reuses one or more company agents. Run `node scripts/solution-workspace.mjs list` and `node scripts/solution-workspace.mjs brief meta-find-verify`. New products get their own bounded developer scope under `solutions/<id>/`; existing apps/services/agent sources keep their current owners and paths.
+
 ## Before editing
 
 1. Resolve authenticated current `main`, open PRs and exact source SHAs. Inspect
