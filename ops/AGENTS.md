@@ -6,6 +6,8 @@ This file governs **developer agents** in the Junction-only monorepo. The
 company-specific files at pets/<slug>/AGENTS.md govern **runtime companion
 behavior**; they never grant a developer cloud, provider or user permission.
 
+Read [the challenge-source routing](challenge-source-routing-20261113.json) and the assigned company's `CHALLENGE_RESEARCH.md` before admitting another slice. Exact official clauses and recorded coverage are now attached for all34 developers; this record starts no jobs.
+
 ## Start from authoritative evidence
 
 1. Read root AGENTS.md, catalog-contract.md, this file, and only the selected

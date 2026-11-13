@@ -4,6 +4,10 @@
 
 Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS.md) for contributor rules, and the [cloud developer playbook](docs/CLOUD_DEVELOPER_PLAYBOOK.md) for assigning and continuing independent company work. Finnish overview: *34 yrityskohtaista, itsenäisesti laadittua kumppania; yritys- tai Chibi-julkaisua ei pidä päätellä valmiista lähdekoodista.*
 
+## Challenge research —13 November2026
+
+[19 source-bound recordings,19 fresh main briefs,19 technical briefs, Fable critique and Discord refresh](docs/challenge-research/README.md) are indexed per [all34 company developers](ops/challenge-source-routing-20261113.json). Recordings cover16 main briefs; Arduino, Ignite Next×Intel and Aalto Beyond the Clinic have source text without a supplied recording. Each company has `CHALLENGE_RESEARCH.md`; this is research attachment, not34 live challenge products.
+
 ## Source-bound status
 
 **W8 provisioning update, 13 November 2026:** all 34 Pro/Legacy environments now have actual provider IDs, individual settings readbacks and prior source-bound Cloud task evidence in [the private provisioning record](ops/cloud-provisioning-20261113.json). The manifests permit dry-run planning; a fresh account/provider/source check and bounded work ownership remain required for each task. This does not qualify Chibi runtime, model evaluations or an autonomous Fleet adapter.
