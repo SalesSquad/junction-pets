@@ -65,3 +65,7 @@ ffmpeg -i input.MOV -map 0:v:0 -map 0:a:0 -map_metadata -1 -vf "scale=480:-2:fla
 ## Current source corrections and developer routing
 
 Read [fresh-source corrections](fresh-source-corrections.md) before using the earlier Fable critique. [All34 developer packets](../../ops/challenge-source-routing-20261113.json) carry precise source links, bounded roles, measurable proof and adversarial cases; six additional MLH technology briefs remain in the shared index without inventing new companions.
+
+## Completed Fable delta
+
+[The second Fable5.2 review](fable-delta-review.md) uses all38 detailed briefs and all34 roles, correcting the first packet's coverage gaps. Its [parsed proposals](fable-delta-review.json) and [model/source receipt](fable-delta-receipt.json) preserve exact provenance. Read its scope note: it did not audit existing runtime PRs.
