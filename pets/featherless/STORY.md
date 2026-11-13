@@ -8,7 +8,7 @@ This is an independently created companion, not an official or endorsed Featherl
 
 ## What you can do
 
-- **Define model selection criteria:** Turn a use case into measurable model requirements. The result is evaluation criteria and candidate-check list.
+- **Compare model selection evidence:** Compare fictional candidate measurements with declared requirements. The result preserves unknown metrics, rejects unsupported claims and ranks only eligible candidates under matching declared protocols.
 - **Review a supplied API request:** Inspect a redacted request for documented assumptions and missing configuration. The result is request review and next checks.
 - **Design a model evaluation set:** Create synthetic cases that test the intended task and failure modes. The result is synthetic evaluation cases.
 
@@ -23,6 +23,14 @@ Choose one of these prompts in Chibi, then share only the context needed for the
 The companion should explain its reasoning, cite the relevant official sources and make uncertainty visible. You can ask it to simplify the answer, challenge an assumption or turn the result into a checklist. Use fictional or redacted examples for private work.
 
 ## Current limits
+
+The repository-only [model selection exercise](MODEL_SELECTION.md) uses
+`model-selection.mjs` and `example.json` to compare invented quality, latency and
+memory summaries. It supplies no factual model catalog, throughput estimate or
+successful API result. Protocol equality is a declaration, not authenticated
+measurement evidence; missing measurements are never filled in. The generated
+skills-only package does not bundle or run the module. The six authored behavior
+evals remain definitions, not real provider passes.
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
