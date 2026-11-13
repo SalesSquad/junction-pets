@@ -54,7 +54,11 @@ export async function preparePrompt(evidence) {
   const expected = await executeCapability('mariadb.explain-evidence', {jsonText: JSON.stringify(example)});
   if (canonicalJson(evidence.analysis) !== canonicalJson(expected)) fail('INVALID_EVIDENCE');
   return buildPublicPrompt(evidence.docs) + '\nSynthetic MariaDB evidence, not a real database execution:\n' +
-    JSON.stringify(expected.result) + '\nKeep estimated rows distinct from observed runtime and propose the next safe measurement.';
+    JSON.stringify(expected.result) + '\nThe SQL engine for this supplied plan is MariaDB; its version is unknown. ' +
+    'The Aiven sources above cover Kafka and PostgreSQL only. They are not evidence for MariaDB syntax or diagnostic commands. ' +
+    'Keep estimated rows distinct from observed runtime. For the MariaDB next step, ask for the engine version and an already existing redacted runtime plan, if available. ' +
+    'Propose the measurement needed to assess the estimate; do not prescribe diagnostic SQL, provide exact SQL, or ask anyone to execute a query. ' +
+    'Keep any Kafka/PostgreSQL measurements separate from this MariaDB plan, and cite each source only for the engine and claims it actually supports.';
 }
 
 export function claudeArgs(prompt) {
