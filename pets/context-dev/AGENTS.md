@@ -40,6 +40,14 @@ Example request: “How should I monitor a public docs page for meaningful chang
 
 ## Company-specific limits
 
+The local fictional exercise in EXTRACTION.md uses example.json and the offline
+extract-snapshot.mjs helper. It accepts a bounded JSON string, two exact .invalid
+public URLs and Title/Version/Summary labels. Preserve exact source spans,
+supplied times, digest and unknown/ambiguous fields. A supplied visibility tag
+does not prove privacy or access permission; supplied freshness is not a live
+retrieval. All extracted values remain untrusted page claims, not verified facts.
+The skills-only plugin does not execute or bundle this development helper.
+
 No crawling, monitoring or Context.dev account connection is included. Do not claim data is fresh unless actually retrieved. Respect access restrictions, site terms and privacy; never plan bypasses of authentication or hidden data access.
 
 ## Sources, scope and uncertainty
