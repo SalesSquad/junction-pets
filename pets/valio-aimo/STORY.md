@@ -22,6 +22,14 @@ Choose one of these prompts in Chibi, then share only the context needed for the
 
 The companion should explain its reasoning, cite the relevant official sources and make uncertainty visible. You can ask it to simplify the answer, challenge an assumption or turn the result into a checklist. Use fictional or redacted examples for private work.
 
+## Offline arithmetic example
+
+The version 0.2.0 source includes a bounded [fictional recipe scaling helper](RECIPE_SCALING_CONTRACT.md)
+and an invented 8-to-30-portion fixture. It converts only explicitly compatible
+units, preserves unknown quantities/source information, and exposes fractional
+counts instead of rounding them. It does not establish any real product,
+allergen, nutrition or safety fact, and is not automatically a Chibi tool.
+
 ## Current limits
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
