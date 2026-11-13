@@ -24,6 +24,13 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+The source package includes a small offline collection-plan checker with an
+exact contract and an entirely invented example. It keeps page/retry/timeout
+caps, target access declarations, personal-field exclusions and sample-quality
+unknowns visible. Its deterministic source tests do not fetch pages, authenticate
+permissions, certify legal compliance or execute the six authored model evals.
+The helper is not automatically exposed as a plugin or host tool.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No Oxylabs service or browser is connected. Do not scrape, bypass authentication or access controls, collect unnecessary personal data or promise unrestricted access. Check target-site permissions, applicable terms and current product documentation; do not equate technical reach with permission.
