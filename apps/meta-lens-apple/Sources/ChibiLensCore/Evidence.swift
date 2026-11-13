@@ -248,9 +248,22 @@ public struct LensScanRequest: Encodable, Sendable {
     /// An authenticated host MUST enforce the contract again after transport.
     @discardableResult
     public func validated() throws -> Self {
+        func jsTrimWhitespace(_ scalar: Unicode.Scalar) -> Bool {
+            // ECMAScript String.prototype.trim whitespace for Unicode scalars.
+            // Swift CharacterSet.whitespacesAndNewlines differs (e.g. U+0085).
+            switch scalar.value {
+            case 0x0009...0x000D, 0x0020, 0x00A0, 0x1680,
+                 0x2000...0x200A, 0x2028, 0x2029, 0x202F, 0x205F,
+                 0x3000, 0xFEFF:
+                return true
+            default:
+                return false
+            }
+        }
         func validText(_ value: String, max: Int = 160) -> Bool {
             !value.isEmpty && value.utf16.count <= max
-                && value == value.trimmingCharacters(in: .whitespacesAndNewlines)
+                && !(value.unicodeScalars.first.map(jsTrimWhitespace) ?? true)
+                && !(value.unicodeScalars.last.map(jsTrimWhitespace) ?? true)
                 && !value.unicodeScalars.contains(where: { $0.value <= 31 })
         }
         func validDigest(_ value: String) -> Bool {

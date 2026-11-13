@@ -24,11 +24,14 @@ for (const mutate of [
   (x) => { x[0].query = "x".repeat(401); },
   (x) => { x[1].observationSha256 = "A".repeat(64); },
   (x) => { x[2].targetId = ""; },
+  (x) => { x[0].query = "charger\uFEFF"; },
 ]) {
   const bad = structuredClone(requests);
   mutate(bad);
   const invalid = bad.find((x, i) => JSON.stringify(x) !== JSON.stringify(requests[i]));
   assert.throws(() => validateRequest(invalid));
 }
+assert.equal(validateRequest({ ...requests[0], query: "charger\u0085" }).query,
+  "charger\u0085");
 
-process.stdout.write("Swift→Meta JS contract parity: 3 valid, 4 invalid cases passed\n");
+process.stdout.write("Swift→Meta JS contract parity: 3 valid, 5 invalid + Unicode boundary passed\n");

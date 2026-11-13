@@ -7,6 +7,11 @@ TASK_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TASK_BUNDLE="$TASK_ROOT/dist/$APP_NAME.app"
 TASK_BINARY="$TASK_BUNDLE/Contents/MacOS/$APP_NAME"
 
+task_bundle_pids() {
+  # Exact executable path comparison; no regex and no killing other processes.
+  ps -axo pid=,comm= | awk -v expected="$TASK_BINARY" '$2 == expected { print $1 }'
+}
+
 case "$MODE" in
   run|--debug|debug|--logs|logs|--telemetry|telemetry|--verify|verify) ;;
   *)
@@ -39,8 +44,23 @@ case "$MODE" in
     /usr/bin/log stream --info --style compact --predicate 'subsystem == "cloud.taika.chibilens.replay"'
     ;;
   --verify|verify)
+    TASK_BEFORE="$(task_bundle_pids)"
     /usr/bin/open -n "$TASK_BUNDLE"
     sleep 1
-    pgrep -f "$TASK_BINARY" >/dev/null
+    TASK_AFTER="$(task_bundle_pids)"
+    for TASK_CANDIDATE in $TASK_AFTER; do
+      TASK_WAS_RUNNING=false
+      for TASK_PRIOR in $TASK_BEFORE; do
+        if [[ "$TASK_PRIOR" == "$TASK_CANDIDATE" ]]; then
+          TASK_WAS_RUNNING=true
+          break
+        fi
+      done
+      if [[ "$TASK_WAS_RUNNING" == false ]]; then
+        exit 0
+      fi
+    done
+    echo "New task-owned ChibiLensDesktop process not confirmed" >&2
+    exit 1
     ;;
 esac

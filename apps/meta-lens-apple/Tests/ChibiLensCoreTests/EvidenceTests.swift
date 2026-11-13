@@ -144,5 +144,11 @@ final class EvidenceTests: XCTestCase {
             targetID: "", hostObservationRef: "host-ref",
             hostObservationDigest: String(repeating: "a", count: 64)
         ).validated())
+        XCTAssertThrowsError(try LensScanRequest.find(
+            requestID: "ok", sessionID: "s-1", query: "charger\u{FEFF}"
+        ).validated())
+        XCTAssertNoThrow(try LensScanRequest.find(
+            requestID: "ok", sessionID: "s-1", query: "charger\u{0085}"
+        ).validated())
     }
 }

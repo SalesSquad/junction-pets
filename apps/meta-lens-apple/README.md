@@ -2,6 +2,10 @@
 
 **Product promise:** _Memory for the physical world. With evidence, not guesses._
 
+Next product direction: [Chibi Resume — the world paused, your intention didn't](PRODUCT_VISION.md),
+with a 60-second challenge demo, staged cross-surface scope and explicit
+requirements for a trustworthy own video model.
+
 An Apple-native replay surface for the Junction Meta challenge. This first
 increment ports the `services/meta-spatial/` request shape to Swift, provides
 a real shared SwiftUI interface, and preserves the difference between **last
@@ -27,8 +31,11 @@ the project's Codex Run action. The executable emits a deterministic JSON
 receipt with `receiptKind:SYNTHETIC`, `identityVerified:false` and
 `actionAuthorized:false`. No external service, ML model, camera, login or SDK
 credentials are used. The `.build` and `dist` outputs are ignored.
+The `--verify` launcher mode checks for a newly started process from this
+specific bundle; it does not prove that the UI rendered, is accessible, or
+passed a device qualification test.
 The parity script validates all three **real Swift-encoded** request modes
-through the existing JavaScript `validateRequest`, including four adversarial
+through the existing JavaScript `validateRequest`, including five adversarial
 mutations; it is an integration acceptance check, not a host authorization.
 
 For the **iOS source port**, create an iOS App target in Xcode, add this folder as
