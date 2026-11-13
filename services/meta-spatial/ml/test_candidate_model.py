@@ -1,12 +1,15 @@
 import math
 import unittest
+from pathlib import Path
 
 from candidate_model import (
     FEATURES,
+    TRAIN_SEED,
     TEST_COUNT,
     TEST_SEED,
     VALIDATION_COUNT,
     VALIDATION_SEED,
+    _emit,
     candidate_proposal,
     metrics,
     synthetic_examples,
@@ -22,6 +25,16 @@ class SyntheticCandidateModelTests(unittest.TestCase):
     def test_learned_and_reproducible(self):
         self.assertGreater(sum(abs(w) for w in self.model["weights"]), 0.25)
         self.assertEqual(self.model, train())
+
+    def test_committed_checkpoint_exactly_matches_fresh_training(self):
+        checkpoint = Path(__file__).with_name("trained-candidate-v1.json")
+        self.assertEqual(checkpoint.read_bytes(), _emit(train()).encode("utf-8"))
+
+    def test_training_seed_cannot_overlap_evaluation_streams(self):
+        self.assertEqual(len({TRAIN_SEED, VALIDATION_SEED, TEST_SEED}), 3)
+        for overlapping_seed in (VALIDATION_SEED, TEST_SEED):
+            with self.subTest(seed=overlapping_seed), self.assertRaisesRegex(ValueError, "overlaps"):
+                train(seed=overlapping_seed)
 
     def test_train_validation_test_generators_differ(self):
         tr = synthetic_examples(117, 8, domain="train")
@@ -41,8 +54,8 @@ class SyntheticCandidateModelTests(unittest.TestCase):
         shifted = synthetic_examples(TEST_SEED, TEST_COUNT, domain="shifted_test")
         m = metrics(self.model, shifted)
         self.assertEqual(m["total"], TEST_COUNT)
-        self.assertLessEqual(m["identityVerifications"], 0)
-        self.assertLessEqual(m["authorizations"], 0)
+        self.assertNotIn("identityVerifications", m)
+        self.assertNotIn("authorizations", m)
         self.assertTrue(0 <= m["falseCandidateRate"] <= 1)
 
     def test_output_is_only_a_proposal_and_strictly_validated(self):
