@@ -61,3 +61,7 @@ Encoding profile (replace filenames):
 ```sh
 ffmpeg -i input.MOV -map 0:v:0 -map 0:a:0 -map_metadata -1 -vf "scale=480:-2:flags=lanczos,fps=10" -c:v libx264 -preset veryfast -b:v 140k -maxrate 180k -bufsize 360k -pix_fmt yuv420p -c:a aac -b:a 32k -ac 1 -ar 16000 -movflags +faststart output.mp4
 ```
+
+## Current source corrections and developer routing
+
+Read [fresh-source corrections](fresh-source-corrections.md) before using the earlier Fable critique. [All34 developer packets](../../ops/challenge-source-routing-20261113.json) carry precise source links, bounded roles, measurable proof and adversarial cases; six additional MLH technology briefs remain in the shared index without inventing new companions.

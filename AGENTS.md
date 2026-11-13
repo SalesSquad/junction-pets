@@ -9,6 +9,10 @@
 3. [`ops/AGENTS.md`](ops/AGENTS.md) plus only the assigned company's `pet.json`, `AGENTS.md`, `STORY.md`, `evals.json` for a pet lane; read the relevant service README/contract before shared-module work.
 4. Resolve **current authenticated GitHub base SHA and PR heads**, check dirty/unpushed work and prior claims. A past chat, stale snapshot, branch name or signed-in browser screenshot does not prove the current source or cloud status.
 
+## Challenge evidence entrypoint
+
+Before company work, read that company's `pets/<company>/CHALLENGE_RESEARCH.md` and the [source routing index](ops/challenge-source-routing-20261113.json). They bind supplied recordings, fresh official main/technical briefs, Discord observations and Fable critique. Official brief clauses outrank rough ASR and earlier proposed helpers. Research or a planned proof is not an executed model workflow.
+
 ## Ownership and parallelism
 
 - One authorized **writer** per company at a time; code and test roles share the same exclusive company writer lease. A test role may write only its explicitly assigned `tests/pet-<company>.test.mjs`; the integrator owns all other `tests/` files. Other company lanes may run in parallel on disjoint paths. One integrator owns cross-cutting files: `schemas/`, `contracts/`, `ops/`, `scripts/`, shared `lib/`, root manifests/lockfiles, generated exports and integrations. Assign explicit disjoint shared-module ownership when needed.
