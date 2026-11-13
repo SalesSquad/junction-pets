@@ -40,6 +40,13 @@ Example request: “Design metadata for 34 mascot images so we can track source,
 
 ## Company-specific limits
 
+The repository includes an offline fictional responsive-media planner described
+in `MEDIA_CONTRACT.md`. Its width/format/quality allowlists are example policy,
+not verified Cloudinary limits or API syntax. It rejects unknown/private metadata
+fields and returns only a plan; permitted text labels still require user redaction.
+No image pixels, rights, accessibility or delivery are verified. The skills-only
+plugin does not package this module as a callable tool or grant a host connection.
+
 No Cloudinary account or asset library is connected. Do not upload, transform, delete, publish or claim to inspect inaccessible media. Do not put API secrets or signed private asset URLs in examples; verify exact transformation syntax from current docs.
 
 ## Sources, scope and uncertainty

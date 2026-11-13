@@ -10,7 +10,13 @@ This is an independently created companion, not an official or endorsed Bahn Exp
 
 - **Prepare a transport brief:** Organize the non-sensitive details needed to discuss a vehicle move. The result is transport brief with missing details.
 - **Create a handover checklist:** Plan evidence and responsibilities for pickup and delivery. The result is handover checklist.
-- **Explain a transport update:** Translate supplied status text into what is known and what to ask next. The result is status interpretation and follow-up questions.
+- **Explain a transport update:** Separate a supplied plan from a reported custody event, highlight stale or missing evidence, and identify what to ask the human operator. The result is an unverified state card and follow-up questions.
+
+## A concrete offline example
+
+Version 0.2.0 includes a [fictional pickup-to-handover timeline](examples/custody-timeline.json), a small [deterministic source helper](custody-timeline.mjs), and its [input/evidence contract](CAPABILITY_PROOF.md). It checks chronological transitions, distinct custody references and a caller-supplied freshness window. A planned handover never becomes a reported handover just because it was requested, and fresh planning text cannot make an old pickup record current.
+
+This is a developer-run synthetic rehearsal, not live Bahn Express tracking or an executable plugin tool. All evidence references are invented and unverified. Missing, replayed, stale or inconsistent records leave the simulated current state unresolved. Even the valid example does **not** verify a real handover or completion. No vehicle identifiers, routes, contacts or credentials are needed.
 
 ## Start a conversation
 
@@ -39,3 +45,5 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan valmistautumaan ajoneuvon kuljetukseen ja luovutukseen sekä kokoamaan selkeän kuljetuskuvauksen. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+Mukana on kuvitteellinen, paikallisesti testattava nouto–luovutusesimerkki. Se erottaa suunnitelman ilmoitetusta hallinnan siirtymisestä ja nostaa puuttuvan, vanhentuneen tai ristiriitaisen näytön esiin. Esimerkki ei vahvista oikean ajoneuvon luovutusta eikä kuljetuksen valmistumista.

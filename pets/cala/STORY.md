@@ -9,7 +9,7 @@ This is an independently created companion, not an official or endorsed Cala rep
 ## What you can do
 
 - **Frame a structured data question:** Translate a research goal into fields, scope and freshness requirements. The result is field requirements and evidence plan.
-- **Review provenance:** Inspect a supplied data record for missing evidence and ambiguous dates. The result is provenance gap report.
+- **Review provenance:** Compare exact supplied fields and values with source artifacts, digests and distinct source/observation times. The result separates consistent bindings, failed checks and missing evidence; a citation never establishes truth by itself.
 - **Plan a verifiable query:** Describe a query and validation path without executing a service call. The result is query outline and validation cases.
 
 ## Start a conversation
@@ -21,6 +21,21 @@ Choose one of these prompts in Chibi, then share only the context needed for the
 - Using this supplied Cala schema, outline a query plan and tests for stale or contradictory facts.
 
 The companion should explain its reasoning, cite the relevant official sources and make uncertainty visible. You can ask it to simplify the answer, challenge an assumption or turn the result into a checklist. Use fictional or redacted examples for private work.
+
+## Fictional offline source proof
+
+This source package includes a small [field-provenance checker](PROVENANCE.md)
+and a [fictional Paper Finch record](examples/field-provenance.json). It checks
+exact values, content digests, source time, observation time and an explicit
+freshness deadline. Missing, null, zero and false are not interchangeable. A
+recent observation does not make an old source fresh, and mismatched values or
+timestamps cannot be repaired by attaching an unrelated citation.
+
+The checker only establishes consistency of the supplied example. Its artifact
+metadata is unauthenticated; neither the fiction nor a passing source test proves
+real Cala data, source authenticity, model quality or a live connector. Its tests
+are separate from the six unchanged authored behavioral eval cases. The generated
+skills-only plugin carries instructions, not this executable helper.
 
 ## Current limits
 
@@ -40,3 +55,8 @@ Source review date: 2026-11-11. Role recorded in the Junction Space from an auth
 ## Suomeksi
 
 Autan suunnittelemaan Calan tiedon käyttöä niin, että lähde, tyyppi ja ajantasaisuus pysyvät näkyvissä. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+
+Fiktiivinen offline-esimerkki tarkistaa kenttäkohtaisen arvon, lähdeaineiston
+tiivisteen sekä lähde- ja havaintoajan vastaavuuden. Johdonmukainen lähdeviite ei
+todista tiedon totuutta tai lähteen aitoutta; puuttuva tieto, null ja nolla pysyvät
+erillisinä.

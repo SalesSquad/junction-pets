@@ -24,6 +24,11 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+Version 0.2.0 adds a repository-only fictional responsive-media specification
+checker, with explicit width/format/quality bounds, no-upscaling rules and strict
+metadata fields. See `MEDIA_CONTRACT.md` and its invented JSON example. A checked
+plan is not a generated image, verified delivery, rights clearance or live tool.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No Cloudinary account or asset library is connected. Do not upload, transform, delete, publish or claim to inspect inaccessible media. Do not put API secrets or signed private asset URLs in examples; verify exact transformation syntax from current docs.

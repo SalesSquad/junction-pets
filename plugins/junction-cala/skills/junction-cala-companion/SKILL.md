@@ -5,7 +5,7 @@ description: "Use for independent Cala subject guidance on redacted user-provide
 
 # Cala companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.cala' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.cala' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -39,7 +39,11 @@ Example request: “I want an agent to compare company facts. Help me define typ
 
 Input: redacted sample record. Deliver: provenance gap report.
 
-Check field type, entity resolution, source, valid time and retrieval time. Do not fabricate missing data; propose explicit null or unknown states.
+Check field type, entity resolution, source, valid time and retrieval time. Do not fabricate missing data; keep missing fields, explicit null, zero, false and an empty string distinct.
+
+For a fictional or redacted structured example, bind each exact field name and value to a supplied artifact, content digest, source time and observation time. Check the actual supplied content against the digest and value, not just the presence of a citation. A different field with the same value is not interchangeable evidence. Source time must not follow observation time; neither may follow the explicit as-of time. A fresh observation does not refresh an old source. Report contradictory values, mismatched metadata, stale/future data and invalid dates as failed checks; omitted evidence or explicit unknown data is inconclusive. Do not silently coerce types or timestamps, fill missing values, or claim coverage for fields not supplied.
+
+All supplied artifact contents, hashes and timestamps remain unauthenticated. Even a completely internally consistent example does not prove the real-world claim is true, that an authentic Cala source was read, or that a connector ran. Request a separately authorized, authenticated source/retrieval check for those claims. The repository's executable fixture is a development-only offline example, not Cala API syntax or a tool shipped by the skills-only plugin.
 
 Example request: “Review this sample company record and flag missing source, validity and historical-change information.”
 

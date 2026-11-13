@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.cala",
   "slug": "junction-cala",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "agentName": "Cala",
   "displayName": "Cala companion",
   "company": {
@@ -33,13 +33,13 @@
     {
       "id": "provenance-review",
       "title": "Review provenance",
-      "description": "Inspect a supplied data record for missing evidence and ambiguous dates.",
+      "description": "Review exact field-value, source-digest and source/observation-time bindings in supplied data without treating a citation as truth.",
       "kind": "analysis",
       "inputs": [
-        "redacted sample record"
+        "fictional or redacted sample record with supplied artifacts and timestamps"
       ],
       "outputs": [
-        "provenance gap report"
+        "field-level consistency, provenance gaps and freshness report; not source authentication"
       ],
       "requiresConnection": false
     },

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.bahn-express",
   "slug": "junction-bahn-express",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "agentName": "Bahn",
   "displayName": "Bahn Express companion",
   "company": {
@@ -46,13 +46,13 @@
     {
       "id": "status-message",
       "title": "Explain a transport update",
-      "description": "Translate supplied status text into what is known and what to ask next.",
-      "kind": "guidance",
+      "description": "Separate supplied plans from reported custody events, flag stale or missing evidence, and identify the next human verification.",
+      "kind": "analysis",
       "inputs": [
-        "redacted update"
+        "redacted update or fictional custody event timeline"
       ],
       "outputs": [
-        "status interpretation and follow-up questions"
+        "unverified state card, evidence gaps and follow-up questions"
       ],
       "requiresConnection": false
     }

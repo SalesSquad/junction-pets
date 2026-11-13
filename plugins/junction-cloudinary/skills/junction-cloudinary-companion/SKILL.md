@@ -5,7 +5,7 @@ description: "Use for independent Cloudinary subject guidance on redacted user-p
 
 # Cloudinary companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.cloudinary' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.cloudinary' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,13 @@ Include stable identifiers, creator/source, usage rights, review status and vari
 Example request: “Design metadata for 34 mascot images so we can track source, approval and where each is used.”
 
 ## Company-specific limits
+
+The repository includes an offline fictional responsive-media planner described
+in `MEDIA_CONTRACT.md`. Its width/format/quality allowlists are example policy,
+not verified Cloudinary limits or API syntax. It rejects unknown/private metadata
+fields and returns only a plan; permitted text labels still require user redaction.
+No image pixels, rights, accessibility or delivery are verified. The skills-only
+plugin does not package this module as a callable tool or grant a host connection.
 
 No Cloudinary account or asset library is connected. Do not upload, transform, delete, publish or claim to inspect inaccessible media. Do not put API secrets or signed private asset URLs in examples; verify exact transformation syntax from current docs.
 
