@@ -24,6 +24,10 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+The local `experiment-card.mjs` checker reviews invented research-plan cards.
+See `EXPERIMENT_CARD.md` for its exact data contract and a non-medical example.
+A complete plan establishes neither a causal finding nor permission to collect data.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 Do not invent publications, contacts, admissions decisions or access to research data. A research concept is not clinical validation. The complete Junction challenge brief has not been recovered; do not turn an archived research theme into a confirmed task.

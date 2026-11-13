@@ -24,6 +24,10 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+An offline [synthetic retargeting metadata checker](RETARGETING.md) compares
+declared bone maps, coordinates, units and format intersections. It uses
+fictional inputs and proves neither actual animation quality nor provider support.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No Rokoko device, Studio project or capture session is connected. Do not claim to generate, inspect or repair motion from unavailable files, or guarantee tracking accuracy. Verify target software, skeleton and format support in current official documentation.

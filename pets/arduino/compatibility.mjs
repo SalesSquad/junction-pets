@@ -1,0 +1,102 @@
+// Offline synthetic declarations only. No hardware or provider operations.
+const invalid = () => { throw new Error('invalid declaration'); };
+
+// Copy descriptor values before calculation. Never invoke input accessors,
+// iterators, conversion hooks or overridden collection methods.
+function snapshot(value, depth = 0, seen = new Set()) {
+  if (depth > 10) invalid();
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
+  if (typeof value === 'number') { if (!Number.isFinite(value)) invalid(); return value; }
+  if (typeof value !== 'object' || seen.has(value)) invalid();
+  const array = Array.isArray(value), proto = Object.getPrototypeOf(value);
+  if (array ? proto !== Array.prototype : proto !== Object.prototype && proto !== null) invalid();
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const keys = Reflect.ownKeys(descriptors);
+  if (keys.some(k => typeof k !== 'string')) invalid();
+  for (const k of keys) if (!Object.hasOwn(descriptors[k], 'value')) invalid();
+  seen.add(value);
+  let result;
+  if (array) {
+    const length = descriptors.length.value;
+    if (!Number.isInteger(length) || length > 100 || keys.length !== length + 1) invalid();
+    result = [];
+    for (let i = 0; i < length; i++) {
+      if (!Object.hasOwn(descriptors, String(i)) || !descriptors[i].enumerable) invalid();
+      result.push(snapshot(descriptors[i].value, depth + 1, seen));
+    }
+  } else {
+    if (keys.length > 20) invalid();
+    result = Object.create(null);
+    for (const k of keys) {
+      if (!descriptors[k].enumerable) invalid();
+      result[k] = snapshot(descriptors[k].value, depth + 1, seen);
+    }
+  }
+  seen.delete(value);
+  return result;
+}
+function record(x, keys) {
+  if (!x || Array.isArray(x) || typeof x !== 'object') invalid();
+  if (Object.keys(x).length !== keys.length || keys.some(k => !Object.hasOwn(x, k))) invalid();
+}
+function number(x, min = 0) {
+  if (!Number.isSafeInteger(x) || x < min || x > 1_000_000_000) invalid();
+}
+function id(x) { if (typeof x !== 'string' || !/^[a-zA-Z0-9-]{1,40}$/.test(x)) invalid(); }
+function list(x) { if (!Array.isArray(x) || x.length < 1 || x.length > 100) invalid(); }
+function counted(x) { list(x.pins); number(x.pinCount, 1); if (x.pinCount !== x.pins.length) invalid(); }
+const modes = new Set(['input', 'output', 'analog-input']);
+
+export function reviewCompatibility(input) {
+  const boundary = {
+    authorization: false, safetyCertification: false,
+    unknowns: ['Declarations are synthetic and unauthenticated.',
+      'Actual board revision, component ratings and wiring are unverified.',
+      'Transient loads, tolerances, thermal behavior and real device behavior are outside this model.'],
+  };
+  try {
+    const x = snapshot(input);
+    record(x, ['board', 'sensors']);
+    const b = x.board;
+    record(b, ['voltageMv', 'powerLimitMa', 'pinLimitMa', 'totalPinLimitMa', 'pinCount', 'pins']);
+    number(b.voltageMv, 1); counted(b);
+    const issues = [];
+    for (const key of ['powerLimitMa', 'pinLimitMa', 'totalPinLimitMa']) {
+      if (b[key] === null) issues.push(`unknown-${key}`); else number(b[key]);
+    }
+    const pins = new Map();
+    for (const p of b.pins) {
+      record(p, ['id', 'modes']); id(p.id); list(p.modes);
+      if (pins.has(p.id) || new Set(p.modes).size !== p.modes.length) invalid();
+      for (const mode of p.modes) if (!modes.has(mode)) invalid();
+      pins.set(p.id, p.modes);
+    }
+    list(x.sensors);
+    const allocated = new Set(), sensors = new Set();
+    let supplyMa = 0, signalMa = 0;
+    for (const s of x.sensors) {
+      record(s, ['id', 'voltageMv', 'currentMa', 'ground', 'pinCount', 'pins']);
+      id(s.id); number(s.voltageMv, 1); number(s.currentMa); counted(s);
+      if (sensors.has(s.id) || typeof s.ground !== 'boolean') invalid();
+      sensors.add(s.id);
+      if (!s.ground) issues.push(`missing-ground:${s.id}`);
+      if (s.voltageMv !== b.voltageMv) issues.push(`voltage-mismatch:${s.id}`);
+      supplyMa += s.currentMa;
+      for (const p of s.pins) {
+        record(p, ['pin', 'mode', 'currentMa']); id(p.pin); number(p.currentMa);
+        if (!modes.has(p.mode)) invalid();
+        if (allocated.has(p.pin)) issues.push(`duplicate-pin:${p.pin}`);
+        allocated.add(p.pin);
+        if (!pins.has(p.pin)) issues.push(`unknown-pin:${p.pin}`);
+        else if (!pins.get(p.pin).includes(p.mode)) issues.push(`mode-mismatch:${p.pin}`);
+        if (b.pinLimitMa !== null && p.currentMa > b.pinLimitMa) issues.push(`pin-oversubscribed:${p.pin}`);
+        signalMa += p.currentMa;
+      }
+    }
+    if (b.powerLimitMa !== null && supplyMa + signalMa > b.powerLimitMa) issues.push('power-oversubscribed');
+    if (b.totalPinLimitMa !== null && signalMa > b.totalPinLimitMa) issues.push('signal-oversubscribed');
+    return {...boundary, status: issues.length ? 'needs-review' : 'consistent', issues, totals: {supplyMa, signalMa}};
+  } catch {
+    return {...boundary, status: 'invalid', issues: ['malformed-or-unsupported-input'], totals: null};
+  }
+}

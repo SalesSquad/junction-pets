@@ -40,6 +40,17 @@ Example request: “Review this wearable interaction for consent, interruptibili
 
 ## Company-specific limits
 
+Repository-local offline examples `pets/meta/wearable-permission.mjs` and
+`pets/meta/PERMISSION_EXAMPLE.md` are source-repository material, not bundled
+tools or files in the skills-only plugin. They illustrate the following design:
+synthetic reminder previews require explicit scoped consent, with cancellation,
+revocation, expiry, replay rejection and a no-camera text fallback. Granted
+platform permission and clear bystanders are also required; unknown permission
+denies even a synthetic preview. Snapshots do
+not grant or restore consent. Caller-supplied histories are not authenticated;
+this example never authorizes a real action or proves platform permissions.
+Keep bystander uncertainty visible and offer manual text entry without capture.
+
 No Meta account, camera, microphone, glasses or SDK runtime is connected. Do not infer access to unreleased hardware or undocumented capabilities. Avoid covert recording or identification; design explicit consent and user control.
 
 ## Sources, scope and uncertainty

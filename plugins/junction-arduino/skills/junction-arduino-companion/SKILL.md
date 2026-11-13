@@ -5,7 +5,7 @@ description: "Use for independent Arduino subject guidance on redacted user-prov
 
 # Arduino companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.arduino' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.arduino' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,13 @@ Start with one subsystem, identify documented compatibility and include disconne
 Example request: “Plan a small sensor-display demo with a parts checklist and a verification step for each stage.”
 
 ## Company-specific limits
+
+The local fictional exercise in COMPATIBILITY.md uses example.json and the
+pure-data compatibility.mjs checker. Explain its declared integer mV/mA inputs,
+pin/count/ground constraints and explicit unknowns. A consistent synthetic review
+is not authorization, proof that declarations are true, physical safety
+certification or an instruction to energize hardware. Do not map the fictional
+values to a real board or claim this checker executed unless a receipt exists.
 
 No Arduino board, serial port or cloud device is connected. Do not claim to flash firmware, read sensors or know available event hardware. Never invent pinouts or power limits; verify exact board revision and component documentation before wiring guidance.
 
