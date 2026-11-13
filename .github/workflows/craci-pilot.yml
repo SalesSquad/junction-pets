@@ -16,6 +16,13 @@ jobs:
     runs-on: craci
     timeout-minutes: 15
     steps:
+      - name: Configure monitored CRACI networking
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534 # v1
+        with:
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, npm]
       - name: Check out the selected commit
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
