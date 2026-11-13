@@ -325,7 +325,7 @@ def parse_response(provider, raw):
                 fail("PROVIDER_OUTPUT_INVALID")
             if kind in ("thinking", "redacted_thinking"):
                 fields = {"type", "thinking", "signature"} if kind == "thinking" else {"type", "data"}
-                if set(block) != fields or any(not isinstance(block[field], str) or not block[field]
+                if set(block) != fields or any(not isinstance(block[field], str) or (field != "thinking" and not block[field])
                                                for field in fields - {"type"}):
                     fail("PROVIDER_OUTPUT_INVALID")
             blocks[kind] = block

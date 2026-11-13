@@ -118,6 +118,8 @@ class PilotTests(unittest.TestCase):
         text = response("anthropic")["content"][0]
         bad = [[thinking], [{"type": "thinking", "thinking": "analysis"}, text],
                [{"type": "thinking", "thinking": "analysis", "signature": 1}, text],
+               [{"type": "thinking", "thinking": None, "signature": "signature"}, text],
+               [{"type": "thinking", "thinking": 1, "signature": "signature"}, text],
                [{"type": "redacted_thinking"}, text],
                [{"type": "redacted_thinking", "data": ""}, text],
                [{"type": "tool_use", "id": "tool", "name": "run", "input": {}}, text],
@@ -128,6 +130,13 @@ class PilotTests(unittest.TestCase):
             value["content"] = deepcopy(content)
             with self.subTest(content=content), self.assertRaisesRegex(pilot.PilotError, "PROVIDER_OUTPUT_INVALID"):
                 self.invoke("anthropic", value)
+
+    def test_anthropic_omitted_display_empty_thinking_is_valid(self):
+        value = response("anthropic")
+        value["content"].insert(0, {"type": "thinking", "thinking": "", "signature": "opaque-signature-canary"})
+        receipt, _ = self.invoke("anthropic", value)
+        self.assertEqual(receipt["result"], RESULT)
+        self.assertNotIn("opaque-signature-canary", json.dumps(receipt))
 
     def test_invalid_options_fail_before_environment_or_network(self):
         cases = [("other", MODEL, SHA, False), ("openai", "x/../../secret", SHA, False),
