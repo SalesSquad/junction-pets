@@ -22,7 +22,22 @@ Choose one of these prompts in Chibi, then share only the context needed for the
 
 The companion should explain its reasoning, cite the relevant official sources and make uncertainty visible. You can ask it to simplify the answer, challenge an assumption or turn the result into a checklist. Use fictional or redacted examples for private work.
 
-## Current limits
+## Fictional revision-and-handoff proof
+
+Version 0.2.0 adds an offline source helper for invented construction-document
+metadata. It checks that one declared owner hands the same current revision to
+the same declared recipient, with a matching acceptance declaration. Stale or
+unrecognized revisions, ambiguous ownership, mismatched document IDs and unknown
+acceptance produce a review card instead of silent approval.
+
+See [`HANDOFF_CONTRACT.md`](HANDOFF_CONTRACT.md) and the
+[fictional example](examples/fictional-handoff.json). Twelve deterministic source
+tests cover the boundary; the six authored companion behavior evals are preserved
+and do not represent actual model execution. The helper does not inspect BIM
+files or drawings, verify real acceptance or authorize construction work. It is
+not an installed tool or a live provider connection.
+
+## Current runtime limits
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
