@@ -4,6 +4,10 @@
 
 Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS.md) for contributor rules, and the [cloud developer playbook](docs/CLOUD_DEVELOPER_PLAYBOOK.md) for assigning and continuing independent company work. Finnish overview: *34 yrityskohtaista, itsenäisesti laadittua kumppania; yritys- tai Chibi-julkaisua ei pidä päätellä valmiista lähdekoodista.*
 
+## Meta scanning: start here
+
+For the Meta challenge, glasses/ARKit research, official Discord resources and the Chibi Lens agent lane, read [META_START_HERE.md](docs/META_START_HERE.md). It links the original messages, SDK repositories, simulator, full technical research, architecture, runnable demo and exact-source validation. This is a developer source map; it grants no device or runtime permissions.
+
 ## Source-bound status
 
 **W8 provisioning update, 13 November 2026:** all 34 Pro/Legacy environments now have actual provider IDs, individual settings readbacks and prior source-bound Cloud task evidence in [the private provisioning record](ops/cloud-provisioning-20261113.json). The manifests permit dry-run planning; a fresh account/provider/source check and bounded work ownership remain required for each task. This does not qualify Chibi runtime, model evaluations or an autonomous Fleet adapter.
