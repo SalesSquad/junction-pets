@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "fictional": true,
+  "dataScope": "aggregate-simulation",
+  "studyDesign": "randomized-simulation",
+  "sampleSize": 24,
+  "sampleUnit": "fictional-record",
+  "methods": {
+    "allocation": "simulated-random",
+    "measurement": "fictional-score",
+    "analysis": "descriptive-summary",
+    "timepoints": 2
+  },
+  "comparator": {
+    "kind": "simulated-group",
+    "sampleSize": 12
+  },
+  "source": {
+    "kind": "fictional-fixture",
+    "id": "fictional-fixture-alpha"
+  },
+  "uncertainty": {
+    "scope": "simulation-only",
+    "missingness": "not-assessed",
+    "limitations": ["no-real-world-inference", "source-not-authenticated"]
+  },
+  "claim": {
+    "kind": "descriptive",
+    "outcome": "fictional-score"
+  }
+}
