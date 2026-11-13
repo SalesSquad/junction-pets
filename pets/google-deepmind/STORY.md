@@ -24,6 +24,12 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+For an offline invented scene-record exercise, see [EVALUATION_PLAN.md](EVALUATION_PLAN.md),
+`example.json` and `evaluation-plan.mjs`. The checker detects declared split
+leakage through source/scene grouping and identifies planned coverage gaps.
+It performs no training or model evaluation; all capabilities remain untested,
+and supplied grouping labels are not authenticated provenance.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No Google account, Gemini API, model endpoint or research system is connected. Do not imply access to research demos, unreleased models or event benefits. Keep product documentation distinct from research announcements and check current model availability before claiming support.
