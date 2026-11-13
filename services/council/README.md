@@ -17,7 +17,11 @@ at `fcb5ef8bf731b72fd557f3c326adbc58f18da8f7`.
 MIT attribution is retained in [LICENSE-UPSTREAM](LICENSE-UPSTREAM).
 This code is independently adapted for Junction; neither an Aiven endorsement
 nor an Aiven service connection is implied. No Aiven logo or private demo data
-is redistributed.
+is redistributed. The machine-readable pins are in
+[`upstream-provenance.json`](upstream-provenance.json); run
+`node scripts/check-council-provenance.mjs` to check local documentation and
+license consistency. That check makes no network request and proves no live
+Aiven or Chibi connection.
 
 ## Local checks
 
