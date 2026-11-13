@@ -53,6 +53,53 @@ const options = () => ({expectedCompanies: COMPANIES, sourceCommit: SOURCE, gene
 const copy = value => structuredClone(value);
 const planned = () => buildDeveloperRoster(fixture(), options());
 
+function readyRoster() {
+  const manifests = fixture();
+  manifests[0].provisioning = {
+    state: 'ready', environmentId: 'opaque-12345',
+    verifiedAt: NOW.toISOString(), evidenceUrl: 'https://example.org/receipt'
+  };
+  return buildDeveloperRoster(manifests, options());
+}
+
+function boundPreflight() {
+  const workId = 'junction.hostinger.code.wave5';
+  const attemptId = 'attempt-hostinger-001';
+  const taskBranch = 'codex/junction-hostinger-wave5';
+  const expectedRemoteHead = 'c'.repeat(40);
+  const leaseId = 'lease-hostinger-000001';
+  return {
+    companySlug: 'hostinger', role: 'code', requestedSourceCommit: SOURCE,
+    workId, attemptId, taskBranch, expectedRemoteHead, now: NOW,
+    providerReadback: {
+      state: 'ready', provider: 'codex-cloud', environmentId: 'opaque-12345',
+      repository: 'SalesSquad/junction-pets', sourceCommit: SOURCE,
+      observedAt: NOW.toISOString()
+    },
+    remoteHeadReadback: {
+      repository: 'SalesSquad/junction-pets', branch: taskBranch,
+      headSha: expectedRemoteHead, observedAt: NOW.toISOString()
+    },
+    leaseReceipt: {
+      scope: 'distributed', leaseDomain: 'junction.hostinger.write',
+      agentId: 'junction-dev-hostinger', companySlug: 'hostinger', sourceCommit: SOURCE,
+      workId, attemptId, taskBranch, expectedRemoteHead, leaseId,
+      fencingToken: 42, expiresAt: '2026-11-13T00:30:00.000Z'
+    },
+    ledgerReadback: {
+      scope: 'distributed-lease-ledger', leaseDomain: 'junction.hostinger.write',
+      agentId: 'junction-dev-hostinger', companySlug: 'hostinger', sourceCommit: SOURCE,
+      workId, attemptId, previousAttemptId: 'attempt-hostinger-000',
+      taskBranch, expectedRemoteHead, leaseId,
+      lastCommittedFencingToken: 41, currentFencingToken: 42,
+      observedAt: NOW.toISOString()
+    },
+    capacityReceipt: {
+      sourceCommit: SOURCE, companySlug: 'hostinger', freeSlots: 4, observedAt: NOW.toISOString()
+    }
+  };
+}
+
 test('34 distinct developer identities, 102 logical roles, zero live processes', () => {
   const roster = planned();
   assert.equal(roster.summary.companyLanes, 34);
@@ -88,6 +135,11 @@ test('strict scoped code/test writers and read-only independent reviewer', () =>
   assert.deepEqual(aiven.roles[1].writePaths, ['tests/pet-aiven.test.mjs']);
   assert.deepEqual(aiven.roles[2].writePaths, []);
   assert.equal(aiven.roles[2].access, 'read-only');
+  assert.equal(aiven.roles[2].reviewerMustBeIndependentFromAuthors, true);
+  assert.equal(aiven.roles[0].reviewerMustBeIndependentFromAuthors, false);
+  assert.ok(aiven.roles[2].handoff.required.includes('independenceEvidence'));
+  assert.equal(aiven.ownership.untrustedRuntimePersonaPath, 'pets/aiven/AGENTS.md');
+  assert.equal(aiven.ownership.runtimePersonaTrust, 'company-specific-task-data-not-executor-policy');
   assert.equal(aiven.roles[0].writerLeaseDomain, 'junction.aiven.write');
   assert.equal(aiven.roles[1].writerLeaseDomain, 'junction.aiven.write');
   assert.equal(aiven.roles[2].writerLeaseDomain, null);
@@ -229,30 +281,16 @@ test('wrong source commit always blocks regardless of stale receipts', () => {
 });
 
 test('even well-formed self-declared provider, fenced lease and capacity cannot grant dispatch', () => {
-  const manifests = fixture();
-  manifests[0].provisioning = {
-    state: 'ready', environmentId: 'opaque-12345',
-    verifiedAt: NOW.toISOString(), evidenceUrl: 'https://example.org/receipt'
-  };
-  const roster = buildDeveloperRoster(manifests, options());
-  const preflight = inspectDeveloperPreflight(roster, {
-    companySlug: 'hostinger', requestedSourceCommit: SOURCE, now: NOW,
-    providerReadback: {
-      state: 'ready', provider: 'codex-cloud', environmentId: 'opaque-12345',
-      repository: 'SalesSquad/junction-pets', sourceCommit: SOURCE, observedAt: NOW.toISOString()
-    },
-    leaseReceipt: {
-      scope: 'distributed', leaseDomain: 'junction.hostinger.write',
-      agentId: 'junction-dev-hostinger', companySlug: 'hostinger',
-      sourceCommit: SOURCE, fencingToken: 1, expiresAt: '2026-11-13T00:30:00.000Z'
-    },
-    capacityReceipt: {
-      sourceCommit: SOURCE, companySlug: 'hostinger', freeSlots: 4, observedAt: NOW.toISOString()
-    }
-  });
+  const preflight = inspectDeveloperPreflight(readyRoster(), boundPreflight());
   assert.equal(preflight.dispatchAllowed, false);
+  assert.equal(preflight.requestedWorkId, 'junction.hostinger.code.wave5');
+  assert.equal(preflight.requestedAttemptId, 'attempt-hostinger-001');
+  assert.ok(!preflight.reasons.includes('missing-or-invalid-distributed-fenced-lease'));
+  assert.ok(!preflight.reasons.includes('stale-or-mismatched-distributed-fencing-ledger-readback'));
   assert.ok(preflight.reasons.includes('provider-readback-not-authenticated-by-planning-module'));
   assert.ok(preflight.reasons.includes('distributed-lease-not-authenticated-by-planning-module'));
+  assert.ok(preflight.reasons.includes('distributed-ledger-readback-not-authenticated-by-planning-module'));
+  assert.ok(preflight.reasons.includes('git-remote-head-readback-not-authenticated-by-planning-module'));
   assert.ok(preflight.reasons.includes('capacity-not-authenticated-by-planning-module'));
   assert.ok(!preflight.reasons.some(reason => reason.includes('host-authorization')));
 });
@@ -284,4 +322,89 @@ test('unknown company or role refuses preflight rather than fabricating a lane',
   assert.throws(() => inspectDeveloperPreflight(planned(), {
     companySlug: 'aiven', role: 'deploy', requestedSourceCommit: SOURCE
   }), /Unknown developer role/);
+});
+
+test('P1: work ID must be scoped to the exact pet and role', () => {
+  const input = boundPreflight();
+  input.workId = 'junction.aiven.code.wave5';
+  const result = inspectDeveloperPreflight(readyRoster(), input);
+  assert.equal(result.dispatchAllowed, false);
+  assert.ok(result.reasons.includes('missing-or-invalid-work-id-or-distinct-attempt-id'));
+  assert.ok(result.reasons.includes('missing-or-invalid-distributed-fenced-lease'));
+  assert.ok(result.reasons.includes('stale-or-mismatched-distributed-fencing-ledger-readback'));
+});
+
+test('P1: attempt ID required, separately bound to both ledger and lease', () => {
+  const input = boundPreflight();
+  input.attemptId = null;
+  const result = inspectDeveloperPreflight(readyRoster(), input);
+  assert.ok(result.reasons.includes('missing-or-invalid-work-id-or-distinct-attempt-id'));
+  assert.ok(result.reasons.includes('missing-or-invalid-distributed-fenced-lease'));
+  assert.equal(result.dispatchAllowed, false);
+});
+
+test('P1: reused attempt ID from ledger is rejected', () => {
+  const input = boundPreflight();
+  input.ledgerReadback.previousAttemptId = input.attemptId;
+  const result = inspectDeveloperPreflight(readyRoster(), input);
+  assert.ok(result.reasons.includes('stale-or-mismatched-distributed-fencing-ledger-readback'));
+  assert.equal(result.dispatchAllowed, false);
+});
+
+test('P1: task branch outside pet scope or invalid expected HEAD is blocked', () => {
+  const input = boundPreflight();
+  input.taskBranch = 'codex/junction-aiven-wave5';
+  input.expectedRemoteHead = 'unexpected-short-sha';
+  const result = inspectDeveloperPreflight(readyRoster(), input);
+  assert.ok(result.reasons.includes('missing-or-invalid-task-branch-or-expected-remote-head'));
+  assert.ok(result.reasons.includes('stale-or-mismatched-git-remote-head-readback'));
+  assert.equal(result.dispatchAllowed, false);
+});
+
+test('P1: lease receipt must bind immutable expected Git HEAD and branch', () => {
+  const input = boundPreflight();
+  input.leaseReceipt.expectedRemoteHead = 'd'.repeat(40);
+  input.leaseReceipt.taskBranch = 'codex/junction-hostinger-old';
+  const result = inspectDeveloperPreflight(readyRoster(), input);
+  assert.ok(result.reasons.includes('missing-or-invalid-distributed-fenced-lease'));
+  assert.equal(result.dispatchAllowed, false);
+});
+
+test('P1: stale fencing token or mismatched current ledger lease is blocked', () => {
+  const input = boundPreflight();
+  input.ledgerReadback.lastCommittedFencingToken = 42;
+  input.ledgerReadback.leaseId = 'lease-forged-owner-99999';
+  const result = inspectDeveloperPreflight(readyRoster(), input);
+  assert.ok(result.reasons.includes('stale-or-mismatched-distributed-fencing-ledger-readback'));
+  assert.equal(result.dispatchAllowed, false);
+});
+
+test('P1: stale ledger readback or future timestamp cannot pass preflight', () => {
+  for (const observedAt of ['2026-11-12T23:45:00.000Z', '2026-11-13T00:01:00.000Z']) {
+    const input = boundPreflight();
+    input.ledgerReadback.observedAt = observedAt;
+    const result = inspectDeveloperPreflight(readyRoster(), input);
+    assert.ok(result.reasons.includes('stale-or-mismatched-distributed-fencing-ledger-readback'));
+  }
+});
+
+test('P1: stale or substituted Git remote HEAD readback is blocked', () => {
+  const input = boundPreflight();
+  input.remoteHeadReadback.headSha = 'e'.repeat(40);
+  input.remoteHeadReadback.observedAt = '2026-11-12T23:00:00.000Z';
+  const result = inspectDeveloperPreflight(readyRoster(), input);
+  assert.ok(result.reasons.includes('stale-or-mismatched-git-remote-head-readback'));
+  assert.equal(result.dispatchAllowed, false);
+});
+
+test('P1: reviewer remains read-only and does not require a company writer lease', () => {
+  const input = boundPreflight();
+  input.role = 'review';
+  input.workId = 'junction.hostinger.review.wave5';
+  input.leaseReceipt = null;
+  input.ledgerReadback = null;
+  const result = inspectDeveloperPreflight(readyRoster(), input);
+  assert.equal(result.dispatchAllowed, false);
+  assert.ok(!result.reasons.includes('missing-or-invalid-distributed-fenced-lease'));
+  assert.ok(!result.reasons.includes('missing-authoritative-distributed-ledger-readback'));
 });
