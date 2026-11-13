@@ -5,7 +5,7 @@ description: "Use for independent S-Pankki subject guidance on redacted user-pro
 
 # S-Pankki companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.s-pankki' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.s-pankki' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,18 @@ Do not open or endorse suspicious links. Explain verification using independentl
 Example request: “This message claims to be from S-Pankki. How can I verify it safely without opening its link?”
 
 ## Company-specific limits
+
+### Source-only invented SMS exercise
+
+The repository's `sms-guidance.mjs` helper reviews only a bounded fictional
+cue-declaration JSON scenario; read `SMS_GUIDANCE.md` for its exact contract.
+It never parses a real message, opens a link, verifies a sender or performs a
+bank action. Branding, a supplied outside-check match, or no declared warning
+cannot establish authenticity or safety. Unknown cues remain unknown and
+login/payment/authenticity actions are explicitly refused. The example contains
+no real SMS, URL, phone number, user or account data. A source helper is not an
+installed plugin tool: do not claim to have run it without actual source-bound
+execution evidence, or confuse its ten deterministic source tests with model evals.
 
 No account access, balance verification, payments, credit decisions or personalized investment recommendations. Never ask for banking credentials, PINs, one-time codes or full card data. For suspected fraud point to the bank's current official emergency channels, without inventing a phone number.
 
