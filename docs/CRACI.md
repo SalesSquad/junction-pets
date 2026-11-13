@@ -1,10 +1,31 @@
-# CRACI pilot for Junction
+# CRACI CI for Junction
 
-This is the manually started CI lane for `SalesSquad/junction-pets` and the
-CRACI side challenge. It runs the repository's existing validation, Node tests
-and catalog build. It does not deploy Chibi or execute companion/provider calls.
+This is the CRACI CI lane for `SalesSquad/junction-pets` and the CRACI side
+challenge. It automatically runs dependency security checks, the repository's
+validation, Node tests and catalog build on pull requests and pushes to `main`.
+It does not deploy Chibi or execute companion/provider calls.
 
-## First run
+## Automatic runs
+
+- Every pull request, regardless of its target branch, runs on opening, new head
+  commits and reopening (GitHub's standard `pull_request` activities). Draft PRs
+  are included. Existing open PRs run on their next such event; enabling triggers
+  does not retroactively dispatch all of them.
+- Every push to `main` runs, with no path filters. Main/manual runs have distinct
+  concurrency groups so a newer run cannot replace a pending main run. For the
+  same PR, newer source cancels obsolete queued/running work.
+- PR jobs use GitHub's tested merge commit and record its exact SHA. They use
+  `pull_request`, read-only repository permissions and no provider secrets;
+  GitHub's own fork approval controls remain in force.
+- After locked installation, `npm audit --audit-level=high` fails the job on high
+  or critical dependency findings (including development/build dependencies),
+  or an audit error. Lower-severity findings remain in the report. It does not
+  change dependencies or run an automatic fix.
+- CRACI generates its own SBOM, vulnerability view and network trace for every
+  job. The npm audit gate is separate from those provider findings and does not
+  by itself prove SBOM completeness or that the software is secure.
+
+## Manual rerun and connection checks
 
 1. Finish CRACI sign-in at <https://platform.craci.com>. In its billing/credit
    view, verify the offered Junction credit, currency, balance and expiry before
@@ -14,7 +35,7 @@ and catalog build. It does not deploy Chibi or execute companion/provider calls.
    approve any new GitHub App permission/repository grant in GitHub's own flow.
    Never post sign-in codes, API tokens or browser cookies into this repository.
 3. Once this workflow is present on `main`, select **Actions → CRACI portable CI
-   pilot → Run workflow** and choose the exact source branch. The CLI equivalent is:
+   → Run workflow** and choose the exact source branch. The CLI equivalent is:
 
    ```sh
    gh workflow run craci-pilot.yml --repo SalesSquad/junction-pets --ref main
@@ -25,12 +46,13 @@ and catalog build. It does not deploy Chibi or execute companion/provider calls.
    URL, run attempt, checked-out commit and CRACI job ID. A queued job or successful
    dispatch request is not an executed build. If no runner appears, inspect App
    coverage/capacity and cancel the pending run rather than repeatedly dispatching.
-5. Require all four stages to pass: dependency installation, validation, tests and
-   build. Retain the executor/source log and CRACI findings for this exact attempt.
+5. Require every stage to pass: dependency installation, vulnerability audit,
+   validation, tests, build and digest recording. Retain the executor/source log and CRACI findings for this exact attempt.
    The final step logs the lockfile digest, a sorted SHA-256 manifest of built
    files and its digest; it does not upload or retain the built files themselves.
 
-The workflow is manual-only, `contents: read`, CRACI-only and bounded to 15 minutes.
+The workflow is `contents: read`, CRACI-only and bounded to 15 minutes.
+`workflow_dispatch` remains available alongside the automatic triggers.
 Checkout credentials are not persisted. It requests no provider secrets, cache,
 artifact upload, deployment or GitHub-hosted fallback. It starts with CRACI's
 2-vCPU default; larger runners require an observed bottleneck and available credit.
@@ -91,6 +113,11 @@ receipt, authored plan or synthetic example must never be labelled a live CRACI 
 - [SBOM and cache completeness](https://docs.craci.com/guides/cache-sbom-completeness/)
 - [Network troubleshooting](https://docs.craci.com/guides/network-troubleshooting/)
 - [Compute usage](https://docs.craci.com/api/usage/)
+- [GitHub PR and push events](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows)
+- [GitHub concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)
+- [npm audit failure threshold](https://docs.npmjs.com/cli/v10/commands/npm-audit/)
 
-References were read on 13 November 2026. Account credit, App installation, actual
-runner pickup, SBOM completeness and vulnerability outcomes require live evidence.
+The original CRACI reference baseline was read on 13 November 2026. Runner and
+network guidance, GitHub event/concurrency rules and npm audit were checked for
+this automatic-CI change on 14 November. Account credit, App installation, runner
+pickup, SBOM completeness and vulnerability outcomes require live evidence.
