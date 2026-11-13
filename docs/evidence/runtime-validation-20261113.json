@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "code_source_commit": "e5f5ae5f296c58091aba8c637419a04849bb1986",
+  "scope": "finite public/synthetic developer workflow and independently authored companion packages",
+  "source_reviews": "Independent read-only reviewers approved authored final bytes; no reviewer rewrote code.",
+  "checks": [
+    {
+      "name": "Node full",
+      "source_commit": "e5f5ae5f296c58091aba8c637419a04849bb1986",
+      "pass": 782,
+      "fail": 0,
+      "log_sha256": "235b9a8fded71cd63b60cd3a7a9c70b13f6c03acdbf37af268bf1e667a0cad77"
+    },
+    {
+      "name": "Council full",
+      "source_commit": "6112461edc485d77ecc920fd04ce9f67bd639384",
+      "pass": 148,
+      "fail": 0,
+      "log_sha256": "f8cdc29cb3706e7879adfc7fae7d68c983f1fb2da348095b6609005ab8a906a4",
+      "source_scope_unchanged_at_code_source": true
+    },
+    {
+      "name": "Actual PostgreSQL16 contention/restart/fencing",
+      "source_commit": "6112461edc485d77ecc920fd04ce9f67bd639384",
+      "result": "pass",
+      "log_sha256": "705728bd4cf1df8beee3d3915405655ebeb0607a059825222ac930a27a28022a",
+      "source_scope_unchanged_at_code_source": true
+    },
+    {
+      "name": "Chromium158/WebKit27.2 desktop/mobile",
+      "source_commit": "a43ac2195a39ac5a3fc9261a3b05faeea52281dc",
+      "result": "pass",
+      "log_sha256": "23aaa110897a759ea1e40d364ac5d6a3d5f2de6748369a85474bfa28ac5684e7",
+      "source_scope_unchanged_at_code_source": true,
+      "native_webmcp_available": false,
+      "registration_fixture": "injected API with real rendered UI completion"
+    },
+    {
+      "name": "Actual repaired public doc/model/PG result and identical replay",
+      "source_commit": "e5f5ae5f296c58091aba8c637419a04849bb1986",
+      "result": "pass",
+      "response_sha256": "57ad57172c0005ab7f4adde42cab22a2aafbd78df04623cfd1951e23c3fa81e9",
+      "first_stdout_sha256": "fb7680cde68bdccb4d225e3578c4d12562c7c04241008cadc09724bbc0a90a64",
+      "replay_stdout_sha256": "e4f5b7489559d69769711ca704b47829ba75aa62c2efc22412110b682e258cff",
+      "second_model_invocation": false,
+      "independent_content_review": "accepted for this one synthetic sample"
+    }
+  ],
+  "failure_retention": [
+    {
+      "source_commit": "d888de7f9a9142e17475205386a75b74f1969a2f",
+      "failure": "Actual concurrent inserts collided on run-id unique index; repaired without weakening the gate."
+    },
+    {
+      "source_commit": "6112461edc485d77ecc920fd04ce9f67bd639384",
+      "response_sha256": "793b419fba424db48655b41b99115265c86966e1f9088aa30efa32c7cb47215c",
+      "failure": "Transport/replay completed; independent content review rejected database diagnostic syntax. Repaired in a separate commit and actual sample."
+    }
+  ],
+  "operations": {
+    "owned_previews_stopped": true,
+    "owned_ephemeral_postgresql_stopped": true,
+    "tcp_database_listener_created": false,
+    "force_push_used": false,
+    "default_branch_push_used": false,
+    "merge_performed": false,
+    "production_release_performed": false
+  },
+  "unverified": [
+    "Aiven managed service/OAuth (fresh readback disconnected)",
+    "Private Chibi recipient identity/consent/Cedar/signed consumption path",
+    "Native browser WebMCP availability",
+    "Held-out usefulness and repeated-run stability",
+    "Private Plugin Creator release/install of changed source"
+  ],
+  "related_chibi": {
+    "pr": "https://github.com/SalesSquad/chibi/pull/117",
+    "source_commit": "8781a97d16c37ca2a6bcf1c2de20d8731fc61cb7",
+    "source_review": "approved admission-only scope",
+    "targeted_rust_tests": 18,
+    "failed": 0,
+    "ignored": 0,
+    "filtered_lib_tests": 111,
+    "log_sha256": "69ad090fd5a69b2be067244dd9dd56ee77c68e5e6070226a931e877480d9162d",
+    "runtime_enabled": false
+  },
+  "costs": {
+    "actual_billing_usd": null,
+    "all_tool_call_cost_usd": null,
+    "note": "CLI list-cost reports and model-review observations are not billing receipts. Unknown costs remain unknown."
+  }
+}
