@@ -58,3 +58,31 @@ test('overflow, underflow and sparse timings fail closed', () => {
     const b=row(); b.timings=timings; assert.equal(compare(row(),b).comparable,false);
   }
 });
+for (const method of ['reduce','some']) test(`reject own ${method} without invoking it`, () => {
+  let calls=0;
+  const a=row(); a.timings[method]=()=>{calls++; return method==='reduce'?1e9:false;};
+  assert.equal(compare(a,row()).comparable,false);
+  assert.equal(calls,0);
+});
+test('reject index and method getters without reading them', () => {
+  for(const key of ['0','reduce','some']) {
+    let reads=0;
+    const a=row(); Object.defineProperty(a.timings,key,{get(){reads++; return key==='0'?10:()=>36;}});
+    assert.equal(compare(a,row()).comparable,false,key);
+    assert.equal(reads,0,key);
+  }
+});
+test('reject symbols, extra properties and nonplain array prototypes', () => {
+  for(const key of ['extra',Symbol('sample')]) {
+    const a=row(); Object.defineProperty(a.timings,key,{value:1});
+    assert.equal(compare(a,row()).comparable,false);
+  }
+  const a=row(); Object.setPrototypeOf(a.timings,Object.create(Array.prototype));
+  assert.equal(compare(a,row()).comparable,false);
+});
+test('normal and frozen arrays retain ratio one, zero warmup and missing rejection', () => {
+  const a=row(), b=row(); Object.freeze(a.timings);
+  assert.equal(compare(a,b).ratio,1);
+  assert.equal(a.warmup,0);
+  delete b.timings[1]; assert.equal(compare(a,b).comparable,false);
+});
