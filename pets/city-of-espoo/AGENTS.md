@@ -40,6 +40,16 @@ Example request: “Review this service journey for a resident who needs simple 
 
 ## Company-specific limits
 
+The local SERVICE_ROUTING.md exercise, example.json and service-routing.mjs
+checker use invented FI/EN service cards only. Explain exact service identifiers,
+matching language, supplied source freshness, declared text alternatives and
+explicit availability/eligibility/accessibility unknowns. An unknown identifier
+must use a non-routing clarification fallback, never a guessed actual service.
+A structurally valid fictional route is not city service availability, an
+accessibility certification, a freshly fetched source or authorization to act.
+Do not put resident data in the fixture, present its .invalid URL as an official
+source, or claim this checker ran without source-bound execution evidence.
+
 Do not submit applications, promise eligibility or make municipal decisions. Do not request unnecessary personal identifiers. An older 2025 partner description is not the 2026 challenge brief; keep that historical material separate.
 
 ## Sources, scope and uncertainty

@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "dataKind": "fictional-fixture",
+  "request": {"language": "fi", "serviceId": "fictional-reading-room"},
+  "asOf": "2026-11-13T12:00:00.000Z",
+  "maxSourceAgeHours": 48,
+  "services": [
+    {
+      "id": "fictional-reading-room",
+      "source": {
+        "kind": "invented-fixture",
+        "url": "https://fixtures.example.invalid/city-of-espoo/reading-room",
+        "checkedAt": "2026-11-12T12:00:00.000Z"
+      },
+      "localizations": {
+        "fi": {
+          "language": "fi",
+          "serviceId": "fictional-reading-room",
+          "title": "Kuvitteellinen lukutila — harjoituskortti",
+          "summary": "Tämä keksitty palvelukortti harjoittelee tiedon löytämistä. Se ei kuvaa Espoon oikeaa palvelua.",
+          "nextSteps": ["Tunnista tarvitsemasi palvelu yleisellä tasolla ilman henkilötietoja.", "Tarkista oikea ohje ja yhteydenottotapa kaupungin ajantasaisesta virallisesta lähteestä."],
+          "unknowns": {
+            "availability": "Oikean palvelun saatavuutta tai aukioloa ei ole tarkistettu.",
+            "eligibility": "Asioinnin ehtoja tai oikeutta palveluun ei ole tarkistettu.",
+            "accessibility": "Todellisen asiointikanavan saavutettavuutta ei ole testattu."
+          }
+        },
+        "en": {
+          "language": "en",
+          "serviceId": "fictional-reading-room",
+          "title": "Fictional reading room — practice card",
+          "summary": "This invented service card rehearses finding information. It does not describe an actual Espoo service.",
+          "nextSteps": ["Describe the service you need in general terms without personal data.", "Check the actual instructions and contact route in a current official city source."],
+          "unknowns": {
+            "availability": "Actual service availability and opening hours have not been checked.",
+            "eligibility": "Conditions and eligibility for the actual service have not been checked.",
+            "accessibility": "Accessibility of the real service channel has not been tested."
+          }
+        }
+      },
+      "channels": [
+        {
+          "id": "plain-text",
+          "kind": "text",
+          "accessibleText": {
+            "fi": "Kuvitteellinen tekstivaihtoehto: lue harjoituskortin vaiheet. Älä lähetä hakemusta tai henkilötietoja.",
+            "en": "Fictional text alternative: read the practice card steps. Do not submit an application or personal data."
+          }
+        }
+      ]
+    }
+  ],
+  "unknownFallback": {
+    "action": "ask-for-service-detail",
+    "serviceId": null,
+    "localizations": {
+      "fi": {
+        "language": "fi",
+        "serviceId": null,
+        "title": "Palvelua ei tunnistettu harjoitusaineistosta",
+        "message": "Tämä keksitty aineisto ei sisällä pyydettyä palvelua. Oikeasta palvelusta ei voi päätellä mitään.",
+        "nextStep": "Kuvaile tarvitsemasi palvelu yleisellä tasolla ilman henkilötietoja ja tarkista oikea palvelu virallisesta lähteestä."
+      },
+      "en": {
+        "language": "en",
+        "serviceId": null,
+        "title": "Service not found in the practice data",
+        "message": "This invented data does not contain the requested service. It says nothing about the actual service.",
+        "nextStep": "Describe the service in general terms without personal data and verify the actual service in an official source."
+      }
+    }
+  }
+}

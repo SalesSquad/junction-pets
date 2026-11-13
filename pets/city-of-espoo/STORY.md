@@ -24,6 +24,13 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+For a fictional offline FI/EN service-routing worksheet, see
+[SERVICE_ROUTING.md](SERVICE_ROUTING.md), `example.json` and `service-routing.mjs`.
+The deterministic checker requires matching identifiers/languages, source and
+freshness fields, explicit unknowns and a bilingual text alternative. Unknown
+services get a clarification fallback. This does not establish real city service
+availability, accessibility certification, a source fetch or permission to act.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 Do not submit applications, promise eligibility or make municipal decisions. Do not request unnecessary personal identifiers. An older 2025 partner description is not the 2026 challenge brief; keep that historical material separate.
@@ -37,5 +44,10 @@ This is newly authored content for the reconstructed 34-company roster. The earl
 Source review date: 2026-11-11. Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it. A 2025 profile description must not be represented as the 2026 challenge.
 
 ## Suomeksi
+
+Mukana on myös keksitty suomi–englanti-harjoituskortti palvelun reitityksestä.
+Tarkistin tunnistaa täsmällisen harjoitustunnisteen tai palauttaa tarkentavan
+kysymyksen ilman palvelureittiä. Tekstivaihtoehto ja lähteen päiväys eivät todista
+oikean palvelun saatavuutta tai saavutettavuutta. Älä anna asukkaiden henkilötietoja.
 
 Autan löytämään Espoon oikean palvelun, ymmärtämään ohjeet ja valmistautumaan asiointiin. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
