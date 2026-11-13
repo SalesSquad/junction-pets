@@ -1,6 +1,6 @@
 # One company, one continuing developer — cloud playbook
 
-**Purpose:** give each of the 34 Junction companions a stable, source-controlled development owner and a dedicated *desired* Codex Cloud environment. This playbook is for the integrator, reviewer and future company agents. It is **not** a claim that 34 environments have been created or 34 workers are online. Start with root [`AGENTS.md`](../AGENTS.md), [`ARCHITECTURE.md`](../ARCHITECTURE.md), [`ops/AGENTS.md`](../ops/AGENTS.md) and the assigned pet only.
+**Purpose:** give each of the 34 Junction companions a stable, source-controlled development owner and a recorded Codex Cloud environment identity. This playbook is for the integrator, reviewer and future company agents. The 34 Pro/**Legacy** IDs are in dated source evidence; this is **not** a claim that 34 workers are online or the IDs are selectable in the new Cloud picker. Start with root [`AGENTS.md`](../AGENTS.md), [`ARCHITECTURE.md`](../ARCHITECTURE.md), [`ops/AGENTS.md`](../ops/AGENTS.md), the [durable queue](DEVELOPMENT_QUEUE.md) and the assigned pet only.
 
 ## Inventory and current activation truth
 
@@ -20,6 +20,8 @@ This produces **34 logical owners, 34 desired configurations and 102 planned rol
 
 **W8 provisioning update, 13 November 2026:** all 34 Pro/Legacy environments now have actual provider IDs, individual settings readbacks and prior source-bound Cloud task evidence in [the private provisioning record](../ops/cloud-provisioning-20261113.json). The manifests permit dry-run planning; a fresh account/provider/source check and bounded work ownership remain required for each task. This does not qualify Chibi runtime, model evaluations or an autonomous Fleet adapter.
 
+**Actual continuation, 13 November:** the owner used authenticated Pro UI and separately verified `chibi-marketplace-cloud` (containing Junction) for the [first Aiven development task](https://chatgpt.com/local/6af6b453-cd8c-8191-92f7-a8559f0350d3). The per-pet Legacy IDs did **not** appear in the new Cloud task picker. [PR #11](https://github.com/SalesSquad/junction-pets/pull/11) subsequently received an independent source review and was merged at `f1bbd3b7a6b1e93e104a28b559263d068248c332`, after 252/252 full Node tests and 23/23 focused source tests on `48db6f84b504c38cfaa3b03ef1f7638588761f3d`. The [development queue](DEVELOPMENT_QUEUE.md) records Aiven as `reviewed`, **MariaDB/AfterQuery as actual provider-observed tasks**, and **31 queued** with null task URLs. MariaDB source pin was verified at `f1bbd3b7`; AfterQuery was still verifying its requested source in preflight. No live model/Chibi runtime pass is claimed.
+
 ## Provision or maintain a dedicated environment
 
 Do these steps **for each company independently**; one blocked company must not halt unrelated work.
@@ -33,7 +35,7 @@ Do these steps **for each company independently**; one blocked company must not 
 
 Authenticated Cloud management may require the owner to complete a mandatory sign-in/verification. An unavailable Cloud API is an explicit provisioning blocker, **not** a reason to invent an ID, switch Pro/Plus profiles to evade quotas or silently use a paid external agent API. The [Cloud dispatch script](../scripts/ops-cloud-dispatch.mjs) creates an inspectable **dry-run plan**; it does **not** provision or execute a task.
 
-**Scheduling fallback (13 November):** the owner automation scheduler rejected another always-on fleet task because its **20-active-task limit** was reached. Therefore **no new recurring company monitor has been created**. Keep the 34 desired owners in source control; use the existing authorized coordinator, explicit owner-triggered batches or an independently verified provider-native task dispatcher to admit work when capacity permits. Record each admission and next check as a durable work item. Do not call an unscheduled roster an active monitoring service or disable unrelated owner automations to make room.
+**Scheduling fallback (13 November):** the owner automation scheduler rejected another always-on fleet task because its **20-active-task limit** was reached. No new recurring company dispatcher exists. The **existing** Junction Mission Control hourly automation now includes a bounded source-completion notification, but it is an event monitor, **not 34 active company developers**. Keep all intended owners and proposed tasks in the [private durable queue](DEVELOPMENT_QUEUE.md); use the authorized integrator, explicit bounded Cloud batches and actual task/PR receipts. Do not disable unrelated automations or infer active execution from the roster.
 
 **Two independent permission planes:** a Codex Cloud task may be allowed to **edit/test repository files** after a verified developer environment, branch and work lease are established. This developer admission grants **zero Chibi recipient/tool/model permissions**. Only the authenticated private Chibi host issues and rechecks tenant-specific runtime consent and Cedar policy. Even a successful developer Cloud run cannot exercise a private Chibi action without separate host authorization.
 
@@ -45,7 +47,7 @@ Authenticated Cloud management may require the owner to complete a mandatory sig
 | Company test agent (planned) | Source-pinned independent run | Test fixture/report paths only when assigned | Exact cases, runner and failures; never green by assumption |
 | Company reviewer (planned) | Independent, generally read-only | None unless explicitly assigned a repair branch | Findings on actual final diff/evidence |
 | Root integrator | One serialized integration lane | Shared schemas, exports, lockfiles, ops registry, cross-pet/service files | No overlap, latest HEAD, decisive tests, staged PR |
-| Fleet coordinator | Capacity/ownership scheduler | Work registry and its own receipts only | Active source/lease, retry owner, no orphan claims |
+| Fleet coordinator (planned/admission owner) | Capacity/ownership control, not an implemented daemon | Durable queue and its own receipts only | Fresh source/lease/task URL and explicit next owner; no phantom running status |
 
 Start with one or two independent pet tasks plus one integrator/reviewer when capacity is verified. Widen based on measured latency, cost, merge rework and authenticated Cloud quotas; **do not launch 34 × 3 jobs** from the mere existence of a roster. Reviewers must be independent of the bytes they verify. Where two specialists touch shared schemas/generators, serialize through the integrator or split by strictly disjoint paths and fixtures.
 
@@ -60,7 +62,7 @@ Start with one or two independent pet tasks plus one integrator/reviewer when ca
 5. **Commit and review:** push to the verified task branch, record latest commit SHA/PR HEAD, obtain independent review and rerun decisive checks on final bytes. Previous receipts become `stale` when HEAD changes.
 6. **Handoff:** store durable record in task PR/registry, preserve failed logs, set a specific next owner/action and release your local lease. When a new Cloud task starts, it reads this source record and resumes independently of chat history.
 
-Use [`ops/AGENTS.md`](../ops/AGENTS.md) for the **machine-readable YAML handoff schema** and [`ops/README.md`](../ops/README.md) for valid receipt fields. A minimum handoff includes `work_id`, `agent_id`, exact `source_commit`, dirty baseline, owned paths, branch/committed HEAD, draft PR, checks and evidence URLs, `verified`, `not_verified`, blocker/owner and one next action. Never put user credentials or private conversation transcripts in receipts.
+Use [`ops/AGENTS.md`](../ops/AGENTS.md) for the **machine-readable YAML handoff schema**, [`ops/README.md`](../ops/README.md) for valid receipts and [`DEVELOPMENT_QUEUE.md`](DEVELOPMENT_QUEUE.md) for the 34 current proposed/observed work items. A minimum handoff includes `work_id`, `agent_id`, exact `source_commit`, dirty baseline, owned paths, branch/committed HEAD, draft PR, checks and evidence URLs, `verified`, `not_verified`, blocker/owner and one next action. Never put user credentials or private conversation transcripts in receipts.
 
 ## Recovery and portable fallback
 

@@ -5,7 +5,7 @@
 ## Read first, in order
 
 1. [`README.md`](README.md) for the product and current *dated* evidence; [`ARCHITECTURE.md`](ARCHITECTURE.md) for service/trust boundaries.
-2. [`catalog-contract.md`](catalog-contract.md), [`docs/DEVELOPMENT_SYSTEM.md`](docs/DEVELOPMENT_SYSTEM.md) and [`docs/CLOUD_DEVELOPER_PLAYBOOK.md`](docs/CLOUD_DEVELOPER_PLAYBOOK.md) for package/fleet semantics.
+2. [`catalog-contract.md`](catalog-contract.md), [`docs/DEVELOPMENT_SYSTEM.md`](docs/DEVELOPMENT_SYSTEM.md), [`docs/CLOUD_DEVELOPER_PLAYBOOK.md`](docs/CLOUD_DEVELOPER_PLAYBOOK.md) and the [durable work queue](docs/DEVELOPMENT_QUEUE.md) for package/fleet semantics.
 3. [`ops/AGENTS.md`](ops/AGENTS.md) plus only the assigned company's `pet.json`, `AGENTS.md`, `STORY.md`, `evals.json` for a pet lane; read the relevant service README/contract before shared-module work.
 4. Resolve **current authenticated GitHub base SHA and PR heads**, check dirty/unpushed work and prior claims. A past chat, stale snapshot, branch name or signed-in browser screenshot does not prove the current source or cloud status.
 
@@ -45,7 +45,7 @@ npm run build
 
 Run `npm run test:wave2` for contracts/Council/ledger/mission-control changes; `npm run plugins:check` when plugin source changes; the isolated Python Council suite exactly as documented in [`services/council/README.md`](services/council/README.md). Use browser, PostgreSQL, host, model and recipient acceptance tests **only when an authorized actual environment exists**, recording blocked/missing gates. Never dilute validators, silently skip assertions, alter past evidence or call a defined eval case a model pass.
 
-Evidence must include exact source SHA, suite/command, executor/environment, observed result, time, authenticated task/log reference and limits. The Wave 3 Codex Cloud [208/208 Node receipt](https://chatgpt.com/local/6af64d73-352c-8191-b84d-a8c2dc328042) binds to its **previous tested head**, not a future commit; older receipts become stale after new code. Real model outcomes remain independently unqualified at the 13 November checkpoint. Chibi Rust PR #113 is not a tested host integration.
+Evidence must include exact source SHA, suite/command, executor/environment, observed result, time, authenticated task/log reference and limits. The Wave 3 Codex Cloud [208/208 Node receipt](https://chatgpt.com/local/6af64d73-352c-8191-b84d-a8c2dc328042) binds to its **previous tested head**, not a future commit; older receipts become stale after new code. Real model outcomes remain independently unqualified at the 13 November checkpoint. Chibi Rust [PR #113](https://github.com/SalesSquad/chibi/pull/113) was compiled/tested and merged, but only as a **disabled host-private admission seam** (119 Rust passes, four PostgreSQL tests ignored, 12 targeted passes). No live authenticated host route or recipient execution was established.
 
 ## Required handoff and continuous care
 
