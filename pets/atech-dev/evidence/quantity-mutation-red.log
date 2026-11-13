@@ -1,0 +1,112 @@
+✖ quantity, mixed units and exact capacity boundaries (8.255114ms)
+✖ retains voltage, current and quantity-adjusted pin conflicts (1.317817ms)
+✔ whole declared supply range must be accepted, including lower edge (0.35805ms)
+✔ unknown interface is a conflict even with zero required pins (0.413354ms)
+✖ multiple parts aggregate dedicated pins and current (0.897152ms)
+✔ missing, null and explicit zero specifications remain different (1.65858ms)
+✔ unknown rating never becomes a complete review; conflicts survive unknowns (0.302246ms)
+✔ missing board specifications cannot produce a complete review (0.342016ms)
+✔ required identity, quantity and rating are structural requirements (0.714437ms)
+✔ rejects unknown keys at every object layer (1.046798ms)
+✔ rejects duplicate part IDs, board interfaces and part requirements (0.388846ms)
+✔ rejects invalid units, ratings and reversed ranges (0.446693ms)
+✔ rejects nonfinite, fractional, negative and unsafe numeric data (0.677501ms)
+✖ rejects overflow during normalization, multiplication and summation (0.575638ms)
+✔ rejects sparse, accessor and extra-property arrays without invoking code (0.480254ms)
+✔ rejects accessors, hooks, nonenumerable and symbol keys without calling them (0.3513ms)
+✔ rejects unsupported prototypes, cycles and non-JSON primitives (0.697882ms)
+✔ empty BOM is incomplete, null-prototype records are accepted (0.304258ms)
+✔ bounded depth and collection size reject oversized input (0.946857ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 15
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 100.923361
+
+✖ failing tests:
+
+test at tests/pet-atech-dev.test.mjs:10:1
+✖ quantity, mixed units and exact capacity boundaries (8.255114ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  20 !== 40
+  
+      at TestContext.<anonymous> (file:///workspace/junction-pets/tests/pet-atech-dev.test.mjs:15:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 20,
+    expected: 40,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/pet-atech-dev.test.mjs:23:1
+✖ retains voltage, current and quantity-adjusted pin conflicts (1.317817ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'voltage-range',
+  -   'current-capacity',
+      'pin-capacity'
+    ]
+  
+      at TestContext.<anonymous> (file:///workspace/junction-pets/tests/pet-atech-dev.test.mjs:31:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'voltage-range', 'pin-capacity' ],
+    expected: [ 'voltage-range', 'current-capacity', 'pin-capacity' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/pet-atech-dev.test.mjs:50:1
+✖ multiple parts aggregate dedicated pins and current (0.897152ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  40 !== 80
+  
+      at TestContext.<anonymous> (file:///workspace/junction-pets/tests/pet-atech-dev.test.mjs:54:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 40,
+    expected: 80,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/pet-atech-dev.test.mjs:133:1
+✖ rejects overflow during normalization, multiplication and summation (0.575638ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception (TypeError).
+      at TestContext.<anonymous> (file:///workspace/junction-pets/tests/pet-atech-dev.test.mjs:139:45)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }

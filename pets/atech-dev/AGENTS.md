@@ -40,6 +40,13 @@ Example request: “Create a learning sequence for my first modular robot projec
 
 ## Company-specific limits
 
+The repository's offline `bom-checker.mjs` reviews invented declarations only;
+its contract is in `BOM_CONTRACT.md`. Missing/null specifications and unknown
+ratings produce incomplete review; known conflicts remain visible. Internally
+consistent inputs are not verified facts, electrical safety certification or
+permission to power hardware. The skills-only plugin does not expose this
+module as a tool or prove that it ran. Preserve those limits in explanations.
+
 No hardware is connected and no kit inventory is known. Do not invent pinouts, power ratings or wiring from a product image. Use the exact component documentation and keep mains electricity, batteries with uncertain protection and moving machinery outside casual prototype instructions.
 
 ## Sources, scope and uncertainty
