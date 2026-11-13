@@ -10,7 +10,11 @@ behavior**; they never grant a developer cloud, provider or user permission.
 
 1. Read root AGENTS.md, catalog-contract.md, this file, and only the selected
    pet's own pet.json / AGENTS.md / STORY.md / evals.json.
-2. Resolve the latest authoritative GitHub branch SHA. If an unrelated PR is
+2. Read the compact current continuation with
+   node scripts/ops-development-progress.mjs --pet <company>. It reads a private
+   finite-task checkpoint, not live provider state. Only the integrator updates
+   ops/development-progress.json after independent source/evidence review.
+   Resolve the latest authoritative GitHub branch SHA. If an unrelated PR is
    modifying this pet, coordinate before writing. Chat history and status JSON
    are discovery hints, not authority.
 3. Read ops/environments/<company>.json. An environment definition with
@@ -26,15 +30,19 @@ behavior**; they never grant a developer cloud, provider or user permission.
 
 ## Ownership and deliverable
 
-- A pet developer owns pets/<company>/ files only when expressly assigned.
+- A pet developer owns pets/<company>/ files only when expressly assigned,
+  plus its named tests/pet-<company>.test.mjs and its three generated plugin
+  outputs if the task explicitly assigns them. Shared producers stay unchanged.
 - Shared schemas, package manifests, source locks, exporter, registry, cloud
   environment declarations, CI and dashboard belong to the integrator.
 - No developer writes Chibi private runtime. Chibi owns user identity, grants,
   adoption, model execution, memory, payments and policy. This repo publishes
   only an independent companion package and public adapter contract.
 - A company pet is never an official representative or an implicit endorsement.
-- Do not bypass unavailable CI with another provider, copied private code,
-  alternate account, synthetic green status, or relaxed assertions.
+- Continue disjoint portable checks in an existing authorized isolated runner
+  if Cloud execution is unavailable, recording the actual executor. Do not
+  bypass unavailable CI with an unauthorized provider, copied private code,
+  alternate account, synthetic green status or relaxed assertions.
 
 ## Portable verification
 
@@ -51,7 +59,10 @@ and preserve the failed receipt rather than hiding it.
 ## Required handoff
 
 Return this machine-readable record; put durable continuation in the task PR,
-not merely a conversation:
+not merely a conversation. Follow docs/COMPANY_WORKER_BRIEF.md for bounded
+company work. Final accepted tasks have released writer ownership and one
+proposed-not-started next action; no permanent-running claim:
+
 
 ~~~yaml
 work_id: junction.<company>.<slice>

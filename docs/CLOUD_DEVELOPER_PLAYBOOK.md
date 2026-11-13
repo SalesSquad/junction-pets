@@ -1,101 +1,124 @@
-# One company, one continuing developer — cloud playbook
+# Cloud developer playbook
 
-**Purpose:** give each of the 34 Junction companions a stable, source-controlled development owner and a recorded Codex Cloud environment identity. This playbook is for the integrator, reviewer and future company agents. The 34 Pro/**Legacy** IDs are in dated source evidence; this is **not** a claim that 34 workers are online or the IDs are selectable in the new Cloud picker. Start with root [`AGENTS.md`](../AGENTS.md), [`ARCHITECTURE.md`](../ARCHITECTURE.md), [`ops/AGENTS.md`](../ops/AGENTS.md), the [durable queue](DEVELOPMENT_QUEUE.md) and the assigned pet only.
+Purpose: continue any of 34 company lanes from private GitHub source and evidence,
+without depending on the original chat or a permanent VM. Read root/ops
+`AGENTS.md`, [architecture](../ARCHITECTURE.md), the
+[worker brief](COMPANY_WORKER_BRIEF.md), and only the assigned
+[continuation record](DEVELOPER_CONTINUITY.md).
 
-## Inventory and current activation truth
+## Identities are not execution
 
-[`ops/registry.mjs`](../ops/registry.mjs) validates 34 company manifests under [`ops/environments/`](../ops/environments/) and 34 unique stable agent IDs. For a company slug `mariadb`:
-
-| Identity | Exact convention | Owns |
+| Concept | Convention / record | Meaning |
 | --- | --- | --- |
-| Companion package | `pets/mariadb/` and `junction-mariadb` | Versioned runtime content and eval definitions |
-| Continuing developer | `junction-dev-mariadb` | Logical responsibility for future Mariadb tasks and handoffs |
-| Desired Cloud environment | `junction-mariadb` | Reusable published *configuration* when provisioned; not a permanent worker |
-| Task branch | `codex/junction-mariadb-<slice>` | One bounded source-committed piece of work |
-| Planned code/test/review cohort | Three roles for this pet | **Future staffing**, independent checks; not three currently running jobs |
+| Companion | `pets/mariadb/`, `junction-mariadb` | Versioned user-facing content |
+| Developer owner | `junction-dev-mariadb` | Stable logical responsibility |
+| Desired environment | `junction-mariadb`, `ops/environments/mariadb.json` | Reusable configuration, subject to fresh provider checks |
+| Finite task | Work ID + actual native/Cloud execution identity | One admitted source-bound job |
+| Task branch | `codex/junction-mariadb-<slice>` | Isolated changes, expected remote HEAD |
+| Continuation | Progress record + original PR/test/review evidence | Released task and next unstarted proposal |
 
-This produces **34 logical owners, 34 desired configurations and 102 planned roles** across the fleet. It does not create runtime/Cloud access by writing JSON. Each new Cloud task gets an isolated workspace; developer continuity comes from **stable IDs + assigned path + GitHub branch/PR + source-bound receipt + next-action owner**, not a long-lived process or chat.
+The older code/test/review roster describes 102 planned roles, not concurrent
+jobs. Allocate only verified capacity, initially one or two disjoint writers
+and an integrator/reviewer. Increase based on actual delivery, integration,
+rework and available quota. Independent review must be independent of authorship.
 
-**Earlier W5 source-bound checkpoint, 13 November 2026:** 33 Cloud manifests were `unprovisioned`; **Aiven** was `published-id-pending`, with owner-observed publication/selectability but `environmentId:null`. At that checkpoint it was **not CLI-dispatch-ready** without an independently observed immutable provider ID. The separate W3 [Codex Cloud Node task](https://chatgpt.com/local/6af64d73-352c-8191-b84d-a8c2dc328042) reported **208/208 Node tests** on source [`be3b9f6`](https://github.com/SalesSquad/junction-pets/commit/be3b9f605752c0d3be790bbb6c1832bda9e96f4c), and a local authorized Python suite reported **104/104**; neither proves the 34 published environments, hosted PostgreSQL/Chibi, or a model evaluation. The independent [W4 Haiku smoke PR #7](https://github.com/SalesSquad/junction-pets/pull/7) is unqualified as a hosted model gate. Always recheck the actual current registry and task HEAD before reporting a new status.
+## Admit a task
 
-**W8 provisioning update, 13 November 2026:** all 34 Pro/Legacy environments now have actual provider IDs, individual settings readbacks and prior source-bound Cloud task evidence in [the private provisioning record](../ops/cloud-provisioning-20261113.json). The manifests permit dry-run planning; a fresh account/provider/source check and bounded work ownership remain required for each task. This does not qualify Chibi runtime, model evaluations or an autonomous Fleet adapter.
+1. Read `node scripts/ops-development-progress.mjs --pet <company>`.
+   The reader is offline and source-local; follow evidence URLs and resolve
+   authenticated current GitHub main, task branch and competing PR heads.
+2. Inspect surviving work/claims and dirty or unpushed changes. Do not take an
+   overlapping company lease. Preserve existing work even if its process ended.
+3. Assign work ID, immutable base SHA/tree, logical owner, actual executor,
+   expected remote branch HEAD, disjoint paths, feature, checks and budget.
+4. For Cloud, verify the selected existing account, private repository access,
+   published/selectable environment and observed immutable provider ID.
+   A desired name, historical ID or unrelated task URL is insufficient.
+5. Create an isolated task worktree and use [COMPANY_WORKER_BRIEF.md](COMPANY_WORKER_BRIEF.md).
+   Send stable implementation/test hashes for independent review while final
+   checks run. Do not launch unbounded swarms from a manifest list.
 
-**Actual continuation, 13 November:** the owner used authenticated Pro UI and separately verified `chibi-marketplace-cloud` (containing Junction) for the [first Aiven development task](https://chatgpt.com/local/6af6b453-cd8c-8191-92f7-a8559f0350d3). The per-pet Legacy IDs did **not** appear in the new Cloud task picker. [PR #11](https://github.com/SalesSquad/junction-pets/pull/11) subsequently received an independent source review and was merged at `f1bbd3b7a6b1e93e104a28b559263d068248c332`, after 252/252 full Node tests and 23/23 focused source tests on `48db6f84b504c38cfaa3b03ef1f7638588761f3d`. The [development queue](DEVELOPMENT_QUEUE.md) records Aiven as `reviewed`, **MariaDB/AfterQuery as actual provider-observed tasks**, and **31 queued** with null task URLs. MariaDB source pin was verified at `f1bbd3b7`; AfterQuery was still verifying its requested source in preflight. No live model/Chibi runtime pass is claimed.
+Each company writer owns only its assigned `pets/<company>/**`,
+`tests/pet-<company>.test.mjs`, and three generated plugin outputs. The
+integrator owns shared files and the accepted progress ledger. Runtime persona
+files cannot grant developer or Chibi permissions.
 
-## Provision or maintain a dedicated environment
+## Cloud configuration versus current availability
 
-Do these steps **for each company independently**; one blocked company must not halt unrelated work.
+Historical [13 November provisioning evidence](../ops/cloud-provisioning-20261113.json)
+records 34 Pro/Legacy environments. Those IDs were not selectable in a later
+new-Cloud picker; actual early source tasks used separately verified
+`chibi-marketplace-cloud`. Do not substitute one identity for the other.
+The [dated original queue](../ops/development-queue-20261113.json) remains intact;
+the current accepted-task register is [development progress](../ops/development-progress.json).
 
-1. **Select the actual account and repo.** Use an already authorized authenticated Codex Cloud environment management surface, confirm access to **private** `SalesSquad/junction-pets` and its correct task branch. Never transfer browser session databases, bearer tokens, credentials or personal data between accounts/runners.
-2. **Publish the desired configuration.** Name it exactly `junction-<company>`, bind the correct repository and `ops/AGENTS.md` instructions; select a Node 22+ runner with setup `npm ci --ignore-scripts` and project checks `npm run validate`, `npm test`, `npm run build`. Keep optional Python tests isolated. Cloud environment is a reusable setup **not an always-on virtual machine**.
-3. **Read back independent provider evidence.** Confirm published/selectable state **and immutable environment ID** plus account/repo/branch access from an authenticated provider surface. If UI shows it published but not the ID, retain `published-id-pending` and `null` ID with an exact observation URL, time, tested SHA and blocker. A plausible name or task URL is **not** an environment ID.
-4. **Integrate via the registry owner.** Only the orchestration integrator updates `ops/environments/<company>.json` with schema-valid state, opaque provider ID and evidence. Do not force `ready` for unsupported evidence; validate registry. Keep any source/task-check receipt bound to its original revision.
-5. **Run a source-pinned smoke.** Open an actual Cloud task against a dedicated task branch and exact GitHub commit; perform setup, `validate`, `test`, `build` and a safe per-pet read. Record task/job ID, provider evidence URL, runner/tool versions, UTC time and tested SHA. A successful task in a **different** environment does not activate this company.
-6. **Assign continuity.** Attach future work requests to the stable `junction-dev-<company>` owner and `pets/<company>/` path. Preserve the last accepted commit, pending PR, failures, next actionable work and review owner. Do **not** persist an unbounded interactive conversation as the only source of truth.
+Maintaining a dedicated environment requires an already authorized management
+surface, correct private repository, supported Node setup and independent
+provider readback. Record actual IDs/selectability and exact-source smoke
+results through the registry owner. Missing IDs remain unknown or
+`published-id-pending`; no guessed identifier or fabricated ready state.
 
-Authenticated Cloud management may require the owner to complete a mandatory sign-in/verification. An unavailable Cloud API is an explicit provisioning blocker, **not** a reason to invent an ID, switch Pro/Plus profiles to evade quotas or silently use a paid external agent API. The [Cloud dispatch script](../scripts/ops-cloud-dispatch.mjs) creates an inspectable **dry-run plan**; it does **not** provision or execute a task.
+`scripts/ops-cloud-dispatch.mjs` only makes an inspectable dry-run plan.
+It has no authenticated create/list/publish/execute authority. An environment
+is reusable configuration; a task is an isolated, time-bounded workspace.
 
-**Scheduling fallback (13 November):** the owner automation scheduler rejected another always-on fleet task because its **20-active-task limit** was reached. No new recurring company dispatcher exists. The **existing** Junction Mission Control hourly automation now includes a bounded source-completion notification, but it is an event monitor, **not 34 active company developers**. Keep all intended owners and proposed tasks in the [private durable queue](DEVELOPMENT_QUEUE.md); use the authorized integrator, explicit bounded Cloud batches and actual task/PR receipts. Do not disable unrelated automations or infer active execution from the roster.
+Normal supported session refresh does not authorize token/session export,
+permission bypass, switching accounts to evade quotas or new paid executors.
+Stop for mandatory sign-in/approval rather than circumventing it. Keep private
+code only within the owner's authorized runner/provider scope.
 
-**Two independent permission planes:** a Codex Cloud task may be allowed to **edit/test repository files** after a verified developer environment, branch and work lease are established. This developer admission grants **zero Chibi recipient/tool/model permissions**. Only the authenticated private Chibi host issues and rechecks tenant-specific runtime consent and Cedar policy. Even a successful developer Cloud run cannot exercise a private Chibi action without separate host authorization.
+## Source-to-PR cycle
 
-## Parallel work: ownership, leasing and capacity
+1. Capture clean baseline and genuine failing new regression where applicable.
+2. Implement a bounded slice; version its changed content, retain six authored
+   eval definitions and use unchanged producers for generated outputs.
+3. Run the brief's baseline/final gates. For shared control-plane/collaboration
+   changes also run Wave 2; for Council changes use its isolated Python suite.
+4. Publish only the task branch, with expected-old-HEAD and no force push.
+   Fetch the actual canonical commit; verify source bytes/tree and rerun decisive
+   gates on clean final HEAD. A same-tree different local SHA is not that receipt.
+5. Independent reviewer checks exact final bytes. Integrator combines disjoint
+   changes, verifies unchanged/shared scope and reruns combined gates before an
+   owner-authorized merge. Do not treat hosted checks as green when absent.
+6. Preserve source, raw failures/success logs and compact PR handoff. Release
+   finite ownership; retain clean worktree while integration still needs it.
+   The integrator updates the genuine progress record and runs real `--check`.
 
-| Role | Work mode | Write scope | Acceptance |
-| --- | --- | --- | --- |
-| Company author (`junction-dev-<slug>`) | Bounded Cloud task per requested slice | `pets/<slug>/` exclusively | Content + citations + tests + commit/PR handoff |
-| Company test agent (planned) | Source-pinned independent run | Test fixture/report paths only when assigned | Exact cases, runner and failures; never green by assumption |
-| Company reviewer (planned) | Independent, generally read-only | None unless explicitly assigned a repair branch | Findings on actual final diff/evidence |
-| Root integrator | One serialized integration lane | Shared schemas, exports, lockfiles, ops registry, cross-pet/service files | No overlap, latest HEAD, decisive tests, staged PR |
-| Fleet coordinator (planned/admission owner) | Capacity/ownership control, not an implemented daemon | Durable queue and its own receipts only | Fresh source/lease/task URL and explicit next owner; no phantom running status |
+Local `ops-work` leases coordinate one filesystem only. Separate Cloud
+workspaces additionally require explicit registry ownership, disjoint branches
+and remote expected-HEAD updates. PostgreSQL fencing for application dispatch
+does not replace Git branch concurrency control.
 
-Start with one or two independent pet tasks plus one integrator/reviewer when capacity is verified. Widen based on measured latency, cost, merge rework and authenticated Cloud quotas; **do not launch 34 × 3 jobs** from the mere existence of a roster. Reviewers must be independent of the bytes they verify. Where two specialists touch shared schemas/generators, serialize through the integrator or split by strictly disjoint paths and fixtures.
+## Fallbacks and concrete limits
 
-[`scripts/ops-work.mjs`](../scripts/ops-work.mjs) supports `status`, `claim`, `release`, and guarded `reclaim-stale-lock`. Its atomic lease only coordinates **one shared filesystem**. Two isolated Cloud workspaces do **not** share that mutex. For cross-cloud concurrency, first inspect remote PRs and owner assignments, use disjoint task branches and a **remote expected-HEAD** check before update; on conflict, stop and rebase/review with preserved work. Database fencing tokens (for application dispatch) do not replace Git branch compare-and-swap.
-
-## Source-to-PR cycle and recoverability
-
-1. **Discover:** record GitHub upstream SHA, outstanding PRs, pet version, latest receipts, dirty/unpushed files and owner. If a previous task is paused, inspect its PR and worktree before claiming an overlapping task.
-2. **Claim:** create `junction.<slug>.<slice>` work ID and bounded path lease. Pair it with a unique `codex/junction-<slug>-<slice>` branch at the exact base SHA.
-3. **Implement:** change only owned paths; update citations/uncertainties and version as appropriate. If host/model or Cloud is unavailable, continue source-only tasks while preserving a `blocked` gate.
-4. **Verify:** run the baseline Node commands and targeted services/Python/browser suites as relevant. Mark a missing real model/provider/Chibi gate `blocked` or `not_verified`; **204 authored eval cases are not 204 live passes**. No validator relaxation to hide failures.
-5. **Commit and review:** push to the verified task branch, record latest commit SHA/PR HEAD, obtain independent review and rerun decisive checks on final bytes. Previous receipts become `stale` when HEAD changes.
-6. **Handoff:** store durable record in task PR/registry, preserve failed logs, set a specific next owner/action and release your local lease. When a new Cloud task starts, it reads this source record and resumes independently of chat history.
-
-Use [`ops/AGENTS.md`](../ops/AGENTS.md) for the **machine-readable YAML handoff schema**, [`ops/README.md`](../ops/README.md) for valid receipts and [`DEVELOPMENT_QUEUE.md`](DEVELOPMENT_QUEUE.md) for the 34 current proposed/observed work items. A minimum handoff includes `work_id`, `agent_id`, exact `source_commit`, dirty baseline, owned paths, branch/committed HEAD, draft PR, checks and evidence URLs, `verified`, `not_verified`, blocker/owner and one next action. Never put user credentials or private conversation transcripts in receipts.
-
-## Recovery and portable fallback
-
-| Failure | Authorized response | Never infer |
+| Blocker | Safe continuation | Do not claim |
 | --- | --- | --- |
-| Cloud ID is missing | Keep manifest `unprovisioned`/`published-id-pending`; queue a provisioning check with owner and task URL | Desired name or old task means `ready` |
-| Cloud task outage/quota | Continue with an **existing authorized** isolated Cloud/local Node runner, pinned SHA and logs; defer provider-qualified work | Portable unit test is a Codex Cloud provider receipt |
-| Owner Mac unavailable | Run Node/Python/fixture tests in a verified Cloud; use Mac only for Mac/Apple-specific tasks when actually online and authorized | iCloud storage or SSH automatically wakes an offline Mac |
-| PR diverged/another author active | Stop overlap; compare current remote heads, preserve diffs, ask integrator to reassign/rebase safely | Local lease protects every Cloud sandbox |
-| PostgreSQL/Aiven/Chibi host unavailable | Run deterministic synthetic contracts and unit tests; mark external gates missing, keep independent pet work moving | Synthetic Council proves signed host receipts |
-| Model/reviewer unavailable | Retain authored eval definitions and source/unit evidence; schedule a bounded real provider run/review once available | A Haiku smoke or registration is a finished provider model evaluation |
+| Missing/unselectable Cloud environment | Existing authorized isolated portable runner, pinned source and actual executor identity | It ran in the missing provider environment |
+| Cloud task launch timeout/outage/quota | Preserve admission/failure; use authorized portable source work where independent | Account rotation or a queued task equals execution |
+| Owner Mac offline | Node/Python/synthetic checks on verified Cloud/local executor | iCloud or SSH wakes an offline device |
+| Diverged PR/active competing writer | Preserve work; stop overlap and coordinate integration/rebase | Local lease protects every Cloud workspace |
+| Unavailable PostgreSQL/Chibi/provider | Synthetic contracts/source checks with external gates explicitly missing | Signed host or real model acceptance |
+| Missing original binary assets | Preserve exact remote tree entries; disclose partial checkout | Build success proves artwork/browser acceptance |
+| Claude or another reviewer unavailable | Preserve actual prior advice and independent available source review | A different reviewer was Claude or old advice reviewed new bytes |
 
-## First-task prompt template
+The existing completion monitor is not a perpetual company dispatcher. A
+separate fleet automation was not created after the observed 20-active-task cap.
+Do not disable unrelated automations to create capacity. Future work is
+`proposed-not-started` until admitted with a real task identity.
 
-Supply **actual values**, not placeholders, when dispatching:
+## Handoff and permission planes
 
-```text
-Work ID: junction.<company>.<slice>
-Repository: private SalesSquad/junction-pets
-Verified base SHA: <exact 40-hex commit>
-Company/agent: <company> / junction-dev-<company>
-Cloud environment: <verified published ID, or explicitly blocked>
-Owned paths: pets/<company>/ (no other writers)
-Read: root AGENTS.md; ARCHITECTURE.md; ops/AGENTS.md;
-      docs/CLOUD_DEVELOPER_PLAYBOOK.md; catalog-contract.md;
-      assigned pet's four source files and prior PR/receipt
-Deliver: scoped implementation, exact citations/versions,
-         task branch, tests, draft PR, independent review findings,
-         machine-readable handoff and next_action
-Checks: npm ci --ignore-scripts; npm run validate; npm test; npm run build
-Do not claim: model execution, Chibi deployment, published Cloud
-              environment, company endorsement or user acceptance
-              without independent exact-source proof.
-```
+Use the compact schema in [ops rules](../ops/AGENTS.md). At minimum: work ID,
+actual executor, base/head/tree, clean/dirty scope, branch/PR, original command
+counts/exit/log hashes, independent reviewed HEAD, limits and next owner/action.
+Do not place secrets or private conversations in receipts.
 
-**Release boundary:** only a separately authorized owner workflow may merge, deploy, publish a private repo, change permissions or spend. The purpose of an autonomous developer fleet is more **verified progress and reproducible recovery**, not reduced consent, weaker gates or fabricated green status. Keep the owner-only [development system](DEVELOPMENT_SYSTEM.md), [Wave 2 historical plan](JUNCTION_SWARM_WAVE2_EXECUTION.md) and root [architecture](../ARCHITECTURE.md) synchronized when real state changes.
+Developer admission authorizes scoped code/test work, not Chibi runtime access.
+Only the private host can authorize recipient/tenant-specific model or tool
+operations, consent, budget and revocation. Model cases, provider tests, host
+acceptance and release are distinct gates.
+
+The owner must separately authorize merge/deploy, spending, credential/permission
+changes and public exports where not already within the approved task. This
+playbook grants none. Follow source evidence, preserve failed history, and keep
+private operations outside the public catalog and Junction submission.
