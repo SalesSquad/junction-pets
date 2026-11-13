@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {buildDeveloperRoster,inspectDeveloperPreflight} from './developer-roster.mjs';
 
 const COMPANIES = Object.freeze([
@@ -221,6 +222,67 @@ test('duplicate provider opaque ID fails closed', () => {
     verifiedAt: '2026-11-12T23:00:00.000Z', evidenceUrl: 'https://example.org/evidence'
   };
   assert.throws(() => buildDeveloperRoster(manifests, options()), /Shared Cloud environment ID/);
+});
+
+test('recorded provider microseconds are preserved without granting readiness', () => {
+  const manifests = fixture();
+  const verifiedAt = '2026-11-13T00:26:59.476670Z';
+  manifests[0].provisioning = {
+    state: 'ready', environmentId: 'opaque-recorded-id', verifiedAt,
+    evidenceUrl: 'https://example.org/provider-observation'
+  };
+  const roster = buildDeveloperRoster(manifests, options());
+  const target = roster.developers.find(row => row.companySlug === 'hostinger');
+  assert.equal(target.cloud.recordedAt, verifiedAt);
+  assert.equal(manifests[0].provisioning.verifiedAt, verifiedAt);
+  assert.equal(target.cloud.authenticatedProviderReady, false);
+  assert.equal(target.dispatch.admitted, false);
+  assert.equal(roster.summary.actualWorkersStarted, 0);
+});
+
+test('all 34 source manifests produce a planning-only developer roster', async () => {
+  // Read immutable source inputs; never mutate the source or write shared caches.
+  const manifests = await Promise.all(COMPANIES.map(async company =>
+    JSON.parse(await readFile(new URL(`./environments/${company}.json`, import.meta.url), 'utf8'))));
+  const roster = buildDeveloperRoster(manifests, options());
+  assert.equal(roster.summary.companyLanes, 34);
+  assert.equal(roster.summary.logicalRoles, 102);
+  assert.equal(roster.summary.actualCloudTasksDispatched, 0);
+  assert.equal(roster.summary.independentlyAuthenticatedReady, 0);
+  for (const manifest of manifests) {
+    const target = roster.developers.find(row => row.petSlug === manifest.petSlug);
+    assert.equal(target.cloud.recordedAt, manifest.provisioning.verifiedAt);
+    assert.equal(target.dispatch.admitted, false);
+    assert.equal(target.dispatch.actualProcessStarted, false);
+  }
+});
+
+test('provider observation precision does not accept malformed dates or time zones', () => {
+  for (const verifiedAt of [
+    '2026-02-30T00:26:59.476670Z', '2026-13-13T00:26:59.476670Z',
+    '2026-11-13T24:00:00.000000Z', '2026-11-13T00:26:60.476670Z',
+    '2026-11-13T00:26:59.476670+00:00', '2026-11-13T00:26:59.47667Z',
+    '2026-11-13T00:26:59.4766700Z', '2026-11-13T00:26:59.476670Zjunk',
+    '2026-11-13T00:26:59.476670Z\n', null, 1794529619476
+  ]) {
+    const manifests = fixture();
+    manifests[0].provisioning = {
+      state: 'ready', environmentId: 'opaque-recorded-id', verifiedAt,
+      evidenceUrl: 'https://example.org/provider-observation'
+    };
+    assert.throws(() => buildDeveloperRoster(manifests, options()),
+      /lacks recorded evidence/, String(verifiedAt));
+  }
+});
+
+test('microsecond metadata compatibility does not alter live readback admission', () => {
+  const input = boundPreflight();
+  input.providerReadback.observedAt = '2026-11-13T00:00:00.000000Z';
+  input.leaseReceipt.expiresAt = '2026-11-13T00:30:00.000000Z';
+  const result = inspectDeveloperPreflight(readyRoster(), input);
+  assert.equal(result.dispatchAllowed, false);
+  assert.ok(result.reasons.includes('provider-readback-identity-source-or-freshness-mismatch'));
+  assert.ok(result.reasons.includes('missing-or-invalid-distributed-fenced-lease'));
 });
 
 test('published-ID-pending null ID stays blocked; stale task receipt is labeled', () => {

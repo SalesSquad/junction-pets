@@ -38,6 +38,17 @@ function utcInstant(value) {
     Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value;
 }
 
+// Provider settings receipts retain their original microsecond precision.
+// This compatibility rule is ONLY for recorded, untrusted manifest metadata:
+// live readbacks, leases and fencing keep the strict millisecond contract above.
+// Check the calendar at JavaScript's precision without rewriting the receipt.
+function recordedUtcObservation(value) {
+  if (utcInstant(value)) return true;
+  return typeof value === 'string' &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/.test(value) &&
+    utcInstant(value.slice(0, 23) + 'Z');
+}
+
 function sortedKeys(object) {
   return Object.keys(object).sort().join('|');
 }
@@ -104,7 +115,7 @@ function checkManifest(manifest, company) {
       : provision.environmentId === null ||
         (typeof provision.environmentId === 'string' && provision.environmentId.length >= 5),
     `Invalid Cloud environment ID for ${company}`);
-    assert(utcInstant(provision.verifiedAt) &&
+    assert(recordedUtcObservation(provision.verifiedAt) &&
       typeof provision.evidenceUrl === 'string' &&
       provision.evidenceUrl.startsWith('https://'),
     `Cloud provisioning metadata lacks recorded evidence for ${company}`);

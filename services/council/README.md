@@ -30,6 +30,11 @@ python3.12 -m venv /tmp/junction-council-venv
 /tmp/junction-council-venv/bin/python -m pytest -q services/council/tests
 ```
 
+The service-local `pytest.ini` adds only this service's package root to the test
+import path. The documented command works from the monorepo root without an
+editable install or a machine-specific `PYTHONPATH`; it does not skip tests or
+replace any host dependency with a production implementation.
+
 The FastAPI builder deliberately has **no anonymous or in-memory replay default**:
 `create_app(graph, authenticator, replay_store)` requires a host-injected identity
 resolver and an **atomic, persistent** replay store. The same host replay store
