@@ -58,6 +58,15 @@ particular, a still-open origin PR does not mean its code is absent from main.
 | Upstream Aiven provenance | [PR55](https://github.com/SalesSquad/junction-pets/pull/55) **merged**. |
 | Accepted-source progress ledger | [PR54](https://github.com/SalesSquad/junction-pets/pull/54), including PR34; final review disposition remains separate. |
 
+At the same authenticated readback, additional open work included
+[PR70](https://github.com/SalesSquad/junction-pets/pull/70) (Meta trained
+candidate scoring), [PR67](https://github.com/SalesSquad/junction-pets/pull/67)
+(Verda trials), [PR64](https://github.com/SalesSquad/junction-pets/pull/64)
+(product workspaces), [PR57](https://github.com/SalesSquad/junction-pets/pull/57)
+(provider pilots), [PR54](https://github.com/SalesSquad/junction-pets/pull/54)
+(continuity), and [PR34](https://github.com/SalesSquad/junction-pets/pull/34)
+(private developer reader). Do not mistake this observed list for a live queue.
+
 The pinned main at this readback was
 `1774ac8d7b6dcee58d8516fcbf923c52a1f71088`.
 The current main `docs/DEVELOPMENT_QUEUE.md` includes historical checkpoints.
