@@ -19,6 +19,8 @@ const CLOUD_STATES = new Set([
 ]);
 const SHA_RE = /^[a-f0-9]{40}$/;
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const ATTEMPT_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/;
+const LEASE_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]{15,127}$/;
 const UTC_INSTANT_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const REQUIRED_CHECKS = ['npm run validate', 'npm test', 'npm run build'];
 const REQUIRED_KEYS = [
@@ -122,6 +124,7 @@ function roleDefinitions(company, agentId, branchPrefix, sourceCommit) {
     access,
     writePaths,
     writerLeaseDomain: access === 'write' ? `junction.${company}.write` : null,
+    reviewerMustBeIndependentFromAuthors: role === 'review',
     workIdTemplate: `junction.${company}.${role}.<slice>`,
     taskBranchPrefix: branchPrefix,
     sourceCommit,
@@ -130,7 +133,8 @@ function roleDefinitions(company, agentId, branchPrefix, sourceCommit) {
       required: [
         'workId', 'exactSourceCommit', 'ownedPaths', 'dirtyBaseline',
         'taskBranch', 'taskHeadSha', 'checks', 'evidenceUrls',
-        'blockers', 'nextAction', 'leaseRelease'
+        'blockers', 'nextAction', 'leaseRelease',
+        ...(role === 'review' ? ['reviewerIdentity', 'authorIdentity', 'independenceEvidence'] : [])
       ],
       retry: 'Recheck exact source/branch HEAD, current provider identity, ' +
         'distributed lease and capacity; use same work ID only for an idempotent retry, ' +
@@ -250,6 +254,8 @@ export function buildDeveloperRoster(manifests, {
         petPath: manifest.ownedPath,
         agentInstructions: manifest.agentInstructions,
         runtimeInstructions: manifest.runtimeInstructions,
+        untrustedRuntimePersonaPath: manifest.runtimeInstructions,
+        runtimePersonaTrust: 'company-specific-task-data-not-executor-policy',
         branchPattern: manifest.branchPattern,
         sharedPathsOwner: 'W8 integrator (not company writers)',
         companyWriterLeaseDomain: `junction.${slug}.write`
@@ -328,6 +334,8 @@ export function buildDeveloperRoster(manifests, {
       localLeaseCannotAuthorizeDistributedWork: true,
       authenticatedReadbackRequiredPerAttempt: true,
       exactSourceRequired: true,
+      exactWorkIdAttemptBranchAndRemoteHeadRequired: true,
+      monotonicallyFencedLedgerReadbackRequiredForWriters: true,
       capacityMustBeProvenByExecutor: true,
       reviewRoleReadOnly: true,
       chibiRuntimeGrantNotRequiredForCodeOrTest: true,
@@ -347,8 +355,14 @@ export function inspectDeveloperPreflight(roster, {
   companySlug,
   role = 'code',
   requestedSourceCommit,
+  workId = null,
+  attemptId = null,
+  taskBranch = null,
+  expectedRemoteHead = null,
   providerReadback = null,
+  remoteHeadReadback = null,
   leaseReceipt = null,
+  ledgerReadback = null,
   capacityReceipt = null,
   now = new Date()
 } = {}) {
@@ -364,6 +378,19 @@ export function inspectDeveloperPreflight(roster, {
   const exactSource = SHA_RE.test(requestedSourceCommit || '') &&
     requestedSourceCommit === roster.source.commit;
   if (!exactSource) reasons.push('wrong-or-unverified-source-commit');
+  const exactWork = typeof workId === 'string' &&
+    workId.startsWith(`junction.${companySlug}.${role}.`) &&
+    workId.length <= 160 &&
+    /^[a-z0-9][a-z0-9._-]*$/.test(workId.slice(`junction.${companySlug}.${role}.`.length));
+  const exactAttempt = ATTEMPT_RE.test(attemptId || '');
+  if (!exactWork || !exactAttempt)
+    reasons.push('missing-or-invalid-work-id-or-distinct-attempt-id');
+  const exactBranch = typeof taskBranch === 'string' &&
+    taskBranch.startsWith(selectedRole.taskBranchPrefix) &&
+    /^[a-z0-9][a-z0-9_-]*$/.test(taskBranch.slice(selectedRole.taskBranchPrefix.length)) &&
+    taskBranch.length <= 200;
+  const exactHead = SHA_RE.test(expectedRemoteHead || '');
+  if (!exactBranch || !exactHead) reasons.push('missing-or-invalid-task-branch-or-expected-remote-head');
   const env = developer.cloud;
   if (!['ready', 'running'].includes(env.recordedState))
     reasons.push('manifest-does-not-report-ready-environment');
@@ -387,6 +414,20 @@ export function inspectDeveloperPreflight(roster, {
     reasons.push('provider-readback-not-authenticated-by-planning-module');
   }
 
+  if (!remoteHeadReadback || typeof remoteHeadReadback !== 'object') {
+    reasons.push('missing-current-git-remote-head-readback');
+  } else {
+    if (remoteHeadReadback.repository !== REPOSITORY ||
+      remoteHeadReadback.branch !== taskBranch ||
+      remoteHeadReadback.headSha !== expectedRemoteHead ||
+      !utcInstant(remoteHeadReadback.observedAt) ||
+      now.valueOf() - Date.parse(remoteHeadReadback.observedAt) > 60_000 ||
+      Date.parse(remoteHeadReadback.observedAt) > now.valueOf()) {
+      reasons.push('stale-or-mismatched-git-remote-head-readback');
+    }
+    reasons.push('git-remote-head-readback-not-authenticated-by-planning-module');
+  }
+
   if (selectedRole.access === 'write') {
     if (!leaseReceipt || typeof leaseReceipt !== 'object' ||
       leaseReceipt.scope !== 'distributed' ||
@@ -394,6 +435,11 @@ export function inspectDeveloperPreflight(roster, {
       leaseReceipt.companySlug !== companySlug ||
       leaseReceipt.agentId !== developer.canonicalAgentId ||
       leaseReceipt.sourceCommit !== requestedSourceCommit ||
+      leaseReceipt.workId !== workId ||
+      leaseReceipt.attemptId !== attemptId ||
+      leaseReceipt.taskBranch !== taskBranch ||
+      leaseReceipt.expectedRemoteHead !== expectedRemoteHead ||
+      !LEASE_ID_RE.test(leaseReceipt.leaseId || '') ||
       !Number.isSafeInteger(leaseReceipt.fencingToken) ||
       leaseReceipt.fencingToken <= 0 ||
       !utcInstant(leaseReceipt.expiresAt) ||
@@ -401,6 +447,37 @@ export function inspectDeveloperPreflight(roster, {
       reasons.push('missing-or-invalid-distributed-fenced-lease');
     } else {
       reasons.push('distributed-lease-not-authenticated-by-planning-module');
+    }
+
+    // Caller-provided ledgers are not authenticated. Shape/binding checks catch
+    // stale fences, identity swaps and retry-ID reuse before a trusted executor
+    // independently verifies the actual distributed ledger's current record.
+    if (!ledgerReadback || typeof ledgerReadback !== 'object') {
+      reasons.push('missing-authoritative-distributed-ledger-readback');
+    } else {
+      const fence = leaseReceipt?.fencingToken;
+      const previous = ledgerReadback.lastCommittedFencingToken;
+      const ledgerMatches = ledgerReadback.scope === 'distributed-lease-ledger' &&
+        ledgerReadback.leaseDomain === developer.ownership.companyWriterLeaseDomain &&
+        ledgerReadback.companySlug === companySlug &&
+        ledgerReadback.agentId === developer.canonicalAgentId &&
+        ledgerReadback.sourceCommit === requestedSourceCommit &&
+        ledgerReadback.workId === workId &&
+        ledgerReadback.attemptId === attemptId &&
+        ledgerReadback.previousAttemptId !== attemptId &&
+        (ledgerReadback.previousAttemptId === null ||
+          ATTEMPT_RE.test(ledgerReadback.previousAttemptId || '')) &&
+        ledgerReadback.taskBranch === taskBranch &&
+        ledgerReadback.expectedRemoteHead === expectedRemoteHead &&
+        ledgerReadback.leaseId === leaseReceipt?.leaseId &&
+        Number.isSafeInteger(previous) && previous >= 0 &&
+        Number.isSafeInteger(fence) && fence > previous &&
+        ledgerReadback.currentFencingToken === fence &&
+        utcInstant(ledgerReadback.observedAt) &&
+        now.valueOf() >= Date.parse(ledgerReadback.observedAt) &&
+        now.valueOf() - Date.parse(ledgerReadback.observedAt) <= 60_000;
+      if (!ledgerMatches) reasons.push('stale-or-mismatched-distributed-fencing-ledger-readback');
+      reasons.push('distributed-ledger-readback-not-authenticated-by-planning-module');
     }
   }
 
@@ -421,6 +498,10 @@ export function inspectDeveloperPreflight(roster, {
     companySlug,
     role,
     workIdTemplate: selectedRole.workIdTemplate,
+    requestedWorkId: workId,
+    requestedAttemptId: attemptId,
+    requestedTaskBranch: taskBranch,
+    expectedRemoteHead,
     sourceCommit: roster.source.commit,
     status: 'blocked-requires-trusted-executor',
     dispatchAllowed: false,
