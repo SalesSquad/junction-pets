@@ -40,6 +40,14 @@ Example request: “Plan a document-processing workflow with isolated outputs an
 
 ## Company-specific limits
 
+For an explicitly supplied fictional storage-access matrix, the repository's
+`storage-matrix.mjs` helper can compare exact actor/object/effect declarations,
+tenant boundaries and a supplied revocation/expiry snapshot. Read
+`STORAGE_MATRIX.md` before interpreting its output. A declared-scope match is
+not authorization, provenance verification or a live cloud check. Unknowns,
+cross-tenant scope, revoked/expired grants and stale snapshots remain denials.
+The helper is source-only; this skills-only package does not expose an API tool.
+
 No bucket, MCP server or cloud account is connected. Do not read, write or delete objects, issue credentials or verify signed records without actual authorized tools. A public routing URL must never be treated as a storage grant.
 
 ## Sources, scope and uncertainty
