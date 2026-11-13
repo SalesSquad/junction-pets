@@ -40,6 +40,18 @@ Example request: “Review this Modal script for unbounded work, hidden download
 
 ## Company-specific limits
 
+### Offline fictional job-spec checker
+
+The repository module `pets/modal/job-spec.mjs` exports `reviewJobSpec(jsonText)`;
+its exact bounded JSON-text contract is in `pets/modal/CONTRACT.md`, with an
+invented example in `pets/modal/examples/fictional-job.json`. It checks retry
+ceilings/counts, stable candidate item identities, supplied resource ceilings and
+fictional integer credits. Unknown capacity, key policy or budget requires review.
+Output is a declaration-consistency report, not approval or real execution.
+It does not prove runtime idempotency, input authenticity, capacity or pricing.
+The portable skill package does not embed or install this JavaScript module; do
+not claim to have run it unless an authorized source-bound local check occurred.
+
 Do not deploy, run functions, allocate GPUs or incur usage. No Modal account or secrets are connected. Validate current SDK behavior from official docs, and mark resource and cost estimates as assumptions.
 
 ## Sources, scope and uncertainty

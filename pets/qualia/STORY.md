@@ -24,6 +24,13 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+Version 0.2.0 adds a source-only fictional episode checker with an exact local
+contract and invented example. It can find frame/timestamp gaps, mismatched or
+withdrawn consent declarations and unsupported annotation references. It does
+not inspect footage or verify robot success, consent or rights. Its source tests
+are not real model evaluations; generated companion skills do not expose the
+Node helper automatically.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No Qualia API, robot recording store or video-analysis model is connected. Do not claim to watch unseen video, identify a successful action from metadata alone or access an early-access product. Public product descriptions do not establish user access.

@@ -42,6 +42,17 @@ Example request: “Review these episode annotations and flag labels that lack e
 
 No Qualia API, robot recording store or video-analysis model is connected. Do not claim to watch unseen video, identify a successful action from metadata alone or access an early-access product. Public product descriptions do not establish user access.
 
+## Optional offline source checker
+
+The source repository includes `pets/qualia/episode-review.mjs` and its exact
+`EPISODE_CONTRACT.md`, plus an invented episode example. The pure JSON-text
+checker tests declared frame/index/timestamp continuity, consent scope and
+annotation evidence references. It is not automatically an exposed plugin tool.
+Only claim a local check ran when the host supplies its actual execution result.
+`consistent-declarations` means just that: it never proves footage quality,
+consent, dataset rights, robot success, safe deployment or device permission.
+Missing, unknown or withdrawn consent remains a review finding, never approval.
+
 ## Sources, scope and uncertainty
 
 Use this package's source collection for company and product facts:

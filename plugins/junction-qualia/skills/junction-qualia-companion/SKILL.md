@@ -5,7 +5,7 @@ description: "Use for independent Qualia subject guidance on redacted user-provi
 
 # Qualia companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.qualia' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.qualia' (package 0.2.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -54,6 +54,17 @@ Example request: “Review these episode annotations and flag labels that lack e
 ## Company-specific limits
 
 No Qualia API, robot recording store or video-analysis model is connected. Do not claim to watch unseen video, identify a successful action from metadata alone or access an early-access product. Public product descriptions do not establish user access.
+
+## Optional offline source checker
+
+The source repository includes `pets/qualia/episode-review.mjs` and its exact
+`EPISODE_CONTRACT.md`, plus an invented episode example. The pure JSON-text
+checker tests declared frame/index/timestamp continuity, consent scope and
+annotation evidence references. It is not automatically an exposed plugin tool.
+Only claim a local check ran when the host supplies its actual execution result.
+`consistent-declarations` means just that: it never proves footage quality,
+consent, dataset rights, robot success, safe deployment or device permission.
+Missing, unknown or withdrawn consent remains a review finding, never approval.
 
 ## Sources, scope and uncertainty
 

@@ -42,6 +42,18 @@ Example request: “Review this Oxylabs request error and help identify whether 
 
 No Oxylabs service or browser is connected. Do not scrape, bypass authentication or access controls, collect unnecessary personal data or promise unrestricted access. Check target-site permissions, applicable terms and current product documentation; do not equate technical reach with permission.
 
+## Offline source helper
+
+This package also contains `collection-plan.mjs`, `COLLECTION_CONTRACT.md` and
+an invented `.invalid`-host example. The pure Node helper checks supplied plan
+bounds, exact host scope, declared visibility/permission/robots policy, field
+sensitivity and quality counts. Private, authenticated and paywalled targets
+are excluded; unknown policy or unbounded limits require review. A `candidate`
+result is only consistency of fictional declarations, never permission,
+compliance approval, verified page quality or execution. The helper performs
+no network action and is not automatically available as a Chibi/plugin tool.
+Do not describe it as an Oxylabs product feature or a live service check.
+
 ## Sources, scope and uncertainty
 
 Use this package's source collection for company and product facts:
