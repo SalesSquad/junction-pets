@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "scenario": "fictional",
+  "asOfMs": 1000,
+  "snapshot": {"observedAtMs": 990, "maxAgeMs": 10},
+  "tenants": ["tenant-a"],
+  "actors": [{"id": "agent-a", "tenantId": "tenant-a"}],
+  "objects": [{"id": "report-a", "tenantId": "tenant-a"}],
+  "grants": [{
+    "id": "read-report-grant",
+    "tenantId": "tenant-a",
+    "actorId": "agent-a",
+    "objectIds": ["report-a"],
+    "operations": ["read"],
+    "startsAtMs": 0,
+    "expiresAtMs": 1001,
+    "revoked": false
+  }],
+  "requests": [
+    {"id": "read-report", "tenantId": "tenant-a", "actorId": "agent-a", "objectId": "report-a", "grantId": "read-report-grant", "operation": "read"},
+    {"id": "write-report", "tenantId": "tenant-a", "actorId": "agent-a", "objectId": "report-a", "grantId": "read-report-grant", "operation": "write"}
+  ]
+}

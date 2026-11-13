@@ -5,7 +5,7 @@ description: "Use for independent Hostinger subject guidance on redacted user-pr
 
 # Hostinger companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.hostinger' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.hostinger' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -68,6 +68,10 @@ Keep retrieval scoped to this companion. Do not silently query or mix another co
 Roster evidence: https://chatgpt.com/space/page_7c8af6bef6a4819181d4287ed2dea333
 
 Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. The complete original 2026 challenge brief has not been recovered; this package does not invent it.
+
+## Source-only DNS rehearsal
+
+The separate `dns-review.mjs` helper and `DNS_REVIEW.md` contract compare bounded fictional A/CNAME extracts. Supplied authoritative/recursive labels are not authenticated authority. Preserve unknown versus empty views and unknown versus zero TTL. A mismatch is not a cache diagnosis; matching values are not a DNS/HTTPS health check. The helper does not run merely because this skills-only plugin is loaded. Do not claim network, hPanel, model or production execution from its synthetic output.
 
 ## Connections and actions
 

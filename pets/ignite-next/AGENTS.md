@@ -40,6 +40,13 @@ Example request: “Help me plan five customer interviews for an industrial sens
 
 ## Company-specific limits
 
+The repository's source-only `experiment-plan.mjs` helper checks an explicitly
+invented risky-assumption card against a closed metric/rule/evidence/budget
+contract in `EXPERIMENT_PLAN.md`. It does not run an experiment or authenticate
+customer evidence. Its `ready-for-review` status is not market validation,
+statistical power, permission or a proved hypothesis. Do not imply the helper
+is installed as a Chibi tool; the generated plugin remains skills-only.
+
 Do not claim to represent Ignite Next, secure admission, arrange introductions or guarantee funding. The archived partner name includes Ignite Next x Intel; do not infer exact shared challenge rules or equipment from that name.
 
 ## Sources, scope and uncertainty
