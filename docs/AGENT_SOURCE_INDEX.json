@@ -1,7 +1,9 @@
 {
   "schemaVersion": 1,
   "repository": "SalesSquad/junction-pets",
-  "observedAt": "2026-11-13T19:13:29.926Z",
+  "observedAt": "2026-11-13T23:28:36.488Z",
+  "observedMainHead": "1774ac8d7b6dcee58d8516fcbf923c52a1f71088",
+  "prSource": "Authenticated GitHub get_pr_info readback for #54-#61, #66 and #68; static snapshot, never an event feed",
   "entryPoint": "START_HERE.md",
   "research": {
     "integratedSourceCommit": "ab3b1b623e6e97e54436b95a62e292e8488687b0",
@@ -302,7 +304,12 @@
       "targetBranch": "codex/junction-video-resume-20261113",
       "url": "https://github.com/SalesSquad/junction-pets/pull/61",
       "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/c6d832cdcf01304f4adea6acbdaecf87fe947add",
-      "isMainImplementation": false,
+      "isMainImplementation": true,
+      "mainIntegration": {
+        "viaPullRequest": 66,
+        "mergeCommit": "cfe5b3ea7107c3f4f4a2422e71e51121fd466471",
+        "note": "Source implementation incorporated via integration PR #66. Original PR #61 remains open; do not merge or relabel it as completed."
+      },
       "includesPullRequests": [
         56,
         58
@@ -313,21 +320,30 @@
       "pullRequest": 60,
       "role": "Start Chibi Lens: scalable Meta scanning and Find & Verify agent",
       "observedCommit": "fb90ab5a6206aac12f96862dbdd486d593656843",
-      "observedState": "open",
+      "observedState": "merged",
       "targetBranch": "main",
       "url": "https://github.com/SalesSquad/junction-pets/pull/60",
       "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/fb90ab5a6206aac12f96862dbdd486d593656843",
-      "isMainImplementation": false
+      "isMainImplementation": true,
+      "mainIntegration": {
+        "viaPullRequest": 68,
+        "mergeCommit": "92c107468f06ca810ec711480057353ddda3e64c",
+        "note": "Meta Lens source integrated through #68; original source PR #60 is also merged. Live provider/device verification remains separate."
+      }
     },
     {
       "pullRequest": 58,
       "role": "Make Nemotron Super VL the NVIDIA companion's visual reasoning engine",
-      "observedCommit": "090dc47b0b43bb12e51988361685cbf81065213c",
-      "observedState": "open",
+      "observedCommit": "c382202038915cf3ae87467d8e4f668f49aa036d",
+      "observedState": "merged",
       "targetBranch": "main",
       "url": "https://github.com/SalesSquad/junction-pets/pull/58",
-      "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/090dc47b0b43bb12e51988361685cbf81065213c",
-      "isMainImplementation": false
+      "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/c382202038915cf3ae87467d8e4f668f49aa036d",
+      "isMainImplementation": true,
+      "mainIntegration": {
+        "viaPullRequest": 58,
+        "mergeCommit": "aaa382a7c56537b897cd8cd3d72bfe151c9add7c"
+      }
     },
     {
       "pullRequest": 57,
@@ -343,21 +359,29 @@
       "pullRequest": 56,
       "role": "Advance 34 companions with callable tools and a measured Aiven workflow",
       "observedCommit": "91137cb91ba8b70cf6aef4de6163e0c452bd20a0",
-      "observedState": "open",
+      "observedState": "merged",
       "targetBranch": "main",
       "url": "https://github.com/SalesSquad/junction-pets/pull/56",
       "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/91137cb91ba8b70cf6aef4de6163e0c452bd20a0",
-      "isMainImplementation": false
+      "isMainImplementation": true,
+      "mainIntegration": {
+        "viaPullRequest": 56,
+        "mergeCommit": "6b86c1de3e4417582fe4cd2dbcfeba2ee2fcdd71"
+      }
     },
     {
       "pullRequest": 55,
       "role": "Pin Aiven Council prototype provenance",
       "observedCommit": "405b5b8b0a0c544ab33403498e918f69c6ce866f",
-      "observedState": "open",
+      "observedState": "merged",
       "targetBranch": "main",
       "url": "https://github.com/SalesSquad/junction-pets/pull/55",
       "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/405b5b8b0a0c544ab33403498e918f69c6ce866f",
-      "isMainImplementation": false
+      "isMainImplementation": true,
+      "mainIntegration": {
+        "viaPullRequest": 55,
+        "mergeCommit": "2ea78fd430518a871fd07793a1111c8c89e7f3c2"
+      }
     },
     {
       "pullRequest": 54,
@@ -371,5 +395,5 @@
       "includesEarlierPullRequest": 34
     }
   ],
-  "sourcePolicy": "This is a dated source map, not a scheduler, permission grant or live PR feed. Resolve authenticated current main and PR heads before work. Runtime extensions listed here are not merged by this documentation integration."
+  "sourcePolicy": "Dated source map, not a scheduler, live PR feed, runtime connection or permission grant. Check current authenticated GitHub main HEAD and PR states before use, including source integrated via a different PR; a still-open origin PR is not proof of code missing from main. Historical source commits and integration receipts remain distinct. Space card inventory is independently versioned in ops/challenge-spaces-reconciliation-20261113.json."
 }
