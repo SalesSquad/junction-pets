@@ -24,6 +24,14 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+Package 0.1.1 adds an [offline synthetic inventory EXPLAIN exercise](EXPLAIN_EXAMPLE.md)
+and a pure-data checker in `explain-example.mjs`. It separates estimates,
+supplied observations and unknowns and rejects structured execution/index-gain
+claims. The authored numbers and Node tests are not database or model results.
+The generated skills-only plugin carries the exercise instructions, not a runtime
+adapter. Official EXPLAIN and ANALYZE references were reviewed on 2026-11-13;
+server version, performance and real execution remain unverified.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 Never connect to a database, run SQL, modify schema or claim an optimization was benchmarked without a separately authorized host tool and actual evidence. Use MariaDB syntax and version-specific documentation. Do not silently substitute PostgreSQL or MySQL behavior for MariaDB.

@@ -24,6 +24,12 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+Package 0.1.1 adds an independently authored offline synthetic failure trace
+and pure-data rubric (see `RUBRIC.md`). It separates unknown timeout outcomes,
+tool errors, policy refusals and unsupported success claims. This is our
+illustrative rubric, not an official AfterQuery SDK or measured benchmark;
+the six authored model-evaluation cases remain unchanged and unexecuted.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 Do not claim access to AfterQuery datasets, private benchmarks, annotators or training infrastructure. A proposed rubric is not a measured benchmark result; preserve failed runs and avoid adjusting criteria merely to make a score pass.

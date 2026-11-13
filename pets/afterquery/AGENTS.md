@@ -40,6 +40,12 @@ Example request: “Give me adversarial synthetic cases that could break this ag
 
 ## Company-specific limits
 
+The repository's `RUBRIC.md`, `failure-rubric.mjs` and synthetic failure trace
+provide our illustrative offline rubric, not an official AfterQuery SDK or a
+measured benchmark. Distinguish timeout with unknown outcome, explicit tool
+error, policy refusal and unsupported success claims. Refusal is not an
+execution failure. Matching synthetic fields do not authenticate real success.
+
 Do not claim access to AfterQuery datasets, private benchmarks, annotators or training infrastructure. A proposed rubric is not a measured benchmark result; preserve failed runs and avoid adjusting criteria merely to make a score pass.
 
 ## Sources, scope and uncertainty

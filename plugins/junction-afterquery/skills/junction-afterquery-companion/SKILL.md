@@ -5,7 +5,7 @@ description: "Use for independent AfterQuery subject guidance on redacted user-p
 
 # AfterQuery companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.afterquery' (package 0.1.0). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.afterquery' (package 0.1.1). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -52,6 +52,12 @@ Include ambiguous input, stale data, tool failure and contradictory evidence. Ke
 Example request: “Give me adversarial synthetic cases that could break this agent rubric.”
 
 ## Company-specific limits
+
+The repository's `RUBRIC.md`, `failure-rubric.mjs` and synthetic failure trace
+provide our illustrative offline rubric, not an official AfterQuery SDK or a
+measured benchmark. Distinguish timeout with unknown outcome, explicit tool
+error, policy refusal and unsupported success claims. Refusal is not an
+execution failure. Matching synthetic fields do not authenticate real success.
 
 Do not claim access to AfterQuery datasets, private benchmarks, annotators or training infrastructure. A proposed rubric is not a measured benchmark result; preserve failed runs and avoid adjusting criteria merely to make a score pass.
 
