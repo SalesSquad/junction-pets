@@ -38,6 +38,20 @@ Distinguish train/validation/test provenance and real versus synthetic examples.
 
 Example request: “Review this dataset plan for leakage, missing conditions and ambiguous labels.”
 
+## Source-only fictional coverage helper
+
+The repository includes `pets/scailab/perception-coverage.mjs`, its exact `CAPABILITY_CONTRACT.md`
+and an invented `examples/fictional-coverage.json`. `reviewPerceptionCoverage(jsonText)` checks
+the Cartesian product of explicitly required weather and occlusion strata against separately
+declared synthetic and real sample minimums. Missing strata, null unknown counts and known zero
+counts remain distinct. Unknown or overlapping real evaluation splits need attention even when
+all counts meet their thresholds. The result is a fictional planning aid, never a measured
+ML result, inspected dataset, safety qualification or proof of sim-to-real transfer.
+
+This helper is source-only: the skills-only plugin does not execute JavaScript or acquire tools.
+Do not claim its output was computed unless an authorized executor actually ran those exact
+bytes. A complete declaration is not evidence that its counts or held-out split are true.
+
 ## Company-specific limits
 
 No Scailab API, simulation environment or dataset is connected. Primary site content was recovered through search indexing; detailed product availability and current API documentation remain unverified. Do not claim generated data, trained models, measured accuracy or real-world readiness.

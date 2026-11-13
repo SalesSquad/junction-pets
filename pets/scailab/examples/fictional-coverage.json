@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "fictional": true,
+  "scenarioId": "invented-loading-bay",
+  "requiredWeather": ["clear", "rain"],
+  "requiredOcclusion": ["none", "partial"],
+  "minimumSamples": {"synthetic": 5, "real": 2},
+  "realEvaluationSplit": "held-out",
+  "strata": [
+    {"weather": "clear", "occlusion": "none", "syntheticSamples": 5, "realSamples": 2},
+    {"weather": "clear", "occlusion": "partial", "syntheticSamples": 5, "realSamples": null},
+    {"weather": "rain", "occlusion": "none", "syntheticSamples": 100, "realSamples": 0}
+  ]
+}
