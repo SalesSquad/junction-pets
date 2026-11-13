@@ -314,9 +314,25 @@ def parse_response(provider, raw):
         if value.get("type") != "message" or value.get("role") != "assistant" or value.get("stop_reason") != "end_turn":
             fail("PROVIDER_RESPONSE_INCOMPLETE")
         content = value.get("content")
-        if not isinstance(content, list) or len(content) != 1 or not isinstance(content[0], dict) or content[0].get("type") != "text":
+        if not isinstance(content, list) or not 1 <= len(content) <= 3:
             fail("PROVIDER_OUTPUT_INVALID")
-        result = generated_result(content[0].get("text"))
+        blocks = {}
+        for block in content:
+            if not isinstance(block, dict):
+                fail("PROVIDER_OUTPUT_INVALID")
+            kind = block.get("type")
+            if kind not in ("text", "thinking", "redacted_thinking") or kind in blocks:
+                fail("PROVIDER_OUTPUT_INVALID")
+            if kind in ("thinking", "redacted_thinking"):
+                fields = {"type", "thinking", "signature"} if kind == "thinking" else {"type", "data"}
+                if set(block) != fields or any(not isinstance(block[field], str) or not block[field]
+                                               for field in fields - {"type"}):
+                    fail("PROVIDER_OUTPUT_INVALID")
+            blocks[kind] = block
+        if "text" not in blocks:
+            fail("PROVIDER_OUTPUT_INVALID")
+        # Thinking and signatures are protocol metadata, never receipt output.
+        result = generated_result(blocks["text"].get("text"))
         usage = usage_counts(value.get("usage"), {"input_tokens": "inputTokens", "output_tokens": "outputTokens"})
         returned_model, response_id = value.get("model"), value.get("id")
     else:

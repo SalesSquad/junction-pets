@@ -99,6 +99,36 @@ class PilotTests(unittest.TestCase):
         self.assertFalse(result["exactModelVerified"])
         self.assertEqual(result["returnedModel"], "resolved-version-v2")
 
+    def test_anthropic_optional_thinking_is_accepted_without_receipt_disclosure(self):
+        thinking = {"type": "thinking", "thinking": "private-reasoning-canary", "signature": "signature-canary"}
+        redacted = {"type": "redacted_thinking", "data": "redacted-reasoning-canary"}
+        for prefix in ([thinking], [redacted], [thinking, redacted]):
+            value = response("anthropic")
+            value["content"] = deepcopy(prefix) + value["content"]
+            with self.subTest(types=[block["type"] for block in prefix]):
+                receipt, _ = self.invoke("anthropic", value)
+                self.assertEqual(receipt["result"], RESULT)
+                self.assertEqual(receipt["usage"]["outputTokens"], 30)
+                serialized = json.dumps(receipt)
+                for canary in ("private-reasoning-canary", "signature-canary", "redacted-reasoning-canary"):
+                    self.assertNotIn(canary, serialized)
+
+    def test_anthropic_malformed_duplicate_and_effect_blocks_are_refused(self):
+        thinking = {"type": "thinking", "thinking": "analysis", "signature": "signature"}
+        text = response("anthropic")["content"][0]
+        bad = [[thinking], [{"type": "thinking", "thinking": "analysis"}, text],
+               [{"type": "thinking", "thinking": "analysis", "signature": 1}, text],
+               [{"type": "redacted_thinking"}, text],
+               [{"type": "redacted_thinking", "data": ""}, text],
+               [{"type": "tool_use", "id": "tool", "name": "run", "input": {}}, text],
+               [{"type": "unknown"}, text], [thinking, deepcopy(thinking), text],
+               [text, deepcopy(text)], [None, text]]
+        for content in bad:
+            value = response("anthropic")
+            value["content"] = deepcopy(content)
+            with self.subTest(content=content), self.assertRaisesRegex(pilot.PilotError, "PROVIDER_OUTPUT_INVALID"):
+                self.invoke("anthropic", value)
+
     def test_invalid_options_fail_before_environment_or_network(self):
         cases = [("other", MODEL, SHA, False), ("openai", "x/../../secret", SHA, False),
                  ("openai", "x?key=bad", SHA, False), ("openai", "", SHA, False),
