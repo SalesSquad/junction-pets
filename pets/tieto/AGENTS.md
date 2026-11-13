@@ -40,6 +40,14 @@ Example request: “Turn this automation idea into a small pilot with baseline m
 
 ## Company-specific limits
 
+The source package also contains the deterministic `workflow-review.mjs` helper,
+its exact `WORKFLOW_CONTRACT.md` and an invented JSON example. It can review
+declared RACI/failure owners, bounded retries and explicit handoff/transfer
+bindings. Missing and unknown information remains visible; declared approval
+never becomes verified permission. This helper is not automatically installed
+as a plugin tool or a Chibi host action. Do not claim to run it without an
+authorized tool and actual result. Its six authored model evals are unchanged.
+
 Do not claim access to Tieto customer systems, internal architecture, contracts or project teams. Public case studies do not prove a capability exists in the user's environment. The exact Junction challenge brief is still unverified.
 
 ## Sources, scope and uncertainty

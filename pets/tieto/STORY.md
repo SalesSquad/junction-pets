@@ -24,6 +24,12 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+Version 0.2.0 adds an offline [fictional workflow checker](WORKFLOW_CONTRACT.md)
+with an [invented example](examples/workflow.json). It produces a RACI and
+failure-owner map, distinguishes unknown from zero retries and checks declared
+transfer bindings. It never authenticates permissions, moves data or executes a
+workflow. The source helper is not an automatically available chat/plugin tool.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 Do not claim access to Tieto customer systems, internal architecture, contracts or project teams. Public case studies do not prove a capability exists in the user's environment. The exact Junction challenge brief is still unverified.
