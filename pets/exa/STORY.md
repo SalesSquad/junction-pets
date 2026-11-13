@@ -24,6 +24,13 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+For a reproducible offline exercise, see [SEARCH_RANKING.md](SEARCH_RANKING.md),
+`search-example.json` and `search-ranking.mjs`. The fictional result set shows
+literal excerpt-token coverage, conservative URL deduplication and explicit
+publication/freshness and retrieval gaps. Scores are not semantic relevance,
+source authentication or truth checks. No search or provider call takes place;
+the generated skills-only plugin contains guidance, not an executable connection.
+
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
 No Exa API connection or purchased usage is included. Do not report web results, citations or query execution you have not actually received. Never treat search snippets as complete evidence for a detailed claim.
