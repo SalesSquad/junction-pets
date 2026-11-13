@@ -1,11 +1,17 @@
 # Junction Mission Control: developer control plane
 
-The 34 files in environments/ declare **desired** pet-specific Codex Cloud
-environments. They are separate from the private Chibi runtime and from runtime
-persona instructions. Currently **33** remain unprovisioned and **Aiven** has
-owner-observed published/selectable evidence with an unresolved opaque Cloud
-ID (`published-id-pending`). All 34 IDs remain null; source snapshots never
-claim provider readiness or Chibi runtime authorization.
+The 34 files in environments/ declare pet-specific Codex Cloud environments.
+All 34 now contain their independently read-back **Pro / Legacy** provider IDs
+and declared `ready` state. The exact settings observations from
+13 November 2026, 00:26–00:32 UTC, are preserved in
+[cloud-provisioning-20261113.json](cloud-provisioning-20261113.json), including
+repository, network settings, hook hashes and the original per-environment task
+references. Each prior task remains bound to its original source SHA.
+
+These editable declarations enable CLI dry-run planning. Mission Control still
+labels them `reported-ready`, with `cloudReady: 0` until a trusted authenticated
+provider adapter independently verifies them. They do not grant Chibi runtime
+permission or represent 34 permanently running workers.
 
 The ordinary data flow is:
 
@@ -144,7 +150,7 @@ dist/mission-control is operational output and **must not** be published with
 dist/site, Chibi Maker packages or the Junction submission artifact. The
 control plane can be privately hosted later with explicit deployment authority.
 
-## Aiven Cloud publication — owner observation, not a readiness grant
+## Historical Aiven Cloud publication — separate Plus observation
 
 At source `b8895789e12937be65cd5b49c9705cd9d9716c30`, the owner observed
 `junction-aiven` as **published/selectable** in Codex Cloud Settings and task
@@ -156,8 +162,12 @@ opaque Cloud environment ID was exposed. The task URL is evidence of task
 execution, not the immutable environment-ID receipt. The 21 tests are NOT
 model evaluations, Chibi host/recipient acceptance, or verified hosted CI.
 
-The source SHA is pinned independently in the manifest and task evidence. When
-Mission Control is generated for a different/unknown source SHA, the Aiven
+The original manifest is preserved byte-for-byte in
+[the historical pending fixture](../tests/fixtures/ops/aiven-published-id-pending.json).
+Its Plus/new-Cloud observation and task are distinct from the new Pro/Legacy
+binding; no historical task was reassigned to the new provider ID.
+The source SHA remains pinned independently in that historical manifest and task evidence. When
+that historical fixture is evaluated for a different/unknown source SHA, the Aiven
 publication observation remains amber `published-id-pending`, but its 21
 historical task checks become `stale-source` and do not qualify current CI,
 model evaluation or Cloud readiness. Editable
@@ -167,10 +177,12 @@ No new credentials were used to create these records.
 ## Optional Codex CLI dispatch planning
 
 node scripts/ops-cloud-dispatch.mjs --pet junction-aiven --branch
-codex/junction-aiven-guidance --source <exact-clean-HEAD> --profile plus
+codex/junction-aiven-guidance --source <exact-clean-HEAD> --profile pro
 only generates an argv array and an isolated task prompt. It does not run
 Codex Cloud, provision an environment, access a Mac or change accounts.
-All 34 manifests still make it fail, including the published-ID-pending
-Aiven declaration, because no independent provider IDs have been recorded. Even after the owner records a verified
-published environment, the plan clearly says a fresh provider and remote
-HEAD check is required before executing through an already authorized CLI.
+All 34 current manifests now provide an ID-backed dry-run plan. A fresh provider,
+account and remote HEAD check is still required before executing through the
+already authorized Mini Pro `codex` CLI. The historical pending fixture remains
+blocked. The separate Fleet controller still requires its authenticated provider
+reader, verifier and fenced work admission; these bindings do not install that
+adapter or authorize a 34-worker fan-out.

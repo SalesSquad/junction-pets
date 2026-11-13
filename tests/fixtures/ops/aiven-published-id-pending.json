@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-aiven",
+  "agentId": "junction-dev-aiven",
+  "provider": "codex-cloud",
+  "desiredName": "junction-aiven",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-aiven-*",
+  "ownedPath": "pets/aiven/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/aiven/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "published-id-pending",
+    "environmentId": null,
+    "verifiedAt": "2026-11-12T22:32:40.000Z",
+    "evidenceUrl": "https://chatgpt.com/local/6af63cbd-674c-8191-83e7-d7be6dd6e040",
+    "sourceCommit": "b8895789e12937be65cd5b49c9705cd9d9716c30",
+    "publicationObservation": "owner-observed-settings-and-task-picker",
+    "taskCheck": {
+      "suite": "submission-gate",
+      "result": "pass",
+      "executed": 21,
+      "passed": 21,
+      "sourceCommit": "b8895789e12937be65cd5b49c9705cd9d9716c30",
+      "evidenceUrl": "https://chatgpt.com/local/6af63cbd-674c-8191-83e7-d7be6dd6e040"
+    }
+  }
+}

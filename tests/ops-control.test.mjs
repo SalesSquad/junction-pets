@@ -38,11 +38,22 @@ const writeReceipt=async (tmp,receipt)=>{
   await writeFile(join(folder,receipt.workId+'.'+receipt.taskHeadSha.slice(0,12)+'.json'),JSON.stringify(receipt));
 };
 
+async function historicalPending(){
+  return JSON.parse(await readFile(join(root,'tests/fixtures/ops/aiven-published-id-pending.json'),'utf8'));
+}
+
 async function fixtureRoot(){
   const path=await mkdtemp(join(tmpdir(),'junction-ops-fixture-'));
   await mkdir(join(path,'ops'));
   await symlink(resolve(root,'pets'),join(path,'pets'),'dir');
-  await symlink(resolve(root,'ops/environments'),join(path,'ops/environments'),'dir');
+  // Synthetic manifests belong to this fixture; never symlink mutable live bindings.
+  await mkdir(join(path,'ops/environments'));
+  const packs=await loadPackages(root);
+  for(const pack of packs){
+    const slug=pack.pet.company.slug;
+    const manifest=slug==='aiven'?await historicalPending():expectedEnvironment(slug);
+    await writeFile(join(path,'ops/environments',slug+'.json'),JSON.stringify(manifest));
+  }
   await mkdir(join(path,'ops/receipts'));
   return path;
 }
@@ -54,14 +65,28 @@ test('34 individually scoped Codex Cloud declarations cover exact package roster
   assert.equal(validateRegistry(packs,envs),true);
   assert.equal(new Set(envs.map(p=>p.agentId)).size,34);
   assert.equal(new Set(envs.map(p=>p.desiredName)).size,34);
-  assert.equal(envs.filter(p=>p.provisioning.state==='unprovisioned').length,33);
-  const aiven=envs.find(p=>p.petSlug==='junction-aiven');
-  assert.equal(aiven.provisioning.state,'published-id-pending');
-  assert.equal(aiven.provisioning.sourceCommit,'b8895789e12937be65cd5b49c9705cd9d9716c30');
-  assert.equal(aiven.provisioning.taskCheck.passed,21);
-  assert.equal(aiven.provisioning.taskCheck.executed,21);
-  assert.ok(envs.every(p=>p.provisioning.environmentId===null));
-  assert.equal(envs.filter(p=>p.provisioning.verifiedAt===null).length,33);
+  const bindings=JSON.parse(await readFile(join(root,'ops/cloud-provisioning-20261113.json'),'utf8'));
+  assert.equal(bindings.accountProfile,'pro');
+  assert.equal(bindings.records.length,34);
+  assert.equal(new Set(bindings.records.map(p=>p.petSlug)).size,34);
+  assert.equal(new Set(envs.map(p=>p.provisioning.environmentId)).size,34);
+  assert.ok(envs.every(p=>p.provisioning.state==='ready'));
+  for(const manifest of envs){
+    const observed=bindings.records.find(p=>p.petSlug===manifest.petSlug);
+    assert.ok(observed,'missing independent provider record for '+manifest.petSlug);
+    assert.equal(observed.repository,REPOSITORY);
+    assert.equal(observed.settingsReadback.name,manifest.petSlug);
+    assert.equal(observed.settingsReadback.result,'pass');
+    assert.ok(Object.values(observed.settingsReadback.checks).every(v=>v===true));
+    assert.equal(observed.environmentId,observed.settingsReadback.environment_id);
+    assert.match(observed.environmentId,/^[a-f0-9]{32}$/);
+    assert.equal(observed.verifiedAt,observed.settingsReadback.observed_at.replace(/\+00:00$/,'Z'));
+    assert.equal(observed.evidenceUrl,'https://chatgpt.com/settings/cloud-environments/'+observed.environmentId);
+    assert.deepEqual(manifest.provisioning,{
+      state:'ready',environmentId:observed.environmentId,
+      verifiedAt:observed.verifiedAt,evidenceUrl:observed.evidenceUrl
+    });
+  }
   assert.ok(envs.every(p=>p.repository===REPOSITORY));
   assert.ok(envs.every(p=>p.agentInstructions==='ops/AGENTS.md'&&p.runtimeInstructions.includes('/AGENTS.md')));
 });
@@ -78,7 +103,7 @@ test('cloud dispatch cannot run against an unprovisioned or invented environment
   const manifest=expectedEnvironment('aiven');
   const request={petSlug:'junction-aiven',branch:'codex/junction-aiven-guidance',sourceCommit:sourceA,profile:'plus'};
   assert.throws(()=>planCloudDispatch(manifest,request),/not declared ready/);
-  const pending=(await loadEnvironmentManifests(root)).find(p=>p.petSlug==='junction-aiven');
+  const pending=await historicalPending();
   assert.throws(()=>planCloudDispatch(pending,request),/not declared ready/);
   const declaration=structuredClone(manifest);
   declaration.provisioning={
@@ -97,7 +122,12 @@ test('cloud dispatch cannot run against an unprovisioned or invented environment
 });
 
 test('published-ID-pending evidence is source-bound, ID-less and cannot forge task checks',async()=>{
-  const pending=(await loadEnvironmentManifests(root)).find(p=>p.petSlug==='junction-aiven');
+  const tmp=await fixtureRoot();
+  try{
+  const pending=await historicalPending();
+  assert.equal(pending.provisioning.sourceCommit,'b8895789e12937be65cd5b49c9705cd9d9716c30');
+  assert.equal(pending.provisioning.taskCheck.executed,21);
+  assert.equal(pending.provisioning.taskCheck.passed,21);
   assert.equal(validateEnvironment(pending,'aiven'),pending);
   assert.equal(pending.provisioning.environmentId,null);
   const mutations=[
@@ -117,7 +147,7 @@ test('published-ID-pending evidence is source-bound, ID-less and cannot forge ta
     mutate(forged.provisioning);
     assert.throws(()=>validateEnvironment(forged,'aiven'),/Pending|pending|observation|task check|URL|source SHA/);
   }
-  const recorded=await buildStatus(root,{sourceCommit:pending.provisioning.sourceCommit,now:fixedTime});
+  const recorded=await buildStatus(tmp,{sourceCommit:pending.provisioning.sourceCommit,now:fixedTime});
   const aiven=recorded.pets.find(p=>p.slug==='junction-aiven');
   assert.equal(aiven.cloud.state,'published-id-pending');
   assert.equal(aiven.cloud.environmentId,null);
@@ -129,15 +159,16 @@ test('published-ID-pending evidence is source-bound, ID-less and cannot forge ta
   assert.equal(recorded.summary.cloudReady,0);
   assert.equal(recorded.summary.cloudPublishedIdPending,1);
   assert.equal(recorded.summary.cloudUnprovisioned,33);
-  const stale=await buildStatus(root,{sourceCommit:sourceB,now:fixedTime});
+  const stale=await buildStatus(tmp,{sourceCommit:sourceB,now:fixedTime});
   const staleAiven=stale.pets.find(p=>p.slug==='junction-aiven');
   assert.equal(staleAiven.cloud.state,'published-id-pending');
   assert.equal(staleAiven.cloud.taskCheck.binding,'stale-source');
   assert.match(staleAiven.blocker,/stale or source identity unknown/);
   assert.equal(stale.summary.cloudPublishedIdPending,1);
   assert.equal(stale.summary.cloudPublishedEvidenceStale,1);
-  const unknown=await buildStatus(root,{sourceCommit:null,now:fixedTime});
+  const unknown=await buildStatus(tmp,{sourceCommit:null,now:fixedTime});
   assert.equal(unknown.pets.find(p=>p.slug==='junction-aiven').cloud.taskCheck.binding,'stale-source');
+  }finally{await rm(tmp,{recursive:true,force:true});}
 });
 
 test('registry rejects duplicate agent, missing company and extra package drift',async()=>{
@@ -160,10 +191,11 @@ test('status has 34 independently addressable pets and never calls authored case
   assert.equal(status.source.commit,sourceA);
   assert.equal(status.source.hostedCiQualified,false);
   assert.deepEqual(status.summary,{
-    total:34,cloudReady:0,cloudUnprovisioned:33,
-    cloudPublishedIdPending:1,cloudPublishedEvidenceStale:1,
+    total:34,cloudReady:0,cloudUnprovisioned:0,
+    cloudPublishedIdPending:0,cloudPublishedEvidenceStale:0,
     active:0,blocked:34,definedEvalCases:204,executedEvalCases:0,published:0
   });
+  assert.ok(status.pets.every(p=>p.cloud.state==='reported-ready'));
   assert.equal(status.pets.filter(p=>p.evaluation.defined===6).length,34);
   assert.ok(status.pets.every(p=>p.evaluation.executed===0&&p.runtime.state==='unverified'));
   assert.ok(status.pets.every(p=>p.development.receiptBinding==='missing'));
