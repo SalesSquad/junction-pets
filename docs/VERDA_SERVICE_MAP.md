@@ -64,4 +64,4 @@ Never poll an ordinary batch deployment URL to check health: **GET as well as PO
 - [Storage](https://docs.verda.com/storage/)
 - [Official Junction event and Best use of Verda](https://verda.com/blog/junction-2026)
 
-Official event criteria ask entrants to document their process and show scaling beyond a prototype. Awards are cloud credits: EUR10,000 for the winner and EUR2,500 each for second and third. No measured speedup, deployment, live model success or award eligibility outcome is claimed here.
+The authenticated Junction Platform brief, captured in the [Verda challenge card](https://chatgpt.com/space/page_40ee62c902108191bb7b43c71ded5f9d), is the current challenge authority: document the process and post a link to its summary in Verda's Discord channel. It lists USD10,000 in cloud credits plus hoodies for first place and USD2,500 each for second and third, superseding the older EUR amounts on Verda's blog. The brief explicitly excludes crypto mining. No measured speedup, deployment, live model success or award eligibility outcome is claimed here.
