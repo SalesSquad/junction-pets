@@ -45,3 +45,8 @@ test('reject invalid source URL and card URL',()=>{
   assert.match(r.errors.join(' '),/source URL/);
   assert.match(r.errors.join(' '),/noncanonical card URL/);
 });
+test('reject coverage links to a Page missing from the verified catalog',()=>{
+  const {index,map}=fixtures();
+  map.main_coverage[0].page_urls=['https://chatgpt.com/space/page_ffffffffffffffffffffffffffffffff'];
+  assert.match(validateSpaceSources(index,map).errors.join(' '),/source references a missing canonical Page/);
+});
