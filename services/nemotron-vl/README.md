@@ -36,3 +36,7 @@ Provider facts checked 2026-11-13:
 - [NVIDIA model card](https://build.nvidia.com/nvidia/nemotron-3.5-super-vl-120b-a12b/modelcard): vision temperature 0.6 / top_p 0.95 and configurable reasoning. The underlying model's up-to-1M context is deployment-dependent.
 
 The REST body uses top-level `chat_template_kwargs`, not the Python SDK's `extra_body` wrapper. Structured outputs use the OpenAI-compatible `response_format` JSON-schema form and are validated again locally. Model capability listings establish advertised support; this exact request combination, account access, quota, latency and live provider behavior require a real authorized smoke run. No such live run has been performed by this implementation. No GPU speedup is claimed.
+
+## Existing portfolio knowledge
+
+For development and the next evidence workflow, read the [source-pinned knowledge reuse audit](../../docs/NVIDIA_KNOWLEDGE_REUSE.md). It records the actual DSH corpus queries, both computer inventories, existing project mechanisms and freshness gaps. Its private developer receipt is not automatically loaded into provider prompts or public plugin exports.
