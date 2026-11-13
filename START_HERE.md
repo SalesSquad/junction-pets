@@ -41,18 +41,30 @@ rough transcripts, analyst proposals and older generic helpers. A recording,
 document, task manifest or review recommendation does not establish a working
 provider connection, a running worker or challenge eligibility.
 
-## Pending implementation sources
+## Current main integrations and pending implementation sources
 
-The [JSON index](docs/AGENT_SOURCE_INDEX.json) pins the observed PR heads and
-source locations. Recheck their current state: they can change after this snapshot.
+At main commit `1774ac8d7b6dcee58d8516fcbf923c52a1f71088`, the following previously
+pending sources are already represented in main. Continue from main, not from
+their older source branches.
 
-| Work | Source / boundary |
+| Integrated work | Main evidence |
 | --- | --- |
-| Agent composition and Stoa → NVIDIA drawing workflow | [PR61](https://github.com/SalesSquad/junction-pets/pull/61); its source already contains PR56 and PR58. Proposed graph edges are not runtime grants. |
-| Meta Find & Verify scan kernel | [PR60](https://github.com/SalesSquad/junction-pets/pull/60); research is in main, executable service remains pending. |
-| Provider pilots | [PR57](https://github.com/SalesSquad/junction-pets/pull/57); development observations do not install production routing. |
-| Upstream Aiven provenance | [PR55](https://github.com/SalesSquad/junction-pets/pull/55). |
-| Accepted-source progress ledger | [PR54](https://github.com/SalesSquad/junction-pets/pull/54), including PR34; final review disposition remains separate. |
+| Agent composition and Stoa → NVIDIA drawing workflow | Integrated through [PR66](https://github.com/SalesSquad/junction-pets/pull/66), merge commit `cfe5b3e9b445257fbc54dc0617f80f993c048df2`; the older [PR61](https://github.com/SalesSquad/junction-pets/pull/61) remains open but is superseded as a default source. |
+| Meta Find & Verify scan kernel | Integrated through [PR68](https://github.com/SalesSquad/junction-pets/pull/68), merge commit `92c107486948a2e6ac635711071805505b816715`; do not resume from PR60 by default. |
+| NVIDIA Nemotron visual reasoning | [PR58](https://github.com/SalesSquad/junction-pets/pull/58), merge commit `aaa382a28e3c27f34b447cc92bbdf9c286ac14f1`. |
+| Callable companion tools and Aiven workflow | [PR56](https://github.com/SalesSquad/junction-pets/pull/56), merge commit `6b86c1d74cb6508a5d40142cbdd782c28d972966`. |
+| Aiven prototype provenance | [PR55](https://github.com/SalesSquad/junction-pets/pull/55), merge commit `2ea78fd164b40ec18c9ee8e99e8c382dd9348f8c`. |
+
+The active implementation queue still requires an authenticated live PR query
+and exact current head before any write. At this snapshot the open queue includes
+[PR70](https://github.com/SalesSquad/junction-pets/pull/70) (Meta trained
+candidate-scoring baseline), [PR67](https://github.com/SalesSquad/junction-pets/pull/67)
+(Verda project trials), [PR64](https://github.com/SalesSquad/junction-pets/pull/64)
+(product workspaces), [PR57](https://github.com/SalesSquad/junction-pets/pull/57)
+(provider pilots), [PR54](https://github.com/SalesSquad/junction-pets/pull/54)
+(continuity ledger), and [PR34](https://github.com/SalesSquad/junction-pets/pull/34)
+(private continuity reader). A listed PR is not qualified merely because it is
+open; resolve its current head, checks, reviews, dependencies and path owner.
 
 The current main `docs/DEVELOPMENT_QUEUE.md` includes historical checkpoints.
 Do not treat an old running/queued count as the current worker state. The private
