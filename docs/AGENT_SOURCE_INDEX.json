@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "repository": "SalesSquad/junction-pets",
-  "observedAt": "2026-11-13T19:13:29.926Z",
+  "observedAt": "2026-11-13T23:04:29Z",
   "entryPoint": "START_HERE.md",
   "research": {
     "integratedSourceCommit": "ab3b1b623e6e97e54436b95a62e292e8488687b0",
@@ -17,7 +17,10 @@
     "research": "docs/research/META_GLASSES_ARKIT_20261113.md",
     "discord": "docs/evidence/meta-discord-20261113.json",
     "runtimePullRequest": 60,
-    "runtimeCommit": "fb90ab5a6206aac12f96862dbdd486d593656843"
+    "runtimeCommit": "fb90ab5a6206aac12f96862dbdd486d593656843",
+    "mainIntegrationPullRequest": 68,
+    "mainIntegrationCommit": "92c107486948a2e6ac635711071805505b816715",
+    "isMainImplementation": true
   },
   "agents": [
     {
@@ -302,32 +305,40 @@
       "targetBranch": "codex/junction-video-resume-20261113",
       "url": "https://github.com/SalesSquad/junction-pets/pull/61",
       "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/c6d832cdcf01304f4adea6acbdaecf87fe947add",
-      "isMainImplementation": false,
+      "isMainImplementation": true,
       "includesPullRequests": [
         56,
         58
       ],
-      "researchParentPullRequest": 59
+      "researchParentPullRequest": 59,
+      "mainIntegrationPullRequest": 66,
+      "mainIntegrationCommit": "cfe5b3e9b445257fbc54dc0617f80f993c048df2",
+      "supersededByPullRequest": 66
     },
     {
       "pullRequest": 60,
       "role": "Start Chibi Lens: scalable Meta scanning and Find & Verify agent",
       "observedCommit": "fb90ab5a6206aac12f96862dbdd486d593656843",
-      "observedState": "open",
+      "observedState": "not_open",
       "targetBranch": "main",
       "url": "https://github.com/SalesSquad/junction-pets/pull/60",
       "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/fb90ab5a6206aac12f96862dbdd486d593656843",
-      "isMainImplementation": false
+      "isMainImplementation": true,
+      "mainIntegrationPullRequest": 68,
+      "mainIntegrationCommit": "92c107486948a2e6ac635711071805505b816715",
+      "supersededByPullRequest": 68
     },
     {
       "pullRequest": 58,
       "role": "Make Nemotron Super VL the NVIDIA companion's visual reasoning engine",
       "observedCommit": "090dc47b0b43bb12e51988361685cbf81065213c",
-      "observedState": "open",
+      "observedState": "merged",
       "targetBranch": "main",
       "url": "https://github.com/SalesSquad/junction-pets/pull/58",
       "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/090dc47b0b43bb12e51988361685cbf81065213c",
-      "isMainImplementation": false
+      "isMainImplementation": true,
+      "mainIntegrationPullRequest": 58,
+      "mainIntegrationCommit": "aaa382a28e3c27f34b447cc92bbdf9c286ac14f1"
     },
     {
       "pullRequest": 57,
@@ -343,21 +354,25 @@
       "pullRequest": 56,
       "role": "Advance 34 companions with callable tools and a measured Aiven workflow",
       "observedCommit": "91137cb91ba8b70cf6aef4de6163e0c452bd20a0",
-      "observedState": "open",
+      "observedState": "merged",
       "targetBranch": "main",
       "url": "https://github.com/SalesSquad/junction-pets/pull/56",
       "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/91137cb91ba8b70cf6aef4de6163e0c452bd20a0",
-      "isMainImplementation": false
+      "isMainImplementation": true,
+      "mainIntegrationPullRequest": 56,
+      "mainIntegrationCommit": "6b86c1d74cb6508a5d40142cbdd782c28d972966"
     },
     {
       "pullRequest": 55,
       "role": "Pin Aiven Council prototype provenance",
       "observedCommit": "405b5b8b0a0c544ab33403498e918f69c6ce866f",
-      "observedState": "open",
+      "observedState": "merged",
       "targetBranch": "main",
       "url": "https://github.com/SalesSquad/junction-pets/pull/55",
       "sourceEntry": "https://github.com/SalesSquad/junction-pets/tree/405b5b8b0a0c544ab33403498e918f69c6ce866f",
-      "isMainImplementation": false
+      "isMainImplementation": true,
+      "mainIntegrationPullRequest": 55,
+      "mainIntegrationCommit": "2ea78fd164b40ec18c9ee8e99e8c382dd9348f8c"
     },
     {
       "pullRequest": 54,
@@ -371,5 +386,6 @@
       "includesEarlierPullRequest": 34
     }
   ],
-  "sourcePolicy": "This is a dated source map, not a scheduler, permission grant or live PR feed. Resolve authenticated current main and PR heads before work. Runtime extensions listed here are not merged by this documentation integration."
+  "sourcePolicy": "This is a dated source map, not a scheduler, permission grant or live PR feed. Resolve authenticated current main and PR heads before work. Extensions with mainIntegrationCommit are already represented in main; open originals marked superseded must not be used as the default continuation source.",
+  "observedMainCommit": "1774ac8d7b6dcee58d8516fcbf923c52a1f71088"
 }
