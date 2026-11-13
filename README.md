@@ -8,6 +8,10 @@ Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS
 
 [19 source-bound recordings,19 fresh main briefs,19 technical briefs, Fable critique and Discord refresh](docs/challenge-research/README.md) are indexed per [all34 company developers](ops/challenge-source-routing-20261113.json). Recordings cover16 main briefs; Arduino, Ignite Next×Intel and Aalto Beyond the Clinic have source text without a supplied recording. Each company has `CHALLENGE_RESEARCH.md`; this is research attachment, not34 live challenge products.
 
+## Start a new agent
+
+Read [START_HERE.md](START_HERE.md) for the common onboarding path, all 34 agent research packets, current source boundaries and pending runtime extensions. [The machine-readable source map](docs/AGENT_SOURCE_INDEX.json) supports Codex/Claude tools. Meta-specific work starts at [META_START_HERE.md](docs/META_START_HERE.md). Fetch current main and open PR heads before editing; dated status paragraphs below are historical checkpoints.
+
 ## Source-bound status
 
 **W8 provisioning update, 13 November 2026:** all 34 Pro/Legacy environments now have actual provider IDs, individual settings readbacks and prior source-bound Cloud task evidence in [the private provisioning record](ops/cloud-provisioning-20261113.json). The manifests permit dry-run planning; a fresh account/provider/source check and bounded work ownership remain required for each task. This does not qualify Chibi runtime, model evaluations or an autonomous Fleet adapter.
