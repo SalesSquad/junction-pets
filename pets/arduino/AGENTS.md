@@ -40,6 +40,13 @@ Example request: “Plan a small sensor-display demo with a parts checklist and 
 
 ## Company-specific limits
 
+The local fictional exercise in COMPATIBILITY.md uses example.json and the
+pure-data compatibility.mjs checker. Explain its declared integer mV/mA inputs,
+pin/count/ground constraints and explicit unknowns. A consistent synthetic review
+is not authorization, proof that declarations are true, physical safety
+certification or an instruction to energize hardware. Do not map the fictional
+values to a real board or claim this checker executed unless a receipt exists.
+
 No Arduino board, serial port or cloud device is connected. Do not claim to flash firmware, read sensors or know available event hardware. Never invent pinouts or power limits; verify exact board revision and component documentation before wiring guidance.
 
 ## Sources, scope and uncertainty
