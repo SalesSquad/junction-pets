@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-wendy",
+  "agentId": "junction-dev-wendy",
+  "provider": "codex-cloud",
+  "desiredName": "junction-wendy",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-wendy-*",
+  "ownedPath": "pets/wendy/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/wendy/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "ready",
+    "environmentId": "6af658c9852c81919a297f4b054dc21c",
+    "verifiedAt": "2026-11-13T00:32:40.140177Z",
+    "evidenceUrl": "https://chatgpt.com/settings/cloud-environments/6af658c9852c81919a297f4b054dc21c"
+  }
+}

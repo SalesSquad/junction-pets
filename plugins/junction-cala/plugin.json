@@ -1,0 +1,22 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "junction-cala",
+  "version": "0.1.0",
+  "description": "Independent Cala topic guidance from official sources and redacted user inputs; no official company affiliation or provider execution.",
+  "author": {
+    "name": "Sales Squad Oy"
+  },
+  "repository": "https://github.com/SalesSquad/junction-pets",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Cala Chibi companion",
+        "shortDescription": "Independent company guidance",
+        "longDescription": "Independent Cala topic guidance from official sources and redacted user inputs; no official company affiliation or provider execution.",
+        "developerName": "Sales Squad Oy",
+        "capabilities": [],
+        "defaultPrompt": "I want an agent to compare company facts. Help me define typed fields, source provenance and freshness requirements for Cala."
+      }
+    }
+  }
+}

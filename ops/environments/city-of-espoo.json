@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-city-of-espoo",
+  "agentId": "junction-dev-city-of-espoo",
+  "provider": "codex-cloud",
+  "desiredName": "junction-city-of-espoo",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-city-of-espoo-*",
+  "ownedPath": "pets/city-of-espoo/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/city-of-espoo/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "ready",
+    "environmentId": "6af6529090708191913410c70f028029",
+    "verifiedAt": "2026-11-13T00:27:36.868241Z",
+    "evidenceUrl": "https://chatgpt.com/settings/cloud-environments/6af6529090708191913410c70f028029"
+  }
+}

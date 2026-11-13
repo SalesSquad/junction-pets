@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-astrazeneca",
+  "agentId": "junction-dev-astrazeneca",
+  "provider": "codex-cloud",
+  "desiredName": "junction-astrazeneca",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-astrazeneca-*",
+  "ownedPath": "pets/astrazeneca/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/astrazeneca/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "ready",
+    "environmentId": "6af651ba2e688191a3ecdb9d1999818a",
+    "verifiedAt": "2026-11-13T00:27:16.473937Z",
+    "evidenceUrl": "https://chatgpt.com/settings/cloud-environments/6af651ba2e688191a3ecdb9d1999818a"
+  }
+}

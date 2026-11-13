@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-intel",
+  "agentId": "junction-dev-intel",
+  "provider": "codex-cloud",
+  "desiredName": "junction-intel",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-intel-*",
+  "ownedPath": "pets/intel/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/intel/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "ready",
+    "environmentId": "6af656115e90819184ab3d5bea0378c6",
+    "verifiedAt": "2026-11-13T00:31:22.912494Z",
+    "evidenceUrl": "https://chatgpt.com/settings/cloud-environments/6af656115e90819184ab3d5bea0378c6"
+  }
+}

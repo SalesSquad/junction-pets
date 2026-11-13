@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-s-pankki",
+  "agentId": "junction-dev-s-pankki",
+  "provider": "codex-cloud",
+  "desiredName": "junction-s-pankki",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-s-pankki-*",
+  "ownedPath": "pets/s-pankki/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/s-pankki/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "ready",
+    "environmentId": "6af657dc98fc8191aeb6650f2a2fead6",
+    "verifiedAt": "2026-11-13T00:32:11.543355Z",
+    "evidenceUrl": "https://chatgpt.com/settings/cloud-environments/6af657dc98fc8191aeb6650f2a2fead6"
+  }
+}

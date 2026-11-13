@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-ironshard",
+  "agentId": "junction-dev-ironshard",
+  "provider": "codex-cloud",
+  "desiredName": "junction-ironshard",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-ironshard-*",
+  "ownedPath": "pets/ironshard/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/ironshard/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "ready",
+    "environmentId": "6af65708d17c8191b363f3b7c2551a4a",
+    "verifiedAt": "2026-11-13T00:31:30.971528Z",
+    "evidenceUrl": "https://chatgpt.com/settings/cloud-environments/6af65708d17c8191b363f3b7c2551a4a"
+  }
+}

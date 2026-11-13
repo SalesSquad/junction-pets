@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "petSlug": "junction-craci",
+  "agentId": "junction-dev-craci",
+  "provider": "codex-cloud",
+  "desiredName": "junction-craci",
+  "repository": "SalesSquad/junction-pets",
+  "branchPattern": "codex/junction-craci-*",
+  "ownedPath": "pets/craci/",
+  "agentInstructions": "ops/AGENTS.md",
+  "runtimeInstructions": "pets/craci/AGENTS.md",
+  "setupCommand": "npm ci --ignore-scripts",
+  "checkCommands": [
+    "npm run validate",
+    "npm test",
+    "npm run build"
+  ],
+  "provisioning": {
+    "state": "ready",
+    "environmentId": "6af6531caf508191afcbce05dd9dc839",
+    "verifiedAt": "2026-11-13T00:30:48.099193Z",
+    "evidenceUrl": "https://chatgpt.com/settings/cloud-environments/6af6531caf508191afcbce05dd9dc839"
+  }
+}

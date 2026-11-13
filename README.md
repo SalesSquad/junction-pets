@@ -1,74 +1,67 @@
-# Junction Pets
+# Junction Company Companions
 
-34 versionoitua, yrityskohtaista Chibi-kumppanipakettia Junctionia varten. Lähderepo on yksityinen [SalesSquad/junction-pets](https://github.com/SalesSquad/junction-pets).
+**34 independently authored, versioned company companions for Junction, with one auditable monorepo and a separate Chibi runtime.** This is the private source repository [`SalesSquad/junction-pets`](https://github.com/SalesSquad/junction-pets). A companion can explain public technical documentation, inspect material supplied by its user and suggest a bounded next step. It is **not** an official company representative, endorsement, published ChatGPT agent or automatically functioning Chibi account.
 
-Tavoite on antaa yrityksen edustajalle nopeasti ymmärrettävä, hyödyllinen kumppani: tutustu siihen katalogissa, kokeile rajattua esimerkkitehtävää ja siirry julkaisemisen jälkeen olemassa olevan Chibin tilille sekä keskusteluun. Kumppanit auttavat dokumentaation ymmärtämisessä, käyttäjän toimittaman aineiston arvioinnissa ja seuraavan tarkistuksen suunnittelussa. [Kumppaniluettelossa](docs/COMPANIONS.md) ovat kaikki 34 yritystä käyttötapoineen.
+Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS.md) for contributor rules, and the [cloud developer playbook](docs/CLOUD_DEVELOPER_PLAYBOOK.md) for assigning and continuing independent company work. Finnish overview: *34 yrityskohtaista, itsenäisesti laadittua kumppania; yritys- tai Chibi-julkaisua ei pidä päätellä valmiista lähdekoodista.*
 
-## Nykyinen tila
+## Source-bound status
 
-Tämän version lähtötila on **yksityinen, julkaisematon kokonaisuus; vastaanottajan koko Chibi-käyttöpolkua ei ole todennettu**. [Host-asetuksissa](config/host-config.json) runtime on `unverified` ja julkaistujen pakettien lista on tyhjä.
+**W8 provisioning update, 13 November 2026:** all 34 Pro/Legacy environments now have actual provider IDs, individual settings readbacks and prior source-bound Cloud task evidence in [the private provisioning record](ops/cloud-provisioning-20261113.json). The manifests permit dry-run planning; a fresh account/provider/source check and bounded work ownership remain required for each task. This does not qualify Chibi runtime, model evaluations or an autonomous Fleet adapter.
 
-| Osa | Nykyinen sisältö | Mitä siitä voi päätellä |
+The table below describes the **13 November 2026 source checkpoint**, including the W8 provisioning records. Recorded configuration is not a fresh provider readback, an active task or a production deployment. Recheck the exact checkout and provider state before dispatch.
+
+| Capability | Verified or authored | Still not proven |
 | --- | --- | --- |
-| Yrityspaketit | 34 pakettia, jokaisella kolme käyttötapaa ja aloituskehotetta | Sisältöä voi tarkastella, versioida ja valmistella Chibiin vietäväksi. |
-| Agenttiohjeet | Yrityskohtainen `AGENTS.md`, lähteet ja toiminnan rajat | Ohjeet määrittävät tarkoitetun käyttäytymisen. Ne eivät muodosta valmista palveluyhteyttä. |
-| Katalogi | Yritysten selaus, pakettilataukset ja QR-esikatselu | Julkaisemattoman kumppanin käyttöönottotoiminto on estetty. QR ei todista vastaanottajan käyttöpolun toimivuutta. |
-| Käyttäytymisen arviointi | 204 kirjoitettua arviointitapausta | Tapaukset ovat arviointisuunnitelma; niitä ei ole tässä työssä ajettu mallia vasten. |
-| Paikallinen tarkistus | Validointi-, sopimustesti- ja build-komennot | Tulos koskee ajettua lähdeversiota ja tarkistuksen rajattua kattavuutta. |
-| Chibi-integraatio | Linkki- ja vientisovittimet sekä erillinen host-raja | Tilit, ehdot, adoptio, aktivointi ja keskustelu tarvitsevat Chibin toteutuksen ja oman varmennuksensa. |
+| Companion content | 34 package directories, four source files per companion, three use cases per package; 34 private Plugin Creator registrations | Company sponsorship, recipient installation, live Chibi use |
+| Development ownership | 34 distinct `junction-dev-<company>` logical IDs, 34 recorded provider environment IDs and a planning-only 102-role continuity roster | Fresh task admission, a cross-cloud writer lease, or 34 currently running developers |
+| Evaluation | 204 authored behavior cases, deterministic source suites and an opt-in [public Haiku smoke](services/eval-runner/HAIKU_PUBLIC_SMOKE.md) | 204 real model evaluations or independent live provider/recipient acceptance; a dry-run smoke is not model execution |
+| Council and contracts | Versioned collaboration schemas and an experimental Aiven-inspired LangGraph host-injected adapter | Production delegation, tenant grants, model execution, PostgreSQL continuity and host-signed receipts |
+| Chibi integration | Export/adapter interface and a distinct private [Chibi PR #113](https://github.com/SalesSquad/chibi/pull/113) host integration workstream | Compiled host integration, working recipient adoption, activated grants or a real delegated model task |
 
-Jokainen kumppani on itsenäisesti luotu. Yrityksen hyväksyntää tai virallisen edustajan asemaa ei oleteta. `content: ready` tarkoittaa valmisteltua sisältöä; `runtime: chibi-host-required` säilyttää suorittavan sovelluksen rajan.
+Historical evidence is preserved separately: W3 commit [`be3b9f6`](https://github.com/SalesSquad/junction-pets/commit/be3b9f605752c0d3be790bbb6c1832bda9e96f4c) reported 208/208 Node checks in [its Codex Cloud task](https://chatgpt.com/local/6af64d73-352c-8191-b84d-a8c2dc328042) and 104/104 Python checks in an authorized local runner. PR #9 commit [`92a0be0`](https://github.com/SalesSquad/junction-pets/commit/92a0be0ef0f0e9066ec2672a320530eecdb12cec) has a later [Cloud task receipt](https://chatgpt.com/codex/tasks/task_e_6af679f222048326be81704ff0c93d9d). These receipts qualify only their recorded source and commands; they do not establish current worker activity or qualify a later commit. Current host status remains in [`config/host-config.json`](config/host-config.json); authored behavior cases are specified in [BEHAVIOR_EVALS.md](docs/BEHAVIOR_EVALS.md).
 
-## Käynnistä paikallisesti
+## Quick start
 
-Tarvitset Node.js-version 22 tai uudemman, npm:n ja pääsyn yksityiseen repoon. Aja repon juuressa:
+Requires Node.js 22+, npm and access to this private repository:
 
 ```sh
-npm ci
+npm ci --ignore-scripts
 npm run validate
 npm test
 npm run build
 ```
 
-`npm ci` asentaa lukitustiedoston mukaiset riippuvuudet. Validointi tarkistaa pakettisopimuksen. `npm test` ajaa paikalliset sopimustestit; testimäärä ja tulos näkyvät komennon tulosteessa. `npm run build` muodostaa katalogidatan ja rakentaa käyttöliittymän hakemistoon `dist/site`. Build ei julkaise paketteja eikä kytke yritysten palveluja.
+`npm run dev` starts the catalog development UI. `npm run test:wave2` runs the focused contract/service/owner UI suites. `npm run ops:status` derives a **private, dated snapshot** from source manifests and receipts. `npm run ops:developers` prints the source-bound, **planning-only** 34-developer/102-role continuity roster from a clean Git checkout. `npm run ops:preview` builds the separate owner-only Mission Control and synthetic Council previews. No command above deploys Chibi, grants user access or executes the 204 model cases.
 
-Kehitysnäkymä käynnistyy komennolla `npm run dev`. Käyttöliittymän tekniset ohjeet ovat [katalogin README-tiedostossa](apps/catalog/README.md).
+The optional Python Council test environment is documented in [`services/council/README.md`](services/council/README.md). It needs a separate Python 3.12/3.13 environment and host-injected security dependencies; a passing unit test does not create an authenticated host.
 
-## Jokaisella yrityksellä on oma kehityslinja
+## Repository map
 
-Yrityksen oma linja tarkoittaa omaa `pets/<company-slug>/`-hakemistoa, paketin versionumeroa, lähteitä ja arviointitapauksia. Kokonaisuutta ylläpidetään yhtenä monorepona; 34 pysyvää Git-haaraa eivät ole pakettimalli. Muutokset tehdään rajatuilla tehtävähaaroilla ja katselmoidaan yhteisten sopimusten kautta.
+| Path | Source of truth / purpose | Owner |
+| --- | --- | --- |
+| [`pets/<company>/`](pets/) | `pet.json`, `AGENTS.md`, `STORY.md`, `evals.json` and cited public source; independent package version | Assigned single pet writer |
+| [`evidence/company-roster.json`](evidence/company-roster.json) | The 34-company roster, categories and uncertainty | Research/integrator |
+| [`catalog-contract.md`](catalog-contract.md), [`schemas/`](schemas/) | Shared package and adapter contracts | Integrator |
+| [`contracts/pet-collaboration/v1/`](contracts/pet-collaboration/v1/) | Portable request/receipt schemas; no identity or grant issuer | Contract integrator |
+| [`services/council/`](services/council/), [`services/dispatch-ledger/`](services/dispatch-ledger/) | Experimental delegated orchestration and durable ledger interfaces | Service specialists/integrator |
+| [`apps/catalog/`](apps/catalog/) | Public-facing discovery UI, previews and QR link | Catalog owner |
+| [`apps/mission-control/`](apps/mission-control/), [`ops/`](ops/) | Private orchestration UI, desired Cloud fleet, leases and receipts | Orchestration integrator |
+| [`plugins/`](plugins/) | Generated, source-bound skills-only companion plugin packages | Plugin integrator |
+| [`lib/`](lib/), [`scripts/`](scripts/), [`tests/`](tests/) | Shared model, exporters, generators and test gates | Integrator; a pet test writer may own only explicitly leased `tests/pet-<company>.test.mjs` |
+| [`config/host-config.json`](config/host-config.json) | Chibi host address/readiness; no user credentials | Host integrator |
 
-| Tiedosto tai hakemisto | Tarkoitus |
-| --- | --- |
-| `pets/<company>/pet.json` | Tunniste, versio, esittely, kolme käyttötapaa, kehotteet ja lähteet. |
-| `pets/<company>/AGENTS.md` | Yrityskohtainen agenttikäyttäytyminen, tiedon rajaus ja yhteyksien ehdot. |
-| `pets/<company>/STORY.md` | Käyttäjän esittely ja suomenkielinen yhteenveto. |
-| `pets/<company>/evals.json` | Kuusi arviointitapausta yritystä kohden. |
-| `evidence/company-roster.json` | Yritysjoukon alkuperä ja epävarmuudet. |
-| `apps/catalog/` | Katalogin käyttöliittymä. |
-| `config/host-config.json` | Kanoninen Chibi-osoite ja julkaisemisen varmennustila. |
-| `lib/`, `scripts/`, `schemas/` | Yhteiset sopimukset, vienti ja tarkistukset. |
+Generated `dist/` outputs are **not** authored source. A pet's `AGENTS.md` is its **runtime persona**; root `AGENTS.md` and [`ops/AGENTS.md`](ops/AGENTS.md) instruct **development workers**. Do not confuse these three roles.
 
-Säilytä paketin `id`, `slug` ja `artIndex` vakaina. Muuta yrityksen omia tiedostoja ja nosta versionumeroa sisällön muuttuessa. Generoidut tiedostot muodostetaan yhteisillä skripteillä. Kenttäsopimus on [catalog-contract.md](catalog-contract.md).
+## One company, one continuing development lane
 
-## Chibi on varsinainen tuote
+Every company has a stable logical developer ID (`junction-dev-<company>`), desired environment name (`junction-<company>`), an owned path (`pets/<company>/`) and a branch pattern (`codex/junction-<company>-*`). These are machine-validated in [`ops/registry.mjs`](ops/registry.mjs). Each developer resumes from a **GitHub SHA + work ID + receipt + open PR**, never from an assumed persistent VM or a remembered chat. A Codex Cloud environment is reusable configuration; a new task is an isolated workspace. Environments must be actually published, their opaque IDs verified, and repo access checked before dispatch.
 
-Tämä repo omistaa yrityssisällön, katalogin ja Chibiin valmisteltavat vientipaketit. **Varsinainen Chibi-lähdekoodi on erillisessä repossa.** Se omistaa tilit, käyttäjien eristämisen, hyväksytyn tarjouksen, tilille sidotun adoption, käyttöoikeudet, aktivoinnin, keskusteluhistorian sekä mallien ja palvelujen suorittamisen.
+The wider plan describes **102 eventual code/test/review roles** (three per company), **not 102 concurrently running workers**. Start with a small verified cohort, limit execution to real capacity, use isolated task branches and disjoint paths, and let one integrator own cross-package files. The [playbook](docs/CLOUD_DEVELOPER_PLAYBOOK.md) contains onboarding, lease limits, evidence and fallback rules; the [development system](docs/DEVELOPMENT_SYSTEM.md) contains Mission Control contracts. The [Wave 2 execution plan](docs/JUNCTION_SWARM_WAVE2_EXECUTION.md) is a **dated plan**; verify its targets against the current GitHub source rather than treating them as achieved.
 
-Katalogi ei luo rinnakkaista kirjautumista tai tekaistua keskustelua. Julkinen QR sisältää vain kanonisen tuotesivun osoitteen. Skannaaminen ei anna tilioikeutta tai palvelun käyttövaltuutta.
+## Product boundary and next proof
 
-Tavoiteltu tapahtumapolku on [tapahtumaoppaassa](docs/EVENT_GUIDE.md). Nykyinen host-sopimus tukee nimenomaista trial-käytäntöä, jonka kesto on 1–90 päivää. Lopullista tapahtuman käyttöoikeus- tai hinnoittelupäätöstä ei ole tehty. Tämän sisällön perusteella ei luvata ikuista ilmaiskäyttöä tai pysyvää omistusta.
+This repository owns independently authored companion content, the catalog, typed Council contracts, synthetic demos and Chibi export adapters. The private [`SalesSquad/chibi`](https://github.com/SalesSquad/chibi) repository **alone** owns accounts, tenant separation, consent, Cedar policy, offer/adoption, tool/model execution, conversations and private memory. LangGraph coordinates proposed steps but cannot mint Chibi grants. QR codes select a product URL; they carry no credentials or authorization.
 
-Tarkka pakkaaminen, Maker-vienti, API-rajat ja julkaisun edellytykset: [CHIBI_INTEGRATION.md](docs/CHIBI_INTEGRATION.md). Toteutuksen kuvat ja visuaalinen tarkistus: [fidelity-ledger.md](design/fidelity-ledger.md).
+The next recipient-facing proof is one exact version of one companion passing the full **Chibi sign-in → explicit offer acceptance → permitted activation → real bounded task → auditable receipt** path. Until then, label catalog, Council, model and adoption examples as authored/synthetic/test-only. See [CHIBI_INTEGRATION.md](docs/CHIBI_INTEGRATION.md), [JUNCTION_SUBMISSION.md](docs/JUNCTION_SUBMISSION.md), [EVENT_GUIDE.md](docs/EVENT_GUIDE.md), the [34 companions](docs/COMPANIONS.md) and [the private worker system](docs/DEVELOPMENT_SYSTEM.md).
 
-## Mistä 34 yritystä tulevat?
-
-Kokonaisuus on koottu Junction Spaceen tallennetusta yritysinventaariosta: 18 challenge-kumppania, 13 technology-kumppania, Arduino, Verda ja Google DeepMind. Lähteet, havaintopäivät ja roolien epävarmuudet ovat [roster-evidenssissä](evidence/company-roster.json).
-
-Aiemman 34 petin alkuperäisiä profiileja, nimiä ja kuvatiedostoja ei saatu palautettua. Tämän repon profiilit ovat uusia, itsenäisesti kirjoitettuja kumppaneita dokumentoidulle yritysjoukolle. Yrityskohtaiset faktat perustuvat pakettien omiin ensisijaisiin lähteisiin. Puuttuvaa challenge-briefiä ei ole korvattu keksityillä vaatimuksilla.
-
-## Seuraava käytännön askel
-
-Aloita yhdestä pilotista, esimerkiksi MariaDB:stä. Vie yksi täsmällinen pakettiversio Chibin yksityiseen testipolkuun, varmista tarjouksen ehdot ja todenna vastaanottajan koko polku sekä lähteisiin sidottu vastaus. Säilytä lähdeversio, testitulos ja mahdollinen este. Laajenna samoilla hyväksymiskriteereillä kaikkiin 34 kumppaniin onnistuneen pilotin jälkeen.
-
-Aloituskehotteet: [COMPANIONS.md](docs/COMPANIONS.md). Tapahtuman esittely ja hyväksymiskriteerit: [EVENT_GUIDE.md](docs/EVENT_GUIDE.md).
+The Junction package source is private. Any challenge submission, public export, licensing change, Chibi installation, spend, merge or deployment requires its own approved workflow; a passing build is not that approval.

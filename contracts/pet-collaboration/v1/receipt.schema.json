@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chibi.pet/contracts/pet-collaboration/v1/receipt.schema.json",
+  "title": "PetCollaborationReceipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "description": "A host-issued result receipt; claims are not proof until validated against host audit/signature.",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "requestId",
+    "tenantId",
+    "actorPetId",
+    "recipientPetId",
+    "decisionRef",
+    "status",
+    "executionKind",
+    "sourceSha",
+    "completedAt",
+    "hostAuthorization",
+    "externalEffects"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "pet-collaboration.v1"
+    },
+    "kind": {
+      "const": "receipt"
+    },
+    "requestId": {
+      "$ref": "#/$defs/id"
+    },
+    "tenantId": {
+      "$ref": "#/$defs/id"
+    },
+    "actorPetId": {
+      "$ref": "#/$defs/id"
+    },
+    "recipientPetId": {
+      "$ref": "#/$defs/id"
+    },
+    "decisionRef": {
+      "$ref": "#/$defs/id"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "denied",
+        "failed",
+        "pending-approval"
+      ]
+    },
+    "executionKind": {
+      "enum": ["none", "model", "tool", "model-and-tool"]
+    },
+    "sourceSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "outputDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "providerReceiptRef": {
+      "$ref": "#/$defs/id"
+    },
+    "toolReceiptRef": {
+      "$ref": "#/$defs/id"
+    },
+    "hostAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issuer", "attestationRef", "signatureRef"],
+      "properties": {
+        "issuer": {"const": "chibi-host"},
+        "attestationRef": {"$ref": "#/$defs/id"},
+        "signatureRef": {"$ref": "#/$defs/id"}
+      }
+    },
+    "hostAuthorization": {
+      "type": "boolean"
+    },
+    "externalEffects": {
+      "type": "boolean"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"status": {"const": "completed"}},
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["hostAttestation", "outputDigest"],
+        "properties": {"hostAuthorization": {"const": true}}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "completed"},
+          "executionKind": {"enum": ["model", "model-and-tool"]}
+        },
+        "required": ["status", "executionKind"]
+      },
+      "then": {"required": ["providerReceiptRef"]}
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "completed"},
+          "executionKind": {"enum": ["tool", "model-and-tool"]}
+        },
+        "required": ["status", "executionKind"]
+      },
+      "then": {"required": ["toolReceiptRef"]}
+    },
+    {
+      "if": {
+        "properties": {"externalEffects": {"const": true}},
+        "required": ["externalEffects"]
+      },
+      "then": {
+        "required": ["hostAttestation", "toolReceiptRef"],
+        "properties": {"executionKind": {"enum": ["tool", "model-and-tool"]}}
+      }
+    },
+    {
+      "if": {
+        "properties": {"status": {"const": "denied"}},
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "executionKind": {"const": "none"},
+          "hostAuthorization": {"const": false},
+          "externalEffects": {"const": false}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_:./-]*$"
+    }
+  }
+}
