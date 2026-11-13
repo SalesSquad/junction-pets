@@ -1,0 +1,167 @@
+{
+  "source_commit": "5852fa406a7ea38ed02f0f83ab9b904ad427bccc",
+  "reviewer_model": "claude-sonnet-5-5",
+  "reviewer_cli": "2.1.322",
+  "num_turns": 21,
+  "duration_ms": 106939,
+  "original_result_sha256": "998c77e0a40ebbb91cc24c7aaef61f1709695cdd1679da1bce551e13f5389957",
+  "tool_calls": [
+    {
+      "name": "Glob",
+      "input": {
+        "pattern": "*"
+      }
+    },
+    {
+      "name": "Glob",
+      "input": {
+        "pattern": "**/{README,AGENTS,CLAUDE,CONTRIBUTING,ONBOARDING}*.md"
+      }
+    },
+    {
+      "name": "Glob",
+      "input": {
+        "pattern": ".github/**"
+      }
+    },
+    {
+      "name": "Read",
+      "input": {
+        "file_path": "START_HERE.md"
+      }
+    },
+    {
+      "name": "Read",
+      "input": {
+        "file_path": "README.md"
+      }
+    },
+    {
+      "name": "Read",
+      "input": {
+        "file_path": "AGENTS.md"
+      }
+    },
+    {
+      "name": "Read",
+      "input": {
+        "file_path": "docs/META_START_HERE.md"
+      }
+    },
+    {
+      "name": "Read",
+      "input": {
+        "file_path": "docs/AGENT_SOURCE_INDEX.json",
+        "limit": 120
+      }
+    },
+    {
+      "name": "Grep",
+      "input": {
+        "pattern": "\"(scripts|test[^\"]*|validate|build|dev|ops:[a-z]+|plugins:check|lint)\"\\s*:",
+        "path": "package.json",
+        "output_mode": "content"
+      }
+    },
+    {
+      "name": "Glob",
+      "input": {
+        "pattern": "{docs/research/*,docs/evidence/*meta*,evidence/meta*,services/meta-spatial/**,docs/challenge-research/official*,docs/challenge-research/source-links.md,ops/challenge-source-routing*,pets/meta/CHALLENGE_RESEARCH.md,pets/stoa/*,pets/nvidia/*,.github/**,.nvmrc,package-lock.json,docs/*STOA*,docs/*NVIDIA*}",
+        "path": "/Users/mikaelervamaa/Developer/junction-claude-onboarding-audit-20261113"
+      }
+    },
+    {
+      "name": "Grep",
+      "input": {
+        "pattern": "NVIDIA|Nvidia|nvidia",
+        "path": "/Users/mikaelervamaa/Developer/junction-claude-onboarding-audit-20261113",
+        "glob": "{START_HERE.md,ARCHITECTURE.md,docs/AGENT_SOURCE_INDEX.json,docs/DEVELOPMENT_QUEUE.md,docs/INTER_PET_COLLABORATION.md,docs/META_START_HERE.md,pets/stoa/*.md,pets/stoa/pet.json,ops/*.md}",
+        "output_mode": "content",
+        "head_limit": 40
+      }
+    },
+    {
+      "name": "Read",
+      "input": {
+        "file_path": "docs/AGENT_SOURCE_INDEX.json",
+        "offset": 270,
+        "limit": 90
+      }
+    },
+    {
+      "name": "Read",
+      "input": {
+        "file_path": "pets/stoa/HANDOFF_CONTRACT.md"
+      }
+    },
+    {
+      "name": "Grep",
+      "input": {
+        "pattern": "NVIDIA|Nemotron|PR ?#?6[01]|next",
+        "path": "pets/stoa/CHALLENGE_RESEARCH.md",
+        "output_mode": "content",
+        "head_limit": 15
+      }
+    },
+    {
+      "name": "Grep",
+      "input": {
+        "pattern": "[Ss]toa",
+        "path": "/Users/mikaelervamaa/Developer/junction-claude-onboarding-audit-20261113",
+        "glob": "{docs/*.md,ops/*.json,ops/*.md,ARCHITECTURE.md,pets/nvidia/*,services/**/*.md,pets/stoa/AGENTS.md}",
+        "output_mode": "content",
+        "head_limit": 25
+      }
+    },
+    {
+      "name": "Grep",
+      "input": {
+        "pattern": "[Nn]ext|[Pp]ending|PR ?#?60|not implemented|Not implemented",
+        "path": "docs/META_SPATIAL_ARCHITECTURE.md",
+        "output_mode": "content",
+        "head_limit": 25
+      }
+    },
+    {
+      "name": "Glob",
+      "input": {
+        "pattern": "tests/*.mjs",
+        "path": "/Users/mikaelervamaa/Developer/junction-claude-onboarding-audit-20261113"
+      }
+    },
+    {
+      "name": "Read",
+      "input": {
+        "file_path": "docs/META_SPATIAL_ARCHITECTURE.md",
+        "offset": 140,
+        "limit": 40
+      }
+    },
+    {
+      "name": "Read",
+      "input": {
+        "file_path": "package.json"
+      }
+    },
+    {
+      "name": "Read",
+      "input": {
+        "file_path": "docs/DEVELOPMENT_QUEUE.md",
+        "limit": 40
+      }
+    }
+  ],
+  "checks": "read-only source review; no runtime tests executed",
+  "limitations": [
+    "No live CI or PR state queried by Claude",
+    "Partial source sample",
+    "Subjective scores"
+  ],
+  "meta_docs_diff": [
+    "AGENTS.md",
+    "README.md",
+    "docs/META_START_HERE.md",
+    "docs/evidence/meta-source-index-20261113.json",
+    "docs/research/META_GLASSES_ARKIT_20261113.md"
+  ]
+}
