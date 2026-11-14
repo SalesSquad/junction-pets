@@ -1,9 +1,10 @@
 # Intel M330 M6 — durable LOCAL software admission host
 
-**Scope:** `solutions/intel-physical-ai/batch/host/**` exclusively; stacked on
-[PR #172](https://github.com/SalesSquad/junction-pets/pull/172), whose source HEAD at
-admission was `2dc36794fec597afaf78eee792746c790b399a89`.
-Authenticated main was `16947f0ccd33d6e3895f08619b7ba425bf453a59`.
+**Scope:** `solutions/intel-physical-ai/batch/host/**` exclusively. Reuses
+merged [PR #169](https://github.com/SalesSquad/junction-pets/pull/169) and
+[PR #172](https://github.com/SalesSquad/junction-pets/pull/172) unchanged.
+Original admission checkpoint: `16947f0ccd33d6e3895f08619b7ba425bf453a59`.
+Actual clean implementation base: merged `main=d11b2714ab5d7024c5bd842e3b93c720ac1dcef5`.
 `junction.intel` / `junction.ignite-next` → `partnerEvidenceKey=ignite-next-and-intel`,
 `ownedBriefRefs=[M330]`. The official latest 14 Nov Intel clarification still
 contains conflicting GitHub/PDF judging weights; neither has been reconciled.
@@ -12,12 +13,13 @@ contains conflicting GitHub/PDF judging weights; neither has been reconciled.
 
 M4 provides **synthetic batch-scoped STOP**, M5 provides the pure cross-batch
 epoch/revision state machine. **M6 is the previously missing durable, single-host
-filesystem transport.** The owner process opens a local directory (mode 0700)
-and stores an append-only, fsynced JSONL *admitted* journal; each committed
+filesystem transport.** The host provisions a local directory with mode 0700
+under an existing parent and fsyncs the parent and root before storing an append-only, fsynced JSONL *admitted* journal; each committed
 record contains the complete independently replayable M5 snapshot. A separate
 bounded `denied.jsonl` contains only reason, event ID, revision and prior root,
-not camera imagery or untrusted raw input. Access control is **not** derived
-from this disk journal.
+not camera imagery or untrusted raw input. The existing denied-audit framing
+is checked before every submission: an invalid tail blocks both subsequent
+admissions and denials. Access control is **not** derived from this journal.
 
 The host serializes all mutations under an exclusive OS directory lock and
 verifies the full journal before each operation. Each caller supplies the last
@@ -61,6 +63,10 @@ paths are implemented here.
 - This code has **no robot connection or motor command**. There is no actual
   physical emergency-stop circuit, safety PLC, robot braking, camera,
   LeRobot leader/follower control, real estate/person data or model inference.
+- The host creates the root nonrecursively beneath an already-existing parent,
+  fsyncs its parent entry and the new root, and only then allows admission.
+  This addresses a source-level crash window in root creation; no abrupt
+  power-loss qualification has been performed.
 - Local `mkdir` locking and fsync provide practical **single-machine**
   serialization and acknowledged filesystem durability. They are not a
   distributed lock, consensus transaction or power-loss proof across NFS
@@ -116,3 +122,17 @@ For a sponsor-authorized station, the independent equipment owner must first:
 These are **external acceptance dependencies**, not completed integrations.
 Portfolio PR Recovery exclusively owns integration of the PR stack
 #169 → #172 → this host milestone; no merge/production release here.
+
+
+## Independent source review and targeted repair
+
+A separate read-only security reviewer inspected initial head `4af8d62`. It
+found **two P2 issues, no P0/P1**: unsynced newly created root-parent metadata
+and a truncated denied audit that could accept subsequent appends. Both were
+corrected exclusively in this host subtree: nonrecursive root provisioning
+with parent/root fsync, and validation of existing denied audit before any
+accepted or rejected operation. The corrected software has **12/12** focused
+Node tests on authorized Mac Mini, including a real separate Node child
+process observing a persisted latch, concurrent local CAS admission, lost-ACK
+retry and explicit corrupted-audit refusal. This is not a fault-injected
+power-loss or physical safety certification.

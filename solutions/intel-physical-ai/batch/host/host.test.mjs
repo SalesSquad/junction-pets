@@ -242,3 +242,35 @@ test('denied log torn write fails closed on audit read',async()=>{
     assert.equal((await h.read()).root,s.root);
   });
 });
+
+
+test('new root entry is provisioned only under existing parent and made private',async()=>{
+  await withStore(async parent=>{
+    const child=join(parent,'fresh-root');
+    const host=localHost(child,{authorize});
+    const state=await host.initialize();
+    assert.equal(state.state.revision,0);
+    assert.equal((await stat(child)).mode&0o077,0);
+    assert.equal((await host.read()).root,state.root);
+    const missing=localHost(join(parent,'missing-parent','subroot'));
+    await assert.rejects(()=>missing.initialize(),/ENOENT/);
+  });
+});
+
+test('corrupted negative audit cannot be ignored before a new admission',async()=>{
+  await withStore(async dir=>{
+    const noauth=localHost(dir);
+    const state=await noauth.initialize();
+    const first=await noauth.submit(run(state,'denied',fixture(52)),{expectedRoot:state.root});
+    assert.equal(first.status,'DENIED');
+    await appendFile(join(dir,'denied.jsonl'),'BROKEN_TAIL','utf8');
+    const host=localHost(dir,{authorize});
+    await assert.rejects(
+      ()=>host.submit(run(state,'would-admit',fixture(52)),{expectedRoot:state.root}),
+      /DENIED_AUDIT_TORN/);
+    await assert.rejects(
+      ()=>noauth.submit(run(state,'another-denied',fixture(53)),{expectedRoot:state.root}),
+      /DENIED_AUDIT_TORN/);
+    assert.equal((await host.read()).root,state.root);
+  });
+});

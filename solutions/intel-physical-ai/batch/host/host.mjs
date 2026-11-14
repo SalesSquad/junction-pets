@@ -2,7 +2,7 @@
 // No physical robot, identity provider, hardware E-stop or network listener.
 import {mkdir,open,lstat,rmdir} from 'node:fs/promises';
 import {constants} from 'node:fs';
-import {resolve,join} from 'node:path';
+import {resolve,join,dirname} from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
 import {genesis,verifyLedger,dispatch,MAX_EVENTS} from '../continuity/continuity.mjs';
 
@@ -36,14 +36,24 @@ export function localHost(directory,{authorize,afterDurableCommit}={}){
   }
   async function checkFile(file){
     const st=await lstat(file).catch(e=>e.code==='ENOENT'?null:Promise.reject(e));
-    if(st&&(!st.isFile()||st.isSymbolicLink()||(st.mode&0o077)!==0))
+    if(st&&(!st.isFile()||st.isSymbolicLink()||st.nlink!==1||(st.mode&0o077)!==0))
       stop('UNTRUSTED_STORAGE_FILE');
     return st;
   }
-  async function syncDirectory(){
+  async function syncPathDirectory(path){
     let h;
-    try{h=await open(root,constants.O_RDONLY);await h.sync();}
+    try{h=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);await h.sync();}
     finally{if(h)await h.close();}
+  }
+  async function syncDirectory(){return syncPathDirectory(root);}
+  async function provisionRoot(){
+    // No recursive mkdir: the parent must pre-exist (host-owned). Any new
+    // root entry is fsynced in its parent *before* journal admission.
+    try{await mkdir(root,{mode:0o700});}
+    catch(e){if(e.code!=='EEXIST')throw e;}
+    await checkDir();
+    await syncPathDirectory(dirname(root));
+    await syncDirectory();
   }
   async function exclusive(task){
     await checkDir();
@@ -134,7 +144,7 @@ export function localHost(directory,{authorize,afterDurableCommit}={}){
     return {status:'DENIED',reason:safeReason,state:current,operationalRoot:current.root};
   }
   async function initialize(){
-    await mkdir(root,{mode:0o700,recursive:true});
+    await provisionRoot();
     return exclusive(async()=>{
       if(await checkFile(journal))return load();
       // State exists iff this record is fully written and fsynced. If crash
@@ -151,6 +161,8 @@ export function localHost(directory,{authorize,afterDurableCommit}={}){
     // No network endpoint. The caller must supply the last observed root and
     // M5 expected revision+epoch. Authorization is private host closure only.
     return exclusive(async()=>{
+      // Audit evidence loss is a hard STOP, including before an admitted write.
+      await readDenied();
       const current=await load();
       // Idempotent identical retries are safe even if caller never received
       // the durable commit acknowledgement.
@@ -182,8 +194,7 @@ export function localHost(directory,{authorize,afterDurableCommit}={}){
       return reply;
     });
   }
-  async function inspectDenied(){
-    return exclusive(async()=>{
+  async function readDenied(){
       const st=await checkFile(denied);
       if(!st)return [];
       if(st.size>MAX_DENIED_BYTES)stop('DENIED_AUDIT_CAPACITY');
@@ -197,7 +208,7 @@ export function localHost(directory,{authorize,afterDurableCommit}={}){
            d.version!==HOST_VERSION||d.status!=='DENIED')stop('DENIED_AUDIT_INVALID');
         return d;
       });
-    });
   }
+  async function inspectDenied(){return exclusive(readDenied);}
   return Object.freeze({initialize,read,submit,inspectDenied});
 }
