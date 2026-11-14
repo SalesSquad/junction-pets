@@ -126,3 +126,19 @@ test('HB source-defect repair admits only two changed Vision model selection pat
     workload:'lens-hb-vision',lane_slice:'selection-repair',source_sha:candidate
   },context),/exact harness source SHA/);
 });
+
+test('six HB feedback folds keep train-only source pins and distinct groups',()=>{
+ const all=resolvePlan({workload:'lens-hb-six-feedback'},context);
+ assert.equal(all.jobCount,6);
+ assert.equal(all.maxParallel,4);
+ assert.deepEqual(all.matrix.include.map(x=>x.fold),[0,1,2,3,4,5]);
+ assert.equal(new Set(all.matrix.include.map(x=>x.cell)).size,6);
+ assert.ok(all.matrix.include.every(x=>x.source_sha===context.harnessSha));
+ const only=resolvePlan({workload:'lens-hb-six-feedback',learning_fold:'3'},context);
+ assert.equal(only.jobCount,1);
+ assert.deepEqual(only.matrix.include.map(x=>x.fold),[3]);
+ assert.throws(()=>resolvePlan({workload:'lens-hb-six-feedback',source_sha:candidate},context),/exact source\/harness SHA/);
+ assert.throws(()=>resolvePlan({workload:'lens-hb-six-feedback',learning_fold:'6'},context),/Unsupported HB six-feedback fold/);
+ assert.throws(()=>resolvePlan({workload:'lens-hb-six-feedback'}, {...context,creditOpen:'false'}),/closed/);
+ assert.throws(()=>resolvePlan({workload:'lens-hb-six-feedback'}, {...context,now:'2026-11-15T17:00:00Z'}),/deadline/);
+});
