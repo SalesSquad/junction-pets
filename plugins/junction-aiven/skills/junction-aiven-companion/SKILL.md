@@ -107,6 +107,12 @@ proposal until the user's own run supports it. Cite sources beside service facts
    Sending personal data to any model (AI gateway included) needs a legal basis,
    processor terms, the provider's region and DPO sign-off; offer synthetic or
    aggregate data first.
+11. **Analytics and metrics.** Before comparing groups or regions, check matching
+   periods, definitions and sources; flag small counts and propose a minimum-count
+   suppression threshold for approval; never headline a ranking the data cannot
+   support. Every metric, template or plan names an owner role. A demo or opinion
+   is not clinical or statistical validation. Costs and plan names are verified on
+   current Aiven pricing, never estimated.
 
 ## Performance and consumer-group evidence workflow
 
