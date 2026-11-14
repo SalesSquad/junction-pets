@@ -103,9 +103,9 @@ An independent standard-library CSV parser computes one synthetic customer's
 expected fields and original source rows, compares them to the real importer,
 and checks that a repeated export refuses to overwrite the existing result.
 Only counts and digests are logged; no dataset/export is committed or published.
-This qualifies import/provenance when executed successfully, not banking advice,
-forecasting, browser behavior or real customer integration. Execution is pending
-until an actual run is linked in the PR handoff.
+This qualifies import/provenance, not banking advice, forecasting, browser
+behavior or real customer integration. The successful actual execution is
+recorded below.
 
 The first sponsor [run43549430489](https://github.com/SalesSquad/junction-pets/actions/runs/43549430489)
 failed before import: the CRACI trace recorded18 denied requests to GitHub's
@@ -113,6 +113,41 @@ LFS object host `github-cloud.githubusercontent.com`. The sponsor lane now
 allows only that observed TLS hostname in addition to the GitHub preset.
 The independent complete-file size/SHA256 check still rejects a pointer, error
 page, partial object or different dataset before invoking the importer.
+
+### Completed first qualification batch
+
+All observations below came from actual CRACI runners and decoded GitHub job
+logs. Source product commits are distinct from the harness/workflow commits.
+
+| Qualification | Product/source SHA | Harness SHA | Actual evidence |
+| --- | --- | --- | --- |
+| Stoa Firefox and WebKit, both widths, official sponsor DXF | `bfb4e363879b9125b10ed8a8a14f77ea5ed8af70` | `d99035ec053381d299a1968974c2fc00ded29b87` | [Firefox job132307459979](https://github.com/SalesSquad/junction-pets/actions/runs/43549188651/job/132307459979), [WebKit job132307459800](https://github.com/SalesSquad/junction-pets/actions/runs/43549188651/job/132307459800) |
+| Stoa Chromium, both widths, official sponsor DXF | `bfb4e363879b9125b10ed8a8a14f77ea5ed8af70` | `4ef6480f70812d5a42ee009b3246cec0a3d28c37` | [run43549650998 / job132308900519](https://github.com/SalesSquad/junction-pets/actions/runs/43549650998/job/132308900519) |
+| Valio all three engines and both widths | `db003d1fd491381e7ce2409eefb1807a0c7ef0de` | `7089e7f656703a1a1fca1ac7145de3dc52dab54e` | [run43549859840](https://github.com/SalesSquad/junction-pets/actions/runs/43549859840), jobs132309562895/132309563215/132309563241 |
+| Official S-Pankki synthetic CSV importer and provenance | `8baf32ebbe4c50e92f3230fa38c843b92b48a0b4` | `7089e7f656703a1a1fca1ac7145de3dc52dab54e` | [run43550002068 / job132310037843](https://github.com/SalesSquad/junction-pets/actions/runs/43550002068/job/132310037843) |
+| Updated CI branch portable integration | branch `7089e7f656703a1a1fca1ac7145de3dc52dab54e`, tested PR merge `05c6ba01483e4219bdb090e87cf7a0737da3e89a` | same branch | [run43549821226](https://github.com/SalesSquad/junction-pets/actions/runs/43549821226) |
+
+The browser matrix produced **12 passed viewport journeys**, no uncaught page
+errors and no horizontal overflow. Stoa's sponsor source hash matched the
+independently pinned DXF hash. Valio's approval/replay/cancellation/changed-price
+and budget gates all passed. Browser-harness SHA256 remained unchanged across
+the network repairs:
+`ca13830f06f260e0b10485a08279854d71a96db69c3172a6cb2bd0e9d833dd4e`.
+
+S-Pankki downloaded and hash-verified the complete362,796,501-byte CSV,
+independently scanned **3,626,755 records**, and compared **581 selected rows**
+including their original physical line numbers. It checked1,162 exact-cent
+values and refused a second export with the original bytes unchanged.
+The exported sample stayed on the ephemeral runner; its SHA256 was
+`361b2e003018f63a62d518cdcbf13c04c65ce10b15611df7f25dcf66cde4ddc4`.
+This is actual sponsor-synthetic data evidence, not a real bank/customer test.
+
+Independent final read-only review found no blocking issue in workflow SHA256
+`84f4f31773a72c1abc39211c1108b315ae894684b5398c0be83612de1190f100`, the browser
+harness above, and sponsor checker SHA256
+`803d04a377324b2eb76c817ed196158d0c6821170182a8de129ab2e789701393`.
+These receipts do not automatically qualify later code, model behavior,
+physical devices or production integration.
 
 ### Continuing use and stop
 
