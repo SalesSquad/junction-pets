@@ -34,6 +34,14 @@ export function createReadOnlySupplierPort({ baseUrl, fetchImpl = globalThis.fet
       if (typeof query !== 'string' || query.length > 160) throw new TradeError('INVALID_QUERY', 'Search query too long.');
       const response = await transport(`/v1/products?q=${encodeURIComponent(query)}`);
       if (!Array.isArray(response.products)) throw new TradeError('SUPPLIER_SCHEMA_INVALID', 'Expected products array.', 502);
+      for (const item of response.products) {
+        if (!item || typeof item !== 'object' || typeof item.sku !== 'string' || !item.sku ||
+            !Number.isSafeInteger(item.priceCents) || item.priceCents < 0 ||
+            !Number.isSafeInteger(item.availableUnits) || item.availableUnits < 0 ||
+            typeof item.sourceVersion !== 'string' || !item.sourceVersion || item.currency !== 'EUR') {
+          throw new TradeError('SUPPLIER_SCHEMA_INVALID', 'Product lacks typed price, stock, source version or EUR currency.', 502);
+        }
+      }
       return response;
     },
     placeOrder: async () => { throw new TradeError('EXTERNAL_ORDER_DISABLED', 'Supplier adapter intentionally prohibits all external order writes.', 403); },

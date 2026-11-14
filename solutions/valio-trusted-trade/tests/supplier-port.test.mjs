@@ -8,7 +8,7 @@ test('independent vendor-neutral adapter supports typed supplier search without 
     baseUrl: 'http://127.0.0.1:1234/api',
     fetchImpl: async (url, init) => {
       seen = { url: String(url), method: init.method, signal: init.signal, redirect: init.redirect };
-      return { ok: true, json: async () => ({ products: [{ sku: 'SUPPLIER-SKU-1', priceCents: 122, availableUnits: 12 }] }) };
+      return { ok: true, json: async () => ({ products: [{ sku: 'SUPPLIER-SKU-1', priceCents: 122, availableUnits: 12, sourceVersion: 'v1', currency: 'EUR' }] }) };
     },
   });
   const response = await port.searchCatalog('lactose free / milk');
@@ -25,4 +25,6 @@ test('supplier adapter rejects cleartext network endpoints and malformed supplie
   assert.throws(() => createReadOnlySupplierPort({ baseUrl: 'https://me:secret@untrusted.example' }), { code: 'INVALID_PROVIDER_URL' });
   const bad = createReadOnlySupplierPort({ baseUrl: 'https://example.test', fetchImpl: async () => ({ ok: true, json: async () => ({ products: 'not-an-array' }) }) });
   await assert.rejects(bad.searchCatalog('milk'), { code: 'SUPPLIER_SCHEMA_INVALID' });
+  const omittedVersion = createReadOnlySupplierPort({ baseUrl: 'https://example.test', fetchImpl: async () => ({ ok: true, json: async () => ({ products: [{ sku: 'SKU1', priceCents: 999, availableUnits: 20, currency: 'EUR' }] }) }) });
+  await assert.rejects(omittedVersion.searchCatalog('milk'), { code: 'SUPPLIER_SCHEMA_INVALID' });
 });
