@@ -79,3 +79,106 @@ practice, duplicate command and changed-goal cases. Run each real provider only
 on the fixed synthetic suite through existing authorized credentials/budget.
 These checks do not qualify physical glasses, production memory, actual
 Taimi mastery, SAM inference or a live private Chibi host.
+
+## Run the experience and simulations
+
+From the Junction repository root, use the existing synthetic observation server:
+
+~~~sh
+node services/meta-spatial/observation-server.mjs --mode synthetic
+~~~
+
+Open http://127.0.0.1:8787 and choose Learn. Start learning, suggest and approve a
+help preference, then use the original packing controls to pause and resume.
+Correct the preference and start a new practice episode. Approved preferences
+survive reload; Forget learning removes memory, outcome and derived reminder
+state. Audit operations and hashed idempotency receipts carry no old preference
+payloads. Learning consent is separate from the existing observation switch.
+
+~~~sh
+node services/lens-learning/simulate.mjs --output /tmp/lens-learning-results
+python3 services/lens-learning/evaluate.py \
+  /tmp/lens-learning-results/provider-suite.json \
+  --factory-checkout /absolute/path/to/authorized/factory-source \
+  --output /tmp/lens-learning-results/provider-offline-report.json
+~~~
+
+The external Factory source must match every module hash in provider-sources.json.
+A clean Git checkout or a separately materialized, byte-verified private source
+snapshot is supported. A snapshot reports executorCommit=null; it does not claim
+a Git checkout. Private Factory code is not distributed with Junction.
+
+The default provider run injects transport fixtures. It tests the actual existing
+wire conversion, answer parser and journal. Its label comparisons are NOT model
+accuracy. An actual bounded provider evaluation explicitly adds:
+
+~~~sh
+--live both --state-dir /absolute/path/to/owned/private-evaluation-state
+~~~
+
+Existing approved host credentials are read by Factory's own adapter. Never copy
+keys into this repository or into the browser. Expected answers and domain
+results remain outside provider payloads. A failed or uncertain attempt consumes
+its recorded budget; retries require an understood outcome and distinct,
+explicitly admitted work. A refusal or model disagreement remains in the report.
+
+The single changed-path browser journey uses an already installed Playwright:
+
+~~~sh
+node services/lens-learning/browser-check.mjs /tmp/lens-learning-browser
+~~~
+
+Set CHROMIUM_PATH to an existing browser executable when necessary. The journey
+starts and closes its own loopback synthetic server and isolated browser context.
+
+## Existing components and integration boundary
+
+| Component | Reused here | Remaining production work |
+| --- | --- | --- |
+| Resume | Original user-confirmed task state, checkpoint and browser experience | Actual authenticated host and device admission |
+| Factory | Exact pinned Jev and OpenAI Decisions serialization, parsing, budget and key-reading implementation, imported externally | A production host chooses when permitted context may leave the device |
+| Chibi memory | Preferences/routines, source provenance and lifecycle inform the interface; private source is not copied | Host-owned mapping and encrypted memory persistence |
+| Taimi learning | Independent versus assisted practice remains distinct; repeated scene templates do not inflate diversity | Real verified learning events and FSRS/domain integration |
+| SAM / NVIDIA | Existing optional observation panel remains available alongside learning | Actual model and physical capture evidence, independently qualified |
+
+The demo supports a fixed synthetic camera-bag routine and explicit help
+preferences. It does not infer an arbitrary new routine from video. Independent
+practice means a synthetic user report, never a measured physical skill.
+Handoffs contain only goal/current task context and are prepared for review;
+they do not dispatch a pet or share a personal profile.
+
+## Evidence
+
+See evidence/ for source-bound domain simulations, browser results, independent
+review and separate provider results. The initial transport-source omission
+and the repaired run are separate records. Neither offline fixtures nor a failed
+local initialization is counted as a successful provider response.
+
+| Observation | Result | What it establishes |
+| --- | --- | --- |
+| Domain simulation | 8 synthetic cases, 11 checks passed | Consent, correction, stale-result and task-state boundaries in the reference core |
+| One real browser journey | 7 checks, no page errors, 7.906 s | The synthetic browser flow on the recorded Chromium runtime |
+| TypeSafe Jev | 7 actual responses; 20 of 21 question labels match | Bounded model behavior on the declared synthetic text inputs |
+| OpenAI Decisions | 7 actual responses; 18 of 21 question labels match | Bounded model behavior on the same declared inputs |
+
+The successful live batch took 12.852287 seconds. It is not an end-user latency
+benchmark. Its seven cases have three related questions each, and the labels
+have not been calibrated against real user benefit. These scores cannot rank
+the models or establish production accuracy. In particular, a `stay_silent`
+answer where the fixture expects `ask_one_question` needs product judgment;
+the original expected labels and mismatches are preserved.
+
+The live run remains bound to its recorded harness hash. A subsequent review
+hardened imported-module path admission; its separate offline checks are recorded
+without relabeling the earlier live run as execution of the changed harness.
+Both providers use synthetic text/state, not camera footage. The browser does
+not call either provider and does not train model weights.
+
+The next meaningful comparison is a frozen, independently reviewed set of new
+episodes, run against the deterministic core, core plus Jev, and core plus
+Decisions. Measure whole-task success, avoidable interruptions, correction
+burden, and time to resume. A real-device experiment must separately measure
+capture-to-feedback latency and learning transfer. Adding similar fixtures alone
+does not supply that evidence.
+
+![Synthetic Lens learning experience](evidence/lens-learning-desktop.png)
