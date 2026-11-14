@@ -36,7 +36,9 @@ test('counts distinct unit outlines, not raw wall/door segments', () => {
 });
 test('absent room, ambiguous room name and unhandled classes fail closed', () => {
   for (const q of ['What is the area of room Z-999?', 'What is the area of Stanza?',
-    'How many doors are there?', 'What color is the roof?', 'How many windows?']) {
+    'How many doors are there?', 'What color is the roof?', 'How many windows?',
+    'How many StanzaXYZ?', 'How many doors in Stanza?',
+    'How many rooms labelled Stanza and Cucina?']) {
     const r = answer(q);
     assert.equal(r.status, 'abstained', q);
     assert.equal(r.evidence.length, 0, q);

@@ -22,6 +22,10 @@ export function pointInPolygon(p, polygon) {
 
 const normalize = (s) => String(s || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const cleanLabel = (s) => normalize(s).replace(/[^\p{L}\p{N}]/gu, '');
+const exactMention = (question, label) => {
+  const escaped = normalize(label).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'iu').test(normalize(question));
+};
 const isLabel = (e) => e.layer === 'ROOM_TEXT' && /^(?:[\p{L}][\p{L}\s.-]{1,38})$/u.test(e.text) && !/^app\.?\s*[a-z]$/i.test(e.text);
 const evidence = (e, detail) => ({ entityId: e.id, layer: e.layer, kind: e.type, detail });
 const supportedUnits = Object.freeze({ 1: 0.0254, 2: 0.3048, 4: 0.001, 5: 0.01, 6: 1 });
@@ -71,16 +75,17 @@ export function answerDrawing(drawing, question) {
       if (!units.length) return abstain('No distinct unit-outline entities are available; text labels alone are insufficient.', drawing);
       return answer(String(units.length), `${units.length} separate UNIT_OUTLINE geometries occur in this drawing. These outlines are individually highlighted; they are not inferred from unrelated doors or wall strokes.`, drawing, units.map(e => evidence(e, 'Source apartment/unit outline')), { type: 'count', value: units.length, unit: 'apartments' });
     }
+    if (/\b(doors?|windows?|walls?|stairs?|columns?|fixtures?|beams?)\b/i.test(q)) {
+      return abstain('This source contains primitives, not independently validated instances of that object class.', drawing);
+    }
     const labels = new Map();
     for (const e of labelTexts) {
       const label = cleanLabel(e.text);
       if (label.length > 1) labels.set(label, e.text);
     }
-    const mentions = [...labels].filter(([label]) => {
-      const normalized = cleanLabel(question);
-      return normalized.includes(label) && label.length >= 3;
-    }).sort((a, b) => b[0].length - a[0].length);
-    if (mentions.length) {
+    const mentions = [...labels].filter(([label, original]) => label.length >= 3 && exactMention(question, original));
+    if (mentions.length > 1) return abstain('Name exactly one room label at a time; this question refers to multiple classes.', drawing);
+    if (mentions.length === 1) {
       const target = mentions[0][0];
       const hits = labelTexts.filter(e => cleanLabel(e.text) === target);
       return answer(String(hits.length), `${hits.length} exact ROOM_TEXT labels reading “${labels.get(target)}” occur in this drawing. Each numbered marker is linked to its original DXF text insertion point.`, drawing, hits.map(e => evidence(e, `ROOM_TEXT: ${e.text}`)), { type: 'count', value: hits.length, unit: labels.get(target) });

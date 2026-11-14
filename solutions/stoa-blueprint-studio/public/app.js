@@ -100,6 +100,28 @@ function renderSource() {
   badge.classList.toggle('real', real);
   $('drawing-stats').textContent = `${d.entities.length} vector/text entities · ${d.sha256 ? `SHA256 ${d.sha256.slice(0, 12)}…` : 'original demo fixture'}`;
 }
+function updateQuickQueries() {
+  const text = state.drawing.entities.filter(e => e.layer === 'ROOM_TEXT' && typeof e.text === 'string');
+  const counts = new Map();
+  for (const e of text) {
+    if (!/^[\p{L}][\p{L}\s.-]{1,38}$/u.test(e.text) || /^app\.?\s*[a-z]$/i.test(e.text)) continue;
+    counts.set(e.text, (counts.get(e.text) || 0) + 1);
+  }
+  const bestLabel = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
+  const bestNumber = text.find(e => /^(?:[a-z]-\d+|\d+(?:[.\-]\d+){1,2})$/i.test(e.text))?.text;
+  const buttons = [...document.querySelectorAll('.suggestion')];
+  if (bestLabel) {
+    buttons[0].dataset.q = `How many rooms labelled ${bestLabel}?`;
+    buttons[0].firstChild.textContent = `Count rooms labelled ${bestLabel} `;
+  }
+  buttons[0].disabled = !bestLabel;
+  if (bestNumber) {
+    buttons[1].dataset.q = `What is the area of room ${bestNumber}?`;
+    buttons[1].firstChild.textContent = `Measure room ${bestNumber} `;
+  }
+  buttons[1].disabled = !bestNumber;
+  return bestLabel ? buttons[0].dataset.q : null;
+}
 function renderAnswer() {
   const result = state.result;
   const supported = result?.status === 'supported';
@@ -170,8 +192,8 @@ async function useDemo() {
   state.drawing = (await response.json()).drawing;
   state.result = null; state.selected = null; state.zoom = 1;
   renderSource(); renderAnswer(); renderEvidence(); renderDrawing();
-  $('question').value = 'How many rooms labelled Stanza?';
-  await ask($('question').value);
+  $('question').value = updateQuickQueries() || '';
+  if ($('question').value) await ask($('question').value);
 }
 async function importDrawing(file) {
   if (!file) return;
@@ -185,8 +207,8 @@ async function importDrawing(file) {
   state.drawing = payload.drawing; state.result = null; state.selected = null; state.zoom = 1;
   $('import-message').textContent = `Imported ${state.drawing.entities.length} source entities. File is never stored on disk. Ask with an exact visible label or room number.`;
   renderSource(); renderAnswer(); renderEvidence(); renderDrawing();
-  $('question').value = 'How many rooms labelled Stanza?';
-  await ask($('question').value);
+  $('question').value = updateQuickQueries() || '';
+  if ($('question').value) await ask($('question').value);
 }
 
 $('question-form').addEventListener('submit', e => {
