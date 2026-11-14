@@ -275,9 +275,13 @@ observationPanel = createObservationPanel({
   read: () => ({ state: session.snapshot(), policy: session.getPolicy() }),
   notify: toast,
   returnToTask: () => { $('#primaryAction').scrollIntoView({ block: 'center' }); $('#primaryAction').focus(); },
+  onStart: (request) => learningPanel?.beginObservation(request) ?? null,
+  onResult: (packet) => learningPanel?.observe(packet),
+  onClear: () => learningPanel?.clearObservation(),
 });
 learningPanel = createLearningPanel({
   mount: $('#learningPanel'),
+  observationView: () => ({ state: session.snapshot(), policy: session.getPolicy() }),
   taskView: () => {
     const state = session.snapshot();
     return { taskId: state.taskId, revision: state.revision,
@@ -297,5 +301,5 @@ const cleanup = registerResumeTools(document, {
     $('#voiceStatus').textContent = ({ unavailable: 'Unavailable in this browser', registered: 'Native surface detected · unqualified', failed: 'Registration failed · controls still work' })[status];
   },
 });
-window.addEventListener('pagehide', () => { cleanup(); observationPanel.dispose(); }, { once: true });
+window.addEventListener('pagehide', () => { cleanup(); observationPanel.dispose(); learningPanel.dispose(); }, { once: true });
 

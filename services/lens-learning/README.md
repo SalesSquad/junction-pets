@@ -182,3 +182,10 @@ capture-to-feedback latency and learning transfer. Adding similar fixtures alone
 does not supply that evidence.
 
 ![Synthetic Lens learning experience](evidence/lens-learning-desktop.png)
+
+## Current view and learned help
+
+The observation panel now composes its admitted visual suggestion with your
+approved help preference in the same episode. See [the observation integration](OBSERVATION.md)
+for the before-request binding, transient lifetime, user journey and exact
+production boundary. This does not save visual data as learning memory.
