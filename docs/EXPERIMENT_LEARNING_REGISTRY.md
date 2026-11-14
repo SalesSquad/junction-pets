@@ -22,7 +22,10 @@ verified source. Never silently fill a missing proof with a synthetic value.
 ## Operating procedure (agent-readable)
 
 1. Before an experiment, freeze `source.commit`, dataset/split sample-set hash,
-   evaluator protocol, primary/safety metric policy and its SHA-256.
+   evaluator protocol, primary/safety metric policy and its SHA-256. Invoke
+   `record-policy` **before the baseline evaluation**, then commit the policy
+   record to reviewable Git history. Self-reported `frozenAt` alone cannot prove
+   real-world predeclaration.
 2. Run on an already-authorized executor. Store private data in its owner-approved
    private store; produce a redacted run envelope with receipt/source hashes.
 3. Write the new immutable run under `ops/experiments` via the CLI and deliver

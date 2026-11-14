@@ -12,6 +12,7 @@ provider credentials stay in their authorized private stores.
 
 ```sh
 node services/experiment-registry/cli.mjs summary
+node services/experiment-registry/cli.mjs record-policy --input /path/to/frozen-policy.json
 node services/experiment-registry/cli.mjs record-run --input /path/to/redacted-run.json
 node services/experiment-registry/cli.mjs record-run --input /path/to/candidate-run.json --baseline baseline-id --policy /path/to/frozen-policy.json
 node services/experiment-registry/cli.mjs record-failure --input /path/to/redacted-failure.json
@@ -20,6 +21,16 @@ node services/experiment-registry/cli.mjs plan-next --input /path/to/next-experi
 node services/experiment-registry/cli.mjs compare --baseline baseline-id --candidate candidate-id --policy /path/to/frozen-policy.json
 node --test services/experiment-registry/registry.test.mjs
 ```
+
+**Register the policy before the first baseline run:** `record-policy` saves
+the *full* immutable policy at `policies/policy.<sha256>.json`, with every
+metric role, bound, accepted evidence level, sample-set digest and protocol.
+A model-evaluation cannot be recorded unless that exact policy is already in
+the registry. A comparison also requires the registered bytes so an independent
+reviewer can reproduce it later; a bare hash is insufficient. The declared
+`frozenAt` is user-supplied metadata, **not independently authenticated time**:
+publish its policy file to a reviewed repository commit before training, and
+verify the commit history independently for claims of predeclaration.
 
 **Model admission is fail-closed:** importing a `model-evaluation` without
 `--baseline` and `--policy` retains the evidence as an unpromoted baseline
@@ -44,7 +55,7 @@ distributed locking, continuously poll providers or claim automatic cloud sync.
 `evidence:{level,ref,receiptSha256}`, `dataset` (or null), `evaluation` (or
 null), `artifact` (or null), `metrics` (each with unit, direction, samples),
 `limitations` and `policySha256` (or null). `kind: model-evaluation` requires
-all model-specific evidence, including a frozen policy digest and a real
+all model-specific evidence, including a registered frozen policy digest and a real
 checkpoint SHA. The supported evidence labels are explicitly **not provider
 attestations**. Historical imports with unknown dataset/protocol hashes must
 use `historical-result`, remain non-comparable and say what is missing.
@@ -85,7 +96,9 @@ Provide a *predeclared* policy with `policyId/taskId/evaluationKind`,
 }
 ```
 
-At least one metric needs `role:primary`. Both runs must pin the canonical
+At least one metric needs `role:primary`, at least one other or shared metric
+must have `role:safety` with zero permitted regression, and the exact policy
+must already be registered. Both runs must pin the canonical
 policy SHA-256, be successful model evaluations for the same task, same exact
 evaluation dataset and sample-set hash, independent holdout/shifted split,
 protocol, evidence class, sample count and metric definitions. A candidate must

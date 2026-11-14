@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import {readFile, stat} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {compareAndRecord, planNext, recordFailure, recordRun, reviewCase, summarize} from './registry.mjs';
+import {compareAndRecord, planNext, recordFailure, recordPolicy, recordRun, reviewCase, summarize} from './registry.mjs';
 
 function options(args) {
   const result = {};
@@ -23,7 +23,7 @@ async function inputJson(path) {
 async function main() {
   const [command, ...rest] = process.argv.slice(2);
   if (!command || ['help', '--help'].includes(command)) {
-  process.stdout.write(`Usage: node services/experiment-registry/cli.mjs COMMAND [OPTIONS]\n\nCommands:\n  record-run     --input run.json [--baseline RUN_ID --policy frozen-policy.json] [--root ops/experiments]\n  record-failure --input failure.json [--root ops/experiments]\n  review-case    --input review.json [--root ops/experiments]\n  plan-next      --input plan.json [--root ops/experiments]\n  compare        --baseline RUN_ID --candidate RUN_ID --policy policy.json [--root ops/experiments]\n  summary        [--root ops/experiments]\n\nComparison exit: 0 = eligible for independent review (NOT deployment), 2 = rejected/incomparable.\n`);
+  process.stdout.write(`Usage: node services/experiment-registry/cli.mjs COMMAND [OPTIONS]\n\nCommands:\n  record-policy  --input frozen-policy.json [--root ops/experiments]\n  record-run     --input run.json [--baseline RUN_ID --policy frozen-policy.json] [--root ops/experiments]\n  record-failure --input failure.json [--root ops/experiments]\n  review-case    --input review.json [--root ops/experiments]\n  plan-next      --input plan.json [--root ops/experiments]\n  compare        --baseline RUN_ID --candidate RUN_ID --policy policy.json [--root ops/experiments]\n  summary        [--root ops/experiments]\n\nModel admission: 0 = eligible for independent review only (NOT deployment), 2 = rejected/incomparable/uncompared.\n`);
     return;
   }
   const opts = options(rest);
@@ -32,6 +32,7 @@ async function main() {
   const root = resolve(opts['--root'] || 'ops/experiments');
   let result;
   switch (command) {
+    case 'record-policy': result = await recordPolicy(root, await inputJson(opts['--input'])); break;
     case 'record-run': {
       if (Boolean(opts['--baseline']) !== Boolean(opts['--policy'])) throw new Error('baseline and frozen policy must be provided together');
       const run = await inputJson(opts['--input']);

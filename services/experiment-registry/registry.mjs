@@ -134,6 +134,12 @@ export async function recordRun(root, run) {
   // between validation and immutable persistence (including adding raw data).
   const input = structuredClone(run);
   validateRun(input);
+  if (input.kind === 'model-evaluation') {
+    // A model evaluation cannot backfill a policy after seeing its results.
+    // Persist the frozen full policy before admitting the baseline itself.
+    const frozen = validatePolicy(await readRecord(root, 'policies', `policy.${input.policySha256}`));
+    if (sha256(canonicalJson(frozen)) !== input.policySha256 || frozen.taskId !== input.taskId || Date.parse(frozen.frozenAt) > Date.parse(input.capturedAt)) fail('model run requires matching preregistered frozen policy');
+  }
   if (input.planId) {
     const plan = await readRecord(root, 'plans', input.planId);
     if (plan.taskId !== input.taskId || plan.status !== 'planned-not-dispatched' || Date.parse(input.capturedAt) < Date.parse(plan.createdAt)) fail('run cannot link to mismatched or future learning plan');
@@ -229,6 +235,13 @@ export function validatePolicy(policy) {
   return policy;
 }
 
+export async function recordPolicy(root, policy) {
+  const input = structuredClone(policy);
+  validatePolicy(input);
+  const policySha256 = sha256(canonicalJson(input));
+  return {policySha256, saved: await immutable(root, 'policies', `policy.${policySha256}`, input)};
+}
+
 export function compareRuns(baseline, candidate, policy) {
   validateRun(baseline); validateRun(candidate); validatePolicy(policy);
   const policySha256 = sha256(canonicalJson(policy));
@@ -287,15 +300,19 @@ export function compareRuns(baseline, candidate, policy) {
 
 export async function compareAndRecord(root, baselineId, candidateId, policy) {
   policy = structuredClone(policy);
+  validatePolicy(policy);
+  const policySha256 = sha256(canonicalJson(policy));
+  const preregistered = validatePolicy(await readRecord(root, 'policies', `policy.${policySha256}`));
+  if (canonicalJson(preregistered) !== canonicalJson(policy)) fail('comparison requires exact preregistered policy');
   const baseline = await readRecord(root, 'runs', baselineId);
   const candidate = await readRecord(root, 'runs', candidateId);
-  const decision = compareRuns(baseline, candidate, policy);
+  const decision = compareRuns(baseline, candidate, preregistered);
   return {decision, saved: await immutable(root, 'comparisons', decision.comparisonId, decision)};
 }
 
 export async function summarize(root) {
   const out = {};
-  for (const name of ['runs', 'failures', 'cases', 'reviews', 'plans', 'comparisons']) {
+  for (const name of ['policies', 'runs', 'failures', 'cases', 'reviews', 'plans', 'comparisons']) {
     try {out[name] = (await readdir(join(root, name))).filter(x => x.endsWith('.json')).length;}
     catch (e) {if (e.code === 'ENOENT') out[name] = 0; else throw e;}
   }

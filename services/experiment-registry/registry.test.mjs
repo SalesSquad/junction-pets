@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {canonicalJson, sha256} from '../../lib/artifact.mjs';
-import {compareAndRecord, compareRuns, planNext, readRecord, recordFailure, recordRun, reviewCase, summarize, validateRun} from './registry.mjs';
+import {compareAndRecord, compareRuns, planNext, readRecord, recordFailure, recordPolicy, recordRun, reviewCase, summarize, validateRun} from './registry.mjs';
 
 const hex = c => c.repeat(64);
 const shas = {dataset: hex('a'), cases: hex('b'), protocol: hex('c'), model1: hex('d'), model2: hex('e'), receipt: hex('f')};
@@ -66,7 +66,27 @@ test('model evaluation requires pinned comparable source, sample and policy', ()
   assert.throws(() => validateRun(run('meta-base', {metrics: [{id: 'id-switch-count', unit: 'count', value: 2.5, samples: 256, direction: 'lower'}]})), /safe integer/);
 });
 
+test('full comparison policy must be immutable and preregistered before the first model run', async () => temporary(async root => {
+  await assert.rejects(recordRun(root, run('meta-base')), /ENOENT/);
+  const path = join(root, 'frozen-policy.json');
+  await writeFile(path, JSON.stringify(policy));
+  const result = spawnSync(process.execPath, [join(import.meta.dirname, 'cli.mjs'), 'record-policy', '--root', root, '--input', path], {encoding: 'utf8'});
+  assert.equal(result.status, 0, result.stderr);
+  const created = JSON.parse(result.stdout);
+  assert.equal(created.policySha256, digest);
+  assert.equal(created.saved.created, true);
+  assert.equal((await recordPolicy(root, policy)).saved.created, false);
+  assert.deepEqual(await readRecord(root, 'policies', `policy.${digest}`), policy);
+  await recordRun(root, run('meta-base'));
+  const changed = {...policy, metrics: policy.metrics.map((entry, i) => i === 0 ? {...entry, minimumImprovement: 0.01} : entry)};
+  const other = await recordPolicy(root, changed);
+  assert.notEqual(other.policySha256, digest);
+  assert.equal((await readRecord(root, 'runs', 'meta-base')).policySha256, digest);
+  assert.equal((await summarize(root)).collections.policies, 2);
+}));
+
 test('immutable event replays are idempotent and conflicting payloads fail', async () => temporary(async root => {
+  await recordPolicy(root, policy);
   const baseline = run('meta-base');
   const first = await recordRun(root, baseline);
   assert.equal(first.created, true);
@@ -77,12 +97,14 @@ test('immutable event replays are idempotent and conflicting payloads fail', asy
 }));
 
 test('simultaneous identical imports preserve one immutable record', async () => temporary(async root => {
+  await recordPolicy(root, policy);
   const output = await Promise.all(Array.from({length: 10}, () => recordRun(root, run('meta-base'))));
   assert.equal(output.filter(x => x.created).length, 1);
   assert.equal((await summarize(root)).collections.runs, 1);
 }));
 
 test('caller mutation after async admission cannot write unvalidated private fields', async () => temporary(async root => {
+  await recordPolicy(root, policy);
   const input = run('meta-base');
   const pending = recordRun(root, input);
   input.rawVideo = 'private input must never be written';
@@ -99,6 +121,7 @@ test('caller mutation after async admission cannot write unvalidated private fie
 }));
 
 test('failures generate quarantined cases, with review-gated next experiment', async () => temporary(async root => {
+  await recordPolicy(root, policy);
   await recordRun(root, run('meta-base'));
   const failure = {schemaVersion: 1, failureId: 'failure.01', runId: 'meta-base', caseSha256: shas.cases, failureCode: 'lookalike-identity', severity: 'high', observedAt: '2026-11-14T02:00:00Z'};
   const initial = await recordFailure(root, failure);
@@ -121,10 +144,11 @@ test('failures generate quarantined cases, with review-gated next experiment', a
   assert.equal((await readRecord(root, 'runs', resumed.runId)).planId, plan.planId);
   await assert.rejects(recordRun(root, {...resumed, runId: 'meta-new2', taskId: 'other-task'}), /mismatched or future learning plan/);
   await assert.rejects(recordRun(root, {...resumed, runId: 'meta-new3', capturedAt: '2026-11-14T02:00:00Z'}), /mismatched or future learning plan/);
-  assert.deepEqual((await summarize(root)).collections, {runs: 2, failures: 1, cases: 1, reviews: 1, plans: 1, comparisons: 0});
+  assert.deepEqual((await summarize(root)).collections, {policies: 1, runs: 2, failures: 1, cases: 1, reviews: 1, plans: 1, comparisons: 0});
 }));
 
 test('rejected review cannot generate an experiment', async () => temporary(async root => {
+  await recordPolicy(root, policy);
   await recordRun(root, run('meta-base'));
   const found = await recordFailure(root, {schemaVersion: 1, failureId: 'failure.02', runId: 'meta-base', caseSha256: shas.cases, failureCode: 'wrong-object', severity: 'high', observedAt: '2026-11-14T02:00:00Z'});
   await reviewCase(root, {schemaVersion: 1, reviewId: 'review.reject', proposalId: found.proposalId, decision: 'reject', reviewer: 'independent-reviewer', reviewedAt: '2026-11-14T02:30:00Z', evidenceSha256: shas.receipt});
@@ -199,6 +223,7 @@ test('post-hoc policies cannot make a model eligible', () => {
 });
 
 test('comparison is immutable/idempotent and CLI non-eligible uses nonzero exit', async () => temporary(async root => {
+  await recordPolicy(root, policy);
   await recordRun(root, run('meta-base')); await recordRun(root, run('meta-new'));
   const good = await compareAndRecord(root, 'meta-base', 'meta-new', policy);
   assert.equal(good.saved.created, true);
@@ -217,6 +242,7 @@ test('comparison is immutable/idempotent and CLI non-eligible uses nonzero exit'
 }));
 
 test('candidate ingestion automatically writes comparison and blocks unsafe candidates', async () => temporary(async root => {
+  await recordPolicy(root, policy);
   await recordRun(root, run('meta-base'));
   const p = join(root, 'frozen-policy.json');
   const input = join(root, 'candidate.json');

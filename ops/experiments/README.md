@@ -6,6 +6,8 @@ original GPU/Apple/Meta execution finished. Original immutable receipts remain
 at their source. Do not add raw training video, model weights, user information,
 credentials or private data here. See `services/experiment-registry/README.md`.
 
-For new work: a producer writes an evidence-bound `run` JSON input, invokes the
+For new model work: register the exact frozen comparison policy **first** and
+preserve it under `policies/policy.<sha256>.json` in an earlier Git commit.
+A producer then writes an evidence-bound `run` JSON input, invokes the
 registry CLI, and delivers these immutable source-pinned records in a task PR.
 Failed cases are quarantined; a comparison never directly grants a release.
