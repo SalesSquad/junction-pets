@@ -1,15 +1,30 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
-import { createTradeService, FIXTURE_POLICY } from '../src/core.mjs';
+import { generateKeyPairSync, randomUUID } from 'node:crypto';
+import { createTradeService, FIXTURE_POLICY, unsignedQuoteBody } from '../src/core.mjs';
 import { createTradeHttpServer } from '../src/server.mjs';
+import { digest, makeDemoMandatePayload, signDemoEnvelope } from '../src/trust-envelope.mjs';
 
 const buyerId = 'helsinki-hotel-demo';
 const orderFor = (service, quantityLitres, key) => {
-  const q = service.requestQuote({ buyerId, requestText: `${quantityLitres} L lactose-free milk`, budgetCents: service.policy().perOrderBudgetCents });
+  const plan = service.planBasket({ buyerId, budgetCents: service.policy().perOrderBudgetCents,
+    requirements: [
+      { family: 'dairy-milk', lactoseFree: true, quantityLitres, deliverBy: '2026-11-16' },
+      { family: 'oat-drink', lactoseFree: true, quantityLitres: 1, deliverBy: '2026-11-16' },
+    ] });
+  const q = service.quoteBasketPlan({ buyerId, planId: plan.id, optionId: 'cost' });
   if (q.approvalRequired) service.approve({ quoteId: q.id, buyerId, decision: 'approve' });
+  // Ledger unit fixture: service records a verified handshake; the separate
+  // HTTP end-to-end test below performs ACTUAL Ed25519 signing/verification.
+  service.recordVerifiedHandshake({ quoteId: q.id, verification: { valid: true,
+    quoteId: q.id, buyerId, signedBy: ['synthetic-buyer-unit-key', 'synthetic-supplier-unit-key'],
+    signedOfferDigest: 'unit-fixture-offer', signedMandateDigest: 'unit-fixture-mandate',
+    quoteBodyDigest: digest(unsignedQuoteBody(q)) } });
   return service.commitOrder({ buyerId, quoteId: q.id, idempotencyKey: key });
 };
+const approveDemo = (service, orderId, decision = 'approve') => service.approvePayment({
+  orderId, buyerId, decision, proposalDigest: service.payment(orderId, buyerId).proposal.digest });
 
 test('multi-supplier trade settles one exact server-owned amount with balanced debit/credit and an idempotent refund', () => {
   const service = createTradeService();
@@ -20,7 +35,7 @@ test('multi-supplier trade settles one exact server-owned amount with balanced d
   assert.equal(before.buyerBalanceCents, 250000);
   assert.throws(() => service.settlePayment({ buyerId, orderId: order.id, idempotencyKey: 'transfer-test-001' }), { code: 'PAYMENT_APPROVAL_REQUIRED' });
   assert.equal(service.paymentJournal().length, 0);
-  service.approvePayment({ orderId: order.id, buyerId, decision: 'approve' });
+  approveDemo(service, order.id);
   const paid = service.settlePayment({ orderId: order.id, buyerId, idempotencyKey: 'transfer-test-001' });
   assert.equal(paid.transfer.status, 'SIMULATED_SETTLED');
   assert.equal(paid.transfer.amountCents, order.totalCents);
@@ -54,13 +69,15 @@ test('multi-supplier trade settles one exact server-owned amount with balanced d
 test('payment decisions are separate, terminal and reject injected amount and beneficiary fields', () => {
   const service = createTradeService();
   const first = orderFor(service, 100, 'settlement-first-001');
-  assert.throws(() => service.approvePayment({ orderId: first.id, buyerId, decision: 'approve', recipient: 'attacker' }), { code: 'PAYMENT_TERMS_FORBIDDEN' });
-  assert.throws(() => service.approvePayment({ orderId: first.id, buyerId: 'attacker', decision: 'approve' }), { code: 'BUYER_MISMATCH' });
-  service.approvePayment({ orderId: first.id, buyerId, decision: 'reject' });
-  assert.throws(() => service.approvePayment({ orderId: first.id, buyerId, decision: 'approve' }), { code: 'PAYMENT_DECISION_FINAL' });
+  const firstDigest = service.payment(first.id, buyerId).proposal.digest;
+  assert.throws(() => service.approvePayment({ orderId: first.id, buyerId, decision: 'approve', proposalDigest: firstDigest, recipient: 'attacker' }), { code: 'PAYMENT_TERMS_FORBIDDEN' });
+  assert.throws(() => service.approvePayment({ orderId: first.id, buyerId: 'attacker', decision: 'approve', proposalDigest: firstDigest }), { code: 'BUYER_MISMATCH' });
+  assert.throws(() => service.approvePayment({ orderId: first.id, buyerId, decision: 'approve', proposalDigest: 'forged' }), { code: 'PAYMENT_TERMS_STALE' });
+  approveDemo(service, first.id, 'reject');
+  assert.throws(() => approveDemo(service, first.id, 'approve'), { code: 'PAYMENT_DECISION_FINAL' });
   assert.throws(() => service.settlePayment({ orderId: first.id, buyerId, idempotencyKey: 'reject-transfer-001' }), { code: 'PAYMENT_APPROVAL_REQUIRED' });
   const second = orderFor(service, 100, 'settlement-second-002');
-  service.approvePayment({ orderId: second.id, buyerId, decision: 'approve' });
+  approveDemo(service, second.id);
   assert.throws(() => service.settlePayment({ orderId: second.id, buyerId, idempotencyKey: 'second-transfer-001', amountCents: 1 }), { code: 'PAYMENT_TERMS_FORBIDDEN' });
   assert.throws(() => service.settlePayment({ orderId: second.id, buyerId, idempotencyKey: 'second-transfer-001', supplierId: 'attacker' }), { code: 'PAYMENT_TERMS_FORBIDDEN' });
   service.settlePayment({ orderId: second.id, buyerId, idempotencyKey: 'second-transfer-001' });
@@ -72,7 +89,7 @@ test('insufficient synthetic EUR blocks atomic postings without touching wallet 
   const service = createTradeService({ policy: { ...FIXTURE_POLICY, perOrderBudgetCents: 350000 } });
   const order = orderFor(service, 1500, 'insufficient-order-001');
   assert.ok(order.totalCents > 250000);
-  service.approvePayment({ orderId: order.id, buyerId, decision: 'approve' });
+  approveDemo(service, order.id);
   assert.throws(() => service.settlePayment({ orderId: order.id, buyerId, idempotencyKey: 'insufficient-transfer-001' }), { code: 'INSUFFICIENT_DEMO_FUNDS' });
   assert.equal(service.demoWallet().buyerBalanceCents, 250000);
   assert.equal(service.paymentJournal().length, 0);
@@ -95,8 +112,22 @@ test('HTTP payment APIs bind synthetic session ownership, block tampering and ve
     const session = await call('/api/demo/session', { buyerId });
     const other = await call('/api/demo/session', { buyerId });
     const token = session.token;
-    const quoted = (await call('/api/quotes', { buyerId, requestText: '100 L lactose-free milk' }, token)).quote;
+    const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+    const jwk = publicKey.export({ format: 'jwk' });
+    const registered = await call('/api/trust/buyer-key', { buyerId,
+      publicJwk: { kty: jwk.kty, crv: jwk.crv, x: jwk.x } }, token);
+    const plan = (await call('/api/plans', { buyerId, budgetCents: 250000, requirements: [
+      { family: 'dairy-milk', lactoseFree: true, quantityLitres: 100, deliverBy: '2026-11-16' },
+      { family: 'oat-drink', lactoseFree: true, quantityLitres: 20, deliverBy: '2026-11-16' },
+    ] }, token)).plan;
+    const quoted = (await call(`/api/plans/${plan.id}/quotes`, { buyerId, optionId: 'cost' }, token)).quote;
+    if (quoted.approvalRequired) await call(`/api/quotes/${quoted.id}/approval`, { buyerId, decision: 'approve' }, token);
+    const signedOffer = (await call(`/api/quotes/${quoted.id}/offer`, { buyerId }, token)).signedOffer;
+    const signedMandate = signDemoEnvelope(privateKey, registered.kid,
+      makeDemoMandatePayload({ quote: quoted, signedOffer, now: Date.now(), nonce: randomUUID() }));
+    assert.equal((await call(`/api/quotes/${quoted.id}/handshake`, { buyerId, signedMandate }, token)).proof.verification.valid, true);
     const order = (await call('/api/orders', { buyerId, quoteId: quoted.id, idempotencyKey: 'http-money-order-001' }, token)).order;
+    assert.equal(order.paymentEligible, true);
     const approvalPath = `/api/orders/${order.id}/payment-approval`;
     const settlePath = `/api/orders/${order.id}/settlement`;
     assert.equal((await call('/api/demo/wallet')).status, 403);
@@ -106,7 +137,11 @@ test('HTTP payment APIs bind synthetic session ownership, block tampering and ve
     assert.equal((await call(approvalPath, { buyerId, decision: 'approve' }, other.token)).error.code, 'BUYER_MISMATCH');
     assert.equal((await call(settlePath, { buyerId, idempotencyKey: 'http-money-payment-001' }, token)).error.code, 'PAYMENT_APPROVAL_REQUIRED');
     assert.equal((await call(approvalPath, { buyerId, decision: 'approve', amountCents: 1 }, token)).error.code, 'PAYMENT_TERMS_FORBIDDEN');
-    assert.equal((await call(approvalPath, { buyerId, decision: 'approve' }, token)).status, 200);
+    const proposal = (await call(`/api/orders/${order.id}/payment`, undefined, token)).proposal;
+    assert.equal(proposal.allocations.reduce((sum, x) => sum + x.amountCents, 0), order.totalCents);
+    assert.equal(proposal.signedQuoteBodyDigest, order.verifiedQuoteBodyDigest);
+    assert.equal((await call(approvalPath, { buyerId, decision: 'approve', proposalDigest: 'tampered' }, token)).error.code, 'PAYMENT_TERMS_STALE');
+    assert.equal((await call(approvalPath, { buyerId, decision: 'approve', proposalDigest: proposal.digest }, token)).status, 200);
     assert.equal((await call(settlePath, { buyerId, idempotencyKey: 'http-money-payment-001', recipient: 'evil' }, token)).error.code, 'PAYMENT_TERMS_FORBIDDEN');
     const paid = await call(settlePath, { buyerId, idempotencyKey: 'http-money-payment-001' }, token);
     assert.equal(paid.status, 201);
@@ -119,5 +154,10 @@ test('HTTP payment APIs bind synthetic session ownership, block tampering and ve
     assert.equal((await call('/api/demo/wallet', undefined, token)).wallet.buyerBalanceCents, 250000);
     assert.equal((await call('/api/demo/ledger/verify', undefined, token)).valid, true);
     assert.ok((await call('/openapi.json')).paths[settlePath.replace(order.id, '{id}')]);
+    const unsigned = (await call('/api/quotes', { buyerId, requestText: '10 L lactose-free milk' }, token)).quote;
+    const unsignedOrder = (await call('/api/orders', { buyerId, quoteId: unsigned.id, idempotencyKey: 'unsigned-legacy-order-001' }, token)).order;
+    assert.equal(unsignedOrder.paymentEligible, false);
+    assert.equal((await call(`/api/orders/${unsignedOrder.id}/payment-approval`, { buyerId, decision: 'approve', proposalDigest: proposal.digest }, token)).error.code, 'SIGNED_TRADE_REQUIRED');
+    assert.equal((await call(`/api/orders/${unsignedOrder.id}/settlement`, { buyerId, idempotencyKey: 'unsigned-legacy-transfer-001' }, token)).error.code, 'SIGNED_TRADE_REQUIRED');
   } finally { await new Promise((done) => server.close(done)); }
 });
