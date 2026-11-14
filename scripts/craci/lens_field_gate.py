@@ -68,21 +68,58 @@ def qualify(data:dict)->dict:
         set(cal_unknown)&set(test_unknown) or set(known)&(set(test_unknown)|set(cal_unknown))):
         reasons.append("UNKNOWN_CLASSES_NOT_EXCLUDED_FROM_CALIBRATION")
     scenes=data.get("scenes")
-    if not isinstance(scenes,list) or not scenes:
-        raise ValueError("No per-physical-scene field evidence")
+    if not isinstance(scenes,list) or not 1<=len(scenes)<=64:
+        raise ValueError("No or unbounded per-physical-scene field evidence")
+
+    # A scene name or an aggregate frame count does NOT prove that a frame
+    # was never in the training/calibration data, or repeated under a new
+    # scene label. Bind actual frame SHA-256 and immutable capture IDs.
+    fit_frames=data.get("frozen_fit_frame_sha256")
+    fit_captures=data.get("frozen_fit_capture_ids")
+    valid_hash=lambda x: isinstance(x,str) and re.fullmatch(r"[a-f0-9]{64}",x) is not None
+    valid_capture=lambda x: isinstance(x,str) and re.fullmatch(r"[a-zA-Z0-9_.:-]{1,128}",x) is not None
+    if (not isinstance(fit_frames,list) or not 1<=len(fit_frames)<=100000 or
+        not all(valid_hash(x) for x in fit_frames) or
+        len(set(fit_frames))!=len(fit_frames) or
+        not isinstance(fit_captures,list) or not 1<=len(fit_captures)<=10000 or
+        not all(valid_capture(x) for x in fit_captures) or
+        len(set(fit_captures))!=len(fit_captures)):
+        reasons.append("MISSING_OR_INVALID_FIT_PROVENANCE")
+        fit_frame_set=set()
+        fit_capture_set=set()
+    else:
+        fit_frame_set=set(fit_frames)
+        fit_capture_set=set(fit_captures)
     ids=set()
     devices=set()
+    captures=set()
+    test_frames=set()
     totals=Counter()
     for record in scenes:
         if not isinstance(record,dict):
             raise ValueError("Invalid physical scene")
         scene_id=record.get("scene_id")
         device=record.get("device")
+        capture=record.get("capture_id")
+        hashes=record.get("frame_sha256")
         if not isinstance(scene_id,str) or not scene_id or scene_id in ids:
             raise ValueError("Duplicate/missing physical scene")
         if not isinstance(device,str) or not device:
             raise ValueError("Missing camera/device group")
-        ids.add(scene_id);devices.add(device)
+        if not valid_capture(capture) or capture in captures:
+            raise ValueError("Duplicate/missing physical video capture")
+        ids.add(scene_id);devices.add(device);captures.add(capture)
+        if capture in fit_capture_set:
+            reasons.append("TRAIN_CALIBRATION_CAPTURE_LEAKAGE")
+        if (not isinstance(hashes,list) or not 1<=len(hashes)<=100000 or
+            not all(valid_hash(h) for h in hashes) or
+            len(hashes)!=len(set(hashes))):
+            reasons.append("MISSING_OR_DUPLICATE_SCENE_FRAME_HASHES")
+        else:
+            current=set(hashes)
+            if current & (test_frames | fit_frame_set):
+                reasons.append("REUSED_OR_FIT_FRAME_LEAKAGE")
+            test_frames.update(current)
         fields=("independent_frames","known_objects","known_correct_accepted",
                 "unknown_objects","unknown_falsely_accepted",
                 "accepted_proposals","accepted_correct",
@@ -97,15 +134,18 @@ def qualify(data:dict)->dict:
         if (n["independent_frames"]<MIN_FRAMES_PER_SCENE or
             n["known_objects"]<30 or n["unknown_objects"]<30):
             reasons.append("SCENE_TOO_SMALL")
+        if not isinstance(hashes,list) or len(hashes)!=n["independent_frames"]:
+            reasons.append("FRAME_COUNT_NOT_VERIFIABLE")
         if (n["known_correct_accepted"]>n["known_objects"] or
             n["unknown_falsely_accepted"]>n["unknown_objects"] or
             n["accepted_correct"]!=n["known_correct_accepted"] or
             n["accepted_proposals"]<n["accepted_correct"]+n["unknown_falsely_accepted"] or
-            n["accepted_proposals"]>n["known_objects"]+n["unknown_objects"] or
             n["detector_true_positives_iou50"]>n["annotated_detectable_objects"]):
             raise ValueError("Inconsistent real-world confusion or localization counts")
     if len(ids)<MIN_TEST_SCENES:reasons.append("NOT_ENOUGH_INDEPENDENT_SCENES")
     if len(devices)<MIN_DEVICES:reasons.append("NOT_ENOUGH_CAMERA_DOMAINS")
+    if len(test_frames)!=totals["independent_frames"]:
+        reasons.append("FRAMES_NOT_GLOBALLY_UNIQUE")
     if totals["accepted_proposals"]<=0 or totals["known_correct_accepted"]<=0:
         reasons.append("ZERO_UTILITY_ABSTENTION")
     if totals["annotated_detectable_objects"]<=0:
@@ -146,7 +186,10 @@ def qualify(data:dict)->dict:
        "sourceCommit":data.get("source_commit"),
        "testedDistinctScenes":len(ids),
        "cameraDomains":len(devices),
-       "uniqueFrameCount":totals["independent_frames"],
+       "uniqueFrameCount":len(test_frames),
+       "verifiedCaptureGroups":len(captures),
+       "trainCalibrationFrameHashesPresent":len(fit_frame_set),
+       "trainCalibrationCaptureIdsPresent":len(fit_capture_set),
        "totals":dict(totals),
        "wilson95":intervals,
        "noProductionChange":True,

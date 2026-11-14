@@ -34,9 +34,12 @@ def archive_reader():
 
 
 def xyxy_from_xywh(box):
-    x,y,w,h=(int(n) for n in box)
-    if w<=0 or h<=0:
-        raise ValueError("Invalid bounding box")
+    if (not isinstance(box, (list, tuple)) or len(box) != 4 or
+            any(type(n) is not int for n in box)):
+        raise ValueError("Bounding box must contain four integer pixels")
+    x,y,w,h = box
+    if x < 0 or y < 0 or w <= 0 or h <= 0 or x+w > 10000 or y+h > 10000:
+        raise ValueError("Invalid or unbounded pixel box")
     return (x,y,x+w,y+h)
 
 
@@ -50,18 +53,48 @@ def overlap(box1,box2):
 
 
 def evaluate(proposals,ground_truth,threshold=0.50):
-    """Greedy one-to-one matching, no rescore/retune by test labels."""
-    pairs=sorted(
-        ((overlap(p,b),pi,gi) for pi,p in enumerate(proposals)
-         for gi,b in enumerate(ground_truth)),reverse=True
+    """Maximum-cardinality one-to-one IoU matching, never greedy undercount.
+
+    Kuhn's deterministic augmenting-path matching finds the largest number of
+    distinct GT objects recoverable by distinct proposals at the frozen IoU
+    cutoff. Earlier greedy IoU sorting could count fewer true positives even
+    when a valid matching existed. We report IoU only AFTER inference.
+    """
+    import math
+    if (not isinstance(threshold,(float,int)) or isinstance(threshold,bool)
+            or not math.isfinite(threshold) or not 0 < threshold <= 1):
+        raise ValueError("IoU threshold must be finite and in (0,1]")
+    if len(proposals)>64 or len(ground_truth)>1000:
+        raise ValueError("Unbounded detector or annotation collection")
+    edges=[]
+    for proposal in proposals:
+        available=[]
+        for gi,gt in enumerate(ground_truth):
+            iou=overlap(proposal,gt)
+            if iou>=threshold:
+                available.append((gi,iou))
+        edges.append(sorted(available,key=lambda item:(-item[1],item[0])))
+
+    assigned_gt={}  # gt_index -> proposal_index
+    def augment(pi,visited):
+        for gi,_ in edges[pi]:
+            if gi in visited:
+                continue
+            visited.add(gi)
+            if gi not in assigned_gt or augment(assigned_gt[gi],visited):
+                assigned_gt[gi]=pi
+                return True
+        return False
+
+    # Scarce valid edges first; stable index tie-break. Reassignment can still
+    # recover every feasible GT/proposal match regardless of initial order.
+    for pi in sorted(range(len(proposals)),key=lambda i:(len(edges[i]),i)):
+        augment(pi,set())
+    matches=sorted(
+        (pi,gi,round(next(iou for candidate,iou in edges[pi]
+                         if candidate==gi),5))
+        for gi,pi in assigned_gt.items()
     )
-    chosen_p=set();chosen_gt=set()
-    matches=[]
-    for iou,pi,gi in pairs:
-        if iou<threshold:break
-        if pi not in chosen_p and gi not in chosen_gt:
-            chosen_p.add(pi);chosen_gt.add(gi)
-            matches.append((pi,gi,round(iou,5)))
     return {
         "proposals":len(proposals),"groundTruthObjects":len(ground_truth),
         "matched":len(matches),"unmatchedObjects":len(ground_truth)-len(matches),
@@ -70,6 +103,7 @@ def evaluate(proposals,ground_truth,threshold=0.50):
         "objectRecall":len(matches)/len(ground_truth) if ground_truth else None,
         "proposalPrecision":len(matches)/len(proposals) if proposals else None,
         "iouThreshold":threshold,
+        "assignment":"max_cardinality_bipartite_iou",
     }
 
 
@@ -87,49 +121,74 @@ def main():
         raise RuntimeError("Scratch must exist and be empty, no reuse")
     root=f"val_primesense/{SCENE:06d}/"
     archive=archive_reader()
-    gt=json.loads(archive.read(root+"scene_gt.json"))
-    info=json.loads(archive.read(root+"scene_gt_info.json"))
-    if len(gt)!=340 or set(gt)!=set(info):
-        raise RuntimeError("Invalid pinned public RGB source annotations")
-    summary=[]
+    # Inference phase: deliberately DO NOT fetch GT scene annotations until
+    # every proposal is frozen. No annotated bbox/mask is accessible to the
+    # detector subprocess or the threshold selection.
+    predictions=[]
     selected=TRAIN_FRAMES[:opts.sample_size]
     for index in selected:
-        k=str(index)
-        if k not in gt:raise RuntimeError("Missing train-scene image")
         filename=f"hb_{SCENE:02}_{index:06}.png"
         local=opts.scratch/filename
         image=archive.read(root+f"rgb/{index:06}.png",max_size=8_000_000)
         if image[:8]!=b"\x89PNG\r\n\x1a\n":
             raise RuntimeError("Public source image not PNG")
-        local.write_bytes(image)
-        output=opts.scratch/f"hb_{SCENE:02}_{index:06}_proposal.json"
-        proc=subprocess.run(
-            [str(opts.detector),"--root",str(opts.scratch),"--frame",filename,
-             "--output",str(output)],capture_output=True,text=True,timeout=120)
-        if proc.returncode!=0:
-            raise RuntimeError(f"Real detector failure on frame {index}: {proc.stderr[-360:]}")
-        result=json.loads(output.read_text())
-        if (result.get("schema")!="chibi.lens.hb.vision-proposal.v1" or
-            result.get("detector")!="AppleObjectnessBasedSaliency" or
-            result.get("usesGroundTruth") is not False or
-            result.get("actionAuthorized") is not False):
-            raise RuntimeError("Detector did not supply trusted label-free saliency output")
-        # Only GT object boxes with >=20% actual visible area are measured.
+        try:
+            local.write_bytes(image)
+            output=opts.scratch/f"hb_{SCENE:02}_{index:06}_proposal.json"
+            proc=subprocess.run(
+                [str(opts.detector),"--root",str(opts.scratch),"--frame",filename,
+                 "--output",str(output)],capture_output=True,text=True,timeout=120)
+            if proc.returncode!=0:
+                raise RuntimeError(f"Real detector failure on frame {index}: {proc.stderr[-360:]}")
+            result=json.loads(output.read_text())
+            if (result.get("schema")!="chibi.lens.hb.vision-proposal.v1" or
+                result.get("detector")!="AppleObjectnessBasedSaliency" or
+                result.get("source")!="BOP_HB_CC0_PUBLIC_RGB" or
+                result.get("frame")!=filename or
+                result.get("usesGroundTruth") is not False or
+                result.get("physicalIdentityVerified") is not False or
+                result.get("actionAuthorized") is not False or
+                type(result.get("maskInstances")) is not int or
+                result["maskInstances"]<0 or
+                not isinstance(result.get("proposals"),list) or
+                len(result["proposals"])>64):
+                raise RuntimeError("Untrusted or incorrectly bound detector frame output")
+            predicted=[(p["x"],p["y"],p["width"],p["height"])
+                       for p in result["proposals"]]
+            predictions.append({
+                "frame_id":str(index),"frame":filename,
+                "sourcePNGsha256":sha256(image).hexdigest(),
+                "predicted":predicted,"mask_instances":result["maskInstances"],
+            })
+        finally:
+            # Even on process failure, don't leave public frame pixels in the
+            # task directory. Original frames never reach Git or CRACI.
+            local.unlink(missing_ok=True)
+
+    # Scoring phase: freeze all detector outputs BEFORE loading annotation.
+    gt=json.loads(archive.read(root+"scene_gt.json"))
+    info=json.loads(archive.read(root+"scene_gt_info.json"))
+    if len(gt)!=340 or set(gt)!=set(info):
+        raise RuntimeError("Invalid pinned public RGB source annotations")
+    summary=[]
+    for frozen in predictions:
+        k=frozen["frame_id"]
+        if k not in gt:
+            raise RuntimeError("Missing annotated train-source frame")
+        if len(gt[k])!=len(info[k]):
+            raise RuntimeError("GT/visibility metadata alignment mismatch")
         expected=[m["bbox_visib"] for o,m in zip(gt[k],info[k])
                   if m.get("visib_fract",0)>=.20 and m.get("bbox_visib")]
-        predicted=[(p["x"],p["y"],p["width"],p["height"])
-                   for p in result["proposals"]]
+        predicted=frozen["predicted"]
         metric=evaluate(predicted,expected)
-        metric["frame"]=filename
-        metric["sourcePNGsha256"]=sha256(image).hexdigest()
-        metric["observedMaskInstances"]=result["maskInstances"]
+        metric["frame"]=frozen["frame"]
+        metric["sourcePNGsha256"]=frozen["sourcePNGsha256"]
+        metric["observedMaskInstances"]=frozen["mask_instances"]
         metric["predictionUsesGT"]=False
         summary.append(metric)
-        print(f"FRAME={filename} OBJECTS={len(expected)} PROPOSALS={len(predicted)} "
+        print(f"FRAME={metric['frame']} OBJECTS={len(expected)} PROPOSALS={len(predicted)} "
               f"MATCHED={metric['matched']} PRECISION={metric['proposalPrecision']} "
               f"RECALL={metric['objectRecall']}",flush=True)
-        # Never retain source full frames in Git or artifact archive.
-        local.unlink()
 
     matched=sum(x["matched"] for x in summary)
     expected=sum(x["groundTruthObjects"] for x in summary)

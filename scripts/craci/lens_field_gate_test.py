@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Repro tests for field readiness; passing a green CI job is insufficient."""
 import copy
+import hashlib
 import importlib.util
 from pathlib import Path
 import unittest
@@ -11,10 +12,16 @@ gate=importlib.util.module_from_spec(sp)
 sp.loader.exec_module(gate)
 
 
+def frame_hash(value):
+    return hashlib.sha256(value.encode("utf8")).hexdigest()
+
+
 def scene(i,dev):
     return {
       "scene_id":f"independent-scene-{i}",
       "device":dev,
+      "capture_id":f"sealed-capture-{i}",
+      "frame_sha256":[frame_hash(f"sealed:{i}:{j}") for j in range(1000)],
       "independent_frames":1000,
       "known_objects":5000,
       "known_correct_accepted":4800,
@@ -41,6 +48,8 @@ def fixture():
       "contains_family_media":False,"private_ocr_uploaded":False,
       "physical_identity_verified":False,"agent_action_authorized":False,
       "known_classes":[12,15],
+      "frozen_fit_frame_sha256":[frame_hash("train:0"),frame_hash("calibration:0")],
+      "frozen_fit_capture_ids":["training-capture","calibration-capture"],
       "unknown_classes_in_calibration":[3,22],
       "unknown_classes_in_test":[23,44],
       "scenes":[scene(i,"camera-1" if i<2 else "camera-2") for i in range(4)],
@@ -132,6 +141,36 @@ class FieldGate(unittest.TestCase):
         self.assertGreater(hi,low)
         _,upper=gate.wilson_interval(2,142)
         self.assertGreater(upper,.01)
+
+    def test_duplicate_heldout_frame_hashes_not_claimed_independent(self):
+        doc=fixture()
+        doc["scenes"][1]["frame_sha256"][0]=doc["scenes"][0]["frame_sha256"][0]
+        reasons=gate.qualify(doc)["reasons"]
+        self.assertIn("REUSED_OR_FIT_FRAME_LEAKAGE",reasons)
+        self.assertIn("FRAMES_NOT_GLOBALLY_UNIQUE",reasons)
+
+    def test_training_calibration_frame_or_capture_leakage(self):
+        doc=fixture()
+        doc["frozen_fit_frame_sha256"].append(doc["scenes"][3]["frame_sha256"][0])
+        doc["scenes"][2]["capture_id"]="calibration-capture"
+        reasons=gate.qualify(doc)["reasons"]
+        self.assertIn("REUSED_OR_FIT_FRAME_LEAKAGE",reasons)
+        self.assertIn("TRAIN_CALIBRATION_CAPTURE_LEAKAGE",reasons)
+
+    def test_frame_count_mismatch_and_missing_fit_provenance(self):
+        doc=fixture()
+        doc["scenes"][0]["frame_sha256"]=doc["scenes"][0]["frame_sha256"][:-1]
+        doc.pop("frozen_fit_frame_sha256")
+        reasons=gate.qualify(doc)["reasons"]
+        self.assertIn("FRAME_COUNT_NOT_VERIFIABLE",reasons)
+        self.assertIn("MISSING_OR_INVALID_FIT_PROVENANCE",reasons)
+
+    def test_background_false_positives_are_measured_not_silently_discarded(self):
+        doc=fixture()
+        for row in doc["scenes"]:
+            row["accepted_proposals"]=11000
+        reasons=gate.qualify(doc)["reasons"]
+        self.assertIn("STATISTICALLY_UNQUALIFIED_accepted_precision",reasons)
 
 
     def test_missing_false_flags_fail_closed(self):
