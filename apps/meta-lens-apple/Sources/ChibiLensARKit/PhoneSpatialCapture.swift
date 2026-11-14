@@ -5,6 +5,7 @@ import ChibiLensCore
 import CoreImage
 import Foundation
 import ImageIO
+import SceneKit
 import UIKit
 import UniformTypeIdentifiers
 
@@ -28,6 +29,27 @@ public final class PhoneSpatialCapture {
     public private(set) var latest: PhoneSpatialObservation?
     public private(set) var stopReason: String?
     public var onObservation: ((PhoneSpatialObservation) -> Void)?
+    public var onStateChanged: ((State, String?) -> Void)?
+    private weak var preview: ARSCNView?
+
+    /// A watermark from ARKit's current frame (including frames not yet encoded).
+    /// It is never converted to a wall clock or to a glasses-camera timestamp.
+    public var currentFrameTimestamp: Double? {
+        guard epoch.isActive, lifetime?.delegate.isTracking == true,
+              UIApplication.shared.applicationState == .active,
+              AVCaptureDevice.authorizationStatus(for: .video) == .authorized else { return nil }
+        return lifetime?.session.currentFrame?.timestamp
+    }
+
+    public struct SurfaceMarker: Sendable {
+        public let id: String
+        public let worldID: String
+        public let measuredAtARSeconds: Double
+        public let cameraToWorld: [Double]
+        public let surfaceToWorld: [Double]
+        public var registration: String { "phone-surface-estimate-unregistered" }
+        public var physicalIdentityVerified: Bool { false }
+    }
 
     private var epoch = CaptureEpoch()
     private var lifetime: PhoneCaptureLifetime?
@@ -83,7 +105,9 @@ public final class PhoneSpatialCapture {
         lifetime = PhoneCaptureLifetime(session: arSession, delegate: receiver, observer: observer)
         let configuration = ARWorldTrackingConfiguration()
         configuration.worldAlignment = .gravity
+        configuration.planeDetection = [.horizontal, .vertical]
         arSession.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+        onStateChanged?(state, nil)
     }
 
     /// Fences results before stopping ARKit; a later start creates a new world ID.
@@ -97,6 +121,52 @@ public final class PhoneSpatialCapture {
         worldID = ""
         state = .stopped
         stopReason = reason
+        clearMarkers()
+        onStateChanged?(state, reason)
+    }
+
+    /// Render using this capture owner's existing session. The view must not run
+    /// or reconfigure the session; there is still exactly one capture delegate.
+    public func attachPreview(_ view: ARSCNView) {
+        preview = view
+        guard let session = lifetime?.session else { return }
+        if view.session !== session { view.session = session }
+        view.automaticallyUpdatesLighting = true
+    }
+
+    public func clearMarkers() {
+        preview?.scene.rootNode.childNodes.filter { $0.name == "chibi-guide-surface" }.forEach { $0.removeFromParentNode() }
+    }
+
+    /// The point is in the visible ARSCNView viewport, so ARKit handles display
+    /// orientation/crop. This measures a surface now, not the selected object's
+    /// identity or the location of any pixel in an older JPEG.
+    public func placeMarker(at point: CGPoint, in view: ARSCNView,
+                            for observation: PhoneSpatialObservation) throws -> SurfaceMarker {
+        try validateCurrent(observation)
+        guard let session = lifetime?.session, view.session === session,
+              point.x.isFinite, point.y.isFinite, view.bounds.contains(point),
+              let frame = session.currentFrame, frame.timestamp >= observation.capturedAtARSeconds,
+              frame.timestamp - observation.capturedAtARSeconds <= 30,
+              let query = view.raycastQuery(from: point, allowing: .estimatedPlane, alignment: .any),
+              let result = session.raycast(query).first else { throw PhoneSpatialObservation.ValidationError.staleWorld }
+        let position = result.worldTransform.columns.3, camera = frame.camera.transform.columns.3
+        let distance = simd_length(SIMD3(position.x-camera.x, position.y-camera.y, position.z-camera.z))
+        guard distance.isFinite, distance >= 0.1, distance <= 5 else { throw PhoneSpatialObservation.ValidationError.invalidPose }
+        try validateCurrent(observation)
+        clearMarkers()
+        let node = SCNNode(geometry: SCNSphere(radius: 0.018))
+        node.name = "chibi-guide-surface"
+        node.geometry?.firstMaterial?.diffuse.contents = UIColor.systemMint
+        node.geometry?.firstMaterial?.lightingModel = .constant
+        node.simdTransform = result.worldTransform
+        view.scene.rootNode.addChildNode(node)
+        func array(_ matrix: simd_float4x4) -> [Double] {
+            (0..<4).flatMap { column in (0..<4).map { row in Double(matrix[column][row]) } }
+        }
+        return SurfaceMarker(id: UUID().uuidString, worldID: observation.worldID,
+            measuredAtARSeconds: frame.timestamp, cameraToWorld: array(frame.camera.transform),
+            surfaceToWorld: array(result.worldTransform))
     }
 
     /// Consume asynchronous work through the live owner, not a saved CaptureGate.
@@ -131,7 +201,9 @@ public final class PhoneSpatialCapture {
                 try validateCurrent(observation)
                 guard epoch.accepts(generation), delegate.accepts(revision) else { return }
                 latest = observation
+                let changed = state != .tracking
                 state = .tracking
+                if changed { onStateChanged?(state, nil) }
                 onObservation?(observation)
             } catch { stop(reason: "invalid-phone-observation") }
         }

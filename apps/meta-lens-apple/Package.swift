@@ -14,7 +14,7 @@ let package = Package(
     targets: [
         .target(name: "ChibiLensCore"),
         .target(name: "ChibiLensARKit", dependencies: ["ChibiLensCore"]),
-        .target(name: "ChibiLensUI", dependencies: ["ChibiLensCore"]),
+        .target(name: "ChibiLensUI", dependencies: ["ChibiLensCore", "ChibiLensARKit"]),
         .executableTarget(name: "ChibiLensReplay", dependencies: ["ChibiLensCore"]),
         .executableTarget(name: "ChibiLensDesktop", dependencies: ["ChibiLensUI"]),
         .testTarget(name: "ChibiLensCoreTests", dependencies: ["ChibiLensCore"]),
