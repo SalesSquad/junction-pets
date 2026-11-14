@@ -10,6 +10,36 @@ The earlier R4 models were actually trained; their results remain in PR #187
 and `retrieval-r4`. R5 does not change their model weights, calibration rule,
 historical results or production acceptance policy.
 
+## Measured development result
+
+Python evaluation and a separately implemented base-R summary agree exactly.
+All rates below describe the same eight selected development families.
+
+| Method | Correct first choice | Explicit proposals | Wrong proposals | Model abstentions |
+| --- | ---: | ---: | ---: | ---: |
+| Frozen R4 baseline | 6/8 (75%) | Not evaluated here | Not evaluated here | Not evaluated here |
+| Nemotron visual | 5/8 (62.5%) | 1/8 | 0/1 | 7/8 |
+| Nemotron detail | 5/8 (62.5%) | 1/8 | 0/1 | 7/8 |
+| Nemotron critic | 4/8 (50%) | 3/8 | 1/3 | 5/8 |
+
+The true product appeared in the frozen top three for only **6/8 queries**.
+R4 already ranked all six first. Consequently this cohort contained no
+baseline error that these three-candidate roles could repair. Visual/detail
+each lost one previously correct answer; critic lost two. These are real
+regressions on this pilot, while zero improvements are structurally forced
+by its candidate pool. The result does not establish that a broader-pool
+reranker could never help. R4 remains the comparison baseline.
+
+OCR returned text for **3/8 queries, with 23 spans**, and no legible text for
+five. These are model observations, not transcription accuracy. There are no
+independent transcription labels. The detail role requested five label
+closeups, one side view and one other observation; no new capture was made.
+
+Proposal coverage above is descriptive and is not qualified acceptance.
+No role demonstrated a coverage gain, and no Nemotron proposal is promoted
+to a production acceptance decision. The deliberately selected eight-case
+sample supports no population confidence interval or >93% coverage claim.
+
 ## Roles and inputs
 
 | Role | Images supplied | Observation |
@@ -87,8 +117,10 @@ NIM. Missing authentication produces `BLOCKED_AUTH`, zero attempted calls and
 exit code 2; it cannot be reported as a provider success.
 
 The NIM adapters and their mocked contract/budget checks are implemented.
-Their live authentication and inference status is recorded separately from
-the successful Verda Nemotron observations in `results/`.
+The actual NIM launch returned **`BLOCKED_AUTH`, exit 2, zero inference calls**:
+the current executor has no configured NVIDIA NIM credential. Its plan and
+receipt are recorded separately from the successful Verda observations in
+`results/nim-01/`. Live OCR v2/Nano inference remains untested.
 
 ## Evaluation and replay
 
@@ -131,21 +163,34 @@ preserved in `results/` rather than rebasing historical receipts.
 The base-R cross-check is reproducible from the retained flat input:
 
 ```sh
+gzip -dc results/pilot-input.csv.gz > /absolute/frozen-pilot-input.csv
 Rscript pilot_summary.R \
-  --input results/pilot-input.csv \
+  --input /absolute/frozen-pilot-input.csv \
   --output /absolute/new-r-summary.csv
 ```
+
+The original CRLF CSV and command logs are gzip-compressed without changing
+their decompressed bytes; the manifest records both stored and original hashes.
 
 It independently counts baseline/ranking results, proposal errors, missing
 observations and paired wins/losses. It performs no model fit, threshold
 selection, population significance test or qualification. Deliberate sampling
 of eight development families does not support those claims.
 
+The actual cross-check ran on R 4.6.2. Python protocol/adapter/runner tests
+passed in their focused runs (17 tests), and six focused evaluator tests passed
+after adding explicit failed-attempt selection. Live calls verified the
+reasoning, JSON and complete-object choice repairs; a separate local JSON
+schema check rejected the observed contradictory, partial and duplicate-choice
+forms. These checks do not qualify the remote model's recognition accuracy.
+
 ## What must improve next
 
 The top-three candidate recall is an upper bound for these ranking roles.
 Useful development findings must next be tested with a larger frozen candidate
-pool and distinct training/development families. OCR needs independently
+pool and distinct training/development families. Include predeclared diagnostic
+cases whose true candidate is at R4 rank 2 or lower, and keep this hard-case
+diagnostic separate from the representative evaluation. OCR needs independently
 transcribed labels before character/word error or accuracy can be measured.
 Additional captures must be genuinely obtained and registered; requesting
 them is not evidence of using multiple views.
