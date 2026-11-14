@@ -100,15 +100,19 @@ test('next cycle is reproducible, disjoint, advisory and source-pinned',()=>{
   const obs=analyze(training,readout);
   const verified={training,receipt:{binding:{runId:'source.reported.run'}},
     immutableSha256:{training:'1'.repeat(64),transitions:'2'.repeat(64)}};
-  const opts={candidateCommit:'3'.repeat(40),candidateWeightsSha:'4'.repeat(64),nextSeedStart:515000};
+  const opts={candidateCommit:'3'.repeat(40),candidateWeightsSha:'4'.repeat(64),
+    candidateStrategyId:'v10_candidate',nextSeedStart:515000};
   const p=recommendNextCycle(verified,obs,opts);
   const q=recommendNextCycle(verified,obs,opts);
   assert.equal(canonical(p),canonical(q));
   assert.equal(p.failureSignal.verdict,'NO_GO_LOST_FROZEN_GOALS');
   assert.equal(p.proposedProspective.seedScanRangeInclusive[0],515000);
   assert.equal(p.proposedProspective.maxEpisodesIfWorldTargetsMet,800);
+  assert.deepEqual(p.proposedProspective.pairedStrategies,
+    ['frozen_v5','frozen_v6','repeat_left','v8_hierarchical','v10_candidate']);
   assert.equal(p.proposedProspective.dispatchAuthorized,false);
   assert.equal(p.modelPromotionAuthorized,false);
   assert.throws(()=>recommendNextCycle(verified,obs,{...opts,nextSeedStart:2}),/NEXT_CANDIDATE_NOT_SOURCE_PINNED/);
+  assert.throws(()=>recommendNextCycle(verified,obs,{...opts,candidateStrategyId:'v8_hierarchical'}),/NEXT_CANDIDATE_NOT_SOURCE_PINNED/);
   assert.match(sha(Buffer.from(canonical(p.proposedProspective))),/^[a-f0-9]{64}$/);
 });
