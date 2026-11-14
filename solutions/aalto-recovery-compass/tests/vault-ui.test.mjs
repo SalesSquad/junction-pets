@@ -37,3 +37,9 @@ test('pagehide clears plaintext and ignores in-flight unlock completion; pagesho
 test('revocation clears draft and requests ciphertext deletion',async()=>{
   const f=fixture();let deleted=0;f.vault.delete=async()=>{deleted++;};f.click('checkin');f.click('choose');f.get('consent').checked=true;f.click('consent-draft');f.click('revoke');await f.tick();assert.equal(deleted,1);assert.equal(f.get('preview-box').textContent,'');assert.equal(f.get('consent').checked,false);
 });
+
+test('deletion without Web Locks explains missing cross-tab coordination',async()=>{
+  const f=fixture();f.vault.delete=async()=>({coordinated:false});f.click('vault-delete');await f.tick();
+  assert.match(f.get('vault-status').textContent,/deleted locally/);
+  assert.match(f.get('vault-status').textContent,/local saves are disabled; deletion was not coordinated with other tabs/);
+});

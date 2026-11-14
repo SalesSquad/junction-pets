@@ -69,10 +69,23 @@ export async function unpack(envelope, { passphrase, context, now = Date.now(), 
   if (payload?.createdAt !== envelope.createdAt || payload?.expiresAt !== envelope.expiresAt) fail('Capsule metadata mismatch.');
   return { session:verifiedSession(payload), includesEnergy:Object.hasOwn(payload, 'energy'), expiresAt:payload.expiresAt };
 }
-/** Adapter operations are serialized, so revoke/delete follows any pending save. */
-export function createVault({ backend, context, crypto = globalThis.crypto, now = Date.now }) {
-  let queue = Promise.resolve();
-  const serial = operation => { const result = queue.then(operation); queue = result.then(() => undefined, () => undefined); return result; };
+// All instances using this database must request this same origin-scoped name.
+const LOCK_NAME = `${VERSION}:storage`;
+function browserLock() {
+  try {
+    const locks = globalThis.navigator?.locks;
+    return typeof locks?.request === 'function' ? locks.request.bind(locks) : null;
+  } catch { return null; }
+}
+/** requestLock follows navigator.locks.request(name, options, callback), injected only by tests.
+ * Request immediately at operation initiation, without a per-instance queue or nested locks.
+ * Backends must resolve writes/deletes only after their transaction commits.
+ */
+export function createVault({ backend, context, crypto = globalThis.crypto, now = Date.now, requestLock = browserLock() }) {
+  const exclusive = async operation => {
+    if (typeof requestLock !== 'function') fail('Local capsule unavailable: Web Locks are required for cross-tab coordination.');
+    return requestLock(LOCK_NAME, { mode:'exclusive' }, operation);
+  };
   const read = async () => {
     support(crypto, context);
     const record = await backend.read();
@@ -81,22 +94,24 @@ export function createVault({ backend, context, crypto = globalThis.crypto, now 
     return record;
   };
   return {
-    inspect: () => serial(async () => { const e = await read(); return e ? { expiresAt:e.expiresAt } : null; }),
-    save: input => serial(async () => {
+    inspect: () => exclusive(async () => { const e = await read(); return e ? { expiresAt:e.expiresAt } : null; }),
+    save: input => exclusive(async () => {
       const record = await pack({ action:input.action, energy:input.energy, passphrase:input.passphrase, context, crypto, now:now() });
       // Do not retain a record that expired while encryption was pending.
       if (!validEnvelope(record, context, now())) fail('Capsule expired before saving.');
       await backend.write(record);
       return { expiresAt:record.expiresAt };
     }),
-    unlock: passphrase => serial(async () => {
+    unlock: passphrase => exclusive(async () => {
       const record = await read();
       if (!record) fail('No valid saved capsule.');
       const result = await unpack(record, { passphrase, context, crypto, now:now() });
       if (result.expiresAt <= now()) { await backend.delete(); fail('Capsule expired.'); }
       return result;
     }),
-    delete: () => serial(() => backend.delete()),
+    delete: () => typeof requestLock === 'function'
+      ? exclusive(async () => { await backend.delete(); return { coordinated:true }; })
+      : Promise.resolve().then(async () => { await backend.delete(); return { coordinated:false }; }),
   };
 }
 /** One fixed record in this origin's database. Resolve writes only on transaction commit. */

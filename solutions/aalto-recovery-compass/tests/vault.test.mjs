@@ -5,7 +5,16 @@ import { pack, unpack, createVault, indexedDBBackend, TTL, ITERATIONS } from '..
 const context='http://127.0.0.1:4180', passphrase='fictional demo passphrase only', time=1_800_000_000_000;
 const options={context,passphrase,now:time,crypto:webcrypto};
 const sealed=()=>pack({...options,action:'pause',energy:'lower'});
-function fixture(){let record;let clock=time;const backend={read:async()=>structuredClone(record),write:async e=>{record=structuredClone(e);},delete:async()=>{record=undefined;}};return {vault:createVault({backend,context,crypto:webcrypto,now:()=>clock}),get:()=>record,set:e=>{record=e;},advance:()=>{clock+=TTL;}};}
+// A single injected lock manager may be shared by multiple simulated tabs.
+function testLock(){
+  const queues=new Map();
+  return (name,options,operation)=>{
+    assert.equal(options.mode,'exclusive');
+    const result=(queues.get(name)??Promise.resolve()).then(operation);
+    queues.set(name,result.catch(()=>{}));return result;
+  };
+}
+function fixture(){let record;let clock=time;const backend={read:async()=>structuredClone(record),write:async e=>{record=structuredClone(e);},delete:async()=>{record=undefined;}};return {vault:createVault({backend,context,crypto:webcrypto,now:()=>clock,requestLock:testLock()}),get:()=>record,set:e=>{record=e;},advance:()=>{clock+=TTL;}};}
 test('AES-GCM roundtrip rederives public session, minimal fields, unique salt/IV',async()=>{
   const e=await sealed(), other=await sealed();assert.equal(ITERATIONS>=200000,true);assert.notEqual(e.iv,other.iv);assert.notEqual(e.salt,other.salt);assert.equal(e.iv.length,24);assert.equal(e.salt.length,32);
   const r=await unpack(e,options);assert.equal(r.session.action.id,'pause');assert.equal(r.session.checkin.energy,'lower');assert.equal(r.session.draft,null);assert.equal(r.session.dataReleaseAuthorized,false);assert.equal(r.includesEnergy,true);
@@ -52,12 +61,60 @@ test('queued deletion cannot be overtaken by an in-progress save',async()=>{
 });
 test('missing browser APIs and failed storage operations report failure',async()=>{
   const backend=indexedDBBackend(null);await assert.rejects(backend.read(),/IndexedDB/);await assert.rejects(backend.delete(),/IndexedDB/);
-  const vault=createVault({context,crypto:{},backend:{read:async()=>null}});await assert.rejects(vault.inspect(),/WebCrypto/);
-  const failed=createVault({context,crypto:webcrypto,backend:{delete:async()=>{throw new Error('storage denied');}}});await assert.rejects(failed.delete(),/storage denied/);
+  const vault=createVault({context,requestLock:testLock(),crypto:{},backend:{read:async()=>null}});await assert.rejects(vault.inspect(),/WebCrypto/);
+  const failed=createVault({context,requestLock:testLock(),crypto:webcrypto,backend:{delete:async()=>{throw new Error('storage denied');}}});await assert.rejects(failed.delete(),/storage denied/);
 });
 
 test('denied IndexedDB getter does not break M1 module initialization',async()=>{
   const original=Object.getOwnPropertyDescriptor(globalThis,'indexedDB');
   try{Object.defineProperty(globalThis,'indexedDB',{configurable:true,get(){throw new Error('denied');}});const backend=indexedDBBackend();await assert.rejects(backend.read(),/IndexedDB/);}
   finally{if(original)Object.defineProperty(globalThis,'indexedDB',original);else delete globalThis.indexedDB;}
+});
+
+test('two instances share lock through delayed encryption and committed save before revoke',async()=>{
+  const requestLock=testLock();let record,releaseEncryption,enteredEncryption;
+  const encrypting=new Promise(resolve=>{enteredEncryption=resolve;});
+  const gate=new Promise(resolve=>{releaseEncryption=resolve;});
+  const events=[];let enteredWrite,releaseCommit;
+  const writing=new Promise(resolve=>{enteredWrite=resolve;});
+  const commit=new Promise(resolve=>{releaseCommit=resolve;});
+  const backend={read:async()=>record,write:async e=>{enteredWrite();await commit;record=e;events.push('committed');},delete:async()=>{record=undefined;events.push('deleted');}};
+  const delayedCrypto={getRandomValues:webcrypto.getRandomValues.bind(webcrypto),subtle:new Proxy(webcrypto.subtle,{get(target,name){
+    if(name==='encrypt')return async(...args)=>{events.push('encrypting');enteredEncryption();await gate;return target.encrypt(...args);};
+    const value=Reflect.get(target,name);return typeof value==='function'?value.bind(target):value;
+  }})};
+  const a=createVault({backend,context,crypto:delayedCrypto,now:()=>time,requestLock});
+  const b=createVault({backend,context,crypto:webcrypto,now:()=>time,requestLock});
+  const saving=a.save({action:'pause',passphrase});await encrypting;
+  const deleting=b.delete();let revoked=false;deleting.then(()=>{revoked=true;});
+  await new Promise(resolve=>setImmediate(resolve));assert.equal(revoked,false);assert.deepEqual(events,['encrypting']);
+  releaseEncryption();await writing;assert.equal(revoked,false);assert.deepEqual(events,['encrypting']);
+  releaseCommit();await Promise.all([saving,deleting]);
+  assert.deepEqual(events,['encrypting','committed','deleted']);assert.equal(record,undefined);
+});
+test('missing production Web Locks refuses save before crypto or writes, but permits honest deletion',async()=>{
+  const original=Object.getOwnPropertyDescriptor(globalThis,'navigator');
+  let writes=0,deletes=0,cryptoCalls=0;
+  try{
+    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{}});
+    const vault=createVault({context,crypto:{getRandomValues(){cryptoCalls++;}},backend:{write:async()=>{writes++;},delete:async()=>{deletes++;}}});
+    await assert.rejects(vault.save({action:'pause',passphrase}),/Web Locks/);
+    assert.equal(cryptoCalls,0);assert.equal(writes,0);
+    assert.deepEqual(await vault.delete(),{coordinated:false});assert.equal(deletes,1);
+  }finally{if(original)Object.defineProperty(globalThis,'navigator',original);else delete globalThis.navigator;}
+});
+test('production lock requests are bound, immediate and never fall back after denial',async()=>{
+  const original=Object.getOwnPropertyDescriptor(globalThis,'navigator');
+  const requests=[];let touched=0;
+  const locks={request(name,options){assert.equal(this,locks);requests.push([name,options]);return Promise.reject(new Error('lock denied'));}};
+  try{
+    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{locks}});
+    const backend={read:async()=>{touched++;},write:async()=>{touched++;},delete:async()=>{touched++;}};
+    const vault=createVault({context,crypto:webcrypto,backend});
+    const operations=[vault.save({action:'pause',passphrase}),vault.delete(),vault.inspect(),vault.unlock(passphrase)];
+    assert.equal(requests.length,4);
+    for(const result of operations)await assert.rejects(result,/lock denied/);
+    assert.equal(touched,0);
+    for(const request of requests)assert.deepEqual(request,['aalto-m343-capsule-v1:storage',{mode:'exclusive'}]);
+  }finally{if(original)Object.defineProperty(globalThis,'navigator',original);else delete globalThis.navigator;}
 });

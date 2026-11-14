@@ -30,7 +30,7 @@ byId('vault-unlock').addEventListener('click',()=>{const passphrase=byId('vault-
   byId('vault-view').hidden=false;expiry(saved.expiresAt);label('vault-status','Unlocked locally. This saved snapshot is separate from the current check-in and sharing controls.');
 });});
 byId('vault-lock').addEventListener('click',()=>{lockView();label('vault-status','Saved view locked. Explicitly unlock to view again.');});
-function deleteVault(message){lockView();byId('vault-consent').checked=false;return runVault(async current=>{await vault.delete();if(current===generation)label('vault-status',message);});}
+function deleteVault(message){lockView();byId('vault-consent').checked=false;return runVault(async current=>{const deleted=await vault.delete();if(current===generation)label('vault-status',message+(deleted?.coordinated===false?' Web Locks unavailable: local saves are disabled; deletion was not coordinated with other tabs.':''));});}
 byId('vault-delete').addEventListener('click',()=>deleteVault('Saved ciphertext deleted locally. No remote copy was sent.'));
 byId('revoke').addEventListener('click',()=>{const r=revoke(session);if(r.ok)session=r.session;resetDraftUI();label('message','Unsent draft cleared from memory.');deleteVault('Consent revoked; saved ciphertext deleted locally.');});
 byId('clear').addEventListener('click',()=>{session=clearAll(session).session??newSession();revoked=true;resetDraftUI();byId('share').hidden=true;byId('suggestion').hidden=true;label('action-title','');label('action-body','');byId('energy').value='prefer-not-to-say';selected='pause';for(const el of choices.querySelectorAll('input'))el.checked=el.value==='pause';byId('vault-energy').checked=false;deleteVault('Session memory erased and saved ciphertext deleted locally.');});
