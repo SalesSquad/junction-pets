@@ -6,6 +6,7 @@ from pathlib import Path
 import math
 import tempfile
 import time
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -48,6 +49,27 @@ class ModelContracts(unittest.TestCase):
         self.assertGreater(run.TRAIN_FIRST_SEED, run.v4.v3.v2.v1.SEED_BANDS["ood"][1])
         self.assertEqual(run.DEV_FIRST_SEED, 129170)
         self.assertLess(run.DEV_LAST_SEED, run.v4.v3.v2.v1.SEED_BANDS["dev"][1])
+        self.assertTrue(120000 <= run.TRAIN_FIRST_SEED < run.TRAIN_LAST_SEED < 520000)
+        self.assertLess(run.NEXT_TRAIN_SEED + 999, 520000)
+
+    def test_frozen_env_rejects_illegal_training_namespace(self):
+        args = run.parse_args(["--mode", "train-dev", "--expected-head", "a"*40,
+                               "--output-dir", "/tmp/fake-out"])
+        with patch.object(run, "TRAIN_FIRST_SEED", 5290000):
+            with self.assertRaisesRegex(ValueError, "FROZEN_ENV_DOMAIN"):
+                run.validate_args(args)
+        with patch.object(run, "NEXT_TRAIN_SEED", 519500):
+            with self.assertRaisesRegex(ValueError, "FROZEN_ENV_DOMAIN"):
+                run.validate_args(args)
+
+    def test_frozen_v4_ancestry_is_mandatory(self):
+        head = "a"*40
+        self.assertEqual(run.V4_SOURCE_SHA, "5be248192d6eb09d54068d5509784644d763006f")
+        with patch.object(run.subprocess, "check_output", side_effect=["/tmp/source\n", head+"\n", ""]), \
+             patch.object(run.subprocess, "run", return_value=SimpleNamespace(returncode=1)) as check:
+            with self.assertRaisesRegex(ValueError, "IMMUTABLE_V4_SOURCE_ANCESTOR_MISSING"):
+                run.source_identity(True, head)
+        self.assertIn(run.V4_SOURCE_SHA, check.call_args.args[0])
 
     def test_default_cli_contract(self):
         args = run.parse_args([
@@ -103,7 +125,7 @@ class ModelContracts(unittest.TestCase):
         self.assertEqual(len(learned["experiments"]), 6)
         self.assertEqual(len(learned["rollouts"]), 12)
         self.assertEqual(call.call_count, 12)
-        self.assertEqual(learned["seeds"], [5290000, 5290001])
+        self.assertEqual(learned["seeds"], [510000, 510001])
         self.assertEqual(learned["winner"]["objective"],
                          max(x["objective"] for x in learned["experiments"]))
 
@@ -115,7 +137,7 @@ class ModelContracts(unittest.TestCase):
         result = run.taxonomy_and_curriculum(rows)
         self.assertEqual(result["failure_taxonomy"]["unsafe_collision_or_bounds"], 1)
         self.assertEqual(result["failure_taxonomy"]["explicit_safe_abstain"], 1)
-        self.assertEqual(result["curriculum_next"]["next_train_first_seed"], 5291000)
+        self.assertEqual(result["curriculum_next"]["next_train_first_seed"], 511000)
         self.assertFalse(result["curriculum_next"]["automatic_rerun"])
 
     def test_scientific_gate_preserves_original_and_v4_safety(self):
