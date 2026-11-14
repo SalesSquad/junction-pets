@@ -66,8 +66,14 @@ export async function runChaosLab({connectionString,requestCount=400,workerCount
     assert(races.filter(x=>x.result?.status==='SIMULATED_SETTLED').length===1,'Race must settle exactly once.');
     assert(races.filter(x=>x.error?.code==='INSUFFICIENT_DEMO_FUNDS').length===1,'Losing order must be refused.');
     const winner=races.find(x=>x.result)?.result.orderId;
-    const returned=await workers[0].call(refund(winner,'race_refund_0000001'));
-    assert(returned.result?.status==='SIMULATED_REFUNDED','Winner refund failed.');
+    const refundRace=await Promise.all([
+      workers[0].call(refund(winner,'race_refund_0000001')),
+      workers[1].call(refund(winner,'race_refund_0000002'))
+    ]);
+    assert(refundRace.filter(x=>x.result?.status==='SIMULATED_REFUNDED').length===1,
+      'Two independent OS workers must not issue two refunds for one order.');
+    assert(refundRace.filter(x=>x.error?.code==='ORDER_ALREADY_REFUNDED').length===1,
+      'Losing refund must refuse after serializable retry.');
 
     // Intentionally kill one worker AFTER actual COMMIT but BEFORE the IPC ACK.
     const crashTask=pay('crash_A','crash_payment_00001',50_000,'farm-b');
@@ -125,11 +131,24 @@ export async function runChaosLab({connectionString,requestCount=400,workerCount
     assert(a.balanced&&a.matching&&a.nonnegative,'Persistent ledger invariant failed.');
     assert(a.orders===102 && a.refunds===101,'Unexpected duplicate settlement or refund.');
     assert(a.batches===203 && a.outboxEvents===203,'Ledger/outbox must record each actual commit exactly once.');
-    // Negative control: a subsequent unbalanced INSERT into a committed batch
-    // must be forbidden by PostgreSQL, not merely overlooked by auditLab().
+    // Negative controls: the outbox cannot be deleted, retargeted or truncated;
+    // after those attempted attacks, unbalanced append must still be denied.
     const sealed=(await admin.query(`SELECT batch_id FROM "${schema}".ledger_batches WHERE order_id=$1 AND kind=$2`,
       ['crash_A','SIMULATED_PAYMENT'])).rows[0]?.batch_id;
     assert(sealed,'Expected durable crash batch to exist.');
+    let outboxDeleteRefusal=false;
+    try { await admin.query(`DELETE FROM "${schema}".ledger_outbox WHERE batch_id=$1`,[sealed]); }
+    catch(e){outboxDeleteRefusal=e.code==='23514'&&String(e.message).includes('IMMUTABLE_OUTBOX_SEAL');}
+    assert(outboxDeleteRefusal,'SQL DELETE of sealed outbox receipt must fail.');
+    let outboxRetargetRefusal=false;
+    try { await admin.query(`UPDATE "${schema}".ledger_outbox SET batch_id=$1 WHERE batch_id=$2`,
+      [randomBytes(16).toString('hex').replace(/^(........)(....)(....)(....)(............)$/,'$1-$2-$3-$4-$5'),sealed]); }
+    catch(e){outboxRetargetRefusal=e.code==='23514'&&String(e.message).includes('IMMUTABLE_OUTBOX_SEAL');}
+    assert(outboxRetargetRefusal,'SQL batch-id retarget of sealed outbox receipt must fail.');
+    let outboxTruncateRefusal=false;
+    try { await admin.query(`TRUNCATE TABLE "${schema}".ledger_outbox`); }
+    catch(e){outboxTruncateRefusal=e.code==='23514'&&String(e.message).includes('IMMUTABLE_OUTBOX_SEAL');}
+    assert(outboxTruncateRefusal,'SQL TRUNCATE must not erase batch seals.');
     let sealedBatchRefusal=false;
     try {
       await admin.query(`INSERT INTO "${schema}".ledger_entries(batch_id,account_id,delta_cents) VALUES ($1,$2,$3)`,
@@ -141,8 +160,10 @@ export async function runChaosLab({connectionString,requestCount=400,workerCount
       'Negative control must leave original durable ledger intact.');
     const elapsedMs=Math.round(performance.now()-t0);
     return {runId:schema,workersStarted:workerCount,independentOsPids:workerCount,
-      requests:requestCount+205, mixedRequests:requestCount,allowedReplays,refusals,
-      postCommitCrashObserved:true,crashReplayed:true,sealedBatchRefusal:true,elapsedMs,
+      requests:requestCount+206, mixedRequests:requestCount,allowedReplays,refusals,
+      refundRaceSingleWinner:true,postCommitCrashObserved:true,crashReplayed:true,
+      outboxDeleteRefusal:true,outboxRetargetRefusal:true,outboxTruncateRefusal:true,
+      sealedBatchRefusal:true,elapsedMs,
       verified:{balanced:a.balanced,matching:a.matching,nonnegative:a.nonnegative,
         exactlyOneRaceWinner:true,committedOrders:a.orders,refunds:a.refunds,
         batches:a.batches,outboxEvents:a.outboxEvents},
