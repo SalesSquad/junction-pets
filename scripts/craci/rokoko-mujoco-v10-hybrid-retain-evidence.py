@@ -95,7 +95,9 @@ def main():
     parser.add_argument("--private-staging", type=Path)
     parser.add_argument("--restore-output", type=Path)
     args = parser.parse_args()
-    harness_root = args.harness_root or Path(__file__).resolve().parent.parent
+    # Installed location: <harness>/scripts/craci/<this file>. Three parent
+    # steps from the file, not two, reach the actual checked-out repo root.
+    harness_root = args.harness_root or Path(__file__).resolve().parent.parent.parent
     packer = import_original_packer(harness_root.resolve(strict=True))
     evidence = args.evidence_root.resolve(strict=True)
     if args.mode == "pack":
