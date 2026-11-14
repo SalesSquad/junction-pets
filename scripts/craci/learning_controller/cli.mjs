@@ -14,15 +14,20 @@ async function main(argv=process.argv.slice(2)) {
   }
   const required=['--pins','--training','--transitions','--manifest','--qualification',
     '--replay','--readout','--receipt','--candidate-commit','--candidate-weights','--out'];
-  if(required.some(k=>!flags[k]) || Object.keys(flags).some(k=>![...required,'--prior'].includes(k)))
-    throw new Error('USAGE: cli.mjs --pins PINS.json --training TRAINING.json --transitions FULL.jsonl.gz --manifest MANIFEST.json --qualification QUALIFICATION.json --replay POSITIVE_REPLAY.json --readout PAIRED_READOUT.json --receipt RECEIPT.json --candidate-commit SHA40 --candidate-weights SHA256 --out NEW.json [--prior PREVIOUS.json]');
+  if(required.some(k=>!flags[k]) || Object.keys(flags).some(k=>![...required,'--prior','--prior-sha256'].includes(k)) ||
+     Boolean(flags['--prior'])!==Boolean(flags['--prior-sha256']))
+    throw new Error('USAGE: cli.mjs --pins PINS.json --training TRAINING.json --transitions FULL.jsonl.gz --manifest MANIFEST.json --qualification QUALIFICATION.json --replay POSITIVE_REPLAY.json --readout PAIRED_READOUT.json --receipt RECEIPT.json --candidate-commit SHA40 --candidate-weights SHA256 --out NEW.json [--prior PREVIOUS.json --prior-sha256 REVIEWED_SHA256]');
   const pins=JSON.parse(await readFile(flags['--pins'],'utf8'));
   const paths={training:flags['--training'],transitions:flags['--transitions'],
     manifest:flags['--manifest'],qualification:flags['--qualification'],
     replay:flags['--replay'],readout:flags['--readout'],receipt:flags['--receipt']};
   let nextSeedStart=515000;
+  let priorBytes=null;
   if(flags['--prior']) {
-    const prior=JSON.parse(await readFile(flags['--prior'],'utf8'));
+    priorBytes=await readFile(flags['--prior']);
+    if(!/^[0-9a-f]{64}$/.test(flags['--prior-sha256']) || sha(priorBytes)!==flags['--prior-sha256'])
+      throw new Error('PRIOR_EXACT_BYTES_NOT_REVIEWER_PINNED');
+    const prior=JSON.parse(priorBytes.toString('utf8'));
     if(prior.schema!=='junction.craci.learning-controller.v1.evidence-cycle' ||
        prior.activationState!=='ADVISORY_NO_DISPATCH_NO_MODEL_PROMOTION' ||
        prior.input?.rawSha256?.training===pins.sha256?.training ||
@@ -34,7 +39,7 @@ async function main(argv=process.argv.slice(2)) {
   const cycle=await compileCycle(paths,pins,{
     candidateCommit:flags['--candidate-commit'],
     candidateWeightsSha:flags['--candidate-weights'],nextSeedStart});
-  if(flags['--prior'])cycle.priorCycleSha256=sha(await readFile(flags['--prior']));
+  if(priorBytes)cycle.priorCycleSha256=sha(priorBytes);
   const output=JSON.stringify(cycle,null,2)+'\n';
   await writeFile(flags['--out'],output,{flag:'wx',mode:0o600});
   process.stdout.write(JSON.stringify({report:flags['--out'],reportSha256:sha(Buffer.from(output)),
