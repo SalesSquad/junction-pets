@@ -18,6 +18,8 @@ conditions. A valid shadow manifest must supply a `campaignHardStopUtc` at or
 before `deadlineUtc`, which itself cannot exceed the broader deadline.
 Planning after either relevant cutoff fails closed. Do not restart Immune/Chaos
 or reset their epochs because a new selector exists.
+For `immune-tournament` and `chaos-lab` candidates, the 14 Nov 18:00 UTC stop
+is additionally a **hard-coded upper bound**. A later manifest stop is refused.
 
 ## Experimental hypothesis selection
 
@@ -28,10 +30,14 @@ Each candidate provides independently motivated **estimated** values in [0,1]:
 uncertainty, model disagreement, safety risk and novelty. The selector scores
 their weighted sum per square root of worst-case reserved euros, with a
 same-group diversity penalty. It excludes unchanged completed-green, unchanged
-failed, queued, running and already-reserved source/fixture tuples. It checks
+failed, queued, running and already-reserved source/fixture tuples. Previously
+passed or failed tuples remain excluded even after later `cancelled` events.
+It checks
 the operator-observed meter timestamp (30-minute maximum age), conservative
 per-cell reserve, campaign reserve, existing active reservations, 64-job ceiling
-and eight-cell parallel ceiling. It never turns a proposed priority into a
+and eight-cell parallel ceiling. The **whole proposed wave**, including jobs
+inside multi-cell candidates and currently active jobs, must fit `maxParallel`.
+It never turns a proposed priority into a
 confirmed performance claim.
 
 **Statistical boundary:** adaptive selection is exploratory. Ordinary fixed
@@ -116,6 +122,9 @@ commit SHA**; otherwise its status is `unknown`. CycloneDX itself does not
 carry a GitHub source SHA: its status stays `unknown` unless the companion
 network trace verifies the exact job/run/harness tuple. Provider-served
 CycloneDX then proves at most a job inventory response, **not completeness**.
+The documented protocols are `http`, `dns`, `tcp` and `ssh_git` (not `ssh`).
+HTTP denials use `policyDenied`; TCP/SSH Git denials use `allowed:false`.
+DNS has no equivalent policy-denial field.
 HTTP errors, missing token, unavailable
 endpoint or mismatched source all fail closed. The API does not supply a
 cryptographically signed attestation in these responses: the output keeps
@@ -149,7 +158,8 @@ different host. The CLI does not contact CRACI when the token is absent.
    Portfolio PR Recovery or alter history to make a failing test green.
 
 **Tests:** `node --test scripts/craci/adaptive-proof.test.mjs` covers source
-replay, budget/cutoff, old green/failure dedupe, chain corruption, missing
-provider token, valid mocked API, source/run mismatch, unbound SBOM rejection
-and HTTP 403. Passing
+replay, budget/cutoff (including nonextendable 14 Nov stop), irreversible
+green/failure dedupe despite cancellation, per-wave cell caps, chain
+corruption, missing provider token, valid mocked API, `ssh_git` parsing,
+source/run mismatch, unbound SBOM rejection and HTTP 403. Passing
 tests are **synthetic**; live CRACI provider readback is not claimed.
