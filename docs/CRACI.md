@@ -30,7 +30,7 @@ these individual jobs remains unknown.
 
 ### Fixed browser workload
 
-The existing workflow now has manual choices `portable` and `product-browser`.
+The existing workflow now has manual choices `portable`, `product-browser` and `sbank-sponsor`.
 Browser dispatch requires a full `source_sha` and `product=stoa|valio`; there is
 no arbitrary command input. It checks out the harness and product separately
 and verifies the product commit before importing any product code.
@@ -64,6 +64,36 @@ Stoa sponsor hostname. Direct TLS download exceptions are not a claim that
 CRACI has package-aware SBOM visibility into browser binaries.
 JSON outcome records remain in GitHub logs. Screenshots/traces are temporary
 runner diagnostics; no persistent artifact upload is claimed.
+
+### First browser execution and environment repair
+
+The first real matrix [run43548723279](https://github.com/SalesSquad/junction-pets/actions/runs/43548723279)
+used harness `a6b8e0cd22a909a728da7eacce06a3181d32cb24` and Stoa source
+`bfb4e363879b9125b10ed8a8a14f77ea5ed8af70`. All three browser jobs acquired CRACI
+runners, then failed in Playwright's system-dependency installation because the
+runner's Microsoft Ubuntu24.04 APT source returned403 under the selected policy.
+No product assertion ran in this attempt. The repair adds only the documented
+package-aware custom APT source `https://packages.microsoft.com/ubuntu/24.04/prod`;
+all other unmatched egress remains denied. This failed receipt is retained.
+
+The actual CRACI UI for portable Valio job132303896493 reported
+**Complete SBOM certified** and no known vulnerabilities among its76 packages.
+That is a provider UI observation for this job; no exported SBOM was independently
+validated, and browser jobs have a different dependency/network scope.
+
+### Official S-Pankki synthetic data import
+
+Manual `workload=sbank-sponsor` checks out official sponsor commit
+`fbdecdedf1a1f49dd641c2e6b9f2b62d0dc0cc8f` with Git LFS and the intended product
+`source_sha` separately. The 2-vCPU/15-minute job verifies **362,796,501 bytes**
+and SHA256`49b3265d8e44e751de305a074dcffcda732bb79aa1e07b46fcca774ce76f1e63`.
+An independent standard-library CSV parser computes one synthetic customer's
+expected fields and original source rows, compares them to the real importer,
+and checks that a repeated export refuses to overwrite the existing result.
+Only counts and digests are logged; no dataset/export is committed or published.
+This qualifies import/provenance when executed successfully, not banking advice,
+forecasting, browser behavior or real customer integration. Execution is pending
+until an actual run is linked in the PR handoff.
 
 ### Continuing use and stop
 
