@@ -42,6 +42,16 @@ test('live replay requires Wikipedia HTTPS provenance',()=>{
   assert.throws(()=>loadDataset({...raw,provenance:'LICENSED_REPLAY',revisions:[
     {...raw.revisions[0],source_url:'https://evil.test/data'}]}),/SOURCE_URL_REQUIRED/);
 });
+test('self-declared licensed source must bind URL to exact revision, not a page',()=>{
+  const x={...raw,provenance:'LICENSED_REPLAY',revisions:[
+    {...raw.revisions[0],source_url:'https://fi.wikipedia.org/w/index.php?oldid=999'}]};
+  assert.throws(()=>loadDataset(x),/SOURCE_REVISION_MISMATCH/);
+  const exact=loadDataset({...x,revisions:[{...x.revisions[0],
+    source_url:'https://fi.wikipedia.org/w/index.php?oldid=101'}]});
+  const s=at(exact,p,'2025-01-10T00:00:00Z');
+  assert.equal(s.source_integrity,'LOCAL_HASH_ONLY_UNVERIFIED');
+  assert.equal(inspect(exact,p,'2025-01-10T00:00:00Z').verified_live_source,false);
+});
 test('unavailable comparisons refuse an answer',()=>{
   const r=inspect(data,'missing','2025-01-01T00:00:00Z','2024-01-01T00:00:00Z');
   assert.equal(r.snapshot.status,'NO_EVIDENCE');assert.equal(r.comparison.status,'UNAVAILABLE');

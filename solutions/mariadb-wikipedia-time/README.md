@@ -19,6 +19,7 @@ The bundled example is SYNTHETIC, not Wikipedia data. Output carries
 OFFLINE_DETERMINISTIC and NO_MARIADB_CONNECTION. Lexical diffs and rapid reverts
 DO NOT prove vandalism, factual truth, bias, or editorial intent. The core has a
 5000-revision fixture limit and no source import or external action.
+A user-supplied LICENSED_REPLAY label is unverified: the URL is only syntax-/revision-ID checked and the hash only covers imported bytes. Every response explicitly says verified_live_source=false; actual source contents and licence still need independent verification.
 
 ## Real database design and blocked dependency
 

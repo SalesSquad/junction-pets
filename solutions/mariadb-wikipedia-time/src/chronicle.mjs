@@ -29,6 +29,9 @@ export function loadDataset(input) {
       let url;try{url=new URL(r.source_url)}catch{throw new Error('SOURCE_URL_REQUIRED')}
       if(url.protocol!=='https:' || !(url.hostname==='wikipedia.org'||url.hostname.endsWith('.wikipedia.org')))
         throw new Error('SOURCE_URL_REQUIRED');
+      const permanent=url.pathname.match(/^\/wiki\/Special:PermanentLink\/([0-9]+)\/?$/);
+      const linkedRevision=url.searchParams.get('oldid') || (permanent && permanent[1]);
+      if(linkedRevision!==r.revision_id)throw new Error('SOURCE_REVISION_MISMATCH');
     }else if(r.source_url!==null)throw new Error('SYNTHETIC_SOURCE_MUST_BE_NULL');
     return Object.freeze({...r,ms,hash:sha256(r.body)});
   });
@@ -47,7 +50,7 @@ export function at(dataset,page,instant) {
   const r=candidates[0];
   return{status:'FOUND',page_id:page,as_of:instant,revision_id:r.revision_id,
     revised_at:r.revised_at,title:r.title,text:r.body,sha256:r.hash,source_url:r.source_url,
-    provenance:dataset.provenance,dataset_id:dataset.dataset_id,license:dataset.dataset_license};
+    provenance:dataset.provenance,source_integrity:'LOCAL_HASH_ONLY_UNVERIFIED',dataset_id:dataset.dataset_id,license:dataset.dataset_license};
 }
 const terms=s=>new Set(s.toLowerCase().match(/[\p{L}\p{N}]+/gu)||[]);
 export function compare(a,b) {
@@ -72,7 +75,7 @@ export function reverts(dataset,page) {
 }
 export function inspect(dataset,page,asOf,compareAt=null){
   const snapshot=at(dataset,page,asOf);
-  return{mode:'OFFLINE_DETERMINISTIC',provider:'NO_MARIADB_CONNECTION',
+  return{mode:'OFFLINE_DETERMINISTIC',provider:'NO_MARIADB_CONNECTION',verified_live_source:false,
     provenance:dataset.provenance,dataset_id:dataset.dataset_id,snapshot,
     comparison:compareAt===null?null:compare(at(dataset,page,compareAt),snapshot),
     suspected_reverts:reverts(dataset,page)};
