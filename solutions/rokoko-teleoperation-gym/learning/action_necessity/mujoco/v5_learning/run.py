@@ -38,12 +38,14 @@ from policy import BOUNDS, DEFAULT, PARAMETERS, make_factory, validate_weights  
 
 
 SCHEMA = "junction.rokoko.mujoco-v5.reward-cost-learning.v1"
-TRAIN_FIRST_SEED = 5_290_000        # Entirely outside all frozen physics bands
-TRAIN_LAST_SEED = 5_290_999         # Train-only namespace, never a holdout
+TRAIN_FIRST_SEED = 510_000          # Valid frozen ContactEnv range < 520000
+TRAIN_LAST_SEED = 510_999           # Train-only namespace, never a holdout
 DEV_FIRST_SEED = 129_170           # Fresh, not v4 exposed dev129030..169
 DEV_LAST_SEED = 129_319            # Reserved for this single candidate cohort
-NEXT_TRAIN_SEED = 5_291_000        # Only future train, not validation/test
+NEXT_TRAIN_SEED = 511_000          # Only future train, not validation/test
 V4_SOURCE_SHA = "5be248192d6eb09d54068d5509784644d763006f"
+FROZEN_ENV_MIN_SEED = 120_000
+FROZEN_ENV_MAX_SEED_EXCLUSIVE = 520_000
 MAX_OPTIONS = 60
 SHA = "0123456789abcdef"
 MAX_TRAIN_EPISODES = 64
@@ -97,6 +99,14 @@ def parse_args(argv=None):
 
 
 def validate_args(args):
+    # Source-invariant check: ContactEnv.reset in frozen learning/env.py
+    # rejects any seed outside [120000, 520000). Do not modify that env to
+    # accommodate training; use a disjoint *valid* seed reservation instead.
+    if not (FROZEN_ENV_MIN_SEED <= TRAIN_FIRST_SEED <= TRAIN_LAST_SEED
+            < FROZEN_ENV_MAX_SEED_EXCLUSIVE
+            and FROZEN_ENV_MIN_SEED <= NEXT_TRAIN_SEED
+            and NEXT_TRAIN_SEED + 999 < FROZEN_ENV_MAX_SEED_EXCLUSIVE):
+        raise ValueError("TRAIN_SEEDS_OUTSIDE_FROZEN_ENV_DOMAIN")
     if not 1 <= args.train_episodes <= MAX_TRAIN_EPISODES:
         raise ValueError("TRAIN_COUNT_OUT_OF_BOUNDS")
     if not 1 <= args.dev_episodes <= MAX_DEV_EPISODES:
