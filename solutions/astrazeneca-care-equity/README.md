@@ -38,7 +38,7 @@ data, which is why the first recommended action is to record four pathway timest
 ## Run it
 
 ```bash
-npm test            # 44 tests: statistics, real-data analysis, optimiser, evidence binding, claim check
+npm test            # 50 tests: statistics, real-data analysis, optimiser, evidence binding, guardrails
 npm run data        # refetch the public snapshot (THL Sotkanet, Statistics Finland, NORDCAN)
 npm run build       # analysis + recommendations -> web/data/app.json
 npm start           # http://127.0.0.1:4179
@@ -59,8 +59,15 @@ server environment; without it the interface reports "not configured" and nothin
   from `data/evidence/literature-v1.json`; costs are planning assumptions the user can change. Each
   scenario number has a range from 300 parameter draws, and a stability score.
 - `src/claims.mjs`, `src/claim-check.mjs`: the county brief is templated from the analysis (no
-  language model writes numbers). A TypeSafe System One model answers one narrow question per
-  sentence: does the cited evidence support it? Anything short of a confident yes goes to a human.
+  language model writes numbers). A TypeSafe System One model answers two narrow questions per
+  sentence: is it faithful to its facts and evidence, and does it overclaim? Anything short of a
+  confident pass goes to a human. Measured on this product (`src/eval-claim-check.mjs`, 650 real
+  calls, `jev-1.14.0`): 161 of 190 true sentences passed automatically, none was wrongly rejected,
+  and all 460 deliberately corrupted sentences (flipped direction, changed number, wrong county,
+  added causal claim) were stopped.
+- `src/narratives.mjs`: plain-language Finnish summaries written by Claude Haiku. A sentence is
+  shown only if every number in it occurs in its source claims and the TypeSafe check passes;
+  failed sentences are dropped, never repaired.
 - `ml/`: an early-warning forecaster for the pathway indicators, trained on the THL municipal panel
   with a rolling-origin backtest against persistence, drift and ridge baselines. The product ships
   whichever method wins on validation, and says so when a baseline wins.

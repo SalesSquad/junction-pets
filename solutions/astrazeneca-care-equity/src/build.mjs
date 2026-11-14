@@ -16,6 +16,12 @@ export function buildApp() {
   const recommendation = recommend(analysis);
   const forecastPath = '../data/ml/forecast-v1.json';
   const forecast = existsSync(at(forecastPath)) ? readJson(forecastPath) : null;
+  const optional = (path) => (existsSync(at(path)) ? readJson(path) : null);
+  const evalRun = optional('../data/claim-check/eval-v1.json');
+  // Stored verdicts are only valid for the snapshot they were computed on.
+  const claimCheck = evalRun && evalRun.snapshotSha256 === sha256('../data/snapshot/public-v1.json') && { service: evalRun.service, model: evalRun.model, ranAt: evalRun.ranAt, autoAccept: evalRun.autoAccept, cases: evalRun.cases, summary: evalRun.summary, overall: evalRun.overall, verdicts: evalRun.verdicts, note: evalRun.note };
+  const narrativeRun = optional('../data/narratives/fi-v1.json');
+  const narratives = narrativeRun && narrativeRun.status === 'CHECKED' ? { generatedAt: narrativeRun.generatedAt, verifier: narrativeRun.verifier, totals: narrativeRun.totals, counties: narrativeRun.counties } : null;
   const known = new Set(evidence.rows.map((r) => r.id));
   const cited = new Set([
     ...recommendation.interventions.flatMap((i) => i.evidence),
@@ -35,7 +41,7 @@ export function buildApp() {
       evidenceSha256: sha256('../data/evidence/literature-v1.json'), forecastSha256: forecast ? sha256(forecastPath) : null,
       sources: snapshot.sources, requests: snapshot.manifest.length, notes: snapshot.notes,
     },
-    analysis, recommendation, forecast,
+    analysis, recommendation, forecast, claimCheck, narratives,
     evidence: evidence.rows, evidenceMethod: evidence.method,
   };
 }
@@ -46,7 +52,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   writeFileSync(at('../web/data/app.json'), `${JSON.stringify(app)}\n`);
   const r = app.recommendation;
   console.log(JSON.stringify({
-    out: 'web/data/app.json', regions: app.analysis.regions.length, evidenceRows: app.evidence.length, forecast: !!app.forecast,
+    out: 'web/data/app.json', regions: app.analysis.regions.length, evidenceRows: app.evidence.length, forecast: !!app.forecast, claimCheck: !!app.claimCheck, narratives: app.narratives ? Object.keys(app.narratives.counties).length : 0,
     portfolio: { budget: r.budget, picks: r.portfolio.picks.length, deathsPostponed: r.portfolio.deathsPostponed, range: [r.portfolio.low, r.portfolio.high] },
   }));
 }

@@ -1,0 +1,1211 @@
+{
+ "schemaVersion": "care-equity-claim-check-eval-v1",
+ "ranAt": "2026-11-14T14:57:26.627Z",
+ "snapshotSha256": "9a68651c35a2f2265fe18ccd7da8cd637ab94e80c86a866e91dba057425f5831",
+ "service": "TypeSafe System One",
+ "model": "jev-1.14.0",
+ "autoAccept": 0.8,
+ "cases": 650,
+ "errors": 0,
+ "usage": {
+  "input_tokens": 561757,
+  "output_tokens": 43482
+ },
+ "summary": {
+  "true": {
+   "n": 190,
+   "SUPPORTED": 161,
+   "UNCLEAR": 29,
+   "NOT_SUPPORTED": 0,
+   "passRate": 0.847
+  },
+  "direction": {
+   "n": 52,
+   "SUPPORTED": 0,
+   "UNCLEAR": 5,
+   "NOT_SUPPORTED": 47,
+   "stoppedRate": 1
+  },
+  "place": {
+   "n": 102,
+   "SUPPORTED": 0,
+   "UNCLEAR": 1,
+   "NOT_SUPPORTED": 101,
+   "stoppedRate": 1
+  },
+  "causal": {
+   "n": 190,
+   "SUPPORTED": 0,
+   "UNCLEAR": 0,
+   "NOT_SUPPORTED": 190,
+   "stoppedRate": 1
+  },
+  "number": {
+   "n": 116,
+   "SUPPORTED": 0,
+   "UNCLEAR": 0,
+   "NOT_SUPPORTED": 116,
+   "stoppedRate": 1
+  }
+ },
+ "overall": {
+  "trueSentencesPassed": 0.847,
+  "corruptedSentencesStopped": 1
+ },
+ "falseAccepts": [],
+ "trueNotPassed": [
+  {
+   "id": "HVA01-locate",
+   "variant": "true",
+   "text": "No measured pathway stage shows East Uusimaa wellbeing services county clearly worse than the country; if outcomes differ, the cause is not locatable from public data.",
+   "verdict": "UNCLEAR",
+   "probability": 0.08,
+   "overclaim": 0.15
+  },
+  {
+   "id": "HVA01-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 73.3% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.5 percentage points, closing about 45% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.78,
+   "overclaim": 0.16
+  },
+  {
+   "id": "HVA02-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 75.4% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.5 percentage points, closing about 65% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.78,
+   "overclaim": 0.17
+  },
+  {
+   "id": "HVA03-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 73.4% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.5 percentage points, closing about 45% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.66,
+   "overclaim": 0.16
+  },
+  {
+   "id": "HVA04-flag-gp_wait_over_7d",
+   "variant": "true",
+   "text": "Waiting time for elective outpatient medical visit (physician) in primary health care exceeds 7 days from assessment of the need for treatment, % appointments kept: Vantaa and Kerava wellbeing services county is at 71.27 (three-year mean to 2025) against 54.7 nationally.",
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.06
+  },
+  {
+   "id": "HVA04-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 72.7% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.5 percentage points, closing about 41% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.79,
+   "overclaim": 0.17
+  },
+  {
+   "id": "HVA05-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 75.0% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.5 percentage points, closing about 60% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.72,
+   "overclaim": 0.17
+  },
+  {
+   "id": "HVA07-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 75.9% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.07 percentage points, closing about 74% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.19
+  },
+  {
+   "id": "HVA08-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 75.9% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.1 percentage points, closing about 73% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.75,
+   "overclaim": 0.17
+  },
+  {
+   "id": "HVA09-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 76.9% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-3.07 percentage points, closing about 98% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.73,
+   "overclaim": 0.2
+  },
+  {
+   "id": "HVA10-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 71.1% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.5 percentage points, closing about 34% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.15
+  },
+  {
+   "id": "HVA11-locate",
+   "variant": "true",
+   "text": "No measured pathway stage shows South Karelia wellbeing services county clearly worse than the country; if outcomes differ, the cause is not locatable from public data.",
+   "verdict": "UNCLEAR",
+   "probability": 0.14,
+   "overclaim": 0.15
+  },
+  {
+   "id": "HVA11-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 75.7% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.27 percentage points, closing about 70% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.78,
+   "overclaim": 0.22
+  },
+  {
+   "id": "HVA12-locate",
+   "variant": "true",
+   "text": "No measured pathway stage shows South Savo wellbeing services county clearly worse than the country; if outcomes differ, the cause is not locatable from public data.",
+   "verdict": "UNCLEAR",
+   "probability": 0.14,
+   "overclaim": 0.15
+  },
+  {
+   "id": "HVA13-flag-screen_cervix",
+   "variant": "true",
+   "text": "Proportion of women invited to cervical cancer screening (smear test) who attended, %: North Savo wellbeing services county is at 67.83 (three-year mean to 2024) against 73.4 nationally and a target of 80.",
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.05
+  },
+  {
+   "id": "HVA13-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 77.1% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-2.9 percentage points, closing about 100% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.58,
+   "overclaim": 0.28
+  },
+  {
+   "id": "HVA14-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 75.9% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.07 percentage points, closing about 74% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.2
+  },
+  {
+   "id": "HVA15-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 78.0% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-1.97 percentage points, closing about 100% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.72,
+   "overclaim": 0.33
+  },
+  {
+   "id": "HVA16-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 75.6% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.37 percentage points, closing about 69% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.17
+  },
+  {
+   "id": "HVA17-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 76.6% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-3.4 percentage points, closing about 88% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.74,
+   "overclaim": 0.18
+  },
+  {
+   "id": "HVA18-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 74.2% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.5 percentage points, closing about 52% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.73,
+   "overclaim": 0.17
+  },
+  {
+   "id": "HVA19-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 76.9% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-3.13 percentage points, closing about 96% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.61,
+   "overclaim": 0.21
+  },
+  {
+   "id": "HVA20-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 77.7% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-2.27 percentage points, closing about 100% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.56,
+   "overclaim": 0.31
+  },
+  {
+   "id": "HVA21-locate",
+   "variant": "true",
+   "text": "No measured pathway stage shows Lapland wellbeing services county clearly worse than the country; if outcomes differ, the cause is not locatable from public data.",
+   "verdict": "UNCLEAR",
+   "probability": 0.11,
+   "overclaim": 0.14
+  },
+  {
+   "id": "HVA21-detect-screen_colorectal",
+   "variant": "true",
+   "text": "Proportion of invited to colorectal cancer screening who attended, %: 75.4% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.5-4.5 percentage points, closing about 65% of the gap.",
+   "verdict": "UNCLEAR",
+   "probability": 0.68,
+   "overclaim": 0.17
+  }
+ ],
+ "verdicts": {
+  "HVA01-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.06
+  },
+  "HVA01-locate": {
+   "verdict": "UNCLEAR",
+   "probability": 0.08,
+   "overclaim": 0.15
+  },
+  "HVA01-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.14
+  },
+  "HVA01-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.92,
+   "overclaim": 0.13
+  },
+  "HVA01-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.78,
+   "overclaim": 0.16
+  },
+  "HVA01-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.88,
+   "overclaim": 0.19
+  },
+  "HVA01-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.15
+  },
+  "HVA02-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.07
+  },
+  "HVA02-flag-screen_breast": {
+   "verdict": "SUPPORTED",
+   "probability": 0.84,
+   "overclaim": 0.05
+  },
+  "HVA02-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.1
+  },
+  "HVA02-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.13
+  },
+  "HVA02-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.9,
+   "overclaim": 0.13
+  },
+  "HVA02-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.19
+  },
+  "HVA02-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.78,
+   "overclaim": 0.17
+  },
+  "HVA02-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.15
+  },
+  "HVA03-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 1,
+   "overclaim": 0.07
+  },
+  "HVA03-flag-screen_breast": {
+   "verdict": "SUPPORTED",
+   "probability": 0.81,
+   "overclaim": 0.05
+  },
+  "HVA03-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.1
+  },
+  "HVA03-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.18
+  },
+  "HVA03-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.9,
+   "overclaim": 0.17
+  },
+  "HVA03-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.66,
+   "overclaim": 0.16
+  },
+  "HVA03-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.15
+  },
+  "HVA04-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.97,
+   "overclaim": 0.06
+  },
+  "HVA04-flag-screen_breast": {
+   "verdict": "SUPPORTED",
+   "probability": 0.86,
+   "overclaim": 0.05
+  },
+  "HVA04-flag-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.89,
+   "overclaim": 0.05
+  },
+  "HVA04-flag-gp_wait_over_7d": {
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.06
+  },
+  "HVA04-flag-gp_wait_over_3m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.92,
+   "overclaim": 0.04
+  },
+  "HVA04-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.97,
+   "overclaim": 0.1
+  },
+  "HVA04-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.16
+  },
+  "HVA04-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.88,
+   "overclaim": 0.17
+  },
+  "HVA04-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.79,
+   "overclaim": 0.17
+  },
+  "HVA04-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.15
+  },
+  "HVA05-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.06
+  },
+  "HVA05-flag-specialist_wait_over_6m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.88,
+   "overclaim": 0.04
+  },
+  "HVA05-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.97,
+   "overclaim": 0.09
+  },
+  "HVA05-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.15
+  },
+  "HVA05-action-equal-fast-lane": {
+   "verdict": "SUPPORTED",
+   "probability": 0.88,
+   "overclaim": 0.11
+  },
+  "HVA05-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.72,
+   "overclaim": 0.17
+  },
+  "HVA05-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.88,
+   "overclaim": 0.2
+  },
+  "HVA05-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.16
+  },
+  "HVA06-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.07
+  },
+  "HVA06-flag-referral_handled_over_21d": {
+   "verdict": "SUPPORTED",
+   "probability": 0.88,
+   "overclaim": 0.05
+  },
+  "HVA06-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.08
+  },
+  "HVA06-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.14
+  },
+  "HVA06-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.15
+  },
+  "HVA06-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.91,
+   "overclaim": 0.17
+  },
+  "HVA06-detect-screen_colorectal": {
+   "verdict": "SUPPORTED",
+   "probability": 0.83,
+   "overclaim": 0.16
+  },
+  "HVA06-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.15
+  },
+  "HVA07-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.07
+  },
+  "HVA07-flag-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.88,
+   "overclaim": 0.05
+  },
+  "HVA07-flag-specialist_wait_over_6m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.04
+  },
+  "HVA07-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.1
+  },
+  "HVA07-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.15
+  },
+  "HVA07-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.89,
+   "overclaim": 0.14
+  },
+  "HVA07-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.9,
+   "overclaim": 0.17
+  },
+  "HVA07-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.19
+  },
+  "HVA07-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.14
+  },
+  "HVA08-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.07
+  },
+  "HVA08-flag-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.84,
+   "overclaim": 0.05
+  },
+  "HVA08-flag-referral_handled_3d": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.04
+  },
+  "HVA08-flag-referral_handled_over_21d": {
+   "verdict": "SUPPORTED",
+   "probability": 0.9,
+   "overclaim": 0.05
+  },
+  "HVA08-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.1
+  },
+  "HVA08-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.14
+  },
+  "HVA08-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.13
+  },
+  "HVA08-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.87,
+   "overclaim": 0.18
+  },
+  "HVA08-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.75,
+   "overclaim": 0.17
+  },
+  "HVA08-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.16
+  },
+  "HVA09-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.07
+  },
+  "HVA09-flag-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.9,
+   "overclaim": 0.05
+  },
+  "HVA09-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.97,
+   "overclaim": 0.11
+  },
+  "HVA09-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.89,
+   "overclaim": 0.17
+  },
+  "HVA09-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.89,
+   "overclaim": 0.15
+  },
+  "HVA09-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.91,
+   "overclaim": 0.18
+  },
+  "HVA09-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.73,
+   "overclaim": 0.2
+  },
+  "HVA09-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.16
+  },
+  "HVA10-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.07
+  },
+  "HVA10-flag-screen_colorectal": {
+   "verdict": "SUPPORTED",
+   "probability": 0.86,
+   "overclaim": 0.05
+  },
+  "HVA10-flag-referral_handled_over_21d": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.05
+  },
+  "HVA10-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.1
+  },
+  "HVA10-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.16
+  },
+  "HVA10-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.89,
+   "overclaim": 0.16
+  },
+  "HVA10-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.15
+  },
+  "HVA10-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.88,
+   "overclaim": 0.2
+  },
+  "HVA10-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.17
+  },
+  "HVA11-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.07
+  },
+  "HVA11-locate": {
+   "verdict": "UNCLEAR",
+   "probability": 0.14,
+   "overclaim": 0.15
+  },
+  "HVA11-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.91,
+   "overclaim": 0.17
+  },
+  "HVA11-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.12
+  },
+  "HVA11-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.92,
+   "overclaim": 0.2
+  },
+  "HVA11-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.78,
+   "overclaim": 0.22
+  },
+  "HVA11-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.15
+  },
+  "HVA12-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.07
+  },
+  "HVA12-locate": {
+   "verdict": "UNCLEAR",
+   "probability": 0.14,
+   "overclaim": 0.15
+  },
+  "HVA12-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.9,
+   "overclaim": 0.15
+  },
+  "HVA12-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.15
+  },
+  "HVA12-detect-screen_colorectal": {
+   "verdict": "SUPPORTED",
+   "probability": 0.8,
+   "overclaim": 0.35
+  },
+  "HVA12-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.16
+  },
+  "HVA13-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.08
+  },
+  "HVA13-flag-screen_cervix": {
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.05
+  },
+  "HVA13-flag-referral_handled_3d": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.05
+  },
+  "HVA13-flag-specialist_wait_over_6m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.04
+  },
+  "HVA13-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.1
+  },
+  "HVA13-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.18
+  },
+  "HVA13-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.13
+  },
+  "HVA13-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.89,
+   "overclaim": 0.16
+  },
+  "HVA13-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.58,
+   "overclaim": 0.28
+  },
+  "HVA13-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.15
+  },
+  "HVA14-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.97,
+   "overclaim": 0.07
+  },
+  "HVA14-flag-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.86,
+   "overclaim": 0.05
+  },
+  "HVA14-flag-gp_wait_over_3m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.04
+  },
+  "HVA14-flag-referral_handled_over_21d": {
+   "verdict": "SUPPORTED",
+   "probability": 0.89,
+   "overclaim": 0.05
+  },
+  "HVA14-flag-specialist_wait_over_6m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.05
+  },
+  "HVA14-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.11
+  },
+  "HVA14-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.16
+  },
+  "HVA14-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.92,
+   "overclaim": 0.16
+  },
+  "HVA14-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.86,
+   "overclaim": 0.17
+  },
+  "HVA14-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.2
+  },
+  "HVA14-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.15
+  },
+  "HVA15-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.06
+  },
+  "HVA15-flag-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.86,
+   "overclaim": 0.05
+  },
+  "HVA15-flag-specialist_wait_over_6m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.91,
+   "overclaim": 0.04
+  },
+  "HVA15-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.97,
+   "overclaim": 0.1
+  },
+  "HVA15-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.16
+  },
+  "HVA15-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.82,
+   "overclaim": 0.17
+  },
+  "HVA15-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.72,
+   "overclaim": 0.33
+  },
+  "HVA15-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.16
+  },
+  "HVA16-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 1,
+   "overclaim": 0.07
+  },
+  "HVA16-flag-referral_handled_3d": {
+   "verdict": "SUPPORTED",
+   "probability": 0.89,
+   "overclaim": 0.04
+  },
+  "HVA16-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.09
+  },
+  "HVA16-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.16
+  },
+  "HVA16-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.14
+  },
+  "HVA16-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.76,
+   "overclaim": 0.17
+  },
+  "HVA16-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.14
+  },
+  "HVA17-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.07
+  },
+  "HVA17-flag-gp_wait_over_3m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.91,
+   "overclaim": 0.05
+  },
+  "HVA17-flag-referral_handled_over_21d": {
+   "verdict": "SUPPORTED",
+   "probability": 0.92,
+   "overclaim": 0.05
+  },
+  "HVA17-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.08
+  },
+  "HVA17-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.92,
+   "overclaim": 0.15
+  },
+  "HVA17-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.88,
+   "overclaim": 0.14
+  },
+  "HVA17-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.18
+  },
+  "HVA17-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.74,
+   "overclaim": 0.18
+  },
+  "HVA17-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.16
+  },
+  "HVA18-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 1,
+   "overclaim": 0.07
+  },
+  "HVA18-flag-referral_handled_3d": {
+   "verdict": "SUPPORTED",
+   "probability": 0.92,
+   "overclaim": 0.04
+  },
+  "HVA18-flag-referral_handled_over_21d": {
+   "verdict": "SUPPORTED",
+   "probability": 0.91,
+   "overclaim": 0.05
+  },
+  "HVA18-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.08
+  },
+  "HVA18-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.15
+  },
+  "HVA18-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.14
+  },
+  "HVA18-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.18
+  },
+  "HVA18-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.73,
+   "overclaim": 0.17
+  },
+  "HVA18-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.16
+  },
+  "HVA19-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.07
+  },
+  "HVA19-flag-gp_wait_over_3m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.91,
+   "overclaim": 0.05
+  },
+  "HVA19-flag-specialist_wait_over_6m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.91,
+   "overclaim": 0.05
+  },
+  "HVA19-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.97,
+   "overclaim": 0.08
+  },
+  "HVA19-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.15
+  },
+  "HVA19-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.91,
+   "overclaim": 0.19
+  },
+  "HVA19-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.61,
+   "overclaim": 0.21
+  },
+  "HVA19-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.14
+  },
+  "HVA20-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.06
+  },
+  "HVA20-flag-specialist_wait_over_6m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.04
+  },
+  "HVA20-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.97,
+   "overclaim": 0.08
+  },
+  "HVA20-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.14
+  },
+  "HVA20-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.94,
+   "overclaim": 0.13
+  },
+  "HVA20-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.83,
+   "overclaim": 0.2
+  },
+  "HVA20-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.56,
+   "overclaim": 0.31
+  },
+  "HVA20-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.15
+  },
+  "HVA21-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 1,
+   "overclaim": 0.07
+  },
+  "HVA21-locate": {
+   "verdict": "UNCLEAR",
+   "probability": 0.11,
+   "overclaim": 0.14
+  },
+  "HVA21-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.15
+  },
+  "HVA21-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.83,
+   "overclaim": 0.16
+  },
+  "HVA21-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.19
+  },
+  "HVA21-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.68,
+   "overclaim": 0.17
+  },
+  "HVA21-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.15
+  },
+  "HVA90-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.07
+  },
+  "HVA90-flag-screen_breast": {
+   "verdict": "UNCLEAR",
+   "probability": 0.75,
+   "overclaim": 0.06
+  },
+  "HVA90-flag-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.83,
+   "overclaim": 0.05
+  },
+  "HVA90-flag-screen_colorectal": {
+   "verdict": "SUPPORTED",
+   "probability": 0.81,
+   "overclaim": 0.05
+  },
+  "HVA90-flag-gp_wait_over_7d": {
+   "verdict": "UNCLEAR",
+   "probability": 0.79,
+   "overclaim": 0.06
+  },
+  "HVA90-flag-gp_wait_over_3m": {
+   "verdict": "SUPPORTED",
+   "probability": 0.9,
+   "overclaim": 0.04
+  },
+  "HVA90-locate": {
+   "verdict": "SUPPORTED",
+   "probability": 0.98,
+   "overclaim": 0.11
+  },
+  "HVA90-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.95,
+   "overclaim": 0.13
+  },
+  "HVA90-detect-screen_colorectal": {
+   "verdict": "UNCLEAR",
+   "probability": 0.78,
+   "overclaim": 0.16
+  },
+  "HVA90-detect-screen_cervix": {
+   "verdict": "SUPPORTED",
+   "probability": 0.87,
+   "overclaim": 0.18
+  },
+  "HVA90-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.16
+  },
+  "HVA91-mortality": {
+   "verdict": "SUPPORTED",
+   "probability": 0.99,
+   "overclaim": 0.06
+  },
+  "HVA91-locate": {
+   "verdict": "UNCLEAR",
+   "probability": 0.22,
+   "overclaim": 0.12
+  },
+  "HVA91-blind-spot": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.15
+  },
+  "HVA91-action-timed-pathways": {
+   "verdict": "SUPPORTED",
+   "probability": 0.93,
+   "overclaim": 0.14
+  },
+  "HVA91-enable": {
+   "verdict": "SUPPORTED",
+   "probability": 0.96,
+   "overclaim": 0.16
+  }
+ },
+ "note": "Corruptions are generated by code from the true sentences: flipped direction, a number multiplied by 1.5, another county name, and an added causal or certainty claim. A corrupted sentence counts as stopped when it is not auto-accepted (it goes to a human or is rejected)."
+}

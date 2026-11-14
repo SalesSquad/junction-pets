@@ -213,16 +213,18 @@ test('claim check without a key reports NOT_CONFIGURED instead of guessing', asy
 });
 test('claim check routes by calibrated probability and sends server-side text only', async () => {
   const brief = buildBrief(app, 'HVA06'); const sent = [];
-  const fake = (probabilities, choice) => async (url, init) => { sent.push(JSON.parse(init.body)); return { ok: true, json: async () => ({ model: 'jev-test', answers: { support: { type: 'choice', choice, confidence: 0.9, probabilities } }, usage: { input_tokens: 10, output_tokens: 1 } }) }; };
+  const fake = (probabilities, choice, overclaim = 0.03) => async (url, init) => { sent.push(JSON.parse(init.body)); return { ok: true, json: async () => ({ model: 'jev-test', answers: { faithful: { type: 'choice', choice, confidence: 0.9, probabilities }, overclaim: { type: 'noul', noul: overclaim } }, usage: { input_tokens: 10, output_tokens: 1 } }) }; };
   const tampered = brief.claims.map((c, i) => (i === 0 ? { ...c, text: 'Cancer care here is the best in the world.' } : c));
   const ok = await verifyClaims(tampered, { apiKey: 'k', app, fetchImpl: fake({ supports: 0.95, contradicts: 0.02, says_nothing: 0.03 }, 'supports') });
   assert.equal(ok.status, 'CHECKED'); assert.ok(ok.results.every((r) => r.verdict === 'SUPPORTED'));
   assert.equal(ok.results[0].textMatchesServer, false);
-  assert.ok(sent.every((b) => !b.state.includes('best in the world') && b.questions.support.type === 'choice'));
+  assert.ok(sent.every((b) => !JSON.stringify(b.state).includes('best in the world') && typeof b.state.claim === 'string' && b.questions.faithful.type === 'choice' && b.questions.overclaim.type === 'noul' && Object.keys(b.state.facts).length > 0));
   const weak = await verifyClaims(brief.claims.slice(0, 2), { apiKey: 'k', app, fetchImpl: fake({ supports: 0.6, contradicts: 0.1, says_nothing: 0.3 }, 'supports') });
   assert.ok(weak.results.every((r) => r.verdict === 'UNCLEAR' && r.needsHumanReview));
   const bad = await verifyClaims(brief.claims.slice(0, 1), { apiKey: 'k', app, fetchImpl: fake({ supports: 0.1, contradicts: 0.7, says_nothing: 0.2 }, 'contradicts') });
   assert.equal(bad.results[0].verdict, 'NOT_SUPPORTED');
+  const over = await verifyClaims(brief.claims.slice(0, 1), { apiKey: 'k', app, fetchImpl: fake({ supports: 0.95, contradicts: 0.02, says_nothing: 0.03 }, 'supports', 0.8) });
+  assert.equal(over.results[0].verdict, 'NOT_SUPPORTED', 'a faithful sentence that overclaims is still rejected');
   const unknown = await verifyClaims([{ id: 'HVA06-made-up' }], { apiKey: 'k', app, fetchImpl: fake({ supports: 0.99 }, 'supports') });
   assert.equal(unknown.results[0].reason, 'UNKNOWN_CLAIM');
   const down = await verifyClaims(brief.claims.slice(0, 2), { apiKey: 'k', app, fetchImpl: async () => { throw new Error('offline'); } });
