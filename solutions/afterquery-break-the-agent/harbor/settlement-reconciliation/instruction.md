@@ -1,14 +1,14 @@
 # Reconcile synthetic payment events safely
 
-You are implementing a CLI program for an offline order-settlement system. A record says an order was approved; events say which charge attempts started and what was observed afterward. **Never assume a timed-out or unfinished attempt failed.** Your goal is to produce an accurate, auditable report and a safe next action for each order, without issuing any charges.
+You are reconciling a finite synthetic order-settlement ledger. A record says an order was approved; events say which charge attempts started and what was observed afterward. **Never assume a timed-out or unfinished attempt failed.** Your goal is to produce an accurate, auditable report and a safe next action for every order, without issuing charges.
 
-Write a Python 3 standard-library-only program at `/app/reconcile.py` with this command:
+Produce the **final JSON artifact** at `/app/output/decisions.json` **before finishing your agent turn**. You may write a Python 3 standard-library-only reconciliation program at `/app/reconcile.py` and invoke it yourself, for example:
 
 ```sh
-python3 /app/reconcile.py --input /app/data/orders.json --output /app/output/report.json
+python3 /app/reconcile.py --input /app/data/orders.json --output /app/output/decisions.json
 ```
 
-Create parent directories for the output when needed. The program must work for any valid input of the schema described below, not only the sample file. It must not modify its input, perform network calls or rely on an external payment provider.
+Create parent directories for the output when needed. The verifier assesses **only this pre-written JSON artifact**, and never executes your code. The artifact must reflect the actual data in `/app/data/orders.json`; do not modify the input, perform network calls or rely on an external payment provider. A program that handles the general schema is encouraged so the result is reproducible.
 
 ## Input schema
 

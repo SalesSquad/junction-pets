@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-# The Oracle proves a complete program can solve new cases. It does not bake
-# precomputed fixture answers into /app or copy verifier tests into the agent.
+# The Oracle runs during the AGENT phase, BEFORE the verifier is mounted.
+# The verifier only sees the final inert JSON artifact, never this program.
 cp /solution/reconcile.py /app/reconcile.py
-python3 /app/reconcile.py --input /app/data/orders.json --output /app/output/report.json
+python3 /app/reconcile.py --input /app/data/orders.json --output /app/output/decisions.json
