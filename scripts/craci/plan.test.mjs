@@ -85,3 +85,44 @@ test('R3 distinct risk, drift, and hard-negative pilots preserve source and gree
                 /31-minute admission cutoff/);
   assert.equal(resolvePlan({workload:'lens-r3-methods'}, {...context, now:'2026-11-15T16:28:59Z'}).jobCount,3);
 });
+
+test('HB real AppleVision open-set source is pinned, four models and independently sliceable', () => {
+  const all = resolvePlan({workload:'lens-hb-vision',lane_slice:'all'},context);
+  const pilot = resolvePlan({workload:'lens-hb-vision',lane_slice:'pilot'},context);
+  const remaining = resolvePlan({workload:'lens-hb-vision',lane_slice:'remaining'},context);
+  assert.equal(all.jobCount,4);
+  assert.equal(all.maxParallel,4);
+  assert.deepEqual(all.matrix.include.map(x=>x.model),
+    ['color','vision_prototype','vision_pca','vision_guard']);
+  assert.equal(pilot.jobCount,1);
+  assert.equal(remaining.jobCount,3);
+  assert.deepEqual([...pilot.matrix.include,...remaining.matrix.include].map(x=>x.cell),
+    all.matrix.include.map(x=>x.cell));
+  assert.ok(all.matrix.include.every(x=>x.source_sha===context.harnessSha));
+  assert.throws(()=>resolvePlan({workload:'lens-hb-vision',source_sha:candidate},context),
+    /exact harness source SHA/);
+  assert.throws(()=>resolvePlan({workload:'lens-hb-vision',lane_slice:'invalid'},context),
+    /Unsupported HB lane slice/);
+});
+
+test('fresh public HB scene8 OOD has exactly one pinned source, no old-scene replay',()=>{
+ const p=resolvePlan({workload:'lens-hb-scene8-ood'},context);
+ assert.equal(p.jobCount,1);
+ assert.equal(p.maxParallel,1);
+ assert.deepEqual(p.matrix.include.map(x=>x.scene),[8]);
+ assert.deepEqual(p.matrix.include.map(x=>x.cell),['hb-scene8-ood-public']);
+ assert.equal(p.matrix.include[0].source_sha,context.harnessSha);
+ assert.throws(()=>resolvePlan({workload:'lens-hb-scene8-ood',source_sha:candidate},context),
+   /exact source\/harness SHA/);
+});
+
+test('HB source-defect repair admits only two changed Vision model selection paths', () => {
+  const repair = resolvePlan({workload:'lens-hb-vision', lane_slice:'selection-repair'}, context);
+  assert.equal(repair.jobCount,2);
+  assert.deepEqual(repair.matrix.include.map(x=>x.model), ['vision_prototype','vision_guard']);
+  assert.ok(repair.matrix.include.every(x=>x.source_sha===context.harnessSha));
+  assert.equal(repair.maxParallel,2);
+  assert.throws(()=>resolvePlan({
+    workload:'lens-hb-vision',lane_slice:'selection-repair',source_sha:candidate
+  },context),/exact harness source SHA/);
+});
