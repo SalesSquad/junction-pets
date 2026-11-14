@@ -2,7 +2,7 @@
   "schema": "junction.meta.dat-mock.verification/v1",
   "work_id": "junction.meta.dat-mock-20261114",
   "base_commit": "82f17099ae1d52efde6661e69f7ea5e38fdcd407",
-  "code_commit": "1cc880481dac80fdd4249d4b5fad23cdd0747c7f",
+  "code_commit": "b98256562beaa4b701c3de150035f7bebeedc75a",
   "dirty_baseline": "clean",
   "owned_paths": [
     "apps/meta-lens-apple/DATMockApp",
@@ -285,6 +285,79 @@
         "DATMockApp/Tests/DATIntegrationTests.swift": "4f5572847ef345b587d7ac7a0bf3c4c97fb9cd916c19adb5b6ffda9a0302916b"
       },
       "scope": "Root read exact bytes; no P1/P2 finding. This adds an exact active-device stream/snapshot guard but does not resolve the observed session-start eligibility failure. Acceptance assertions, deadlines, SDK pin and signing remained unchanged."
+    },
+    {
+      "name": "diagnostic-only iOS build-for-testing",
+      "result": "pass",
+      "source_commit": "b98256562beaa4b701c3de150035f7bebeedc75a",
+      "receipt": "lens-dat-state-20261114-03",
+      "elapsed_seconds": 27.067,
+      "log_sha256": "4aa3759b3378846b31462e19738d8be4742ab625eaa5f57f4f1b8d3068fe5229",
+      "completed_at": "2026-11-14T12:59:18.281728+00:00"
+    },
+    {
+      "name": "public SDK state diagnostic acceptance",
+      "result": "fail",
+      "source_commit": "b98256562beaa4b701c3de150035f7bebeedc75a",
+      "receipt": "lens-dat-state-20261114-03",
+      "tests": 1,
+      "failure_records": 2,
+      "test_seconds": 30.495,
+      "xcodebuild_exit": 65,
+      "xcodebuild_seconds": 174.56,
+      "log_sha256": "79e596467a5e5f77a845afc775b6a3a4617fe3c55c05021fce9b385b1bb75189",
+      "execution_sha256": "d6e3c34814c8765490a4d5c298978d285ccdda6163b2e43b72a03c2991e2e3d4",
+      "command_receipt_sha256": "2741463f195c65f172ab04a9c53a51668c609ed26ca4a0fdb384885c9ec34f6d",
+      "evidence_root": "/Users/mikaelervamaa/Developer/meta-dat-state-diagnostic-20261114",
+      "repository_evidence": {
+        "execution": "evidence/20261114-continuation/diagnostic-execution.json",
+        "xctest_log": "evidence/20261114-continuation/diagnostic-xctest.log"
+      },
+      "xcresult": "Integration.xcresult",
+      "completed_at": "2026-11-14T13:02:44.989669+00:00",
+      "observed": {
+        "configured": true,
+        "frameCount": 0,
+        "lastError": "Starting Meta test session: No eligible device available",
+        "before_session_start": {
+          "linkState": "connected",
+          "compatibility": "undefined",
+          "donState": "unknown",
+          "hingeState": "unknown",
+          "registrationStateRaw": 3,
+          "registrationState": "registered",
+          "selectorExact": true,
+          "sessionExact": true,
+          "bundle": "cloud.taika.chibi.datmock"
+        },
+        "startup_catch": {
+          "linkState": "connected",
+          "compatibility": "undefined",
+          "donState": "unknown",
+          "hingeState": "unknown",
+          "registrationStateRaw": 3,
+          "registrationState": "registered",
+          "selectorExact": true,
+          "sessionExact": true,
+          "bundle": "cloud.taika.chibi.datmock"
+        }
+      },
+      "registration_mapping_source": "Pinned SDK0bd369298eef6a980ad0bdb6c8a5502f2c02a08c MWDATCore-Swift.h declares MWDATRegistrationStateRegistered = 3.",
+      "scope": "Diagnostic-only source; original acceptance predicate, deadlines, polling, assertions and cleanup are unchanged. Public states do not prove all SDK-internal eligibility. No frame/OCR/revocation/disconnect pass.",
+      "source_identity_consistent": true,
+      "cleanup": {
+        "shutdownExit": 0,
+        "deleteExit": 0,
+        "ownedSimulatorAbsent": true
+      }
+    },
+    {
+      "name": "diagnostic-only independent source review",
+      "result": "pass",
+      "source_commit": "b98256562beaa4b701c3de150035f7bebeedc75a",
+      "evidence": "evidence/20261114-continuation/diagnostic-source-review.json",
+      "evidence_sha256": "cdf90e73e768647074e491aae7ef38b4cd4a2daa907380ca1e8f6e2c8aac32a2",
+      "scope": "Root read the complete bounded public-state diagnostic delta before commit and execution; no P1/P2 finding, not runtime qualification."
     }
   ],
   "not_verified": [
@@ -295,11 +368,11 @@
     "Signed/released iOS app"
   ],
   "preserved": "All prior source, failed native runs, raw logs, execution records and xcresults remain preserved on the executing Macs. Both continuation execution.json and xctest.log files were copied byte-for-byte to the shared workspace and hash-verified. Original unpublished local1b6f442 remains on its original branch; no daemon or recurring job was added.",
-  "next_action": "Use the pinned SDK's public exact-device state API to record bounded pre-session-start link, compatibility, don, hinge and registration diagnostics. Preserve the current failing predicate and deadlines; independently review the diagnostic-only delta before one further unchanged acceptance case. Do not add another eligibility wait without source and runtime evidence.",
+  "next_action": "Independently review one official-sample-aligned AutoDeviceSelector control with a Sendable filter capturing only the immutable owned mock ID. Retain exact-ID stream/snapshot guards and all existing watchdog, epoch, cancellation and test conditions. The public sample does not document a separate compatibility-ready wait; do not add one or overwrite unknown states. Admit at most one bounded comparison after exact source/filter review.",
   "recorded_at": "2026-11-14T00:44:33.046651+00:00",
-  "previous_code_commit": "27091442ac70632e552aff810376a4be18a6d2fb",
-  "latest_native_test_source_commit": "1cc880481dac80fdd4249d4b5fad23cdd0747c7f",
-  "current_native_status": "failed_session_start_eligibility_after_discovery_and_selector_readiness",
+  "previous_code_commit": "1cc880481dac80fdd4249d4b5fad23cdd0747c7f",
+  "latest_native_test_source_commit": "b98256562beaa4b701c3de150035f7bebeedc75a",
+  "current_native_status": "failed_session_start_with_registered_connected_exact_mock_and_undefined_compatibility",
   "source_preservation": {
     "original_diagnostic_local_commit": "1b6f442ad8075f0ff7093a152f0f5d5b3da2a5f3",
     "original_local_branch": "codex/meta-next-dat-simulator-signing-20261114",
@@ -334,30 +407,30 @@
     }
   ],
   "cleanup": {
-    "owned_simulators": "Both continuation-owned simulators shut down/deleted with exit0; absence verified after each run. Earlier records remain preserved.",
-    "native_processes": "Both continuation builds/tests completed. No new diagnostic test has been dispatched.",
+    "owned_simulators": "All three continuation-owned simulators shut down/deleted with exit0; absence verified after each run. Earlier records remain preserved.",
+    "native_processes": "All three continuation builds/tests completed. No selector-control test has been dispatched.",
     "retained_idle_session": "meta-next-dat-20261114 (original preserved work) and meta-dat-accept-20261114 (current receipt runner) retained pending bounded diagnostic continuation.",
     "ancestor_session": "Untouched.",
     "mini_ssh_probe": "Ended; PID absence verified. No authentication or permissions changed.",
     "retained_checkouts": "Clean native source, exact pinned SDK and built products retained for pending qualification; original unpushed diagnostic commit preserved."
   },
-  "updated_at": "2026-11-14T12:49:38.839Z",
+  "updated_at": "2026-11-14T13:07:53.888Z",
   "metrics": {
-    "actual_xctest_cases_this_continuation": 5,
+    "actual_xctest_cases_this_continuation": 6,
     "passed_cases": 0,
-    "failed_cases": 5,
-    "incremental_harness_builds": 4,
+    "failed_cases": 6,
+    "incremental_harness_builds": 5,
     "full_suites_repeated": 0,
     "provider_allocations": 0,
     "monetary_cost": null,
     "tool_call_count": null,
     "unknowns": "No aggregate connector/model billing or complete call counter was available.",
     "this_resume": {
-      "actual_xctest_cases": 2,
+      "actual_xctest_cases": 3,
       "passed_cases": 0,
-      "failed_cases": 2,
-      "failure_records": 4,
-      "incremental_builds": 2,
+      "failed_cases": 3,
+      "failure_records": 6,
+      "incremental_builds": 3,
       "full_suites_repeated": 0,
       "new_provider_allocations": 0
     }

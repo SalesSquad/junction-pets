@@ -77,18 +77,25 @@ and zero frames. Discovery and selector presence alone therefore do not
 establish session eligibility. No acceptance condition, deadline or SDK pin
 was relaxed.
 
-Both continuation runs executed one XCTest case; each reported two failure
+All three continuation runs executed one XCTest case; each reported two failure
 records from the timed-out condition and thrown diagnostic error. Their exact
 source, build/test log hashes and cleanup receipts are in
-[the verification record](VERIFICATION.json). Both owned simulators were
+[the verification record](VERIFICATION.json). All three owned simulators were
 shut down and removed. The original local diagnostic commit `1b6f442` remains
 preserved on its original branch.
 
-The next step is a diagnostic-only snapshot of the pinned SDK's public
-device state immediately before session start, followed by independent review
-and one unchanged acceptance case. A further waiting loop is not yet justified
-by the observed state. No physical-glasses, frame/OCR or production acceptance
-pass is claimed.
+The diagnostic-only follow-up at `b982565` also built, then failed the same
+case. Both the pre-start and catch snapshots show `link=connected`, registered
+state, exact selector/session IDs and the correct application bundle, but
+`compatibility=undefined`, `don=unknown` and `hinge=unknown`. These are actual
+public SDK observations, not proof of an SDK defect or all internal eligibility.
+
+The official sample uses `AutoDeviceSelector`. A proposed control keeps that
+selector restricted to the immutable owned mock ID and retains the current
+exact-ID guards. It requires independent source/filter review before one
+bounded comparison. The public sample does not document a separate
+`.compatible` wait; no such wait or fabricated ready state has been added.
+No physical-glasses, frame/OCR or production acceptance pass is claimed.
 
 ## Lifecycle and trust
 
