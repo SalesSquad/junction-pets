@@ -103,6 +103,31 @@ def verify_paired_train_result(training, manifest, source_head, evidence_dir,
             "V8_PROSPECTIVE_NOT_FULLY_PAIRED")
     check["schema"] = "junction.rokoko.mujoco-v8-prospective.craci.train.v1"
     check["independentHoldout"] = False
+    by_name = {}
+    for name in STRATEGIES:
+        rows = [row for row in training["trials"]
+                if row["strategy"] == name and row["observed_corridor"]]
+        require(len(rows) == 128, "V8_INCOMPLETE_CANDIDATE_NEAR_WORLD_COMPARISON")
+        by_name[name] = {
+            "safe_near_goals": sum(int(row["success"] and not row["unsafe"])
+                                   for row in rows),
+            "unsafe_near": sum(int(row["unsafe"]) for row in rows),
+            "safe_lateral_ge_25mm": sum(int(not row["unsafe"] and
+                                           row["away_lateral_displacement"] >= .025)
+                                      for row in rows),
+            "forward_reopen_worlds": sum(int(row["forward_reopened_after_side"] > 0)
+                                         for row in rows),
+        }
+    check["prospective_train_only_paired_candidate_and_controls"] = by_name
+    check["candidate_v8_safe_goal_difference_vs_best_frozen_baseline"] = (
+        by_name["v8_hierarchical"]["safe_near_goals"] -
+        max(by_name["frozen_v5"]["safe_near_goals"],
+            by_name["frozen_v6"]["safe_near_goals"]))
+    check["model_improvement_independently_verified"] = False
+    check["next_experiment_advisory"] = {
+        "new_train_seed_start": 514_000,
+        "next_step": "scientific_review_then_independent_new_train_cohort",
+        "note": "No promotion based on TRAIN-only difference; no locked dev/test authorization"}
     return check
 
 
@@ -173,6 +198,13 @@ def main():
     manifest = v7_qualifier.read_json(output / "manifest.json")
     check = verify_paired_train_result(training, manifest, requested_head,
                                        output, v7_qualifier)
+    readout_path = output / "paired-readout.json"
+    readout = load_json(readout_path)
+    require(manifest.get("auxiliary_file_sha256", {}).get("paired-readout.json") ==
+            sha_file(readout_path) and
+            readout.get("executed_head") == requested_head and
+            readout.get("dataset_sha256") == training["dataset_sha256"],
+            "V8_ADVISORY_READOUT_SOURCE_OR_DATASET_MISMATCH")
     require(result.returncode == 0, "V8_PROSPECTIVE_PRODUCER_NONZERO")
 
     # Re-execute all claimed positive trajectories on the exact original
