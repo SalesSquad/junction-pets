@@ -317,9 +317,13 @@ def fit_stage(samples, stage, held_seed_set):
     if not fit:
         return weights, {"stage": stage, "train_samples": 0,
                          "diagnostic_samples": len(diagnostic),
+                         "initial_fit_cross_entropy": None,
+                         "initial_train_diagnostic_cross_entropy": None,
                          "fit_cross_entropy": None,
                          "train_diagnostic_cross_entropy": None,
                          "trained": False}
+    initial_fit_loss = cross_entropy(fit, weights)
+    initial_diagnostic_loss = cross_entropy(diagnostic, weights)
     x, masks, labels, importance = stage_matrix(fit)
     rng = np.random.default_rng(RANDOM_SEED + stage)
     for _ in range(EPOCHS):
@@ -336,6 +340,8 @@ def fit_stage(samples, stage, held_seed_set):
             weights -= LEARNING_RATE * grad
     return weights, {"stage": stage, "train_samples": len(fit),
                      "diagnostic_samples": len(diagnostic),
+                     "initial_fit_cross_entropy": initial_fit_loss,
+                     "initial_train_diagnostic_cross_entropy": initial_diagnostic_loss,
                      "fit_cross_entropy": cross_entropy(fit, weights),
                      "train_diagnostic_cross_entropy": cross_entropy(diagnostic, weights),
                      "trained": True}
