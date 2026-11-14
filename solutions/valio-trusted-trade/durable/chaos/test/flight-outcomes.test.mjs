@@ -29,6 +29,12 @@ test('injected unrelated SQL 42P01 during verified kill is refused, not replay-c
   assert.throws(()=>auditInterruptedFlights(outcomes,workers()),/FLIGHT_UNEXPECTED_SQL_RESULT: flight 4, code 42P01/);
 });
 
+test('spoofed connection-terminated text cannot promote SQLSTATE 42P01 to crash disconnect',()=>{
+  const outcomes=interrupted();
+  outcomes[4]={status:'fulfilled',value:{error:{code:'42P01',message:'Connection terminated unexpectedly'}}};
+  assert.throws(()=>auditInterruptedFlights(outcomes,workers()),/FLIGHT_UNEXPECTED_SQL_RESULT: flight 4, code 42P01/);
+});
+
 test('unverified child death, arbitrary IPC rejection, missing and duplicate outcomes all refuse qualification',()=>{
   const outcomes=interrupted(),owned=workers();
   owned[2].child.signalCode='SIGTERM';
