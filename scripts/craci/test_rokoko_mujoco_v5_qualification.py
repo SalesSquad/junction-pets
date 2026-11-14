@@ -118,6 +118,16 @@ class QualificationContracts(unittest.TestCase):
         d["summaries"]["learned_v5"]["paired_bootstrap95_pp"] = [-2., 25.]
         self.assertFalse(validator.verify_dev_receipt(t, m, d, SOURCE)["science_gate_passed"])
 
+    def test_scientific_red_proposes_only_new_training_and_dev_seeds(self):
+        t, m, d = fixture()
+        d["summaries"]["learned_v5"]["paired_bootstrap95_pp"] = [-2., 25.]
+        result = validator.verify_dev_receipt(t, m, d, SOURCE)
+        next_round = result["next_learning_round"]
+        self.assertEqual(next_round["new_train_only_seed_start"], 5291000)
+        self.assertEqual(next_round["new_fresh_dev_seed_start"], 129250)
+        self.assertFalse(next_round["dispatch_authorized"])
+        self.assertTrue(next_round["requires_new_source_and_weight_hashes"])
+
     def test_summary_forgery_fails(self):
         t, m, d = fixture()
         d["summaries"]["learned_v5"]["candidate_success"] += 1
