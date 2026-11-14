@@ -8,6 +8,6 @@
 
 **60–85 seconds — The refusal:** Highlight `NON_DISCRIMINATING_CHECK` for the second claim. Both claims are also flagged `SYNTHETIC_ONLY`. An impressive summary cannot turn either into verified evidence.
 
-**85–105 seconds — Human remains accountable:** Show `humanReviewSet` and the pending reviewer decision. The tool does not merge, verify signatures or make a privileged approval. A future actual log must be independently checked by a named person.
+**85–105 seconds — Human remains accountable:** Show `humanReviewSet` and the pending decision of the explicitly **fictional** reviewer, Aino Example. No actual human has reviewed or approved the sample. The tool does not merge, verify signatures or make a privileged approval. A future actual log must be independently checked by a named person.
 
 **105–120 seconds — Measurement & next:** Show measured local rule-check counts from the actual Node test report, not invented C# outcomes. Next step: run the official C# sample on base/head, capture logs, and compare false reassurance rates and human review effort against a plain summary.
