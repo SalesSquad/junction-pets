@@ -45,7 +45,25 @@ def safe_root(folder: Path):
 
 def verify_parts(folder: Path, report: dict):
     require(report.get("schema") == SCHEMA, "EVIDENCE_PACK_SCHEMA")
+    # The part report is not an authority unto itself. Bind restored bytes to
+    # the independently qualified producer manifest, preventing re-hashed ZIP
+    # and re-hashed part-report substitutions after publication.
+    frozen_manifest = folder / "manifest.json"
+    require(frozen_manifest.is_file() and not frozen_manifest.is_symlink() and
+            sha_file(frozen_manifest) == report.get("original_manifest_sha256"),
+            "EVIDENCE_PACK_FROZEN_MANIFEST_MISMATCH")
+    source_manifest = json.loads(frozen_manifest.read_text(encoding="utf8"))
+    require(report.get("exact_source_sha") == source_manifest.get("executed_head"),
+            "EVIDENCE_PACK_SOURCE_HEAD_MISMATCH")
+    declared = report.get("sources")
+    require(isinstance(declared, list) and
+            sorted(item.get("name") for item in declared) == sorted(SOURCE_FILES) and
+            set(source_manifest.get("file_sha256", {})) == set(SOURCE_FILES),
+            "EVIDENCE_PACK_SOURCE_SET_MISMATCH")
     for source in report["sources"]:
+        require(source["original_sha256"] ==
+                source_manifest["file_sha256"][source["name"]],
+                "EVIDENCE_PACK_SOURCE_HASH_MANIFEST_MISMATCH")
         digest = hashlib.sha256()
         expected_total = 0
         for part in source["parts"]:
