@@ -78,6 +78,10 @@ export function validateManifest(manifest, now = new Date()) {
   requireThat(Array.isArray(manifest.candidates) && manifest.candidates.length <= MAX_CANDIDATES, 'TOO_MANY_CANDIDATES');
   const ids = new Set(), tuples = new Set();
   const candidates = manifest.candidates.map(value => validatedCandidate(value, manifest));
+  // These two campaigns have their own *immutable* 14 Nov 20:00 Helsinki stop.
+  // A caller cannot extend it by supplying a later campaignHardStopUtc.
+  if (candidates.some(c => c.workload === 'immune-tournament' || c.workload === 'chaos-lab'))
+    requireThat(campaignStop <= Date.parse('2026-11-14T18:00:00Z'), 'IMMUNE_CHAOS_HARD_STOP_EXCEEDED');
   for (const candidate of candidates) {
     requireThat(!ids.has(candidate.id) && !tuples.has(candidate.tupleDigest), 'DUPLICATE_EXPERIMENT');
     ids.add(candidate.id); tuples.add(candidate.tupleDigest);
@@ -139,8 +143,12 @@ export async function appendReceipt(logPath, event, {expectedHead} = {}) {
 export function selectExperiments(manifest, receiptsText = '', {now = new Date()} = {}) {
   const candidates = validateManifest(manifest, now);
   const history = verifyReceiptLog(receiptsText);
-  const latest = new Map();
-  for (const event of history.events) latest.set(event.tupleDigest, event);
+  const latest = new Map(), everPassed = new Set(), everFailed = new Set();
+  for (const event of history.events) {
+    latest.set(event.tupleDigest, event);
+    if (event.status === 'passed') everPassed.add(event.tupleDigest);
+    if (event.status === 'failed') everFailed.add(event.tupleDigest);
+  }
   const excluded = [], eligible = [];
   let activeReserve = 0, activeJobs = 0;
   for (const entry of latest.values()) if (ACTIVE.has(entry.status)) {
@@ -148,15 +156,18 @@ export function selectExperiments(manifest, receiptsText = '', {now = new Date()
     activeJobs += entry.jobs;
   }
   const ceiling = Math.max(0, Math.min(manifest.creditRemainingEur, manifest.campaignRemainingEur) - activeReserve);
-  const jobsLeft = Math.max(0, manifest.maxJobs - activeJobs);
+  // This result represents one simultaneous wave, not an unbounded queue.
+  // In particular an 8-cell candidate cannot fit a 4-cell maxParallel window.
+  const jobsLeft = Math.max(0, Math.min(manifest.maxJobs - activeJobs,
+    manifest.maxParallel - activeJobs));
   for (const candidate of candidates) {
     const prior = latest.get(candidate.tupleDigest);
     if (prior && (prior.sourceSha !== candidate.sourceSha || prior.harnessSha !== candidate.harnessSha))
       throw new Error('RECEIPT_SOURCE_BINDING_CONFLICT');
-    if (prior?.status === 'passed' || (prior && ACTIVE.has(prior.status))) {
-      excluded.push({id: candidate.id, reason: prior.status === 'passed' ? 'unchanged_green_tuple' : 'already_reserved_or_running'}); continue;
+    if (everPassed.has(candidate.tupleDigest) || (prior && ACTIVE.has(prior.status))) {
+      excluded.push({id: candidate.id, reason: everPassed.has(candidate.tupleDigest) ? 'unchanged_green_tuple' : 'already_reserved_or_running'}); continue;
     }
-    if (prior?.status === 'failed') {
+    if (everFailed.has(candidate.tupleDigest)) {
       // Repetition is only useful when the test case/repair changes (and therefore its digest changes).
       excluded.push({id: candidate.id, reason: 'unchanged_failed_tuple_requires_new_hypothesis'});continue;
     }
