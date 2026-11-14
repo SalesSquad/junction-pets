@@ -16,9 +16,21 @@ const EXPECTED_MESSAGES=[
 ];
 
 export function isExpectedCrashDisconnect(error){
-  const code=String(error?.code||'');
+  const code=typeof error?.code==='string'?error.code:'';
   const message=String(error?.message||'');
-  return EXPECTED_CODES.has(code)||EXPECTED_MESSAGES.some(re=>re.test(message));
+  // PostgreSQL emits a precise SQLSTATE for SQL/provider failures. Never let
+  // attacker/spoofed exception text override a present non-transport code.
+  // A message fallback exists ONLY for node-postgres disconnects with no code.
+  if(code)return EXPECTED_CODES.has(code);
+  return EXPECTED_MESSAGES.some(re=>re.test(message));
+}
+
+export function wirePgError(error){
+  // Do not invent a synthetic `UNEXPECTED` error code for a real node-postgres
+  // disconnect that had no code: it would block the narrow message fallback.
+  // Conversely preserve all nonempty SQLSTATEs so prose cannot override them.
+  return {code:typeof error?.code==='string'&&error.code?error.code:null,
+    message:String(error?.message||'').slice(0,200)};
 }
 
 export function guardPgPool(pool,{expectedCrash=()=>false,onFault=()=>{}}={}){
