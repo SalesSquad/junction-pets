@@ -35,7 +35,10 @@ test('closed deadline, malformed source and unsupported sponsor override stop ad
 test('every fixed workload has bounded cells, full immutable sources and unique receipt keys', () => {
   for (const workload of WORKLOADS) {
     const input = {workload};
-    if (['product-browser', 'sbank-sponsor'].includes(workload)) input.source_sha = candidate;
+    if (!['tieto-sponsor', 'immune-tournament', 'chaos-lab',
+         'portfolio-browser', 'new-products-browser'].includes(workload)) {
+      input.source_sha = candidate;
+    }
     if (['portfolio-browser', 'new-products-browser'].includes(workload)) input.product = 'all';
     const plan = resolvePlan(input, context);
     assert.ok(plan.jobCount >= 1 && plan.jobCount <= 12);
@@ -44,4 +47,15 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
     for (const row of plan.matrix.include) assert.match(row.source_sha, /^[a-f0-9]{40}$/);
   }
   assert.throws(() => resolvePlan({workload: 'meta-browser', browser: 'firefox'}, context), /Chromium/);
+});
+
+test('V8 prospective workload admits exactly one reviewed source and stops at credit cutoff', () => {
+  const workload = 'rokoko-mujoco-v8-prospective';
+  assert.throws(() => resolvePlan({workload}, context), /requires an explicit source_sha/);
+  const admitted = resolvePlan({workload, source_sha: candidate}, context);
+  assert.equal(admitted.jobCount, 1);
+  assert.deepEqual(admitted.matrix.include.map(x => x.source_sha), [candidate]);
+  assert.deepEqual(admitted.matrix.include.map(x => x.qualification), ['product-source']);
+  assert.throws(() => resolvePlan({workload, source_sha: candidate}, {
+    ...context, now: '2026-11-15T17:00:00Z'}), /deadline/);
 });
