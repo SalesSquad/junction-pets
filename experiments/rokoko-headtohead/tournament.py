@@ -80,9 +80,21 @@ def verify_shared_simulator(v2_root: Path, td_root: Path) -> tuple[Path, Path]:
     v2_src = v2_root / ARENA_PATH
     td_src = td_root / ARENA_PATH
     for filename, expected in (("arena.py", ARENA_SHA256), ("run.py", RUN_SHA256)):
-        for parent in (v2_src, td_src):
-            if _sha(parent / filename) != expected:
-                raise ValueError("SHARED_SIMULATOR_SHA_MISMATCH")
+        for role, parent in (("v2", v2_src), ("td", td_src)):
+            try:
+                actual = _sha(parent / filename)
+            except OSError as error:
+                # Source paths in a throwaway runner are not secrets, but retain
+                # only the bounded role/basename/error-class in the public log.
+                raise ValueError(
+                    f"SHARED_SIMULATOR_UNREADABLE role={role} file={filename} "
+                    f"error={type(error).__name__}"
+                ) from error
+            if actual != expected:
+                raise ValueError(
+                    f"SHARED_SIMULATOR_SHA_MISMATCH role={role} file={filename} "
+                    f"expected={expected} observed={actual}"
+                )
     if v2_src.resolve() == td_src.resolve():
         raise ValueError("SEPARATE_SOURCE_ROOTS_REQUIRED")
     return v2_src, td_src
