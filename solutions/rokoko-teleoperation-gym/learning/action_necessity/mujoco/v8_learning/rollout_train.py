@@ -484,6 +484,22 @@ def build_source_bound_manifest(output, head, frozen_sha, training, trial_count)
             "dev_cal_test_ood_opened": False, "promotion_authorized": False}
 
 
+def write_compact_source_bound_training(path, training):
+    """Lossless V7-compatible compact JSON: all 640 rows and sparse refs remain.
+
+    Unlike the generic historical `v8.write_new`, which pretty-indents every
+    deeply nested sparse 18D transition, the original V7 producer used a
+    canonical compact single-line JSON training summary. It is the same exact
+    JSON object; no rounding, omission, field filtering or threshold change.
+    """
+    encoded = v8.canonical_bytes(training) + b"\n"
+    v8.require(0 < len(encoded) <= MAX_CAPTURED_JSON_BYTES,
+               "V8_TRAIN_SUMMARY_EXCEEDS_CRACI_CAPTURE_LIMIT")
+    with path.open("xb") as stream:
+        stream.write(encoded)
+    return len(encoded)
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--mode", choices=("prospective-train",), required=True)
@@ -569,9 +585,8 @@ def main(argv=None):
                 "source_sha256": {"rollout_train.py": sha_file(HERE / "rollout_train.py"),
                                   "run.py": sha_file(HERE / "run.py")},
                 "trials": trials, "dataset_sha256": dataset_sha}
-    v8.write_new(output / "training.json", training)
-    v8.require((output / "training.json").stat().st_size <= MAX_CAPTURED_JSON_BYTES,
-               "V8_TRAIN_SUMMARY_EXCEEDS_CRACI_CAPTURE_LIMIT")
+    captured_training_bytes = write_compact_source_bound_training(
+        output / "training.json", training)
     readout.update(schema=SCHEMA + ".readout", executed_head=head,
                    frozen_weights_sha256=frozen_sha,
                    dataset_sha256=dataset_sha)
@@ -581,6 +596,7 @@ def main(argv=None):
     manifest = build_source_bound_manifest(output, head, frozen_sha, training, len(trials))
     v8.write_new(output / "manifest.json", manifest)
     print(json.dumps({"executed_head": head, "train_only_real_trials": len(trials),
+                      "training_json_bytes": captured_training_bytes,
                       "model_weights_sha256": frozen_sha,
                       "dataset_sha256": dataset_sha,
             "v8_safe_near_goals": readout["strategies"]["v8_hierarchical"]["safe_near_goals"],
