@@ -92,3 +92,39 @@ test('real MIT-licensed image feature trials use only pinned harness and four no
   assert.throws(() => resolvePlan({workload: 'lens-real-bop-train',source_sha:candidate},context),
                 /pinned harness SHA/);
 });
+
+test('eight fresh real-image R/metadata lanes are unique and fail closed', () => {
+  const all = resolvePlan({workload:'lens-r8-meta', lane_slice:'all'}, context);
+  const pilot = resolvePlan({workload:'lens-r8-meta', lane_slice:'pilot'}, context);
+  const remainder = resolvePlan({workload:'lens-r8-meta', lane_slice:'remaining'}, context);
+  assert.equal(all.jobCount,8);
+  assert.equal(all.maxParallel,8);
+  assert.equal(pilot.jobCount,1);
+  assert.equal(remainder.jobCount,7);
+  assert.deepEqual([...pilot.matrix.include,...remainder.matrix.include].map(r=>r.cell),
+                   all.matrix.include.map(r=>r.cell));
+  assert.equal(new Set(all.matrix.include.map(r=>r.arm)).size,8);
+  assert.ok(all.matrix.include.every(r=>r.source_sha === context.harnessSha));
+  assert.throws(()=>resolvePlan({workload:'lens-r8-meta', source_sha:candidate},context),
+    /pinned immutable harness/);
+  assert.throws(()=>resolvePlan({workload:'lens-r8-meta', lane_slice:'unsupported'},context),
+    /Unsupported R8 lane slice/);
+});
+
+test('R3 distinct risk, drift, and hard-negative pilots preserve source and green R8 cohorts', () => {
+  const all = resolvePlan({workload:'lens-r3-methods',lane_slice:'all'},context);
+  const pilot = resolvePlan({workload:'lens-r3-methods',lane_slice:'pilot'},context);
+  const remaining = resolvePlan({workload:'lens-r3-methods',lane_slice:'remaining'},context);
+  assert.equal(all.jobCount,3);
+  assert.equal(all.maxParallel,3);
+  assert.deepEqual(all.matrix.include.map(x=>x.method),
+                   ['risk-upper','metadata-shield','hard-negative']);
+  assert.deepEqual([...pilot.matrix.include,...remaining.matrix.include].map(x=>x.cell),
+                   all.matrix.include.map(x=>x.cell));
+  assert.equal(new Set(all.matrix.include.map(x=>x.cell)).size,3);
+  assert.ok(all.matrix.include.every(x=>x.source_sha===context.harnessSha));
+  assert.throws(()=>resolvePlan({workload:'lens-r3-methods',source_sha:candidate},context),
+                /pinned immutable harness/);
+  assert.throws(()=>resolvePlan({workload:'lens-r3-methods',lane_slice:'invalid'},context),
+                /Unsupported R3 lane slice/);
+});
