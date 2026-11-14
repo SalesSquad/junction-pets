@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import sys
 import tempfile
+from types import ModuleType
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -119,6 +122,16 @@ class HybridContracts(unittest.TestCase):
         self.assertLessEqual(c.rescue_rounds, h.MAX_RESCUE_ROUNDS)
         self.assertEqual(c(public_observation(), mask()), 6)
 
+    def test_rescue_budget_yields_a_real_v5_decision_between_rounds(self):
+        c = h.ConservativeHybrid(factory(6), factory(3))
+        for _ in range(h.RESCUE_OPTIONS_PER_ROUND):
+            self.assertEqual(c(public_observation(), mask()), 3)
+        self.assertEqual(c.rescue_rounds, 1)
+        self.assertEqual(c(public_observation(), mask()), 6)
+        self.assertEqual(c.rescue_rounds, 1)
+        self.assertEqual(c(public_observation(), mask()), 3)
+        self.assertEqual(c.rescue_rounds, 2)
+
     def test_unshielded_baseline_proposal_fail_closed(self):
         c = h.ConservativeHybrid(factory(1), factory(3))
         with self.assertRaisesRegex(h.HybridContractError, "SEVEN_OPTION_SHIELD"):
@@ -150,6 +163,16 @@ class HybridContracts(unittest.TestCase):
             p.write_text("{}\n")
             with self.assertRaisesRegex(h.HybridContractError, "UNREVIEWED"):
                 h.frozen_factories(p, h.V8 / "checkpoints/training-receipt.json")
+
+    def test_generic_run_module_collision_cannot_supply_frozen_verifier(self):
+        forged = ModuleType("run")
+        forged.__file__ = __file__
+        forged.verify_frozen_model = lambda *args: (None, None, h.V8_CANONICAL_MODEL_SHA256)
+        with patch.dict(sys.modules, {"run": forged}):
+            with self.assertRaisesRegex(h.HybridContractError, "GENERIC_RUN_IMPORT_COLLISION"):
+                h.verified_original_bundle(
+                    h.V8 / "checkpoints/weights.json",
+                    h.V8 / "checkpoints/training-receipt.json")
 
     def test_missing_factory_mode_rejected(self):
         with self.assertRaises(h.HybridContractError):
