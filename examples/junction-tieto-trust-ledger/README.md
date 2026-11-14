@@ -11,7 +11,7 @@ node --test ledger.test.mjs
 node demo.mjs
 ```
 
-The demo uses a deliberately **synthetic** set of check outcomes. Although the sample source SHA values and changed paths are real GitHub provenance, the purported pass/fail results are **not** test executions. The sample illustrates a favorable claimed fail→pass check and a deceptive pass→pass check; the gate refuses both as proven evidence and explicitly flags the second as nondiscriminating. Do not report the fictional outcomes as MessagePack test results.
+The demo uses a deliberately **synthetic** set of check outcomes. Its named reviewer, **Aino Example (fictional reviewer)**, is fictional and has not accepted anything. Although the sample source SHA values and changed paths are real GitHub provenance, the purported pass/fail results are **not** test executions. The sample illustrates a favorable claimed fail→pass check and a deceptive pass→pass check; the gate refuses both as proven evidence and explicitly flags the second as nondiscriminating. Do not report the fictional outcomes as MessagePack test results.
 
 ## Official challenge mapping
 
