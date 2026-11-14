@@ -85,6 +85,7 @@ node scripts/craci/learning_controller/cli.mjs \
   --receipt "$RECEIPT" \
   --candidate-commit 58c972e58575f022f2e97f09612f7c7fb244d4cb \
   --candidate-weights 3a926fdd80bc5bfe069ba4ab50792aaed760d81480eb68a80b6e087beec71f3d \
+  --candidate-strategy v10_candidate \
   --out NEW-EVIDENCE-CYCLE.json
 ```
 
