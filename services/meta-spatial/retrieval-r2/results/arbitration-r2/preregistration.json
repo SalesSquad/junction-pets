@@ -1,0 +1,59 @@
+{
+  "absent_error_scope": "ANY acceptance across all query variants within each absent family",
+  "absent_family_risk_targets": [
+    0.01,
+    0.05
+  ],
+  "actual_new_view_observed": false,
+  "agreement": "DINO_top1 == dev_selected_SigLIP_hybrid_top1 == RRF_top1; exact product, not family",
+  "calibration_coverage_targets": [
+    0.1,
+    0.25,
+    0.5,
+    0.75
+  ],
+  "capture_outcome": "SIMULATED_RECOMMENDATION_ONLY",
+  "counterfactual_quality_gain_measured": false,
+  "evaluation_partitions": [
+    "test",
+    "ood"
+  ],
+  "id": "META-LENS-TRAIN-20261114-R2-ARBITRATION-1",
+  "methods": [
+    "frozen_siglip_hybrid",
+    "frozen_dino",
+    "fixed_rrf",
+    "fixed_rrf_agreement"
+  ],
+  "model_pins": {
+    "dino": {
+      "dimension": 384,
+      "id": "facebook/dinov2-small",
+      "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056",
+      "weights": "ae1e99fcefd534ed978cdeb8326f08030c96e28b7a81ffcbc98a857c84d14be1"
+    },
+    "siglip": {
+      "dimension": 768,
+      "id": "google/siglip2-base-patch16-224",
+      "revision": "75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2",
+      "weights": "612923381c76ec5a9bed335d1c48827e3f2e506ac31b044b63b2031fadee6a0b"
+    }
+  },
+  "present_error_scope": "ALL query rows plus any error within each family",
+  "rrf_components": [
+    "DINO_image_image",
+    "SigLIP_image_image",
+    "SigLIP_image_text"
+  ],
+  "rrf_k": 60,
+  "rrf_weights": [
+    1,
+    1,
+    1
+  ],
+  "script_sha256": "1ce0dbc10c740d94d397c1c7528765a2ed14b6a04b38b19af164570fed0ea8fc",
+  "selection_after_test_inspection_allowed": false,
+  "siglip_hybrid_weight_selection_partition": "dev",
+  "threshold_selection_partition": "cal",
+  "trained_parameters": 0
+}
