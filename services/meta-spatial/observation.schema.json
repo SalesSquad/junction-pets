@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:chibi:meta:sam31-observation:v1",
+  "title": "Untrusted SAM 3.1 observation candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "evidenceMode",
+    "episodeId",
+    "sessionId",
+    "captureGeneration",
+    "runId",
+    "trackGeneration",
+    "sourceThroughFrameIndex",
+    "frame",
+    "model",
+    "tracks"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "meta.sam31.observation"
+    },
+    "evidenceMode": {
+      "enum": [
+        "MODEL",
+        "SYNTHETIC"
+      ]
+    },
+    "episodeId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "sessionId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "captureGeneration": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "runId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "trackGeneration": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "sourceThroughFrameIndex": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "frameIndex",
+        "sha256",
+        "capturedAt",
+        "width",
+        "height"
+      ],
+      "properties": {
+        "frameIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "codeCommit",
+        "weightsRevision",
+        "checkpointSha256"
+      ],
+      "properties": {
+        "id": {
+          "const": "facebook/sam3.1"
+        },
+        "codeCommit": {
+          "const": "eef6839bcfc3458dd52ea80535dc6bd62aea86b1"
+        },
+        "weightsRevision": {
+          "const": "daa63191845a41281374e725f4c9e51c7a824460"
+        },
+        "checkpointSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "tracks": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "trackId",
+          "label",
+          "bbox",
+          "maskSha256",
+          "crop",
+          "visibility"
+        ],
+        "properties": {
+          "trackId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "bbox": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "maskSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "crop": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sha256",
+              "width",
+              "height",
+              "mimeType"
+            ],
+            "properties": {
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "mimeType": {
+                "enum": [
+                  "image/png",
+                  "image/jpeg"
+                ]
+              }
+            }
+          },
+          "visibility": {
+            "const": "visible"
+          }
+        }
+      }
+    }
+  },
+  "description": "bbox is normalized xyxy; strictly positive area. sourceThroughFrameIndex must equal frame.frameIndex: publish only the last frame of the provided causal prefix. track IDs are unique within this envelope and not physical identity. SYNTHETIC never proves a model execution. PNG masks/crops live in trusted artifact storage, not arbitrary user URLs."
+}

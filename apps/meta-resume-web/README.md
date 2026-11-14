@@ -20,9 +20,63 @@ python3 -m http.server 4179 --bind 127.0.0.1 --directory apps/meta-resume-web
 
 Open `http://127.0.0.1:4179/`. Use `http://127.0.0.1:4179/?display=1` for the
 compact display view. Stop the temporary preview with Ctrl-C when finished.
-The app itself makes no API, font, image, telemetry or provider requests.
+The page makes one same-origin observation-service discovery request. A plain
+static server returns unavailable; the existing local packing controls still work.
+There are no external font, image or telemetry requests. Images are sent for
+interpretation only after an explicit **Analyze this moment** action, when an
+observation service is connected.
 The HTTP origin is needed for ES modules; opening `index.html` directly as a
 local file is not the supported launch path.
+
+## What changed? — optional observation panel
+
+The new panel connects to the local observation service documented in the
+[Meta service](../../services/meta-spatial/README.md). It keeps imported media
+and suggestions in page memory only; neither is written to the local command
+journal or admitted as trusted task evidence.
+
+For a complete synthetic interpretation journey, start the existing Node service
+instead of the plain static preview:
+
+```sh
+node services/meta-spatial/observation-server.mjs --mode synthetic --port 8787
+```
+
+Open `http://127.0.0.1:8787/`. This mode uses a synthetic response and makes no
+NVIDIA inference call. Stop the temporary service with Ctrl-C when finished.
+
+- **Use synthetic sample** fetches the service's original sample. Synthetic
+  tracking or interpretation is visibly labelled **SYNTHETIC DEMO**.
+- **Import observation** accepts one exported JSON bundle up to 2 MiB, containing
+  a SAM observation envelope and one inline PNG/JPEG frame or crop up to 1 MiB.
+  Source/image hashes, bounded fields, dimensions and current session/capture
+  generation are checked. URLs and executable content are not imported.
+- **Analyze this moment** sends the image and current unconfirmed step to the
+  same-origin service. A hosted NVIDIA profile discloses that the selected image
+  will go to NVIDIA; local and synthetic modes have their own explicit labels.
+- Results are advisory and bound to the exact task revision, frame, run, session
+  and capture generation. An old response, changed task or revoked capture is
+  discarded. Restart also cancels pending work even when fixture IDs repeat.
+- No observation result calls `dispatch`, confirms a step or turns a SAM track
+  into a physical `subjectId`. **Return to my current step** moves focus to the
+  existing user-controlled action. The confirmation dialog remains mandatory.
+
+The server contract is `GET /api/config` → `{mode, csrfToken}`, `GET
+/api/demo-observation` → `{observation, image}`, and `POST /api/observe` with
+`X-Meta-CSRF`. Requests carry `{schemaVersion, task, observation, image}`. The
+canonical [observation schema](../../services/meta-spatial/observation.schema.json)
+describes the candidate envelope; server-side validation remains authoritative.
+The frontend never receives provider credentials or chooses a provider URL.
+Its Content Security Policy allows only same-origin API requests.
+
+One focused check for image binding, stale replies and unauthorized completion:
+
+```sh
+node --test apps/meta-resume-web/observation-client.test.mjs
+```
+
+These client checks are not a rendered-browser, SAM execution, NVIDIA model,
+physical-glasses or private Chibi-host qualification.
 
 ## Try the complete moment
 
@@ -61,12 +115,14 @@ that service and does not call its synthetic candidate scorer. The private Chibi
 host remains the future authority for identity, consent, capture admission,
 memory, commands and effects.
 
-The assignment is `META-EXEC-20261114/U1`, with exclusive ownership of
+The original assignment was `META-EXEC-20261114/U1`, with exclusive ownership of
 `apps/meta-resume-web/**`, based on Junction
 `98d5a524d61e431ca36acd62b268ede343fc7fe2`. The coordinator owns the separate
 shared [command schema](../../docs/meta-execution/resume-command.schema.json)
-and [golden fixture](../../docs/meta-execution/golden-path.fixture.json) in the
-planning branch; those links become available after the corresponding integration.
+and [golden fixture](../../docs/meta-execution/golden-path.fixture.json), now
+integrated in the source baseline. The observation extension starts from
+`1283d38c0352055fb487f0c2d7af06f86a915f9b` under
+`META-SAM-NVIDIA-IMPL-20261114`.
 
 ## State and command contract
 
@@ -140,7 +196,7 @@ local demo, not a substitute for authenticated production authorization.
 Native surface detection is labelled **unqualified**, not a successful glasses
 or voice-availability claim.
 
-## Verification and limits
+## Earlier U1 verification and remaining limits
 
 One actual browser journey was attempted on the authorized Linux executor.
 Chromium failed **before page load** with
@@ -172,6 +228,10 @@ node apps/meta-resume-web/verify.mjs /tmp/chibi-resume-browser-check
 single script checks the visible journey with keyboard confirmation, local
 refresh continuity, a 600×600 viewport, cancellation, correction and revoke;
 it writes two screenshots and a JSON receipt and always closes its own server.
+It now uses the actual synthetic observation service and includes exactly one
+Analyze action at revision 4. The response must render without advancing the
+revision or confirming the charger; a later confirmation clears the suggestion,
+and revoke clears the preview and disables analysis.
 It does not provision a browser or service, run a matrix, or contact a provider.
 
 No physical-device, live capture, native assistant, host persistence,
