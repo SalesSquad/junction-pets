@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.aiven",
   "slug": "junction-aiven",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "agentName": "Aiven",
   "displayName": "Aiven companion",
   "company": {
@@ -11,80 +11,124 @@
     "role": "technology",
     "website": "https://aiven.io/"
   },
-  "tagline": "Clarify a managed data workflow before provisioning it.",
-  "introduction": "A data-platform companion for Aiven documentation, helping map requirements, review integration assumptions and plan observable operations.",
-  "welcome": "What would you like to understand or plan with Aiven? Choose a starter below, or share a small redacted example.",
+  "tagline": "Design and inspect an evidence-first Aiven data stack for AI agents.",
+  "introduction": "A data-platform companion for Aiven: it maps a workload to managed PostgreSQL, Kafka, OpenSearch, Valkey, ClickHouse and AI gateway patterns, designs replayable agent event logs and model evaluations, and, when the host grants a read-only Aiven connection, inspects real service state.",
+  "welcome": "What are you building on Aiven? Describe the workload, or share a small redacted data flow, and I will propose the services, the failure checks and what to measure first.",
   "accent": "#467bc1",
   "artIndex": 29,
   "capabilities": [
     {
       "id": "service-map",
-      "title": "Map data requirements",
-      "description": "Relate an application workload to the appropriate Aiven documentation areas.",
+      "title": "Map a workload to Aiven services",
+      "description": "Relate transactional, streaming, search, cache, analytics and model-routing needs to specific Aiven services and documentation, with the constraint that decides each choice.",
       "kind": "planning",
       "inputs": [
-        "application and data requirements"
+        "application, data and agent requirements"
       ],
       "outputs": [
-        "service questions and documentation map"
+        "service map with deciding constraints and documentation references"
       ],
       "requiresConnection": false
     },
     {
-      "id": "integration-review",
-      "title": "Review integration assumptions",
-      "description": "Inspect a proposed data flow for identity, schema and failure gaps.",
+      "id": "event-flight-recorder",
+      "title": "Design a replayable agent event log",
+      "description": "Design a PostgreSQL outbox, Debezium change capture through Kafka Connect and keyed Kafka topics so every agent action can be replayed, deduplicated by an idempotency key and audited after a disconnect.",
+      "kind": "planning",
+      "inputs": [
+        "agent actions, data ownership and delivery requirements"
+      ],
+      "outputs": [
+        "topic, key and connector design with a duplicate-and-disconnect test plan"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "stream-guardrails",
+      "title": "Plan real-time guardrails on event streams",
+      "description": "Specify streaming rules that detect bursts, cost spikes or new destinations in agent or device events and emit an explicit pause signal for the host to enforce; states whether Flink or a Kafka consumer is the available implementation.",
+      "kind": "planning",
+      "inputs": [
+        "event schema and risk thresholds"
+      ],
+      "outputs": [
+        "guardrail rules, pause-signal contract and evaluation cases"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "model-route-evaluation",
+      "title": "Plan model evaluation through AI gateway",
+      "description": "Plan running the same behaviour cases across several models through the Aiven AI gateway and choosing the cheapest model that passes a stated quality gate, with billing and early-availability limits made explicit.",
       "kind": "analysis",
       "inputs": [
-        "system diagram or data-flow description"
+        "behaviour cases, quality gate and budget"
       ],
       "outputs": [
-        "integration findings"
+        "evaluation matrix plan and routing decision criteria"
       ],
       "requiresConnection": false
     },
     {
-      "id": "operations-plan",
-      "title": "Plan operational evidence",
-      "description": "Define the evidence needed to support a reliability claim.",
+      "id": "search-and-memory",
+      "title": "Design search, retrieval memory and caching",
+      "description": "Combine OpenSearch full-text and vector search, PostgreSQL pgvector and Valkey caching or rate limits for catalogue search, agent memory with provenance and repeated-question cost control.",
       "kind": "planning",
       "inputs": [
-        "service goals and current observations"
+        "content, query patterns and freshness needs"
       ],
       "outputs": [
-        "monitoring and recovery plan"
+        "index, memory and cache design with relevance and staleness checks"
       ],
       "requiresConnection": false
     },
     {
-      "id": "integration-design",
-      "title": "Design Aiven challenge support",
-      "description": "Meaningful managed-data/service workflow owner. Produce a source-backed plan and peer handoff proposal; this capability alone executes no provider, database or physical action.",
+      "id": "usage-analytics",
+      "title": "Plan usage metering and analytics",
+      "description": "Plan streaming usage and cost events from Kafka into ClickHouse for metering, reports and operational dashboards, separating measured usage from estimates.",
       "kind": "planning",
       "inputs": [
-        "a scoped public or synthetic task and the exact challenge or integration question"
+        "usage events and reporting questions"
       ],
       "outputs": [
-        "At least one actual Aiven service central to working project, measured against local/no-service baseline;40% meaningful use/30% implementation/20% impact/10% creativity",
-        "source references, dependencies and explicitly unverified actions"
+        "analytics schema, ingestion path and metric definitions"
       ],
       "requiresConnection": false
+    },
+    {
+      "id": "platform-as-code",
+      "title": "Plan Aiven infrastructure as code",
+      "description": "Plan declaring Aiven services with the Aiven Operator for Kubernetes or Terraform, per-environment projects and cross-region replication, so the stack is reviewable and reproducible.",
+      "kind": "planning",
+      "inputs": [
+        "environments, regions and ownership model"
+      ],
+      "outputs": [
+        "resource layout, promotion flow and review checklist"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "live-stack-inspection",
+      "title": "Inspect a connected Aiven project read-only",
+      "description": "With a host-granted read-only Aiven MCP connection, list services, states, metrics, logs and integrations and compare them with the intended design; never creates, changes or deletes resources.",
+      "kind": "connection-required",
+      "inputs": [
+        "host-granted read-only Aiven connection and the question to answer"
+      ],
+      "outputs": [
+        "observed service state with timestamps, gaps against the design and one next check"
+      ],
+      "requiresConnection": true
     }
   ],
   "starterPrompts": [
-    "Plan a source-backed meaningful managed-data/service workflow owner task for this challenge.",
-    "Review this public or synthetic example against the challenge requirements and identify an adversarial check.",
-    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns."
+    "Map my AI agent app to Aiven services: we store users and tasks, stream agent actions and need search.",
+    "Design a replayable event log for our agent so a duplicate message or a disconnect never repeats an action.",
+    "Plan how to compare three models on our 50 test cases through Aiven AI gateway and pick the cheapest that passes.",
+    "Review this redacted data flow for source-of-truth, retry and schema-evolution problems."
   ],
   "sources": [
-    {
-      "id": "official-docs",
-      "title": "Aiven documentation",
-      "url": "https://aiven.io/docs/",
-      "publisher": "Aiven",
-      "checkedAt": "2026-11-11",
-      "summary": "Official managed data services, platform, developer tools and integration documentation."
-    },
     {
       "id": "pg-slow-queries",
       "title": "Identify PostgreSQL slow queries",
@@ -116,6 +160,70 @@
       "publisher": "Junction2026 / Aiven",
       "checkedAt": "2026-11-13",
       "summary": "Official challenge text captured from the signed-in participant platform on 13 November 2026. Meaningful managed-data/service workflow owner. Required proof and limitations are recorded in the source-bound challenge packet."
+    },
+    {
+      "id": "kafka-debezium-pg",
+      "title": "Create a Debezium source connector from PostgreSQL to Apache Kafka",
+      "url": "https://aiven.io/docs/products/kafka/kafka-connect/howto/debezium-source-connector-pg",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-14",
+      "summary": "Debezium reads committed changes from the PostgreSQL transaction log into Kafka topics for multiple consumers; Aiven supports several Debezium versions and advises pinning the connector version."
+    },
+    {
+      "id": "flink-overview",
+      "title": "Aiven for Apache Flink",
+      "url": "https://aiven.io/docs/products/flink",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-14",
+      "summary": "Managed Flink SQL stream processing. The page states existing services remain supported and new stream-processing workloads go through the Aiven account manager, so availability must be confirmed."
+    },
+    {
+      "id": "opensearch-overview",
+      "title": "Aiven for OpenSearch",
+      "url": "https://aiven.io/docs/products/opensearch",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-14",
+      "summary": "Managed OpenSearch for logs, application search and analytical aggregations, with OpenSearch Dashboards included."
+    },
+    {
+      "id": "valkey-overview",
+      "title": "Aiven for Valkey",
+      "url": "https://aiven.io/docs/products/valkey",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-14",
+      "summary": "Managed in-memory Valkey, compatible with Redis OSS 7.2.4, for caching and other in-memory data structures."
+    },
+    {
+      "id": "clickhouse-overview",
+      "title": "Aiven for ClickHouse",
+      "url": "https://aiven.io/docs/products/clickhouse",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-14",
+      "summary": "Managed columnar OLAP database for real-time analytical reports, with built-in integrations for Aiven for Kafka and Aiven for PostgreSQL."
+    },
+    {
+      "id": "ai-gateway-sdks",
+      "title": "Use AI gateway with SDKs",
+      "url": "https://aiven.io/docs/products/ai-gateway/use-sdks",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-14",
+      "summary": "Early availability. OpenAI- and Anthropic-compatible access at ai.aiven.io; the aiven-model router is free to use, named models are billed at listed rates, and the gateway must be enabled for the organization."
+    },
+    {
+      "id": "kubernetes-operator",
+      "title": "Aiven Operator for Kubernetes",
+      "url": "https://aiven.io/docs/tools/kubernetes",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-14",
+      "summary": "Manages Aiven services as Kubernetes custom resources; requires an operator install, cluster admin access and a token held in a Kubernetes Secret."
+    },
+    {
+      "id": "aiven-mcp",
+      "title": "Aiven MCP server for managed services",
+      "url": "https://aiven.io/docs/tools/mcp-server",
+      "publisher": "Aiven",
+      "checkedAt": "2026-11-14",
+      "summary": "MCP server for AI assistants to view and manage Aiven services; read-only mode and service scopes control which operations are available."
     }
   ],
   "sourceEvidence": {

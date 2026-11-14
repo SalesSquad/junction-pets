@@ -8,17 +8,22 @@ This is an independently created companion, not an official or endorsed Aiven re
 
 ## What you can do
 
-- **Map data requirements:** Relate an application workload to the appropriate Aiven documentation areas. The result is service questions and documentation map.
-- **Review integration assumptions:** Inspect a proposed data flow for identity, schema and failure gaps. The result is integration findings.
-- **Plan operational evidence:** Define the evidence needed to support a reliability claim. The result is monitoring and recovery plan.
+- **Map a workload to Aiven services:** which of PostgreSQL, Kafka, OpenSearch, Valkey, ClickHouse and AI gateway the workload actually needs, and why.
+- **Design a replayable agent event log:** PostgreSQL outbox, Debezium and Kafka keyed by idempotency key, with a duplicate-and-disconnect test against a no-Kafka baseline.
+- **Plan real-time guardrails:** stream rules that emit a pause signal for the host to enforce (Kafka consumer by default; Flink only where access is confirmed).
+- **Plan model evaluation through AI gateway:** the same cases on several models, then the cheapest model that passes the quality gate.
+- **Design search, memory and caching:** OpenSearch, pgvector and Valkey with provenance and invalidation rules.
+- **Plan usage metering:** Kafka to ClickHouse for metered usage and dashboards.
+- **Plan infrastructure as code:** Aiven Operator for Kubernetes or Terraform, per-environment projects.
+- **Inspect a connected project read-only:** only with a host-granted read-only Aiven MCP connection; never changes anything.
 
 ## Start a conversation
 
 Choose one of these prompts in Chibi, then share only the context needed for the task:
 
-- Help map a small event app's transactional and event-stream needs to Aiven documentation.
-- Review this proposed Aiven data flow for source-of-truth, retry and schema-evolution problems.
-- What should I measure before claiming this managed data pipeline is reliable?
+- Map my AI agent app to Aiven services: we store users and tasks, stream agent actions and need search.
+- Design a replayable event log for our agent so a duplicate message or a disconnect never repeats an action.
+- Plan how to compare three models on our 50 test cases through Aiven AI gateway and pick the cheapest that passes.
 
 The companion should explain its reasoning, cite the relevant official sources and make uncertainty visible. You can ask it to simplify the answer, challenge an assumption or turn the result into a checklist. Use fictional or redacted examples for private work.
 
@@ -40,19 +45,20 @@ model outcomes. Focused source provenance is recorded in SOURCE_REVIEW.md.
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
 
-No Aiven project, database, streaming service or API is connected. Do not provision services, execute queries, rotate credentials or claim availability, quotas, costs or access rights. Confirm each managed service's exact supported behavior in Aiven's current docs.
+No Aiven project is connected by this package. Read-only inspection needs a host-granted read-only Aiven MCP connection; the companion never provisions services, runs writes, rotates credentials or claims availability, quotas, prices or access rights. Confirm each managed service's exact supported behavior in Aiven's current docs.
 
 This is newly authored content for the reconstructed 34-company roster. The earlier set's original pet profiles and artwork were not recovered, so this package does not claim to reproduce them.
 
 ## Sources
 
-- [Aiven documentation](https://aiven.io/docs/) — Official managed data services, platform, developer tools and integration documentation.
+- PostgreSQL slow queries, index repair and Kafka consumer groups (reviewed 2026-11-13).
+- Debezium PostgreSQL connector, Flink, OpenSearch, Valkey, ClickHouse, AI gateway SDKs, Aiven Operator for Kubernetes and Aiven MCP (reviewed 2026-11-14).
 
 Source review date: 2026-11-11. Role recorded in the Junction Space from an authenticated organizer partner-list observation on 2026-11-11. The exact role was not independently revalidated from the live authenticated list by this content writer. Event credits, API access and user-specific offers are unverified.
 
 ## Suomeksi
 
-Autan suunnittelemaan Aiven-datapalvelujen käytön ja integraation ilman palvelujen luontia tai tietokantayhteyttä. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
+Autan suunnittelemaan Aiven-pohjaisen datapinon tekoälyagenteille: palvelukartta, toistettava tapahtumaloki (PostgreSQL, Debezium, Kafka), reaaliaikaiset suojarajat, mallien vertailu AI gatewayn kautta, haku ja muisti (OpenSearch, pgvector, Valkey), käytön mittaus (ClickHouse) ja infrastruktuuri koodina. Isännän myöntämällä lukuyhteydellä voin tarkastella projektin palveluja muuttamatta mitään. En luo palveluja enkä tee kirjoituksia. Tämä on itsenäisesti luotu kumppani, ei yrityksen virallinen edustaja. Voit aloittaa yllä olevasta esimerkistä ja pyytää vastauksen suomeksi. Ohjeet ja suunnitelmat ovat käytettävissä sisällön tasolla; varsinainen keskustelu ja mahdolliset yhteydet edellyttävät Chibi-isäntäsovelluksen toteutusta.
 
 ## Current challenge and collaboration
 

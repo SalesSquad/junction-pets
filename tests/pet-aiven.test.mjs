@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {loadPackages, validatePet, packageDigest} from '../lib/catalog.mjs';
 import {companyContext} from '../lib/company-context.mjs';
+import {readFileSync} from 'node:fs';
 
 // Authored-package regressions only: no retrieval, provider call or model scoring.
 const packs = await loadPackages(fileURLToPath(new URL('../', import.meta.url)));
@@ -21,12 +22,13 @@ const authored = id => {
 test('Aiven retains v1 isolated guidance contract and focused official provenance', () => {
   validatePet(pack.pet);
   assert.equal(pack.pet.schemaVersion, 1);
-  assert.equal(pack.pet.version, '0.1.3');
+  assert.equal(pack.pet.version, '0.2.0');
   assert.equal(pack.pet.slug, 'junction-aiven');
   assert.equal(pack.pet.artIndex, 29);
-  assert.equal(pack.pet.capabilities.length, 4);
-  assert.equal(pack.pet.capabilities.find(c => c.id === 'integration-design')?.kind, 'planning');
-  assert.ok(pack.pet.capabilities.every(c => !c.requiresConnection));
+  assert.equal(pack.pet.capabilities.length, 8);
+  const connected = pack.pet.capabilities.filter(c => c.requiresConnection).map(c => c.id);
+  assert.deepEqual(connected, ['live-stack-inspection']);
+  assert.equal(pack.pet.capabilities.find(c => c.id === 'live-stack-inspection').kind, 'connection-required');
   assert.equal(pack.pet.availability.runtime, 'chibi-host-required');
   assert.equal(pack.pet.availability.companyEndorsed, false);
   for (const url of Object.values(urls)) {
@@ -77,4 +79,44 @@ test('authored no-hit, irrelevant-hit and failure scenarios preserve useful reco
   assert.match(pack.instructions, /reference to verify/);
   assert.match(pack.instructions, /Never fabricate a supporting URL/);
   assert.match(pack.story, /authored expectations, not measured/);
+});
+
+test('Aiven stack capabilities stay source-bound, read-only and honest about availability', () => {
+  const stack = {
+    'event-flight-recorder': 'https://aiven.io/docs/products/kafka/kafka-connect/howto/debezium-source-connector-pg',
+    'stream-guardrails': 'https://aiven.io/docs/products/flink',
+    'model-route-evaluation': 'https://aiven.io/docs/products/ai-gateway/use-sdks',
+    'search-and-memory': 'https://aiven.io/docs/products/opensearch',
+    'usage-analytics': 'https://aiven.io/docs/products/clickhouse',
+    'platform-as-code': 'https://aiven.io/docs/tools/kubernetes',
+    'live-stack-inspection': 'https://aiven.io/docs/tools/mcp-server'
+  };
+  for (const [id, url] of Object.entries(stack)) {
+    assert.ok(pack.pet.capabilities.some(c => c.id === id), `missing capability ${id}`);
+    const source = pack.pet.sources.find(s => s.url === url);
+    assert.ok(source, `missing source ${url}`);
+    assert.equal(source.checkedAt, '2026-11-14');
+    assert.ok(pack.instructions.includes(url), `instructions must cite ${url}`);
+  }
+  assert.ok(pack.pet.sources.length <= 12);
+  assert.match(pack.instructions, /account manager/);
+  assert.match(pack.instructions, /early availability/);
+  assert.match(pack.instructions, /Never create, update, delete or power services/);
+  assert.doesNotMatch(pack.instructions, /^You are Aiven,/m);
+  assert.doesNotMatch(JSON.stringify(pack.pet.capabilities), /40% meaningful use/);
+  const suite = JSON.parse(readFileSync(new URL('../pets/aiven/evals-stack.json', import.meta.url), 'utf8'));
+  assert.equal(suite.petId, 'junction.aiven');
+  assert.equal(suite.cases.length, 6);
+  for (const c of suite.cases) {
+    assert.deepEqual(Object.keys(c).sort(), ['id', 'mustInclude', 'mustNotClaim', 'prompt']);
+    assert.ok(c.mustInclude.length >= 2 && c.mustNotClaim.length >= 2);
+    assert.ok(!pack.evals.cases.some(b => b.id === c.id));
+  }
+  const stackCase = id => suite.cases.find(c => c.id === id);
+  assert.ok([...companyContext(pack)].length < 20000);
+  const dup = stackCase('flight-recorder-duplicate-disconnect');
+  assert.ok(dup.mustInclude.some(s => /no-Kafka baseline/.test(s)));
+  assert.ok(dup.mustNotClaim.some(s => /exactly-once/.test(s)));
+  assert.ok(stackCase('guardrails-flink-availability').mustInclude.some(s => /account manager/.test(s)));
+  assert.ok(stackCase('live-inspection-read-only').mustNotClaim.some(s => /Offsets were reset/.test(s)));
 });

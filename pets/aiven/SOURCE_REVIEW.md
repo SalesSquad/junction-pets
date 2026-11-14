@@ -34,3 +34,26 @@ digest, pinned model/version, actual retrieval outcomes and independent scoring.
 The real retriever/host must supply scoped source URLs, content and failure/no-hit
 status; this content-only change cannot implement or attest those runtime results.
 Shared generator/lock and runtime changes remain outside this writer's scope.
+
+## Stack capability sources — 14 November 2026
+
+Work ID: `junction.aiven.stack-capabilities-20261114`. The eight pages below were
+fetched from the published aiven.io/docs website on 14 November 2026 (HTTP 200) and
+summarised in `pet.json`. The generic docs landing page was removed as a source
+because the guidance itself says a landing page is not proof. No account was
+changed; separately, a read-only `mcp-aiven@1.20.0` run against the owner's
+project verified the 37-tool read-only set used by workflow 8.
+
+| URL | Observed support and limits |
+| --- | --- |
+| https://aiven.io/docs/products/kafka/kafka-connect/howto/debezium-source-connector-pg | Debezium reads committed PostgreSQL changes into Kafka; several versions supported; pin the connector version. |
+| https://aiven.io/docs/products/flink | Existing services supported; new stream-processing workloads go through the account manager. Availability is not assumed. |
+| https://aiven.io/docs/products/opensearch | Search, logs and aggregations with OpenSearch Dashboards. No vector-search page was cited (the guessed URL returned 404). |
+| https://aiven.io/docs/products/valkey | In-memory, Redis OSS 7.2.4 compatible; caching. |
+| https://aiven.io/docs/products/clickhouse | Columnar OLAP with built-in Kafka and PostgreSQL integrations. |
+| https://aiven.io/docs/products/ai-gateway/use-sdks | Early availability; OpenAI/Anthropic-compatible; `aiven-model` router free, named models billed; organization enablement required. |
+| https://aiven.io/docs/tools/kubernetes | Operator manages Aiven services as CRDs; needs cluster admin and a token Secret. |
+| https://aiven.io/docs/tools/mcp-server | View and manage services; read-only mode and service scopes. |
+
+Integrator follow-up: regenerate `plugins/junction-aiven/` and the Chibi
+`web/public/junction/` bundle from this version (the Chibi bundle still ships 0.1.0).
