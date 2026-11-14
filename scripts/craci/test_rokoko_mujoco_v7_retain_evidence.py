@@ -8,6 +8,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
+import zipfile
 
 
 MODULE = Path(__file__).with_name("rokoko-mujoco-v7-retain-evidence.py")
@@ -72,6 +73,40 @@ class ExactRetentionContracts(unittest.TestCase):
                 dest.write(b"tamper")
             with self.assertRaisesRegex(AssertionError, "ARCHIVE_TAMPERED"):
                 retained.verify_parts(artifacts, report)
+
+    def test_rehashed_forged_part_and_report_cannot_defeat_frozen_manifest(self):
+        with tempfile.TemporaryDirectory(prefix="craci-v7-retention-") as directory:
+            root = Path(directory) / "evidence"
+            artifacts, _ = fixture(root)
+            report = retained.package_evidence(root, Path(directory) / "staging",
+                                               chunk_bytes=128)
+            source = report["sources"][0]
+            part = source["parts"][0]
+            zip_file = artifacts / part["archive"]
+            with zipfile.ZipFile(zip_file, "r") as reader:
+                old = reader.read(part["entry"])
+            forged = b"X" * len(old)
+            with zipfile.ZipFile(zip_file, "w", compression=zipfile.ZIP_DEFLATED) as writer:
+                writer.writestr(part["entry"], forged)
+            part["raw_sha256"] = hashlib.sha256(forged).hexdigest()
+            part["archive_sha256"] = retained.sha_file(zip_file)
+            part["archive_bytes"] = zip_file.stat().st_size
+            whole = hashlib.sha256()
+            for member in source["parts"]:
+                with zipfile.ZipFile(artifacts / member["archive"], "r") as reader:
+                    whole.update(reader.read(member["entry"]))
+            source["original_sha256"] = whole.hexdigest()
+            self.assertNotEqual(source["original_sha256"],
+                                json.loads((artifacts / "manifest.json").read_text())
+                                ["file_sha256"][source["name"]])
+            with self.assertRaisesRegex(AssertionError,
+                                        "SOURCE_HASH_MANIFEST_MISMATCH"):
+                retained.verify_parts(artifacts, report)
+            (artifacts / "retention-manifest.json").write_text(
+                json.dumps(report, sort_keys=True) + "\n", encoding="utf8")
+            with self.assertRaisesRegex(AssertionError,
+                                        "SOURCE_HASH_MANIFEST_MISMATCH"):
+                retained.restore_parts(artifacts, Path(directory) / "restored")
 
     def test_global_collector_cap_is_never_relaxed(self):
         with tempfile.TemporaryDirectory(prefix="craci-v7-retention-") as directory:
