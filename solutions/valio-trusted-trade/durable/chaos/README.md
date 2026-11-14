@@ -1,0 +1,35 @@
+# Valio WAL Recovery Chaos — isolated PostgreSQL SIGKILL/restart
+
+**Work ID:** `J26-VALIO-WAL-CHAOS-20261114`.
+
+Dependency: previously **actually PostgreSQL-qualified** [Valio durable PR #156](https://github.com/SalesSquad/junction-pets/pull/156), source `3273d3cefd97adda0757dace1ebd1952314966b6`, CRACI [run #43626798415](https://github.com/SalesSquad/junction-pets/actions/runs/43626798415). This is a new stacked draft PR, *not* an edit to that qualified source. The original failed [run #43626421407](https://github.com/SalesSquad/junction-pets/actions/runs/43626421407) remains historical evidence of the prior search-path bug.
+
+**Meaningful change:** test actual OS/storage death and Write-Ahead Log recovery, rather than repeatedly running already-green in-memory fixtures or falsely simulating a crash with an HTTP 500. This tool creates a **new disposable PostgreSQL cluster in a private random temporary directory**, listens only on a private UNIX socket, with `fsync=on`, `synchronous_commit=on`, `full_page_writes=on`. It verifies the exact PostgreSQL postmaster's `/proc` executable and PGDATA path before SIGKILL. It never connects to or stops a pre-existing host service or external database.
+
+## Source-pinned manual CRACI entrypoint
+
+Preconditions: non-root Linux executor, Node 22+, PostgreSQL server tooling (`initdb`, `pg_ctl`, `postgres` for 14–18), parent `durable/package-lock.json` npm dependencies. No Docker, service account password, runtime provider key, production PostgreSQL, sponsor API or persistent filesystem required.
+
+```sh
+cd solutions/valio-trusted-trade/durable
+npm ci --ignore-scripts --no-audit --no-fund
+node --test chaos/test/*.test.mjs
+node chaos/wal-lab.mjs --allow-kill9 --workers 8 --requests 10000 --seed 20261114 --max-minutes 23
+```
+
+The command explicitly requires `--allow-kill9` and will refuse root/non-Linux hosts. A job-local Ubuntu package install may expose binaries under `/usr/lib/postgresql/16/bin` (discovered automatically), or pass a **verified installed** absolute `VALIO_PG_BIN_DIR`. It does **not** use `VALIO_TEST_DATABASE_URL` because it owns and provisions its own test-only cluster. Pass `CRACI_SOURCE_SHA` from a verified checkout for an informational, source-bound job log; the harness cannot independently prove GitHub checkout authenticity.
+
+Runtime controls: `--requests` even 200–10000 (default 10000), `--workers` 3–8, `--max-minutes` 5–25 (default 23), optional `--keep-data` for test-owned crash forensics. Default successful cleanup stops and removes only this invocation's exact `j26-valio-wal-*` temporary cluster. If PostgreSQL cannot be proven stopped or crash recovery fails, it preserves that test-owned directory and reports the reason instead of deleting uncertain state.
+
+## Proof sequence
+
+1. Create a unique PostgreSQL cluster and private socket. Start eight distinct Node worker OS processes against its own fresh `j26_*` schema. Post two acknowledged synthetic order commits.
+2. Commit another order, kill its *Node worker* after PostgreSQL COMMIT but before its IPC acknowledgment. Record the ambiguity.
+3. Install a temporary test-only five-second `pg_sleep` trigger for eight distinct flight orders. Observe a **real `PgSleep` wait event** in `pg_stat_activity`; kill the **verified isolated PostgreSQL postmaster** using SIGKILL (and only its verified subprocesses). No host/other service process is targeted.
+4. Restart exactly the same PGDATA/WAL, check new postmaster PID, actual PostgreSQL interruption/redo log signals, and balance/outbox invariants. Replay the acknowledged + ambiguous operations and all flight keys. Require exactly 11 durable orders/batches/outbox rows, independent of how many flight commits survived the crash.
+5. Preserve **four adversarial SQL tamper controls** against a WAL-recovered sealed batch: outbox DELETE, mutation, TRUNCATE and unbalanced late INSERT must each return SQLSTATE `23514`, with no altered audit.
+6. Execute 10,000 **distinct state-changing** requests: 5,000 uniquely keyed, frozen supplier payment intents followed by 5,000 distinct compensating refunds (some multi-supplier), with a deterministic fixture seed and a fixed cap on execution time. Require exactly 10,011 batches and 10,011 outbox records, 5,011 distinct settled orders, 5,000 refunds, zero negative balances and zero unbalanced batches. No repeated unchanged green requests are counted toward 10k.
+
+JSON output includes measured duration, immutable fixture plan digest, actual PostgreSQL version, owned pre/post-restart postmaster PIDs, observed wait event, WAL recovery markers and log digest, replay observations and aggregate ledger/outbox invariants. CRACI wrapper must pin the exact GitHub source/workflow SHA separately and retain the real runner job URL/cost (actual provider bill may remain unknown). A local Node contract test **does not qualify** the WAL recovery; only the real isolated PostgreSQL job can.
+
+**Trust boundary:** All orders, approvals, buyers, suppliers and euro balances are synthetic. No live buyer identity, legal mandate, bank movement, supplier order, production Postgres or external exactly-once outbox delivery. Killing a test-owned PostgreSQL postmaster validates local crash/WAL recovery only, not distributed consensus or disaster recovery across hosts.
