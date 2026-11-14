@@ -59,7 +59,7 @@ def bible_prompt(slug: str, cast: list[str], lang: str) -> str:
 
 
 def baseline_prompt(slug: str, lang: str) -> str:
-    return pv.system_prompt(pv.persona(slug), lang) + " In `delivery` give a short acting note for the voice."
+    return pv.system_prompt(pv.persona(slug), lang, legacy=True) + " In `delivery` give a short acting note for the voice."
 
 
 def gen_line(system: str, prompt: str, key: str, log: list) -> dict:

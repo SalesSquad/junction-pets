@@ -55,8 +55,12 @@ in the language they heard, `--reply-language sv-SE` forces one language.
   handles both.
 - Multi-speaker in one request is limited to **2 speakers**, so N-agent conversations are
   synthesized turn by turn (what `relay` does).
-- `GET /v1beta/voices` lists the extended voice library; custom/cloned voices exist but are not
-  used here.
+- `GET /v1beta/voices` lists the extended voice library. **Voice design** (`POST /v1beta/voices`,
+  `type: "prompted"`, `model: gemini-3.8-flash-tts`, a one-sentence description: age, gender,
+  timbre, accent) returns a `voice_…` id and a sample; the id goes in
+  `speechConfig.voiceConfig.voice`. Put permanent traits in the description and the situation
+  in each line's `speech_metadata.style`. 200 designed voices per project, 1-year TTL.
+  `scene.py design-voices` stores the ids in `learned/designed-voices.json`.
 - Real-time duplex: Live API models `gemini-3.8-live`, `gemini-3.1-flash-live-preview`,
   `gemini-2.5-flash-native-audio-latest`, `gemini-3.5-live-translate-preview`
   (bidiGenerateContent over WebSocket, 16 kHz in / 24 kHz out PCM). `pet_voice.py` already
