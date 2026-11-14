@@ -25,7 +25,7 @@ user = getpass.getuser()
 database = "junction_council_test_craci"
 started = False
 try:
-    subprocess.run([str(bin_dir / "initdb"), "-D", str(data), "--auth-local=trust",
+    subprocess.run([str(bin_dir / "initdb"), "-D", str(data), "--encoding=UTF8", "--auth-local=trust",
         "--auth-host=reject", "--no-locale"], env=env, check=True, stdout=subprocess.DEVNULL)
     subprocess.run([str(bin_dir / "pg_ctl"), "-D", str(data), "-l", str(scratch / "postgres.log"),
         "-o", f"-c listen_addresses='' -k {sock} -p 54329", "-w", "start"],
@@ -36,6 +36,14 @@ try:
     from psycopg.conninfo import make_conninfo
     env["JUNCTION_COUNCIL_TEST_DATABASE_URL"] = make_conninfo(
         dbname=database, host=str(sock), port=54329, user=user, connect_timeout=3)
+    import psycopg
+    with psycopg.connect(env["JUNCTION_COUNCIL_TEST_DATABASE_URL"]) as connection:
+        server_encoding = connection.execute("SHOW server_encoding").fetchone()[0]
+        client_encoding = connection.execute("SHOW client_encoding").fetchone()[0]
+        assert server_encoding == "UTF8" and client_encoding == "UTF8"
+        assert connection.execute("SELECT 'synthetic'::text").fetchone()[0] == "synthetic"
+    print(json.dumps({"postgres_server_encoding": server_encoding,
+        "postgres_client_encoding": client_encoding, "text_adaptation": "str"}))
     env["PYTHONPATH"] = str(root / "services/council")
     gate = root / "services/council/tests/test_postgres_replay_pg.py"
     completed = subprocess.run([sys.executable, str(gate)], cwd=root, env=env, timeout=180)

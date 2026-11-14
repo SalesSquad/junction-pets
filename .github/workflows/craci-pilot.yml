@@ -381,7 +381,7 @@ jobs:
         product: ${{ fromJSON(inputs.product == 'sbank' && '["sbank"]' || inputs.product == 'hostinger' && '["hostinger"]' || inputs.product == 'espoo' && '["espoo"]' || '["sbank","hostinger","espoo"]') }}
         browser: ${{ fromJSON(inputs.browser == 'chromium' && '["chromium"]' || inputs.browser == 'firefox' && '["firefox"]' || inputs.browser == 'webkit' && '["webkit"]' || '["chromium","firefox","webkit"]') }}
     env:
-      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || fromJSON('{"sbank":"8baf32ebbe4c50e92f3230fa38c843b92b48a0b4","hostinger":"23a029a48794ba275a0309584bf9968f7f5b665c","espoo":"40d7be0dbb3ab601443c5d79290979e58288edc8"}')[matrix.product] }}
+      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || fromJSON('{"sbank":"b2bb7f532fd496287aace73da98296306080df6c","hostinger":"23a029a48794ba275a0309584bf9968f7f5b665c","espoo":"ccd67d64f9a94952b0cd0f0ae1a6e2c8e8901a0a"}')[matrix.product] }}
     steps:
       - name: Configure browser installation networking
         uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
@@ -464,7 +464,7 @@ jobs:
       matrix:
         shard: ${{ fromJSON(inputs.shard == '0' && '[0]' || inputs.shard == '1' && '[1]' || inputs.shard == '2' && '[2]' || inputs.shard == '3' && '[3]' || '[0,1,2,3]') }}
     env:
-      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || '8baf32ebbe4c50e92f3230fa38c843b92b48a0b4' }}
+      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || 'b2bb7f532fd496287aace73da98296306080df6c' }}
     steps:
       - name: Configure source-only networking
         uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
@@ -492,12 +492,12 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
-      - name: Check 22002 independent cent and provenance properties
+      - name: Check 220002 independent cent and provenance properties
         env:
           SOURCE_DIR: ${{ github.workspace }}/source
           EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
           CRACI_SHARD: ${{ matrix.shard }}
-          CRACI_CASES: '2000'
+          CRACI_CASES: '20000'
         run: |
           set -euo pipefail
           git -C harness rev-parse HEAD
