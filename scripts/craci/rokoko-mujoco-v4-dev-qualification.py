@@ -8,7 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-SOURCE = "3845af08a6df0dfb8b844f355b722425e254b312"
+SOURCE = "5be248192d6eb09d54068d5509784644d763006f"
 
 
 def main() -> int:
@@ -31,7 +31,7 @@ def main() -> int:
     destination = evidence / "dev-physics-v4.json"
     execution = subprocess.run([
         str(python), str(module / "run.py"), "--split", "dev", "--episodes", "70",
-        "--seed-offset", "30", "--max-options", "60", "--require-git", "--expected-head", SOURCE,
+        "--seed-offset", "100", "--max-options", "60", "--require-git", "--expected-head", SOURCE,
         "--output", str(destination),
     ], cwd=str(src), check=False)
     if not destination.is_file():
@@ -44,12 +44,38 @@ def main() -> int:
         obj["schema"] == "rokoko-mujoco-real-physics-swept-lane-v4"
         and obj["actual_physics_engine"] == "mujoco-3.3.7"
         and obj["executed_head"] == SOURCE
-        and obj["split"] == "dev" and obj["first_seed"] == 129030
+        and obj["split"] == "dev" and obj["first_seed"] == 129100
         and obj["episodes"] == 70 and len(rows) == 70
         and all(
             len({record["world_hash"] for record in row.values()}) == 1
-            and all(record["physics_steps"] > 0 for record in row.values())
+            and all(
+                (record["physics_steps"] > 0 and record["zero_physics_abstain"] is False)
+                or (
+                    policy == "safe_v4"
+                    and record["zero_physics_abstain"] is True
+                    and record["physics_steps"] == 0
+                    and record["option_steps"] == 1
+                    and record["abstained"] is True
+                    and record["success"] is False
+                    and record["unsafe"] is False
+                    and record["proposal_counts"] == {"ABSTAIN": 1}
+                    and record["option_trace"] == [{
+                        "option": 1, "proposed": "ABSTAIN", "allowed": True,
+                        "progress_m": 0., "contacts_added": 0, "refusals_added": 0,
+                    }]
+                )
+                for policy, record in row.items()
+            )
             for row in rows
+        )
+        and all(
+            obj["abstention_accounting"][policy]["zero_physics_abstained"] ==
+            sum(int(row[policy]["zero_physics_abstain"]) for row in rows)
+            for policy in ("constant", "risk_v3", "safe_v4")
+        )
+        and all(
+            obj["abstention_accounting"][policy]["zero_physics_abstained"] == 0
+            for policy in ("constant", "risk_v3")
         )
     )
     science_ok = (
@@ -61,9 +87,11 @@ def main() -> int:
         and comparisons["candidate_unsafe"] <= comparisons["constant_unsafe"]
     )
     summary = {
-        "schema": "junction.rokoko.mujoco-v4.craci.dev.v1",
+        "schema": "junction.rokoko.mujoco-v4.craci.dev.v2",
         "source_sha": SOURCE,
         "actual_physics_source_verified": source_ok,
+        "zero_physics_explicit_safe_abstentions": obj["abstention_accounting"]["safe_v4"]["zero_physics_abstained"],
+        "zero_physics_refusals_are_not_physical_safety_proofs": True,
         "policy_scientific_gate_passed": science_ok,
         "teacher_baseline_negative_historical_run": 43627944236,
         "risk_v3_cal_negative_run": 43630816368,
@@ -76,7 +104,7 @@ def main() -> int:
         "delta_success_pp": comparisons["delta_success_percentage_points"],
         "paired_bootstrap95_pp": comparisons["paired_bootstrap95_pp"],
         "decision": "qualified_on_dev_only" if source_ok and science_ok else "failed_or_inconclusive_on_dev",
-        "limits": "real MuJoCo CPU physics on fresh 70 dev worlds 129030-129099; exposed v3 calibration 229000-229099 excluded; test/OOD untouched",
+        "limits": "real MuJoCo CPU physics on fresh 70 dev worlds 129100-129169; prior v4 attempt 129030-129099 exposed; exposed v3 calibration 229000-229099 excluded; test/OOD untouched",
     }
     with (evidence / "qualification.json").open("x") as handle:
         json.dump(summary, handle, sort_keys=True, indent=2)
