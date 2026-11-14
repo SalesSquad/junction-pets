@@ -67,7 +67,8 @@
 .learning-status { min-height:20px; margin-top:15px; color:var(--accent); font-size:11px; }
 .learning-status.learning-error { color:var(--amber); }
 .learning-storage { color:#899681; font-size:10px; margin-top:4px; }
-.compact .learning-panel { padding:24px 12px 0; margin-top:24px; }
+/* The 600px display keeps full learning controls behind the existing return link. */
+.compact .learning-panel { display:none; }
 @media(max-width:960px) {
   .learning-grid { grid-template-columns:1fr; }
   .learning-controls-grid { grid-template-columns:1fr 1fr; }
