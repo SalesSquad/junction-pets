@@ -205,6 +205,12 @@ def bind_terminal_dwell_and_timeout(training: dict, raw_gzip: Path):
     return len(seen)
 
 
+def all_goals_plus_original_positive(row, original_selector):
+    """Strict superset of V7 positive replay; includes clear-world goals too."""
+    require(type(row.get("success")) is bool, "HYBRID_INVALID_GOAL_REPLAY_LABEL")
+    return bool(original_selector(row) or row["success"])
+
+
 def main():
     source_root = Path(os.environ["CRACI_SOURCE_ROOT"]).resolve(strict=True)
     harness_root = Path(os.environ["CRACI_HARNESS_ROOT"]).resolve(strict=True)
@@ -347,6 +353,12 @@ def main():
 
     replayer = import_source(harness_root / "scripts/craci/rokoko-mujoco-v7-positive-replay.py",
                              "hybrid_original_true_physics_replayer")
+    # Original V7 positive replay historically selects near-corridor goals
+    # only. This four-arm prospective qualification MUST additionally replay
+    # every clear-world success, not merely inherit the old narrower selector.
+    historical_selector = replayer.positive_candidate
+    replayer.positive_candidate = lambda row: all_goals_plus_original_positive(
+        row, historical_selector)
     factory = {
         "frozen_v5": v5_factory,
         "v8_hierarchical": v8_factory,
@@ -357,10 +369,11 @@ def main():
     replay = replayer.replay_positive(
         destination, lambda: Env(max_options=60), lambda name: factory[name],
         runner.v7.v6.v5.v4.v3.v2.v1._world_signature)
+    all_goal_seeds = {row["seed"] for row in training["trials"]
+                      if row["success"] and not row["unsafe"]}
     require(replay["claim_verified"] is True and
             replay["selection_scan_replayed"] >= NEAR + CLEAR and
-            replay["verified_near_corridor_success_worlds"] ==
-            raw_check["worlds_safe_corridor_success"],
+            replay["verified_near_corridor_success_worlds"] == len(all_goal_seeds),
             "HYBRID_FROZEN_POLICY_OR_REAL_PHYSICS_REPLAY_FAILED")
     result_doc = {
         "schema": SCHEMA + ".independent-qualification", "source_head": requested_source,
@@ -369,6 +382,8 @@ def main():
         "real_original_option_transitions": raw_check["actual_real_option_transitions"],
         "all_original_full_traces_and_masks_verified": True,
         "independent_true_physics_positive_replay": True,
+        "independent_true_physics_all_goal_worlds_replayed": len(all_goal_seeds),
+        "original_v7_positive_selector_strengthened_to_all_goal_worlds": True,
         "independent_public_mask_reopen_worlds": reopens,
         "strict_frozen_v5_placebo_identical": True,
         "science": science, "candidate_verdict": science["verdict"],
