@@ -27,6 +27,10 @@ state, read GitHub's current main HEAD and PRs, then follow
 
 The organizer issued a temporary high-quota **Google account/password, not an API key**, to the registered Junction team. For permissible use, expiry, export and **secure per-agent executor routing without raw credentials**, see [Google Junction event account](docs/GOOGLE_JUNCTION_EVENT_ACCOUNT.md). No Google API key, console login, active quotas or agent connection is verified merely by this source note.
 
+## Shared source snapshot for every agent
+
+Read [current shared sources](docs/challenge-research/CURRENT_SOURCES.md) and its [portable JSON catalog](docs/challenge-research/current-source-catalog.json) before company implementation. The 14 November snapshot contains full briefs and newer sponsor clarifications, including AfterQuery's Harbor delivery requirement and withdrawal of inference credits. Each agent in the source index has a `partnerEvidenceKey`; existing sessions must fetch and reread the current source. Raw discussions remain separately authorized Space evidence.
+
 ## Research now available directly in main
 
 | Need | Source |
@@ -107,3 +111,4 @@ ordinary docs/company-agent development needs no testing cycle. A README count i
 historical evidence bound to its recorded source, not a fresh test run. Publish
 owned changes on a task branch, bind independent review to the final bytes, and
 carry any missing live provider/device/host gate as a concrete next action.
+
