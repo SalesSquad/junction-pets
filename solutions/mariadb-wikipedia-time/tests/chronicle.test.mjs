@@ -56,3 +56,34 @@ test('unavailable comparisons refuse an answer',()=>{
   const r=inspect(data,'missing','2025-01-01T00:00:00Z','2024-01-01T00:00:00Z');
   assert.equal(r.snapshot.status,'NO_EVIDENCE');assert.equal(r.comparison.status,'UNAVAILABLE');
 });
+
+test('case, accent, Unicode composition and whitespace preserve page and dataset identity', () => {
+  const pages = [
+    'case:Harbor', 'case:harbor', 'accent:cafe', 'accent:café',
+    'unicode:é', 'unicode:e\u0301', 'space:topic', 'space:topic '
+  ];
+  const rows = pages.map((page_id, index) => ({
+    revision_id: String(801 + index), page_id, title: page_id,
+    revised_at: '2025-03-05T00:00:00Z', body: 'distinct ' + (801 + index),
+    source_url: null
+  }));
+  const base = {...raw, dataset_id: 'RuntimeDataset', revisions: rows};
+  const upper = loadDataset(base);
+  const lower = loadDataset({...base, dataset_id: 'runtimedataset'});
+  assert.notEqual(upper.dataset_id, lower.dataset_id);
+  for (let index = 0; index < pages.length; index++) {
+    assert.equal(at(upper, pages[index], '2025-03-06T00:00:00Z').revision_id,
+      String(801 + index));
+  }
+  assert.equal(at(upper, 'CASE:Harbor', '2025-03-06T00:00:00Z').status, 'NO_EVIDENCE');
+});
+
+test('temporal SQL schema declares NO PAD binary collation for each identity key', () => {
+  const ddl = readFileSync(fileURLToPath(new URL('../sql/schema.sql', import.meta.url)), 'utf8');
+  for (const [column, limit] of [['dataset_id', 100], ['source_revision_id', 32], ['page_id', 128]]) {
+    const pattern = new RegExp(
+      '\\b' + column + '\\s+VARCHAR\\(' + limit + '\\)\\s+CHARACTER SET utf8mb4\\s+COLLATE utf8mb4_nopad_bin\\s+NOT NULL', 'i');
+    assert.match(ddl, pattern, column + ' must preserve strict identifier identity');
+  }
+  assert.match(ddl, /WITH SYSTEM VERSIONING/);
+});
