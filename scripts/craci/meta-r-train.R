@@ -27,6 +27,10 @@ stopifnot(identical(hashed, receipt$dataset_sha256))
 
 df <- read.csv(input, stringsAsFactors = FALSE, check.names = FALSE)
 robust <- isTRUE(receipt$robust_training)
+stress24 <- identical(receipt$profile, "hardshift24")
+stopifnot(!stress24 || (length(unique(receipt$cohort)) == 1L &&
+          receipt$cohort %in% 0:23 &&
+          !is.null(receipt$stress_variant)))
 expected_total <- if (robust) 35000L else 30000L
 expected_splits <- if (robust) c("train", "cal", "shifted", "normal_holdout") else
   c("train", "cal", "shifted")
@@ -151,7 +155,7 @@ if (length(admitted)) {
   winner <- admitted[order(-scores, false_rates, admitted)][[1]]
 }
 
-set.seed(20261114L + as.integer(unique(df$cohort)))
+set.seed((if (stress24) 20261214L else 20261114L) + as.integer(unique(df$cohort)))
 shifted_probs <- setNames(lapply(model_names, score, data = shifted), model_names)
 shifted_metrics <- setNames(lapply(model_names, function(name) {
   summary_metrics(shifted, shifted_probs[[name]], thresholds[[name]])
@@ -162,8 +166,15 @@ positive <- which(shifted$label == 1L)
 delta <- as.integer(shifted_probs[[winner]][positive] >= thresholds[[winner]]) -
   as.integer(shifted_probs[["baseline_calibrated"]][positive] >=
                thresholds[["baseline_calibrated"]])
-draws <- replicate(1200, mean(sample(delta, length(delta), replace = TRUE)))
-ci <- as.numeric(quantile(draws, c(0.025, 0.975), names = FALSE, type = 1))
+draws <- replicate(if (stress24) 12000L else 1200L,
+                   mean(sample(delta, length(delta), replace = TRUE)))
+ci95 <- as.numeric(quantile(draws, c(0.025, 0.975), names = FALSE, type = 1))
+# Familywise error control for 24 separate selected-winner holdout comparisons:
+# Bonferroni alpha .05/24, two-sided, predeclared and not tuned on test.
+ci_family <- if (stress24) as.numeric(quantile(
+  draws, c(0.05 / (2 * 24), 1 - 0.05 / (2 * 24)),
+  names = FALSE, type = 1)) else NULL
+ci <- if (stress24) ci_family else ci95
 selected <- shifted_metrics[[winner]]
 baseline <- shifted_metrics[["baseline_calibrated"]]
 normal_metrics <- if (robust) setNames(lapply(model_names, function(name) {
@@ -172,10 +183,13 @@ normal_metrics <- if (robust) setNames(lapply(model_names, function(name) {
 normal_safety <- !robust ||
   normal_metrics[[winner]]$fpr <=
     normal_metrics[["baseline_calibrated"]]$fpr + 0.01
+hard_negative_safety <- !stress24 ||
+  is.null(selected$hard_negative_fpr) ||
+  selected$hard_negative_fpr <= baseline$hard_negative_fpr
 quality <- if (winner != "baseline_calibrated" &&
                selected$fpr <= baseline$fpr &&
                selected$recall > baseline$recall &&
-               ci[[1]] > 0 && normal_safety) {
+               ci[[1]] > 0 && normal_safety && hard_negative_safety) {
   "EXPLORATORY_SYNTHETIC_HELDOUT_GAIN"
 } else "NO_RELIABLE_SHIFTED_GAIN"
 
@@ -185,7 +199,12 @@ report <- list(
   datasetSha256 = receipt$dataset_sha256,
   modelFamiliesTrained = names(models),
   candidateCount = length(models),
-  trainingProfile = if (robust) "mixed_train_shifted_calibration" else "source_train_source_calibration",
+  trainingProfile = if (stress24) "hardshift24_blinded_stress_holdout" else
+    if (robust) "mixed_train_shifted_calibration" else "source_train_source_calibration",
+  stressVariant = if (stress24) receipt$stress_variant else NULL,
+  familywiseAlpha = if (stress24) 0.05 else NULL,
+  heldoutComparisons = if (stress24) 24L else NULL,
+  selectedHardNegativeFprNoWorse = hard_negative_safety,
   calibrationDomain = receipt$calibration_domain,
   trainingCases = nrow(train), calibrationCases = nrow(cal),
   independentShiftedCases = nrow(shifted),
@@ -198,7 +217,8 @@ report <- list(
   shiftedHoldout = shifted_metrics,
   normalHoldout = normal_metrics,
   selectedMinusCalibratedBaselineShiftedRecall = as.numeric(mean(delta)),
-  pairedBootstrap95pct = ci,
+  pairedBootstrap95pct = ci95,
+  pairedBootstrapFamilywise24 = ci_family,
   selectedMinusBaselineShiftedFalseCandidates = selected$fp - baseline$fp,
   qualityClaim = quality,
   syntheticScoreModelOnly = TRUE, realCameraModel = FALSE,
@@ -217,5 +237,6 @@ cat(jsonlite::toJSON(list(
   cohort = as.integer(unique(df$cohort)), selected = winner,
   quality = quality, testRecall = selected$recall,
   baselineRecall = baseline$recall, testFpr = selected$fpr,
-  baselineFpr = baseline$fpr, deltaBootstrap95pct = ci),
+  baselineFpr = baseline$fpr, deltaBootstrap95pct = ci95,
+  deltaFamilywise24 = ci_family),
   auto_unbox = TRUE, null = "null"), "\n")
