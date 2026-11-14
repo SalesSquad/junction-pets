@@ -23,6 +23,10 @@ state, read GitHub's current main HEAD and PRs, then follow
    Checks or independent review are optional unless concrete risk or real
    qualification requires them. Never conflate synthetic and actual host evidence.
 
+## Google Junction temporary event account (14–15 November)
+
+The organizer issued a temporary high-quota **Google account/password, not an API key**, to the registered Junction team. For permissible use, expiry, export and **secure per-agent executor routing without raw credentials**, see [Google Junction event account](docs/GOOGLE_JUNCTION_EVENT_ACCOUNT.md). No Google API key, console login, active quotas or agent connection is verified merely by this source note.
+
 ## Research now available directly in main
 
 | Need | Source |
