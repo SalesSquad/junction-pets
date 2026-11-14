@@ -153,6 +153,8 @@ class V12ActualEvidenceContractTest(unittest.TestCase):
         self.assertFalse(readout["modelPromotionAuthorized"])
         with self.assertRaisesRegex(ValueError,"INCOMPLETE"):
             protocol.paired_physical_goal_readout(trials[:-1],cohort,"pilot")
+        with self.assertRaisesRegex(ValueError,"UNKNOWN_PHYSICAL_COHORT_STAGE"):
+            protocol.paired_physical_goal_readout(trials,cohort,"not-a-real-stage")
 
 
 if __name__=="__main__":unittest.main()
