@@ -55,14 +55,14 @@ try {
   // execFile buffers stderr/stdout on nonzero exit; without these we would
   // misleadingly report a generic failure even for a real WAL invariant bug.
   const scrub=value=>String(value??'')
-    .replace(/socket:[^\\s"']+/g,'[private-socket]')
-    .replace(/postgres(?:ql)?:\\/\\/[^\\s"']+/gi,'[private-database-url]')
-    .replace(/(password|token|authorization)\\s*[:=]\\s*[^\\s"']+/gi,'$1=[redacted]')
+    .replace(/socket:\S+/g,'[private-socket]')
+    .replace(/postgres(?:ql)?:\/\/\S+/gi,'[private-database-url]')
+    .replace(/(password|token|authorization)\s*[:=]\s*\S+/gi,'$1=[redacted]')
     .slice(-16000);
   const savedOut=scrub(error.stdout||childStdout);
   const savedErr=scrub(error.stderr||childStderr||error.message);
-  if(savedOut)await writeFile(join(output,'child.stdout.log'),savedOut+'\\n',{flag:'wx'});
-  if(savedErr)await writeFile(join(output,'child.stderr.log'),savedErr+'\\n',{flag:'wx'});
+  if(savedOut)await writeFile(join(output,'child.stdout.log'),savedOut+'\n',{flag:'wx'});
+  if(savedErr)await writeFile(join(output,'child.stderr.log'),savedErr+'\n',{flag:'wx'});
   const failure={schema:'junction.valio.wal.craci.qualification.v1',
     source_sha:SOURCE,status:'failed_or_blocked',
     error_code:/^[A-Z_]{4,80}$/.test(error.message||'')?error.message:'WAL_LAB_EXECUTION_FAILED',
