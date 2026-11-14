@@ -35,12 +35,13 @@ const FRONTIER_PINS = Object.freeze({
   'valio-settlement-browser': 'd45f450a38ec6c8fb2f73b96d181454458ae3928',
   'bahn-offline-sweep': 'a4396d5ead2acc3d3db5e9a456af7f48058bb358',
   'rokoko-rl-cpu': '59479b42b177c1829a2e6678adfff1fb68aef09c',
+  'rokoko-rl-full': '59479b42b177c1829a2e6678adfff1fb68aef09c',
 });
 export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full',
 ]);
 
 function choose(value, choices, label) {
