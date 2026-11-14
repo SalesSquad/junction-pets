@@ -1,6 +1,7 @@
 """Synthetic contract tests only; never a substitute for real CRACI physics."""
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 from pathlib import Path
 import unittest
@@ -14,21 +15,30 @@ SOURCE = "a" * 40
 
 
 def fixture():
-    rollouts = [{"seed": 5290000, "transitions": [{"action": 2, "reward": 0.5,
-                                                     "cost": 0}]}]
+    event = {"observation": [0.0] * 18, "next_observation": [0.0] * 18,
+             "mask": [1] * 7, "action": 2, "action_name": "PUSH_FAST",
+             "reward": 0.5, "cost": 0, "done": True}
+    rollouts = [{"generation": generation, "candidate": candidate,
+                 "seed": seed, "world_hash": hashlib.sha256(str(seed).encode()).hexdigest(),
+                 "transitions": [dict(event)]}
+                for generation in range(2) for candidate in range(3)
+                for seed in range(5290000, 5290048)]
     weights = {"clearance": 0.066, "lane_distance": 0.031}
     digest = validator.canonical_sha256(rollouts)
     wsha = validator.canonical_sha256(weights)
     training = dict(executed_head=SOURCE, dataset_sha256=digest,
-                    weights_sha256=wsha, actual_transition_count=1,
+                    weights_sha256=wsha, actual_transition_count=len(rollouts),
                     train_first_seed=5290000, train_episodes=48,
+                    actual_physics_engine="mujoco-3.3.7",
                     rollouts=rollouts, selected={"weights": weights})
-    model = dict(weights_sha256=wsha, weights=weights)
+    model = dict(executed_head=SOURCE, weights_sha256=wsha,
+                 dataset_sha256=digest, weights=weights)
     paired = []
     for i in range(80):
         row = {}
         for name in ("constant", "safe_v4", "learned_v5"):
-            row[name] = dict(seed=129170+i, world_hash="world-hash-long-"+str(i),
+            row[name] = dict(seed=129170+i,
+                             world_hash=hashlib.sha256(str(129170+i).encode()).hexdigest(),
                              success=(name == "learned_v5" and i < 24) or
                                      (name == "constant" and i < 13) or
                                      (name == "safe_v4" and i < 19),
@@ -36,13 +46,14 @@ def fixture():
                              zero_physics_abstain=False, physics_steps=100,
                              option_steps=1)
         paired.append(row)
+    ci = validator.paired_ci_from_worlds(paired)
     dev = dict(executed_head=SOURCE, split="dev", first_seed=129170,
                episodes=80, actual_physics_engine="mujoco-3.3.7",
                weights_sha256=wsha, dataset_sha256=digest,
                paired_worlds=paired, summaries={"learned_v5": {
                    "candidate_success": 24, "constant_success": 13,
                    "candidate_unsafe": 0, "constant_unsafe": 0,
-                   "paired_bootstrap95_pp": [2.0, 25.0],
+                   "paired_bootstrap95_pp": ci,
                }})
     return training, model, dev
 
@@ -59,6 +70,26 @@ class QualificationContracts(unittest.TestCase):
         t, m, d = fixture()
         t["train_first_seed"] = 129170
         with self.assertRaisesRegex(AssertionError, "UNREGISTERED_TRAIN_COHORT"):
+            validator.verify_dev_receipt(t, m, d, SOURCE)
+
+    def test_train_seed_leak_cannot_hide_behind_recomputed_dataset_sha(self):
+        t, m, d = fixture()
+        t["rollouts"][0]["seed"] = 129170
+        rehashed = validator.canonical_sha256(t["rollouts"])
+        t["dataset_sha256"] = m["dataset_sha256"] = d["dataset_sha256"] = rehashed
+        with self.assertRaisesRegex(AssertionError, "TRAINING_ROLLOUT_CONTAINS_EXPOSED"):
+            validator.verify_dev_receipt(t, m, d, SOURCE)
+
+    def test_mask_bypass_in_training_fails(self):
+        t, m, d = fixture()
+        t["rollouts"][0]["transitions"][0]["mask"][2] = 0
+        with self.assertRaisesRegex(AssertionError, "BYPASSED_SHARED_SHIELD"):
+            validator.verify_dev_receipt(t, m, d, SOURCE)
+
+    def test_unrecorded_training_rollouts_fail(self):
+        t, m, d = fixture()
+        t["rollouts"].pop()
+        with self.assertRaises(AssertionError):
             validator.verify_dev_receipt(t, m, d, SOURCE)
 
     def test_exposed_dev_seed_window_fails(self):
@@ -87,7 +118,7 @@ class QualificationContracts(unittest.TestCase):
 
     def test_mismatched_world_fails(self):
         t, m, d = fixture()
-        d["paired_worlds"][0]["learned_v5"]["world_hash"] = "different-valid-hash"
+        d["paired_worlds"][0]["learned_v5"]["world_hash"] = "f" * 64
         with self.assertRaisesRegex(AssertionError, "UNMATCHED_MUJOCO"):
             validator.verify_dev_receipt(t, m, d, SOURCE)
 
@@ -115,12 +146,29 @@ class QualificationContracts(unittest.TestCase):
 
     def test_negative_confidence_interval_blocks_science(self):
         t, m, d = fixture()
-        d["summaries"]["learned_v5"]["paired_bootstrap95_pp"] = [-2., 25.]
+        for i, row in enumerate(d["paired_worlds"]):
+            row["learned_v5"]["success"] = i < 14
+        d["summaries"]["learned_v5"]["candidate_success"] = 14
+        d["summaries"]["learned_v5"]["paired_bootstrap95_pp"] = (
+            validator.paired_ci_from_worlds(d["paired_worlds"]))
         self.assertFalse(validator.verify_dev_receipt(t, m, d, SOURCE)["science_gate_passed"])
+
+    def test_forged_positive_confidence_interval_fails_closed(self):
+        t, m, d = fixture()
+        for i, row in enumerate(d["paired_worlds"]):
+            row["learned_v5"]["success"] = i < 14
+        d["summaries"]["learned_v5"]["candidate_success"] = 14
+        d["summaries"]["learned_v5"]["paired_bootstrap95_pp"] = [2., 25.]
+        with self.assertRaisesRegex(AssertionError, "PRODUCER_CONFIDENCE_INTERVAL"):
+            validator.verify_dev_receipt(t, m, d, SOURCE)
 
     def test_scientific_red_proposes_only_new_training_and_dev_seeds(self):
         t, m, d = fixture()
-        d["summaries"]["learned_v5"]["paired_bootstrap95_pp"] = [-2., 25.]
+        for i, row in enumerate(d["paired_worlds"]):
+            row["learned_v5"]["success"] = i < 14
+        d["summaries"]["learned_v5"]["candidate_success"] = 14
+        d["summaries"]["learned_v5"]["paired_bootstrap95_pp"] = (
+            validator.paired_ci_from_worlds(d["paired_worlds"]))
         result = validator.verify_dev_receipt(t, m, d, SOURCE)
         next_round = result["next_learning_round"]
         self.assertEqual(next_round["new_train_only_seed_start"], 5291000)
