@@ -17,6 +17,50 @@ frame contains two visual lookalikes; the system **declines to verify** until an
 authenticated host confirms a unique ID. Revoking capture leaves a text-based
 fallback. This is an honest synthetic replay, not a recording from Meta glasses.
 
+## Phone ARKit source adapter
+
+The separate `ChibiLensARKit` library adds explicitly started iOS phone capture
+to the package. It emits a `PhoneSpatialObservation` containing an existing
+`LensFrameDraft(source: .phoneCamera)`, encoded JPEG and same-frame camera
+transform/intrinsics. Capture time remains in the ARKit clock domain. The image
+stays in native captured-image orientation; consumers must account for display
+rotation/crop when placing overlays.
+
+The adapter checks existing OS camera permission, caller consent and bystander
+clearance. The embedding app owns permission UI and `NSCameraUsageDescription`;
+the adapter never requests permission or starts itself. The owner must call
+`stop()` on consent/clearance withdrawal or when the capture view ends. Pending
+frames are fenced on stop, tracking loss, interruption and session rollover.
+Loss of established normal tracking retires that world and requires an explicit
+new start. After asynchronous analysis, call `capture.validateCurrent(observation)`
+on the main actor before using its result; a saved `CaptureGate` is insufficient.
+Only one encoded frame may await publication, with admission limited to 2 Hz.
+Device depth/mesh support is reported, but neither feature is enabled or captured
+by this first increment. There is no new provider route, memory store or service.
+
+```swift
+import ChibiLensARKit
+import ChibiLensCore
+
+// On the main actor, after the app's explicit user capture action and OS grant:
+let capture = PhoneSpatialCapture()
+capture.onObservation = { observation in
+    // Local preview or a proposal to the existing authenticated host.
+    // Keep observation.frame and geometry together; neither is a host receipt.
+}
+try capture.start(sessionID: "phone-session", consent: .granted,
+                  bystanderClearance: true)
+// Retain capture only for the user's capture session.
+capture.stop() // on revoke, clearance withdrawal, or view disposal
+```
+
+Phone pose remains **client-unverified / unregistered**. It cannot supply the
+glasses pose, prove object identity or complete a task. The SDK mock app below is
+unchanged. Physical phone capture, tracking recovery and the private host
+admission path require separate acceptance. See
+[ARKit and ScreenshotContext reuse](ARKIT_SCREEN_CONTEXT.md) for current SAM3.1 /
+Nemotron evidence, exact screenshot-reference semantics and staged integration.
+
 ## Official Meta SDK mock-video app
 
 The separate [DATMockApp](DATMockApp/README.md) links pinned official Meta DAT
