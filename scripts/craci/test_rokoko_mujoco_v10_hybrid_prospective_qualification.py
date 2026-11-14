@@ -6,6 +6,9 @@ import gzip
 import importlib.util
 import json
 from pathlib import Path
+import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -130,6 +133,36 @@ class PairedTrainScience(unittest.TestCase):
 
 
 class ArchivePreflight(unittest.TestCase):
+    def test_installed_cli_finds_original_packer_without_harness_root_flag(self):
+        """Regression: /repo/scripts/craci/ -> /repo needs THREE parents."""
+        with tempfile.TemporaryDirectory() as folder:
+            repo = Path(folder) / "verified-harness"
+            scripts = repo / "scripts" / "craci"
+            scripts.mkdir(parents=True)
+            installed = scripts / "rokoko-mujoco-v10-hybrid-retain-evidence.py"
+            shutil.copyfile(HERE / installed.name, installed)
+            # Only the original packer ABI is stubbed here: this focused test
+            # is about *path resolution*, not a simulated ZIP qualification.
+            original = scripts / "rokoko-mujoco-v7-retain-evidence.py"
+            original.write_text(
+                "CHUNK_BYTES=6*1024*1024\n"
+                "MAX_FILE_BYTES=20*1024*1024\n"
+                "MAX_COLLECTOR_BYTES=63*1024*1024\n"
+                "SOURCE_FILES=('training.json','full_transitions.jsonl.gz')\n"
+                "ARTIFACT_SCHEMAS={}\n"
+                "def restore_parts(folder, output):\n"
+                "    return {'sources': []}\n",
+                encoding="utf8")
+            evidence = Path(folder) / "existing-evidence"
+            evidence.mkdir()
+            completed = subprocess.run([
+                sys.executable, str(installed), "--mode", "restore",
+                "--evidence-root", str(evidence),
+                "--restore-output", str(Path(folder) / "new-restored-output"),
+            ], capture_output=True, text=True, check=False, timeout=10)
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertIn(packer.SCHEMA, completed.stdout)
+
     def test_exact_three_original_files_and_independent_replay(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
