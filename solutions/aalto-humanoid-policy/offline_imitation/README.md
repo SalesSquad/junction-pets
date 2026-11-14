@@ -28,6 +28,15 @@ python3 offline_study.py --dataset-root /path/to/pinned/snapshot \
 
 The default split seed `20261114` fixes **12 complete training episodes, four validation episodes and four untouched test episodes**. No adjacent frame from the same episode crosses the partitions. Validation selects ridge regularization; test results are calculated once. Metrics are MAE/RMSE in joint radians with per-episode macro averages. Baselines are train-mean, current-state identity, 1-nearest-training-state action, and a clearly labeled **non-deployable teacher-forced previous-action oracle**. The report includes source, data-file and script SHA-256s, episode IDs/counts, model selection and limitations; a `.npz` stores only ridge weights with no executable pickle.
 
+Because four episodes may strongly favor one model, run the deterministic five-seed sensitivity study. This tests the **fixed seeds 20261114 through 20261118 without cherry-picking**, with complete episode partitions preserved in every fold; the heldout groups overlap between seeds and are not independent datasets:
+
+```bash
+python3 sensitivity_suite.py --dataset-root /path/to/pinned/snapshot \
+  --output /scratch/aalto-m320-five-seed-001
+```
+
+The new output contains all five seed receipts, their model weight arrays and `summary.json`, including source hashes, each held-out episode's error/exposure, median and worst gain. A robust improvement is accepted only if the validation-selected ridge improves at least **5% on each of the five fixed test splits**. Negative results are mandatory evidence, not grounds to choose a more favorable seed. No GPU/AV1 or robot simulator is used by this sensitivity suite.
+
 Use the shortest affected-path test:
 
 ```bash
