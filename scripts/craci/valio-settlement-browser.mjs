@@ -72,6 +72,7 @@ async function runViewport(browser,viewport){
     const handshake=await clickPost(page,'#handshake-button','/api/quotes/'+quote.id+'/handshake');
     assert.equal(handshake.status,201);
     assert.equal(handshake.body.proof.verification.valid,true);
+    await page.waitForFunction(()=>document.querySelector('#trust-badge')?.textContent.includes('SIGNED DEMO PROOF'));
     assert.match(await page.locator('#trust-badge').textContent(),/SIGNED DEMO PROOF/);
     await page.waitForFunction(()=>document.querySelector('#commit-button')?.disabled===false);
 
@@ -82,6 +83,7 @@ async function runViewport(browser,viewport){
     assert.ok(order.totalCents>0);
     const authorization=(await committed.request.allHeaders()).authorization;
     assert.match(authorization,/^Bearer [a-z0-9-]+$/i);
+    await page.waitForFunction(()=>document.querySelector('#payment-status')?.textContent.includes('APPROVAL REQUIRED'));
     assert.equal(await page.locator('#payment-send-button').isDisabled(),true);
     assert.match(await page.locator('#payment-status').textContent(),/APPROVAL REQUIRED/);
 
@@ -119,6 +121,7 @@ async function runViewport(browser,viewport){
     const verifyPaid=await jsonGet(page,base,'/api/demo/ledger/verify',authorization);
     assert.equal(verifyPaid.valid,true);
     assert.equal(verifyPaid.totalDebitCents,order.totalCents);
+    await page.waitForFunction(()=>document.querySelector('#payment-status')?.textContent.includes('BALANCED'));
     assert.match(await page.locator('#payment-status').textContent(),/BALANCED/);
 
     const replay=await clickPost(page,'#payment-replay-button','/api/orders/'+order.id+'/settlement');
