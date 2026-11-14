@@ -21,8 +21,8 @@ FEATURES = ("visual", "text", "shape", "quality", "recency")
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--source-root", type=Path, required=True)
-    p.add_argument("--cohort", type=int, choices=range(12), required=True)
-    p.add_argument("--profile", choices=("normal", "robust"), default="normal")
+    p.add_argument("--cohort", type=int, choices=range(24), required=True)
+    p.add_argument("--profile", choices=("normal", "robust", "hardshift24"), default="normal")
     p.add_argument("--out", type=Path, required=True)
     args = p.parse_args()
 
@@ -57,7 +57,9 @@ def main():
             ("cal", "validation", CAL, "cal"),
             ("shifted", "shifted_test", SHIFTED, "shifted"),
         )
-    else:
+    elif args.profile == "robust":
+        if args.cohort > 11:
+            raise RuntimeError("Robust cohort must be 0..11")
         # New scientific hypothesis: mixed source/shift training, a *shifted*
         # calibration set and independent source + shifted heldouts. None of
         # these seeds overlaps the original cohort's earlier datasets.
@@ -67,6 +69,23 @@ def main():
             "cal": 710_007 + args.cohort * 10_037,
             "shifted": 810_011 + args.cohort * 10_039,
             "normal_holdout": 910_013 + args.cohort * 10_043,
+        }
+        parts = (
+            ("train", "train", 10_000, "train_normal"),
+            ("train", "shifted_test", 10_000, "train_shifted"),
+            ("cal", "shifted_test", 5_000, "cal"),
+            ("shifted", "shifted_test", 5_000, "shifted"),
+            ("normal_holdout", "train", 5_000, "normal_holdout"),
+        )
+    if args.profile == "hardshift24":
+        # New disjoint source/cal/test seeds for 24 independent 35k cohorts.
+        # These are different from the eight normal and twelve robust cohorts.
+        seeds = {
+            "train_normal": 2_110_001 + args.cohort * 101,
+            "train_shifted": 2_310_003 + args.cohort * 101,
+            "cal": 2_510_007 + args.cohort * 101,
+            "shifted": 2_710_011 + args.cohort * 101,
+            "normal_holdout": 2_910_013 + args.cohort * 101,
         }
         parts = (
             ("train", "train", 10_000, "train_normal"),
@@ -101,12 +120,27 @@ def main():
                     raise RuntimeError("Unexpected model feature count")
                 if ex.hard_negative and ex.same_object:
                     raise RuntimeError("Hard-negative source contradicts label")
+                values = list(ex.features)
+                if args.profile == "hardshift24" and split == "shifted":
+                    # Predeclared synthetic stress: confusable negatives and
+                    # degraded true positives. Label-aware perturbation only in
+                    # the untouched test generator, NEVER in model predictors.
+                    # Four variants prevent a single arbitrary perturbation
+                    # from masquerading as broad domain robustness.
+                    variant = args.cohort % 4
+                    boost = 0.10 + 0.02 * variant
+                    if not ex.same_object:
+                        for axis in ((0, 2), (0, 1), (2, 3), (4, 0))[variant]:
+                            values[axis] = min(1.0, values[axis] + boost)
+                    else:
+                        axis = (0, 1, 3, 4)[variant]
+                        values[axis] = max(0.0, values[axis] * (0.80 + 0.02 * variant))
                 row = dict(split=split, cohort=args.cohort, row_id=start_row + i,
                            label=int(ex.same_object), hard_negative=int(ex.hard_negative),
                            baseline_probability=format(
-                               module._model_score(frozen, ex.features), ".14g"))
+                               module._model_score(frozen, values), ".14g"))
                 row.update({name: format(float(v), ".14g")
-                            for name, v in zip(FEATURES, ex.features)})
+                            for name, v in zip(FEATURES, values)})
                 writer.writerow(row)
                 positives[split] += int(ex.same_object)
                 hard_negatives[split] += int(ex.hard_negative)
@@ -117,8 +151,10 @@ def main():
         "cohort": args.cohort,
         "source_kind": "synthetic-feature-scores-not-camera-images",
         "profile": args.profile,
-        "robust_training": args.profile == "robust",
-        "calibration_domain": ("shifted_test" if args.profile == "robust" else "validation"),
+        "robust_training": args.profile in ("robust", "hardshift24"),
+        "stress_variant": args.cohort % 4 if args.profile == "hardshift24" else None,
+        "stress_split_only": "shifted" if args.profile == "hardshift24" else None,
+        "calibration_domain": ("shifted_test" if args.profile in ("robust", "hardshift24") else "validation"),
         "seed_sets": seeds,
         "original_baseline_seeds_disjoint": True,
         "counts": counts,
