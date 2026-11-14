@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#071815" />
+  <meta name="description" content="Trusted Trade: a synthetic, independently verifiable autonomous procurement mission control." />
+  <title>Trusted Trade — Procurement Command</title>
+  <link rel="stylesheet" href="/mission.css" />
+  <script type="module" src="/mission.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a href="/" class="brand" aria-label="Trusted Trade procurement command"><span class="brand-symbol">✳</span><span>TRUSTED TRADE <span class="brand-sep">/</span> <b>AIMO</b></span></a>
+      <span class="top-context">Procurement Command</span>
+      <span class="demo-pill">● &nbsp; DEMONSTRATION ONLY</span>
+      <div class="top-actions"><span class="live-dot"></span><span id="event-count">0 local events</span><a href="/classic" class="top-link">Classic demo ↗</a></div>
+    </header>
+
+    <div class="workbench">
+      <nav class="sidebar" aria-label="Mission sections">
+        <div class="side-links">
+          <a href="#overview" class="side-link">⌂ <span>Overview</span></a>
+          <a href="#mission" class="side-link current">◎ <span>Missions</span></a>
+          <span class="side-mission"><span class="online-dot"></span> HOTEL NORTH · 16 NOV</span>
+          <a href="#options" class="side-link">◇ <span>Offers</span></a>
+          <a href="#trust" class="side-link">⟷ <span>Handshakes</span></a>
+          <a href="#audit" class="side-link">⬡ <span>Audit</span></a>
+        </div>
+        <div class="side-foot"><strong>TRUSTED TRADE</strong><span>JUNCTION 2026 · INDEPENDENT PROTOTYPE</span><small>All companies, products, emissions, ratings and orders are fictional.</small></div>
+      </nav>
+
+      <main id="overview" class="main-content">
+        <div class="intro-row"><div><div class="eyebrow"><span class="eyebrow-line"></span> AUTONOMOUS COMMERCE / VERIFIED BY DESIGN</div><h1>A procurement that<br /><em>proves itself.</em></h1><p>AI-to-AI procurement with explainable choices, signed synthetic mandates, and a human in control — even when supply fails.</p></div><div class="proof-summary"><span class="proof-icon">⬡</span><div><b>3 independent controls</b><small>Plan integrity · quote-bound mandate · safe commitment</small></div></div></div>
+
+        <div class="main-grid" id="mission">
+          <div class="mission-column">
+            <section class="intent surface" aria-labelledby="intent-title">
+              <div class="section-kicker"><span>01 / PROCUREMENT INTENT</span><span class="tag">TYPED · POLICY-BOUND</span></div>
+              <h2 id="intent-title">What should your kitchen secure?</h2>
+              <p>Two product families, one budget, multiple fictional suppliers. Every constraint is enforced by deterministic code.</p>
+              <form id="mission-form" class="mission-form">
+                <div class="field"><label for="dairy">Lactose-free dairy milk</label><div class="input-unit"><input id="dairy" name="dairy" type="number" min="1" max="10000" step="1" value="480" required /><span>litres</span></div></div>
+                <div class="field"><label for="oat">Oat drink</label><div class="input-unit"><input id="oat" name="oat" type="number" min="1" max="10000" step="1" value="240" required /><span>litres</span></div></div>
+                <div class="field"><label for="budget">Maximum commitment</label><div class="input-unit"><span class="currency">€</span><input id="budget" name="budget" type="number" min="1" max="2500" step="1" value="1750" required /><span>EUR</span></div></div>
+                <div class="field field-date"><span>Delivery</span><strong>Monday, 16 Nov 2026</strong><small>No lactose substitution · no backorders</small></div>
+                <button id="plan-button" type="submit" class="primary-button">✦ &nbsp; Plan autonomous basket <span>↗</span></button>
+              </form>
+              <p class="microcopy"><span class="online-dot"></span> No LLM invents prices, stock, authority or product eligibility. Synthetic data only.</p>
+            </section>
+
+            <section class="options-section" id="options" aria-labelledby="options-title">
+              <div class="section-title"><div><span class="eyebrow">02 / EXPLAINABLE NEGOTIATION</span><h2 id="options-title">Three ways to fulfill the mission.</h2></div><span id="plan-status" class="section-indicator">AWAITING MISSION</span></div>
+              <div class="option-grid" id="option-grid" aria-live="polite"><div class="option-placeholder">Define a purchase and let the agent compare exact-match supply options.</div></div>
+              <p class="option-disclaimer">*Risk and emission estimates are invented demo heuristics, not audited Valio or supplier data. All prices are fictional net amounts.</p>
+            </section>
+
+            <section class="timeline surface" aria-labelledby="timeline-title"><div class="section-kicker"><span>03 / SELF-HEALING SUPPLY CHAIN</span><span class="tag" id="timeline-status">READY</span></div><div class="timeline-head"><div><h2 id="timeline-title">Live agent negotiation &amp; contingency</h2><p>Change inventory mid-mission and watch the plan recover without reusing approval.</p></div><button id="shock" type="button" class="outline-button" disabled>Simulate supplier outage ↗</button></div><ol id="timeline-events" class="timeline-events" aria-live="polite"><li class="timeline-event"><span class="event-mark">·</span><span><strong>Mission control online</strong><small>Waiting for a typed request. No external orders are possible.</small></span></li></ol></section>
+          </div>
+
+          <aside class="trust-column" id="trust">
+            <section class="trust surface" aria-labelledby="trust-title"><div class="trust-head"><div><span class="trust-symbol">⬡</span><h2 id="trust-title">Trust &amp; Approval</h2></div><span id="trust-badge" class="trust-badge">NOT YET VERIFIED</span></div><p class="trust-subtitle">Prove precisely what a simulated agent is authorized to commit.</p>
+              <div class="trust-divider"></div>
+              <div class="trust-fact"><span>Buyer context</span><strong>Hotel North · fictional</strong><small id="buyer-context">Ephemeral demo capability, not a verified identity</small></div>
+              <div class="trust-fact"><span>Selected fixed-price offer</span><strong id="selected-price">—</strong><small id="selected-id">Select a plan to generate an immutable quote</small></div>
+              <div class="trust-fact"><span>Cryptographic proof</span><strong id="crypto-title">Awaiting signed exchange</strong><small id="crypto-info">Ed25519 synthetic keys; browser and server checks</small></div>
+              <div class="trust-fact"><span>Bound authority</span><strong id="approval-summary">Human by exception</strong><small id="approval-description">Changed terms require a new decision and mandate.</small></div>
+              <div class="trust-divider"></div>
+              <div class="decision-rail"><div class="decision-head"><span>THE COMMITMENT GATE</span><span id="decision-badge">NO QUOTE</span></div><p id="trust-message">Choose an option. The service fixes its price and inventory version before any decision.</p><div class="decision-buttons"><button id="quote-button" class="primary-button" disabled>Create fixed-price quote ↗</button><button id="approve-button" class="primary-button" disabled>Approve synthetic quote ✓</button><button id="reject-button" class="outline-button" disabled>Reject</button><button id="handshake-button" class="primary-button" disabled>Verify Kättely handshake ↗</button><button id="commit-button" class="primary-button" disabled>Commit simulated order ↗</button><button id="replay-button" class="outline-button" disabled>Prove no duplicate order</button></div></div>
+              <div class="proof-foot"><span>✓</span><div><strong>Proof-carrying procurement</strong><small>The quote and mandate are signed with separate, self-attested local demo keys. Not a live Kättely, AP2 or commercial identity integration.</small></div></div>
+            </section>
+            <section class="status surface"><div class="status-number"><span>FULL AUTONOMY</span><strong>Bounded</strong></div><p>The agent can search, compare and replan. Humans retain authority over meaningful commitments and changed terms.</p></section>
+          </aside>
+        </div>
+
+        <section id="audit" class="audit surface"><div class="audit-top"><div><span class="eyebrow">04 / EVIDENCE LEDGER</span><h2>Every important decision leaves a trace.</h2></div><button type="button" class="outline-button" id="audit-refresh">Refresh evidence ↻</button></div><div id="alert" class="alert" role="alert" hidden></div><div class="audit-table"><div class="audit-header"><span>EVENT</span><span>RECEIPT / SOURCE</span><span>TIME</span></div><ol id="audit-events" class="audit-records"><li>No local demo events yet.</li></ol></div></section>
+        <footer class="footer"><span>TRUSTED TRADE · JUNCTION 2026</span><span>Invented data · no Valio system connection · zero commercial effects</span></footer>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

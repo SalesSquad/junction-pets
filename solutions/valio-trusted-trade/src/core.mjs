@@ -3,13 +3,15 @@
  * All products, stock, people and orders are invented demo data.
  * No calls to Valio or a production purchasing system are made.
  */
+import { planProcurementPortfolio, PlannerFault } from './procurement-planner.mjs';
+import { digest } from './trust-envelope.mjs';
 
 export const FIXTURE_CATALOG = Object.freeze([
-  { sku: 'DEMO-LF-1', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 780, priceCents: 174, deliverBy: '2026-11-16', certification: 'Finnish origin · fictional', version: 1 },
-  { sku: 'DEMO-LF-2', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 900, priceCents: 189, deliverBy: '2026-11-16', certification: 'Animal welfare · fictional', version: 1 },
-  { sku: 'DEMO-LF-3', name: 'Organic lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 140, priceCents: 217, deliverBy: '2026-11-17', certification: 'Organic · fictional', version: 1 },
-  { sku: 'DEMO-REG-1', name: 'Standard dairy milk · 1 L', family: 'dairy-milk', lactoseFree: false, unitsAvailable: 1900, priceCents: 143, deliverBy: '2026-11-16', certification: 'Finnish origin · fictional', version: 1 },
-  { sku: 'DEMO-OAT-1', name: 'Oat drink · 1 L', family: 'oat-drink', lactoseFree: true, unitsAvailable: 2100, priceCents: 162, deliverBy: '2026-11-16', certification: 'Plant-based · fictional', version: 1 },
+  { sku: 'DEMO-LF-1', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 780, priceCents: 174, deliverBy: '2026-11-16', certification: 'Finnish origin · fictional', version: 1, supplierId: 'fictional-north-dairy', reliabilityBps: 9640, emissionsGramsPerL: 1150 },
+  { sku: 'DEMO-LF-2', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 900, priceCents: 189, deliverBy: '2026-11-16', certification: 'Animal welfare · fictional', version: 1, supplierId: 'fictional-coastal-foods', reliabilityBps: 9910, emissionsGramsPerL: 960 },
+  { sku: 'DEMO-LF-3', name: 'Organic lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 140, priceCents: 217, deliverBy: '2026-11-17', certification: 'Organic · fictional', version: 1, supplierId: 'fictional-hill-farm', reliabilityBps: 9700, emissionsGramsPerL: 910 },
+  { sku: 'DEMO-REG-1', name: 'Standard dairy milk · 1 L', family: 'dairy-milk', lactoseFree: false, unitsAvailable: 1900, priceCents: 143, deliverBy: '2026-11-16', certification: 'Finnish origin · fictional', version: 1, supplierId: 'fictional-north-dairy', reliabilityBps: 9640, emissionsGramsPerL: 1120 },
+  { sku: 'DEMO-OAT-1', name: 'Oat drink · 1 L', family: 'oat-drink', lactoseFree: true, unitsAvailable: 2100, priceCents: 162, deliverBy: '2026-11-16', certification: 'Plant-based · fictional', version: 1, supplierId: 'fictional-oatworks', reliabilityBps: 9820, emissionsGramsPerL: 380 },
 ]);
 
 export const FIXTURE_POLICY = Object.freeze({
@@ -39,6 +41,21 @@ const safeWhole = (value, min, max, label) => {
 };
 
 const digestLike = (value) => JSON.stringify(value);
+
+/** Checks the local receipt chain; persistence and external anchoring are out of scope. */
+export function verifyAuditChain(receipts) {
+  if (!Array.isArray(receipts)) return { valid: false, firstInvalidIndex: 0 };
+  let prevHash = 'GENESIS';
+  for (const [index, receipt] of receipts.entries()) {
+    if (!receipt || receipt.prevHash !== prevHash ||
+        receipt.hash !== digest({ id: receipt.id, time: receipt.time, event: receipt.event,
+          detail: receipt.detail, prevHash: receipt.prevHash })) {
+      return { valid: false, firstInvalidIndex: index };
+    }
+    prevHash = receipt.hash;
+  }
+  return { valid: true, count: receipts.length, headDigest: prevHash, mode: 'IN_MEMORY_HASH_LINKED_NOT_EXTERNAL_ANCHORED' };
+}
 
 /** No LLM claims: the demo deliberately accepts only the supported request shape. */
 export function parseBuyerRequest(raw) {
@@ -89,13 +106,16 @@ export function unsignedQuoteBody(q) {
 export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = FIXTURE_POLICY, clock = () => Date.now() } = {}) {
   const catalog = new Map(initialCatalog.map((item) => [item.sku, { ...item }]));
   const quotes = new Map();
+  const plans = new Map();
   const orders = new Map();
   const idempotency = new Map();
   const audit = [];
   let serial = 0;
   const nextId = (prefix) => `${prefix}-DEMO-${String(++serial).padStart(4, '0')}`;
   const record = (event, detail) => {
-    const receipt = { id: nextId('EV'), time: new Date(clock()).toISOString(), event, detail };
+    const prevHash = audit.at(-1)?.hash ?? 'GENESIS';
+    const receipt = { id: nextId('EV'), time: new Date(clock()).toISOString(), event, detail, prevHash };
+    receipt.hash = digest(receipt);
     audit.push(receipt);
     return receipt;
   };
@@ -158,6 +178,77 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     quotes.set(quote.id, quote);
     record('QUOTE_CREATED', { quoteId, lines: lines.map((x) => ({ sku: x.sku, quantityLitres: x.quantityLitres, stockVersion: x.stockVersion })), totalCents, approvalRequired });
     return structuredClone(quote);
+  };
+
+  const planBasket = ({ buyerId, requirements, budgetCents = policy.perOrderBudgetCents, ...unknown } = {}) => {
+    if (Object.keys(unknown).length) throw new TradeError('INVALID_PORTFOLIO', 'Portfolio only accepts buyer, typed requirements and budget.');
+    if (buyerId !== policy.buyerId) throw new TradeError('BUYER_NOT_FOUND', 'Only the fictional demo buyer is available.', 403);
+    safeWhole(budgetCents, 1, policy.perOrderBudgetCents, 'Maximum budget');
+    let planned;
+    try { planned = planProcurementPortfolio({ catalog: catalogList(), requirements, budgetCents }); }
+    catch (error) {
+      if (!(error instanceof PlannerFault)) throw error;
+      record('PORTFOLIO_REFUSED', { reason: error.code, detail: error.details });
+      throw new TradeError(error.code, error.message, error.code === 'INVALID_PORTFOLIO' ? 400 : 409, error.details);
+    }
+    const now = clock();
+    const plan = { ...planned, id: nextId('P'), buyerId, createdAtMs: now, expiresAtMs: now + policy.quoteLifetimeMs, status: 'PROPOSED_NOT_ORDERED' };
+    plans.set(plan.id, plan);
+    record('PORTFOLIO_PLANNED', { planId: plan.id, variants: plan.options.map((option) => ({ id: option.id, totalCents: option.totalCents, supplierCount: option.supplierCount })), recommended: plan.recommendedOptionId });
+    return structuredClone(plan);
+  };
+
+  const quoteBasketPlan = ({ buyerId, planId, optionId, ...unknown } = {}) => {
+    if (Object.keys(unknown).length) throw new TradeError('ORDER_TERMS_FORBIDDEN', 'Only a server-held plan and option may be quoted.');
+    const plan = plans.get(planId);
+    if (!plan) throw new TradeError('PLAN_NOT_FOUND', 'Plan is unknown; create one from typed needs.', 404);
+    if (buyerId !== plan.buyerId) throw new TradeError('BUYER_MISMATCH', 'Plan belongs to another buyer.', 403);
+    if (clock() >= plan.expiresAtMs) throw new TradeError('PLAN_EXPIRED', 'Plan expired; replan with current source terms.', 409);
+    const option = plan.options.find((candidate) => candidate.id === optionId);
+    if (!option) throw new TradeError('OPTION_NOT_FOUND', 'Choose one of the server-owned portfolio options.', 404);
+    if (!option.withinBudget) throw new TradeError('BUDGET_EXCEEDED', 'This plan option exceeds the declared budget.', 409);
+    for (const line of option.lines) {
+      const current = catalog.get(line.sku);
+      if (!current || current.priceCents !== line.unitPriceCents || current.version !== line.stockVersion || current.unitsAvailable < line.quantityLitres) {
+        throw new TradeError('PLAN_STALE', 'Portfolio must be replanned from new supplier facts.', 409, { sku: line.sku });
+      }
+    }
+    const now = clock();
+    const quote = { id: nextId('Q'), buyerId, planId, optionId,
+      requested: { requirements: structuredClone(plan.requirements), mode: 'TYPED_PORTFOLIO' },
+      lines: structuredClone(option.lines), totalCents: option.totalCents,
+      budgetCents: plan.budgetCents, approvalRequired: option.totalCents > policy.autoCommitLimitCents,
+      approval: null, status: option.totalCents > policy.autoCommitLimitCents ? 'AWAITING_HUMAN_APPROVAL' : 'AUTO_COMMIT_ELIGIBLE',
+      createdAtMs: now, expiresAtMs: now + policy.quoteLifetimeMs, orderId: null,
+      provider: 'INVENTED_LOCAL_CATALOG',
+      explanation: `Server-held ${option.title.toLowerCase()} basket: ${option.explanation} Fixed synthetic prices, stock versions and policy are rechecked on commitment.` };
+    quotes.set(quote.id, quote);
+    record('PORTFOLIO_QUOTED', { planId, optionId, quoteId: quote.id, totalCents: quote.totalCents, approvalRequired: quote.approvalRequired });
+    return structuredClone(quote);
+  };
+
+  const recoverPlan = ({ buyerId, planId, ...unknown } = {}) => {
+    if (Object.keys(unknown).length) throw new TradeError('INVALID_PORTFOLIO', 'Recovery can only use original server-owned requirements.');
+    const original = plans.get(planId);
+    if (!original) throw new TradeError('PLAN_NOT_FOUND', 'Original plan not found.', 404);
+    if (buyerId !== original.buyerId) throw new TradeError('BUYER_MISMATCH', 'Only the original buyer may replan.', 403);
+    const recovered = planBasket({ buyerId, requirements: original.requirements, budgetCents: original.budgetCents });
+    record('SUPPLY_SELF_HEALED', { fromPlanId: planId, toPlanId: recovered.id, buyerDecision: 'FRESH_DECISION_REQUIRED', changedOptions: recovered.options.map((x) => x.id) });
+    return { ...recovered, recoveredFrom: planId, humanApprovalCarriedOver: false };
+  };
+
+  const recordVerifiedHandshake = ({ quoteId, verification }) => {
+    const q = getQuote(quoteId);
+    if (!verification || verification.valid !== true || verification.quoteId !== quoteId || verification.buyerId !== q.buyerId ||
+        !Array.isArray(verification.signedBy) || verification.signedBy.length !== 2 ||
+        typeof verification.signedOfferDigest !== 'string' || typeof verification.signedMandateDigest !== 'string') {
+      throw new TradeError('INVALID_TRUST_EVIDENCE', 'Only a cryptographically verified quote-bound receipt may extend the audit.', 409);
+    }
+    return record('TRUST_HANDSHAKE_VERIFIED', {
+      quoteId, buyerId: q.buyerId, signedOfferDigest: verification.signedOfferDigest,
+      signedMandateDigest: verification.signedMandateDigest, quoteBodyDigest: verification.quoteBodyDigest,
+      signingKeyIds: verification.signedBy, keys: 'UNVERIFIED_SELF_ATTESTED_DEMO', verified: true,
+    });
   };
 
   const assertFresh = (q) => {
@@ -254,17 +345,36 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     return { ...p };
   };
 
+  const simulateStockShock = ({ sku, unitsAvailable, ...unknown } = {}) => {
+    if (Object.keys(unknown).length) throw new TradeError('INVALID_STOCK_CHANGE', 'Only SKU and integer stock may be changed in this simulation.');
+    const p = catalog.get(sku);
+    if (!p) throw new TradeError('SKU_NOT_FOUND', 'Unknown synthetic product.', 404);
+    safeWhole(unitsAvailable, 0, 1_000_000, 'Available litres');
+    const previousUnitsAvailable = p.unitsAvailable;
+    p.unitsAvailable = unitsAvailable;
+    p.version += 1;
+    record('DEMO_SUPPLIER_DISRUPTION', { sku, previousUnitsAvailable, unitsAvailable, version: p.version, type: 'INVENTED_STOCK_SHOCK' });
+    return { ...p };
+  };
+
   return Object.freeze({
     catalog: catalogList,
     policy: () => ({ ...policy, provider: 'FIXTURE_ONLY', approverAuthentication: 'NOT_IMPLEMENTED' }),
     requestQuote,
+    planBasket,
+    quoteBasketPlan,
+    recoverPlan,
+    assertQuoteFresh: (quoteId) => { assertFresh(getQuote(quoteId)); return true; },
     quote: (id) => structuredClone(getQuote(id)),
     approve: decideApproval,
     order: (id) => structuredClone(getOrder(id)),
     commitOrder,
     cancelOrder,
     simulatePriceChange,
+    simulateStockShock,
     audit: () => structuredClone(audit),
+    auditVerify: () => verifyAuditChain(audit),
+    recordVerifiedHandshake,
     recordRefusal: (code, path) => record('HTTP_REFUSED', { reason: code, path }),
   });
 }

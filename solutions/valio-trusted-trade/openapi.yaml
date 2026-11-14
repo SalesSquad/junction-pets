@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Trusted Trade — implemented SYNTHETIC localhost API",
-    "version": "0.2.0",
-    "description": "All parties, stock, prices, approvals and orders invented. No commercial effects. Demo capabilities are not verified identities."
+    "version": "0.3.0",
+    "description": "All parties, stock, prices, approvals, emission factors and orders invented. No commercial effects. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification."
   },
   "servers": [
     {
@@ -14,6 +14,25 @@
     "/.well-known/trusted-trade": {
       "get": {
         "summary": "Discover synthetic capabilities",
+        "responses": {
+          "200": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/.well-known/trusted-trade/jwks.json": {
+      "get": {
+        "summary": "Publish ephemeral self-attested demo verification keys, NOT a trusted identity registry",
         "responses": {
           "200": {
             "description": "Synthetic result only"
@@ -134,6 +153,70 @@
         }
       }
     },
+    "/api/trust/buyer-key": {
+      "post": {
+        "summary": "Register independent buyer agent PUBLIC Ed25519 key in its demo session",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "buyerId",
+                  "publicJwk"
+                ],
+                "properties": {
+                  "buyerId": {
+                    "type": "string"
+                  },
+                  "publicJwk": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "kty",
+                      "crv",
+                      "x"
+                    ],
+                    "properties": {
+                      "kty": {
+                        "const": "OKP"
+                      },
+                      "crv": {
+                        "const": "Ed25519"
+                      },
+                      "x": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
     "/api/policy": {
       "get": {
         "summary": "Read server-owned demo budget and approval threshold",
@@ -185,6 +268,202 @@
                   "properties": {
                     "quote": {
                       "$ref": "#/components/schemas/Quote"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/plans": {
+      "post": {
+        "summary": "Compare deterministic multi-item portfolio plans, no commitment",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioPlanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "plan"
+                  ],
+                  "properties": {
+                    "plan": {
+                      "$ref": "#/components/schemas/PortfolioPlan"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/plans/{id}/quotes": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Fix a server-held option to an immutable synthetic quote",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "buyerId",
+                  "optionId"
+                ],
+                "properties": {
+                  "buyerId": {
+                    "type": "string"
+                  },
+                  "optionId": {
+                    "enum": [
+                      "cost",
+                      "resilience",
+                      "footprint"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "quote"
+                  ],
+                  "properties": {
+                    "quote": {
+                      "$ref": "#/components/schemas/Quote"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/plans/{id}/recover": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Replan after disruption; NEVER reuse original quote approval",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "buyerId"
+                ],
+                "properties": {
+                  "buyerId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "plan"
+                  ],
+                  "properties": {
+                    "plan": {
+                      "$ref": "#/components/schemas/PortfolioPlan"
                     }
                   }
                 }
@@ -362,6 +641,148 @@
                     },
                     "body": {
                       "$ref": "#/components/schemas/UnsignedQuoteBody"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/quotes/{id}/offer": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Supplier signs exact quote using its own ephemeral demo Ed25519 key",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "buyerId"
+                ],
+                "properties": {
+                  "buyerId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "signedOffer"
+                  ],
+                  "properties": {
+                    "signedOffer": {
+                      "$ref": "#/components/schemas/SignedEnvelope"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/quotes/{id}/handshake": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Verify buyer-process-signed mandate against supplier-signed offer and session public key",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "buyerId",
+                  "signedMandate"
+                ],
+                "properties": {
+                  "buyerId": {
+                    "type": "string"
+                  },
+                  "signedMandate": {
+                    "$ref": "#/components/schemas/SignedEnvelope"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "proof"
+                  ],
+                  "properties": {
+                    "proof": {
+                      "$ref": "#/components/schemas/TradeProof"
                     }
                   }
                 }
@@ -581,6 +1002,25 @@
         }
       }
     },
+    "/api/audit/verify": {
+      "get": {
+        "summary": "Verify the in-memory SHA-256 receipt hash chain; no external anchoring",
+        "responses": {
+          "200": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
     "/api/demo/reprice": {
       "post": {
         "summary": "Demo-only mutation; invalidates old source versions",
@@ -608,6 +1048,55 @@
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 100000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/demo/shock": {
+      "post": {
+        "summary": "Synthetic stock outage; triggers a safe recovery flow",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sku",
+                  "unitsAvailable"
+                ],
+                "properties": {
+                  "sku": {
+                    "type": "string"
+                  },
+                  "unitsAvailable": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000
                   }
                 }
               }
@@ -806,48 +1295,7 @@
           "lines": {
             "type": "array",
             "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "sku",
-                "name",
-                "quantityLitres",
-                "unitPriceCents",
-                "totalCents",
-                "stockVersion",
-                "certification",
-                "deliverBy"
-              ],
-              "properties": {
-                "sku": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "quantityLitres": {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                "unitPriceCents": {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                "totalCents": {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                "stockVersion": {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                "certification": {
-                  "type": "string"
-                },
-                "deliverBy": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/components/schemas/QuoteLine"
             }
           }
         }
@@ -916,6 +1364,257 @@
           },
           "deliverBy": {
             "const": "2026-11-16"
+          }
+        }
+      },
+      "PortfolioPlanRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "buyerId",
+          "requirements",
+          "budgetCents"
+        ],
+        "properties": {
+          "buyerId": {
+            "type": "string"
+          },
+          "requirements": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "$ref": "#/components/schemas/BuyingNeed"
+            }
+          },
+          "budgetCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 250000
+          }
+        }
+      },
+      "QuoteLine": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sku",
+          "name",
+          "quantityLitres",
+          "unitPriceCents",
+          "totalCents",
+          "stockVersion",
+          "certification",
+          "deliverBy"
+        ],
+        "properties": {
+          "sku": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "quantityLitres": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unitPriceCents": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "totalCents": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "stockVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "certification": {
+            "type": "string"
+          },
+          "deliverBy": {
+            "type": "string"
+          },
+          "family": {
+            "type": "string"
+          },
+          "supplierId": {
+            "type": "string"
+          },
+          "reliabilityBps": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "emissionsGramsPerL": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "PortfolioOption": {
+        "type": "object",
+        "required": [
+          "id",
+          "totalCents",
+          "lines",
+          "withinBudget",
+          "carbonKgEstimate",
+          "riskScorePct"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "cost",
+              "resilience",
+              "footprint"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "totalCents": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "equivalentTo": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuoteLine"
+            }
+          },
+          "withinBudget": {
+            "type": "boolean"
+          },
+          "carbonKgEstimate": {
+            "type": "number",
+            "description": "Fictional kg-equivalent estimate; not certified environmental information"
+          },
+          "riskScorePct": {
+            "type": "number",
+            "description": "Synthetic heuristic; not probability of real supplier failure"
+          },
+          "largestSupplierExposurePct": {
+            "type": "number"
+          },
+          "supplierCount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "PortfolioPlan": {
+        "type": "object",
+        "required": [
+          "id",
+          "buyerId",
+          "requirements",
+          "options",
+          "recommendedOptionId",
+          "expiresAtMs"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "buyerId": {
+            "type": "string"
+          },
+          "requirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuyingNeed"
+            }
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortfolioOption"
+            }
+          },
+          "recommendedOptionId": {
+            "type": "string"
+          },
+          "expiresAtMs": {
+            "type": "integer"
+          },
+          "recoveredFrom": {
+            "type": "string"
+          },
+          "humanApprovalCarriedOver": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SignedEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "protected",
+          "payload",
+          "signature"
+        ],
+        "properties": {
+          "protected": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "typ",
+              "alg",
+              "kid"
+            ],
+            "properties": {
+              "typ": {
+                "const": "kattely.demo.procurement-envelope.v1"
+              },
+              "alg": {
+                "const": "EdDSA"
+              },
+              "kid": {
+                "type": "string"
+              }
+            }
+          },
+          "payload": {
+            "type": "object"
+          },
+          "signature": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeProof": {
+        "type": "object",
+        "required": [
+          "mode",
+          "signedOffer",
+          "signedMandate",
+          "verification"
+        ],
+        "properties": {
+          "mode": {
+            "const": "SELF_ATTESTED_EPHEMERAL_DEMO_KEYS"
+          },
+          "proofType": {
+            "type": "string"
+          },
+          "signedOffer": {
+            "$ref": "#/components/schemas/SignedEnvelope"
+          },
+          "signedMandate": {
+            "$ref": "#/components/schemas/SignedEnvelope"
+          },
+          "verification": {
+            "type": "object"
           }
         }
       },
