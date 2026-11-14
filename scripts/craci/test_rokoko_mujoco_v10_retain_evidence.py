@@ -34,15 +34,22 @@ def source_fixture(base: Path, big=False):
     source_sha = "c" * 40
     write_json(private / "paired-readout.json", {
         "executed_head": source_sha, "dataset_sha256": "d" * 64,
+        "strategies": {name: {"safe_goals_clear": 0} for name in (
+            "frozen_v5", "frozen_v6", "repeat_left", "frozen_v8", "v10_loss_informed")},
         "model_promotion_authorized": False})
     manifest = {"schema": pack.MANIFEST_SCHEMA, "executed_head": source_sha,
                 "file_sha256": {n: pack.sha_file(private / n) for n in pack.SOURCE_FILES},
                 "auxiliary_file_sha256": {
                     "paired-readout.json": pack.sha_file(private / "paired-readout.json")}}
     write_json(private / "manifest.json", manifest)
-    replay = {"claim_verified": True, "model_promotion_authorized": False,
+    near_replay = {"claim_verified": True, "model_promotion_authorized": False,
               "fully_replayed_positive_train_trials": 1}
-    write_json(private / "independent-positive-replay.json", replay)
+    clear_replay = {"claim_verified": True, "model_promotion_authorized": False,
+                    "dev_cal_test_ood_opened": False,
+                    "claimed_safe_clear_goal_trajectories": 0,
+                    "replayed_safe_clear_goal_trajectories": 0}
+    write_json(private / "independent-positive-replay.json", near_replay)
+    write_json(private / "independent-clear-goal-replay.json", clear_replay)
     write_json(private / "independent-qualification.json", {
         "schema": pack.QUALIFIED_SCHEMA,
         "decision": "valid_source_bound_five_way_train_only_evidence",
@@ -53,7 +60,8 @@ def source_fixture(base: Path, big=False):
         "actual_real_option_transitions": 1000,
         "full_transition_archive_sha256": manifest["file_sha256"]["full_transitions.jsonl.gz"],
         "dataset_sha256": "d" * 64,
-        "independent_true_physics_positive_replay": replay})
+        "independent_true_physics_positive_replay": near_replay,
+        "independent_true_physics_clear_goal_replay": clear_replay})
     return private
 
 
@@ -87,6 +95,18 @@ class V10PrivateOriginalPackingTests(unittest.TestCase):
             with part.open("ab") as stream:
                 stream.write(b"corruption")
             with self.assertRaisesRegex(AssertionError, "ARCHIVE_BYTES_OR_SHA_INVALID"):
+                pack.verify_archive_parts(collector, report)
+
+    def test_tampered_small_independent_proof_is_sha_rejected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            private = source_fixture(base)
+            collector = base / "collector" / "artifacts" / "v10"
+            pack.publish_private_source(private, collector)
+            report = json.loads((collector / "retention-manifest.json").read_text())
+            with (collector / "independent-clear-goal-replay.json").open("ab") as stream:
+                stream.write(b"tampered small proof")
+            with self.assertRaisesRegex(AssertionError, "INDEPENDENT_PROOF_BYTES_CHANGED"):
                 pack.verify_archive_parts(collector, report)
 
     def test_source_receipt_without_positive_replay_cannot_publish(self):
