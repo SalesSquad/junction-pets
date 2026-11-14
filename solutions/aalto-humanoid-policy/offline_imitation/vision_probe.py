@@ -98,9 +98,11 @@ def evaluate_features(features: np.ndarray, state: np.ndarray, action: np.ndarra
     return result
 
 
-def progress_fingerprint(source: dict, indices: np.ndarray, stride: int, max_per_episode: int) -> dict:
+def progress_fingerprint(source: dict, indices: np.ndarray, stride: int,
+                         max_per_episode: int, video_sha256: dict[str, str] | None = None) -> dict:
     h = hashlib.sha256(indices.tobytes()).hexdigest()
     return {"source_data": source["parquet_sha256"], "info_sha256": source["info_sha256"],
+            "video_sha256": video_sha256 or {},
             "dataset_revision": base.DATASET_COMMIT, "model_commit": MODEL_COMMIT,
             "lerobot_commit_expected": LEROBOT_COMMIT,
             "code_sha256": base.digest_file(Path(__file__).resolve()),
@@ -152,9 +154,16 @@ def run(root: Path, out: Path, *, resume: bool, stride: int,
     for key in CAMERAS:
         if not (root / "videos" / key).is_dir():
             raise ValueError(f"missing public AV1 footage for camera {key}")
+    video_sha256 = {}
+    for key in CAMERAS:
+        files = sorted((root / "videos" / key).glob("chunk-*/*.mp4"))
+        if not files:
+            raise ValueError(f"no public AV1 video shard for {key}")
+        for path in files:
+            video_sha256[str(path.relative_to(root))] = base.digest_file(path)
     episode, frame, states, actions = base.read_parquet_vectors(root)
     indices = balanced_indices(episode, frame, stride, max_per_episode)
-    fingerprint = progress_fingerprint(data_source, indices, stride, max_per_episode)
+    fingerprint = progress_fingerprint(data_source, indices, stride, max_per_episode, video_sha256)
     if resume:
         if not out.is_dir() or not (out / "fingerprint.json").is_file():
             raise ValueError("resume requires existing checkpoint/fingerprint directory")
@@ -176,7 +185,10 @@ def run(root: Path, out: Path, *, resume: bool, stride: int,
         param.requires_grad_(False)
 
     # Dataset is read with its source SHA and local root; no unpinned Hub update.
-    dataset = LeRobotDataset(base.DATASET_REPO, root=root, revision=base.DATASET_COMMIT)
+    # Pin the decoder backend: torchcodec auto-discovery is environment-sensitive
+    # and AV1 support differs across torch/CUDA wheel combinations.
+    dataset = LeRobotDataset(base.DATASET_REPO, root=root,
+                             revision=base.DATASET_COMMIT, video_backend="pyav")
     if len(dataset) != base.N_FRAMES:
         raise ValueError("LeRobot decoder changed dataset row count")
     for offset, i in enumerate(indices[len(completed):], start=len(completed)):
