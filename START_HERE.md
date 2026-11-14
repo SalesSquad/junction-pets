@@ -27,6 +27,12 @@ state, read GitHub's current main HEAD and PRs, then follow
 
 The organizer issued a temporary high-quota **Google account/password, not an API key**, to the registered Junction team. For permissible use, expiry, export and **secure per-agent executor routing without raw credentials**, see [Google Junction event account](docs/GOOGLE_JUNCTION_EVENT_ACCOUNT.md). No Google API key, console login, active quotas or agent connection is verified merely by this source note.
 
+## Personal Gemini API CLI — Verda-style trusted-host route (14 November)
+
+The owner's **personal** Google AI Studio key `Junction-2026-Gemini-Agent-Mesh` is distinct from the **temporary** Google Junction event account above. The personal key was verified on MBP (authenticated model list HTTP 200, prior tiny inference HTTP 200) and kept in owner-local macOS Keychain. Agent guidance and runnable source are in private [SalesSquad/agents PR #120](https://github.com/SalesSquad/agents/pull/120), especially `docs/gemini-junction.md` and `cloud-services/google-gemini-personal/README.md`.
+
+**Authorized agents:** discover RDC `list_devices`, select the actually online MacBook Pro, read its RDC skill/shared rules, then on that MBP call `/Users/mikaelervamaa/.local/bin/gemini-agent status` or `inventory` (one read-only model catalog request). `probe` makes **one explicit, bounded** generation test and is never automatic/hourly. Agents without separately verified RDC cannot invoke the key merely by reading this page. No key, Mac Keychain material, env token or account session is copied to Mini, Claude, Codex Cloud or Chibi. This is not a deployment or a global API grant.
+
 ## Shared source snapshot for every agent
 
 Read [current shared sources](docs/challenge-research/CURRENT_SOURCES.md) and its [portable JSON catalog](docs/challenge-research/current-source-catalog.json) before company implementation. The 14 November snapshot contains full briefs and newer sponsor clarifications, including AfterQuery's Harbor delivery requirement and withdrawal of inference credits. Each agent in the source index has a `partnerEvidenceKey`; existing sessions must fetch and reread the current source. Raw discussions remain separately authorized Space evidence.
