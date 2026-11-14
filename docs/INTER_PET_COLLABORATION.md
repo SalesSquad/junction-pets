@@ -65,6 +65,8 @@ Keep this repository as the **agent package and protocol** source. Implement the
 
 ### Chat and voice adapters
 
+**Implemented developer voice layer (14 Nov 2026):** [`services/pet-voice/`](../services/pet-voice/README.md) gives all 34 pets a Gemini TTS voice and default language; pets exchange *audio* turns (listener transcribes with Gemini, answers in persona, speaks back) with `turnId`/envelope receipts and a learning loop. It runs on the owner's Mac with a Keychain key and is synthetic dialogue only — not the authenticated Chibi path described here.
+
 The same inter-pet envelope can be surfaced as a chat transcript, a voice turn or a multimodal tool card. A voice layer supplies consent-verified transcript chunks and a `turnId`; it does **not** grant microphone/camera rights to arbitrary pets. The parent pet can narrate a delegated response with attribution and uncertainty. Before claiming a *live* demo, verify Chibi's real authenticated recipient path, speaker/device permissions, actual model output, handoff receipts and revocation through end-to-end tests.
 
 ### OpenAI Agents and Codex Cloud
