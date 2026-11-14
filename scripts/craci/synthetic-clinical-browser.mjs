@@ -124,6 +124,7 @@ async function astraState(page,state){
 }
 async function astraJourney(page){
   await astraState(page,'ACTION_REVIEW');
+  await page.waitForFunction(()=>!document.querySelector('#export')?.disabled && document.querySelector('#action')?.textContent.includes('Regional referral pathway lead'));
   assert.equal(await page.locator('#export').isEnabled(),true);
   assert.match(await page.locator('#action').textContent(),/Regional referral pathway lead/);
   await page.locator('#indicator').selectOption('diagnostic_wait');
@@ -131,6 +132,7 @@ async function astraJourney(page){
   assert.equal(await page.locator('#export').isDisabled(),true);
   await page.locator('#indicator').selectOption('treatment_start');
   await astraState(page,'SUPPRESSED');
+  await page.waitForFunction(()=>document.querySelector('#export')?.disabled && document.querySelector('#numbers')?.textContent==='');
   assert.equal(await page.locator('#export').isDisabled(),true);
   assert.equal(await page.locator('#numbers').textContent(),'','Suppressed numbers must not render');
 
@@ -145,6 +147,7 @@ async function astraJourney(page){
   assert.equal(await page.locator('#export').isDisabled(),true);
 
   await page.locator('#focus').selectOption('fictional-coastal');
+  await astraState(page,'REFUSED');
   await page.locator('#peer').selectOption('fictional-inland');
   await astraState(page,'ACTION_REVIEW');
   assert.equal(await page.locator('#export').isEnabled(),true);
