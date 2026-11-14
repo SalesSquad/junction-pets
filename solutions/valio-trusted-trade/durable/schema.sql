@@ -70,8 +70,13 @@ FOR EACH STATEMENT EXECUTE FUNCTION guard_outbox_seal();
 CREATE FUNCTION assert_balanced_batch() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE n bigint; total bigint;
 BEGIN
-  SELECT count(*), coalesce(sum(delta_cents),0)
-    INTO n,total FROM ledger_entries WHERE batch_id = NEW.batch_id;
+  -- A trigger can fire from an explicitly schema-qualified DML statement
+  -- while the caller's search_path points elsewhere. Bind its owning schema,
+  -- quote it as an identifier and pass the batch value separately.
+  EXECUTE format(
+    'SELECT count(*), coalesce(sum(delta_cents),0) FROM %I.ledger_entries WHERE batch_id = $1',
+    TG_TABLE_SCHEMA)
+    INTO n,total USING NEW.batch_id;
   IF n < 2 OR total <> 0 THEN
     RAISE EXCEPTION 'UNBALANCED_LEDGER_BATCH %: count %, net %',NEW.batch_id,n,total
       USING ERRCODE='23514';
@@ -84,8 +89,13 @@ FOR EACH ROW EXECUTE FUNCTION assert_balanced_batch();
 -- A batch becomes sealed when its atomic outbox receipt is written. No later
 -- transaction may append entries without re-running the balance constraint.
 CREATE FUNCTION reject_sealed_batch_append() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE sealed boolean;
 BEGIN
-  IF EXISTS (SELECT 1 FROM ledger_outbox WHERE batch_id = NEW.batch_id) THEN
+  EXECUTE format(
+    'SELECT EXISTS (SELECT 1 FROM %I.ledger_outbox WHERE batch_id = $1)',
+    TG_TABLE_SCHEMA)
+    INTO sealed USING NEW.batch_id;
+  IF sealed THEN
     RAISE EXCEPTION 'SEALED_LEDGER_BATCH %',NEW.batch_id USING ERRCODE='23514';
   END IF;
   RETURN NEW;
