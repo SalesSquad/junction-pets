@@ -1,0 +1,84 @@
+{
+  "schema": "junction.meta.dat-mock.verification/v1",
+  "work_id": "junction.meta.dat-mock-20261114",
+  "base_commit": "82f17099ae1d52efde6661e69f7ea5e38fdcd407",
+  "code_commit": "a1fefd76a100a23ec4051beec487a61d676e08a9",
+  "dirty_baseline": "clean",
+  "owned_paths": [
+    "apps/meta-lens-apple/DATMockApp",
+    "apps/meta-lens-apple/Sources/ChibiLensCore/CaptureEpoch.swift",
+    "apps/meta-lens-apple/Tests/ChibiLensCoreTests/CaptureEpochTests.swift",
+    "apps/meta-lens-apple/README.md",
+    "docs/META_START_HERE.md"
+  ],
+  "branch": "codex/junction-meta-dat-mock-20261114",
+  "pr_url": "https://github.com/SalesSquad/junction-pets/pull/75",
+  "upstream": {
+    "repository": "https://github.com/facebook/meta-wearables-dat-ios",
+    "version": "1.0.1",
+    "commit": "0bd369298eef6a980ad0bdb6c8a5502f2c02a08c",
+    "resolver_mode": "clean verified local shallow official SDK checkout",
+    "docs_observed_main": "bbae597cd1c748cd29b9375a1624a8d75b1c9e14"
+  },
+  "checks": [
+    {
+      "name": "project generator",
+      "result": "pass",
+      "executor": "cloud Python3 and authorized Mac Xcode27.2"
+    },
+    {
+      "name": "CaptureEpochTests",
+      "result": "pass",
+      "tests": 2,
+      "failures": 0,
+      "source_commit": "49af4a41c90043d8e5253672fb62b3a25f9c2cd3",
+      "log_sha256": "c7e9d84b6abe3ce232c9925c3ddf7b1cd8a422c44c65c9f21f3e29b69160abd2",
+      "executor": "authorized MacBook Air Swift6.4",
+      "receipt": "junction-meta-dat-core-001",
+      "scope": "Core epoch and its tests remain byte-identical at code_commit; not an adapter runtime pass."
+    },
+    {
+      "name": "iOS build-for-testing",
+      "result": "pass",
+      "source_commit": "a1fefd76a100a23ec4051beec487a61d676e08a9",
+      "executor": "authorized MacBook Pro Xcode27.2 27B52; arm64 iOS Simulator; deployment17.2",
+      "command": "xcodebuild -scheme ChibiDATMock -jobs 1 -destination generic/platform=iOS Simulator build-for-testing CODE_SIGNING_ALLOWED=NO ARCHS=arm64 ONLY_ACTIVE_ARCH=YES",
+      "log_sha256": "f4b7db2462dd462e62c21f2ac0842ef6240c956025659ca188094e473c6d4d7e",
+      "receipt": "junction-meta-dat-native-003"
+    },
+    {
+      "name": "actual SDK frame/OCR/revoke/disconnect acceptance",
+      "result": "blocked",
+      "source_commit": "a1fefd76a100a23ec4051beec487a61d676e08a9",
+      "receipt": "junction-meta-dat-native-004",
+      "observed": "No XCTest test-case or camera-frame result returned. Native log ended BUILD INTERRUPTED during simulator startup. Runner termination fallback raised Operation not permitted for process-group SIGKILL; no safeguard bypass performed. Disk was below the 20GiB running guard; time/log size evidence indicates disk guard was the initiating condition, but the exception prevented direct reason persistence.",
+      "scope": "No actual SDK camera frame, OCR, permission-loss or disconnect acceptance pass is claimed."
+    },
+    {
+      "name": "owned simulator cleanup",
+      "result": "pass",
+      "observed": "First shutdown/delete calls timed out. One bounded retry returned exit0 for both; official device list and absent device.plist confirmed owned simulator removed. No task-owned xcodebuild remained.",
+      "simulator_udid": "857A1852-58E8-4889-A687-B236ADFE6E34"
+    },
+    {
+      "name": "independent source review",
+      "result": "pass",
+      "scope": "No remaining P0/P1 source blocker; not runtime qualification.",
+      "reviewed_sha256": {
+        "DATMockApp/Sources/DATCaptureModel.swift": "3bef9d870fa3cedeae91a102b757bba7904d4b37bf2c3392aba54e4de21b2a96",
+        "DATMockApp/Tests/DATIntegrationTests.swift": "081129d020c346f588c130f3735b16c7f69db39fe89c582d941d514fb6856757",
+        "DATMockApp/scripts/generate_project.py": "fc10fc9d03cffc2411eff24d6fe7d8c6e01f23b4321b52f2cd69fd184c35f545"
+      }
+    }
+  ],
+  "not_verified": [
+    "SDK frame/OCR runtime on simulator",
+    "Imported-video UX on a running app",
+    "Real Meta glasses or phone camera",
+    "Chibi host admission or privileged execution",
+    "Signed/released iOS app"
+  ],
+  "preserved": "Source pushed; exact build logs, original interruption records and cleanup receipts retained on the executing Macs. Clean checkouts and built app kept for a test-without-building resume; no daemon or recurring job added.",
+  "next_action": "On an admitted Apple executor with sufficient stable simulator headroom, generate with the pinned SDK checkout and run the existing DATIntegrationTests once against these source bytes; do not rerun unchanged core/full suites.",
+  "recorded_at": "2026-11-14T00:44:33.046651+00:00"
+}

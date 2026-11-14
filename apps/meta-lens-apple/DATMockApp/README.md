@@ -51,6 +51,17 @@ no late frames, explicit restart, disconnect and cleared preview. It does not
 silently swap in a fake SDK when a host or SDK cannot run it. The app-local
 generation fence also has focused tests in `ChibiLensCoreTests`.
 
+## Observed verification — 14 November 2026
+
+The official-SDK iOS app and integration test **compile successfully** on Xcode
+27.2 for arm64 Simulator at code commit `a1fefd76`. The two unchanged core
+cancellation-fence tests pass. The simulator frame/OCR/revocation test did not
+reach a test-case result: simulator startup consumed disk headroom and the
+guarded run was interrupted. Its disposable simulator was subsequently shut
+down and deleted successfully. **No end-to-end frame or hardware pass is claimed.**
+See [the source-bound verification record](VERIFICATION.json) for exact hashes,
+review bindings, original interruption limits and the single resume action.
+
 ## Lifecycle and trust
 
 - User revocation/backgrounding invalidates the app generation synchronously,
