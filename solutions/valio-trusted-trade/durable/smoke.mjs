@@ -136,25 +136,25 @@ export async function runChaosLab({connectionString,requestCount=400,workerCount
     const sealed=(await admin.query(`SELECT batch_id FROM "${schema}".ledger_batches WHERE order_id=$1 AND kind=$2`,
       ['crash_A','SIMULATED_PAYMENT'])).rows[0]?.batch_id;
     assert(sealed,'Expected durable crash batch to exist.');
-    let outboxDeleteRefusal=false;
+    let outboxDeleteRefusal=false, outboxDeleteSqlstate='NO_ERROR';
     try { await admin.query(`DELETE FROM "${schema}".ledger_outbox WHERE batch_id=$1`,[sealed]); }
-    catch(e){outboxDeleteRefusal=e.code==='23514'&&String(e.message).includes('IMMUTABLE_OUTBOX_SEAL');}
-    assert(outboxDeleteRefusal,'SQL DELETE of sealed outbox receipt must fail.');
-    let outboxRetargetRefusal=false;
+    catch(e){outboxDeleteSqlstate=e.code||'UNKNOWN';outboxDeleteRefusal=e.code==='23514'&&String(e.message).includes('IMMUTABLE_OUTBOX_SEAL');}
+    assert(outboxDeleteRefusal,`SQL DELETE of sealed outbox receipt must fail (SQLSTATE ${outboxDeleteSqlstate}).`);
+    let outboxRetargetRefusal=false, outboxRetargetSqlstate='NO_ERROR';
     try { await admin.query(`UPDATE "${schema}".ledger_outbox SET batch_id=$1 WHERE batch_id=$2`,
       [randomBytes(16).toString('hex').replace(/^(........)(....)(....)(....)(............)$/,'$1-$2-$3-$4-$5'),sealed]); }
-    catch(e){outboxRetargetRefusal=e.code==='23514'&&String(e.message).includes('IMMUTABLE_OUTBOX_SEAL');}
-    assert(outboxRetargetRefusal,'SQL batch-id retarget of sealed outbox receipt must fail.');
-    let outboxTruncateRefusal=false;
+    catch(e){outboxRetargetSqlstate=e.code||'UNKNOWN';outboxRetargetRefusal=e.code==='23514'&&String(e.message).includes('IMMUTABLE_OUTBOX_SEAL');}
+    assert(outboxRetargetRefusal,`SQL batch-id retarget of sealed outbox receipt must fail (SQLSTATE ${outboxRetargetSqlstate}).`);
+    let outboxTruncateRefusal=false, outboxTruncateSqlstate='NO_ERROR';
     try { await admin.query(`TRUNCATE TABLE "${schema}".ledger_outbox`); }
-    catch(e){outboxTruncateRefusal=e.code==='23514'&&String(e.message).includes('IMMUTABLE_OUTBOX_SEAL');}
-    assert(outboxTruncateRefusal,'SQL TRUNCATE must not erase batch seals.');
-    let sealedBatchRefusal=false;
+    catch(e){outboxTruncateSqlstate=e.code||'UNKNOWN';outboxTruncateRefusal=e.code==='23514'&&String(e.message).includes('IMMUTABLE_OUTBOX_SEAL');}
+    assert(outboxTruncateRefusal,`SQL TRUNCATE must not erase batch seals (SQLSTATE ${outboxTruncateSqlstate}).`);
+    let sealedBatchRefusal=false, appendSqlstate='NO_ERROR';
     try {
       await admin.query(`INSERT INTO "${schema}".ledger_entries(batch_id,account_id,delta_cents) VALUES ($1,$2,$3)`,
         [sealed,'demo:supplier:farm-c:wallet',1]);
-    } catch(e) { sealedBatchRefusal=e.code==='23514'&&String(e.message).includes('SEALED_LEDGER_BATCH'); }
-    assert(sealedBatchRefusal,'Post-commit ledger insertion was not denied.');
+    } catch(e) { appendSqlstate=e.code||'UNKNOWN';sealedBatchRefusal=e.code==='23514'&&String(e.message).includes('SEALED_LEDGER_BATCH'); }
+    assert(sealedBatchRefusal,`Post-commit ledger insertion was not denied (SQLSTATE ${appendSqlstate}).`);
     const afterTamper=await auditLab(admin,schema);
     assert(afterTamper.batches===a.batches&&afterTamper.matching&&afterTamper.balanced,
       'Negative control must leave original durable ledger intact.');
