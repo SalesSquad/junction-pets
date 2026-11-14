@@ -78,26 +78,79 @@ class SpreadGuardDesk(starter.Desk):
         return max(self.now + HOUR, *(leg["pickup"]["window"]["from"]
                                       for leg in request["legs"]))
 
+    @staticmethod
+    def _open_at(place: dict[str, Any], earliest: int, latest: int,
+                 note: dict[str, Any] | None, stop: str,
+                 trade_in_customer_pickup: bool = False) -> int | None:
+        """First stop inside its real published hours and note-adjusted slot.
+
+        Dealer acceptance is delayed until its next opening; a Sunday arrival
+        is not an on-time Sunday delivery. The second pickup of a connected
+        trade-in may follow the new car's delivery after the original slot.
+        """
+        window = starter.window_from_note(note, place["window"], stop)
+        start = max(earliest, window["from"])
+        end = min(latest, window["to"])
+        if trade_in_customer_pickup:
+            end = latest
+        if start > end:
+            return None
+        hours = place.get("hours")
+        if place.get("privateAddress") or hours is None:
+            return start
+
+        for day in range(start // DAY, end // DAY + 1):
+            weekday = day % 7
+            if weekday <= 4:
+                if weekday not in hours.get("weekdays", []):
+                    continue
+                opens, closes = hours["opens"], hours["closes"]
+            elif weekday == 5 and hours.get("saturday") is not None:
+                opens = hours["saturday"]["opens"]
+                closes = hours["saturday"]["closes"]
+            else:
+                continue  # Sunday or a closed Saturday
+            candidate = max(start, day * DAY + opens)
+            if candidate <= min(end, day * DAY + closes):
+                return candidate
+        return None
+
     def _slack(self, request: dict[str, Any], option: dict[str, Any]) -> int:
-        """Pessimistic time buffer, not a proof of physical feasibility."""
-        start = self._ready(request)
-        road = self._route_minutes(request)
-        handoffs = 70 * len(request["legs"])
-        charge = sum(55 for leg in request["legs"]
-                     if leg["car"]["electric"] and leg["car"]["chargePercent"] is not None
-                     and leg["car"]["chargePercent"] < 30)
-        # Reserve for driver reaching pickup, traffic and uncertain readiness.
-        end = start + round_up_div(road * 125, 100) + handoffs + charge + 150
-        for leg in request["legs"]:
-            dest = leg["delivery"]
-            if dest["privateAddress"]:
-                end_limit = dest["window"]["to"] + 30
-                end = max(end, dest["window"]["from"])
-                if end > end_limit:
-                    return -10000
-        return min(option["deadline"], min((leg["delivery"]["window"]["to"]
-                                              + (30 if leg["delivery"]["privateAddress"] else 0))
-                                             for leg in request["legs"])) - end
+        """Conservative sequential route and site-hours buffer, not a guarantee."""
+        cursor = self.now + HOUR
+        previous: str | None = None
+        note = request.get("note")
+        for index, leg in enumerate(request["legs"]):
+            pickup = leg["pickup"]
+            destination = leg["delivery"]
+            connected_trade_in = (index > 0 and previous == pickup["placeId"]
+                                  and pickup.get("privateAddress", False))
+            earliest_pickup = cursor
+            if previous is not None and previous != pickup["placeId"]:
+                earliest_pickup += round_up_div(
+                    self.roads.get((previous, pickup["placeId"]), UNKNOWN_ROAD_MINUTES) * 125, 100
+                )
+            pickup_at = self._open_at(
+                pickup, earliest_pickup, option["deadline"], note, "pickup",
+                trade_in_customer_pickup=connected_trade_in,
+            )
+            if pickup_at is None:
+                return -10000
+            road = self.roads.get((pickup["placeId"], destination["placeId"]),
+                                  UNKNOWN_ROAD_MINUTES)
+            charge = (55 if leg["car"]["electric"]
+                      and leg["car"]["chargePercent"] is not None
+                      and leg["car"]["chargePercent"] < 30 else 0)
+            arrival = pickup_at + round_up_div(road * 125, 100) + 70 + charge + 150
+            deadline = option["deadline"]
+            if destination.get("privateAddress"):
+                deadline = min(deadline, destination["window"]["to"] + 30)
+            delivered_at = self._open_at(destination, arrival, deadline, note, "delivery")
+            if delivered_at is None:
+                return -10000
+            cursor = delivered_at
+            previous = destination["placeId"]
+        return option["deadline"] - cursor
 
     def _price_factor_bps(self, dealer: str, backlog: int) -> int:
         if self.level <= 3:
