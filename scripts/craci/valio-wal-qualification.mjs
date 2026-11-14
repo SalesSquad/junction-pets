@@ -6,7 +6,7 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 
 const exec=promisify(execFile);
-const SOURCE='89280ad3b4839e7783d57f99e13706f3bcbf8cb1';
+const SOURCE='b81b38d1214cf4736d31dfbd29c7e3551ec9200d';
 const fail=code=>{throw new Error(code)};
 const root=resolve(process.env.CRACI_SOURCE_ROOT||'');
 const output=resolve(process.env.CRACI_RECEIPT_DIR||'', 'artifacts','valio-wal');
