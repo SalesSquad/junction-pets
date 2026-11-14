@@ -36,6 +36,29 @@ _Updated 2026-11-14T21:55:11Z from 3 run(s), 74/74 turns ok._
   (pace, volume, emotion) to be useful for `speech_metadata.style`. (2026-11-15)
 - **Scenes beat relays.** A situation with stakes (03:12, crashed demo, 3 % battery) gives
   the pets something to react to; a ring of introductions only produces interviews. (2026-11-15)
+- **Scene engine v2 beat the bible pilot 3/4 blind** (Haiku, both orders): not-generic 6.5 vs
+  4.5, want-to-listen 7.5 vs 6.75. The tag budget removed the `[short pause]` template named in
+  every v1 loss. Still weak: comebacks that don't follow ("That is a meeting disguised as a
+  train") and near-synonym tics ("Fascinating." once "Interesting." was spent).
+  `scene-evidence/judge-v1-vs-v2-20261115.json`. (2026-11-15)
+- **An ensemble is not a rotation.** The v2 director let Arduino and Atech argue for 7 lines
+  while three pets waited. Forcing rotation (no A-B-A, max 2 lines while anyone is silent) gave
+  everyone a line (longest duet 2, max share 0.17) but lost 0/2 blind to the duet: one-liners
+  nobody answered, each pet doing its own bit. Now an argument may run A-B-A-B, then a third
+  voice must take a side, twist it or undercut it, and a pet's first line has to come in on
+  the line before it. Not yet tested live (text quota ran out) — run `v2d` and judge it
+  against `robot-dog-stage-text-v2`. (2026-11-15)
+- **Tell the critic a listed problem is a must-fix.** With "keep" allowed, one critic pass
+  left verbatim example lines and question streaks in 6/12 lines of `disk-full-0200` (v2b).
+  With "keep is not allowed while a listed problem remains" both v2c scenes ended with 0 open
+  problems; the extra critic round for surviving hard problems never had to fire. (2026-11-15)
+- **Memory makes running jokes — and new tics.** Rokoko's three-quarter-time waltz carried
+  from the crash scene into the ethics scene, MariaDB's 13 May 2018 came back in every
+  disk-full run. Good once per scene; next: let a note fade after it has been used. (2026-11-15)
+- **Free text quota ≈ 8 scenes a night.** A 12-turn scene costs ~45 Gemini text calls
+  (director, writer, critic, memory). After ~8 scenes 3.5-flash-lite and then 3.5-flash hit
+  their daily caps (reset ≈ 08:00 UTC). Iterate on text in small batches, judge with Haiku, and
+  keep the morning quota for audio. (2026-11-15)
 
 - **Use the MBP Keychain key directly in-process.** `gemini-agent` deliberately refuses
   generation (`status|inventory|probe` only); voice work uses `pet_voice.py`, which reads the

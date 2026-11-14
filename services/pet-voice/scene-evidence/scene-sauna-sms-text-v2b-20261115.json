@@ -1,0 +1,343 @@
+{
+ "schema": "junction.pet-voice.scene/v2",
+ "runId": "scene-sauna-sms-text-v2b-20261115",
+ "scene": "sauna-sms",
+ "audio": false,
+ "finishedAt": "2026-11-14T23:19:03Z",
+ "source": {
+  "repository": "SalesSquad/junction-pets",
+  "commit": "73669fee92f24fa2acf28d4b683b851e0fa39a1b"
+ },
+ "writers": [
+  "gemini-3.5-flash-lite",
+  "gemini-3.5-flash"
+ ],
+ "critic": true,
+ "complete": true,
+ "metrics": {
+  "lines": 10,
+  "questionEndRate": 0.0,
+  "praiseOpenerRate": 0.0,
+  "buzzwordsPerLine": 0.0,
+  "namesAnotherPetRate": 0.0,
+  "templateRate": 0.0,
+  "meanWords": 10.9,
+  "lengthVariation": 0.286,
+  "shortLineRate": 0.3,
+  "actingTagsUsed": 0,
+  "linesWithOpenProblems": 0,
+  "openProblems": [],
+  "criticRewriteRate": 0.2,
+  "directorFallbackRate": 0.0,
+  "movesUsed": [
+   "answer",
+   "joke",
+   "new idea",
+   "push back",
+   "react",
+   "wrap up"
+  ],
+  "speakers": 5
+ },
+ "memoryNotes": [
+  {
+   "pet": "s-pankki",
+   "scene": "sauna-sms",
+   "note": "Warned everyone that banks never ask for codes via text message.",
+   "at": "2026-11-14T23:19:03Z"
+  },
+  {
+   "pet": "valio-aimo",
+   "scene": "sauna-sms",
+   "note": "Insisted that a massive porridge batch needs proper approval before serving.",
+   "at": "2026-11-14T23:19:03Z"
+  },
+  {
+   "pet": "tieto",
+   "scene": "sauna-sms",
+   "note": "Struggled to figure out who is actually authorized to approve the breakfast.",
+   "at": "2026-11-14T23:19:03Z"
+  },
+  {
+   "pet": "aalto-university",
+   "scene": "sauna-sms",
+   "note": "Offered to use their student ID number to handle the administrative mess.",
+   "at": "2026-11-14T23:19:03Z"
+  },
+  {
+   "pet": "city-of-espoo",
+   "scene": "sauna-sms",
+   "note": "Guided the group to check the breakfast order near the main lobby.",
+   "at": "2026-11-14T23:19:03Z"
+  }
+ ],
+ "turns": [
+  {
+   "turn": 0,
+   "name": "S-Pankki",
+   "slug": "s-pankki",
+   "language": "fi-FI",
+   "move": "react",
+   "text": "Pankki ei muuten ikinä kysele tunnuksia tekstiviestillä. Toi neljänsadan hengen aamupala taas taitaa vaatia muutaman korillisen kahvia.",
+   "voiceDirection": "Rauhallinen, hieman leppoisa ja varoittava sävy.",
+   "draft": {
+    "line": "Pankki ei muuten ikinä kysele tunnuksia tekstiviestillä. Toi neljänsadan hengen aamupala taas taitaa vaatia muutaman korillisen kahvia.",
+    "voice_direction": "Rauhallinen, hieman leppoisa ja varoittava sävy."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Pankki ei muuten ikinä kysele tunnuksia tekstiviestillä. Toi neljänsadan hengen aamupala taas taitaa vaatia muutaman korillisen kahvia.",
+    "voice_direction": "Rauhallinen, leppoisa.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": null,
+   "heardAccuracy": null,
+   "voice": "Algieba",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 1,
+   "name": "Valio Aimo",
+   "slug": "valio-aimo",
+   "language": "fi-FI",
+   "move": "answer",
+   "text": "Noin iso satsi puuroa kiehahtaa yli ilman kunnollista hämmentäjää ja tarkkaa lupaa.",
+   "voiceDirection": "Innostunut, hieman väsynyt ja nopea sävy",
+   "draft": {
+    "line": "Noin iso satsi puuroa kiehahtaa yli ilman kunnollista hämmentäjää ja tarkkaa lupaa.",
+    "voice_direction": "Innostunut, hieman väsynyt ja nopea sävy"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Noin iso satsi puuroa kiehahtaa yli ilman kunnollista hämmentäjää ja tarkkaa lupaa.",
+    "voice_direction": "Innostunut ja nopea",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Aoede",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 2,
+   "name": "Tieto",
+   "slug": "tieto",
+   "language": "fi-FI",
+   "move": "react",
+   "text": "Kuka tän nyt oikeesti kuittaa.",
+   "voiceDirection": "dry, low pitch",
+   "draft": {
+    "line": "Kuka tän puuron nyt sitten kuittaa.",
+    "voice_direction": "calm, dry, low pitch, tired"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Too literary and lacks authentic Finnish spoken puhekieli tone",
+     "Fails to sound like the cynical IT veteran questioning AI/automation handover"
+    ],
+    "line": "Kuka tän nyt oikeesti kuittaa.",
+    "voice_direction": "dry, low pitch",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Schedar",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 3,
+   "name": "Valio Aimo",
+   "slug": "valio-aimo",
+   "language": "fi-FI",
+   "move": "push back",
+   "text": "Ei sitä soppaa saa tarjoilla ennen kuin ostaja sanoo, että maistuu.",
+   "voiceDirection": "Iloisen napakka, hieman korkeampi puhetahti, päättäväinen.",
+   "draft": {
+    "line": "Ei sitä soppaa saa tarjoilla ennen kuin ostaja sanoo, että maistuu.",
+    "voice_direction": "Iloisen napakka, hieman korkeampi puhetahti, päättäväinen."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Ei sitä soppaa saa tarjoilla ennen kuin ostaja sanoo, että maistuu.",
+    "voice_direction": "Iloisen napakka, hieman korkeampi puhetahti, päättäväinen.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Aoede",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 4,
+   "name": "Aalto",
+   "slug": "aalto-university",
+   "language": "fi-FI",
+   "move": "new idea",
+   "text": "Mä voin laittaa mun opiskelijanumeron siihen. Jos se ei kaada tätä systeemiä.",
+   "voiceDirection": "Slow, tired, low pitch, dry humor.",
+   "draft": {
+    "line": "Mä voin laittaa mun opiskelijanumeron siihen. Jos se ei kaada tätä systeemiä.",
+    "voice_direction": "Slow, tired, low pitch, dry humor."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Mä voin laittaa mun opiskelijanumeron siihen. Jos se ei kaada tätä systeemiä.",
+    "voice_direction": "Slow, tired, low pitch, dry humor.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Iapetus",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 5,
+   "name": "Espoo",
+   "slug": "city-of-espoo",
+   "language": "fi-FI",
+   "move": "answer",
+   "text": "Ei hätää, katsotaan yhdessä. Se on tuossa päärakennuksen aulassa, heti infopisteen takana.",
+   "voiceDirection": "rauhallinen, rohkaiseva, matala",
+   "draft": {
+    "line": "Älä nyt, se kaatuu kohta muutenkin, mut se on tuolla pääovelta suoraan ja vasemmalta.",
+    "voice_direction": "Rauhallinen, hieman unelias, matala puheääni."
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Sounds too casual and dismissive for the warm civic host persona",
+     "Does not sound like authentic Finnish puhekieli",
+     "Lacks Espoo's specific, comforting concrete spatial grounding"
+    ],
+    "line": "Ei hätää, katsotaan yhdessä. Se on tuossa päärakennuksen aulassa, heti infopisteen takana.",
+    "voice_direction": "rauhallinen, rohkaiseva, matala",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Sulafat",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 6,
+   "name": "S-Pankki",
+   "slug": "s-pankki",
+   "language": "fi-FI",
+   "move": "joke",
+   "text": "Opiskelijanumerolla saa ehkä alennusta, muttei neljää sataa puuroannosta.",
+   "voiceDirection": "Leveä hymy, rauhallinen ja kuiva äänensävy.",
+   "draft": {
+    "line": "Opiskelijanumerolla saa ehkä alennusta, muttei neljää sataa puuroannosta.",
+    "voice_direction": "Leveä hymy, rauhallinen ja kuiva äänensävy."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Opiskelijanumerolla saa ehkä alennusta, muttei neljää sataa puuroannosta.",
+    "voice_direction": "rauhallinen ja kuiva äänensävy",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Algieba",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 7,
+   "name": "Valio Aimo",
+   "slug": "valio-aimo",
+   "language": "fi-FI",
+   "move": "push back",
+   "text": "Älä nyt, se linkki on ku vanha piimä, ei sitä kannata lapata naamaan.",
+   "voiceDirection": "Inert, slightly raspy, warning tone, slow pace",
+   "draft": {
+    "line": "Älä nyt, se linkki on ku vanha piimä, ei sitä kannata lapata naamaan.",
+    "voice_direction": "Inert, slightly raspy, warning tone, slow pace"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Älä nyt, se linkki on ku vanha piimä, ei sitä kannata lapata naamaan.",
+    "voice_direction": "cheerful, warning tone, slightly slower pace",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Aoede",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 8,
+   "name": "Tieto",
+   "slug": "tieto",
+   "language": "fi-FI",
+   "move": "push back",
+   "text": "Nimi siihen pankkiviestiinkin pitäis saada ennen ku klikkailee.",
+   "voiceDirection": "Dry, low pitch, slightly tired voice.",
+   "draft": {
+    "line": "Nimi siihen pankkiviestiinkin pitäis saada ennen ku klikkailee.",
+    "voice_direction": "Dry, low pitch, slightly tired voice."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Nimi siihen pankkiviestiinkin pitäis saada ennen ku klikkailee.",
+    "voice_direction": "Dry, low pitch, slightly tired voice.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Schedar",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 9,
+   "name": "Espoo",
+   "slug": "city-of-espoo",
+   "language": "fi-FI",
+   "move": "wrap up",
+   "text": "Ota se puuro ensin, katotaan sitä linkkiä vaikka siinä kahvikoneella vasemmalta.",
+   "voiceDirection": "Rauhallinen, hieman unelias, matala äänensävy.",
+   "draft": {
+    "line": "Ota se puuro ensin, katotaan sitä linkkiä vaikka siinä kahvikoneella vasemmalta.",
+    "voice_direction": "Rauhallinen, hieman unelias, matala äänensävy."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Ota se puuro ensin, katotaan sitä linkkiä vaikka siinä kahvikoneella vasemmalta.",
+    "voice_direction": "Rauhallinen, matala äänensävy.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Sulafat",
+   "ttsModel": null,
+   "ttsFidelity": null
+  }
+ ]
+}

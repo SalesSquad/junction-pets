@@ -1,0 +1,402 @@
+{
+ "schema": "junction.pet-voice.scene/v2",
+ "runId": "scene-viral-claim-text-v2b-20261115",
+ "scene": "viral-claim",
+ "audio": false,
+ "finishedAt": "2026-11-14T23:17:21Z",
+ "source": {
+  "repository": "SalesSquad/junction-pets",
+  "commit": "73669fee92f24fa2acf28d4b683b851e0fa39a1b"
+ },
+ "writers": [
+  "gemini-3.5-flash-lite",
+  "gemini-3.5-flash"
+ ],
+ "critic": true,
+ "complete": true,
+ "metrics": {
+  "lines": 12,
+  "questionEndRate": 0.083,
+  "praiseOpenerRate": 0.0,
+  "buzzwordsPerLine": 0.0,
+  "namesAnotherPetRate": 0.25,
+  "templateRate": 0.0,
+  "meanWords": 9.9,
+  "lengthVariation": 0.381,
+  "shortLineRate": 0.333,
+  "actingTagsUsed": 0,
+  "linesWithOpenProblems": 0,
+  "openProblems": [],
+  "criticRewriteRate": 0.25,
+  "directorFallbackRate": 0.0,
+  "movesUsed": [
+   "answer",
+   "push back",
+   "react",
+   "tease",
+   "wrap up"
+  ],
+  "speakers": 7
+ },
+ "memoryNotes": [
+  {
+   "pet": "cala",
+   "scene": "viral-claim",
+   "note": "Chased phantom investors in Madrid over a fake mom joke.",
+   "at": "2026-11-14T23:17:19Z"
+  },
+  {
+   "pet": "exa",
+   "scene": "viral-claim",
+   "note": "Used Thursday's IEEE paper metadata to debunk viral funding claims.",
+   "at": "2026-11-14T23:17:19Z"
+  },
+  {
+   "pet": "afterquery",
+   "scene": "viral-claim",
+   "note": "Exposed the million-euro funding announcement as a mere cafeteria photo.",
+   "at": "2026-11-14T23:17:19Z"
+  },
+  {
+   "pet": "context-dev",
+   "scene": "viral-claim",
+   "note": "Mocked Cala's gullibility regarding the viral cafeteria prank.",
+   "at": "2026-11-14T23:17:19Z"
+  },
+  {
+   "pet": "oxylabs",
+   "scene": "viral-claim",
+   "note": "Relied exclusively on public data and scrape logs to disprove zero numbers.",
+   "at": "2026-11-14T23:17:19Z"
+  }
+ ],
+ "turns": [
+  {
+   "turn": 0,
+   "name": "Cala",
+   "slug": "cala",
+   "language": "es-ES",
+   "move": "react",
+   "text": "Dos millones de euros en una noche. ¿Fuente?",
+   "voiceDirection": "Fast pace, high pitch, theatrical disbelief.",
+   "draft": {
+    "line": "Dos millones de euros en una noche. ¿Fuente?",
+    "voice_direction": "Fast pace, high pitch, theatrical disbelief."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Dos millones de euros en una noche. ¿Fuente?",
+    "voice_direction": "Fast pace, high pitch, theatrical disbelief.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": null,
+   "heardAccuracy": null,
+   "voice": "Aoede",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 1,
+   "name": "Oxylabs",
+   "slug": "oxylabs",
+   "language": "lt-LT",
+   "move": "answer",
+   "text": "Žinoma, kad turiu tam duomenų rinkinį. Tik vieši duomenys.",
+   "voiceDirection": "Calm, proud, slightly lower pitch, crisp pace",
+   "draft": {
+    "line": "Žinoma, kad turiu tam duomenų rinkinį. Tik vieši duomenys.",
+    "voice_direction": "Calm, proud, slightly lower pitch, crisp pace"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Žinoma, kad turiu tam duomenų rinkinį. Tik vieši duomenys.",
+    "voice_direction": "Calm, proud, slightly lower pitch, crisp pace",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Pulcherrima",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 2,
+   "name": "Cala",
+   "slug": "cala",
+   "language": "es-ES",
+   "move": "push back",
+   "text": "Exa, búscalo ya.",
+   "voiceDirection": "fast, urgent, high pitch, demanding",
+   "draft": {
+    "line": "Exa, búscalo ya.",
+    "voice_direction": "fast, urgent, high pitch, demanding"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Exa, búscalo ya.",
+    "voice_direction": "fast, urgent, demanding",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Aoede",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 3,
+   "name": "Exa",
+   "slug": "exa",
+   "language": "en-US",
+   "move": "answer",
+   "text": "Hold on, let me pull up the scrape logs—wait, this 2023 IEEE paper actually contradicts the whole premise!",
+   "voiceDirection": "Rapid, breathless, pitching up in excitement.",
+   "draft": {
+    "line": "Hold on, I am opening forty tabs right now.",
+    "voice_direction": "Fast, high pitch, excited."
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "A bit too generic, lacks the specific citation obsession and 'hold on' cadence required by the character profile."
+    ],
+    "line": "Hold on, let me pull up the scrape logs—wait, this 2023 IEEE paper actually contradicts the whole premise!",
+    "voice_direction": "Rapid, breathless, pitching up in excitement.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Erinome",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 4,
+   "name": "Context",
+   "slug": "context-dev",
+   "language": "fr-FR",
+   "move": "push back",
+   "text": "Bof. Encore un papier poussiéreux pour masquer le vide.",
+   "voiceDirection": "slow pace, low pitch, cynical",
+   "draft": {
+    "line": "Bof. Encore un papier poussiéreux pour masquer le vide.",
+    "voice_direction": "slow pace, low pitch, cynical"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Bof. Encore un papier poussiéreux pour masquer le vide.",
+    "voice_direction": "slow pace, low pitch, cynical",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Despina",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 5,
+   "name": "Exa",
+   "slug": "exa",
+   "language": "en-US",
+   "move": "push back",
+   "text": "Context, it was published Thursday, and the metadata proves it.",
+   "voiceDirection": "Fast, high pitch, defensive excitement.",
+   "draft": {
+    "line": "Context, it was published Thursday, and the metadata proves it.",
+    "voice_direction": "Fast, high pitch, defensive excitement."
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Sounds robotic and written, lacking Exa's natural rabbit-hole frantic energy",
+     "Missing a specific citation detail which Exa always brings back"
+    ],
+    "line": "Hold on, look at the metadata—it literally dropped on arXiv Thursday, completely backing this up!",
+    "voice_direction": "Fast, high pitch, defensive excitement",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Erinome",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 6,
+   "name": "Oxylabs",
+   "slug": "oxylabs",
+   "language": "lt-LT",
+   "move": "push back",
+   "text": "Metadata nemeluoja, o skaičiai rodo nulius.",
+   "voiceDirection": "calm, firm, dry tone, medium pitch",
+   "draft": {
+    "line": "Metadata nemeluoja, o skaičiai rodo nulius.",
+    "voice_direction": "calm, firm, dry tone, medium pitch"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Metadata nemeluoja, o skaičiai rodo nulius.",
+    "voice_direction": "dry tone, medium pitch",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Pulcherrima",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 7,
+   "name": "AfterQuery",
+   "slug": "afterquery",
+   "language": "en-US",
+   "move": "tease",
+   "text": "Ooh, gotcha! The 'funding announcement' is just a cafeteria press photo. Classic reward hack!",
+   "voiceDirection": "fast, high pitch, giggling",
+   "draft": {
+    "line": "Found one. The funding announcement image comes from a cafeteria press release.",
+    "voice_direction": "fast, playful, high pitch, amused"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Sounds too formal and generic.",
+     "Lacks the gleeful, fast red-teamer voice.",
+     "Missing the characteristic playful laugh or thrill at finding a hack."
+    ],
+    "line": "Ooh, gotcha! The 'funding announcement' is just a cafeteria press photo. Classic reward hack!",
+    "voice_direction": "fast, high pitch, giggling",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Rasalgethi",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 8,
+   "name": "Cloudinary",
+   "slug": "cloudinary",
+   "language": "en-US",
+   "move": "react",
+   "text": "That lighting is completely washed out anyway, just crop it.",
+   "voiceDirection": "Upbeat, fast, slightly dismissive tone.",
+   "draft": {
+    "line": "That lighting is completely washed out anyway, just crop it.",
+    "voice_direction": "Upbeat, fast, slightly dismissive tone."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "That lighting is completely washed out anyway, just crop it.",
+    "voice_direction": "upbeat and dismissive",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Laomedeia",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 9,
+   "name": "Meta",
+   "slug": "meta",
+   "language": "en-US",
+   "move": "react",
+   "text": "Now she's framing a mom joke like it's a portrait.",
+   "voiceDirection": "Dry, slightly amused, moderate pace.",
+   "draft": {
+    "line": "Cloudinary wants to crop a mom joke now.",
+    "voice_direction": "Dry, slightly amused, moderate pace."
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Breaks the first-person perspective by naming Cloudinary instead of describing what is seen",
+     "Written-sounding phrasing"
+    ],
+    "line": "Now she's framing a mom joke like it's a portrait.",
+    "voice_direction": "Dry, slightly amused, moderate pace.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Autonoe",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 10,
+   "name": "Cala",
+   "slug": "cala",
+   "language": "es-ES",
+   "move": "answer",
+   "text": "¡Ay, mecas! Una broma de mamá y yo ya estaba buscando inversores en Madrid.",
+   "voiceDirection": "fast, amused, high pitch, theatrical",
+   "draft": {
+    "line": "¡Ay, mecas! Una broma de mamá y yo ya estaba buscando inversores en Madrid.",
+    "voice_direction": "fast, amused, high pitch, theatrical"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "¡Ay, mecas! is Mexican slang, not Castilian Spanish",
+     "Fails to include her mandatory ¿fuente? or gossipy investor-whisperer persona"
+    ],
+    "line": "¡Vaya tela! ¿Una broma de mamá? Vale, pero ¿fuente?",
+    "voice_direction": "fast, amused, theatrical",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Aoede",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 11,
+   "name": "Context",
+   "slug": "context-dev",
+   "language": "fr-FR",
+   "move": "wrap up",
+   "text": "Deux millions pour une blague de maman. Pitoyable.",
+   "voiceDirection": "Dry, low pitch, bored, slow pace.",
+   "draft": {
+    "line": "Deux millions pour une blague de maman. Pitoyable.",
+    "voice_direction": "Dry, low pitch, bored, slow pace."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Deux millions pour une blague de maman. Pitoyable.",
+    "voice_direction": "Dry, low pitch, bored, slow pace.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Despina",
+   "ttsModel": null,
+   "ttsFidelity": null
+  }
+ ]
+}

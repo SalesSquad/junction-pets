@@ -58,7 +58,7 @@ durations and iCloud copies.
 ## Persona lab (personality, not just a voice)
 
 `persona_lab.py` A/B-tests the same scene (`scenes.json`) with the current company-copy persona
-versus a character bible (`characters.json`, pilot: 6 pets) plus craft rules against AI slop.
+versus a character bible (`characters.json`, now all 34 pets) plus craft rules against AI slop.
 It is text-only, so it works while the TTS quota is out.
 
 ```sh
@@ -69,6 +69,44 @@ python3 persona_lab.py ab --tag my-test                          # both arms, al
 Outputs per scene: both transcripts, slop metrics (template rate, question endings, praise
 openers, buzzwords, length variation, acting tags) and a blind X/Y packet for a judge or a
 human. Pilot result: `persona-evidence/pilot-20261115.json` (bible arm won 4/4 blind).
+
+## Scene engine (v2): characters that play off each other
+
+`scene.py` runs a scene from `scenes.json` (7 scenes, every pet in at least one) as a small
+production line per turn:
+
+1. **Director** picks who speaks next and the move (tease, push back, short reaction, …).
+   Rules first: opener, everyone speaks once, no A-B-A duets, nobody past two lines while
+   someone is still silent; then an LLM director for the most natural next speaker.
+2. **Writer** gets the character bible (`characters.json`: core, want, flaw, speech, humour,
+   opinions, relationships, own-language anchors, catchphrases, never-list, vocal delivery),
+   the scene beat, memory notes and the owner's taste, hears the previous WAV and writes one
+   line plus a vocal direction (pace, volume, pitch, emotion).
+3. **Checks** (`check_line`): length, reused example lines, catchphrase budget per scene,
+   same opener as last time, one voice tag max, stage directions, praise openers, buzzwords,
+   question streaks, body-movement directions, native script for the language.
+4. **Critic** keeps or rewrites the line; the version with fewer problems wins.
+5. **Voice**: the pet's designed Gemini voice (`design-voices`, Voice design API,
+   `learned/designed-voices.json`) with the per-line direction as `speech_metadata.style`;
+   prebuilt voice or Live audio as fallback.
+6. **Memory**: after the scene each pet keeps up to 6 short notes (`~/Library/Application Support/JunctionPetVoice/memory/pets.json`, local, not in git), so
+   running jokes and grudges carry into the next scene.
+
+```sh
+python3 scene.py design-voices --pets rokoko,bahn-express  # one designed voice per pet
+python3 scene.py run demo-crash-0312                       # audio scene, ~4 Gemini calls/turn
+python3 scene.py run all --text-only --tag test            # text only, no TTS quota
+python3 listen.py build --spec spec.json --out /tmp/listen  # blind A/B listening page
+python3 listen.py ingest --ratings ratings.json --key /tmp/listen/key.json --manifest-dir /tmp/listen
+```
+
+**Blind listening → taste.** `listen.py build` pairs two systems per scene (X/Y in random
+order) and prebuilt vs designed voice per pet (A/B), writes `index.html` and a private
+`key.json`. The owner's ratings (winner, reasons, 👍/👎 per line, free note) are read back with
+`ingest` into `learned/taste.json`: system wins/losses, liked and disliked lines per pet,
+voice preference and notes. `scene.py` puts liked/disliked lines and notes into every writer
+prompt and uses the preferred voice type, so each listening round steers the next scene.
+Scene receipts (text, metrics, director decisions, no audio) go to `scene-evidence/`.
 
 ## Boundaries
 

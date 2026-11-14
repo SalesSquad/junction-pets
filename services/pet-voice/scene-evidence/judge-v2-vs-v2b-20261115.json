@@ -1,0 +1,28 @@
+{
+  "schema": "junction.pet-voice.blind-judge/v1",
+  "date": "2026-11-15",
+  "judge": "Claude Haiku via owner's MBP haiku MCP (blind X/Y, both orders, sequential, no schema)",
+  "question": "Score each transcript 1-10 on distinct, not_generic, natural, listen, ensemble; pick a winner; quote the 3 worst lines.",
+  "arms": {
+    "v2": "scene-robot-dog-stage-text-v2-20261115: free LLM director (longest duet 7 lines, Arduino 4 lines)",
+    "v2b": "scene-robot-dog-stage-text-v2b-20261115: strict rotation (no A-B-A, max 2 lines while anyone is silent; longest duet 2)"
+  },
+  "judgments": [
+    {"scene": "robot-dog-stage", "X": "v2", "Y": "v2b", "winner": "v2",
+     "scores": {"v2": {"distinct": 7, "not_generic": 6, "natural": 6, "listen": 7, "ensemble": 7},
+                "v2b": {"distinct": 6, "not_generic": 4, "natural": 6, "listen": 5, "ensemble": 6}},
+     "worst": ["v2b: Every roar in the stadium flows together when you thread ten thousand minds at once.",
+               "v2: Ten thousand threads processing those wiggles simultaneously.",
+               "v2b: Cliente batendo palma agora mesmo, esquece o resto!"],
+     "verdict": "v2: Arduino and Atech react to each other's bad ideas; v2b repeats its speaker loop and leans on NVIDIA's brochure lines."},
+    {"scene": "robot-dog-stage", "X": "v2b", "Y": "v2", "winner": "v2",
+     "scores": {"v2b": {"distinct": 7, "not_generic": 4, "natural": 5, "listen": 5, "ensemble": 5},
+                "v2": {"distinct": 7, "not_generic": 5, "natural": 7, "listen": 7, "ensemble": 6}},
+     "verdict": "v2 lines build on each other (the fall, the resistor, kettle and eyebrow callbacks), though Arduino dominates; NVIDIA's 'ten thousand' hype is a tic in both."}
+  ],
+  "summary": {
+    "v2_wins": 2, "v2b_wins": 0,
+    "lesson": "Strict rotation gives everyone a line but kills exchanges. Next director (v2d): an argument may run A-B-A-B, then a third voice must take a side; a pet's first line must come in on the previous line.",
+    "next": ["judge v2d vs v2 once the daily text quota resets", "NVIDIA 'ten thousand threads' is a bible-anchor tic across runs"]
+  }
+}
