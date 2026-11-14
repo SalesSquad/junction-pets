@@ -243,5 +243,25 @@ class AllPhysicalGoalsMustReplay(unittest.TestCase):
         self.assertTrue(qual.all_goals_plus_original_positive(near_lateral, old_v7_near_only))
 
 
+class HostedPinnedVenv(unittest.TestCase):
+    def test_real_venv_python_symlink_is_valid_and_source_bound(self):
+        """Hosted Ubuntu's `python3 -m venv` produces bin/python as a symlink."""
+        with tempfile.TemporaryDirectory() as folder:
+            subprocess.run([sys.executable, "-m", "venv", str(Path(folder) / "mujoco-venv")],
+                           check=True, capture_output=True, text=True, timeout=60)
+            interpreter = Path(folder) / "mujoco-venv" / "bin" / "python"
+            self.assertTrue(interpreter.is_symlink(), "regression requires the actual hosted symlink shape")
+            self.assertEqual(qual.verified_venv_python(Path(folder)), interpreter)
+
+    def test_venv_identity_cannot_be_forged_by_system_python_symlink(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder) / "mujoco-venv"
+            (root / "bin").mkdir(parents=True)
+            (root / "pyvenv.cfg").write_text("home = /usr/bin\n", encoding="utf8")
+            (root / "bin/python").symlink_to(sys.executable)
+            with self.assertRaisesRegex(AssertionError, "VENV_NOT_ISOLATED"):
+                qual.verified_venv_python(Path(folder))
+
+
 if __name__ == "__main__":
     unittest.main()
