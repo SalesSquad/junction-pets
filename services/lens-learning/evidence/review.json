@@ -1,0 +1,35 @@
+{
+  "workId": "LENS-LEARNING-20261114",
+  "scope": "synthetic learning reference; not production authority",
+  "reviewer": "independent read-only agent",
+  "sourceHashes": {
+    "apps/meta-resume-web/learning-core.mjs": "af20a9e4c3720f8263b8726aeeb3b6aa79fd8f3ffb0204ee9d6fd7e29e312be4",
+    "apps/meta-resume-web/learning-panel.mjs": "4650aedca3e3e6bc7c5559feb3ba5dad8eb1ba6c7b4e224d0bbf1fea14492e4a",
+    "apps/meta-resume-web/app.mjs": "56f876e031b0b855138e0aadf1fc5661bff0680542ccb803a4bfeb05044edd5d"
+  },
+  "findings": [
+    {
+      "severity": "P2",
+      "finding": "Colon-delimited tuple IDs could collide during valid state restoration.",
+      "repair": "Serialize episode/step as an unambiguous JSON tuple.",
+      "status": "verified repaired"
+    },
+    {
+      "severity": "P2",
+      "finding": "Feedback could refer to a previous task snapshot; same-identity reset could retain old proposals.",
+      "repair": "Track latest task, clear on change, invalidate from both reset paths, reject old feedback and decisions.",
+      "status": "verified repaired"
+    }
+  ],
+  "executedChecks": [
+    "tuple restoration",
+    "stale feedback rejection",
+    "same-identity reset invalidation"
+  ],
+  "remainingP1P2": 0,
+  "limitations": [
+    "No broad suite by reviewer",
+    "No browser or provider call by reviewer",
+    "No production host or physical capture qualification"
+  ]
+}

@@ -238,3 +238,23 @@ No physical-device, live capture, native assistant, host persistence,
 cross-device or production qualification is implied by this source. The next
 integration is the existing Chibi host command/evidence adapter and DAT capture
 lane, under their owners, followed by one admitted real-device journey.
+
+
+## Lens learning: teach, correct, reuse and forget
+
+The Learn panel adds an explicitly synthetic personal-learning loop to this same
+Resume journey. Start learning, propose and approve a help preference, save your
+place, then correct that preference and reuse it in a new practice episode.
+Learning consent and original task confirmations remain separate. Forgetting
+removes learned and derived state; a model proposal cannot complete a step.
+
+Goals, explicit feedback, contextual reminders, independently reported versus
+assisted practice, and unsent specialist handoffs are included. The fixed camera
+bag is a reference routine; arbitrary routine extraction from live video is not
+implemented. Personal production storage belongs in the private Chibi host.
+
+See [the learning service](../../services/lens-learning/README.md) for the bounded
+domain/browser simulations and the external, source-pinned TypeSafe Jev and
+OpenAI Decisions evaluator. Offline parser fixtures and actual model responses
+are reported separately. No provider credential enters this browser.
+
