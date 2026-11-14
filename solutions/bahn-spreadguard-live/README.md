@@ -42,17 +42,26 @@ moving clock. It **never** calls `advance` for a final.
 ## Strategy and limits
 
 - Quote only one preferred deadline option; estimate feasibility from the
-  official 30-place road map, dealer windows, shortage at driver home towns,
-  local order backlog, conservative buffer and expected fees.
+  official 30-place road map, dealer windows, available drivers, observed
+  positions/bookings, local order backlog and conservative timing buffers.
 - Use dealer-specific trust and win/loss counters from observable events, with
-  deterministic recovery from the official historical event log.
-- Start funded gigs at 155% of reference fee, escalate to 230% if still
-  unbooked, and use a faster emergency schedule on `deadline_close`.
+  deterministic recovery from the official historical event log. Booking
+  delay observations gradually adjust the minimum required time buffer.
+- Normally reserve 15% of won-order revenue and cap escalating driver offers
+  by the remaining fee budget, deducting actual driver ledger costs and
+  outstanding booked commitments. A `deadline_close` warning allows a bounded
+  102% revenue emergency budget to protect the >90% on-time qualification gate.
+- For an exact policy comparison on **unranked practice worlds only**, use
+  `SPREAD_GUARD_POLICY=baseline` for the original 155–230% payout ramp or
+  `SPREAD_GUARD_POLICY=risk_budget` (default) for the bounded policy. Use the
+  same official `--seed` for both attempts, and compare sponsor world scores;
+  never infer genuine rank from the synthetic sensitivity harness.
 - Delegate correct post/withdraw/repost/rate-limit behavior to the official
   starter, adding optional manual-licence/plates constraints from dealer notes.
 
 This is **runnable API integration**, not a claim of >90% real qualification.
-No registered team key, official practice score, ranking run, or final execution
-was available when this artifact was authored. Algorithm parameters are a
-first hypothesis, not trained or validated against the hidden worlds. Keep the
-existing PR #101 and its local uncommitted V2 repairs intact.
+The `One Man Raid` team was registered on 2026-11-14; its token stays exclusively
+in the owner's Mac Keychain and must never enter this repository. Official
+practice is being qualified independently of this draft PR. Algorithm parameters
+remain hypotheses until paired real-world practice scores validate them. Keep
+the existing PR #101 and its local uncommitted V2 repairs intact.

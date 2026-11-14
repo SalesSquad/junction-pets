@@ -11,8 +11,9 @@ for practice and `--board` only once qualification has been established.
 from __future__ import annotations
 
 import math
+import os
 import re
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
 from typing import Any
 
 from spread import starter
@@ -22,6 +23,11 @@ MINUTE = 1
 HOUR = 60
 DAY = 1440
 UNKNOWN_ROAD_MINUTES = 420
+DRIVER_POSITION_TTL_MINUTES = 180
+EXPENSE_KINDS = frozenset((
+    "driver_fee", "failed_visit", "release_fee", "waiting", "fine",
+    "late_refund", "undelivered_penalty",
+))
 
 
 def road_index(map_data: dict[str, Any]) -> dict[tuple[str, str], int]:
@@ -40,8 +46,22 @@ class SpreadGuardDesk(starter.Desk):
 
     def __init__(self, world: Any, level: int, now: int):
         super().__init__(world, level, now)
+        # An explicit switch makes A/B trials on identical official practice
+        # seeds possible without touching the running final/board path.
+        self.policy = os.getenv("SPREAD_GUARD_POLICY", "risk_budget")
+        if self.policy not in ("baseline", "risk_budget"):
+            raise ValueError("SPREAD_GUARD_POLICY must be baseline or risk_budget")
         self.roads: dict[tuple[str, str], int] = {}
         self.roster: list[dict[str, Any]] = []
+        self.driver_places: dict[str, str] = {}
+        self.driver_place_observed_at: dict[str, int] = {}
+        self.active_drivers: dict[str, str] = {}  # gig ID -> driver ID
+        self.booked_fees: dict[str, int] = {}  # committed but not necessarily paid
+        self.paid_by_gig: Counter[str] = Counter()
+        self.paid_by_order: Counter[str] = Counter()
+        self.expenses_by_order: Counter[str] = Counter()
+        self.failed_legs_by_gig: dict[str, set[int]] = defaultdict(set)
+        self.booking_delays: deque[int] = deque(maxlen=32)
         self.trust: Counter[str] = Counter()
         self.won_by_dealer: Counter[str] = Counter()
         self.lost_by_dealer: Counter[str] = Counter()
@@ -70,9 +90,95 @@ class SpreadGuardDesk(starter.Desk):
         return total
 
     def _driver_count(self, pickup_place_id: str) -> int:
-        """Homes, not promises of availability. Only softens the risk score."""
-        return sum(self.roads.get((d["homePlaceId"], pickup_place_id), 10000) <= 150
-                   for d in self.roster)
+        """Use observed positions and active bookings where available.
+
+        A driver's home is only a fallback until the world reveals their
+        position; it never overrides a known live booking.
+        """
+        unavailable = set(self.active_drivers.values()) if self.policy != "baseline" else set()
+        def origin_for(driver: dict[str, Any]) -> str:
+            driver_id = driver["id"]
+            observed = self.driver_place_observed_at.get(driver_id, -10000)
+            if (self.policy != "baseline" and driver_id in self.driver_places
+                    and 0 <= self.now - observed <= DRIVER_POSITION_TTL_MINUTES):
+                return self.driver_places[driver_id]
+            return driver["homePlaceId"]
+
+        return sum(
+            d["id"] not in unavailable
+            and self.roads.get((origin_for(d), pickup_place_id), 10000) <= 150
+            for d in self.roster
+        )
+
+    def _booking_delay_buffer(self) -> int:
+        """Small, evidence-driven delivery buffer; never claim a calibrated ETA."""
+        if self.policy == "baseline" or len(self.booking_delays) < 6:
+            return 0
+        recent = sorted(self.booking_delays)
+        p75 = recent[(3 * (len(recent) - 1)) // 4]
+        return min(180, max(0, p75 - 60))
+
+    def _record_ledger(self, event: dict[str, Any]) -> None:
+        line = event["line"]
+        order_id = line.get("orderId")
+        if not order_id or line.get("kind") not in EXPENSE_KINDS:
+            return
+        # All negative ledger lines reduce available order cash. Driver fees
+        # are additionally tracked per gig so booked but already paid fees
+        # aren't charged to the available budget twice.
+        cost = max(0, -int(line["cents"]))
+        self.expenses_by_order[order_id] += cost
+        if line["kind"] == "driver_fee":
+            self.paid_by_order[order_id] += cost
+            if line.get("gigId"):
+                self.paid_by_gig[line["gigId"]] += cost
+
+    def _remaining_fee_budget(self, order: dict[str, Any], cars: int) -> int | None:
+        """What the current post may still commit, in exact integer cents.
+
+        Hold 15% of revenue in normal operations. On a deadline warning, allow
+        up to 102% of revenue *across the order*, to rescue on-time delivery.
+        Other active booked gigs and ledger costs are deducted first.
+        """
+        if self.policy == "baseline" or self.level < 7:
+            return None
+        price = order.get("priceCents")
+        if not isinstance(price, int) or price <= 0:
+            return 1  # quarantine malformed revenue, never unbounded spending
+        order_id = order["id"]
+        allowed = price * (102 if order_id in self.urgent else 85) // 100
+        committed = 0
+        covered_legs: set[int] = set()
+        for gig_id in self.active_drivers:
+            post = self.posts.get(gig_id)
+            if post and post["stops"][0]["orderId"] == order_id:
+                committed += max(0, self.booked_fees.get(gig_id, 0)
+                                 - self.paid_by_gig[gig_id])
+                covered_legs.update(s["leg"] for s in post["stops"]
+                                    if s["orderId"] == order_id)
+        available = max(0, allowed - self.expenses_by_order[order_id] - committed)
+        # A split trade-in must not grant the full remaining order budget to
+        # each separate gig. Already booked legs are funded by 'committed' and
+        # do not divide the free budget a second time.
+        open_legs = sum(value is None and i not in covered_legs
+                        for i, value in enumerate(order.get("deliveredAt", [])))
+        open_legs = max(cars, open_legs)
+        return max(1, available * cars // open_legs)
+
+    def _release_driver_if_finished(self, gig_id: str) -> None:
+        post = self.posts.get(gig_id)
+        if post is None:
+            return
+        legs = {(s["orderId"], s["leg"]) for s in post["stops"]}
+        if legs and all(
+            order_id not in self.orders
+            or self.orders[order_id]["deliveredAt"][leg] is not None
+            or leg in self.failed_legs_by_gig.get(gig_id, set())
+            for order_id, leg in legs
+        ):
+            self.active_drivers.pop(gig_id, None)
+            self.booked_fees.pop(gig_id, None)
+            self.failed_legs_by_gig.pop(gig_id, None)
 
     def _ready(self, request: dict[str, Any]) -> int:
         return max(self.now + HOUR, *(leg["pickup"]["window"]["from"]
@@ -188,7 +294,7 @@ class SpreadGuardDesk(starter.Desk):
         eligible: list[tuple[float, dict[str, Any], int]] = []
         for option in request["options"]:
             slack = self._slack(request, option)
-            if slack < (120 if self.level < 7 else 210):
+            if slack < (120 if self.level < 7 else 210 + self._booking_delay_buffer()):
                 continue
             if self.level >= 7 and self.roster and self._driver_count(origin) < 2:
                 if slack < 600:
@@ -232,7 +338,10 @@ class SpreadGuardDesk(starter.Desk):
         # Never reduce fees; latest steps stay within API 48-step limit.
         factor = [205, 225, 240, 260] if order["id"] in self.urgent else [155, 165, 185, 210, 230]
         gaps = [0, 15, 30, 60] if order["id"] in self.urgent else [0, 30, 90, 180, 300]
-        return [{"at": self.now + at, "feeCents": round_up_div(fee * rate, 100)}
+        cap = self._remaining_fee_budget(order, cars)
+        return [{"at": self.now + at,
+                 "feeCents": min(round_up_div(fee * rate, 100), cap)
+                 if cap is not None else round_up_div(fee * rate, 100)}
                 for at, rate in zip(gaps, factor)]
 
     def post(self, order: dict[str, Any], legs: list[int], retry: starter.Retry = starter.Retry()) -> None:
@@ -262,6 +371,33 @@ class SpreadGuardDesk(starter.Desk):
             return
         self.seen.add(event["seq"])
         kind = event["kind"]
+        if kind == "ledger":
+            self._record_ledger(event)
+        elif kind == "gig_booked":
+            gig_id = event["gigId"]
+            self.active_drivers[gig_id] = event["driverId"]
+            self.booked_fees[gig_id] = int(event["feeCents"])
+            post = self.posts.get(gig_id)
+            if post and post.get("schedule"):
+                delay = event["at"] - post["schedule"][0]["at"]
+                if delay >= 0:
+                    self.booking_delays.append(delay)
+        elif kind in ("gig_dropped", "no_show"):
+            self.active_drivers.pop(event["gigId"], None)
+            self.booked_fees.pop(event["gigId"], None)
+        elif kind in ("picked_up", "delivered"):
+            driver_id = self.active_drivers.get(event["gigId"])
+            if driver_id:
+                self.driver_places[driver_id] = event["placeId"]
+                self.driver_place_observed_at[driver_id] = event["at"]
+        elif kind == "order_cancelled":
+            for affected in event.get("gigs", []):
+                if affected.get("outcome") != "continues":
+                    self.active_drivers.pop(affected["gigId"], None)
+                    self.booked_fees.pop(affected["gigId"], None)
+                    self.failed_legs_by_gig.pop(affected["gigId"], None)
+        elif kind == "visit_failed":
+            self.failed_legs_by_gig[event["gigId"]].add(event["leg"])
         if kind == "order_lost":
             req = self.requests.get(event["requestId"])
             if req:
@@ -273,6 +409,9 @@ class SpreadGuardDesk(starter.Desk):
             order = self.orders.get(event["orderId"])
             if order:
                 self._mark_complete(order)
+            self._release_driver_if_finished(event["gigId"])
+        elif kind == "visit_failed":
+            self._release_driver_if_finished(event["gigId"])
 
     def rejoin(self, snapshot: dict[str, Any], history: list[dict[str, Any]]) -> None:
         # Reconstruct adaptive pricing/trust from *server* evidence, then let
@@ -280,8 +419,28 @@ class SpreadGuardDesk(starter.Desk):
         requests = {e["request"]["id"]: e["request"] for e in history
                     if e["kind"] == "price_request"}
         known_orders: dict[str, dict[str, Any]] = {}
+        self.driver_places = {p["driverId"]: p["placeId"]
+                              for p in snapshot.get("driverPositions", [])}
+        self.driver_place_observed_at = {p["driverId"]: snapshot["now"]
+                                         for p in snapshot.get("driverPositions", [])}
+        self.active_drivers = {g["id"]: g["driverId"] for g in snapshot["gigs"]
+                               if g["status"] in ("booked", "working") and g.get("driverId")}
+        self.booked_fees = {g["id"]: int(g["feeCents"]) for g in snapshot["gigs"]
+                            if g["id"] in self.active_drivers}
+        self.paid_by_order.clear()
+        self.paid_by_gig.clear()
+        self.expenses_by_order.clear()
+        self.failed_legs_by_gig.clear()
+        self.booking_delays.clear()
+        posted_at = {g["id"]: g["postedAt"] for g in snapshot["gigs"]}
         for event in history:
             kind = event["kind"]
+            if kind == "ledger":
+                self._record_ledger(event)
+            elif kind == "gig_booked" and event["gigId"] in posted_at:
+                delay = event["at"] - posted_at[event["gigId"]]
+                if delay >= 0:
+                    self.booking_delays.append(delay)
             if kind == "order_won":
                 order = event["order"]
                 known_orders[order["id"]] = {**order, "deliveredAt": list(order["deliveredAt"])}

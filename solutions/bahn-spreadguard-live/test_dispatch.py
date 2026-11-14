@@ -1,6 +1,8 @@
 """No-key contract checks against the genuine spread-0.1.0 SDK."""
 import copy
+import os
 import unittest
+from unittest.mock import patch
 
 from dispatch import SpreadGuardDesk
 
@@ -149,6 +151,120 @@ class SpreadGuardSDKContract(unittest.TestCase):
                        "at": 480, "request": self.request}, won, delivered])
         self.assertEqual(fresh.trust["dealer1"], 1)
         self.assertEqual(fresh.outbox, [])
+
+    def test_quote_bound_is_enforced_by_actual_driver_schedule(self):
+        req = copy.deepcopy(self.request)
+        req["referenceFeeCents"] = 24000
+        self.desk.requests[req["id"]] = req
+        order = won_order(req)
+        order["priceCents"] = 48000
+        self.desk.orders[order["id"]] = order
+        routine = self.desk.fees_for(order, 1)
+        self.assertEqual(routine[0]["feeCents"], 37200)
+        self.assertEqual(routine[-1]["feeCents"], 40800)  # 85% of sale
+        self.assertEqual([x["feeCents"] for x in routine],
+                         sorted(x["feeCents"] for x in routine))
+        self.desk.urgent.add(order["id"])
+        rescue = self.desk.fees_for(order, 1)
+        self.assertEqual(rescue[-1]["feeCents"], 48960)  # 102% of sale
+        self.assertEqual([x["feeCents"] for x in rescue],
+                         sorted(x["feeCents"] for x in rescue))
+
+    def test_active_bookings_position_and_release(self):
+        self.desk.quote(self.request)
+        self.desk.handle({"kind": "order_won", "seq": 1, "at": 495,
+                          "order": won_order(self.request)})
+        post = next(x for x in self.desk.outbox if x["type"] == "post")
+        self.desk.carry(post, "g1")
+        self.assertEqual(self.desk._driver_count("A"), 4)
+        self.desk.handle({"kind": "gig_booked", "seq": 2, "at": 515,
+                          "gigId": "g1", "driverId": "D1", "feeCents": 18600})
+        self.assertEqual(self.desk._driver_count("A"), 3)
+        self.desk.handle({"kind": "picked_up", "seq": 3, "at": 560,
+                          "gigId": "g1", "orderId": "R1", "leg": 0,
+                          "placeId": "B"})
+        self.desk.handle({"kind": "delivered", "seq": 4, "at": 1100,
+                          "gigId": "g1", "orderId": "R1", "leg": 0,
+                          "placeId": "B"})
+        self.desk.now = 1100
+        self.assertNotIn("g1", self.desk.active_drivers)
+        self.assertEqual(self.desk.driver_places["D1"], "B")
+        self.assertEqual(self.desk._driver_count("A"), 3)
+        self.desk.now = 1300
+        self.assertEqual(self.desk._driver_count("A"), 4)  # stale GPS expires
+
+    def test_paid_and_committed_fees_are_not_double_counted(self):
+        req = copy.deepcopy(self.request)
+        req["referenceFeeCents"] = 20000
+        self.desk.requests["R1"] = req
+        order = won_order(req)
+        order["priceCents"] = 70000
+        order["legs"] = order["legs"] * 2
+        order["deliveredAt"] = [None, None]
+        self.desk.orders["R1"] = order
+        self.desk.posts["g1"] = {"stops": [{"orderId": "R1", "leg": 0}]}
+        self.desk.active_drivers["g1"] = "D1"
+        self.desk.booked_fees["g1"] = 16000
+        first = self.desk._remaining_fee_budget(order, 1)
+        self.assertEqual(first, 43500)  # other leg already funded
+        self.desk.handle({"seq": 1, "at": 500, "kind": "ledger",
+                          "line": {"kind": "driver_fee", "cents": -12000,
+                                   "orderId": "R1", "gigId": "g1"}})
+        self.assertEqual(self.desk._remaining_fee_budget(order, 1), first)
+        self.desk.handle({"seq": 1, "at": 500, "kind": "ledger",
+                          "line": {"kind": "driver_fee", "cents": -12000,
+                                   "orderId": "R1", "gigId": "g1"}})
+        self.assertEqual(self.desk.paid_by_order["R1"], 12000)
+        self.desk.handle({"seq": 2, "at": 520, "kind": "ledger",
+                          "line": {"kind": "failed_visit", "cents": -5000,
+                                   "orderId": "R1", "gigId": "g2"}})
+        self.assertEqual(self.desk.expenses_by_order["R1"], 17000)
+        self.assertEqual(self.desk._remaining_fee_budget(order, 1), 38500)
+
+    def test_failed_pickup_releases_driver_for_next_order(self):
+        self.desk.quote(self.request)
+        self.desk.handle({"kind": "order_won", "seq": 1, "at": 495,
+                          "order": won_order(self.request)})
+        post = next(x for x in self.desk.outbox if x["type"] == "post")
+        self.desk.carry(post, "g1")
+        self.desk.handle({"kind": "gig_booked", "seq": 2, "at": 515,
+                          "gigId": "g1", "driverId": "D1", "feeCents": 18600})
+        self.assertEqual(self.desk._driver_count("A"), 3)
+        self.desk.handle({"kind": "visit_failed", "seq": 3, "at": 560,
+                          "gigId": "g1", "orderId": "R1", "leg": 0,
+                          "reason": "not_ready"})
+        self.assertNotIn("g1", self.desk.active_drivers)
+        self.assertEqual(self.desk._driver_count("A"), 4)
+
+    def test_baseline_switch_retains_original_unbounded_fee_ramp(self):
+        with patch.dict(os.environ, {"SPREAD_GUARD_POLICY": "baseline"}):
+            baseline = SpreadGuardDesk(self.world, 8, 480)
+            baseline.requests["R1"] = self.request
+            order = won_order(self.request)
+            order["priceCents"] = 15000
+            self.assertEqual(baseline.fees_for(order, 1)[-1]["feeCents"],
+                             27600)
+
+    def test_rejoin_rebuilds_fees_and_driver_positions(self):
+        order = won_order(self.request)
+        gig = {"id": "g1", "status": "booked", "driverId": "D1",
+               "feeCents": 18600, "postedAt": 500, "stops": [
+                   {"orderId": "R1", "leg": 0, "kind": "pickup"}],
+               "audience": {"experienced": False, "manualLicence": False},
+               "schedule": [{"at": 500, "feeCents": 18600}]}
+        self.desk.rejoin({"openRequests": [], "orders": [order], "gigs": [gig],
+                          "now": 480,
+                          "driverPositions": [{"driverId": "D1", "placeId": "B",
+                                               "gigId": "g1"}]},
+                         [{"kind": "price_request", "seq": 1, "at": 480,
+                           "request": self.request},
+                          {"kind": "ledger", "seq": 2, "at": 530,
+                           "line": {"kind": "driver_fee", "cents": -4000,
+                                    "orderId": "R1", "gigId": "g1"}}])
+        self.assertEqual(self.desk.driver_places["D1"], "B")
+        self.assertEqual(self.desk.active_drivers["g1"], "D1")
+        self.assertEqual(self.desk.paid_by_order["R1"], 4000)
+        self.assertEqual(self.desk._driver_count("A"), 3)
 
 
 if __name__ == "__main__":
