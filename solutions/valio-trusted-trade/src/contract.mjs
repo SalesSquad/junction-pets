@@ -1,9 +1,10 @@
 // Implemented localhost contract. No sponsor API or authentication claim.
-export const endpoints = Object.freeze({ session: '/api/demo/session', catalog: '/api/catalog', policy: '/api/policy', quotes: '/api/quotes', orders: '/api/orders', audit: '/api/audit', auditVerify: '/api/audit/verify', reprice: '/api/demo/reprice', plans: '/api/plans', shock: '/api/demo/shock', jwks: '/.well-known/trusted-trade/jwks.json', buyerKey: '/api/trust/buyer-key' });
+export const endpoints = Object.freeze({ session: '/api/demo/session', catalog: '/api/catalog', policy: '/api/policy', quotes: '/api/quotes', orders: '/api/orders', audit: '/api/audit', auditVerify: '/api/audit/verify', reprice: '/api/demo/reprice', plans: '/api/plans', shock: '/api/demo/shock', jwks: '/.well-known/trusted-trade/jwks.json', buyerKey: '/api/trust/buyer-key', wallet: '/api/demo/wallet', ledger: '/api/demo/ledger', ledgerVerify: '/api/demo/ledger/verify' });
 export const metadata = Object.freeze({ mode: 'SYNTHETIC_NONCOMMERCIAL', supplier_id: 'supplier-demo', openapi: '/openapi.json', endpoints,
   approval: 'UNAUTHENTICATED_SYNTHETIC_HUMAN_DECISION', session: 'EPHEMERAL_DEMO_CAPABILITY_NOT_REAL_IDENTITY',
   quoteBody: 'UNSIGNED_kattely.procurement.quote.v1', tradeProof: 'Ed25519_SIGNED_LOCAL_DEMO_KEYS_NOT_REAL_KATTELY_OR_AP2',
   portfolio: 'DETERMINISTIC_MULTI_PRODUCT_OPTIONS_WITH_SYNTHETIC_METRICS', recovery: 'STOCK_SHOCK_REPLANS_WITH_FRESH_APPROVAL',
+  settlement: 'DOUBLE_ENTRY_SYNTHETIC_WALLET_REQUIRES_SEPARATE_DEMO_PAYMENT_APPROVAL_NO_PSP',
   families: ['dairy-milk', 'oat-drink'], fixtureDeliveryDate: '2026-11-16' });
 const json = (schema) => ({ 'application/json': { schema } });
 const ref = (name) => ({ $ref: `#/components/schemas/${name}` });
@@ -16,7 +17,7 @@ const operation = (summary, schema, status = '200', secured = false) => ({ summa
   responses: { [status]: { description: 'Synthetic result only' }, '400': { description: 'Invalid terms' }, '403': { description: 'Buyer capability or approval refused' }, '409': { description: 'Budget, stock, expiry, state or replay conflict' } } });
 const parameter = (name) => ({ name, in: 'path', required: true, schema: str });
 export const openapi = {
-  openapi: '3.1.0', info: { title: 'Trusted Trade — implemented SYNTHETIC localhost API', version: '0.3.0', description: 'All parties, stock, prices, approvals, emission factors and orders invented. No commercial effects. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification.' },
+  openapi: '3.1.0', info: { title: 'Trusted Trade — implemented SYNTHETIC localhost API', version: '0.4.0', description: 'All parties, stock, prices, approvals, emission factors, orders and EUR wallet balances invented. No banking, brokerage or commercial effects. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification.' },
   servers: [{ url: '/' }], paths: {
     '/.well-known/trusted-trade': { get: operation('Discover synthetic capabilities') },
     [endpoints.jwks]: { get: operation('Publish ephemeral self-attested demo verification keys, NOT a trusted identity registry') },
@@ -24,6 +25,9 @@ export const openapi = {
     [endpoints.catalog]: { get: operation('Read current synthetic product prices, stock and versions') },
     [endpoints.buyerKey]: { post: operation('Register independent buyer agent PUBLIC Ed25519 key in its demo session', object({ buyerId: str, publicJwk: object({ kty: { const: 'OKP' }, crv: { const: 'Ed25519' }, x: str }) }), '201', true) },
     [endpoints.policy]: { get: operation('Read server-owned demo budget and approval threshold') },
+    [endpoints.wallet]: { get: operation('Read fictional buyer and supplier wallet balances; demo session required', null, '200', true) },
+    [endpoints.ledger]: { get: operation('Inspect in-memory fictional double-entry EUR journal', null, '200', true) },
+    [endpoints.ledgerVerify]: { get: operation('Verify balanced postings and local hash-linked settlement receipts', null, '200', true) },
     [endpoints.quotes]: { post: operation('Fix price and check availability; no reservation', ref('QuoteRequest'), '201', true) },
     [endpoints.plans]: { post: operation('Compare deterministic multi-item portfolio plans, no commitment', ref('PortfolioPlanRequest'), '201', true) },
     '/api/plans/{id}/quotes': { parameters: [parameter('id')], post: operation('Fix a server-held option to an immutable synthetic quote', object({ buyerId: str, optionId: { enum: ['cost', 'resilience', 'footprint'] } }), '201', true) },
@@ -36,6 +40,9 @@ export const openapi = {
     [endpoints.orders]: { post: operation('Revalidate and commit exactly one simulated order', object({ quoteId: str, buyerId: str, idempotencyKey: { type: 'string', pattern: '^[A-Za-z0-9_-]{10,80}$' } }), '201', true) },
     '/api/orders/{id}': { parameters: [parameter('id')], get: operation('Read simulated receipt') },
     '/api/orders/{id}/cancel': { parameters: [parameter('id')], post: operation('Cancel and restock once', object({ buyerId: str }), '200', true) },
+    '/api/orders/{id}/payment': { parameters: [parameter('id')], get: operation('Read owner-session synthetic payment approval, transfer and balances', null, '200', true) },
+    '/api/orders/{id}/payment-approval': { parameters: [parameter('id')], post: operation('Explicit NEW fictional human click required before simulated money transfer', object({ buyerId: str, decision: { enum: ['approve', 'reject'] } }), '200', true) },
+    '/api/orders/{id}/settlement': { parameters: [parameter('id')], post: operation('Transfer invented EUR from buyer fixture wallet to order-derived fictional suppliers exactly once', object({ buyerId: str, idempotencyKey: { type: 'string', pattern: '^[A-Za-z0-9_-]{10,80}$' } }), '201', true) },
     [endpoints.audit]: { get: operation('Read append-only in-memory demo events') },
     [endpoints.auditVerify]: { get: operation('Verify the in-memory SHA-256 receipt hash chain; no external anchoring') },
     [endpoints.reprice]: { post: operation('Demo-only mutation; invalidates old source versions', object({ sku: str, priceCents: { ...int, maximum: 100000 } }), '200', true) },
@@ -53,6 +60,13 @@ export const openapi = {
       lines: { type: 'array', items: ref('QuoteLine') } } },
     Order: { type: 'object', required: ['id', 'buyerId', 'quoteId', 'status', 'totalCents', 'commitment'], properties: {
       id: str, buyerId: str, quoteId: str, status: { enum: ['SIMULATED_COMMITTED', 'SIMULATED_CANCELLED'] }, totalCents: int, commitment: { const: 'SIMULATION_ONLY_NO_REAL_PURCHASE' }, idempotentReplay: { type: 'boolean' } } },
+    SyntheticWallet: { type: 'object', required: ['mode', 'currency', 'buyerBalanceCents', 'suppliers'], properties: {
+      mode: { const: 'SYNTHETIC_IN_MEMORY_NO_BANK_TRANSFER' }, currency: { const: 'EUR' },
+      buyerBalanceCents: { type: 'integer', minimum: 0 }, initialBuyerFundsCents: int,
+      suppliers: { type: 'array', items: object({ account: str, balanceCents: { type: 'integer', minimum: 0 } }) } } },
+    SyntheticPayment: { type: 'object', required: ['approval', 'transfer', 'wallet'], properties: {
+      approval: { type: ['object', 'null'] }, transfer: { type: ['object', 'null'] }, wallet: ref('SyntheticWallet'),
+      idempotentReplay: { type: 'boolean' } } },
     BuyingNeed: object({ family: { enum: ['dairy-milk', 'oat-drink'] }, quantityLitres: { ...int, maximum: 10000 }, lactoseFree: { type: 'boolean' }, deliverBy: { const: '2026-11-16' } }),
     PortfolioPlanRequest: object({ buyerId: str, requirements: { type: 'array', minItems: 2, maxItems: 2, items: ref('BuyingNeed') }, budgetCents: { ...int, maximum: 250000 } }),
     QuoteLine: object({ sku: str, name: str, quantityLitres: int, unitPriceCents: int, totalCents: int,
@@ -93,4 +107,6 @@ successSchema('/api/plans/{id}/quotes', 'post', object({ quote: ref('Quote') }))
 successSchema('/api/quotes/{id}/offer', 'post', object({ signedOffer: ref('SignedEnvelope') }));
 successSchema('/api/quotes/{id}/handshake', 'post', object({ proof: ref('TradeProof') }));
 for (const [path, method] of [[endpoints.orders, 'post'], ['/api/orders/{id}', 'get'], ['/api/orders/{id}/cancel', 'post']]) successSchema(path, method, object({ order: ref('Order') }));
+successSchema(endpoints.wallet, 'get', object({ wallet: ref('SyntheticWallet') }));
+for (const [path, method] of [['/api/orders/{id}/payment', 'get'], ['/api/orders/{id}/payment-approval', 'post'], ['/api/orders/{id}/settlement', 'post']]) successSchema(path, method, ref('SyntheticPayment'));
 successSchema('/api/quotes/{id}/body', 'get', object({ mode: { const: 'SYNTHETIC' }, signature: { const: 'UNSIGNED' }, body: ref('UnsignedQuoteBody') }));
