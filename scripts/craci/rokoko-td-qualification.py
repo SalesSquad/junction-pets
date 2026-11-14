@@ -30,7 +30,7 @@ def main() -> int:
     runner = src / "solutions/rokoko-teleoperation-gym/learning/action_necessity/rl/td_agent.py"
     summary = {"schema": "junction.rokoko.td.craci.qualification.v1",
                "source_sha": SOURCE_SHA, "expected_weights_sha256": MODEL_SHA,
-               "used_predeclared_worlds_once": True, "results": [], "all_criteria_passed": False}
+               "preregistered_seed_windows": True, "global_once_registry_enforced": False, "results": [], "all_criteria_passed": False}
     for split, first, count in SPLITS:
         destination = output / (split + ".json")
         try:
