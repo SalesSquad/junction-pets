@@ -5,18 +5,20 @@ import {validateEpisode} from "./engine.mjs";
 export function parseCsv(text) {
   if (typeof text!=="string" || text.length>5_000_000) throw new Error("REFUSED: CSV preview exceeds bounded 5MB");
   const rows=[];
-  let cell="",row=[],quoted=false;
+  let cell="",row=[],quoted=false,closed=false;
   for(let i=0;i<text.length;i++) {
     const ch=text[i];
     if(quoted) {
       if(ch==='"' && text[i+1]==='"') {cell+='"';i++;}
-      else if(ch==='"') quoted=false;
+      else if(ch==='"') {quoted=false;closed=true;}
       else cell+=ch;
+    } else if(closed && ![',','\r','\n'].includes(ch)) {
+      throw new Error("REFUSED: malformed CSV after closing quote");
     } else if(ch==='"') {
       if(cell.length) throw new Error("REFUSED: malformed CSV quote");
       quoted=true;
-    } else if(ch===",") {row.push(cell);cell="";}
-    else if(ch==="\n") {row.push(cell.replace(/\r$/,"")); rows.push(row);row=[];cell="";}
+    } else if(ch===",") {row.push(cell);cell="";closed=false;}
+    else if(ch==="\n") {row.push(cell.replace(/\r$/,"")); rows.push(row);row=[];cell="";closed=false;}
     else cell+=ch;
   }
   if(quoted) throw new Error("REFUSED: unterminated CSV quote");
