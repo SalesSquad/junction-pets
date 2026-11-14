@@ -47,7 +47,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab', 'rokoko-r-tournament', 'meta-r-tournament', 'meta-r-robust', 'lens-real-bop-train', 'lens-r8-meta',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab', 'rokoko-r-tournament', 'meta-r-tournament', 'meta-r-robust', 'lens-real-bop-train', 'lens-r8-meta', 'lens-r3-methods',
 ]);
 
 function choose(value, choices, label) {
@@ -130,6 +130,14 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     for (const [index, arm] of arms.entries()) {
       if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
       add(`lens-r8-${index}-${arm}`, harnessSha, {arm, iteration: index + 1});
+    }
+  } else if (workload === 'lens-r3-methods') {
+    if (override && override !== harnessSha) throw new Error('Lens R3 requires pinned immutable harness');
+    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining'], 'R3 lane slice');
+    const methods = ['risk-upper', 'metadata-shield', 'hard-negative'];
+    for (const [index, method] of methods.entries()) {
+      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
+      add(`lens-r3-${index}-${method}`, harnessSha, {method, iteration: index + 1});
     }
   } else if (workload === 'rokoko-rl-ablations') {
     for (const learnerSeed of [17,43]) add(`rokoko-ablation-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});
