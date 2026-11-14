@@ -62,6 +62,16 @@ class UberMarketSDKContract(unittest.TestCase):
         self.desk.orders[order["id"]] = order
         self.assertEqual(self.desk._virtual_free_supply("B"), 0)
 
+    def test_unreachable_jobs_do_not_erase_other_zone_capacity(self):
+        # Four waiting jobs at B cannot use drivers stationed at A because
+        # A->B is 180min (>150). Jobs>=drivers is not citywide exhaustion.
+        for index in range(4):
+            order = won_order(request())
+            order["id"] = f"remote-{index}"
+            order["legs"][0]["pickup"]["placeId"] = "B"
+            self.desk.orders[order["id"]] = order
+        self.assertEqual(self.desk._virtual_free_supply("A"), 4)
+
     def test_split_trade_in_reserves_two_virtual_gigs(self):
         self.desk.roads[("A", "B")] = 90
         order = won_order(request())

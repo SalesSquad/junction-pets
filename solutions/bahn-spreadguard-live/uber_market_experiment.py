@@ -91,11 +91,21 @@ class UberMarketDesk(DiscoveryDesk):
                 if index % 2 == 1:  # bounded 0.5 token per pending quote
                     jobs.append((expiry, "pending:" + request_id, place))
         jobs.sort()
-        # With as many outstanding jobs as free drivers, the city has no
-        # uncommitted supply anywhere; a full graph search adds no value.
-        # This also bounds matching work in overloaded official worlds.
+        # Under overload, preserve drivers in genuinely *other* zones: a job
+        # unreachable from them cannot consume their capacity. Drivers who
+        # can reach any open job remain conservatively reserved. This bounded
+        # lower estimate avoids a false citywide zero-supply assertion.
         if len(jobs) >= len(free_drivers) and jobs:
-            return 0
+            if len(jobs) > 500:
+                return 0  # time-bounded fail-closed under extreme backlog
+            threatened = {
+                driver["id"] for _, _, job_place in jobs
+                for driver in free_drivers
+                if self.roads.get((positions[driver["id"]], job_place), 10_000) <= 150
+            }
+            return sum(driver_id not in threatened
+                       and self.roads.get((place, origin), 10_000) <= 150
+                       for driver_id, place in positions.items())
         candidates: list[list[str]] = []
         for _, _, place in jobs:
             reachable = sorted((self.roads.get((positions[d["id"]], place), 10000),
