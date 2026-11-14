@@ -1,0 +1,39 @@
+{
+  "fixture_notice": "ALL DATA SYNTHETIC. No Rokoko stream, SDK, gloves, robot, simulator or human participants.",
+  "episodes": [
+    {
+      "schema": "motionbridge.episode.v1",
+      "id": "fragile-pick-clean",
+      "source_label": "SYNTHETIC_FIXTURE",
+      "calibration": {"frame_id":"tabletop-v1","units":"m","bounds":{"x":[-0.5,0.5],"y":[0,0.6],"z":[0,0.6]}},
+      "goal": {"x":0.18,"y":0.22,"z":0.15,"grip":0.4},
+      "baseline_ms": 420,
+      "steps": [
+        {"at_ms":0,"hand":{"x":0,"y":0.10,"z":0.2,"grip":0.1},"tracking_quality":0.98,"deadman":true},
+        {"at_ms":50,"hand":{"x":0.03,"y":0.12,"z":0.2,"grip":0.14},"tracking_quality":0.97,"deadman":true},
+        {"at_ms":100,"hand":{"x":0.06,"y":0.14,"z":0.19,"grip":0.2},"tracking_quality":0.97,"deadman":true},
+        {"at_ms":150,"hand":{"x":0.09,"y":0.16,"z":0.18,"grip":0.24},"tracking_quality":0.98,"deadman":true},
+        {"at_ms":200,"hand":{"x":0.12,"y":0.18,"z":0.17,"grip":0.3},"tracking_quality":0.99,"deadman":true},
+        {"at_ms":250,"hand":{"x":0.15,"y":0.2,"z":0.16,"grip":0.35},"tracking_quality":0.98,"deadman":true},
+        {"at_ms":300,"hand":{"x":0.18,"y":0.22,"z":0.15,"grip":0.4},"tracking_quality":0.98,"deadman":true}
+      ]
+    },
+    {
+      "schema": "motionbridge.episode.v1",
+      "id": "dropout-rearm-protocol",
+      "source_label": "SYNTHETIC_FIXTURE",
+      "calibration": {"frame_id":"tabletop-v1","units":"m","bounds":{"x":[-0.5,0.5],"y":[0,0.6],"z":[0,0.6]}},
+      "goal": {"x":0.18,"y":0.22,"z":0.15,"grip":0.4},
+      "baseline_ms": 580,
+      "steps": [
+        {"at_ms":0,"hand":{"x":0,"y":0.1,"z":0.2,"grip":0.1},"tracking_quality":0.96,"deadman":true},
+        {"at_ms":50,"hand":{"x":0.03,"y":0.12,"z":0.2,"grip":0.15},"tracking_quality":0.97,"deadman":true},
+        {"at_ms":100,"hand":{"x":0.06,"y":0.14,"z":0.19,"grip":0.2},"tracking_quality":0.97,"deadman":true},
+        {"at_ms":280,"hand":{"x":0.08,"y":0.15,"z":0.18,"grip":0.2},"tracking_quality":0.5,"deadman":false},
+        {"at_ms":330,"hand":{"x":0.1,"y":0.17,"z":0.17,"grip":0.26},"tracking_quality":0.95,"deadman":true},
+        {"at_ms":380,"hand":{"x":0.13,"y":0.19,"z":0.16,"grip":0.32},"tracking_quality":0.96,"deadman":true,"reset_ack":true},
+        {"at_ms":430,"hand":{"x":0.18,"y":0.22,"z":0.15,"grip":0.4},"tracking_quality":0.98,"deadman":true}
+      ]
+    }
+  ]
+}

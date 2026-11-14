@@ -1,0 +1,42 @@
+{
+  "schema": "lens.learning-provider-source-review/v1",
+  "workId": "LENS-LEARNING-20261114",
+  "reviewer": "independent read-only agent",
+  "sourceHashes": {
+    "services/lens-learning/evaluate.py": "fc538f00d7ab52583b570763f964d65892dcfe452c2be07987c4933ea4632bb3",
+    "services/lens-learning/test_evaluate.py": "af6a61976116ebfc12cb91709c9823d8125529ff7de2a889a50417c21dd49337",
+    "services/lens-learning/provider-sources.json": "93a5db4c924ea12a5c6f2af81539d5b37bac74cf9c2fd79b79d1f2389493c3aa"
+  },
+  "finding": {
+    "severity": "P2",
+    "description": "Imported project modules resolving outside the admitted root could escape provenance checks.",
+    "reproducedBeforeRepair": [
+      "shadow deferred module",
+      "unmanifested outside namespace module",
+      "manifested symlink escaping root"
+    ],
+    "repair": "Require every declared and loaded project module origin inside the source root and in the manifest, with exactly two source-pinned compatibility aliases.",
+    "status": "repaired; final bytes independently read"
+  },
+  "remainingP1P2": 0,
+  "checks": {
+    "executor": "isolated existing cloud workspace",
+    "reportedBy": "source owner; coordinator preserved exact stderr transcript",
+    "command": "FACTORY_CHECKOUT=/tmp/lens-final-factory-plgmkps7 PYTHONDONTWRITEBYTECODE=1 python3 -B services/lens-learning/test_evaluate.py -v",
+    "factoryCommit": "3d279f11341081ba4fa030db90ede0f329370dd3",
+    "externalSnapshot": true,
+    "executorCommit": null,
+    "qualifiedModules": 11,
+    "exitCode": 0,
+    "passed": 6,
+    "durationSeconds": 0.05,
+    "providerCalls": 0,
+    "stdout": "",
+    "stderrFile": "provider-final-source-tests.log",
+    "stderrSha256": "bdc38e5202e714a466751f13d223aead0bbc107342b4a97d9a3c9339f2fdfd0d"
+  },
+  "limitations": [
+    "Reviewer did not rerun tests or call providers.",
+    "Prior live evidence remains bound to the original recorded harness hash; no new live run claimed."
+  ]
+}

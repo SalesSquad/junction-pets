@@ -2,7 +2,7 @@
   "schema": "junction.meta.dat-mock.verification/v1",
   "work_id": "junction.meta.dat-mock-20261114",
   "base_commit": "82f17099ae1d52efde6661e69f7ea5e38fdcd407",
-  "code_commit": "27091442ac70632e552aff810376a4be18a6d2fb",
+  "code_commit": "1cc880481dac80fdd4249d4b5fad23cdd0747c7f",
   "dirty_baseline": "clean",
   "owned_paths": [
     "apps/meta-lens-apple/DATMockApp",
@@ -171,29 +171,149 @@
       "source_commit": "27091442ac70632e552aff810376a4be18a6d2fb",
       "observed": "MBP RDC timed out; existing Mini Tailscale status independently reports MBP offline since 10:00 UTC. Existing Air SSH route requires an additional provider authentication check. Mini has 12.407 GiB free, below this lane's retained 25 GiB boot / 20 GiB running guards.",
       "scope": "No iOS typecheck, link or actual XCTest has run on the discovery repair."
+    },
+    {
+      "name": "continuation iOS build-for-testing",
+      "result": "pass",
+      "source_commit": "1128b6d495ef0de47acd79c6ee7b50d6db538652",
+      "receipt": "lens-dat-accept-20261114-01",
+      "executor": "authorized MacBook Pro Xcode27.2 27B52; official SDK1.0.1; owned iOS27.2 simulator",
+      "elapsed_seconds": 25.467,
+      "log_sha256": "a7bd5890a8c90dae4e43274c40e500c51d6de7841d2aee7e57dbc51e64ef4152",
+      "completed_at": "2026-11-14T12:24:29.093926+00:00"
+    },
+    {
+      "name": "continuation actual SDK frame/OCR/revoke/disconnect acceptance",
+      "result": "fail",
+      "source_commit": "1128b6d495ef0de47acd79c6ee7b50d6db538652",
+      "receipt": "lens-dat-accept-20261114-01",
+      "tests": 1,
+      "failure_records": 2,
+      "test_seconds": 25.443,
+      "xcodebuild_exit": 65,
+      "xcodebuild_seconds": 152.78,
+      "log_sha256": "ed512544828cef5ec4f7f37d2524d43629ddab36a59fbe803638db9b4a502299",
+      "execution_sha256": "631cc67979cb86e7dcb32096a262b7e9a5297f2e166e5d9f894332c0999354b3",
+      "command_receipt_sha256": "a2eeece34e12450d5126f2897e0b059a20e13918d19f6c73bee2ad2049b501e1",
+      "evidence_root": "/Users/mikaelervamaa/Developer/meta-dat-accept-20261114",
+      "xcresult": "Integration.xcresult",
+      "completed_at": "2026-11-14T12:27:34.717520+00:00",
+      "observed": {
+        "configured": true,
+        "running": false,
+        "cleaning": false,
+        "frameCount": 0,
+        "recognizedText": "",
+        "frameDigestLength": 0,
+        "lastError": "Starting Meta test session: No eligible device available",
+        "statusHistory": [
+          "Connecting simulated glasses",
+          "Could not start Meta test session"
+        ]
+      },
+      "scope": "The unchanged single acceptance case failed in session.start(). No SDK frame, OCR, permission-loss or disconnect runtime pass is claimed.",
+      "cleanup": {
+        "shutdownExit": 0,
+        "deleteExit": 0,
+        "ownedSimulatorAbsent": true
+      },
+      "source_identity_consistent": false,
+      "source_binding_note": "The wrapper intentionally preserved original local1b6f442 and switched to fetched1128b6d before build; its outer observations differ. The custom execution record admits clean1128b6d and binds all harness sources and built products.",
+      "repository_evidence": {
+        "execution": "evidence/20261114-continuation/first-execution.json",
+        "xctest_log": "evidence/20261114-continuation/first-xctest.log"
+      }
+    },
+    {
+      "name": "continuation iOS build-for-testing",
+      "result": "pass",
+      "source_commit": "1cc880481dac80fdd4249d4b5fad23cdd0747c7f",
+      "receipt": "lens-dat-selector-20261114-02",
+      "executor": "authorized MacBook Pro Xcode27.2 27B52; official SDK1.0.1; owned iOS27.2 simulator",
+      "elapsed_seconds": 23.786,
+      "log_sha256": "fb270bd9679c6e89d89d1cb2b02636723c9b5ba60f74375378c2f7a898502f52",
+      "completed_at": "2026-11-14T12:38:51.581623+00:00"
+    },
+    {
+      "name": "continuation actual SDK frame/OCR/revoke/disconnect acceptance",
+      "result": "fail",
+      "source_commit": "1cc880481dac80fdd4249d4b5fad23cdd0747c7f",
+      "receipt": "lens-dat-selector-20261114-02",
+      "tests": 1,
+      "failure_records": 2,
+      "test_seconds": 25.412,
+      "xcodebuild_exit": 65,
+      "xcodebuild_seconds": 156.7,
+      "log_sha256": "d1bf14f39df19cb6e58e25af4b2237fcc5684e5dcc966183179d173c18bf618b",
+      "execution_sha256": "7ed86d6cd12cab5a19b0dc9c034971404731b782d85493a9655b6e4085a5b02a",
+      "command_receipt_sha256": "4cf73a9362e2f0921d55253384e678a71fdbbb77d9d0f9e334a1cda339da6b0a",
+      "evidence_root": "/Users/mikaelervamaa/Developer/meta-dat-selector-accept-20261114",
+      "xcresult": "Integration.xcresult",
+      "completed_at": "2026-11-14T12:41:58.397762+00:00",
+      "observed": {
+        "configured": true,
+        "running": false,
+        "cleaning": false,
+        "frameCount": 0,
+        "recognizedText": "",
+        "frameDigestLength": 0,
+        "lastError": "Starting Meta test session: No eligible device available",
+        "statusHistory": [
+          "Connecting simulated glasses",
+          "Could not start Meta test session"
+        ]
+      },
+      "scope": "The unchanged single acceptance case failed in session.start(). No SDK frame, OCR, permission-loss or disconnect runtime pass is claimed.",
+      "cleanup": {
+        "shutdownExit": 0,
+        "deleteExit": 0,
+        "ownedSimulatorAbsent": true
+      },
+      "source_identity_consistent": true,
+      "source_binding_note": "Clean HEAD and source observations match for this run.",
+      "repository_evidence": {
+        "execution": "evidence/20261114-continuation/selector-execution.json",
+        "xctest_log": "evidence/20261114-continuation/selector-xctest.log"
+      }
+    },
+    {
+      "name": "exact selector-readiness independent source review",
+      "result": "pass",
+      "source_commit": "1cc880481dac80fdd4249d4b5fad23cdd0747c7f",
+      "reviewed_sha256": {
+        "DATMockApp/Sources/DATCaptureModel.swift": "c742eff354e8f295995d4293d3ed8d0f8f3e2144611bba1ea267d68c232fc053",
+        "DATMockApp/Tests/DATIntegrationTests.swift": "4f5572847ef345b587d7ac7a0bf3c4c97fb9cd916c19adb5b6ffda9a0302916b"
+      },
+      "scope": "Root read exact bytes; no P1/P2 finding. This adds an exact active-device stream/snapshot guard but does not resolve the observed session-start eligibility failure. Acceptance assertions, deadlines, SDK pin and signing remained unchanged."
     }
   ],
   "not_verified": [
-    "SDK frame/OCR runtime on simulator",
+    "SDK frame/OCR/revoke/disconnect acceptance pass on simulator",
     "Imported-video UX on a running app",
     "Real Meta glasses or phone camera",
     "Chibi host admission or privileged execution",
-    "Signed/released iOS app",
-    "Current discovery repair against the iOS SDK or simulator"
+    "Signed/released iOS app"
   ],
-  "preserved": "Source pushed; exact build logs, original interruption records and cleanup receipts retained on the executing Macs. Clean checkouts and built app kept for a test-without-building resume; no daemon or recurring job added.",
-  "next_action": "Restore the admitted MBP connection (or complete required authentication/capacity/toolchain checks on an existing Apple executor). Preserve local diagnostic branch 1b6f442, fetch this PR into a separate task branch, regenerate using exact SDK1.0.1, incrementally rebuild changed harness, then run only DATIntegrationTests/testRealSDKVideoFramesOCRRevocationAndDisconnect once with existing guards. Retrieve original r9 artifacts and close the idle owned session after work is preserved.",
+  "preserved": "All prior source, failed native runs, raw logs, execution records and xcresults remain preserved on the executing Macs. Both continuation execution.json and xctest.log files were copied byte-for-byte to the shared workspace and hash-verified. Original unpublished local1b6f442 remains on its original branch; no daemon or recurring job was added.",
+  "next_action": "Use the pinned SDK's public exact-device state API to record bounded pre-session-start link, compatibility, don, hinge and registration diagnostics. Preserve the current failing predicate and deadlines; independently review the diagnostic-only delta before one further unchanged acceptance case. Do not add another eligibility wait without source and runtime evidence.",
   "recorded_at": "2026-11-14T00:44:33.046651+00:00",
-  "previous_code_commit": "a1fefd76a100a23ec4051beec487a61d676e08a9",
-  "latest_native_test_source_commit": "1b6f442ad8075f0ff7093a152f0f5d5b3da2a5f3",
-  "current_native_status": "blocked_pending_reverification_of_discovery_repair",
+  "previous_code_commit": "27091442ac70632e552aff810376a4be18a6d2fb",
+  "latest_native_test_source_commit": "1cc880481dac80fdd4249d4b5fad23cdd0747c7f",
+  "current_native_status": "failed_session_start_eligibility_after_discovery_and_selector_readiness",
   "source_preservation": {
     "original_diagnostic_local_commit": "1b6f442ad8075f0ff7093a152f0f5d5b3da2a5f3",
     "original_local_branch": "codex/meta-next-dat-simulator-signing-20261114",
     "republished_diagnostic_commit": "16b913394149a503781dbbfe02621ac433cf6eb9",
     "diagnostic_file_sha256": "4f5572847ef345b587d7ac7a0bf3c4c97fb9cd916c19adb5b6ffda9a0302916b",
     "note": "Diagnostic file was republished byte-identically through GitHub while the original local commit and its full diff/metadata remain retained. This does not claim that the original Git object was pushed. Preserve that local branch when resuming.",
-    "original_patch_sha256": "1e042792aa22f298b6996cacb123b97d001fcf021263019b04b648eca4e9a40e"
+    "original_patch_sha256": "1e042792aa22f298b6996cacb123b97d001fcf021263019b04b648eca4e9a40e",
+    "resume_export": {
+      "source_commit": "1b6f442ad8075f0ff7093a152f0f5d5b3da2a5f3",
+      "branch": "codex/meta-next-dat-simulator-signing-20261114",
+      "path": "/Users/mikaelervamaa/Developer/meta-dat-accept-20261114/preserved-original-diagnostic.patch",
+      "sha256": "777a2aebb79715c89beb0b1f5a51cd0eb9ca830722557fb3cc08f3a860e042ac",
+      "note": "Additional format-patch export from the preserved original Git object; earlier patch evidence is unchanged."
+    }
   },
   "runner_attempts_without_test_results": [
     {
@@ -214,23 +334,33 @@
     }
   ],
   "cleanup": {
-    "owned_simulators": "All task-created simulators shut down/deleted; absence verified before MBP disconnection.",
-    "native_processes": "Actual builds/tests completed before outage; no new native test queued.",
-    "retained_idle_session": "meta-next-dat-20261114 on offline MBP; cannot close until reconnecting.",
+    "owned_simulators": "Both continuation-owned simulators shut down/deleted with exit0; absence verified after each run. Earlier records remain preserved.",
+    "native_processes": "Both continuation builds/tests completed. No new diagnostic test has been dispatched.",
+    "retained_idle_session": "meta-next-dat-20261114 (original preserved work) and meta-dat-accept-20261114 (current receipt runner) retained pending bounded diagnostic continuation.",
     "ancestor_session": "Untouched.",
     "mini_ssh_probe": "Ended; PID absence verified. No authentication or permissions changed.",
-    "retained_checkouts": "Clean local diagnostic source and signed products retained for pending native qualification; original unpushed commit must be preserved."
+    "retained_checkouts": "Clean native source, exact pinned SDK and built products retained for pending qualification; original unpushed diagnostic commit preserved."
   },
-  "updated_at": "2026-11-14T10:20:09.974Z",
+  "updated_at": "2026-11-14T12:49:38.839Z",
   "metrics": {
-    "actual_xctest_cases_this_continuation": 3,
+    "actual_xctest_cases_this_continuation": 5,
     "passed_cases": 0,
-    "failed_cases": 3,
-    "incremental_harness_builds": 2,
+    "failed_cases": 5,
+    "incremental_harness_builds": 4,
     "full_suites_repeated": 0,
     "provider_allocations": 0,
     "monetary_cost": null,
     "tool_call_count": null,
-    "unknowns": "No aggregate connector/model billing or complete call counter was available."
-  }
+    "unknowns": "No aggregate connector/model billing or complete call counter was available.",
+    "this_resume": {
+      "actual_xctest_cases": 2,
+      "passed_cases": 0,
+      "failed_cases": 2,
+      "failure_records": 4,
+      "incremental_builds": 2,
+      "full_suites_repeated": 0,
+      "new_provider_allocations": 0
+    }
+  },
+  "integration_main_commit": "b031515acda42b816f9d36d81686a1d4543d4f4f"
 }

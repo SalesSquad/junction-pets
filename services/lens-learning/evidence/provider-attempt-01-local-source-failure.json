@@ -1,0 +1,146 @@
+{
+  "report": {
+    "schema": "lens.learning-evaluation-report/v1",
+    "evidenceMode": "SYNTHETIC",
+    "responseOrigin": "LIVE_EVALUATION",
+    "authority": "advisory_only",
+    "factorySource": {
+      "repository": "SalesSquad/factory",
+      "commit": "3d279f11341081ba4fa030db90ede0f329370dd3",
+      "adapterPath": "tools/factory_os/decision_assist.py",
+      "adapterSha256": "1ac50753e7e889b7f75474d38bea08bff9f672ee477e75843448001aa9c93a17",
+      "url": "https://github.com/SalesSquad/factory/blob/3d279f11341081ba4fa030db90ede0f329370dd3/tools/factory_os/decision_assist.py",
+      "moduleHashes": {
+        "tools/factory_os/decision_assist.py": "1ac50753e7e889b7f75474d38bea08bff9f672ee477e75843448001aa9c93a17",
+        "tools/factory_os/common.py": "c8c684cae274fd7f64a975cdcc37789d582865be2b88a3181af61f49862bb888",
+        "tools/factory_os/model_gateway.py": "c7b20a6b4ac94d2c66cd8238ced7689d2239ca05e3920e9cfc0b0b6dd7eec046",
+        "tools/factory_os/secure_fs.py": "6f630584765c8fc53268fb45760b1bf2f7b4afbb4a5161e39de96a37f96944f9",
+        "tools/factory_os/__init__.py": "a97949b30f1a4daa2d7694e85b22ae6994f985c1eb01e08bddac02c2238b105c",
+        "tools/factory_os/log.py": "05ad6abf394508a3c10300c75518f9f1bfe59048c358ba307404342d89cb43fd",
+        "tools/factory_os/transcript.py": "88fdd2ef6ee5136cf319e22358c0235140cca8be36331080bda19340c4284215",
+        "kernel/factory_kernel/__init__.py": "4d0bbee2fe32fd29a6e6cdd9449e9f2a6c7025aed8d8c3bfd5451914f002f88e",
+        "kernel/factory_kernel/common.py": "232c066fa19977175eb75e2f24e5e76df6d9c328e03d4310a74fc8109db57fb5",
+        "kernel/factory_kernel/secure_fs.py": "f3228c1e143e36a70b27999a7db340cb037db159747d15a0a6e79f691389e51f"
+      },
+      "executorCommit": null,
+      "sourceQualification": "all_imported_project_modules_match_pinned_bytes"
+    },
+    "suiteSha256": "d327ad5fe57dd98fd52ee0ab564b367fb126aff3bd15e9d705146c700f7ad3f5",
+    "source": {
+      "baseCommit": "9e1915827fabff9836dac217ab69727e514acc49",
+      "files": {
+        "apps/meta-resume-web/learning-core.mjs": "af20a9e4c3720f8263b8726aeeb3b6aa79fd8f3ffb0204ee9d6fd7e29e312be4",
+        "apps/meta-resume-web/state.mjs": "06870e53760a2986430b57299dadc4ce8983c986757cf894b483d1d94c4c1b0d",
+        "apps/meta-resume-web/fixture.mjs": "94a701e6e4e6ca100d9717e22d638d925349c1e23b3063a7cedad078d6c45c03",
+        "services/lens-learning/simulate.mjs": "ca36608f47e98bcf3bae9437466edfdd204db9ec67d21b6904a95cf37b586e2b"
+      }
+    },
+    "durationSeconds": 0.013038,
+    "providerAttempts": 2,
+    "simulatedTransports": 0,
+    "cachedReplays": 0,
+    "observedUsage": {
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    "estimatedCostUsd": null,
+    "plannedCaseCalls": 16,
+    "notAttemptedCaseCalls": 14,
+    "errors": 2,
+    "results": [
+      {
+        "caseId": "unconfirmed-visual-guess",
+        "provider": "jev",
+        "responseOrigin": "NO_PROVIDER_RESPONSE",
+        "measurement": "model_evaluation",
+        "inputSha256": "998259b090be624d6ee6d31f24982d27e3c558ddea5b38d3fdc76cd459582d56",
+        "wireSha256": "9a04ea61b6f77a124cf86a1f2c21c056aae710dbd8029c63bf291d51717aad4b",
+        "durationSeconds": 0.003296,
+        "labelComparison": [],
+        "receipt": {
+          "schema": "factory.decision-assist-receipt/v1",
+          "provider": "jev",
+          "profile": "standard",
+          "policy_sha256": "48d8eb0172bebc8b9c7eaa3debadbd6a5690fd4e297d79317cdfc6bcfb49d6ef",
+          "model_requested": "jev-1.13.0",
+          "model_returned": null,
+          "task_id": "lens-unconfirmed-visual-guess",
+          "source_sha256": "998259b090be624d6ee6d31f24982d27e3c558ddea5b38d3fdc76cd459582d56",
+          "request_sha256": "8e8f57114395609c69920f166a604d420f622f6d7cf3e6e5e19b4bd6a1fe81fe",
+          "wire_sha256": "9a04ea61b6f77a124cf86a1f2c21c056aae710dbd8029c63bf291d51717aad4b",
+          "input_bytes": 463,
+          "request_bytes": 2879,
+          "question_count": 3,
+          "status": "provider_unavailable",
+          "answers": [],
+          "usage": null,
+          "response_sha256": null,
+          "latency_seconds": 0.000129,
+          "estimated_cost_usd": null,
+          "pricing_date": "2026-10-10",
+          "cost_basis": "published_base_input_rate_excludes_account_or_regional_adjustments",
+          "authority": "advisory_only",
+          "replayed": false,
+          "attempts_consumed": 1
+        }
+      },
+      {
+        "caseId": "unconfirmed-visual-guess",
+        "provider": "openai",
+        "responseOrigin": "NO_PROVIDER_RESPONSE",
+        "measurement": "model_evaluation",
+        "inputSha256": "998259b090be624d6ee6d31f24982d27e3c558ddea5b38d3fdc76cd459582d56",
+        "wireSha256": "6664693d7e6942f8599c55ae3f2053a57d9db04374cc8635ecff5397db0b65e1",
+        "durationSeconds": 0.00706,
+        "labelComparison": [],
+        "receipt": {
+          "schema": "factory.decision-assist-receipt/v1",
+          "provider": "openai",
+          "profile": "standard",
+          "policy_sha256": "48d8eb0172bebc8b9c7eaa3debadbd6a5690fd4e297d79317cdfc6bcfb49d6ef",
+          "model_requested": "gpt-6-luna",
+          "model_returned": null,
+          "task_id": "lens-unconfirmed-visual-guess",
+          "source_sha256": "998259b090be624d6ee6d31f24982d27e3c558ddea5b38d3fdc76cd459582d56",
+          "request_sha256": "319296e5f2c98d03f32ea3338c34d2aaae7ae7614b0a9867c2671e84fe0cfaf9",
+          "wire_sha256": "6664693d7e6942f8599c55ae3f2053a57d9db04374cc8635ecff5397db0b65e1",
+          "input_bytes": 463,
+          "request_bytes": 3161,
+          "question_count": 3,
+          "status": "provider_unavailable",
+          "answers": [],
+          "usage": null,
+          "response_sha256": null,
+          "latency_seconds": 0.000281,
+          "estimated_cost_usd": null,
+          "pricing_date": "2026-10-10",
+          "cost_basis": "published_base_input_rate_excludes_account_or_regional_adjustments",
+          "authority": "advisory_only",
+          "replayed": false,
+          "attempts_consumed": 1
+        }
+      }
+    ]
+  },
+  "diagnosis": {
+    "classification": "local_source_snapshot_missing_deferred_deadline_module",
+    "transportCallbacks": 2,
+    "httpSends": 0,
+    "observedProviderOutage": false,
+    "proof": "ModuleNotFoundError reproduced by local import without network"
+  },
+  "commandReceipt": {
+    "command_id": "lens-learning-live-pass-20261114-01",
+    "state": "completed",
+    "exit_code": 2,
+    "submitted_at": "2026-11-14T11:27:18.247178+00:00",
+    "running_at": "2026-11-14T11:27:18.519579+00:00",
+    "completed_at": "2026-11-14T11:27:19.296632+00:00",
+    "timed_out": false
+  },
+  "rawFileHashes": {
+    "receipt.json": "0470da45ab001587268b3c61b0493d7ad4af44ec6248235136aa057037c93e84",
+    "stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -19,12 +19,12 @@ fallback. This is an honest synthetic replay, not a recording from Meta glasses.
 
 ## Official Meta SDK mock-video app
 
-The separate [DATMockApp](DATMockApp/README.md) links pinned official Meta DAT 1.0.1,
-receives MockDeviceKit video frames and runs local Vision OCR. It has its own
-iOS app/test target, consent/revocation/disconnect handling and generated HEVC
-fixture. The macOS replay package below remains SDK-independent. Consult the
-DAT harness verification record for actual native test outcomes; source alone
-is not device qualification.
+The separate [DATMockApp](DATMockApp/README.md) links pinned official Meta DAT
+1.0.1 and implements a mock-video, local Vision OCR and revocation path. Its
+actual app/test build passes, but the unchanged native acceptance still stops
+at session start with No eligible device available and zero admitted frames.
+See the harness verification record for the preserved runs and next diagnosis.
+The macOS replay package below remains SDK-independent.
 
 ## Run from the package directory
 

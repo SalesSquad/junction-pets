@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 1,
+  "experiment": "native",
+  "source_sha": "83c45015f475471a861d663677d060e26b2692c3",
+  "arch": "arm64",
+  "kernel": "Linux aarch64",
+  "node": "v22.23.5",
+  "synthetic": true,
+  "provider_integration": false,
+  "observed_at": "2026-11-14T08:35:09.966Z",
+  "cases": 9,
+  "output_sha256": "6f323fd6052fa020c02de088673774a7373cbc07b5a55a8da5d9779bb0853a6e",
+  "fixture_sha256": "dbc4b82dcd1fbb0f3f12f7e2d7b0e5f0133c43a0830fd00474dd10d890ed52d1",
+  "results": [
+    {
+      "name": "before-first",
+      "value": {
+        "mode": "OFFLINE_DETERMINISTIC",
+        "provider": "NO_MARIADB_CONNECTION",
+        "verified_live_source": false,
+        "provenance": "SYNTHETIC",
+        "dataset_id": "j26-synthetic-chronicle-v1",
+        "snapshot": {
+          "status": "NO_EVIDENCE",
+          "page_id": "demo:harbor-energy",
+          "as_of": "2025-01-09T23:59:59Z"
+        },
+        "comparison": null,
+        "suspected_reverts": [
+          {
+            "revision_ids": [
+              "101",
+              "102",
+              "103"
+            ],
+            "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+          }
+        ]
+      }
+    },
+    {
+      "name": "exact-first",
+      "value": {
+        "mode": "OFFLINE_DETERMINISTIC",
+        "provider": "NO_MARIADB_CONNECTION",
+        "verified_live_source": false,
+        "provenance": "SYNTHETIC",
+        "dataset_id": "j26-synthetic-chronicle-v1",
+        "snapshot": {
+          "status": "FOUND",
+          "page_id": "demo:harbor-energy",
+          "as_of": "2025-01-10T00:00:00Z",
+          "revision_id": "101",
+          "revised_at": "2025-01-10T00:00:00Z",
+          "title": "Fictional Harbor Energy",
+          "text": "The fictional harbor announced a pilot solar project and public consultation.",
+          "sha256": "1687534ba0f70f76df60a8397692c25debf9e23f62aaf9ee3506dd3cc23f25b8",
+          "source_url": null,
+          "provenance": "SYNTHETIC",
+          "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+          "dataset_id": "j26-synthetic-chronicle-v1",
+          "license": "CC0 synthetic demonstration, not Wikipedia data"
+        },
+        "comparison": null,
+        "suspected_reverts": [
+          {
+            "revision_ids": [
+              "101",
+              "102",
+              "103"
+            ],
+            "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+          }
+        ]
+      }
+    },
+    {
+      "name": "before-change",
+      "value": {
+        "mode": "OFFLINE_DETERMINISTIC",
+        "provider": "NO_MARIADB_CONNECTION",
+        "verified_live_source": false,
+        "provenance": "SYNTHETIC",
+        "dataset_id": "j26-synthetic-chronicle-v1",
+        "snapshot": {
+          "status": "FOUND",
+          "page_id": "demo:harbor-energy",
+          "as_of": "2025-01-10T23:59:59.999Z",
+          "revision_id": "101",
+          "revised_at": "2025-01-10T00:00:00Z",
+          "title": "Fictional Harbor Energy",
+          "text": "The fictional harbor announced a pilot solar project and public consultation.",
+          "sha256": "1687534ba0f70f76df60a8397692c25debf9e23f62aaf9ee3506dd3cc23f25b8",
+          "source_url": null,
+          "provenance": "SYNTHETIC",
+          "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+          "dataset_id": "j26-synthetic-chronicle-v1",
+          "license": "CC0 synthetic demonstration, not Wikipedia data"
+        },
+        "comparison": null,
+        "suspected_reverts": [
+          {
+            "revision_ids": [
+              "101",
+              "102",
+              "103"
+            ],
+            "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+          }
+        ]
+      }
+    },
+    {
+      "name": "exact-change",
+      "value": {
+        "mode": "OFFLINE_DETERMINISTIC",
+        "provider": "NO_MARIADB_CONNECTION",
+        "verified_live_source": false,
+        "provenance": "SYNTHETIC",
+        "dataset_id": "j26-synthetic-chronicle-v1",
+        "snapshot": {
+          "status": "FOUND",
+          "page_id": "demo:harbor-energy",
+          "as_of": "2025-01-11T00:00:00Z",
+          "revision_id": "102",
+          "revised_at": "2025-01-11T00:00:00Z",
+          "title": "Fictional Harbor Energy",
+          "text": "The fictional harbor cancelled its solar project overnight.",
+          "sha256": "3aaddd673c8f562c6c5b79053d3459f7f73cf09b036b70a31443109ff51d5308",
+          "source_url": null,
+          "provenance": "SYNTHETIC",
+          "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+          "dataset_id": "j26-synthetic-chronicle-v1",
+          "license": "CC0 synthetic demonstration, not Wikipedia data"
+        },
+        "comparison": null,
+        "suspected_reverts": [
+          {
+            "revision_ids": [
+              "101",
+              "102",
+              "103"
+            ],
+            "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+          }
+        ]
+      }
+    },
+    {
+      "name": "before-revert",
+      "value": {
+        "mode": "OFFLINE_DETERMINISTIC",
+        "provider": "NO_MARIADB_CONNECTION",
+        "verified_live_source": false,
+        "provenance": "SYNTHETIC",
+        "dataset_id": "j26-synthetic-chronicle-v1",
+        "snapshot": {
+          "status": "FOUND",
+          "page_id": "demo:harbor-energy",
+          "as_of": "2025-01-11T02:59:59.999Z",
+          "revision_id": "102",
+          "revised_at": "2025-01-11T00:00:00Z",
+          "title": "Fictional Harbor Energy",
+          "text": "The fictional harbor cancelled its solar project overnight.",
+          "sha256": "3aaddd673c8f562c6c5b79053d3459f7f73cf09b036b70a31443109ff51d5308",
+          "source_url": null,
+          "provenance": "SYNTHETIC",
+          "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+          "dataset_id": "j26-synthetic-chronicle-v1",
+          "license": "CC0 synthetic demonstration, not Wikipedia data"
+        },
+        "comparison": null,
+        "suspected_reverts": [
+          {
+            "revision_ids": [
+              "101",
+              "102",
+              "103"
+            ],
+            "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+          }
+        ]
+      }
+    },
+    {
+      "name": "exact-revert",
+      "value": {
+        "mode": "OFFLINE_DETERMINISTIC",
+        "provider": "NO_MARIADB_CONNECTION",
+        "verified_live_source": false,
+        "provenance": "SYNTHETIC",
+        "dataset_id": "j26-synthetic-chronicle-v1",
+        "snapshot": {
+          "status": "FOUND",
+          "page_id": "demo:harbor-energy",
+          "as_of": "2025-01-11T03:00:00Z",
+          "revision_id": "103",
+          "revised_at": "2025-01-11T03:00:00Z",
+          "title": "Fictional Harbor Energy",
+          "text": "The fictional harbor announced a pilot solar project and public consultation.",
+          "sha256": "1687534ba0f70f76df60a8397692c25debf9e23f62aaf9ee3506dd3cc23f25b8",
+          "source_url": null,
+          "provenance": "SYNTHETIC",
+          "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+          "dataset_id": "j26-synthetic-chronicle-v1",
+          "license": "CC0 synthetic demonstration, not Wikipedia data"
+        },
+        "comparison": null,
+        "suspected_reverts": [
+          {
+            "revision_ids": [
+              "101",
+              "102",
+              "103"
+            ],
+            "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+          }
+        ]
+      }
+    },
+    {
+      "name": "other-page",
+      "value": {
+        "mode": "OFFLINE_DETERMINISTIC",
+        "provider": "NO_MARIADB_CONNECTION",
+        "verified_live_source": false,
+        "provenance": "SYNTHETIC",
+        "dataset_id": "j26-synthetic-chronicle-v1",
+        "snapshot": {
+          "status": "FOUND",
+          "page_id": "demo:civic-debate",
+          "as_of": "2025-02-01T00:00:00Z",
+          "revision_id": "201",
+          "revised_at": "2025-02-01T00:00:00Z",
+          "title": "Fictional Civic Debate",
+          "text": "Public debate records were opened for inspection.",
+          "sha256": "2ce0f3d71b9f463f83b1efc535d3f14fb9c457e033f8b41c436f52080604fd9b",
+          "source_url": null,
+          "provenance": "SYNTHETIC",
+          "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+          "dataset_id": "j26-synthetic-chronicle-v1",
+          "license": "CC0 synthetic demonstration, not Wikipedia data"
+        },
+        "comparison": null,
+        "suspected_reverts": []
+      }
+    },
+    {
+      "name": "unknown-page",
+      "value": {
+        "mode": "OFFLINE_DETERMINISTIC",
+        "provider": "NO_MARIADB_CONNECTION",
+        "verified_live_source": false,
+        "provenance": "SYNTHETIC",
+        "dataset_id": "j26-synthetic-chronicle-v1",
+        "snapshot": {
+          "status": "NO_EVIDENCE",
+          "page_id": "demo:absent",
+          "as_of": "2025-02-01T00:00:00Z"
+        },
+        "comparison": null,
+        "suspected_reverts": []
+      }
+    },
+    {
+      "name": "invalid-calendar-date",
+      "value": {
+        "status": "REFUSED",
+        "reason": "INVALID_UTC"
+      }
+    }
+  ],
+  "status": "passed"
+}

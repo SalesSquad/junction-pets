@@ -60,37 +60,42 @@ generation fence also has focused tests in `ChibiLensCoreTests`.
 
 ## Observed verification — 14 November 2026
 
-The official SDK harness builds on Xcode 27.2. Actual XCTest execution exposed
-a bootstrap failure caused by fully disabled signing; simulator-only ad-hoc
-signing fixed that failure at `eb2fca3`. The original failure and its raw log
-remain preserved.
+The official SDK harness builds on Xcode 27.2. The historical bootstrap failure
+was repaired with simulator-only ad-hoc signing at `eb2fca3`; all original
+failures and raw evidence remain preserved.
 
-The next actual test, with unchanged acceptance conditions and better failure
-diagnostics, reached `configured=true` but failed before streaming with
-`No eligible device available` and zero admitted frames. This identified the
-session startup/discovery boundary; it did not establish an OCR or SDK
-raw-frame-delivery defect.
+On the restored MacBook Pro, the discovery repair at `1128b6d` built successfully
+and ran the unchanged, single real-SDK acceptance case. The case failed before
+streaming: `configured=true`, zero admitted frames and
+`Starting Meta test session: No eligible device available`.
 
-The current repair at `2709144` waits for the exact mock ID in the SDK's
-device discovery stream before creating a session. It has independent source
-review and a successful Swift syntax parse. **The repaired iOS build and
-frame/OCR/revoke/disconnect test have not run:** the MBP disconnected; the
-existing Air route requires additional authentication, and the Mini has
-12.407 GiB free, below the retained native execution guards.
+A bounded follow-up at `1cc8804` also waits for the exact mock ID in the selector's
+active-device stream and rechecks its snapshot before starting the session.
+This version passed an independent source review and an actual SDK build.
+Its same acceptance case still failed at `session.start()` with the same error
+and zero frames. Discovery and selector presence alone therefore do not
+establish session eligibility. No acceptance condition, deadline or SDK pin
+was relaxed.
 
-Resume on the existing admitted Apple executor: preserve its original local
-diagnostic commit `1b6f442`, fetch the current PR source into a separate task
-branch, regenerate, incrementally rebuild the changed harness, then run the
-existing single integration test. Older built products do not contain this
-discovery repair. See [the source-bound verification record](VERIFICATION.json)
-for exact hashes, original failures, cleanup and remaining qualification.
-No physical-glasses or end-to-end frame/OCR pass is claimed.
+Both continuation runs executed one XCTest case; each reported two failure
+records from the timed-out condition and thrown diagnostic error. Their exact
+source, build/test log hashes and cleanup receipts are in
+[the verification record](VERIFICATION.json). Both owned simulators were
+shut down and removed. The original local diagnostic commit `1b6f442` remains
+preserved on its original branch.
+
+The next step is a diagnostic-only snapshot of the pinned SDK's public
+device state immediately before session start, followed by independent review
+and one unchanged acceptance case. A further waiting loop is not yet justified
+by the observed state. No physical-glasses, frame/OCR or production acceptance
+pass is claimed.
 
 ## Lifecycle and trust
 
 - Startup subscribes to SDK discovery before reading its current snapshot,
-  waits only for the owned mock identifier and rechecks generation, cancellation
-  and current device presence before creating the exact-device session.
+  waits only for the owned mock identifier and exact active-device selection,
+  then rechecks generation, cancellation and current device presence before
+  creating the exact-device session.
 - User revocation/backgrounding invalidates the app generation synchronously,
   clears preview/text, cancels pending analysis and stops the camera/session.
 - Camera permission is checked after awaits, before analysis and before result

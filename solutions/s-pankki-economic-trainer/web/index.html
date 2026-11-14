@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <meta name="description" content="An independent Junction 2026 personal finance trainer prototype with transaction-level evidence." />
+  <title>Lumo — understand your money</title>
+  <link rel="stylesheet" href="/web/styles.css" />
+  <script type="module" src="/web/app.mjs"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="wordmark" href="#top" aria-label="Lumo start"><span class="brand-mark" aria-hidden="true">✳</span><span>lumo<span class="brand-period">.</span></span></a>
+      <div class="side-section"><div class="eyebrow">YOUR SPACE</div>
+        <a class="side-link active" href="#conversation"><span aria-hidden="true">◉</span> Money conversation</a>
+        <a class="side-link" href="#baskets"><span aria-hidden="true">▥</span> Three money baskets</a>
+        <a class="side-link" href="#runway"><span aria-hidden="true">◷</span> What-if money runway</a>
+        <a class="side-link" href="#evidence"><span aria-hidden="true">⌗</span> Evidence explorer</a>
+      </div>
+      <div class="side-note">
+        <span class="side-sparkle">✦</span>
+        <p>Clarity is a superpower.</p>
+        <span>Ask, understand and decide. The numbers are yours to question.</span>
+      </div>
+      <p class="sidebar-footer">Independent Junction prototype<br/>No bank connection or payments</p>
+    </aside>
+
+    <main id="top">
+      <div class="topline"><span class="live-dot" aria-hidden="true"></span><span id="dataset-label">FICTIONAL DEMO · LOCAL DATA</span><span class="topline-right">Your money, in perspective <span aria-hidden="true">↗</span></span></div>
+
+      <section class="welcome" aria-label="Overview">
+        <div><div class="eyebrow eyebrow-purple">MEET YOUR MONEY, AGAIN</div><h1>Make sense of<br/><em>every euro.</em></h1><p class="lede">A little more understanding. A lot more freedom. Ask naturally — every answer traces back to transactions and honest assumptions.</p></div>
+        <div class="halo-card"><span class="halo-icon" aria-hidden="true">✶</span><span>Money clarity</span><strong>starts here.</strong><span class="halo-dots" aria-hidden="true">· · ·</span></div>
+      </section>
+
+      <section class="overview" aria-label="Financial overview">
+        <div class="overview-box overview-primary"><div class="eyebrow">OBSERVED BALANCES <span class="info-tip" title="Last balance per account in the selected CSV, not a live bank balance">ⓘ</span></div><div id="balance" class="big-number">—</div><p>From each account's latest dataset row</p></div>
+        <div class="overview-box overview-available"><div class="eyebrow">ILLUSTRATIVE SPENDING ROOM <span class="info-tip" title="Balances minus user-entered reserves, not a guarantee">ⓘ</span></div><div id="available" class="big-number">—</div><p>After the reserves you choose</p></div>
+        <div class="overview-box overview-period"><div class="eyebrow">LATEST RECORD <span class="info-tip" title="The dataset is historical; no live sync">ⓘ</span></div><div id="last-date" class="big-number big-date">—</div><p id="period-subtitle">Historical CSV snapshot</p></div>
+      </section>
+
+      <section id="conversation" class="conversation section-gap" aria-label="Money conversation">
+        <div class="section-title"><div><div class="eyebrow eyebrow-purple">01 / ASK AND UNDERSTAND</div><h2>A clearer conversation.</h2></div><span class="new-pill">TRANSACTION-VERIFIED</span></div>
+        <div class="chat-panel"><div class="assistant-intro"><span class="assistant-avatar" aria-hidden="true">✳</span><div><strong>Hello. I'm Lumo.</strong><p>I'm your careful money explainer. I can calculate, cite and say when I don't know.</p></div></div>
+          <div id="answer" class="answer" aria-live="polite"></div>
+          <div class="prompts" aria-label="Example questions">
+            <button class="prompt" type="button" data-prompt="Where did my money go this month?">Where did my money go? <span aria-hidden="true">↗</span></button>
+            <button class="prompt" type="button" data-prompt="How much did I spend on taxis?">What about taxis? <span aria-hidden="true">↗</span></button>
+            <button class="prompt" type="button" data-prompt="What can I safely spend this week?">What can I spend this week? <span aria-hidden="true">↗</span></button>
+          </div>
+          <form id="ask-form" class="ask-form"><label class="sr-only" for="question">Ask about your money</label><input id="question" name="question" autocomplete="off" placeholder="Ask your money a question…" maxlength="300" required /><button type="submit" aria-label="Get a calculated answer"><span aria-hidden="true">↗</span></button></form>
+          <div class="trust-line"><span aria-hidden="true">◉</span> Calculations run locally in your browser. No model, payments or bank credentials.</div>
+        </div>
+      </section>
+
+      <section id="baskets" class="section-gap" aria-labelledby="baskets-title"><div class="section-title"><div><div class="eyebrow eyebrow-purple">02 / LEARN YOUR PATTERNS</div><h2 id="baskets-title">The three baskets.</h2><p>Some expenses are commitments. Others are choices. Seeing the difference is where financial confidence starts.</p></div><span class="month-label" id="month-label">—</span></div>
+        <div id="basket-cards" class="basket-grid"></div>
+        <div class="unclassified-banner" id="unclassified-banner"></div>
+      </section>
+
+      <section id="reserves" class="section-gap" aria-labelledby="reserves-title"><div class="section-title"><div><div class="eyebrow eyebrow-purple">03 / MAKE A PLAN</div><h2 id="reserves-title">Make room for real life.</h2><p>Set aside money before calling anything available. These are your planning assumptions, not forecasts.</p></div></div>
+        <form id="reserves-form" class="reserve-panel"><div class="reserve-input"><label for="regular">Upcoming regular bills (€)</label><input id="regular" inputmode="decimal" value="350.00" pattern="[0-9]+([.,][0-9]{1,2})?" required /></div><div class="reserve-input"><label for="irregular">Irregular expense buffer (€)</label><input id="irregular" inputmode="decimal" value="150.00" pattern="[0-9]+([.,][0-9]{1,2})?" required /></div><div class="reserve-input"><label for="emergency">Emergency buffer (€)</label><input id="emergency" inputmode="decimal" value="120.00" pattern="[0-9]+([.,][0-9]{1,2})?" required /></div><button class="apply-button" type="submit">Update plan <span aria-hidden="true">↗</span></button><p id="reserve-error" role="alert"></p></form>
+      </section>
+
+      <section id="runway" class="section-gap" aria-labelledby="runway-title"><div class="section-title"><div><div class="eyebrow eyebrow-purple">04 / PRACTISE A CHOICE</div><h2 id="runway-title">What if I spend this much?</h2><p>Try a small daily choice and one extra purchase across a few days. This is arithmetic on yesterday's snapshot, never a prediction or permission to spend.</p></div><span class="month-label">YOUR WHAT-IF LAB</span></div>
+        <div class="runway-panel">
+          <form id="runway-form" class="runway-form">
+            <div class="reserve-input"><label for="runway-days">How far to imagine</label><select id="runway-days"><option value="7">7 days</option><option value="14" selected>14 days</option><option value="30">30 days</option></select></div>
+            <div class="reserve-input"><label for="runway-daily">Daily flex spending (€)</label><input id="runway-daily" inputmode="decimal" value="15.00" pattern="[0-9]+([.,][0-9]{1,2})?" required /></div>
+            <div class="reserve-input"><label for="runway-onetime">One extra purchase (€)</label><input id="runway-onetime" inputmode="decimal" value="75.00" pattern="[0-9]+([.,][0-9]{1,2})?" required /></div>
+            <button class="apply-button" type="submit">Run my scenario <span aria-hidden="true">↗</span></button>
+            <p id="runway-error" role="alert"></p>
+          </form>
+          <div id="runway-result" class="runway-result" aria-live="polite" aria-atomic="true"></div>
+          <div class="runway-graph-wrap"><div class="runway-graph-head"><strong>Day-by-day illustrative room</strong><span>AFTER YOUR EXTRA PURCHASE</span></div><div id="runway-chart" class="runway-chart" role="img" aria-label="Day-by-day illustrated remaining room for the what-if scenario"></div></div>
+          <p id="runway-note" class="runway-note"></p>
+        </div>
+      </section>
+
+      <section id="evidence" class="section-gap evidence-section" aria-labelledby="evidence-title"><div class="section-title"><div><div class="eyebrow eyebrow-purple">05 / FOLLOW THE PROOF</div><h2 id="evidence-title">Every answer has a trail.</h2><p>No mysterious numbers. No invisible assumptions. Inspect the source row behind each claim.</p></div><span id="row-count" class="month-label">—</span></div>
+        <div class="table-scroller"><table><thead><tr><th>CSV ROW</th><th>DATE</th><th>CATEGORY</th><th>BASKET</th><th class="right">NET CHANGE</th></tr></thead><tbody id="transaction-rows"></tbody></table></div>
+        <div class="import-box"><div><strong>Have the sponsor's synthetic CSV?</strong><p>Export one customer locally and open the JSON here. Data stays in this browser tab; no uploads or account connections.</p></div><label class="import-button" id="import-button" for="dataset-upload" role="button" tabindex="0">Open local export <span aria-hidden="true">↗</span></label><input id="dataset-upload" type="file" accept=".json,application/json" /><p id="upload-error" role="alert"></p></div>
+      </section>
+      <footer>Built for Junction 2026 · S-Pankki challenge concept · Independent, non-endorsed prototype. <strong>No financial advice or spending guarantee.</strong></footer>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,5 +1,190 @@
 # CRACI CI for Junction
 
+## Active owner-authorized CRACI window — 14 November 2026
+
+Work ID: `CRACI-ACTIVATE-20261114`. Mikael explicitly requested substantial use
+of existing CRACI credits for the next two days. This is the scoped exception to
+the usual GitHub Actions opt-out for **SalesSquad/junction-pets only**.
+
+The authenticated existing `onemanraid` billing page showed **EUR 1,009.97
+starter credit remaining** on 14 November. The owner authorized at most
+**EUR 1,000 of existing credits**, with no top-up, cash charge or new provider.
+The page did not display credit expiry. The conservative operational cutoff is
+**2026-11-15 17:00 UTC / Sunday 19:00 Europe/Helsinki**, matching CRACI's announced
+Junction weekend window; this is not a claim about the credit's legal expiry.
+
+Repository Actions was read back enabled after checking that its only workflow
+was CRACI portable CI (ID `417767938`). Existing PR events now launch actual
+CRACI jobs. Three previously unqualified source heads completed successfully:
+
+| Source / purpose | Source SHA | Actual GitHub run | CRACI job / runner |
+| --- | --- | --- | --- |
+| PR76 Linux environment qualification | `10c5b2df57e1ad3bbdeedf69ec23906a1be4c34d` | [43548053684](https://github.com/SalesSquad/junction-pets/actions/runs/43548053684) | `132303867708` / `craci-3-4c175445` |
+| PR85 S-Pankki Node integration | `8baf32ebbe4c50e92f3230fa38c843b92b48a0b4` | [43548058431](https://github.com/SalesSquad/junction-pets/actions/runs/43548058431) | `132303882860` / `craci-0-a1618a21` |
+| PR87 Valio Node integration | `db003d1fd491381e7ce2409eefb1807a0c7ef0de` | [43548062533](https://github.com/SalesSquad/junction-pets/actions/runs/43548062533) | `132303896493` / `craci-2-305400a7` |
+
+These jobs passed install, audit, validation, Node tests, catalog build and
+digest recording. They do not prove browser behavior, actual banking data,
+Harbor isolation, live model use or deployment. Exact account-billed cost for
+these individual jobs remains unknown.
+
+### Fixed browser workload
+
+The existing workflow now has manual choices `portable`, `product-browser` and `sbank-sponsor`.
+Browser dispatch requires a full `source_sha` and `product=stoa|valio`; there is
+no arbitrary command input. It checks out the harness and product separately
+and verifies the product commit before importing any product code.
+
+```sh
+gh workflow run craci-pilot.yml --repo SalesSquad/junction-pets \
+  --ref codex/junction-craci-burst-20261114 \
+  -f workload=product-browser -f product=stoa \
+  -f source_sha=bfb4e363879b9125b10ed8a8a14f77ea5ed8af70
+```
+
+Use the live reviewed harness branch/HEAD and current intended product SHA;
+the example is a dated initial source, not a permanent current-head assertion.
+The three browser jobs are Chromium, Firefox and WebKit, at most three parallel
+jobs per dispatch, each explicitly **4 vCPU, 20 minutes maximum**. Each checks
+1440×900 and 390×844 viewports. The narrow viewport is not a physical phone test.
+
+- **Stoa:** room count, area, evidence selection and polygon highlight,
+  unsupported-question refusal, local DXF import, and the official sponsor DXF
+  fetched through bounded range requests and independently checked against
+  `4070c5f19eb921bc08e2f5a23e957086f76abcca03fafbb8b62ca30c8a60b58d`.
+- **Valio:** quantities and cent-exact quote, human-approval gate, replay of the
+  actual browser-emitted order payload with one audit event, cancellation and
+  restored stock, price-change invalidation, and budget refusal. All suppliers,
+  orders and payments in this test are synthetic; no real purchase occurs.
+
+Browser runtime requests are restricted to the test's own loopback origin.
+Installation uses the locked Playwright version, npm/Ubuntu/GitHub presets,
+the two version-documented Playwright download hosts and the specific public
+Stoa sponsor hostname. Direct TLS download exceptions are not a claim that
+CRACI has package-aware SBOM visibility into browser binaries.
+JSON outcome records remain in GitHub logs. Screenshots/traces are temporary
+runner diagnostics; no persistent artifact upload is claimed.
+
+### First browser execution and environment repair
+
+The first real matrix [run43548723279](https://github.com/SalesSquad/junction-pets/actions/runs/43548723279)
+used harness `a6b8e0cd22a909a728da7eacce06a3181d32cb24` and Stoa source
+`bfb4e363879b9125b10ed8a8a14f77ea5ed8af70`. All three browser jobs acquired CRACI
+runners, then failed in Playwright's system-dependency installation because the
+runner's Microsoft Ubuntu24.04 APT source returned403 under the selected policy.
+No product assertion ran in this attempt. The repair adds only the documented
+package-aware custom APT source `https://packages.microsoft.com/ubuntu/24.04/prod`;
+all other unmatched egress remains denied. This failed receipt is retained.
+
+The repaired [run43549188651](https://github.com/SalesSquad/junction-pets/actions/runs/43549188651)
+on harness `d99035ec053381d299a1968974c2fc00ded29b87` passed Stoa's complete
+Firefox and WebKit journeys at both widths, including the official sponsor
+sample and source hash. Chromium still failed before product assertions:
+its pinned Chrome-for-Testing download redirected from `cdn.playwright.dev`
+to `storage.googleapis.com`, which the CRACI trace recorded as denied.
+An independent public HEAD request confirmed the same307 redirect and a200
+response at the exact official object. Only that TLS host is added; there is
+no Google wildcard or default-allow policy. The fixed `browser` selector admits
+one engine so this repair does not repeat the already-passed Firefox/WebKit
+product assertions. Their browser-harness bytes are unchanged.
+
+The actual CRACI UI for portable Valio job132303896493 reported
+**Complete SBOM certified** and no known vulnerabilities among its76 packages.
+That is a provider UI observation for this job; no exported SBOM was independently
+validated, and browser jobs have a different dependency/network scope.
+
+### Official S-Pankki synthetic data import
+
+Manual `workload=sbank-sponsor` checks out official sponsor commit
+`fbdecdedf1a1f49dd641c2e6b9f2b62d0dc0cc8f` with Git LFS and the intended product
+`source_sha` separately. The 2-vCPU/15-minute job verifies **362,796,501 bytes**
+and SHA256`49b3265d8e44e751de305a074dcffcda732bb79aa1e07b46fcca774ce76f1e63`.
+An independent standard-library CSV parser computes one synthetic customer's
+expected fields and original source rows, compares them to the real importer,
+and checks that a repeated export refuses to overwrite the existing result.
+Only counts and digests are logged; no dataset/export is committed or published.
+This qualifies import/provenance, not banking advice, forecasting, browser
+behavior or real customer integration. The successful actual execution is
+recorded below.
+
+The first sponsor [run43549430489](https://github.com/SalesSquad/junction-pets/actions/runs/43549430489)
+failed before import: the CRACI trace recorded18 denied requests to GitHub's
+LFS object host `github-cloud.githubusercontent.com`. The sponsor lane now
+allows only that observed TLS hostname in addition to the GitHub preset.
+The independent complete-file size/SHA256 check still rejects a pointer, error
+page, partial object or different dataset before invoking the importer.
+
+### Completed first qualification batch
+
+All observations below came from actual CRACI runners and decoded GitHub job
+logs. Source product commits are distinct from the harness/workflow commits.
+
+| Qualification | Product/source SHA | Harness SHA | Actual evidence |
+| --- | --- | --- | --- |
+| Stoa Firefox and WebKit, both widths, official sponsor DXF | `bfb4e363879b9125b10ed8a8a14f77ea5ed8af70` | `d99035ec053381d299a1968974c2fc00ded29b87` | [Firefox job132307459979](https://github.com/SalesSquad/junction-pets/actions/runs/43549188651/job/132307459979), [WebKit job132307459800](https://github.com/SalesSquad/junction-pets/actions/runs/43549188651/job/132307459800) |
+| Stoa Chromium, both widths, official sponsor DXF | `bfb4e363879b9125b10ed8a8a14f77ea5ed8af70` | `4ef6480f70812d5a42ee009b3246cec0a3d28c37` | [run43549650998 / job132308900519](https://github.com/SalesSquad/junction-pets/actions/runs/43549650998/job/132308900519) |
+| Valio all three engines and both widths | `db003d1fd491381e7ce2409eefb1807a0c7ef0de` | `7089e7f656703a1a1fca1ac7145de3dc52dab54e` | [run43549859840](https://github.com/SalesSquad/junction-pets/actions/runs/43549859840), jobs132309562895/132309563215/132309563241 |
+| Official S-Pankki synthetic CSV importer and provenance | `8baf32ebbe4c50e92f3230fa38c843b92b48a0b4` | `7089e7f656703a1a1fca1ac7145de3dc52dab54e` | [run43550002068 / job132310037843](https://github.com/SalesSquad/junction-pets/actions/runs/43550002068/job/132310037843) |
+| Updated CI branch portable integration | branch `7089e7f656703a1a1fca1ac7145de3dc52dab54e`, tested PR merge `05c6ba01483e4219bdb090e87cf7a0737da3e89a` | same branch | [run43549821226](https://github.com/SalesSquad/junction-pets/actions/runs/43549821226) |
+
+The browser matrix produced **12 passed viewport journeys**, no uncaught page
+errors and no horizontal overflow. Stoa's sponsor source hash matched the
+independently pinned DXF hash. Valio's approval/replay/cancellation/changed-price
+and budget gates all passed. Browser-harness SHA256 remained unchanged across
+the network repairs:
+`ca13830f06f260e0b10485a08279854d71a96db69c3172a6cb2bd0e9d833dd4e`.
+
+S-Pankki downloaded and hash-verified the complete362,796,501-byte CSV,
+independently scanned **3,626,755 records**, and compared **581 selected rows**
+including their original physical line numbers. It checked1,162 exact-cent
+values and refused a second export with the original bytes unchanged.
+The exported sample stayed on the ephemeral runner; its SHA256 was
+`361b2e003018f63a62d518cdcbf13c04c65ce10b15611df7f25dcf66cde4ddc4`.
+This is actual sponsor-synthetic data evidence, not a real bank/customer test.
+
+Independent final read-only review found no blocking issue in workflow SHA256
+`84f4f31773a72c1abc39211c1108b315ae894684b5398c0be83612de1190f100`, the browser
+harness above, and sponsor checker SHA256
+`803d04a377324b2eb76c817ed196158d0c6821170182a8de129ab2e789701393`.
+These receipts do not automatically qualify later code, model behavior,
+physical devices or production integration.
+
+### Continuing use and stop
+
+The existing Junction Product Factory and sole Portfolio PR Recovery
+automations received this bounded CRACI exception without a schedule change.
+They must select missing evidence or an actual failure, check current source
+and existing runs, and avoid repeating a successful unchanged workload.
+Start at most three jobs per batch; do not create a 34-agent fanout or burn
+credits with idle/repeated work.
+
+The repository variable `CRACI_CREDIT_WINDOW_OPEN=true` admits these workflow
+jobs before runner allocation. Missing/false closes new jobs. Each job also
+checks the UTC cutoff before installing dependencies. This second check occurs
+after initial allocation and is not a provider hard spending cap.
+
+A one-time shutdown automation `Automation_563ad488d07081919594286152d28d46`
+is scheduled for **15 November 19:00 Europe/Helsinki**. It sets the flag false,
+disables only workflow417767938, checks the resulting state and cancels only
+this window's unfinished work. The two existing automations carry the same
+expiry instruction as a fallback. Scheduling is verified; future execution
+must still be observed. The shutdown uses existing authorized administration
+access and cannot be claimed successful if that access is unavailable.
+
+The CRACI billing page and delayed completed-job usage meter must be rechecked
+before expanding load. Do not treat a successful YAML write, dispatch request,
+green npm audit or old receipt as a new runner/SBOM/budget attestation.
+
+### Explicit unresolved lane
+
+The proposed AfterQuery Harbor reference/no-operation and adversarial workload
+was not activated. Automated tool safety checks blocked that authoring task,
+including its reduced benign follow-up. No blocked payload or Harbor runner
+job was installed. The existing AfterQuery owner retains the actual
+separate-container qualification gap; local regression remains distinct from
+that proof. Other independent CRACI workloads continue.
+
+
 This is the CRACI CI lane for `SalesSquad/junction-pets` and the CRACI side
 challenge. It automatically runs dependency security checks, the repository's
 validation, Node tests and catalog build on pull requests and pushes to `main`.
@@ -54,8 +239,9 @@ It does not deploy Chibi or execute companion/provider calls.
 The workflow is `contents: read`, CRACI-only and bounded to 15 minutes.
 `workflow_dispatch` remains available alongside the automatic triggers.
 Checkout credentials are not persisted. It requests no provider secrets, cache,
-artifact upload, deployment or GitHub-hosted fallback. It starts with CRACI's
-2-vCPU default; larger runners require an observed bottleneck and available credit.
+artifact upload, deployment or GitHub-hosted fallback. The portable lane explicitly requests
+2 vCPU; the browser lane requests 4 vCPU for browser/system installation and
+three-engine qualification. Available credit and observed capacity still bound admission.
 
 ## Network and dependency evidence
 
@@ -121,3 +307,9 @@ The original CRACI reference baseline was read on 13 November 2026. Runner and
 network guidance, GitHub event/concurrency rules and npm audit were checked for
 this automatic-CI change on 14 November. Account credit, App installation, runner
 pickup, SBOM completeness and vulnerability outcomes require live evidence.
+
+
+
+## Expanded portfolio campaign
+
+The owner subsequently requested much broader use of the same credits. See [CRACI_PORTFOLIO_20261114.md](CRACI_PORTFOLIO_20261114.md) and [its exact run receipts](craci/portfolio-20261114.json) for the expanded fixed lanes, source-pinned browser coverage, 880,008 independent arithmetic checks, real PostgreSQL, Meta seed study and official Tieto compiler compatibility results. The earlier evidence above remains historical and unchanged; the portfolio campaign supersedes the earlier three-job admission limit while retaining the credit ceiling and shutdown.
