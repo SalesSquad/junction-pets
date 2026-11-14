@@ -63,8 +63,17 @@ def dataset_preflight(root: Path) -> dict:
             or len(set(state_names[0])) != DIM or state_names != action_names):
         raise ValueError("action/state joint order cannot be matched exactly")
     paths = sorted((root / "data").glob("chunk-*/*.parquet"))
-    if not paths or any(path.is_symlink() for path in paths):
-        raise ValueError("missing or symlinked data Parquet files")
+    if not paths:
+        raise ValueError("missing data Parquet files")
+    # huggingface_hub's immutable revision snapshots normally link to the same
+    # repository cache's blobs/. Allow only that recognized symlink shape.
+    hf_repo_cache = root.parent.parent if root.parent.name == "snapshots" \
+        and root.name == DATASET_COMMIT else None
+    for path in paths:
+        if path.is_symlink():
+            target = path.resolve(strict=True)
+            if hf_repo_cache is None or not target.is_relative_to(hf_repo_cache / "blobs"):
+                raise ValueError("Parquet symlink escapes the pinned HF repository cache")
     hashes = {str(path.relative_to(root)): digest_file(path) for path in paths}
     return {"repo_id": DATASET_REPO, "revision": DATASET_COMMIT,
             "info_sha256": INFO_SHA256, "card_sha256": README_SHA256,
