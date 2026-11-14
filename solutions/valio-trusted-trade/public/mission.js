@@ -1,7 +1,8 @@
 /** The interactive command UI uses only local synthetic HTTP contracts. */
 const BUYER = 'helsinki-hotel-demo';
 const state = { token: null, plan: null, optionId: null, quote: null, proof: null, order: null,
-  idempotencyKey: null, busy: false, browserVerified: false, buyerKey: null, buyerKid: null };
+  idempotencyKey: null, paymentKey: null, payment: null, wallet: null,
+  busy: false, browserVerified: false, buyerKey: null, buyerKid: null };
 const $ = (id) => document.getElementById(id);
 const euro = (cents) => new Intl.NumberFormat('en-FI', { style: 'currency', currency: 'EUR' }).format(cents / 100);
 const node = (tag, text, cls) => {
@@ -40,10 +41,13 @@ function selectOption(id) {
   state.quote = null;
   state.proof = null;
   state.order = null;
+  state.payment = null;
+  state.paymentKey = null;
   state.browserVerified = false;
   state.idempotencyKey = null;
   renderOptions();
   renderTrust();
+  renderPayment();
 }
 
 function appendMetric(parent, label, value, fill) {
@@ -123,6 +127,31 @@ function renderTrust() {
     'Choose an option. The service fixes its price and inventory version before any decision.';
 }
 
+function renderPayment() {
+  const order = state.order;
+  const pay = state.payment;
+  const transfer = pay?.transfer;
+  const active = order?.status === 'SIMULATED_COMMITTED';
+  $('wallet-balance').textContent = euro(state.wallet?.buyerBalanceCents ?? 250_000);
+  $('payment-amount').textContent = order ? euro(order.totalCents) : '—';
+  $('payment-approve-button').disabled = state.busy || !active || Boolean(pay?.approval);
+  $('payment-send-button').disabled = state.busy || !active || pay?.approval?.decision !== 'approve' || Boolean(transfer);
+  $('payment-replay-button').disabled = state.busy || !transfer;
+  $('payment-refund-button').disabled = state.busy || !active;
+  $('payment-status').textContent = transfer?.status === 'SIMULATED_REFUNDED' ? 'REVERSED ✓' :
+    transfer ? 'BALANCED ✓' : pay?.approval?.decision === 'approve' ? 'READY TO TRANSFER' :
+    pay?.approval?.decision === 'reject' ? 'REFUSED' : order ? 'APPROVAL REQUIRED' : 'AWAITING ORDER';
+  if (!order) {
+    $('payment-description').textContent = 'Commit an order to see its server-derived supplier payout split.';
+  } else if (transfer) {
+    const allocations = transfer.allocations.map((item) => `${item.supplierId}: ${euro(item.amountCents)}`).join(' · ');
+    $('payment-description').textContent = `${transfer.id} · ${transfer.status.replaceAll('_', ' ')} · ${transfer.journalEntryIds.length} balanced postings. ${allocations}. Fictional funds only.`;
+  } else {
+    const suppliers = [...new Set(order.lines.map((line) => line.supplierId ?? 'supplier-demo'))];
+    $('payment-description').textContent = `Server-owned order ${order.id} for ${euro(order.totalCents)} across ${suppliers.length} invented supplier wallet(s). A separate synthetic human payment decision is mandatory.`;
+  }
+}
+
 function alertError(message) {
   $('alert').hidden = !message;
   $('alert').textContent = message ?? '';
@@ -148,6 +177,7 @@ async function act(label, callback) {
   alertError(null);
   renderOptions();
   renderTrust();
+  renderPayment();
   try { await callback(); }
   catch (error) {
     alertError(`${label} refused: ${error.code ?? 'ERROR'} · ${error.message}`);
@@ -157,6 +187,7 @@ async function act(label, callback) {
     state.busy = false;
     renderOptions();
     renderTrust();
+    renderPayment();
     try { await refreshAudit(); } catch { /* Local server may have stopped. */ }
   }
 }
@@ -180,6 +211,8 @@ function setPlan(plan) {
   state.quote = null;
   state.proof = null;
   state.order = null;
+  state.payment = null;
+  state.paymentKey = null;
   state.browserVerified = false;
   state.idempotencyKey = null;
 }
@@ -278,8 +311,44 @@ $('handshake-button').addEventListener('click', () => act('Kättely handshake', 
 $('commit-button').addEventListener('click', () => act('Simulated order commitment', async () => {
   const { order } = await api('/api/orders', { buyerId: BUYER, quoteId: state.quote.id, idempotencyKey: state.idempotencyKey });
   state.order = order;
+  state.paymentKey = crypto.randomUUID();
+  state.payment = await api(`/api/orders/${encodeURIComponent(order.id)}/payment`);
+  state.wallet = state.payment.wallet;
   timeline('ONE simulated commitment', `${order.id} · ${euro(order.totalCents)} · zero external order or payment`);
   $('timeline-status').textContent = 'RECEIPT RECORDED';
+}));
+
+$('payment-approve-button').addEventListener('click', () => act('Independent demo payment approval', async () => {
+  state.payment = await api(`/api/orders/${encodeURIComponent(state.order.id)}/payment-approval`, { buyerId: BUYER, decision: 'approve' });
+  state.wallet = state.payment.wallet;
+  timeline('Explicit payment consent recorded', `Separate fictional approval for ${state.order.id} · ${euro(state.order.totalCents)} · NOT banking consent`);
+}));
+
+$('payment-send-button').addEventListener('click', () => act('Synthetic EUR transfer', async () => {
+  state.payment = await api(`/api/orders/${encodeURIComponent(state.order.id)}/settlement`, { buyerId: BUYER, idempotencyKey: state.paymentKey });
+  state.wallet = state.payment.wallet;
+  const verification = await api('/api/demo/ledger/verify');
+  if (!verification.valid) throw Error('The fictional double-entry journal failed balance verification.');
+  timeline('Fictional EUR settled to supplier wallets', `${state.payment.transfer.id} · ${euro(state.payment.transfer.amountCents)} · ${verification.journalEntries} hash-linked balanced postings · no PSP or bank`);
+  $('timeline-status').textContent = 'TRANSFER PROVEN · SYNTHETIC';
+}));
+
+$('payment-replay-button').addEventListener('click', () => act('Payment replay defense', async () => {
+  const replay = await api(`/api/orders/${encodeURIComponent(state.order.id)}/settlement`, { buyerId: BUYER, idempotencyKey: state.paymentKey });
+  if (!replay.idempotentReplay || replay.transfer.id !== state.payment.transfer.id ||
+      replay.wallet.buyerBalanceCents !== state.wallet.buyerBalanceCents) throw Error('Replay unexpectedly changed the fictional EUR balance.');
+  timeline('Duplicate transfer safely blocked', `${replay.transfer.id} returned again without new journal entries or wallet changes`);
+}));
+
+$('payment-refund-button').addEventListener('click', () => act('Simulated order cancellation and refund', async () => {
+  const { order } = await api(`/api/orders/${encodeURIComponent(state.order.id)}/cancel`, { buyerId: BUYER });
+  state.order = order;
+  state.payment = await api(`/api/orders/${encodeURIComponent(order.id)}/payment`);
+  state.wallet = state.payment.wallet;
+  const verification = await api('/api/demo/ledger/verify');
+  if (!verification.valid) throw Error('The fictional refund journal did not balance.');
+  timeline('Fictional transfer reversed', `${order.id} cancelled · ${euro(order.totalCents)} back in buyer demo wallet · original order restored stock`);
+  $('timeline-status').textContent = 'CANCELLED / REVERSED';
 }));
 
 $('replay-button').addEventListener('click', () => act('Replay resistance', async () => {
@@ -338,10 +407,12 @@ async function boot() {
     }
     const discovery = await api('/.well-known/trusted-trade');
     if (discovery.mode !== 'SYNTHETIC_NONCOMMERCIAL') throw Error('Wrong supplier mode; writes remain disabled.');
-    await Promise.all([api('/api/catalog'), refreshAudit()]);
+    const [, wallet] = await Promise.all([api('/api/catalog'), api('/api/demo/wallet'), refreshAudit()]);
+    state.wallet = wallet.wallet;
     timeline('Independent signing key registered', state.buyerKey ? 'Buyer private key remains in browser; supplier receives public key only.' : 'This browser does not support Ed25519; cryptographic handshake disabled.');
   } catch (error) { alertError(`Demo backend unavailable: ${error.message}. Start npm start in solutions/valio-trusted-trade.`); }
   renderOptions();
   renderTrust();
+  renderPayment();
 }
 boot();
