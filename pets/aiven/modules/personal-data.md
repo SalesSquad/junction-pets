@@ -12,6 +12,8 @@
 - Deleting or retaining personal data needs the data owner and the data protection
   officer (DPO); check legal retention before deletion; prefer index lifecycle
   policies over ad-hoc deletes.
+- New processing of special-category data (health) with new technology (an LLM,
+  a new analytics store) needs a DPIA (GDPR Art. 35) before go-live; name it.
 - Sending personal data to any model (Aiven AI gateway included) needs a legal
   basis, processor terms (DPA), the provider's region, retention and DPO sign-off;
   offer synthetic or aggregate data first. A demo or mentor opinion is not clinical

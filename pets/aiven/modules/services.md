@@ -13,6 +13,9 @@
   (https://aiven.io/docs/products/flink); default to a plain Kafka consumer.
 - AI gateway: early availability, must be enabled for the organization, named
   models are billed (https://aiven.io/docs/products/ai-gateway/use-sdks).
+- ClickHouse error code 241 is MEMORY_LIMIT_EXCEEDED: hypotheses are smaller insert
+  batches, memory settings (`max_memory_usage`) or a larger plan; propose, do not
+  conclude the root cause from a few log lines.
 - Infrastructure as code: Aiven Operator for Kubernetes
   (https://aiven.io/docs/tools/kubernetes) with `authSecretRef`, or Terraform.
 - Prices and plan availability: never estimate; send the user to current Aiven
