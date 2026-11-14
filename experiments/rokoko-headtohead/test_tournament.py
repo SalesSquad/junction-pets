@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import hashlib
 import json
+from pathlib import Path
+import tempfile
 import unittest
 from dataclasses import dataclass
 from types import SimpleNamespace
 
 from tournament import (ARENA_SHA256, SPLITS, TD_SOURCE, TD_WEIGHTS,
                         V2_SOURCE, V2_WEIGHTS, frozen_td_digest,
-                        paired_metric, compare_one_split, sample_definition)
+                        paired_metric, compare_one_split, sample_definition,
+                        verify_shared_simulator)
 
 
 class SplitContracts(unittest.TestCase):
@@ -59,6 +62,20 @@ class SplitContracts(unittest.TestCase):
     def test_frozen_hashes_explicit(self):
         for digest in (V2_SOURCE, TD_SOURCE, V2_WEIGHTS, TD_WEIGHTS, ARENA_SHA256):
             self.assertRegex(digest, r"^[0-9a-f]{40}$|^[0-9a-f]{64}$")
+
+    def test_mismatched_simulator_reports_role_file_and_digest_before_scoring(self):
+        with tempfile.TemporaryDirectory() as temp:
+            v2 = Path(temp) / "v2"
+            td = Path(temp) / "td"
+            for root in (v2, td):
+                source = root / "solutions/rokoko-teleoperation-gym/learning/action_necessity"
+                source.mkdir(parents=True)
+                (source / "arena.py").write_text("not-the-frozen-source\n")
+                (source / "run.py").write_text("not-the-frozen-source\n")
+            with self.assertRaisesRegex(ValueError,
+                                        r"SHARED_SIMULATOR_SHA_MISMATCH role=v2 file=arena\.py "
+                                        r"expected=[0-9a-f]{64} observed=[0-9a-f]{64}"):
+                verify_shared_simulator(v2, td)
 
 
 class MetricContracts(unittest.TestCase):
