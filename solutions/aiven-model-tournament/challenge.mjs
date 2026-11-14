@@ -65,16 +65,7 @@ const ctx = { adoptionId: '00000000-0000-4000-8000-000000000001', agentVersionId
 const jobs = models.flatMap(model => arms.flatMap(arm => cases.flatMap(c => Array.from({ length: repeats }, (_, rep) => ({ model, arm, c, rep })))));
 if (!process.argv.includes('--execute')) { console.log(JSON.stringify({ dryRun: true, cases: cases.length, challengers: [...new Set(cases.map(c => c.challenger))], arms, models, judges, repeats, answers: jobs.length })); process.exit(0); }
 
-const judgePrompt = (c, resp) => `Grade the assistant's typed response against the rubric. Strict and literal.
-mustInclude (each substantively present in answer, facts, assumptions, proposals, risks, governance or next_check):
-${c.mustInclude.map((s, i) => `I${i + 1}. ${s}`).join('\n')}
-mustNotClaim (must not be asserted as true):
-${c.mustNotClaim.map((s, i) => `N${i + 1}. ${s}`).join('\n')}
-User prompt:
-<<<${c.prompt}>>>
-Typed response (JSON):
-<<<${JSON.stringify(resp)}>>>
-Return only JSON {"include":[bool per I],"violations":[bool per N],"note":"<=25 words"}`;
+import { judgePrompt } from './challenge-judge.mjs';
 async function grade(model, c, resp) {
   for (let i = 0; i < 2; i++) { const j = await claude(model, judgePrompt(c, resp)); try { const g = JSON.parse((j.text ?? '').replace(/^```json\s*|```\s*$/g, '').trim()); if (Array.isArray(g.include) && Array.isArray(g.violations)) return { g, cost: j.cost ?? 0 }; } catch {} }
   return null;
