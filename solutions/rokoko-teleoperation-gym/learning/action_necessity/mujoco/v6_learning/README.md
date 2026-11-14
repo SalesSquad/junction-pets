@@ -36,6 +36,11 @@ probe timing, desired lateral lane, pusher clearance and recovery threshold.
 Six candidates across **two generations** are optimized against actual
 MuJoCo per-option rewards/costs; this is small-policy return optimization,
 **not** training an LLM or claiming proven robot safety.
+The optimizer deliberately gives extra weight to successful, unsafe-free
+**observed corridor training** worlds, identified solely from their first
+noisy public observation. This avoids easy clear training worlds drowning out
+the contact-failure hypothesis. It never uses development/calibration/test
+outcomes for candidate selection.
 
 ## Exact manual CRACI command
 
