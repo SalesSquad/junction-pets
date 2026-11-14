@@ -24,6 +24,8 @@ DATASET_REPO = "zupermiez/g1_pick_cube"
 DATASET_COMMIT = "04046a85586feb5727f991adee3367176015cab0"
 INFO_SHA256 = "cc93b965d0a4d975e43749f1f408c693774d7da90d132924740ba0a494c98c70"
 README_SHA256 = "43b571d3b957bde4b3b307a3d2ac732c9ba6f5e906b6a49a5b8eac6b68efd8b0"
+PARQUET_SHA256 = {"data/chunk-000/file-000.parquet":
+                  "49a03ab14237467f27b5656d78103b8a716062e21e106c0f5650c566be25ded3"}
 UPSTREAM_COMMIT = "36daf5b44dad46b8f448a5124ded7faa9947be1e"
 SPLIT_SEED = 20261114
 FEATURES = ("observation.state", "action")
@@ -65,16 +67,25 @@ def dataset_preflight(root: Path) -> dict:
     paths = sorted((root / "data").glob("chunk-*/*.parquet"))
     if not paths:
         raise ValueError("missing data Parquet files")
-    # huggingface_hub's immutable revision snapshots normally link to the same
-    # repository cache's blobs/. Allow only that recognized symlink shape.
+    expected_paths = set(PARQUET_SHA256)
+    if {str(path.relative_to(root)) for path in paths} != expected_paths:
+        raise ValueError("Parquet shard paths differ from pinned sponsor snapshot")
+    # Hugging Face snapshot symlinks can refer to either repository-local blobs
+    # or the shared hub/blobs/ tree used by newer hf-xet. Both are allowed only
+    # when the entire Parquet content matches its pinned SHA256 below.
     hf_repo_cache = root.parent.parent if root.parent.name == "snapshots" \
-        and root.name == DATASET_COMMIT else None
+        and root.name == DATASET_COMMIT \
+        and root.parent.parent.name == "datasets--zupermiez--g1_pick_cube" else None
+    allowed_blobs = (hf_repo_cache / "blobs", hf_repo_cache.parent / "blobs") \
+        if hf_repo_cache is not None else ()
     for path in paths:
         if path.is_symlink():
             target = path.resolve(strict=True)
-            if hf_repo_cache is None or not target.is_relative_to(hf_repo_cache / "blobs"):
+            if not any(target.is_relative_to(base) for base in allowed_blobs):
                 raise ValueError("Parquet symlink escapes the pinned HF repository cache")
     hashes = {str(path.relative_to(root)): digest_file(path) for path in paths}
+    if hashes != PARQUET_SHA256:
+        raise ValueError("Parquet bytes differ from pinned sponsor revision")
     return {"repo_id": DATASET_REPO, "revision": DATASET_COMMIT,
             "info_sha256": INFO_SHA256, "card_sha256": README_SHA256,
             "parquet_sha256": hashes, "joint_names": state_names[0],
