@@ -1,0 +1,521 @@
+{
+  "actual_v7_real_option_transitions": 68568,
+  "evidence": {
+    "v7": {
+      "dataset_sha256": "d1ad3e8de866e38a15e86d76f16205d7ff1830289de151af78014edb03c36320",
+      "full_transitions_file_sha256": "3888fd350c66f3a1ca6a2bebb7731097c86181b5644d921b0bb580855bae4d64",
+      "independent_positive_replay_sha256": "89b854b61f820c3a87c6b7e8c4e1732c0627ee5663e4e7cee17954b44da22f17",
+      "independent_qualification_sha256": "2c371bc969d502bd1a64d6a5744012440deea961c22cfee7a173dbd72de5bc49",
+      "positive_replay_verified": true,
+      "qualification_complete": true,
+      "run_id": "craci.43640728389.1.ebec06d6f3461523",
+      "source_sha": "127ceb9be4374ba46908cd398ced6b740275a434",
+      "training_file_sha256": "06ffeb5f4d5a639eba15f0bd2c260b6d0c046ea13665a8f5e884848bb1a236d8"
+    }
+  },
+  "negative_evidence": [
+    "V7 six novel macros produced no new near-world safe goal wins.",
+    "V7 repeat_left provides safe lateral motor demonstration, not new complete wins.",
+    "Only two existing near-world goal witness seeds: substantial overfit uncertainty."
+  ],
+  "schema": "junction.rokoko.mujoco-v9.stage-graph-learning.v1.readout",
+  "v7": {
+    "clear_world_count": 32,
+    "near_world_count": 128,
+    "paired_vs_frozen_safe_near": {
+      "align_left": {
+        "lost_frozen_wins": 2,
+        "net_paired_delta": -2,
+        "new_wins": 0,
+        "rate_delta": -0.015625,
+        "ties": 126
+      },
+      "align_right": {
+        "lost_frozen_wins": 2,
+        "net_paired_delta": -2,
+        "new_wins": 0,
+        "rate_delta": -0.015625,
+        "ties": 126
+      },
+      "frozen_v5": {
+        "lost_frozen_wins": 0,
+        "net_paired_delta": 0,
+        "new_wins": 0,
+        "rate_delta": 0.0,
+        "ties": 128
+      },
+      "frozen_v6": {
+        "lost_frozen_wins": 1,
+        "net_paired_delta": -1,
+        "new_wins": 0,
+        "rate_delta": -0.007812,
+        "ties": 127
+      },
+      "observed_branch": {
+        "lost_frozen_wins": 2,
+        "net_paired_delta": -2,
+        "new_wins": 0,
+        "rate_delta": -0.015625,
+        "ties": 126
+      },
+      "repeat_left": {
+        "lost_frozen_wins": 2,
+        "net_paired_delta": -2,
+        "new_wins": 0,
+        "rate_delta": -0.015625,
+        "ties": 126
+      },
+      "repeat_right": {
+        "lost_frozen_wins": 2,
+        "net_paired_delta": -2,
+        "new_wins": 0,
+        "rate_delta": -0.015625,
+        "ties": 126
+      },
+      "retreat_left": {
+        "lost_frozen_wins": 2,
+        "net_paired_delta": -2,
+        "new_wins": 0,
+        "rate_delta": -0.015625,
+        "ties": 126
+      }
+    },
+    "strategies": {
+      "align_left": {
+        "abstained_near": 0,
+        "chronological_counts": {
+          "contact": 128,
+          "full_stage_safe_goal_dwell": 0,
+          "lateral25_after_contact": 32,
+          "reopen_after_lateral25": 10,
+          "safe_goal_dwell_any_path": 0
+        },
+        "chronological_rates": {
+          "contact": {
+            "count": 128,
+            "denominator": 128,
+            "wilson95": [
+              0.970863,
+              1.0
+            ]
+          },
+          "full_stage_safe_goal_dwell": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "lateral25_after_contact": {
+            "count": 32,
+            "denominator": 128,
+            "wilson95": [
+              0.183013,
+              0.331556
+            ]
+          },
+          "reopen_after_lateral25": {
+            "count": 10,
+            "denominator": 128,
+            "wilson95": [
+              0.042987,
+              0.137847
+            ]
+          },
+          "safe_goal_dwell_any_path": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          }
+        },
+        "safe_near_worlds": 128,
+        "unsafe_near": 0
+      },
+      "align_right": {
+        "abstained_near": 0,
+        "chronological_counts": {
+          "contact": 125,
+          "full_stage_safe_goal_dwell": 0,
+          "lateral25_after_contact": 0,
+          "reopen_after_lateral25": 0,
+          "safe_goal_dwell_any_path": 0
+        },
+        "chronological_rates": {
+          "contact": {
+            "count": 125,
+            "denominator": 128,
+            "wilson95": [
+              0.933356,
+              0.991998
+            ]
+          },
+          "full_stage_safe_goal_dwell": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "lateral25_after_contact": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "reopen_after_lateral25": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "safe_goal_dwell_any_path": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          }
+        },
+        "safe_near_worlds": 125,
+        "unsafe_near": 3
+      },
+      "frozen_v5": {
+        "abstained_near": 105,
+        "chronological_counts": {
+          "contact": 23,
+          "full_stage_safe_goal_dwell": 0,
+          "lateral25_after_contact": 0,
+          "reopen_after_lateral25": 0,
+          "safe_goal_dwell_any_path": 2
+        },
+        "chronological_rates": {
+          "contact": {
+            "count": 23,
+            "denominator": 128,
+            "wilson95": [
+              0.122825,
+              0.255216
+            ]
+          },
+          "full_stage_safe_goal_dwell": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "lateral25_after_contact": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "reopen_after_lateral25": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "safe_goal_dwell_any_path": {
+            "count": 2,
+            "denominator": 128,
+            "wilson95": [
+              0.004295,
+              0.055181
+            ]
+          }
+        },
+        "safe_near_worlds": 23,
+        "unsafe_near": 0
+      },
+      "frozen_v6": {
+        "abstained_near": 77,
+        "chronological_counts": {
+          "contact": 51,
+          "full_stage_safe_goal_dwell": 0,
+          "lateral25_after_contact": 1,
+          "reopen_after_lateral25": 0,
+          "safe_goal_dwell_any_path": 1
+        },
+        "chronological_rates": {
+          "contact": {
+            "count": 51,
+            "denominator": 128,
+            "wilson95": [
+              0.317776,
+              0.485018
+            ]
+          },
+          "full_stage_safe_goal_dwell": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "lateral25_after_contact": {
+            "count": 1,
+            "denominator": 128,
+            "wilson95": [
+              0.00138,
+              0.042926
+            ]
+          },
+          "reopen_after_lateral25": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "safe_goal_dwell_any_path": {
+            "count": 1,
+            "denominator": 128,
+            "wilson95": [
+              0.00138,
+              0.042926
+            ]
+          }
+        },
+        "safe_near_worlds": 51,
+        "unsafe_near": 0
+      },
+      "observed_branch": {
+        "abstained_near": 0,
+        "chronological_counts": {
+          "contact": 126,
+          "full_stage_safe_goal_dwell": 0,
+          "lateral25_after_contact": 55,
+          "reopen_after_lateral25": 23,
+          "safe_goal_dwell_any_path": 0
+        },
+        "chronological_rates": {
+          "contact": {
+            "count": 126,
+            "denominator": 128,
+            "wilson95": [
+              0.944819,
+              0.995705
+            ]
+          },
+          "full_stage_safe_goal_dwell": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "lateral25_after_contact": {
+            "count": 55,
+            "denominator": 128,
+            "wilson95": [
+              0.347212,
+              0.516261
+            ]
+          },
+          "reopen_after_lateral25": {
+            "count": 23,
+            "denominator": 128,
+            "wilson95": [
+              0.122825,
+              0.255216
+            ]
+          },
+          "safe_goal_dwell_any_path": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          }
+        },
+        "safe_near_worlds": 126,
+        "unsafe_near": 2
+      },
+      "repeat_left": {
+        "abstained_near": 0,
+        "chronological_counts": {
+          "contact": 128,
+          "full_stage_safe_goal_dwell": 0,
+          "lateral25_after_contact": 74,
+          "reopen_after_lateral25": 40,
+          "safe_goal_dwell_any_path": 0
+        },
+        "chronological_rates": {
+          "contact": {
+            "count": 128,
+            "denominator": 128,
+            "wilson95": [
+              0.970863,
+              1.0
+            ]
+          },
+          "full_stage_safe_goal_dwell": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "lateral25_after_contact": {
+            "count": 74,
+            "denominator": 128,
+            "wilson95": [
+              0.491518,
+              0.660179
+            ]
+          },
+          "reopen_after_lateral25": {
+            "count": 40,
+            "denominator": 128,
+            "wilson95": [
+              0.238655,
+              0.397271
+            ]
+          },
+          "safe_goal_dwell_any_path": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          }
+        },
+        "safe_near_worlds": 128,
+        "unsafe_near": 0
+      },
+      "repeat_right": {
+        "abstained_near": 0,
+        "chronological_counts": {
+          "contact": 96,
+          "full_stage_safe_goal_dwell": 0,
+          "lateral25_after_contact": 0,
+          "reopen_after_lateral25": 0,
+          "safe_goal_dwell_any_path": 0
+        },
+        "chronological_rates": {
+          "contact": {
+            "count": 96,
+            "denominator": 128,
+            "wilson95": [
+              0.668444,
+              0.816987
+            ]
+          },
+          "full_stage_safe_goal_dwell": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "lateral25_after_contact": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "reopen_after_lateral25": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "safe_goal_dwell_any_path": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          }
+        },
+        "safe_near_worlds": 96,
+        "unsafe_near": 32
+      },
+      "retreat_left": {
+        "abstained_near": 0,
+        "chronological_counts": {
+          "contact": 128,
+          "full_stage_safe_goal_dwell": 0,
+          "lateral25_after_contact": 23,
+          "reopen_after_lateral25": 3,
+          "safe_goal_dwell_any_path": 0
+        },
+        "chronological_rates": {
+          "contact": {
+            "count": 128,
+            "denominator": 128,
+            "wilson95": [
+              0.970863,
+              1.0
+            ]
+          },
+          "full_stage_safe_goal_dwell": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          },
+          "lateral25_after_contact": {
+            "count": 23,
+            "denominator": 128,
+            "wilson95": [
+              0.122825,
+              0.255216
+            ]
+          },
+          "reopen_after_lateral25": {
+            "count": 3,
+            "denominator": 128,
+            "wilson95": [
+              0.008002,
+              0.066644
+            ]
+          },
+          "safe_goal_dwell_any_path": {
+            "count": 0,
+            "denominator": 128,
+            "wilson95": [
+              0.0,
+              0.029137
+            ]
+          }
+        },
+        "safe_near_worlds": 128,
+        "unsafe_near": 0
+      }
+    }
+  },
+  "v8_status": "UNSEEN_PENDING_BYTE_EXACT_INDEPENDENT_CRACI_QUALIFICATION",
+  "v9_status": "TRAINED_OFFLINE_UNPROMOTED_NO_NEW_PHYSICS",
+  "work_id": "J26-ROKOKO-V9-ADAPTIVE-LOOP-20261114"
+}
