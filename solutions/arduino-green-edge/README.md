@@ -132,3 +132,47 @@ and malformed sensors, recentness/watchdog, deterministic replay/injected
 transport and energy double-counting. Browser rendering, screen reader behavior,
 physical hardware, licensed model execution and actual power remain unqualified.
 Coordinator owns publication; this work makes one local source commit only.
+
+## M2: local meter-evidence comparison (14 November 2026)
+
+This is a second, **completely separate** local-only user journey below the M1
+room lab. Click **Review synthetic example**, **Review negative outcome**, or
+select a local JSON file. A complete three-channel comparison is shown with the
+baseline, switched-load and UNO Q/device-overhead channels visible separately.
+Nothing is uploaded or saved to browser storage. User-supplied values and
+self-declared calibration are never a verified physical meter record, even if
+the file passes structural checks. An arithmetic difference is **not** evidence
+of causal environmental savings. There is no connected board or sensor.
+
+Run from this directory (Node 22+, no dependencies):
+
+    node measurement-cli.mjs positive
+    node measurement-cli.mjs negative
+    node measurement-cli.mjs tests/meter-positive.json
+    node --test tests/measurement.test.mjs
+
+Strict contract: `green-edge.meter-review.v1` JSON, evidence labelled
+`SYNTHETIC` or `USER_SUPPLIED_UNVERIFIED`, exact `mWh` unit (integer
+milli-watt-hours), and separate `baseline`, `scenario`, `device` arrays of
+2–96 matched, contiguous `{startMs,endMs,mWh}` intervals. Three matching
+pseudonymous meter calibration declarations must include `meterId`,
+`checkedAtMs` and `validUntilMs`. Parsed files cap at 128 KiB. Every interval
+for each channel has the same endpoints; gaps, overlaps, negative/unsafe values,
+expired declared calibration, extra fields and missing device costs refuse the
+comparison. Conversion: **1 mWh = 0.000001 kWh**. Signed result = baseline
+minus scenario minus device; negative results remain negative. No imputation or
+extrapolation, no fusion with M1's counterfactual watt assumptions, and no
+claims of authenticated timestamp, calibrated actual hardware, carbon impact
+or real energy savings. The file includes no person or occupancy fields.
+
+The positive SYNTHETIC example is +210 mWh (0.000210 kWh) over three 10-second
+intervals; negative example is -135 mWh (-0.000135 kWh). Both are exercises,
+not physical measurements. These numbers cannot qualify M356/T45.
+
+**Exactly next acceptance dependency:** an authorized UNO Q + Modulino bench,
+separately calibrated physical meter/channel provenance, and a consented
+repeatable offline load comparison with measured power and stable environmental
+conditions. Check installed Arduino App Lab/Bridge versions and supervisor safety
+before wiring any output; no network, hardware/SDK or published Project Hub
+submission was performed by this code. The local review cannot authenticate
+self-reported files or independently identify a causal green outcome.

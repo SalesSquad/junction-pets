@@ -1,0 +1,75 @@
+{
+  "schema": "green-edge.meter-review.v1",
+  "evidence": "SYNTHETIC",
+  "unit": "mWh",
+  "calibration": {
+    "baseline": {
+      "meterId": "fixture-baseline",
+      "checkedAtMs": 0,
+      "validUntilMs": 30000
+    },
+    "scenario": {
+      "meterId": "fixture-scenario",
+      "checkedAtMs": 0,
+      "validUntilMs": 30000
+    },
+    "device": {
+      "meterId": "fixture-device",
+      "checkedAtMs": 0,
+      "validUntilMs": 30000
+    }
+  },
+  "channels": {
+    "baseline": [
+      {
+        "startMs": 0,
+        "endMs": 10000,
+        "mWh": 170
+      },
+      {
+        "startMs": 10000,
+        "endMs": 20000,
+        "mWh": 170
+      },
+      {
+        "startMs": 20000,
+        "endMs": 30000,
+        "mWh": 170
+      }
+    ],
+    "scenario": [
+      {
+        "startMs": 0,
+        "endMs": 10000,
+        "mWh": 90
+      },
+      {
+        "startMs": 10000,
+        "endMs": 20000,
+        "mWh": 90
+      },
+      {
+        "startMs": 20000,
+        "endMs": 30000,
+        "mWh": 90
+      }
+    ],
+    "device": [
+      {
+        "startMs": 0,
+        "endMs": 10000,
+        "mWh": 10
+      },
+      {
+        "startMs": 10000,
+        "endMs": 20000,
+        "mWh": 10
+      },
+      {
+        "startMs": 20000,
+        "endMs": 30000,
+        "mWh": 10
+      }
+    ]
+  }
+}
