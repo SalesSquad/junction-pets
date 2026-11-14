@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "runId": "rokoko.v11.6b6399.gate.train",
+  "projectId": "rokoko",
+  "taskId": "rokoko.mujoco-prospective-train",
+  "kind": "training",
+  "capturedAt": "2026-11-14T23:02:05.470Z",
+  "status": "succeeded",
+  "source": {
+    "repository": "SalesSquad/junction-pets",
+    "commit": "6b6399a54d69c06740ca0c7d1ef66074a5d1732c"
+  },
+  "evidence": {
+    "level": "local-receipt-unverified",
+    "ref": "https://github.com/SalesSquad/junction-pets/pull/217",
+    "receiptSha256": "15b0c8a18b2a9ce574febe3e6ef275c68bb93fb42227af79f15c6c2b8abbcba8"
+  },
+  "dataset": {
+    "sha256": "739c30a13ecacdecd404774fc9dadd887944f32df5cef14cfd2758a639460419",
+    "sampleSetSha256": "ac101715484383b1b5add91eeaac5e8f1f532de7a476aca1e53393c5686469c1",
+    "split": "train",
+    "sampleCount": 800,
+    "origin": "synthetic"
+  },
+  "evaluation": null,
+  "artifact": {
+    "type": "report",
+    "sha256": "b115fc329b50f2557e8c6074734990dbcf6d1c5046516fbbda6158c5c513eaa8"
+  },
+  "metrics": [
+    {
+      "id": "v11-gate-grid-candidates-actually-scored",
+      "value": 96,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 96
+    },
+    {
+      "id": "v11-fit-real-train-worlds",
+      "value": 125,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 125
+    },
+    {
+      "id": "v11-held-train-diagnostic-worlds",
+      "value": 35,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 35
+    },
+    {
+      "id": "original-frozen-v5-goal-wins-protected-by-nontrigger",
+      "value": 37,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 37
+    },
+    {
+      "id": "v11-actual-v5-goal-win-triggered",
+      "value": 0,
+      "unit": "count",
+      "direction": "lower",
+      "samples": 37
+    },
+    {
+      "id": "v11-v10-reopen-opportunities-on-failed-v5-worlds",
+      "value": 102,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 160
+    },
+    {
+      "id": "source-v10-real-train-episodes-consumed",
+      "value": 800,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 800
+    },
+    {
+      "id": "source-v10-real-options-consumed",
+      "value": 38569,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 38569
+    }
+  ],
+  "limitations": [
+    "Source-only V11 controller training from genuine hosted V10 TRAIN physics: 800 episodes, 38,569 mask-verified actions. No new V11 MuJoCo trial or model-physics performance claim.",
+    "96 candidate public-state gates checked; selected one V5-default legal-mask shielded rescue with at most one eight-option V10 intervention and immediate return to V5 when safe forward is legal.",
+    "Historical V10 TRAIN cohort split by seed modulo five: 125 FIT and35 held TRAIN diagnostics. Zero interventions observed along all 37 original frozen V5 safe-goal trajectories. This is noninterference, not counterfactual future physics.",
+    "Observed V10 forward reopens in 102 failed V5 worlds and selected rescue budget8 are navigation-proxy training signals, NOT safe250-tick goal wins or a reason to promote.",
+    "Frozen source gate SHA256 b115fc329b50f2557e8c6074734990dbcf6d1c5046516fbbda6158c5c513eaa8 and next fresh cohort plan SHA256 3b4fc425c5f9af4ab2e28b2afcaeae62543ba08a3064406c4150b84c4d57f494 in PR#217.",
+    "No DEV/CAL/TEST/OOD, independent sealed holdout, signed provider attestation, deployed model, verified GPU/billing or release. Fresh 517000+ real-physics qualification is separate pending future run."
+  ],
+  "policySha256": null
+}
