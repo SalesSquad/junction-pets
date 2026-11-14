@@ -11,7 +11,7 @@ on:
         description: Fixed qualification workload
         type: choice
         default: portable
-        options: [portable, product-browser, sbank-sponsor, portfolio-browser, tieto-sponsor]
+        options: [portable, product-browser, sbank-sponsor, portfolio-browser, sbank-properties, tieto-sponsor, council-postgres, meta-seeds]
       source_sha:
         description: Full source commit; required for product browser and sponsor jobs
         type: string
@@ -421,3 +421,159 @@ jobs:
           set -euo pipefail
           export CRACI_BROWSER_OUTPUT="$RUNNER_TEMP/craci-portfolio-browser-results"
           node scripts/craci/portfolio-browser.mjs
+
+  sbank-properties:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'sbank-properties' }}
+    name: S-Pankki independent arithmetic / shard ${{ matrix.shard }}
+    runs-on: craci
+    timeout-minutes: 15
+    concurrency:
+      group: craci-sbank-properties-${{ matrix.shard }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: ${{ fromJSON(inputs.shard == '0' && '[0]' || inputs.shard == '1' && '[1]' || inputs.shard == '2' && '[2]' || inputs.shard == '3' && '[3]' || '[0,1,2,3]') }}
+    env:
+      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || '8baf32ebbe4c50e92f3230fa38c843b92b48a0b4' }}
+    steps:
+      - name: Configure source-only networking
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github]
+      - name: Enforce window and exact source
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+          [[ "$PRODUCT_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          ref: ${{ env.PRODUCT_SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Check 22002 independent cent and provenance properties
+        env:
+          SOURCE_DIR: ${{ github.workspace }}/source
+          EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
+          CRACI_SHARD: ${{ matrix.shard }}
+          CRACI_CASES: '2000'
+        run: |
+          set -euo pipefail
+          git -C harness rev-parse HEAD
+          export CRACI_SEED="$((20261114 + CRACI_SHARD * 1000003))"
+          node harness/scripts/craci/sbank-properties.mjs
+
+  meta-seeds:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'meta-seeds' }}
+    name: Meta synthetic model / seed shard ${{ matrix.shard }}
+    runs-on: craci
+    timeout-minutes: 20
+    concurrency:
+      group: craci-meta-seeds-${{ matrix.shard }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: ${{ fromJSON(inputs.shard == '0' && '[0]' || inputs.shard == '1' && '[1]' || inputs.shard == '2' && '[2]' || inputs.shard == '3' && '[3]' || '[0,1,2,3]') }}
+    steps:
+      - name: Configure source-only model study
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github]
+      - name: Enforce credit window
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          ref: '634f1e0e6cb2de46bcf0a783532d46c23f513d11'
+          persist-credentials: false
+      - name: Train and measure predeclared independent seeds
+        env:
+          SOURCE_DIR: ${{ github.workspace }}/source
+          EXPECTED_SOURCE_SHA: '634f1e0e6cb2de46bcf0a783532d46c23f513d11'
+          CRACI_SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          git -C harness rev-parse HEAD
+          python3 --version
+          python3 harness/scripts/craci/meta-seeds.py
+
+  council-postgres:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'council-postgres' }}
+    name: Council Python and real disposable PostgreSQL
+    runs-on: craci
+    timeout-minutes: 25
+    concurrency:
+      group: craci-council-postgres
+      cancel-in-progress: false
+    steps:
+      - name: Configure existing Python and Ubuntu package sources
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '4'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, pypi, ubuntu]
+            sources:
+              - apt:
+                  urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
+      - name: Enforce credit window
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          ref: '672da2be99edff2fa25c0ab2703e6da88061a62f'
+          persist-credentials: false
+      - name: Install the existing pinned Council dependencies
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/council-venv"
+          "$RUNNER_TEMP/council-venv/bin/python" -m pip install -r source/services/council/requirements-dev.txt
+          "$RUNNER_TEMP/council-venv/bin/python" -m pip freeze
+          if ! compgen -G '/usr/lib/postgresql/*/bin/initdb' > /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+          fi
+      - name: Run actual Python behavior and durable PostgreSQL replay
+        env:
+          SOURCE_DIR: ${{ github.workspace }}/source
+          EXPECTED_SOURCE_SHA: '672da2be99edff2fa25c0ab2703e6da88061a62f'
+        run: |
+          set -euo pipefail
+          test "$(git -C source rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          git -C harness rev-parse HEAD
+          "$RUNNER_TEMP/council-venv/bin/python" -m pytest -q source/services/council/tests
+          "$RUNNER_TEMP/council-venv/bin/python" harness/scripts/craci/council-postgres.py

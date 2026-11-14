@@ -27,12 +27,20 @@ async function includesText(page, selector, expected) {
   { selector, expected });
 }
 
-async function moneyIs(page, selector, cents) {
+async function moneyIs(page, selector, cents, suffix = '') {
   assert.ok(Number.isSafeInteger(cents) && cents >= 0);
-  await page.waitForFunction(({ selector, cents }) => {
-    const value = document.querySelector(selector)?.textContent ?? '';
-    return value.includes('€') && Number(value.replace(/\D/g, '')) === cents;
-  }, { selector, cents });
+  await page.waitForFunction(({ selector, cents, suffix }) => {
+    let value = (document.querySelector(selector)?.textContent ?? '').trim();
+    if (suffix) {
+      if (!value.endsWith(suffix)) return false;
+      value = value.slice(0, -suffix.length).trim();
+    }
+    // The public UI contract is en-FI EUR formatting. Expected cents above are
+    // independent arithmetic; do not discard signs or decimal separators.
+    const expected = new Intl.NumberFormat('en-FI', { style: 'currency', currency: 'EUR' }).format(cents / 100);
+    const normaliseSpaces = text => text.replace(/\s+/g, ' ').trim();
+    return normaliseSpaces(value) === normaliseSpaces(expected);
+  }, { selector, cents, suffix });
 }
 
 async function citationsResolve(page, selector) {
@@ -58,7 +66,7 @@ async function sbankJourney(page) {
   assert.equal(await page.locator('#runway-chart .runway-column').count(), 14);
 
   await page.locator('[data-prompt="How much did I spend on taxis?"]').click();
-  await includesText(page, '#answer .answer-text', '12.50');
+  await moneyIs(page, '#answer .answer-text', 1250, ' net spending, using 1 matching source rows.');
   assert.deepEqual(await citationsResolve(page, '#answer a.source-pill'), [9]);
   await page.locator('#answer a.source-pill').click();
   await page.waitForFunction(() => location.hash === '#source-row-9');
@@ -112,7 +120,7 @@ async function sbankJourney(page) {
   await moneyIs(page, '#balance', 99000);
   await moneyIs(page, '#available', 81494);
   await page.locator('[data-prompt="How much did I spend on taxis?"]').click();
-  await includesText(page, '#answer .answer-text', '10.00');
+  await moneyIs(page, '#answer .answer-text', 1000, ' net spending, using 2 matching source rows.');
   assert.deepEqual(await citationsResolve(page, '#answer a.source-pill'), [1002, 1003]);
   assert.equal(await page.locator('#transaction-rows tr').count(), 3);
 
@@ -246,7 +254,22 @@ async function espooJourney(page) {
   assert.equal(await page.locator('#slot').inputValue(), '2026-11-15T09:00:00Z');
   await page.locator('#detail a[href="#evidence-M-01"]').first().click();
   assert.equal(await page.locator('#evidence-M-01').getAttribute('open'), '');
-  await page.waitForFunction(() => document.activeElement === document.querySelector('#evidence-M-01 summary'));
+  let focusFailure;
+  try {
+    await page.waitForFunction(() => document.activeElement === document.querySelector('#evidence-M-01 summary'));
+  } catch (error) {
+    // Focus is independent of the meeting state machine. Keep its failure,
+    // inspect the actual browser state and continue the remaining journey;
+    // the complete viewport still fails below, even if later checks pass.
+    const observed = await page.evaluate(() => ({
+      activeTag: document.activeElement?.tagName,
+      activeId: document.activeElement?.id,
+      activeMarkup: document.activeElement?.outerHTML.slice(0, 300),
+      sourceOpen: document.querySelector('#evidence-M-01')?.open,
+      hash: location.hash,
+    }));
+    focusFailure = { check: 'evidence-summary-focus', error: error.message, observed };
+  }
   await includesText(page, '#evidence-M-01', 'not externally verified');
 
   await page.locator('#proposal-form button[type="submit"]').click();
@@ -296,13 +319,20 @@ async function espooJourney(page) {
   await textIs(page, '#count', '5 fictional candidates · all visible');
   assert.equal(await page.locator('#meeting-list .draft-note').count(), 0);
   await includesText(page, '#meeting-list', 'No proposals yet');
-  return {
-    allCandidatesVisible: 5, linkedEvidenceAndFocus: 'passed',
+  const coverage = {
+    allCandidatesVisible: 5, linkedEvidenceAndFocus: focusFailure ? 'failed' : 'passed',
     distinctProposeAndRespond: 'passed', duplicateProposalGate: 'passed',
     cancellationAndDeclineReleaseTime: 'passed', employerTimeCollision: 'passed',
     unknownPortfolioStillSelectable: 'passed', quarterHourAlignment: 'passed',
     resetAndReloadMemoryBoundary: 'passed', identityAndConsent: 'simulation-only',
   };
+  if (focusFailure) {
+    const error = new Error('Evidence summary did not retain focus after the citation click; independent meeting checks completed.');
+    error.coverage = coverage;
+    error.failedChecks = [focusFailure];
+    throw error;
+  }
+  return coverage;
 }
 
 async function availablePort() {
@@ -403,7 +433,8 @@ async function main() {
         failed = true;
         process.exitCode = 1;
         console.error(JSON.stringify({ label, sourceSha: head, status: 'failed', durationMs: Date.now() - started,
-          error: error.stack || String(error), pageErrors: errors, unexpectedNetwork }));
+          error: error.stack || String(error), pageErrors: errors, unexpectedNetwork,
+          coverage: error.coverage, failedChecks: error.failedChecks }));
         await page?.screenshot({ path: `${output}/${label}-failure.png`, fullPage: true }).catch(() => {});
       } finally {
         const cleanupErrors = [];
