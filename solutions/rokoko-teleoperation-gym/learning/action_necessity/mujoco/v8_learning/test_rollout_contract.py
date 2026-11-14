@@ -78,6 +78,21 @@ def synthetic_frozen():
 
 
 class V8ProspectiveTrainContracts(unittest.TestCase):
+    def test_manifest_exact_two_raw_files_readout_only_auxiliary(self):
+        with tempfile.TemporaryDirectory(prefix="v8-manifest-") as directory:
+            folder = Path(directory)
+            for name in ("full_transitions.jsonl.gz", "training.json",
+                         "paired-readout.json"):
+                (folder / name).write_text("contract-only")
+            doc = rollout.build_source_bound_manifest(
+                folder, "a" * 40, rollout.FROZEN_WEIGHTS_SHA256,
+                {"source_sha256": {"run.py": "a" * 64}}, 640)
+            self.assertEqual(set(doc["file_sha256"]),
+                             {"training.json", "full_transitions.jsonl.gz"})
+            self.assertEqual(set(doc["auxiliary_file_sha256"]),
+                             {"paired-readout.json"})
+            self.assertFalse(doc["promotion_authorized"])
+
     def test_forward_reopen_requires_immediate_side_causality(self):
         before_masked = [1, 0, 0, 1, 1, 0, 1]
         after_open = [1, 1, 1, 1, 1, 0, 1]
@@ -132,8 +147,8 @@ class V8ProspectiveTrainContracts(unittest.TestCase):
                                                  frozen_v7=Source())(), "frozen_v5")
         self.assertEqual(rollout.policy_factory("repeat_left", matrix,
                                                  frozen_v7=Source())(), "repeat_left")
-        ctor = rollout.policy_factory("v8_hierarchical", matrix, frozen_v7=Source())
-        self.assertIsNot(ctor(), ctor())
+        with self.assertRaisesRegex(ValueError, "UNREVIEWED_IN_MEMORY_MODEL"):
+            rollout.policy_factory("v8_hierarchical", matrix, frozen_v7=Source())
         with self.assertRaisesRegex(ValueError, "UNREGISTERED_PROSPECTIVE_POLICY"):
             rollout.policy_factory("retreat_right", matrix, frozen_v7=Source())
         original = MODULE.parent / "checkpoints" / "weights.json"
@@ -143,6 +158,11 @@ class V8ProspectiveTrainContracts(unittest.TestCase):
             obs = np.zeros(18)
             obs[16] = .10
             self.assertIn(policy(obs, [1, 1, 1, 1, 1, 1, 1]), range(7))
+            loaded_weights, _, _ = rollout.verify_frozen_model(
+                original, original.with_name("training-receipt.json"),
+                rollout.FROZEN_WEIGHTS_SHA256)
+            factory_in_memory = rollout.policy_factory("v8_hierarchical", loaded_weights)
+            self.assertIsNot(factory_in_memory(), factory_in_memory())
 
     def test_paired_near_loss_novel_and_unsafe_are_reported(self):
         rows = []
