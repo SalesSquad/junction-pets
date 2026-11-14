@@ -56,6 +56,7 @@ function evaluateNetwork(raw, q) {
     job.repository !== q.repository || job.jobId !== q.jobId || job.runId !== q.runId ||
     job.commitSha !== q.harnessSha ||
     (q.runAttempt !== null && job.runAttempt !== q.runAttempt) ||
+    typeof job.status !== 'string' || job.status.length === 0 || job.status.length > 40 ||
     !Array.isArray(observations) || observations.length > 10000)
     return {status:'unknown',reason:'PROVIDER_JOB_BINDING_MISMATCH'};
   const protocols = Object.create(null);let denied=0;
@@ -121,7 +122,11 @@ export async function fetchCraciEvidence(query, {token,fetchImpl=fetch,timeoutMs
     const result = await apiJson('usage',{start:usagePeriod.start,end:usagePeriod.end},token,fetchImpl,timeoutMs,1024*1024);
     usage=evaluateUsage(result,usagePeriod);
   }
-  const networkResult=evaluateNetwork(network,q),sbomResult=evaluateSbom(sbom);
+  const networkResult=evaluateNetwork(network,q);
+  // CycloneDX currently does not carry the GitHub source SHA. Its URL selector
+  // alone cannot independently bind the bytes to the pinned harness commit.
+  const sbomResult=networkResult.status==='provider_api_observed' ? evaluateSbom(sbom) :
+    {status:'unknown',reason:'JOB_BINDING_UNVERIFIED'};
   return {...base,reason:networkResult.status==='provider_api_observed' || sbomResult.status==='provider_api_observed' ?
     'PROVIDER_API_OBSERVATION_NOT_SIGNED_ATTESTATION_OR_EURO_BILL':'NO_VERIFIED_PROVIDER_OBSERVATION',
     network:networkResult,sbom:sbomResult,usage};
