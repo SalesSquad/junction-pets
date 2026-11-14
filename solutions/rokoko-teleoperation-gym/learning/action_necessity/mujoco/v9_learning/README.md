@@ -33,7 +33,9 @@ their *own* manifest is only a local output inventory, never proof of CRACI
 execution. The stage grader independently checks full raw transitions, per-row
 canonical hashes, shield legality, chronological contact → 25mm signed lateral
 → immediate side-option forward-mask reopening → 250-tick safe goal dwell.
-Absolute safe goals and incomplete paths are reported separately. Frozen V5/V6
+Lateral-after-contact is measured from the **contact-time** public baseline,
+not earlier pre-contact displacement. Absolute safe goals and incomplete paths
+are reported separately. Frozen V5/V6
 are paired on each identical world rather than compared across seed cohorts.
 
 The learner uses only public-observation, mask, and action-history features;
@@ -49,7 +51,8 @@ worse TRAIN-only diagnostic loss are marked blocked. Physics improvement is unkn
 Future V8 ingestion uses `--v8-verified`, but is deliberately fail-closed while
 `V8_EVIDENCE_LOCK` is `None`. To unlock, separately independently replay the
 entire completed 640-episode MuJoCo cohort and code-review fixed V8 run ID,
-source/harness SHA, receipt, qualification, and exact raw/summary SHA-256s.
+source/harness SHA, completion receipt, qualification, independent positive
+replay, and exact raw/summary SHA-256s.
 Never pass hashes as CLI trust flags. Then V9 can train on both immutable TRAIN
 cohorts, report within-cohort paired outcomes, and select its next focus from
 verified V8 evidence without modifying the frozen V8 experiment.
