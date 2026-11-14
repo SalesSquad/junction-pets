@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { loadPackages } from '../../lib/catalog.mjs';
 import { companyContext } from '../../lib/company-context.mjs';
 import { validateResponse, toPendingActions, RESPONSE_SCHEMA, RESPONSE_SCHEMA_V2 } from '../aiven-decision-bridge/bridge.mjs';
-import { systemFor } from '../../pets/aiven/modules/router.mjs';
+import { systemFor, MODULES } from '../../pets/aiven/modules/router.mjs';
 
 const arg = (k, d) => process.argv.find(a => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -52,7 +52,8 @@ For each case write strict, checkable mustInclude (2-4) and mustNotClaim (1-3) i
 }
 
 const set = JSON.parse(readFileSync(arg('cases'), 'utf8'));
-const arms = arg('arms', 'full').split(','); // full = AGENTS.md + response.v1; modular = routed modules + response.v2
+const arms = arg('arms', 'full').split(','); // full = AGENTS.md + v1; modular = routed modules + v2; allmodules = every module always + v2
+const allModules = ['core', ...Object.keys(MODULES)].map(n => readFileSync(new URL(`../../pets/aiven/modules/${n}.md`, import.meta.url), 'utf8')).join('\n\n');
 const models = arg('models', 'haiku,sonnet').split(','), repeats = Number(arg('repeats', '2')), judge = arg('judge', 'opus'), concurrency = Number(arg('concurrency', '6'));
 const system = companyContext(aiven);
 const ctx = { adoptionId: '00000000-0000-4000-8000-000000000001', agentVersionId: '00000000-0000-4000-8000-000000000002', authorityRevision: '1', conversationId: 'astra', chibi: 'junction.aiven' };
@@ -73,7 +74,7 @@ const results = []; let next = 0; const started = new Date().toISOString();
 await Promise.all(Array.from({ length: concurrency }, async () => {
   while (next < jobs.length) {
     const { model, arm, c, rep } = jobs[next++];
-    const routed = arm === 'modular' ? systemFor(c.prompt) : null;
+    const routed = arm === 'modular' ? systemFor(c.prompt) : arm === 'allmodules' ? { modules: ['all'], system: allModules } : null;
     const a = await claude(model, c.prompt, routed ? routed.system : system, routed ? RESPONSE_SCHEMA_V2 : RESPONSE_SCHEMA);
     if (a.error || !a.data) { results.push({ model, arm, case: c.id, rep, error: a.error ?? 'no structured output' }); continue; }
     const typedErrors = validateResponse(a.data);
