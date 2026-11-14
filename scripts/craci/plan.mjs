@@ -33,6 +33,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
+  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train',
 ]);
 
 function choose(value, choices, label) {
@@ -76,6 +77,22 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override) throw new Error('Tieto uses sponsor_revision pins; source_sha is unsupported for this workload');
     const revisions = revision === 'all' ? ['base', '2283', '2234', '2129', '2297'] : revision === 'heads' ? ['2283', '2234', '2129', '2297'] : [revision];
     for (const rev of revisions) add(`tieto-${rev}-${toolchain}`, SPONSOR_PINS[rev], {revision: rev, source_repository: 'te-industry-tech-office/junction26-messagepack-csharp'});
+  } else if (['meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x'].includes(workload)) {
+    // These are frozen synthetic five-score model experiments, not image recognition.
+    const meta = '634f1e0e6cb2de46bcf0a783532d46c23f513d11';
+    if (override && override !== meta) throw new Error('Meta R source must match frozen candidate SHA');
+    const hard = workload === 'meta-r-hardshift-2x';
+    const n = hard ? 24 : workload === 'meta-r-robust' ? 12 : 8;
+    for (let cohort = 0; cohort < n; cohort++) {
+      const prefix = hard ? 'meta-r-hardshift-2x' : workload === 'meta-r-robust' ? 'meta-r-robust' : 'meta-r';
+      add(`${prefix}-${cohort}`, meta, {cohort});
+    }
+  } else if (workload === 'lens-real-bop-train') {
+    // Admitted public BOP YCB-Video features are stored at the pinned harness source.
+    if (override && override !== harnessSha) throw new Error('Real RGB numeric features must use exact source/harness SHA');
+    for (const profile of ['all','color','spatial','gradient']) {
+      add(`lens-real-${profile}`, harnessSha, {profile});
+    }
   } else {
     if (workload === 'sbank-sponsor' && !override) throw new Error('sbank-sponsor requires source_sha');
     const source = override || BASELINES[workload] || harnessSha;
@@ -90,7 +107,7 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     }
   }
   return {schemaVersion: 1, workload, harnessSha, selectedAt: when.toISOString(), windowEnd: WINDOW_END,
-    sourceOverride: override || null, maxParallel: Math.min(8, include.length),
+    sourceOverride: override || null, maxParallel: workload === 'meta-r-hardshift-2x' ? Math.min(6, include.length) : Math.min(8, include.length),
     jobCount: workload === 'cache-proof' ? 2 : include.length, matrix: {include}};
 }
 
