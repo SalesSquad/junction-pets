@@ -1,0 +1,132 @@
+{
+  "accepted_coverage_measured": false,
+  "action_authorized": false,
+  "cohort": {
+    "calibration_or_test_rows_allowed": false,
+    "candidate_limit": 100,
+    "candidate_rows": {
+      "dev": 72700,
+      "train": 331300
+    },
+    "dev_queries_without_positive": 8,
+    "oracle_candidate_injection": false,
+    "partitions": [
+      "train",
+      "dev"
+    ],
+    "queries": {
+      "dev": 727,
+      "train": 3313
+    },
+    "training_queries_with_positive": 3280,
+    "training_queries_without_positive": 33
+  },
+  "execution_constraints": {
+    "additional_cloud_spend_usd": 0,
+    "gpu_instances": 0,
+    "new_packages": [],
+    "outputs_must_be_new": true,
+    "provider_inference_calls": 0,
+    "source_must_be_committed_and_clean": true
+  },
+  "experiment": "cpu_hist_gradient_boosting6",
+  "feature_names": [
+    "f_visual",
+    "f_adapted",
+    "f_text",
+    "f_reverse_rank",
+    "f_density",
+    "f_gap"
+  ],
+  "fixed_parameters": {
+    "categorical_features": null,
+    "class_weight": null,
+    "early_stopping": false,
+    "learning_rate": 0.05,
+    "loss": "log_loss",
+    "max_bins": 127,
+    "max_iter": 150,
+    "min_samples_leaf": 100,
+    "random_state": 20261115
+  },
+  "grid": [
+    {
+      "l2_regularization": 1.0,
+      "max_leaf_nodes": 15
+    },
+    {
+      "l2_regularization": 10.0,
+      "max_leaf_nodes": 15
+    },
+    {
+      "l2_regularization": 1.0,
+      "max_leaf_nodes": 31
+    },
+    {
+      "l2_regularization": 10.0,
+      "max_leaf_nodes": 31
+    }
+  ],
+  "input_pins": {
+    "baseline_model_sha256": "4f6db7b937a244b2a6cdf5298d6087bcd84d01445219882c2b7d041986a3a0b6",
+    "candidates_sha256": "8879394491a3bbbb576c616dcf93a7d0fe2642f0623dddc08a4a2f159ba8cc21",
+    "prepared_manifest_sha256": "817435715686cc2d98eea94ea5d4fa95450fb803be3328eb66feb53185b631d0",
+    "prepared_source_commit": "8948b44454f1a5dd174395e6d69e1ae8b533688b",
+    "truth_sha256": "114ae227c2095be5b43c43d47c692aab8da5547d4818885855ca0b64bfc1370f"
+  },
+  "kind": "meta.r7.nonlinear_cpu_protocol",
+  "model": {
+    "class": "sklearn.ensemble.HistGradientBoostingClassifier",
+    "development_early_stopping": false,
+    "missing_positive_training": "Exclude the 33 untrainable queries from fitting only; retain all queries in evaluation.",
+    "numpy_version": "2.5.4",
+    "objective": "pointwise weighted binary log loss; not a pairwise or listwise objective",
+    "preprocessing": "No learned preprocessing or scaling; six original finite numeric features only.",
+    "score": "raw decision_function, used only to order candidates within each query",
+    "sklearn_version": "1.9.1",
+    "weighting": "Equal total weight per train family, then per query; within a query one half positive and one half shared by its 99 negatives; normalize mean weight to one."
+  },
+  "physical_identity_verified": false,
+  "preparation_origins": {
+    "dataset_sha256": "bd70decf437dd34dfa9e2866c2110b142d7e746ea66c6f1098ac81deb6cac59c",
+    "r4_report_sha256": "8eda9a3d532b931bc93a765e555bc9008ce9d3c781d1c9efef583e6db515ca80"
+  },
+  "publication": {
+    "private": [
+      "candidate rows",
+      "truth",
+      "query-level predictions",
+      "joblib models",
+      "raw process logs"
+    ],
+    "public": [
+      "source",
+      "numeric aggregate metrics",
+      "configuration",
+      "hashes"
+    ]
+  },
+  "qualification": false,
+  "question": "Can a nonlinear rank score recover errors that the frozen six-feature linear R4 ranker misses?",
+  "runtime": {
+    "max_wall_seconds": 600,
+    "threads": 4
+  },
+  "schema_version": 1,
+  "selection": {
+    "adapt_grid_after_dev_results": false,
+    "denominator": 727,
+    "frozen_control_candidate_recall_count": 719,
+    "frozen_control_correct_at_1": 466,
+    "order": [
+      "higher exact recall_at_1",
+      "higher MRR",
+      "fewer max_leaf_nodes",
+      "higher l2_regularization"
+    ],
+    "partition": "dev",
+    "retain_frozen_baseline_unless": "Strictly higher exact recall_at_1, or identical exact recall_at_1 with strictly higher MRR.",
+    "tie_break_within_query": "candidate_id ascending, matching frozen R4"
+  },
+  "work_id": "META-LENS-R7-NONLINEAR-20261115"
+}
