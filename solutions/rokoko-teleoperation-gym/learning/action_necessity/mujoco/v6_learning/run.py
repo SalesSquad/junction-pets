@@ -278,10 +278,19 @@ def paired_dev(env, weights, dev_count, deadline):
 def scientific_gate(worlds, summaries, context):
     baseline = v5.v4.v3.v2.qualification(summaries["learned_v6"])
     unsafe_v5 = sum(int(row["learned_v5"]["unsafe"]) for row in worlds)
+    lost_constant_successes = sum(int(row["constant"]["success"] and
+                                      not row["learned_v6"]["success"]) for row in worlds)
     lost_v5_successes = sum(int(row["learned_v5"]["success"] and
                                 not row["learned_v6"]["success"]) for row in worlds)
+    new_unsafe_vs_constant = sum(int(row["learned_v6"]["unsafe"] and
+                                     not row["constant"]["unsafe"]) for row in worlds)
+    new_unsafe_vs_v5 = sum(int(row["learned_v6"]["unsafe"] and
+                               not row["learned_v5"]["unsafe"]) for row in worlds)
     new_v5_wins = sum(int(row["learned_v6"]["success"] and
                           not row["learned_v5"]["success"]) for row in worlds)
+    genuinely_new_both_wins = sum(int(row["learned_v6"]["success"] and
+                                      not row["learned_v5"]["success"] and
+                                      not row["constant"]["success"]) for row in worlds)
     corridor_new_wins = sum(int(ctx["observed_corridor"] and
                                 row["learned_v6"]["success"] and
                                 not row["learned_v5"]["success"])
@@ -290,15 +299,24 @@ def scientific_gate(worlds, summaries, context):
     result.update(
         unsafe_v5=unsafe_v5,
         no_unsafe_regression_vs_v5=summaries["learned_v6"]["candidate_unsafe"]<=unsafe_v5,
+        new_unsafe_vs_constant=new_unsafe_vs_constant,
+        new_unsafe_vs_v5=new_unsafe_vs_v5,
+        no_new_unsafe_worlds=(new_unsafe_vs_constant==0 and new_unsafe_vs_v5==0),
+        lost_constant_successes=lost_constant_successes,
         lost_v5_successes=lost_v5_successes,
-        no_v5_success_regressions=lost_v5_successes==0,
+        no_baseline_success_regressions=(lost_constant_successes==0 and
+                                         lost_v5_successes==0),
         fresh_v5_relative_wins=new_v5_wins,
+        genuinely_new_wins_vs_both=genuinely_new_both_wins,
+        minimum_new_both_wins_met=genuinely_new_both_wins>=5,
         observed_corridor_new_wins=corridor_new_wins,
         observed_corridor_worlds=sum(int(x["observed_corridor"]) for x in context),
     )
     result["scientifically_qualifies"] = bool(
         baseline["scientifically_qualifies"] and result["no_unsafe_regression_vs_v5"]
-        and result["no_v5_success_regressions"]
+        and result["no_new_unsafe_worlds"]
+        and result["no_baseline_success_regressions"]
+        and result["minimum_new_both_wins_met"]
         and summaries["learned_v6"]["candidate_success"] >=
             summaries["learned_v5"]["candidate_success"]
     )
