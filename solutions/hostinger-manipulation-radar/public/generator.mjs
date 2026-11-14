@@ -1,0 +1,7 @@
+// Authored synthetic observations only. Truth labels are in fixtures/, never scoring input.
+const epoch=Date.parse('2026-11-14T10:00:00Z');
+export function sample(prefix,n,{step=5,young=true,names=true,reuse=true,target=true,url=true,attribution=false,unknown=false,offset=0,payload='View the new demonstration project and share the exact announcement today'}={}) {
+ const aliases=['cedar','harbor','moss','river','stone','larch','fern','birch','willow','maple','pine','elm'];
+ const variants=['My notes from the morning workshop include useful diagrams','A different view of the prototype after testing it today','I compared the layout with an earlier design over lunch','Sharing a short summary of what worked during our trial','This page has a reference for the new sample project','We made a small demonstration for the community meetup','A few observations from the afternoon engineering session','Here is my independent account of the local event'];
+ return Array.from({length:n},(_,i)=>({id:`${prefix}-${i+1}`,account:names?`${prefix}_agent_${100+i}`:`${aliases[i%aliases.length]}-${prefix}`,time:new Date(epoch+offset+i*step*1000).toISOString(),text:reuse?payload:variants[i%variants.length],url:url?`https://example.invalid/${prefix}?ref=${i}`:'',amplifies:target?`${prefix}-origin`:'',accountAgeDays:unknown?null:young?2+i%3:400+i*57,attribution:attribution?'Synthetic Wire / licensed bulletin':''}));
+}

@@ -1,0 +1,14 @@
+import http from 'node:http';
+import {readFile} from 'node:fs/promises';
+import {pathToFileURL} from 'node:url';
+import {benchmark} from './benchmark.mjs';
+const files=new Map([['/',['index.html','text/html']],['/style.css',['style.css','text/css']],['/app.mjs',['app.mjs','text/javascript']],['/detector.mjs',['detector.mjs','text/javascript']],['/scenarios.mjs',['scenarios.mjs','text/javascript']],['/generator.mjs',['generator.mjs','text/javascript']]]);
+export function createServer() {return http.createServer(async(req,res)=>{
+ const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"};
+ if(!['GET','HEAD'].includes(req.method)){res.writeHead(405,{...headers,Allow:'GET, HEAD'});res.end();return;}
+ try {if(req.url==='/api/benchmark'){const data=JSON.stringify(await benchmark());res.writeHead(200,{...headers,'Content-Type':'application/json'});res.end(req.method==='HEAD'?undefined:data);return;}
+ const entry=files.get(req.url);if(!entry){res.writeHead(404,headers);res.end('Not found');return;}
+ const data=await readFile(new URL(`./public/${entry[0]}`,import.meta.url));res.writeHead(200,{...headers,'Content-Type':`${entry[1]}; charset=utf-8`});res.end(req.method==='HEAD'?undefined:data);
+ }catch{res.writeHead(500,headers);res.end('Unable to load local resource');}
+ });}
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){const port=Number(process.env.PORT||4173);createServer().listen(port,'127.0.0.1',()=>console.log(`SYNTHETIC Radar: http://127.0.0.1:${port} (Hostinger NOT VERIFIED)`));}
