@@ -103,6 +103,21 @@ final class DATCaptureModel: ObservableObject {
                 }
                 let selector = SpecificDeviceSelector(device: mock.deviceIdentifier)
                 self.selector = selector
+                // The selector resolves eligibility asynchronously after discovery.
+                // Subscribe before checking it so session.start() sees the exact mock.
+                let selectedDevices = selector.activeDeviceStream()
+                self.status = "Waiting for selected Meta test glasses"
+                if selector.activeDevice != mock.deviceIdentifier {
+                    for await selectedDevice in selectedDevices {
+                        guard self.epoch.accepts(generation), !Task.isCancelled else { return }
+                        if selectedDevice == mock.deviceIdentifier { break }
+                    }
+                }
+                guard self.epoch.accepts(generation), !Task.isCancelled else { return }
+                guard selector.activeDevice == mock.deviceIdentifier,
+                      wearables.devices.contains(mock.deviceIdentifier) else {
+                    throw DeviceSessionError.noEligibleDevice
+                }
                 self.status = "Creating Meta test session"
                 let session = try wearables.createSession(deviceSelector: selector)
                 self.session = session
