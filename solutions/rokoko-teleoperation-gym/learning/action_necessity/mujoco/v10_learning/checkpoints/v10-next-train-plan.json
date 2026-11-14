@@ -1,0 +1,34 @@
+{
+  "clear_worlds": 32,
+  "comparators": [
+    "frozen_v5",
+    "frozen_v6",
+    "repeat_left",
+    "frozen_v8",
+    "v10_loss_informed"
+  ],
+  "current_train_loss_world_count": 9,
+  "dev_cal_test_ood_opened": false,
+  "does_not_modify_v9_frozen_514000_cohort": true,
+  "goal_train_diagnostic_worlds": [
+    513158,
+    513175
+  ],
+  "model_promotion_authorized": false,
+  "near_worlds": 128,
+  "new_spending_authorized": false,
+  "planned_paired_real_episodes": 800,
+  "preregistered_public_initial_observation_scan_last_seed": 515511,
+  "preregistered_seed_start": 515000,
+  "prospective_physics_dispatched": false,
+  "requirements_before_rollout": [
+    "independent source/science review of V10 code, exact model and train readout",
+    "fresh 515000+ TRAIN-only cohort and frozen 5-way paired schedule",
+    "original seven-action safety shield without overrides",
+    "full real-MuJoCo option traces with independent replay and no model promotion",
+    "no regression on preregistered held TRAIN goal worlds"
+  ],
+  "schema": "junction.rokoko.mujoco-v10.source-bound-loss-learning.v1.next-train-plan",
+  "selection": "ascending TRAIN seeds; public initial abs(observation[7]) < 0.122 near",
+  "v10_stage_head_unqualified": []
+}
