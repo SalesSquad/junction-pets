@@ -37,6 +37,11 @@ try {
     replay_anchor:r.priorConfirmedCommits===2&&r.ambiguousCommittedNoAck===1&&r.replayedFlightIntents===8,
     replay_integrity:r.ordersAfterFlightResolution===11&&r.allFourTamperRefusals===true,
     real_workers:c.originalWorkerPids===8&&c.postCrashWorkerPids===8,
+    classified_all_eight_flight_outcomes:c.interruptedFlightAudit&&
+      ['committed','disconnects','killedWorkers'].every(k=>
+        Number.isInteger(c.interruptedFlightAudit[k])&&c.interruptedFlightAudit[k]>=0)&&
+      c.interruptedFlightAudit.committed+c.interruptedFlightAudit.disconnects+
+      c.interruptedFlightAudit.killedWorkers===8,
     eight_actual_inflight_backends:c.observedSleepingBackends===8&&c.matchedFlightIds===8&&
       c.insertQueryMatched===true&&Array.isArray(c.observedBackendPids)&&
       c.observedBackendPids.length===8&&new Set(c.observedBackendPids).size===8,
