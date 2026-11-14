@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Trusted Trade — implemented SYNTHETIC localhost API",
-    "version": "0.3.0",
-    "description": "All parties, stock, prices, approvals, emission factors and orders invented. No commercial effects. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification."
+    "version": "0.4.0",
+    "description": "All parties, stock, prices, approvals, emission factors, orders and EUR wallet balances invented. No banking, brokerage or commercial effects. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification."
   },
   "servers": [
     {
@@ -220,6 +220,94 @@
     "/api/policy": {
       "get": {
         "summary": "Read server-owned demo budget and approval threshold",
+        "responses": {
+          "200": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/demo/wallet": {
+      "get": {
+        "summary": "Read fictional buyer and supplier wallet balances; demo session required",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "wallet"
+                  ],
+                  "properties": {
+                    "wallet": {
+                      "$ref": "#/components/schemas/SyntheticWallet"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/demo/ledger": {
+      "get": {
+        "summary": "Inspect in-memory fictional double-entry EUR journal",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/demo/ledger/verify": {
+      "get": {
+        "summary": "Verify balanced postings and local hash-linked settlement receipts",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Synthetic result only"
@@ -983,6 +1071,179 @@
         }
       }
     },
+    "/api/orders/{id}/payment": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Read owner-session synthetic payment approval, transfer and balances",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyntheticPayment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/orders/{id}/payment-approval": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Explicit NEW fictional human click required before simulated money transfer",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "buyerId",
+                  "decision"
+                ],
+                "properties": {
+                  "buyerId": {
+                    "type": "string"
+                  },
+                  "decision": {
+                    "enum": [
+                      "approve",
+                      "reject"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyntheticPayment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/orders/{id}/settlement": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Transfer invented EUR from buyer fixture wallet to order-derived fictional suppliers exactly once",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "buyerId",
+                  "idempotencyKey"
+                ],
+                "properties": {
+                  "buyerId": {
+                    "type": "string"
+                  },
+                  "idempotencyKey": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{10,80}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyntheticPayment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
     "/api/audit": {
       "get": {
         "summary": "Read append-only in-memory demo events",
@@ -1332,6 +1593,79 @@
           },
           "commitment": {
             "const": "SIMULATION_ONLY_NO_REAL_PURCHASE"
+          },
+          "idempotentReplay": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SyntheticWallet": {
+        "type": "object",
+        "required": [
+          "mode",
+          "currency",
+          "buyerBalanceCents",
+          "suppliers"
+        ],
+        "properties": {
+          "mode": {
+            "const": "SYNTHETIC_IN_MEMORY_NO_BANK_TRANSFER"
+          },
+          "currency": {
+            "const": "EUR"
+          },
+          "buyerBalanceCents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "initialBuyerFundsCents": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "suppliers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "account",
+                "balanceCents"
+              ],
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "balanceCents": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "SyntheticPayment": {
+        "type": "object",
+        "required": [
+          "approval",
+          "transfer",
+          "wallet"
+        ],
+        "properties": {
+          "approval": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "transfer": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "wallet": {
+            "$ref": "#/components/schemas/SyntheticWallet"
           },
           "idempotentReplay": {
             "type": "boolean"
