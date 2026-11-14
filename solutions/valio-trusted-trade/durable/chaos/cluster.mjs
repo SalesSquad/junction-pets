@@ -91,6 +91,7 @@ export async function sigkillOwnedPostmaster(c) {
     throw new Error('STOP: SIGKILL is permitted exactly once for the original isolated cluster.');
   const pid=await verifyOwnPostmaster(c);
   const expected=await realpath(join(c.binDir,'postgres'));
+  const expectedData=await realpath(c.dataDir);
   let listed=[];
   try {
     listed=(await readFile(`/proc/${pid}/task/${pid}/children`,'utf8'))
@@ -98,15 +99,22 @@ export async function sigkillOwnedPostmaster(c) {
   }catch{ /* no child list; only verified postmaster is eligible */ }
   const verifiedChildren=[];
   for(const child of listed) {
-    try {if(await realpath(`/proc/${child}/exe`)===expected)verifiedChildren.push(child);}catch{}
+    try {
+      const [exe,cwd]=await Promise.all([
+        realpath(`/proc/${child}/exe`),realpath(`/proc/${child}/cwd`)]);
+      if(exe===expected&&cwd===expectedData)verifiedChildren.push(child);
+    }catch{}
   }
   process.kill(pid,'SIGKILL'); // Exact verified test postmaster, never a host PG service.
-  await timeout(150);
   for(const child of verifiedChildren) {
-    try {if(await realpath(`/proc/${child}/exe`)===expected)process.kill(child,'SIGKILL');}catch{}
+    try {
+      const [exe,cwd]=await Promise.all([
+        realpath(`/proc/${child}/exe`),realpath(`/proc/${child}/cwd`)]);
+      if(exe===expected&&cwd===expectedData)process.kill(child,'SIGKILL');
+    }catch{}
   }
   c.crashed=true;
-  await timeout(300);
+  await timeout(450);
   return {oldPostmasterPid:pid,verifiedChildrenKilled:verifiedChildren.length,signal:'SIGKILL'};
 }
 
