@@ -40,8 +40,16 @@ Read [the challenge-source routing](challenge-source-routing-20261113.json) and 
 
 ## Portable verification
 
-Run npm ci --ignore-scripts, npm run validate, npm test, npm run build, and
-node scripts/ops-build-status.mjs. Record exact source commit for all results.
+Follow the root AGENTS.md lightweight rule: ordinary code, docs and features
+need no required tests, repeat reviews, separate QA workers or per-commit CI
+receipts. For a concrete bug or material credentials, company/source provenance,
+tenant consent or privileged-integration risk, choose one targeted check or
+reviewer when useful. Retain actual project safeguards and merge/release authority.
+
+Available milestone commands are npm ci --ignore-scripts, npm run validate,
+npm test, npm run build and node scripts/ops-build-status.mjs. Full suites are
+optional; environment checkCommands do not make them mandatory for every task.
+Record the exact source commit and actual scope for any results you report.
 Model evaluations are a **separate gate**; 204 authored test cases do not mean
 204 executed or passed tests. Browser, PostgreSQL, Chibi host, adoption and
 provider gates must be marked absent until independently evidenced.
@@ -52,8 +60,10 @@ and preserve the failed receipt rather than hiding it.
 
 ## Required handoff
 
-Return this machine-readable record; put durable continuation in the task PR,
-not merely a conversation:
+For routine changes, put a brief commit/changed-path/risks handoff and next
+action in the task PR. For consequential or qualification work, use the
+machine-readable record below with only actual check results. Durable
+continuation belongs in the PR, not merely a conversation:
 
 ~~~yaml
 work_id: junction.<company>.<slice>

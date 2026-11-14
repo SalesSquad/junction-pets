@@ -1,267 +1,532 @@
+# Manual, useful qualification only. Ordinary PR and main commits do not fan out CI.
+# Credit authorization ends 2026-11-15T17:00:00Z; existing stop automation remains authoritative.
+# Source choices are resolved by scripts/craci/plan.mjs before matrix allocation.
+# Explicit Docker CDN TLS remains outside package-aware detection; see the delivery report.
 name: CRACI portable CI
-run-name: CRACI ${{ inputs.workload || 'portable' }} ${{ inputs.workload == 'product-browser' && inputs.product || '' }} ${{ inputs.source_sha || github.sha }}
-
-on:
-  pull_request:
-  push:
-    branches: [main]
+run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
+'on':
   workflow_dispatch:
     inputs:
       workload:
         description: Fixed qualification workload
         type: choice
         default: portable
-        options: [portable, product-browser, sbank-sponsor, portfolio-browser, sbank-properties, tieto-sponsor, council-postgres, meta-seeds, new-products-browser, native-probe, cache-proof, mariadb-runtime]
+        options:
+        - portable
+        - product-browser
+        - sbank-sponsor
+        - portfolio-browser
+        - sbank-properties
+        - tieto-sponsor
+        - council-postgres
+        - meta-seeds
+        - new-products-browser
+        - native-probe
+        - cache-proof
+        - mariadb-runtime
+        - meta-browser
       source_sha:
-        description: Full source commit; required for product browser and sponsor jobs
+        description: Full product SHA; overrides historical baseline. Tieto uses sponsor_revision.
         type: string
         default: ''
       product:
         description: Product for the browser workload
         type: choice
         default: stoa
-        options: [stoa, valio, sbank, hostinger, espoo, exa, cala, context, all]
+        options:
+        - stoa
+        - valio
+        - sbank
+        - hostinger
+        - espoo
+        - exa
+        - cala
+        - context
+        - all
       browser:
         description: Run all engines or only the engine needing qualification
         type: choice
         default: all
-        options: [all, chromium, firefox, webkit]
+        options:
+        - all
+        - chromium
+        - firefox
+        - webkit
       sponsor_revision:
         description: Tieto sponsor canary or fixed five-commit matrix
         type: choice
         default: base
-        options: [base, '2283', '2234', '2129', '2297', heads, all]
+        options:
+        - base
+        - '2283'
+        - '2234'
+        - '2129'
+        - '2297'
+        - heads
+        - all
       tieto_toolchain:
         description: Preserve pinned SDK or explicitly test Roslyn 4.12 compatibility
         type: choice
         default: pinned
-        options: [pinned, compatible]
+        options:
+        - pinned
+        - compatible
       shard:
         description: Fixed scenario shard; use all only for new scenario coverage
         type: choice
         default: all
-        options: [all, '0', '1', '2', '3']
-
+        options:
+        - all
+        - '0'
+        - '1'
+        - '2'
+        - '3'
 permissions:
   contents: read
-
 env:
-  # Conservative owner-authorized Junction window, not provider credit expiry.
   CRACI_WINDOW_END: '2026-11-15T17:00:00Z'
-
 concurrency:
-  group: craci-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
+  group: craci-${{ github.run_id }}
+  cancel-in-progress: false
 jobs:
+  plan:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
+    name: Admit exact sources and bounded matrix
+    runs-on: craci
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      source_sha: ${{ steps.plan.outputs.source_sha }}
+    steps:
+    - name: Configure source-only planner
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: default
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce the authorized credit deadline
+      run: |
+        set -euo pipefail
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+    - name: Check out immutable harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - id: plan
+      name: Validate inputs before any matrix fan-out
+      env:
+        CRACI_INPUTS: ${{ toJSON(inputs) }}
+        CRACI_CREDIT_WINDOW_OPEN: ${{ vars.CRACI_CREDIT_WINDOW_OPEN }}
+      run: |
+        set -euo pipefail
+        test "$(git -C harness rev-parse HEAD)" = "$GITHUB_SHA"
+        node harness/scripts/craci/plan.mjs
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-plan-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-plan/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
   portable:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && (github.event_name != 'workflow_dispatch' || inputs.workload == 'portable') }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'portable' }}
     name: Validate, test and build on CRACI
     runs-on: craci
     timeout-minutes: 15
     steps:
-      - name: Configure monitored CRACI networking
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534 # v1
-        with:
-          size: '2'
-          image: ubuntu-24.04
-          network: |
-            default: deny
-            presets: [github, npm]
-      - name: Enforce the credit window and source format
-        env:
-          SOURCE_SHA: ${{ inputs.source_sha }}
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-          if [ -n "$SOURCE_SHA" ]; then [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; fi
-      - name: Check out the selected commit
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          ref: ${{ inputs.source_sha || github.sha }}
-          persist-credentials: false
-      - name: Set up Node 22
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-      - name: Record source and executor
-        env:
-          SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
-          git rev-parse HEAD
-          node --version
-          npm --version
-          uname -sm
-      - name: Install locked dependencies
-        run: npm ci --ignore-scripts
-      - name: Audit dependency vulnerabilities
-        run: npm audit --audit-level=high
-      - name: Validate packages
-        run: npm run validate
-      - name: Run Node tests
-        run: npm test
-      - name: Build catalog
-        run: npm run build
-      - name: Record lockfile and build digests
-        run: |
-          set -euo pipefail
-          test -d dist/site
-          find dist/site -type f -print0 | LC_ALL=C sort -z | xargs -0 -r sha256sum -- > "$RUNNER_TEMP/craci-build.sha256"
-          test -s "$RUNNER_TEMP/craci-build.sha256"
-          sha256sum package-lock.json
-          cat "$RUNNER_TEMP/craci-build.sha256"
-          sha256sum "$RUNNER_TEMP/craci-build.sha256"
-
+    - name: Configure monitored CRACI networking
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - name: Check out immutable harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out the selected commit
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        path: source
+    - name: Set up Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Record source and executor
+      env:
+        SOURCE_SHA: ${{ matrix.source_sha }}
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+        git rev-parse HEAD
+        node --version
+        npm --version
+        uname -sm
+      working-directory: source
+    - name: Explicit portable milestone qualification
+      working-directory: source
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        npm ci --ignore-scripts
+        npm audit --audit-level=high
+        npm run validate
+        npm test
+        npm run build
+        test -d dist/site
+        find dist/site -type f -print0 | LC_ALL=C sort -z | xargs -0 -r sha256sum -- > "$CRACI_RECEIPT_DIR/artifacts/build.sha256"
+        test -s "$CRACI_RECEIPT_DIR/artifacts/build.sha256"
+        sha256sum package-lock.json
+        sha256sum "$CRACI_RECEIPT_DIR/artifacts/build.sha256"
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: portable
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
   product-browser:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'product-browser' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'product-browser' }}
     name: ${{ inputs.product }} / ${{ matrix.browser }} on CRACI
     runs-on: craci
     timeout-minutes: 20
     strategy:
       fail-fast: false
       max-parallel: 3
-      matrix:
-        browser: ${{ fromJSON(inputs.browser == 'chromium' && '["chromium"]' || inputs.browser == 'firefox' && '["firefox"]' || inputs.browser == 'webkit' && '["webkit"]' || '["chromium","firefox","webkit"]') }}
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
-      - name: Configure browser installation networking
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '4'
-          image: ubuntu-24.04
-          network: |
-            default: deny
-            presets: [github, npm, ubuntu]
-            sources:
-              - apt:
-                  urls:
-                    - https://packages.microsoft.com/ubuntu/24.04/prod
-            connections:
-              - tls:
-                  serverNamePatterns:
-                    - cdn.playwright.dev
-                    - playwright.download.prss.microsoft.com
-                    - storage.googleapis.com
-                    - fwjydgxpttajiqpfmqtj.supabase.co
-                  ports: [443]
-      - name: Enforce the credit window and immutable input
-        env:
-          SOURCE_SHA: ${{ inputs.source_sha }}
-          PRODUCT: ${{ inputs.product }}
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          case "$PRODUCT" in stoa|valio) ;; *) exit 1;; esac
-      - name: Check out the pinned harness
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Check out the pinned product
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: ${{ inputs.source_sha }}
-          persist-credentials: false
-      - name: Set up Node 22
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-      - name: Install the locked harness and selected browser
-        working-directory: harness
-        env:
-          BROWSER: ${{ matrix.browser }}
-        run: |
-          set -euo pipefail
-          git rev-parse HEAD
-          git -C ../source rev-parse HEAD
-          npm ci --ignore-scripts
-          npx --no-install playwright install --with-deps "$BROWSER"
-      - name: Fetch and verify the Stoa sponsor sample
-        if: ${{ inputs.product == 'stoa' }}
-        run: |
-          set -euo pipefail
-          node source/solutions/stoa-blueprint-studio/scripts/fetch-sponsor-sample.mjs "$RUNNER_TEMP/stoa-sponsor.dxf"
-          printf 'STOA_SPONSOR_DXF=%s\n' "$RUNNER_TEMP/stoa-sponsor.dxf" >> "$GITHUB_ENV"
-      - name: Exercise desktop and narrow product journeys
-        working-directory: harness
-        env:
-          PRODUCT: ${{ inputs.product }}
-          BROWSER: ${{ matrix.browser }}
-          CRACI_SOURCE_SHA: ${{ inputs.source_sha }}
-          PRODUCT_SOURCE_ROOT: ${{ github.workspace }}/source
-        run: |
-          set -euo pipefail
-          export CRACI_BROWSER_OUTPUT="$RUNNER_TEMP/craci-browser-results"
-          node scripts/craci/product-browser.mjs "$PRODUCT" "$BROWSER"
-
+    - name: Configure browser installation networking
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm, ubuntu]
+          sources:
+            - apt:
+                urls:
+                  - https://packages.microsoft.com/ubuntu/24.04/prod
+          connections:
+            - tls:
+                serverNamePatterns:
+                  - cdn.playwright.dev
+                  - playwright.download.prss.microsoft.com
+                  - storage.googleapis.com
+                  - fwjydgxpttajiqpfmqtj.supabase.co
+                ports: [443]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - name: Check out the pinned harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out the pinned product
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Set up Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install the locked harness and selected browser
+      working-directory: harness
+      env:
+        BROWSER: ${{ matrix.browser }}
+      run: |
+        set -euo pipefail
+        start=$(date +%s)
+        npm ci --ignore-scripts
+        installed=$(date +%s)
+        npx --no-install playwright install --with-deps "$BROWSER"
+        ready=$(date +%s)
+        printf '{"dependencyInstallSeconds":%s,"browserInstallSeconds":%s,"browser":"%s"}\n' "$((installed-start))" "$((ready-installed))" "$BROWSER" > "$CRACI_RECEIPT_DIR/artifacts/setup-timing.json"
+    - name: Fetch and verify the Stoa sponsor sample
+      if: ${{ inputs.product == 'stoa' }}
+      run: |
+        set -euo pipefail
+        node source/solutions/stoa-blueprint-studio/scripts/fetch-sponsor-sample.mjs "$RUNNER_TEMP/stoa-sponsor.dxf"
+        printf 'STOA_SPONSOR_DXF=%s\n' "$RUNNER_TEMP/stoa-sponsor.dxf" >> "$GITHUB_ENV"
+    - name: Exercise desktop and narrow product journeys
+      working-directory: harness
+      env:
+        PRODUCT: ${{ inputs.product }}
+        BROWSER: ${{ matrix.browser }}
+        CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+        PRODUCT_SOURCE_ROOT: ${{ github.workspace }}/source
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        export CRACI_BROWSER_OUTPUT="$CRACI_RECEIPT_DIR/artifacts/product-browser"
+        node scripts/craci/product-browser.mjs "$PRODUCT" "$BROWSER"
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+    env:
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: product-browser
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
   sbank-sponsor:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'sbank-sponsor' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'sbank-sponsor' }}
     name: S-Pankki official synthetic CSV import on CRACI
     runs-on: craci
     timeout-minutes: 15
     steps:
-      - name: Configure GitHub source networking
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '2'
-          image: ubuntu-24.04
-          network: |
-            default: deny
-            presets: [github]
-            connections:
-              - tls:
-                  serverNamePatterns: [github-cloud.githubusercontent.com]
-                  ports: [443]
-      - name: Enforce the credit window and immutable input
-        env:
-          SOURCE_SHA: ${{ inputs.source_sha }}
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
-      - name: Check out the pinned harness
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Check out the pinned S-Pankki implementation
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: ${{ inputs.source_sha }}
-          persist-credentials: false
-      - name: Fetch the official pinned sponsor CSV through Git LFS
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          repository: hackjunction/Junction-2026-S-pankki
-          ref: fbdecdedf1a1f49dd641c2e6b9f2b62d0dc0cc8f
-          path: sponsor
-          lfs: true
-          sparse-checkout: tx_junction_transactions.csv
-          sparse-checkout-cone-mode: false
-          persist-credentials: false
-      - name: Set up Node 22
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-      - name: Verify real CSV bytes, independent rows and refusal to overwrite
-        env:
-          CRACI_SOURCE_SHA: ${{ inputs.source_sha }}
-        run: |
-          set -euo pipefail
-          git -C harness rev-parse HEAD
-          git -C source rev-parse HEAD
-          git -C sponsor rev-parse HEAD
-          python3 harness/scripts/craci/sbank-sponsor-check.py --csv "$GITHUB_WORKSPACE/sponsor/tx_junction_transactions.csv" --source-root "$GITHUB_WORKSPACE/source" --output "$RUNNER_TEMP/sponsor-customer.json"
-
-
+    - name: Configure GitHub source networking
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+          connections:
+            - tls:
+                serverNamePatterns: [github-cloud.githubusercontent.com]
+                ports: [443]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - name: Check out the pinned harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out the pinned S-Pankki implementation
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Fetch the official pinned sponsor CSV through Git LFS
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        repository: hackjunction/Junction-2026-S-pankki
+        ref: fbdecdedf1a1f49dd641c2e6b9f2b62d0dc0cc8f
+        path: sponsor
+        lfs: true
+        sparse-checkout: tx_junction_transactions.csv
+        sparse-checkout-cone-mode: false
+        persist-credentials: false
+    - name: Set up Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Verify real CSV bytes, independent rows and refusal to overwrite
+      env:
+        CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        git -C harness rev-parse HEAD
+        git -C source rev-parse HEAD
+        git -C sponsor rev-parse HEAD
+        python3 harness/scripts/craci/sbank-sponsor-check.py --csv "$GITHUB_WORKSPACE/sponsor/tx_junction_transactions.csv" --source-root "$GITHUB_WORKSPACE/source" --output "$CRACI_RECEIPT_DIR/artifacts/sponsor-customer.json"
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: sbank-sponsor
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
   tieto-sponsor:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'tieto-sponsor' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'tieto-sponsor' }}
     name: Tieto MessagePack / ${{ matrix.revision }} / ${{ inputs.tieto_toolchain }}
     runs-on: craci
     timeout-minutes: 30
@@ -271,103 +536,161 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 8
-      matrix:
-        revision: ${{ fromJSON(inputs.sponsor_revision == 'all' && '["base","2283","2234","2129","2297"]' || inputs.sponsor_revision == 'heads' && '["2283","2234","2129","2297"]' || inputs.sponsor_revision == '2283' && '["2283"]' || inputs.sponsor_revision == '2234' && '["2234"]' || inputs.sponsor_revision == '2129' && '["2129"]' || inputs.sponsor_revision == '2297' && '["2297"]' || '["base"]') }}
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     env:
-      SPONSOR_SHA: ${{ fromJSON('{"base":"32258fdbee4bcd653c79f51b4376b5103c6f4d27","2283":"9df83c38409c8bfad0517aebffe48211eda4a5b4","2234":"9007cee1163c4a274fd60c3cc20c21ae63622786","2129":"083afd994c1c9a994cb2cd5aa0b6ad805a621457","2297":"a0aa5ab2de7f5a669d97e37184a89034c1de82b6"}')[matrix.revision] }}
+      SPONSOR_SHA: ${{ matrix.source_sha }}
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_NOLOGO: '1'
       TIETO_TOOLCHAIN: ${{ inputs.tieto_toolchain || 'pinned' }}
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/sponsor
+      CRACI_SOURCE_REPOSITORY: te-industry-tech-office/junction26-messagepack-csharp
+      CRACI_WORKLOAD: tieto-sponsor
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: ${{ inputs.tieto_toolchain == 'compatible' && '["global.json"]' || '[]' }}
     steps:
-      - name: Configure public sponsor and SDK downloads
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '8'
-          image: ubuntu-24.04
-          network: |
-            default: deny
-            presets: [github, ubuntu]
-            sources:
-              - apt:
-                  urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
-            connections:
-              - tls:
-                  serverNamePatterns:
-                    - builds.dotnet.microsoft.com
-                    - ci.dot.net
-                    - dotnetcli.azureedge.net
-                    - dotnetcli.blob.core.windows.net
-                    - api.nuget.org
-                    - globalcdn.nuget.org
-                    - pkgs.dev.azure.com
-                    - dnceng.pkgs.visualstudio.com
-                  ports: [443]
-      - name: Enforce the credit window
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-          [[ "$SPONSOR_SHA" =~ ^[0-9a-f]{40}$ ]]
-      - name: Check out the pinned campaign harness
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Check out official sponsor history for versioning
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          repository: te-industry-tech-office/junction26-messagepack-csharp
-          path: sponsor
-          ref: ${{ env.SPONSOR_SHA }}
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Install the sponsor-pinned .NET SDK
-        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
-        with:
-          global-json-file: sponsor/global.json
-      - name: Install explicitly selected compatible compiler
-        if: ${{ inputs.tieto_toolchain == 'compatible' }}
-        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
-        with:
-          dotnet-version: '9.0.100'
-      - name: Restore the expected legacy timezone data
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y tzdata-legacy
-          test -f /usr/share/zoneinfo/Cuba
-      - name: Record the explicit compiler compatibility overlay
-        if: ${{ inputs.tieto_toolchain == 'compatible' }}
-        working-directory: sponsor
-        run: |
-          set -euo pipefail
-          python3 ../harness/scripts/craci/tieto-toolchain.py
-          git diff -- global.json
-          test "$(git diff --name-only)" = "global.json"
-      - name: Build and test four actual sponsor suites
-        working-directory: sponsor
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$SPONSOR_SHA"
-          git rev-parse HEAD
-          git -C ../harness rev-parse HEAD
-          dotnet --version
-          sha256sum global.json nuget.config LICENSE
-          mkdir -p "$RUNNER_TEMP/tieto-results"
-          result=0
-          for suite in MessagePack.SourceGenerator.Tests MessagePack.SourceGenerator.ExecutionTests MessagePack.SourceGenerator.MapModeExecutionTests MessagePack.Tests; do
-            if dotnet test "tests/$suite/$suite.csproj" -c Release -f net8.0 --logger "trx;LogFileName=$suite.trx" --results-directory "$RUNNER_TEMP/tieto-results" --blame-hang-timeout 3m; then
-              printf 'SUITE_PASS %s\n' "$suite"
-            else
-              printf 'SUITE_FAIL %s\n' "$suite"
-              result=1
-            fi
-          done
-          python3 ../harness/scripts/craci/summarize-trx.py "$RUNNER_TEMP/tieto-results" "$SPONSOR_SHA"
-          exit "$result"
-
+    - name: Configure public sponsor and SDK downloads
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '8'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, ubuntu]
+          sources:
+            - apt:
+                urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
+          connections:
+            - tls:
+                serverNamePatterns:
+                  - builds.dotnet.microsoft.com
+                  - ci.dot.net
+                  - dotnetcli.azureedge.net
+                  - dotnetcli.blob.core.windows.net
+                  - api.nuget.org
+                  - globalcdn.nuget.org
+                  - pkgs.dev.azure.com
+                  - dnceng.pkgs.visualstudio.com
+                ports: [443]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - name: Check out the pinned campaign harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out official sponsor history for versioning
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        repository: te-industry-tech-office/junction26-messagepack-csharp
+        path: sponsor
+        ref: ${{ matrix.source_sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Install the sponsor-pinned .NET SDK
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+      with:
+        global-json-file: sponsor/global.json
+    - name: Install explicitly selected compatible compiler
+      if: ${{ inputs.tieto_toolchain == 'compatible' }}
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+      with:
+        dotnet-version: 9.0.100
+    - name: Restore the expected legacy timezone data
+      run: |
+        set -euo pipefail
+        sudo apt-get update
+        sudo apt-get install -y tzdata-legacy
+        test -f /usr/share/zoneinfo/Cuba
+    - name: Record the explicit compiler compatibility overlay
+      if: ${{ inputs.tieto_toolchain == 'compatible' }}
+      working-directory: sponsor
+      run: |
+        set -euo pipefail
+        python3 ../harness/scripts/craci/tieto-toolchain.py
+        git diff -- global.json
+        test "$(git diff --name-only)" = "global.json"
+    - name: Build and test four actual sponsor suites
+      working-directory: sponsor
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$SPONSOR_SHA"
+        git rev-parse HEAD
+        git -C ../harness rev-parse HEAD
+        dotnet --version
+        sha256sum global.json nuget.config LICENSE
+        mkdir -p "$CRACI_RECEIPT_DIR/artifacts/tieto-results"
+        result=0
+        for suite in MessagePack.SourceGenerator.Tests MessagePack.SourceGenerator.ExecutionTests MessagePack.SourceGenerator.MapModeExecutionTests MessagePack.Tests; do
+          if dotnet test "tests/$suite/$suite.csproj" -c Release -f net8.0 --logger "trx;LogFileName=$suite.trx" --results-directory "$CRACI_RECEIPT_DIR/artifacts/tieto-results" --blame-hang-timeout 3m; then
+            printf 'SUITE_PASS %s\n' "$suite"
+          else
+            printf 'SUITE_FAIL %s\n' "$suite"
+            result=1
+          fi
+        done
+        python3 ../harness/scripts/craci/summarize-trx.py "$CRACI_RECEIPT_DIR/artifacts/tieto-results" "$SPONSOR_SHA"
+        exit "$result"
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
   portfolio-browser:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'portfolio-browser' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'portfolio-browser' }}
     name: Portfolio ${{ matrix.product }} / ${{ matrix.browser }}
     runs-on: craci
     timeout-minutes: 20
@@ -377,81 +700,133 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 8
-      matrix:
-        product: ${{ fromJSON(inputs.product == 'sbank' && '["sbank"]' || inputs.product == 'hostinger' && '["hostinger"]' || inputs.product == 'espoo' && '["espoo"]' || inputs.product == 'exa' && '["exa"]' || '["sbank","hostinger","espoo","exa"]') }}
-        browser: ${{ fromJSON(inputs.browser == 'chromium' && '["chromium"]' || inputs.browser == 'firefox' && '["firefox"]' || inputs.browser == 'webkit' && '["webkit"]' || '["chromium","firefox","webkit"]') }}
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     env:
-      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || fromJSON('{"sbank":"b2bb7f532fd496287aace73da98296306080df6c","hostinger":"23a029a48794ba275a0309584bf9968f7f5b665c","espoo":"ccd67d64f9a94952b0cd0f0ae1a6e2c8e8901a0a","exa":"2ce520f55a97f2491d34fb4582de728e7f379c1b"}')[matrix.product] }}
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: portfolio-browser
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
     steps:
-      - name: Configure browser installation networking
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '4'
-          image: ubuntu-24.04
-          network: |
-            default: deny
-            presets: [github, npm, ubuntu]
-            sources:
-              - apt:
-                  urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
-            connections:
-              - tls:
-                  serverNamePatterns:
-                    - cdn.playwright.dev
-                    - playwright.download.prss.microsoft.com
-                    - storage.googleapis.com
-                  ports: [443]
-      - name: Enforce window and unambiguous source selection
-        env:
-          SELECTED_PRODUCT: ${{ inputs.product }}
-          SOURCE_OVERRIDE: ${{ inputs.source_sha }}
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-          [[ "$PRODUCT_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          if [ -n "$SOURCE_OVERRIDE" ]; then
-            case "$SELECTED_PRODUCT" in sbank|hostinger|espoo|exa) ;; *) exit 1;; esac
-          fi
-      - name: Check out the pinned harness
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Check out the product's own PR source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: ${{ env.PRODUCT_SOURCE_SHA }}
-          persist-credentials: false
-      - name: Set up Node 22
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-      - name: Install the locked harness and selected browser
-        working-directory: harness
-        env:
-          BROWSER: ${{ matrix.browser }}
-        run: |
-          set -euo pipefail
-          git rev-parse HEAD
-          git -C ../source rev-parse HEAD
-          npm ci --ignore-scripts
-          npx --no-install playwright install --with-deps "$BROWSER"
-      - name: Exercise consequential local product workflows
-        working-directory: harness
-        env:
-          CRACI_PRODUCT: ${{ matrix.product }}
-          CRACI_BROWSER: ${{ matrix.browser }}
-          SOURCE_DIR: ${{ github.workspace }}/source
-          EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
-        run: |
-          set -euo pipefail
-          export CRACI_BROWSER_OUTPUT="$RUNNER_TEMP/craci-portfolio-browser-results"
-          node scripts/craci/portfolio-browser.mjs
-
+    - name: Configure browser installation networking
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm, ubuntu]
+          sources:
+            - apt:
+                urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
+          connections:
+            - tls:
+                serverNamePatterns:
+                  - cdn.playwright.dev
+                  - playwright.download.prss.microsoft.com
+                  - storage.googleapis.com
+                ports: [443]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - name: Check out the pinned harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out the product's own PR source
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Set up Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install the locked harness and selected browser
+      working-directory: harness
+      env:
+        BROWSER: ${{ matrix.browser }}
+      run: |
+        set -euo pipefail
+        start=$(date +%s)
+        npm ci --ignore-scripts
+        installed=$(date +%s)
+        npx --no-install playwright install --with-deps "$BROWSER"
+        ready=$(date +%s)
+        printf '{"dependencyInstallSeconds":%s,"browserInstallSeconds":%s,"browser":"%s"}\n' "$((installed-start))" "$((ready-installed))" "$BROWSER" > "$CRACI_RECEIPT_DIR/artifacts/setup-timing.json"
+    - name: Exercise consequential local product workflows
+      working-directory: harness
+      env:
+        CRACI_PRODUCT: ${{ matrix.product }}
+        CRACI_BROWSER: ${{ matrix.browser }}
+        SOURCE_DIR: ${{ github.workspace }}/source
+        EXPECTED_SOURCE_SHA: ${{ matrix.source_sha }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        export CRACI_BROWSER_OUTPUT="$CRACI_RECEIPT_DIR/artifacts/portfolio-browser"
+        node scripts/craci/portfolio-browser.mjs
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
   sbank-properties:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'sbank-properties' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'sbank-properties' }}
     name: S-Pankki independent arithmetic / shard ${{ matrix.shard }}
     runs-on: craci
     timeout-minutes: 15
@@ -461,51 +836,108 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 8
-      matrix:
-        shard: ${{ fromJSON(inputs.shard == '0' && '[0]' || inputs.shard == '1' && '[1]' || inputs.shard == '2' && '[2]' || inputs.shard == '3' && '[3]' || '[0,1,2,3]') }}
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     env:
-      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || 'b2bb7f532fd496287aace73da98296306080df6c' }}
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: sbank-properties
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
     steps:
-      - name: Configure source-only networking
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '2'
-          image: ubuntu-24.04
-          network: |
-            default: deny
-            presets: [github]
-      - name: Enforce window and exact source
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-          [[ "$PRODUCT_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: ${{ env.PRODUCT_SOURCE_SHA }}
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-      - name: Check 220002 independent cent and provenance properties
-        env:
-          SOURCE_DIR: ${{ github.workspace }}/source
-          EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
-          CRACI_SHARD: ${{ matrix.shard }}
-          CRACI_CASES: '20000'
-        run: |
-          set -euo pipefail
-          git -C harness rev-parse HEAD
-          export CRACI_SEED="$((20261114 + CRACI_SHARD * 1000003))"
-          node harness/scripts/craci/sbank-properties.mjs
-
+    - name: Configure source-only networking
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Check 220002 independent cent and provenance properties
+      env:
+        SOURCE_DIR: ${{ github.workspace }}/source
+        EXPECTED_SOURCE_SHA: ${{ matrix.source_sha }}
+        CRACI_SHARD: ${{ matrix.shard }}
+        CRACI_CASES: '20000'
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        git -C harness rev-parse HEAD
+        export CRACI_SEED="$((20261114 + CRACI_SHARD * 1000003))"
+        node harness/scripts/craci/sbank-properties.mjs
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
   meta-seeds:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'meta-seeds' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'meta-seeds' }}
     name: Meta synthetic model / seed shard ${{ matrix.shard }}
     runs-on: craci
     timeout-minutes: 20
@@ -515,44 +947,104 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 8
-      matrix:
-        shard: ${{ fromJSON(inputs.shard == '0' && '[0]' || inputs.shard == '1' && '[1]' || inputs.shard == '2' && '[2]' || inputs.shard == '3' && '[3]' || '[0,1,2,3]') }}
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
-      - name: Configure source-only model study
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '2'
-          image: ubuntu-24.04
-          network: |
-            default: deny
-            presets: [github]
-      - name: Enforce credit window
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: '634f1e0e6cb2de46bcf0a783532d46c23f513d11'
-          persist-credentials: false
-      - name: Train and measure predeclared independent seeds
-        env:
-          SOURCE_DIR: ${{ github.workspace }}/source
-          EXPECTED_SOURCE_SHA: '634f1e0e6cb2de46bcf0a783532d46c23f513d11'
-          CRACI_SHARD: ${{ matrix.shard }}
-        run: |
-          set -euo pipefail
-          git -C harness rev-parse HEAD
-          python3 --version
-          python3 harness/scripts/craci/meta-seeds.py
-
+    - name: Configure source-only model study
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Train and measure predeclared independent seeds
+      env:
+        SOURCE_DIR: ${{ github.workspace }}/source
+        EXPECTED_SOURCE_SHA: ${{ matrix.source_sha }}
+        CRACI_SHARD: ${{ matrix.shard }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        git -C harness rev-parse HEAD
+        python3 --version
+        python3 harness/scripts/craci/meta-seeds.py
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+    env:
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: meta-seeds
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
   council-postgres:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'council-postgres' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'council-postgres' }}
     name: Council Python and real disposable PostgreSQL
     runs-on: craci
     timeout-minutes: 25
@@ -560,56 +1052,119 @@ jobs:
       group: craci-council-postgres
       cancel-in-progress: false
     steps:
-      - name: Configure existing Python and Ubuntu package sources
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '4'
-          image: ubuntu-24.04
-          network: |
-            default: deny
-            presets: [github, pypi, ubuntu]
-            sources:
-              - apt:
-                  urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
-      - name: Enforce credit window
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: '672da2be99edff2fa25c0ab2703e6da88061a62f'
-          persist-credentials: false
-      - name: Install the existing pinned Council dependencies
-        run: |
-          set -euo pipefail
-          python3 -m venv "$RUNNER_TEMP/council-venv"
-          "$RUNNER_TEMP/council-venv/bin/python" -m pip install -r source/services/council/requirements-dev.txt
-          "$RUNNER_TEMP/council-venv/bin/python" -m pip freeze
-          if ! compgen -G '/usr/lib/postgresql/*/bin/initdb' > /dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y postgresql
-          fi
-      - name: Run actual Python behavior and durable PostgreSQL replay
-        env:
-          SOURCE_DIR: ${{ github.workspace }}/source
-          EXPECTED_SOURCE_SHA: '672da2be99edff2fa25c0ab2703e6da88061a62f'
-        run: |
-          set -euo pipefail
-          test "$(git -C source rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
-          git -C harness rev-parse HEAD
-          "$RUNNER_TEMP/council-venv/bin/python" -m pytest -q source/services/council/tests
-          "$RUNNER_TEMP/council-venv/bin/python" harness/scripts/craci/council-postgres.py
-
-
-
+    - name: Configure existing Python and Ubuntu package sources
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+          sources:
+            - apt:
+                urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Install the existing pinned Council dependencies
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/council-venv"
+        "$RUNNER_TEMP/council-venv/bin/python" -m pip install -r source/services/council/requirements-dev.txt
+        "$RUNNER_TEMP/council-venv/bin/python" -m pip freeze
+        if ! compgen -G '/usr/lib/postgresql/*/bin/initdb' > /dev/null; then
+          sudo apt-get update
+          sudo apt-get install -y postgresql
+        fi
+    - name: Run actual Python behavior and durable PostgreSQL replay
+      env:
+        SOURCE_DIR: ${{ github.workspace }}/source
+        EXPECTED_SOURCE_SHA: ${{ matrix.source_sha }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        test "$(git -C source rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+        git -C harness rev-parse HEAD
+        "$RUNNER_TEMP/council-venv/bin/python" -m pytest -q source/services/council/tests
+        "$RUNNER_TEMP/council-venv/bin/python" harness/scripts/craci/council-postgres.py
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: council-postgres
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
   new-products-browser:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'new-products-browser' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'new-products-browser' }}
     name: New product ${{ matrix.product }} / ${{ matrix.browser }}
     runs-on: craci
     timeout-minutes: 20
@@ -619,241 +1174,474 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 6
-      matrix:
-        product: ${{ fromJSON(inputs.product == 'cala' && '["cala"]' || inputs.product == 'context' && '["context"]' || '["cala","context"]') }}
-        browser: ${{ fromJSON(inputs.browser == 'chromium' && '["chromium"]' || inputs.browser == 'firefox' && '["firefox"]' || inputs.browser == 'webkit' && '["webkit"]' || '["chromium","firefox","webkit"]') }}
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     env:
-      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || fromJSON('{"cala":"ff6b0bacb1d796a098dba6798d61f59dc977420c","context":"76f0405ac49f2017129ec11d891c2a2cbe7d1838"}')[matrix.product] }}
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: new-products-browser
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
     steps:
-      - name: Configure monitored packages and bounded browser downloads
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '4'
-          image: ubuntu-24.04
-          network: |
-            default: deny
-            presets: [github, npm, ubuntu]
-            sources:
-              - apt:
-                  urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
-            connections:
-              - tls:
-                  serverNamePatterns: [cdn.playwright.dev, playwright.download.prss.microsoft.com, storage.googleapis.com]
-                  ports: [443]
-      - name: Enforce credit window and exact product selection
-        env:
-          SELECTED_PRODUCT: ${{ inputs.product }}
-          SOURCE_OVERRIDE: ${{ inputs.source_sha }}
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-          [[ "$PRODUCT_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          case "$SELECTED_PRODUCT" in cala|context|all) ;; *) exit 1;; esac
-          if [ -n "$SOURCE_OVERRIDE" ]; then
-            case "$SELECTED_PRODUCT" in cala|context) ;; *) exit 1;; esac
-          fi
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: ${{ env.PRODUCT_SOURCE_SHA }}
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-      - name: Install locked browser harness
-        working-directory: harness
-        env:
-          BROWSER: ${{ matrix.browser }}
-        run: |
-          set -euo pipefail
-          git rev-parse HEAD
-          npm ci --ignore-scripts
-          npx --no-install playwright install --with-deps "$BROWSER"
-      - name: Exercise actual local HTTP product journeys
-        working-directory: harness
-        env:
-          CRACI_PRODUCT: ${{ matrix.product }}
-          CRACI_BROWSER: ${{ matrix.browser }}
-          SOURCE_DIR: ${{ github.workspace }}/source
-          EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
-        run: |
-          set -euo pipefail
-          export CRACI_BROWSER_OUTPUT="$RUNNER_TEMP/craci-new-product-results"
-          node scripts/craci/new-products-browser.mjs
-
+    - name: Configure monitored packages and bounded browser downloads
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm, ubuntu]
+          sources:
+            - apt:
+                urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
+          connections:
+            - tls:
+                serverNamePatterns: [cdn.playwright.dev, playwright.download.prss.microsoft.com, storage.googleapis.com]
+                ports: [443]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install locked browser harness
+      working-directory: harness
+      env:
+        BROWSER: ${{ matrix.browser }}
+      run: |
+        set -euo pipefail
+        start=$(date +%s)
+        npm ci --ignore-scripts
+        installed=$(date +%s)
+        npx --no-install playwright install --with-deps "$BROWSER"
+        ready=$(date +%s)
+        printf '{"dependencyInstallSeconds":%s,"browserInstallSeconds":%s,"browser":"%s"}\n' "$((installed-start))" "$((ready-installed))" "$BROWSER" > "$CRACI_RECEIPT_DIR/artifacts/setup-timing.json"
+    - name: Exercise actual local HTTP product journeys
+      working-directory: harness
+      env:
+        CRACI_PRODUCT: ${{ matrix.product }}
+        CRACI_BROWSER: ${{ matrix.browser }}
+        SOURCE_DIR: ${{ github.workspace }}/source
+        EXPECTED_SOURCE_SHA: ${{ matrix.source_sha }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        export CRACI_BROWSER_OUTPUT="$CRACI_RECEIPT_DIR/artifacts/new-products-browser"
+        node scripts/craci/new-products-browser.mjs
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
   native-probe:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'native-probe' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'native-probe' }}
     name: Native product behavior / ${{ matrix.arch }}
     runs-on: craci
     timeout-minutes: 10
     strategy:
       fail-fast: false
       max-parallel: 2
-      matrix:
-        include:
-          - arch: x64
-            image: default
-          - arch: arm64
-            image: craci-slim-arm
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     env:
-      PRODUCT_SOURCE_SHA: 'd0be3abf66c86d6817f82ca5ae5598ae003b5360'
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: native-probe
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
     steps:
-      - name: Select native runner architecture
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '2'
-          image: ${{ matrix.image }}
-          network: |
-            default: deny
-            presets: [github]
-      - name: Enforce credit window
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: ${{ env.PRODUCT_SOURCE_SHA }}
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-      - name: Check independent expected answers and publish canonical digest
-        env:
-          SOURCE_DIR: ${{ github.workspace }}/source
-          EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
-          EXPECTED_ARCH: ${{ matrix.arch }}
-        run: |
-          set -euo pipefail
-          git -C harness rev-parse HEAD
-          node harness/scripts/craci/platform-probe.mjs native
-
+    - name: Select native runner architecture
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ${{ matrix.image }}
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Check independent expected answers and publish canonical digest
+      env:
+        SOURCE_DIR: ${{ github.workspace }}/source
+        EXPECTED_SOURCE_SHA: ${{ matrix.source_sha }}
+        EXPECTED_ARCH: ${{ matrix.arch }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        export CRACI_RESULT_FILE="$CRACI_RECEIPT_DIR/artifacts/platform-result.json"
+        set -euo pipefail
+        git -C harness rev-parse HEAD
+        node harness/scripts/craci/platform-probe.mjs native
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
   cache-cold:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'cache-proof' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'cache-proof' }}
     name: Monitored dependency cache / cold producer
     runs-on: craci
     timeout-minutes: 10
     outputs:
       cache_key: ${{ steps.key.outputs.key }}
-      graph_sha: ${{ steps.probe.outputs.graph_sha }}
-      lock_sha: ${{ steps.probe.outputs.lock_sha }}
+      graph_sha: ${{ steps.qualification.outputs.graph_sha }}
+      lock_sha: ${{ steps.qualification.outputs.lock_sha }}
       node_version: ${{ steps.node.outputs.node-version }}
     steps:
-      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '2'
-          image: default
-          network: |
-            default: deny
-            presets: [github, npm]
-      - name: Enforce credit window
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: '98d5a524d61e431ca36acd62b268ede343fc7fe2'
-          persist-credentials: false
-      - id: node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-      - name: Select one run-specific lockfile and architecture cache key
-        id: key
-        env:
-          KEY: j26-craci-probe-v1-${{ github.run_id }}-${{ github.run_attempt }}-${{ runner.os }}-${{ runner.arch }}-${{ steps.node.outputs.node-version }}-${{ hashFiles('source/package-lock.json') }}
-        run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
-      - name: Prove the producer starts without a cache hit
-        id: lookup
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
-        with:
-          path: ${{ runner.temp }}/craci-npm-cache
-          key: ${{ steps.key.outputs.key }}
-          lookup-only: true
-      - name: Install through monitored npm and fingerprint actual dependencies
-        id: probe
-        env:
-          SOURCE_DIR: ${{ github.workspace }}/source
-          EXPECTED_SOURCE_SHA: '98d5a524d61e431ca36acd62b268ede343fc7fe2'
-          CACHE_MODE: cold
-          CACHE_HIT: ${{ steps.lookup.outputs.cache-hit }}
-          CACHE_KEY: ${{ steps.key.outputs.key }}
-          CRACI_NPM_CACHE: ${{ runner.temp }}/craci-npm-cache
-        run: node harness/scripts/craci/platform-probe.mjs cache
-      - name: Save exactly one monitored cache
-        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
-        with:
-          path: ${{ runner.temp }}/craci-npm-cache
-          key: ${{ steps.key.outputs.key }}
-
+    - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: default
+        network: |
+          default: deny
+          presets: [github, npm]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ needs.plan.outputs.source_sha }}
+        persist-credentials: false
+    - id: node
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Select one run-specific lockfile and architecture cache key
+      id: key
+      env:
+        KEY: j26-craci-probe-v1-${{ github.run_id }}-${{ github.run_attempt }}-${{ runner.os }}-${{ runner.arch }}-${{ steps.node.outputs.node-version
+          }}-${{ hashFiles('source/package-lock.json') }}
+      run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
+    - name: Prove the producer starts without a cache hit
+      id: lookup
+      uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+      with:
+        path: ${{ runner.temp }}/craci-npm-cache
+        key: ${{ steps.key.outputs.key }}
+        lookup-only: true
+    - name: Install through monitored npm and fingerprint actual dependencies
+      id: qualification
+      env:
+        SOURCE_DIR: ${{ github.workspace }}/source
+        EXPECTED_SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
+        CACHE_MODE: cold
+        CACHE_HIT: ${{ steps.lookup.outputs.cache-hit }}
+        CACHE_KEY: ${{ steps.key.outputs.key }}
+        CRACI_NPM_CACHE: ${{ runner.temp }}/craci-npm-cache
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        export CRACI_RESULT_FILE="$CRACI_RECEIPT_DIR/artifacts/platform-result.json"
+        node harness/scripts/craci/platform-probe.mjs cache
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+    - name: Save exactly one monitored cache
+      uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+      with:
+        path: ${{ runner.temp }}/craci-npm-cache
+        key: ${{ steps.key.outputs.key }}
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+    env:
+      PRODUCT_SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
+      CRACI_SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: cache-proof
+      CRACI_CELL: cache-cold
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
   cache-warm:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'cache-proof' }}
-    needs: cache-cold
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'cache-proof' }}
+    needs:
+    - plan
+    - cache-cold
     name: Monitored dependency cache / warm offline consumer
     runs-on: craci
     timeout-minutes: 10
     steps:
-      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '2'
-          image: default
-          network: |
-            default: deny
-            presets: [github]
-      - name: Enforce credit window
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: '98d5a524d61e431ca36acd62b268ede343fc7fe2'
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: ${{ needs.cache-cold.outputs.node_version }}
-      - name: Require the exact producer cache
-        id: restore
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
-        with:
-          path: ${{ runner.temp }}/craci-npm-cache
-          key: ${{ needs.cache-cold.outputs.cache_key }}
-          fail-on-cache-miss: true
-      - name: Install offline and compare source validation and dependency graph
-        env:
-          SOURCE_DIR: ${{ github.workspace }}/source
-          EXPECTED_SOURCE_SHA: '98d5a524d61e431ca36acd62b268ede343fc7fe2'
-          CACHE_MODE: warm
-          CACHE_HIT: ${{ steps.restore.outputs.cache-hit }}
-          CACHE_KEY: ${{ needs.cache-cold.outputs.cache_key }}
-          CRACI_NPM_CACHE: ${{ runner.temp }}/craci-npm-cache
-          EXPECTED_CACHE_GRAPH_SHA: ${{ needs.cache-cold.outputs.graph_sha }}
-          EXPECTED_CACHE_LOCK_SHA: ${{ needs.cache-cold.outputs.lock_sha }}
-        run: node harness/scripts/craci/platform-probe.mjs cache
-
+    - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: default
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ needs.plan.outputs.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: ${{ needs.cache-cold.outputs.node_version }}
+    - name: Require the exact producer cache
+      id: restore
+      uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+      with:
+        path: ${{ runner.temp }}/craci-npm-cache
+        key: ${{ needs.cache-cold.outputs.cache_key }}
+        fail-on-cache-miss: true
+    - name: Install offline and compare source validation and dependency graph
+      env:
+        SOURCE_DIR: ${{ github.workspace }}/source
+        EXPECTED_SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
+        CACHE_MODE: warm
+        CACHE_HIT: ${{ steps.restore.outputs.cache-hit }}
+        CACHE_KEY: ${{ needs.cache-cold.outputs.cache_key }}
+        CRACI_NPM_CACHE: ${{ runner.temp }}/craci-npm-cache
+        EXPECTED_CACHE_GRAPH_SHA: ${{ needs.cache-cold.outputs.graph_sha }}
+        EXPECTED_CACHE_LOCK_SHA: ${{ needs.cache-cold.outputs.lock_sha }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        export CRACI_RESULT_FILE="$CRACI_RECEIPT_DIR/artifacts/platform-result.json"
+        node harness/scripts/craci/platform-probe.mjs cache
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    env:
+      PRODUCT_SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
+      CRACI_SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: cache-proof
+      CRACI_CELL: cache-warm
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
   mariadb-runtime:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'mariadb-runtime' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'mariadb-runtime' }}
     name: Actual MariaDB temporal schema and durability
     runs-on: craci
     timeout-minutes: 15
@@ -861,45 +1649,232 @@ jobs:
       group: craci-mariadb-runtime
       cancel-in-progress: false
     env:
-      PRODUCT_SOURCE_SHA: 'd0be3abf66c86d6817f82ca5ae5598ae003b5360'
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
       CRACI_MARIADB_IMAGE: mariadb@sha256:75b300c790eec33cd4386d80fc1a938e27604ba70f3eeda25e52874be2aae424
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: mariadb-runtime
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
     steps:
-      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '4'
-          image: default
-          network: |
-            default: deny
-            presets: [github, dockerhub]
-            # Docker Hub's documented CDN; the initial trace denied this exact host.
-            # Direct TLS permits the image download but is outside package detection.
-            connections:
-              - tls:
-                  serverNamePatterns: [production.cloudfront.docker.com]
-                  ports: [443]
-      - name: Enforce credit window
-        run: |
-          set -euo pipefail
-          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: harness
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          path: source
-          ref: ${{ env.PRODUCT_SOURCE_SHA }}
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-      - name: Run actual unchanged DDL, temporal comparisons and restart durability
-        env:
-          SOURCE_DIR: ${{ github.workspace }}/source
-          EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
-        run: |
-          set -euo pipefail
-          git -C harness rev-parse HEAD
-          export CRACI_MARIADB_OUTPUT="$RUNNER_TEMP/craci-mariadb-results"
-          python3 harness/scripts/craci/mariadb-runtime.py
+    - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: default
+        network: |
+          default: deny
+          presets: [github, dockerhub]
+          # Docker Hub's documented CDN; the initial trace denied this exact host.
+          # Direct TLS permits the image download but is outside package detection.
+          connections:
+            - tls:
+                serverNamePatterns: [production.cloudfront.docker.com]
+                ports: [443]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Run actual unchanged DDL, temporal comparisons and restart durability
+      env:
+        SOURCE_DIR: ${{ github.workspace }}/source
+        EXPECTED_SOURCE_SHA: ${{ matrix.source_sha }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        git -C harness rev-parse HEAD
+        export CRACI_MARIADB_OUTPUT="$CRACI_RECEIPT_DIR/artifacts/mariadb"
+        python3 harness/scripts/craci/mariadb-runtime.py
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+  meta-browser:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'meta-browser' }}
+    name: Meta resume / existing Chromium acceptance journey
+    runs-on: craci
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: meta-browser
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+      BROWSER: chromium
+    steps:
+    - name: Configure monitored packages and bounded browser downloads
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm, ubuntu]
+          sources:
+            - apt:
+                urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
+          connections:
+            - tls:
+                serverNamePatterns: [cdn.playwright.dev, playwright.download.prss.microsoft.com, storage.googleapis.com]
+                ports: [443]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install locked browser harness
+      working-directory: harness
+      env:
+        BROWSER: chromium
+      run: |
+        set -euo pipefail
+        start=$(date +%s)
+        npm ci --ignore-scripts
+        installed=$(date +%s)
+        npx --no-install playwright install --with-deps "$BROWSER"
+        ready=$(date +%s)
+        printf '{"dependencyInstallSeconds":%s,"browserInstallSeconds":%s,"browser":"%s"}\n' "$((installed-start))" "$((ready-installed))" "$BROWSER" > "$CRACI_RECEIPT_DIR/artifacts/setup-timing.json"
+    - name: Exercise actual Meta consent, correction and resume journey
+      working-directory: harness
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        export NODE_PATH="$CRACI_HARNESS_ROOT/node_modules"
+        export CHROMIUM_PATH="$(node -p 'require("playwright").chromium.executablePath()')"
+        node "$CRACI_SOURCE_ROOT/apps/meta-resume-web/verify.mjs" "$CRACI_RECEIPT_DIR/artifacts/meta-browser"
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
