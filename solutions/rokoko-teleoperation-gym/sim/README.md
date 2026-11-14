@@ -27,37 +27,42 @@ physics path actually ran, so no kinematic fallback was substituted. Full Playgr
 Isaac Sim, learned checkpoints and external inference were neither installed nor run.
 
 `receipt.json` records final seeds, raw per-trial outcomes, platform/time, exact
-base SHA, and SHA256 of executed source/scene/M2 inputs. Its execution HEAD is the
-base, with explicitly uncommitted working bytes bound by hashes. The delivering
-local commit binds these artifacts; it cannot be embedded in itself.
+base SHA, and SHA256 of executed source/scene/M2 inputs. Its execution HEAD is the preceding M3 source commit,
+with its subsequently repaired working bytes bound by exact SHA-256 hashes.
+The delivering fix commit binds the final code and receipt; it cannot embed its
+own Git commit SHA in its content.
 `pilot-receipt.json` preserves the first failed exploratory design (0/30 successes
 for each comparator, one closed-loop fragility violation); its old script hash
 is historical and its exact script is not retained. Two further exploratory runs
 used offsets +20000 and +30000; their observed counts were 11/30 and 10/30
 closed-loop versus 0/30 replay. They informed the audit, are development evidence,
-and are **not** final holdout evidence. No parameter was changed after observing
-the final +40000 split. No broad CI suites were run.
+and are **not** final holdout evidence. The initial +40000 split returned
+10/30 versus 0/30 but an independent safety audit found that tracking recovery
+was implicitly acting as an operator acknowledgement. After changing that safety
+logic, a **new, frozen +50000 holdout** was run without tuning to its outcomes.
+Previous +40000 metrics are historical, not final evidence. No broad CI suites were run.
 
 ## Final executed results
 
-Paired shifted holdout (30 scenarios per policy, 40104–40133):
+Paired shifted holdout (30 scenarios per policy, 50104–50133), AFTER ACK repair:
 
 | Metric | Open-loop replay | Object-centered |
 | --- | ---: | ---: |
-| Independent safe goal successes | 0/30 | 10/30 |
-| Mean final ground-truth error | 0.133445 m | 0.082372 m |
-| Trials with pusher/object contact | 25/30 | 30/30 |
+| Independent safe goal successes | 0/30 | 8/30 |
+| Mean final ground-truth error | 0.147776 m | 0.087009 m |
+| Trials with pusher/object contact | 19/30 | 30/30 |
 | False sensor success claims | 0 | 0 |
 | Fragility violations | 0 | 0 |
-| Trials with object/obstacle contact (rejected) | 2 | 5 |
-| Object workspace excursions (rejected) | 0 | 2 |
+| Trials with object/obstacle contact (rejected) | 1 | 3 |
+| Object workspace excursions (rejected) | 0 | 0 |
 | Deadman-violating target updates | 0 | 0 |
-| Human requests / actual takeovers | 2 / 0 | 18 / 0 |
+| Human requests / actual takeovers | 2 / 0 | 22 / 0 |
+| Distinct scripted synthetic ACK events / real humans | 26 / 0 | 26 / 0 |
 
 Calibration split: replay 0/6, closed-loop 4/6 safe successes. The final experiment
 ran 72 comparator episodes plus one always-released-deadman negative. Contact
-smoke, damaging-impact negative, fixed-seed determinism and three contract tests
-passed. The controller still fails **20/30** shifted tasks: this is a useful
+smoke, damaging-impact negative, fixed-seed determinism and four contract tests
+passed. The controller still fails **22/30** shifted tasks: this is a useful
 counterexample generator with modest improvement, not a solved manipulation task
 or statistical/real-world generalization claim. Occlusion HOLD, deadman release,
 obstacle abstention, friction-dependent slip, lateral instability and goal
@@ -115,7 +120,7 @@ velocity cap, intervention budget and **the exact same per-seed scenarios**:
 
 The six `train` seeds 104–109 are a calibration/development split, with narrow
 pose/friction variation and no occlusion/obstacle on the push route. No weights,
-model or hyperparameters are fitted by this script. Holdout seeds **40104–40133**
+model or hyperparameters are fitted by this script. Holdout seeds **50104–50133**
 are disjoint, paired across policies, and expand lateral pose to ±45 mm,
 friction to [0.15,0.8], with mass [0.05,0.12] kg, independent box locations,
 0/160/400 ms occlusions and deterministic deadman releases on seeds divisible by 7.
@@ -139,8 +144,10 @@ damage, outside bounds, or after obstacle contact.
 
 M1 intent is preserved locally: deadman release, poor tracking, age >120 ms or
 invalid workspace latches HOLD; rearm needs two healthy ticks and an acknowledgement.
-The simulation supplies synthetic reset acknowledgements on healthy observations;
-there is **no real operator approval**. HOLD freezes the requested pusher target,
+The simulation provides a **separate scripted synthetic ACK event two ticks
+AFTER tracking restoration**, not an ACK derived from sensor quality itself;
+there is **no real operator approval**. Without the independent scripted event,
+the HOLD persists despite arbitrarily many fresh healthy observations. HOLD freezes the requested pusher target,
 not simulator time or inertial motion; a position servo can still exert force at
 the held target. This is emphatically not an emergency stop implementation.
 The target speed cap is 0.08 m/s, far below M1's 1.6 m/s positional proposal limit.

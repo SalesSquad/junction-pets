@@ -85,6 +85,11 @@ def run(seed, policy, shifted, progress, force_deadman=False):
     d.qpos[0:2] = [s['x'], s['y']]
     mj.mj_forward(m, d)
     hold = Hold()
+    # A separately scripted SYNTHETIC operator acknowledgement is an explicit
+    # input, never inferred merely from the tracking stream becoming healthy.
+    # This is not a real person's approval or physical emergency stop.
+    ack_tick = (s['stale_start'] + s['stale_length'] + 2) if s['stale_length'] else None
+    ack_events = 0
     target = [-0.06, 0.0]
     last_seen = [s['x'], s['y']]
     seen_at = 0.0
@@ -112,7 +117,9 @@ def run(seed, policy, shifted, progress, force_deadman=False):
         if choice == 'REQUEST_HUMAN':
             budget -= 1
             requests += 1  # No simulated oracle takeover: request then abstain.
-        held = hold.update(deadman, obs['age'], obs['quality'], obs['inside'], not occluded)
+        scripted_ack = bool(ack_tick is not None and tick == ack_tick and deadman and not occluded)
+        ack_events += int(scripted_ack)
+        held = hold.update(deadman, obs['age'], obs['quality'], obs['inside'], scripted_ack)
         if held or choice in ('HALT', 'REQUEST_HUMAN'):
             held_steps += 1
             # Freeze requested joint target, not object physics; no teleport or qvel reset.
@@ -164,6 +171,7 @@ def run(seed, policy, shifted, progress, force_deadman=False):
                 max_step_impulse_ns=max_impulse, pusher_object_contact_steps=contacts,
                 obstacle_contact_steps=obstacle_contacts, held_ticks=held_steps,
                 unsafe_deadman_commands=unsafe_commands, human_requests=requests, human_takeovers=0,
+                synthetic_operator_ack_events=ack_events,
                 remaining_human_budget=budget, decisions=counts, final_object_xyz=d.xpos[oid].tolist())
 
 
@@ -195,7 +203,7 @@ def main():
     path = [math.dist([steps[0]['hand'][k] for k in ('x','y')], [s['hand'][k] for k in ('x','y')]) for s in steps]
     progress = [p/path[-1] for p in path]
     train_seeds = list(range(args.seed, args.seed+6))
-    holdout_seeds = list(range(args.seed+40000, args.seed+40000+args.trials))
+    holdout_seeds = list(range(args.seed+50000, args.seed+50000+args.trials))
     train = [run(s, p, False, progress) for s in train_seeds for p in ('open_loop','object_centered')]
     holdout = [run(s, p, True, progress) for s in holdout_seeds for p in ('open_loop','object_centered')]
     negative = run(args.seed, 'object_centered', False, progress, force_deadman=True)

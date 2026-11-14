@@ -17,6 +17,15 @@ class SafetyTests(unittest.TestCase):
         self.assertTrue(h.update(True, 0.121, 1, True, True))
         self.assertTrue(h.update(True, 0, 1, False, True))
 
+    def test_tracking_recovery_is_not_acknowledgement(self):
+        # A resumed sensor stream alone is not a human re-arm signal.
+        h=Hold()
+        self.assertTrue(h.update(True, 0.20, 0.6, True, False))
+        self.assertTrue(h.update(True, 0, 1, True, False))
+        self.assertTrue(h.update(True, 0, 1, True, False))
+        self.assertTrue(h.update(True, 0, 1, True, False))
+        self.assertFalse(h.update(True, 0, 1, True, True))
+
     def test_false_success_and_contact_required(self):
         self.assertFalse(score(0, False, 0, 0, False))
         self.assertFalse(score(0, True, 1, 0, False))
