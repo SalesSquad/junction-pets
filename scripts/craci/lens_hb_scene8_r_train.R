@@ -147,13 +147,21 @@ measure<-function(rows,p,allow){
       unknownFalseAcceptance=if(sum(!known))sum(wrong&!known)/sum(!known) else NULL,
       acceptedPrecision=if(sum(allow))sum(correct)/sum(allow) else NULL)
 }
-calibrate<-function(rows,p,gate){
+calibrate<-function(rows,p,gate,max_wrong=Inf){
  if(length(p)!=nrow(rows)||length(gate)!=nrow(rows))
   stop("Calibrator row mismatch")
  conf<-pmax(p,1-p)
  wrong<-ifelse(p>=.5,"15","12")!=rows$label
  thresholds<-unique(c(.5,sort(conf[gate],decreasing=TRUE)+1e-11,Inf))
- budget<-floor(.05*nrow(rows))
+ # Admissible wrong accepts must satisfy BOTH the original five-percent
+ # empirical risk cap and the currently calibrated baseline wrong count.
+ # Rank only feasible thresholds instead of picking unsafe high coverage
+ # and later discarding a different safe, useful threshold.
+ if(length(max_wrong)!=1L || is.na(max_wrong) || max_wrong<0 ||
+    (!is.infinite(max_wrong) && (!is.finite(max_wrong) ||
+                                max_wrong!=floor(max_wrong))))
+   stop("Invalid baseline wrong-accept budget")
+ budget<-min(floor(.05*nrow(rows)),max_wrong)
  best<-list(threshold=Inf,correct=-1L,wrong=Inf)
  for(t in thresholds){
   accept<-gate&conf>=t
@@ -172,7 +180,7 @@ calibrate<-function(rows,p,gate){
  best
 }
 bcal<-calibrate(cal,pbase_cal,rep(TRUE,nrow(cal)))
-ccal<-calibrate(cal,p_cal,gate_cal)
+ccal<-calibrate(cal,p_cal,gate_cal,max_wrong=bcal$metrics$wrongTotal)
 # Repair the old Pareto-selector bug: choose among FEASIBLE safe candidates
 # BEFORE ranking correct-known successes, never choose best-coverage but unsafe
 # then blindly revert to the abstain-all baseline.

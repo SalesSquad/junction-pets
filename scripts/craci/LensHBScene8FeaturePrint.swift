@@ -54,6 +54,7 @@ defer { try? handle.close() }
 let encoder=JSONEncoder()
 encoder.outputFormatting=[.sortedKeys]
 var counted=0
+var seenRowIds=Set<String>()
 for line in lines {
     let parts=line.split(separator:"\t",omittingEmptySubsequences:false)
     guard parts.count==2 else { fputs("Malformed manifest\n",stderr);exit(5) }
@@ -62,18 +63,28 @@ for line in lines {
     // New scene8 PUBLIC-only OOD contract. Reject ALL legacy train/cal/test scenes and path traversal.
     guard rowId.range(of:#"^hb_08_[0-9]{6}_(11|15|22|24|31|32)$"#,
                       options:.regularExpression) != nil,
+          relative == rowId + ".png",
+          !seenRowIds.contains(rowId),
           relative.range(of:#"^[a-zA-Z0-9_-]+\.png$"#,
                          options:.regularExpression) != nil else {
         fputs("Unsafe input row or filename\n",stderr)
         exit(5)
     }
     let imageURL=root.appendingPathComponent(relative).standardizedFileURL
+    let canonicalRoot=root.resolvingSymlinksInPath()
+    let canonicalImage=imageURL.resolvingSymlinksInPath()
+    let imageAttributes=try? imageURL.resourceValues(forKeys:
+        [.isSymbolicLinkKey,.isRegularFileKey])
     guard imageURL.deletingLastPathComponent().path == root.path,
+          canonicalImage.deletingLastPathComponent().path == canonicalRoot.path,
+          imageAttributes?.isSymbolicLink == false,
+          imageAttributes?.isRegularFile == true,
           fm.fileExists(atPath:imageURL.path),
           !imageURL.path.contains("/../") else {
         fputs("Not a resident owned public image\n",stderr)
         exit(5)
     }
+    seenRowIds.insert(rowId)
     autoreleasepool {
         do {
             let request=VNGenerateImageFeaturePrintRequest()
