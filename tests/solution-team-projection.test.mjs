@@ -9,9 +9,10 @@ import {projectSolutionTeams} from '../lib/solution-team-projection.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const packages=await loadPackages(root);
 const valio=JSON.parse(await readFile(new URL('../solutions/valio-trusted-trade/solution.json',import.meta.url),'utf8'));
+const project=manifests=>projectSolutionTeams(packages,manifests.map(manifest=>({directory:manifest.id,manifest})));
 
 test('Valio team binds three existing pets, declared skills and original avatar indices',()=>{
-  const projection=projectSolutionTeams(packages,[valio]);
+  const projection=project([valio]);
   assert.equal(projection.executionMode,'declared-memberships-no-dispatch');
   assert.deepEqual(projection.teams[0].members.map(member=>[member.petId,member.artIndex]),[
     ['junction.valio-aimo',1],['junction.aiven',29],['junction.afterquery',8],
@@ -27,9 +28,10 @@ test('Valio team binds three existing pets, declared skills and original avatar 
 });
 
 test('unknown member, unknown capability and duplicate plan fail before visualization',()=>{
-  assert.throws(()=>projectSolutionTeams(packages,[{...valio,agentIds:[...valio.agentIds,'junction.fake']}]),/Unknown agent/);
-  assert.throws(()=>projectSolutionTeams(packages,[{...valio,capabilityUses:[{...valio.capabilityUses[0],capabilityId:'purchase-live-stock'}]}]),/Unknown or unselected agent capability/);
-  assert.throws(()=>projectSolutionTeams(packages,[{...valio,capabilityUses:[{...valio.capabilityUses[0],status:'executed'}]}]),/Capability uses are planned references/);
-  assert.throws(()=>projectSolutionTeams(packages,[{...valio,ownedPaths:['apps/collaboration-demo/']}]),/Scaffold ownership/);
-  assert.throws(()=>projectSolutionTeams(packages,[valio,valio]),/Duplicate solution/);
+  assert.throws(()=>project([{...valio,agentIds:[...valio.agentIds,'junction.fake']}]),/Unknown agent/);
+  assert.throws(()=>project([{...valio,capabilityUses:[{...valio.capabilityUses[0],capabilityId:'purchase-live-stock'}]}]),/Unknown or unselected agent capability/);
+  assert.throws(()=>project([{...valio,capabilityUses:[{...valio.capabilityUses[0],status:'executed'}]}]),/Capability uses are planned references/);
+  assert.throws(()=>project([{...valio,ownedPaths:['apps/collaboration-demo/']}]),/Scaffold ownership/);
+  assert.throws(()=>projectSolutionTeams(packages,[{directory:'moved-valio-workspace',manifest:valio}]),/Invalid solution identity/);
+  assert.throws(()=>project([valio,valio]),/Duplicate solution/);
 });
