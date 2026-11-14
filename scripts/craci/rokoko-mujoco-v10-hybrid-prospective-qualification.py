@@ -211,6 +211,43 @@ def all_goals_plus_original_positive(row, original_selector):
     return bool(original_selector(row) or row["success"])
 
 
+def verified_venv_python(runner_temp: Path):
+    """Accept normal Python venv executable symlinks, not forged environments.
+
+    POSIX `python3 -m venv` normally makes `bin/python` a symlink to the base
+    interpreter. Forbid symlinks on the private venv root/config and original
+    evidence files; require actual isolated `sys.prefix` from the interpreter.
+    """
+    root = Path(runner_temp) / "mujoco-venv"
+    python = root / "bin/python"
+    config = root / "pyvenv.cfg"
+    require(root.is_dir() and not root.is_symlink() and
+            config.is_file() and not config.is_symlink() and
+            (root / "bin").is_dir() and not (root / "bin").is_symlink() and
+            python.is_file() and os.access(python, os.X_OK) and
+            python.resolve(strict=True).is_file(),
+            "HYBRID_PINNED_MUJOCO_ENV_MISSING")
+    config_values = dict(tuple(part.strip() for part in line.split("=", 1)) for line in
+                         (entry.strip() for entry in config.read_text(encoding="utf8").splitlines())
+                         if "=" in line)
+    require(config_values.get("include-system-site-packages", "").strip() == "false",
+            "HYBRID_PINNED_MUJOCO_VENV_NOT_ISOLATED")
+    # This invokes the executable only for its immutable runtime identity.
+    # The actual MuJoCo/NumPy wheel versions are verified separately below.
+    probe = subprocess.run([
+        str(python), "-c",
+        "import json,sys;print(json.dumps({'prefix':sys.prefix,"
+        "'base_prefix':sys.base_prefix,'executable':sys.executable}))",
+    ], capture_output=True, text=True, check=True, timeout=15)
+    details = json.loads(probe.stdout)
+    require(Path(details.get("prefix", "")).resolve() == root.resolve() and
+            Path(details.get("base_prefix", "")).resolve() != root.resolve() and
+            Path(details.get("executable", "")).resolve(strict=True) ==
+            python.resolve(strict=True),
+            "HYBRID_PYTHON_NOT_ACTUALLY_RUNNING_INSIDE_PINNED_VENV")
+    return python
+
+
 def main():
     source_root = Path(os.environ["CRACI_SOURCE_ROOT"]).resolve(strict=True)
     harness_root = Path(os.environ["CRACI_HARNESS_ROOT"]).resolve(strict=True)
@@ -232,11 +269,10 @@ def main():
                             "--is-ancestor", V8_TRAINER_HEAD, requested_source],
                            capture_output=True).returncode == 0,
             "HYBRID_FROZEN_TRAINER_NOT_IN_SOURCE_LINEAGE")
-    python = Path(os.environ["RUNNER_TEMP"]) / "mujoco-venv/bin/python"
-    require(python.is_file() and not python.is_symlink(),
-            "HYBRID_PINNED_MUJOCO_ENV_MISSING")
+    python = verified_venv_python(Path(os.environ["RUNNER_TEMP"]))
     subprocess.run([str(python), "-c",
-                    "import mujoco,numpy;assert mujoco.__version__=='3.3.7'"],
+                    "import mujoco,numpy;assert mujoco.__version__=='3.3.7'"
+                    " and numpy.__version__=='2.3.4'"],
                    check=True, cwd=source_root)
 
     original = source_root / V8 / "checkpoints"
