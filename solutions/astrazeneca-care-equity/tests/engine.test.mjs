@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { assess, exportProposal } from '../src/engine.mjs';
+const data = JSON.parse(readFileSync(new URL('../fixtures/regions.json', import.meta.url), 'utf8'));
+const run = (d=data, indicatorId='timely_referrals', focusId='fictional-coastal', peerId='fictional-inland') => assess(d, { indicatorId, focusId, peerId });
+const clone = () => structuredClone(data);
+test('proposes reviewed synthetic action with exact source digest', async () => {
+  const r=await run();assert.equal(r.status,'ACTION_REVIEW');assert.equal(r.proposedAction.decision,'HUMAN_REVIEW_REQUIRED');assert.equal(r.evidence.dataClass,'SYNTHETIC_DEMONSTRATION');assert.equal(r.evidence.sourceDigest.length,64);assert.equal(r.evidence.goal3Verified,false);
+});
+test('action export labels draft only, no real sponsor data',async ()=>{const x=exportProposal(await run());assert.equal(x.ok,true);assert.equal(x.effect,'DRAFT_ONLY');assert.equal(x.verifiedLiveData,false);});
+test('does not export an inconclusive action',async ()=>{const x=exportProposal(await run(data,'diagnostic_wait'));assert.equal(x.ok,false);});
+test('overlapping uncertainty refuses ranking',async ()=> assert.equal((await run(data,'diagnostic_wait')).status,'INSUFFICIENT_EVIDENCE'));
+test('small cohort suppresses outputs even with a large gap',async ()=> assert.equal((await run(data,'treatment_start')).status,'SUPPRESSED'));
+test('comparison of same region refused',async ()=>assert.equal((await run(data,'timely_referrals','fictional-inland','fictional-inland')).status,'REFUSED'));
+test('mismatched period blocked',async ()=>{const d=clone();d.regions[0].period='2025-Q2';assert.equal((await run(d)).reason,'MISMATCHED_PERIOD');});
+test('mismatched source ID blocked',async ()=>{const d=clone();d.regions[0].measures.timely_referrals.sourceRef='WRONG';assert.equal((await run(d)).reason,'SOURCE_MISMATCH');});
+test('missing source licence blocked',async ()=>{const d=clone();delete d.source.license;assert.equal((await run(d)).reason,'UNTRACEABLE_SOURCE');});
+test('invalid percent rejected',async ()=>{const d=clone();d.regions[0].measures.timely_referrals.high=105;assert.equal((await run(d)).reason,'INVALID_MEASUREMENT');});
+test('nonstandardized indicator cannot compare age-adjusted row',async ()=>{const d=clone();d.regions[0].measures.timely_referrals.standardization='NOT_STANDARDIZED';assert.equal((await run(d)).reason,'NONCOMPARABLE_STANDARDIZATION');});
+test('unknown source attestation refused',async ()=>{const d=clone();d.dataClass='CLEARED_AGGREGATE_INPUT';assert.equal((await run(d)).reason,'SOURCE_NOT_ATTESTED');});
+test('cannot infer actual clinical benefit',async ()=>{const r=await run();assert.equal(r.proposedAction.caveats.some(s=>s.includes('not a causal effect')),true);});
+test('peer with worse value does not generate reversed action',async ()=>assert.equal((await run(data,'timely_referrals','fictional-inland','fictional-coastal')).status,'NO_ACTION_GAP'));
