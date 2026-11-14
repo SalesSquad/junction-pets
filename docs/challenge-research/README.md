@@ -2,6 +2,10 @@
 
 Private research for challenge-specific developers. Source baseline: `61f10a44cfd833e02fa64462dfc7429046fff210`; work `JUNCTION-VIDEO-RESUME-20261113`. This package recovers the interrupted study without treating historical analyst drafts as fresh observations.
 
+## Latest shared sources
+
+Begin with [CURRENT_SOURCES.md](CURRENT_SOURCES.md) and [current-source-catalog.json](current-source-catalog.json) for the 14 November full briefs and sponsor clarifications. The older dated recordings and analyses below remain source history. The organizer's 21 video links now include Arduino, Ignite × Intel and Aalto Beyond the Clinic; they were indexed, not newly transcribed.
+
 ## Read in order
 
 1. [Current official main briefs](official-briefs.md), [19 tech briefs](official-tech-briefs.md), and [detail-page source links](source-links.md): fresh signed-in captures with URLs and timestamps. Requirement authority exceeds rough ASR and proposals. The older Fable-input index is retained separately.
@@ -69,3 +73,4 @@ Read [fresh-source corrections](fresh-source-corrections.md) before using the ea
 ## Completed Fable delta
 
 [The second Fable5.2 review](fable-delta-review.md) uses all38 detailed briefs and all34 roles, correcting the first packet's coverage gaps. Its [parsed proposals](fable-delta-review.json) and [model/source receipt](fable-delta-receipt.json) preserve exact provenance. Read its scope note: it did not audit existing runtime PRs.
+
