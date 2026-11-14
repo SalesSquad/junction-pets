@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import gzip
 import importlib.util
 import json
 from pathlib import Path
@@ -165,6 +166,35 @@ class ArchivePreflight(unittest.TestCase):
             (root / "paired-readout.json").write_text("MUTATED")
             with self.assertRaisesRegex(AssertionError, "UNBOUND_ORIGINAL_PARTS_PLAN"):
                 packer.prereview_artifacts(root, Hasher())
+
+
+class TerminalDwellBinding(unittest.TestCase):
+    def test_terminal_dwell_and_timeout_are_bound_to_real_full_trace(self):
+        row = {"seed": qual.FIRST, "strategy": qual.STRATEGIES[0],
+               "success": True, "unsafe": False, "abstained": False,
+               "dwell_ticks_final": 250, "safe_goal_dwell250": True,
+               "timeout": False}
+        doc = {"seed": qual.FIRST, "strategy": qual.STRATEGIES[0],
+               "transitions": [{"dwell_ticks_current": 250}]}
+        with tempfile.TemporaryDirectory() as folder:
+            raw = Path(folder) / "full_transitions.jsonl.gz"
+            with gzip.open(raw, "wt", encoding="utf8") as f:
+                f.write(json.dumps(doc) + "\n")
+            self.assertEqual(qual.bind_terminal_dwell_and_timeout(
+                {"trials": [row]}, raw), 1)
+            row["dwell_ticks_final"] = 0
+            row["safe_goal_dwell250"] = False
+            with self.assertRaisesRegex(AssertionError, "FORGED_TERMINAL_DWELL"):
+                qual.bind_terminal_dwell_and_timeout({"trials": [row]}, raw)
+
+    def test_no_missing_or_duplicate_final_records(self):
+        with tempfile.TemporaryDirectory() as folder:
+            raw = Path(folder) / "full_transitions.jsonl.gz"
+            with gzip.open(raw, "wt", encoding="utf8") as f:
+                f.write("")
+            with self.assertRaisesRegex(AssertionError, "COVERAGE_INCOMPLETE"):
+                qual.bind_terminal_dwell_and_timeout({"trials": [{
+                    "seed": qual.FIRST, "strategy": qual.STRATEGIES[0]}]}, raw)
 
 
 if __name__ == "__main__":
