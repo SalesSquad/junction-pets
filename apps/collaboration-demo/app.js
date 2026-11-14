@@ -15,14 +15,16 @@ function canonicalJson(value){
   if(Array.isArray(value))return '['+value.map(canonicalJson).join(',')+']';
   return '{'+Object.keys(value).sort().map(key=>JSON.stringify(key)+':'+canonicalJson(value[key])).join(',')+'}';
 }
-async function verifyTraceDigest(value){
-  if(!globalThis.crypto?.subtle || !/^[a-f0-9]{64}$/.test(value.traceSha256??''))throw new Error('Trace checksum verification unavailable');
-  const {traceSha256,...content}=value;
+async function verifyDigest(value,field){
+  const expected=value?.[field];
+  if(!globalThis.crypto?.subtle || !/^[a-f0-9]{64}$/.test(expected??''))throw new Error('Checksum verification unavailable');
+  const content={...value};delete content[field];
   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonicalJson(content)));
   const actual=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
-  if(actual!==traceSha256)throw new Error('Trace checksum mismatch');
+  if(actual!==expected)throw new Error('Checksum mismatch');
   // A self-contained checksum detects corruption, not provider or source authenticity.
 }
+const verifyTraceDigest=value=>verifyDigest(value,'traceSha256');
 
 const element=(tag,className='',text='')=>{
   const item=document.createElement(tag);
@@ -156,6 +158,86 @@ function failure(reason){
   $('progressLabel').textContent='No verified demo fixture';
   const card=element('div','detail-empty');append(card,element('h3','','Run the generator'),element('p','','Use node scripts/pet-collaboration-demo.mjs then serve dist/collaboration-demo over HTTP. No live agent run is claimed.'));$('detail').replaceChildren(card);
 }
+let solutionTeams=[];
+let teamProjectionSha='';
+function renderTeam(id,updateUrl=false){
+  const team=solutionTeams.find(candidate=>candidate.id===id);
+  if(!team)return;
+  $('solutionPicker').value=id;
+  const pane=$('solutionTeam');pane.replaceChildren();
+  const summary=element('div','team-summary');
+  append(summary,element('span','kicker','SOURCE-DECLARED TEAM'),element('h3','',team.title),
+    element('p','',team.challengeSlugs.join(' · ')+' · Stage: '+team.stage+' · No host grant or execution'));
+  pane.append(summary);
+  const rail=element('div','team-rail');
+  for(const member of team.members){
+    const card=element('article','team-member');
+    const body=element('div','team-member-copy');
+    append(body,element('span','team-badge',member.capabilityUses.length?'PLANNED SKILL':'DECLARED PET'),
+      element('h4','',member.displayName),
+      element('p','team-company',member.company),
+      element('p','',member.capabilityUses.length
+        ?member.capabilityUses.map(use=>use.title).join(' · ')
+        :'No peer capability planned'));
+    append(card,petAvatar(member.petId),body);
+    rail.append(card);
+  }
+  pane.append(rail);
+  const heading=element('h4','team-routes-heading','Potential peer assistance — no dispatch');
+  pane.append(heading);
+  const routes=element('ol','team-routes');
+  const anchor=team.members[0];
+  for(const peer of team.members.slice(1)){
+    const item=element('li','team-route');
+    append(item,element('strong','',anchor.company+' → '+peer.company),
+      element('span','team-badge','PROPOSED'),
+      element('p','',peer.capabilityUses.map(use=>use.purpose).join(' ')||'No declared request capability'));
+    routes.append(item);
+  }
+  if(routes.children.length)pane.append(routes);
+  else pane.append(element('p','team-no-routes','Only one pet is currently linked to this solution. No peer route is claimed.'));
+  $('teamMeta').textContent='Manifest projection SHA-256: '+shortHash(teamProjectionSha)+' · Not a signed Chibi receipt';
+  if(updateUrl){
+    const url=new URL(window.location.href);
+    url.searchParams.set('solution',id);
+    window.history.pushState(null,'',url);
+  }
+}
+async function loadSolutionTeams(){
+  const pane=$('solutionTeam'),picker=$('solutionPicker');
+  try{
+    const response=await fetch('./solution-teams.json',{cache:'no-store'});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const value=await response.json();
+    if(value.executionMode!=='declared-memberships-no-dispatch'||!Array.isArray(value.teams)
+      ||value.teams.some(team=>!Array.isArray(team.members)||!Array.isArray(team.challengeSlugs)
+        ||team.members.some(member=>typeof member.petId!=='string'||!Array.isArray(member.capabilityUses))))
+      throw new Error('Invalid non-executable team projection');
+    await verifyDigest(value,'projectionSha256');
+    solutionTeams=value.teams;
+    teamProjectionSha=value.projectionSha256;
+    picker.replaceChildren();
+    for(const team of solutionTeams){
+      const option=element('option','',team.title);option.value=team.id;picker.append(option);
+      for(const member of team.members)companions.set(member.petId,member);
+    }
+    if(!solutionTeams.length){pane.textContent='No source-declared solution teams yet.';return;}
+    picker.disabled=false;
+    const defaultTeam=solutionTeams.find(team=>team.members.length>1)??solutionTeams[0];
+    const requested=new URL(window.location.href).searchParams.get('solution');
+    renderTeam(solutionTeams.some(team=>team.id===requested)?requested:defaultTeam.id);
+    picker.addEventListener('change',()=>renderTeam(picker.value,true));
+    window.addEventListener('popstate',()=>{
+      const wanted=new URL(window.location.href).searchParams.get('solution');
+      renderTeam(solutionTeams.some(team=>team.id===wanted)?wanted:defaultTeam.id);
+    });
+  }catch(error){
+    picker.disabled=true;
+    pane.textContent='Solution teams unavailable: '+(error instanceof Error?error.message:'unknown source error');
+    $('teamMeta').textContent='The independent synthetic Council replay remains available above.';
+  }
+}
+
 async function setup(){
   $('play').addEventListener('click',play);
   $('next').addEventListener('click',()=>{stop();next();});
@@ -179,5 +261,6 @@ async function setup(){
     atlas.src='./company-mascots.png';
     notice('Deterministic fixture loaded · source commit not verified.');
   }catch(error){failure(error instanceof Error?error.message:'Unknown load error');}
+  await loadSolutionTeams(); // Independent of the synthetic trace's availability.
 }
 setup();

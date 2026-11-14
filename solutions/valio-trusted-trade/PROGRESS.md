@@ -18,6 +18,14 @@
 - Independent P1 parser reproduction resolved: decimal point/comma, negative quantity, mixed-product request, alternate/earlier deadline and appended instructions fail closed; valid single-item positive whole litres remain accepted.
 - PR #82's exact `validateSolution` function (`scripts/solution-workspace.mjs` blob `8366a973ce820ae72961af2b7fc19b49a772f29e`) executed with our `solution.json` and authentic Valio `pet.json`: **PASS**; `stage: building`.
 
+## Agent Mesh composition slice (14 November 2026)
+
+- Work ID: `junction.agent-mesh.phase2.20261114`; source base `697000c8ab5782e380dcc526fe1f1e220a78ab42` (PR #124).
+- Selected three **existing** companions in `solution.json`: Valio Aimo, Aiven and AfterQuery; capabilities and purposes are all marked `planned`.
+- Browser projection comes from the same solution manifest and pet sources, not another registry. No Chibi adoption, permission, model run or supplier connection is implied.
+- Acceptance: `node --test tests/solution-team-projection.test.mjs`, `npm run demo:council`, and PR #82 solution-workspace contract check when the shared validator lands.
+- Next: integrate product-specific peer request with Chibi's current Cedar/adoption and durable receipt paths; no live dispatch until reviewed host authority exists.
+
 ## Not yet integrated
 
 1. Sponsor-authenticated catalog/quotes/order mock: **unverified**, so no invented provider integration. Must confirm provider contract and permitted sandbox first.
