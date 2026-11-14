@@ -86,6 +86,18 @@ class QualificationContracts(unittest.TestCase):
         self.assertEqual(result["failure_mining"]["candidate_loses_worlds_v5_wins"], 1)
         self.assertFalse(result["science_gate_passed"])
 
+    def test_unsafe_shift_between_worlds_cannot_fake_zero_hazard_regression(self):
+        t, m, d = fixture()
+        # Same total hazards for all arms but different *paired* worlds.
+        d["paired_worlds"][50]["constant"]["unsafe"] = True
+        d["paired_worlds"][50]["learned_v5"]["unsafe"] = True
+        d["paired_worlds"][51]["learned_v6"]["unsafe"] = True
+        d["summaries"]["learned_v6"]["constant_unsafe"] = 1
+        d["summaries"]["learned_v6"]["candidate_unsafe"] = 1
+        result = validator.verify_dev_receipt(t, m, d, SOURCE)
+        self.assertEqual(result["failure_mining"]["candidate_new_hazard_worlds_vs_baselines"], 1)
+        self.assertFalse(result["science_gate_passed"])
+
     def test_wrong_training_window_fails_closed(self):
         t, m, d = fixture()
         t["train_first_seed"] = 129250
