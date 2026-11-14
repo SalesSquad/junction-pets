@@ -271,8 +271,11 @@ export function analyzePairedTraining(training, readout, {
   };
 }
 
-export function recommendNextCycle(verified, observation, {candidateCommit,candidateWeightsSha,nextSeedStart=515000}={}) {
+export function recommendNextCycle(verified, observation, {
+  candidateCommit,candidateWeightsSha,candidateStrategyId,nextSeedStart=515000}={}) {
   insist(SHA40.test(candidateCommit||'') && SHA64.test(candidateWeightsSha||'') &&
+    /^[a-z][a-z0-9_]{2,63}$/.test(candidateStrategyId||'') &&
+    ![...Object.keys(observation.strategyMetrics)].includes(candidateStrategyId) &&
     Number.isInteger(nextSeedStart) && nextSeedStart>=515000 && nextSeedStart+511<=2147483647,
     'NEXT_CANDIDATE_NOT_SOURCE_PINNED');
   const pastSeeds=new Set(verified.training.cohort.map(w=>w.seed));
@@ -297,11 +300,12 @@ export function recommendNextCycle(verified, observation, {candidateCommit,candi
     observedTeacherSelection:{seedIds:nearTeacherSeeds,source:'original same-world frozen V5/V6 winning TRAIN observations',
       labels:'only actual observed actions of successful frozen controls; NOT counterfactual action labels',
       candidateFailureRowsMayChangeSamplingWeights:true},
-    proposedProspective:{candidateCommit,candidateWeightsSha,nextTrainSeedStart:nextSeedStart,
+    proposedProspective:{candidateCommit,candidateWeightsSha,candidateStrategyId,
+      incumbentStrategyId:p.candidate,nextTrainSeedStart:nextSeedStart,
       seedScanRangeInclusive:[nextSeedStart,nextSeedStart+511],seedScanSha256:digest(seeds),
       initialObservationOnlySelection:{nearWorldsTarget:128,clearWorldsTarget:32,
         noClaimsAboutFutureWorldClassification:true},
-      pairedStrategies:['frozen_v5','frozen_v6','repeat_left','v8_hierarchical','v10_candidate'],
+      pairedStrategies:['frozen_v5','frozen_v6','repeat_left',p.candidate,candidateStrategyId],
       maxEpisodesIfWorldTargetsMet:800,
       rawCapturePreflight:{summaryCaptureLimitBytes:19*1024*1024,
         nextActualSummaryBytes:'unknown_until_generated',
