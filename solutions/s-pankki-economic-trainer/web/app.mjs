@@ -1,4 +1,4 @@
-import {answerQuestion, BASKETS, budgetCapacity, centsToEuros, currentMonth, latestDate, readTransactions, spendingSummary} from '../src/coach.mjs';
+import {answerQuestion, BASKETS, budgetCapacity, centsToEuros, currentMonth, latestDate, readTransactions, selectEvidenceRows, spendingSummary} from '../src/coach.mjs';
 import {syntheticRows} from '../src/demo-data.mjs';
 
 const $ = (id) => document.getElementById(id);
@@ -58,10 +58,11 @@ function renderTransactions(highlight = []) {
   const tbody = $('transaction-rows');
   const highlights = new Set(highlight);
   tbody.replaceChildren();
-  const visibleRows = transactions.slice().reverse().slice(0, 150);
-  $('row-count').textContent = `${visibleRows.length} / ${transactions.length} ROWS`;
+  const visibleRows = selectEvidenceRows(transactions, highlight);
+  $('row-count').textContent = `${visibleRows.length} / ${transactions.length} ROWS (CITED ROWS ALWAYS INCLUDED)`;
   for (const x of visibleRows) {
     const tr = document.createElement('tr');
+    tr.id = `source-row-${x.row}`;
     if (highlights.has(x.row)) tr.className = 'highlight-row';
     tr.append(textElement('td', 'source-row', `#${x.row}`));
     tr.append(textElement('td', '', x.date));
@@ -84,7 +85,8 @@ function renderAnswer(question) {
   area.append(textElement('p', 'answer-text', answer.message));
   if (answer.type === 'budget') {
     const x = answer.result;
-    area.append(textElement('div', 'answer-note', `Observed ${centsToEuros(x.balanceCents)} − regular ${centsToEuros(x.reserves.regularBills)} − irregular ${centsToEuros(x.reserves.irregularBuffer)} − emergency ${centsToEuros(x.reserves.emergencyBuffer)} = ${centsToEuros(x.availableCents)}. ${x.caveat}`));
+    const gap = x.shortfallCents > 0 ? ` Reserves exceed observed balances by ${centsToEuros(x.shortfallCents)}; illustrative spending room is zero.` : '';
+    area.append(textElement('div', 'answer-note', `max(0, observed ${centsToEuros(x.balanceCents)} − regular ${centsToEuros(x.reserves.regularBills)} − irregular ${centsToEuros(x.reserves.irregularBuffer)} − emergency ${centsToEuros(x.reserves.emergencyBuffer)}) = ${centsToEuros(x.availableCents)}.${gap} ${x.caveat}`));
   } else if (answer.type !== 'refusal') {
     area.append(textElement('div', 'answer-note', 'Derived from the local historical dataset. Transfers are excluded, refunds offset recognised spending, and unknown categories remain explicitly unclassified.'));
   }
@@ -93,8 +95,8 @@ function renderAnswer(question) {
     sourceList.setAttribute('aria-label', 'Cited transaction row numbers');
     for (const row of answer.sources.slice(0, 30)) {
       const a = textElement('a', 'source-pill', `CSV #${row}`);
-      a.href = '#evidence';
-      a.title = 'Find the source row in the evidence explorer';
+      a.href = `#source-row-${row}`;
+      a.title = `Jump to source row ${row} in the evidence explorer`;
       sourceList.append(a);
     }
     if (answer.sources.length > 30) sourceList.append(textElement('span', 'source-pill', `+${answer.sources.length - 30} additional rows`));

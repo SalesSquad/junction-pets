@@ -2,7 +2,7 @@
 // The application never connects to a bank, initiates a payment or calls a model.
 
 const requiredColumns = [
-  'customer_id', 'bank_account_id', 'tx_date', 'category',
+  'customer_id', 'bank_account_id', 'tx_date', 'tx_timestamp', 'category',
   'tx_amount_eur', 'balance_after_eur', 'transaction_type',
 ];
 
@@ -63,6 +63,21 @@ function validDay(day) {
   return !Number.isNaN(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === day;
 }
 
+export function parseTransactionTimestamp(value) {
+  const raw = String(value ?? '').trim();
+  const match = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2}):(\d{2})(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})?$/i.exec(raw);
+  if (!match || !validDay(match[1]) || Number(match[2]) > 23 || Number(match[3]) > 59 || Number(match[4]) > 59) {
+    throw new Error('Invalid transaction timestamp: expected YYYY-MM-DD HH:MM:SS with optional timezone');
+  }
+  const iso = raw.replace(' ', 'T');
+  // Sponsor timestamps without timezone are interpreted as UTC for deterministic
+  // chronology; never infer a missing bank timezone or local device timezone.
+  const withZone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(iso) ? iso : `${iso}Z`;
+  const epoch = Date.parse(withZone);
+  if (!Number.isFinite(epoch)) throw new Error('Invalid transaction timestamp offset');
+  return epoch;
+}
+
 export function readTransactions(rows) {
   if (!Array.isArray(rows) || rows.length === 0) throw new Error('Provide at least one synthetic transaction');
   const parsed = rows.map((row, index) => {
@@ -71,6 +86,7 @@ export function readTransactions(rows) {
     const customerId = String(row.customer_id);
     const accountId = String(row.bank_account_id);
     if (!customerId || !accountId) throw new Error('Missing customer or account ID');
+    const timestampMs = parseTransactionTimestamp(row.tx_timestamp);
     const cents = eurosToCents(row.tx_amount_eur);
     const balanceCents = eurosToCents(row.balance_after_eur);
     const classification = categoryRules.get(normalise(row.category)) ?? ['unclassified', String(row.category).slice(0, 42)];
@@ -80,7 +96,7 @@ export function readTransactions(rows) {
     const amountCents = basket === 'non-spending' ? 0 : cents < 0 ? -cents : refund ? -cents : 0;
     return {
       row: Number(row.sourceLine) || index + 2, // CSV line number; row 1 is the header.
-      customerId, accountId, date: String(row.tx_date),
+      customerId, accountId, date: String(row.tx_date), timestampMs,
       category: String(row.category).slice(0, 80), basket,
       group: classification[1], amountCents, changeCents: cents,
       balanceCents, transactionType: String(row.transaction_type).slice(0, 60),
@@ -89,7 +105,21 @@ export function readTransactions(rows) {
   });
   const customerIds = new Set(parsed.map(x => x.customerId));
   if (customerIds.size !== 1) throw new Error('Multiple customers: select one synthetic customer before loading');
-  return parsed.sort((a, b) => a.date.localeCompare(b.date) || a.row - b.row);
+  if (new Set(parsed.map(x => x.row)).size !== parsed.length) throw new Error('Duplicate source CSV row: provenance would be ambiguous');
+  return parsed.sort((a, b) => a.date.localeCompare(b.date) || a.timestampMs - b.timestampMs || a.row - b.row);
+}
+
+// Keep the evidence explorer bounded while guaranteeing every displayed citation
+// has an actual rendered target, even if the row is older than the latest page.
+export function selectEvidenceRows(rows, citedRows = [], recentLimit = 150, citationLimit = 30) {
+  const recent = rows.slice(-recentLimit).reverse();
+  const visible = new Set(recent.map(x => x.row));
+  for (const rowId of citedRows.slice(0, citationLimit)) {
+    if (visible.has(rowId)) continue;
+    const original = rows.find(x => x.row === rowId);
+    if (original) { recent.push(original); visible.add(rowId); }
+  }
+  return recent;
 }
 
 export function latestDate(rows) {
@@ -118,14 +148,25 @@ export function spendingSummary(rows, month = currentMonth(rows)) {
 }
 
 function latestBalanceByAccount(rows) {
-  const accounts = new Map();
+  const byAccount = new Map();
   for (const row of rows) {
-    const existing = accounts.get(row.accountId);
-    if (!existing || existing.date < row.date || (existing.date === row.date && existing.row < row.row)) {
-      accounts.set(row.accountId, {balanceCents: row.balanceCents, date: row.date, row: row.row});
-    }
+    const group = byAccount.get(row.accountId) ?? [];
+    group.push(row);
+    byAccount.set(row.accountId, group);
   }
-  return [...accounts.values()];
+  const latest = [];
+  for (const [accountId, group] of byAccount) {
+    const lastTimestampMs = group.reduce((latestMs, x) => Math.max(latestMs, x.timestampMs), -Infinity);
+    const candidates = group.filter(x => x.timestampMs === lastTimestampMs);
+    if (new Set(candidates.map(x => x.balanceCents)).size > 1) {
+      throw new Error(`Ambiguous latest balance for account ${accountId}: same timestamp, different balances`);
+    }
+    // Identical timestamps AND identical balances: use the greatest CSV row
+    // only as a deterministic citation, not as an assertion of later time.
+    const chosen = candidates.reduce((a, b) => b.row > a.row ? b : a);
+    latest.push({balanceCents: chosen.balanceCents, date: chosen.date, timestampMs: chosen.timestampMs, row: chosen.row});
+  }
+  return latest;
 }
 
 export function budgetCapacity(rows, assumptions = {}) {
@@ -138,7 +179,9 @@ export function budgetCapacity(rows, assumptions = {}) {
   if (!Number.isSafeInteger(balanceCents) || !Number.isSafeInteger(reserveCents)) throw new Error('Unsafe total');
   return {
     illustrationOnly: true, balanceCents, reserveCents,
+    netAfterReservesCents: balanceCents - reserveCents,
     availableCents: Math.max(0, balanceCents - reserveCents),
+    shortfallCents: Math.max(0, reserveCents - balanceCents),
     accountBalanceSources: accountBalances.map(x => x.row),
     asOf: latestDate(rows), reserves: {regularBills: reserves[0], irregularBuffer: reserves[1], emergencyBuffer: reserves[2]},
     caveat: 'Illustrative only. The CSV snapshot does not include pending card holds, future income, upcoming bills or real-time balances; not a spending guarantee.',

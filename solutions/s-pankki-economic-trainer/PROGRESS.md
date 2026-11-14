@@ -4,7 +4,7 @@
 
 **Task owner:** S-Pankki product slice writer, exclusive ownership `solutions/s-pankki-economic-trainer/**`. Repo task admission base was `7b80fee6aad03e145a8197be4482842e07a09e40`; refreshed commit after docs-only #79 main merge: `bb1f50908e05ada32e947abff86ac5e31e82e22d`; re-resolve current main/PR state before continuing.
 
-**Implemented:** deterministic transaction/cents engine, named three-basket classification, refund/transfer treatment, explicit reserves, evidence rows, adversarial refusals; sponsor CSV BOM/LFS-aware per-customer streaming importer; mobile-first local browser UI. Fictional demonstration dataset is clearly labeled.
+**Implemented:** deterministic transaction/cents engine, named three-basket classification, refund/transfer treatment, explicit reserves and shortfall, timestamp-ranked account balances with tied-latest ambiguity refusal, evidence rows, adversarial refusals; sponsor CSV BOM/LFS-aware per-customer streaming importer; mobile-first local browser UI. Fictional demonstration dataset is clearly labeled.
 
 **Acceptance commands:** `node --test tests/coach.test.mjs`, `node server.mjs` and browser `http://127.0.0.1:4173` with 3 sample questions, one reserve adjustment and one refused unsupported instruction.
 

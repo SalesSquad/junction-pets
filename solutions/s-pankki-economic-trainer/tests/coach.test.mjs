@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp, writeFile, rm} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
-import {answerQuestion, budgetCapacity, centsToEuros, eurosToCents, monthBefore, readTransactions, spendingSummary} from '../src/coach.mjs';
+import {answerQuestion, budgetCapacity, centsToEuros, eurosToCents, monthBefore, parseTransactionTimestamp, readTransactions, selectEvidenceRows, spendingSummary} from '../src/coach.mjs';
 import {syntheticRows} from '../src/demo-data.mjs';
 import {parseCsvLine, selectCustomer} from '../src/import-sponsor.mjs';
 
@@ -20,8 +20,20 @@ test('exact cents: decimal and comma, never floating point cents', () => {
 
 test('schema rejects missing date, impossible calendar and mixed customers', () => {
   assert.throws(() => readTransactions([{...syntheticRows[0], tx_date: '2026-02-30'}]), /Invalid transaction date/);
+  assert.throws(() => readTransactions([{...syntheticRows[0], tx_timestamp: '2026-02-30T09:00:00Z'}]), /Invalid transaction timestamp/);
+  assert.throws(() => readTransactions([{...syntheticRows[0], tx_timestamp: undefined}]), /Missing tx_timestamp/);
   assert.throws(() => readTransactions([{...syntheticRows[0], category: null}]), /Missing category/);
   assert.throws(() => readTransactions([{...syntheticRows[0]}, {...syntheticRows[1], customer_id: 'OTHER'}]), /Multiple customers/);
+  assert.throws(() => readTransactions([{...syntheticRows[0], sourceLine: 200}, {...syntheticRows[1], sourceLine: 200}]), /Duplicate source CSV row/);
+});
+
+test('P2: citations outside latest 150 rows remain visible and linkable in the evidence explorer', () => {
+  const many = readTransactions(Array.from({length: 220}, (_, i) => ({...syntheticRows[0], sourceLine: i + 2})));
+  const visible = selectEvidenceRows(many, [2, 5, 221]);
+  assert.equal(visible.length, 152);
+  assert.deepEqual(visible.slice(-2).map(x => x.row), [2, 5]);
+  assert(visible.some(x => x.row === 221));
+  assert.equal(new Set(visible.map(x => x.row)).size, visible.length);
 });
 
 test('money baskets and source row claims are deterministic', () => {
@@ -54,6 +66,8 @@ test('most recent balance per account is used once with explicit reserve arithme
   assert.equal(result.reserveCents, 62000);
   assert.equal(result.availableCents, 325745);
   assert.deepEqual(result.accountBalanceSources, [17, 14]);
+  assert.equal(result.shortfallCents, 0);
+  assert.equal(result.netAfterReservesCents, 325745);
   assert.match(result.caveat, /not a spending guarantee/i);
 });
 
@@ -61,6 +75,32 @@ test('reserve controls never allow negative reserves or unsupported arithmetic',
   assert.throws(() => budgetCapacity(rows, {regularBills: '-1', irregularBuffer: '0', emergencyBuffer: '0'}), /negative/);
   const conservative = budgetCapacity(rows, {regularBills: '9999.99', irregularBuffer: '0', emergencyBuffer: '0'});
   assert.equal(conservative.availableCents, 0);
+  assert.equal(conservative.netAfterReservesCents, 387745 - 999999);
+  assert.equal(conservative.shortfallCents, 999999 - 387745);
+});
+
+test('P1: latest timestamp wins even if a later CSV row contains an older same-day balance', () => {
+  const observed = readTransactions([
+    {...syntheticRows[0], sourceLine: 101, tx_date: '2026-11-14', tx_timestamp: '2026-11-14T23:00:00Z', balance_after_eur: '100.00'},
+    {...syntheticRows[0], sourceLine: 102, tx_date: '2026-11-14', tx_timestamp: '2026-11-14T09:00:00Z', balance_after_eur: '200.00'},
+  ]);
+  const capacity = budgetCapacity(observed, {regularBills: '0', irregularBuffer: '0', emergencyBuffer: '0'});
+  assert.equal(capacity.balanceCents, 10000);
+  assert.deepEqual(capacity.accountBalanceSources, [101]);
+});
+
+test('P1: conflicting latest identical timestamps refuse capacity, consistent ties cite deterministic CSV row', () => {
+  const first = {...syntheticRows[0], sourceLine: 101, tx_timestamp: '2026-11-14 23:00:00', tx_date: '2026-11-14', balance_after_eur: '100.00'};
+  const conflicting = {...first, sourceLine: 102, balance_after_eur: '200.00'};
+  assert.throws(() => budgetCapacity(readTransactions([first, conflicting])), /Ambiguous latest balance/);
+  const consistent = {...first, sourceLine: 103};
+  assert.deepEqual(budgetCapacity(readTransactions([first, consistent])).accountBalanceSources, [103]);
+});
+
+test('P1: timestamp timezone normalization is explicit and independent of source row order', () => {
+  assert.equal(parseTransactionTimestamp('2026-11-14 23:00:00'), parseTransactionTimestamp('2026-11-14T23:00:00Z'));
+  assert.equal(parseTransactionTimestamp('2026-11-15T01:00:00+02:00'), parseTransactionTimestamp('2026-11-14T23:00:00Z'));
+  assert.throws(() => parseTransactionTimestamp('2026-11-14T25:00:00Z'), /Invalid transaction timestamp/);
 });
 
 test('specific question cites exact taxi rows', () => {
