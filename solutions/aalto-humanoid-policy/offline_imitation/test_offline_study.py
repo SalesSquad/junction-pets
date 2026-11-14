@@ -151,6 +151,14 @@ class MetadataGuard(unittest.TestCase):
 
 
 class VisionHelpers(unittest.TestCase):
+    def test_video_hashes_change_resume_fingerprint(self):
+        source = {"parquet_sha256": {"data/file.parquet": "pinned"}, "info_sha256": "metadata"}
+        indices = np.array([0, 6, 12], dtype=np.int64)
+        first = v.progress_fingerprint(source, indices, 6, 80, {"videos/cam/file.mp4": "aaa"})
+        altered = v.progress_fingerprint(source, indices, 6, 80, {"videos/cam/file.mp4": "bbb"})
+        self.assertNotEqual(first, altered)
+        self.assertEqual(first["video_sha256"], {"videos/cam/file.mp4": "aaa"})
+
     def test_episode_uniform_frame_selection(self):
         ep = np.repeat(np.arange(20), 30)
         frame = np.tile(np.arange(30), 20)
