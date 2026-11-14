@@ -2,7 +2,7 @@
   "schema": "junction.meta.dat-mock.verification/v1",
   "work_id": "junction.meta.dat-mock-20261114",
   "base_commit": "82f17099ae1d52efde6661e69f7ea5e38fdcd407",
-  "code_commit": "b98256562beaa4b701c3de150035f7bebeedc75a",
+  "code_commit": "57959dbd175f65bf3f7cc28cac56bfc2c20ee05b",
   "dirty_baseline": "clean",
   "owned_paths": [
     "apps/meta-lens-apple/DATMockApp",
@@ -358,21 +358,77 @@
       "evidence": "evidence/20261114-continuation/diagnostic-source-review.json",
       "evidence_sha256": "cdf90e73e768647074e491aae7ef38b4cd4a2daa907380ca1e8f6e2c8aac32a2",
       "scope": "Root read the complete bounded public-state diagnostic delta before commit and execution; no P1/P2 finding, not runtime qualification."
+    },
+    {
+      "name": "exact-mock automatic selector independent review",
+      "result": "pass",
+      "source_commit": "57959dbd175f65bf3f7cc28cac56bfc2c20ee05b",
+      "evidence": "evidence/20261114-continuation/auto-selector-source-review.json",
+      "evidence_sha256": "159ce3bd501963d5abfebf53a23e8d8a766a8f926a25b6e032b32c67edb0b5b0",
+      "scope": "Root reviewed the complete control diff; independent SDK reviewer verified the pinned Sendable exact-ID filter contract. Existing test predicates, deadlines, permission, epoch and cancellation guards are unchanged."
+    },
+    {
+      "name": "exact-mock automatic selector iOS build-for-testing",
+      "result": "pass",
+      "source_commit": "57959dbd175f65bf3f7cc28cac56bfc2c20ee05b",
+      "receipt": "lens-dat-auto-20261114-04",
+      "executor": "authorized MacBook Pro Xcode27.2 27B52; official Meta DAT1.0.1; iOS27.2 Simulator",
+      "elapsed_seconds": 32.426,
+      "log_sha256": "f01de0eee8f82f2ea372b444e4a29f9fa0205abaf70284ba969a74a5e2ebb7e8",
+      "completed_at": "2026-11-14T13:11:54.898485+00:00"
+    },
+    {
+      "name": "actual SDK frame/OCR/revoke/permission-loss/restart/disconnect acceptance",
+      "result": "pass",
+      "source_commit": "57959dbd175f65bf3f7cc28cac56bfc2c20ee05b",
+      "receipt": "lens-dat-auto-20261114-04",
+      "tests": 1,
+      "failures": 0,
+      "test_seconds": 6.731,
+      "xcodebuild_exit": 0,
+      "xcodebuild_seconds": 118.72,
+      "log_sha256": "25771090f2a6c2cb0cd96179e9b753aff9a6a9ea40d5dd48e9d99e88d04ccbfc",
+      "execution_sha256": "f6d8f511f6fdc241a27b39792b5e10da33334c1dba46ecd3ea340a05fdf1a94e",
+      "command_receipt_sha256": "64e74cdb6031cbed48b9d265bbf60c013eb6924bd4f77f0efa7e1b89fc477c9b",
+      "evidence_root": "/Users/mikaelervamaa/Developer/meta-dat-auto-control-20261114",
+      "repository_evidence": {
+        "execution": "evidence/20261114-continuation/auto-execution.json",
+        "xctest_log": "evidence/20261114-continuation/auto-xctest.log"
+      },
+      "xcresult": "Integration.xcresult",
+      "completed_at": "2026-11-14T13:14:28.180081+00:00",
+      "accepted": [
+        "Consent denial does not start capture.",
+        "Immediate revoke cancels queued SDK activation and removes imported media.",
+        "Official SDK video frames reach the adapter and local Vision recognizes CHARGER.",
+        "Frame timestamp and 64-character SHA-256 diagnostic are present.",
+        "Revoke clears preview/text and prevents late admitted frames during the assertion window.",
+        "Explicit restart delivers frames again.",
+        "Mock SDK camera permission loss stops capture and clears preview/text.",
+        "A further explicit restart delivers frames; simulated disconnect stops capture and clears preview/text.",
+        "Cleanup finishes after every exercised stop."
+      ],
+      "scope": "Actual official SDK and Vision execution with owned mock-video pixels on iOS Simulator. Does not qualify physical glasses, phone camera, imported-video UI, production host/memory or release. The successful control does not prove a specific internal SDK bug.",
+      "source_identity_consistent": true,
+      "cleanup": {
+        "shutdownExit": 0,
+        "deleteExit": 0,
+        "ownedSimulatorAbsent": true
+      }
     }
   ],
   "not_verified": [
-    "SDK frame/OCR/revoke/disconnect acceptance pass on simulator",
     "Imported-video UX on a running app",
     "Real Meta glasses or phone camera",
     "Chibi host admission or privileged execution",
     "Signed/released iOS app"
   ],
-  "preserved": "All prior source, failed native runs, raw logs, execution records and xcresults remain preserved on the executing Macs. Both continuation execution.json and xctest.log files were copied byte-for-byte to the shared workspace and hash-verified. Original unpublished local1b6f442 remains on its original branch; no daemon or recurring job was added.",
-  "next_action": "Independently review one official-sample-aligned AutoDeviceSelector control with a Sendable filter capturing only the immutable owned mock ID. Retain exact-ID stream/snapshot guards and all existing watchdog, epoch, cancellation and test conditions. The public sample does not document a separate compatibility-ready wait; do not add one or overwrite unknown states. Admit at most one bounded comparison after exact source/filter review.",
+  "preserved": "All original failed runs and the successful control remain retained with exact source/file/product hashes, raw logs, execution JSON and xcresults. All four continuation execution JSON and raw XCTest logs are committed under evidence/20261114-continuation, with independent reviews. The original unpublished local1b6f442 stays on its original branch and has an additional preserved format-patch export.",
+  "next_action": "Integrator finalizes PR75 review/metadata with this source-bound mock acceptance. Physical glasses, real-device permissions, imported-video UI and production Chibi admission/memory remain separate qualification work. Do not repeat this unchanged passing simulator case solely for another evidence-only commit.",
   "recorded_at": "2026-11-14T00:44:33.046651+00:00",
-  "previous_code_commit": "1cc880481dac80fdd4249d4b5fad23cdd0747c7f",
-  "latest_native_test_source_commit": "b98256562beaa4b701c3de150035f7bebeedc75a",
-  "current_native_status": "failed_session_start_with_registered_connected_exact_mock_and_undefined_compatibility",
+  "previous_code_commit": "b98256562beaa4b701c3de150035f7bebeedc75a",
+  "latest_native_test_source_commit": "57959dbd175f65bf3f7cc28cac56bfc2c20ee05b",
+  "current_native_status": "passed_mock_frame_ocr_revoke_permission_loss_restart_disconnect",
   "source_preservation": {
     "original_diagnostic_local_commit": "1b6f442ad8075f0ff7093a152f0f5d5b3da2a5f3",
     "original_local_branch": "codex/meta-next-dat-simulator-signing-20261114",
@@ -407,33 +463,43 @@
     }
   ],
   "cleanup": {
-    "owned_simulators": "All three continuation-owned simulators shut down/deleted with exit0; absence verified after each run. Earlier records remain preserved.",
-    "native_processes": "All three continuation builds/tests completed. No selector-control test has been dispatched.",
-    "retained_idle_session": "meta-next-dat-20261114 (original preserved work) and meta-dat-accept-20261114 (current receipt runner) retained pending bounded diagnostic continuation.",
+    "owned_simulators": "All four continuation-owned simulators shut down/deleted with exit0; each absence verified. Earlier native evidence remains preserved.",
+    "native_processes": "All four continuation builds/tests completed; no further native command is queued.",
+    "retained_idle_session": "Idle meta-next-dat-20261114 and meta-dat-accept-20261114 are closed during final handoff after this evidence is pushed.",
     "ancestor_session": "Untouched.",
     "mini_ssh_probe": "Ended; PID absence verified. No authentication or permissions changed.",
-    "retained_checkouts": "Clean native source, exact pinned SDK and built products retained for pending qualification; original unpushed diagnostic commit preserved."
+    "retained_checkouts": "Keep native checkout, pinned SDK, built products and xcresults: they preserve original unpublished1b6f442, historical failures and the reproducible passing products. No task worktree or prior evidence is deleted."
   },
-  "updated_at": "2026-11-14T13:07:53.888Z",
+  "updated_at": "2026-11-14T13:21:39.334Z",
   "metrics": {
-    "actual_xctest_cases_this_continuation": 6,
-    "passed_cases": 0,
+    "actual_xctest_cases_this_continuation": 7,
+    "passed_cases": 1,
     "failed_cases": 6,
-    "incremental_harness_builds": 5,
+    "incremental_harness_builds": 6,
     "full_suites_repeated": 0,
     "provider_allocations": 0,
     "monetary_cost": null,
     "tool_call_count": null,
     "unknowns": "No aggregate connector/model billing or complete call counter was available.",
     "this_resume": {
-      "actual_xctest_cases": 3,
-      "passed_cases": 0,
+      "actual_xctest_cases": 4,
+      "passed_cases": 1,
       "failed_cases": 3,
       "failure_records": 6,
-      "incremental_builds": 3,
+      "incremental_builds": 4,
       "full_suites_repeated": 0,
       "new_provider_allocations": 0
     }
   },
-  "integration_main_commit": "b031515acda42b816f9d36d81686a1d4543d4f4f"
+  "integration_main_commit": "b031515acda42b816f9d36d81686a1d4543d4f4f",
+  "final_source_sha256": {
+    "apps/meta-lens-apple/DATMockApp/.gitignore": "2e559d4458399631f6ef2f32b25ee4c90b316019cfb72e454d7dcb15165223b3",
+    "apps/meta-lens-apple/DATMockApp/Info.plist": "ecd87a2de11729300a6c61cbea2a85f984af245095d42a67931ed5526626390e",
+    "apps/meta-lens-apple/DATMockApp/Resources/charger-label.mp4": "37586605e337086e3fc35867ede03c6f48e863bfea2e239bce0890a5be25d8ec",
+    "apps/meta-lens-apple/DATMockApp/Tests/DATIntegrationTests.swift": "7d08dc9e0ebda93ad5f8b2e1bb434d5612a00e437422669742757ea41cb6e479",
+    "apps/meta-lens-apple/DATMockApp/scripts/generate_project.py": "7edef2645b2aae526c17658622b567cfc2c6fe108645942341560468889002a1",
+    "apps/meta-lens-apple/DATMockApp/scripts/generate_video.py": "3ed906bd15c078fab9189afe6d9f2c14b44c90d0758e1e65eb47165537b649bc",
+    "apps/meta-lens-apple/DATMockApp/Sources/DATCaptureModel.swift": "a848d18eaaea2c9b9a124eebd4f9bf13d0454f7a4aeddc243d2dad5a04904b43",
+    "apps/meta-lens-apple/DATMockApp/Sources/ChibiDATMockApp.swift": "6374568b2d7c1fde66debb9fa99ce4ccd133221f88f4c491a1138d559595dc10"
+  }
 }

@@ -60,42 +60,35 @@ generation fence also has focused tests in `ChibiLensCoreTests`.
 
 ## Observed verification — 14 November 2026
 
-The official SDK harness builds on Xcode 27.2. The historical bootstrap failure
-was repaired with simulator-only ad-hoc signing at `eb2fca3`; all original
-failures and raw evidence remain preserved.
+**The official SDK mock-video acceptance passes at `57959db`: one actual XCTest
+case, zero failures, 6.731 seconds.** The app/test build passes on Xcode 27.2
+with pinned Meta DAT 1.0.1 and an owned iOS 27.2 simulator.
 
-On the restored MacBook Pro, the discovery repair at `1128b6d` built successfully
-and ran the unchanged, single real-SDK acceptance case. The case failed before
-streaming: `configured=true`, zero admitted frames and
-`Starting Meta test session: No eligible device available`.
+The unchanged acceptance conditions require actual SDK video frames, local
+Vision recognition of `CHARGER`, a timestamp and frame digest, then revoke and
+clear, no late admitted frames, explicit restart, SDK camera permission loss,
+another restart and simulated disconnect. All of these conditions completed.
+The source is an owned generated video delivered through MockDeviceKit; real
+glasses, a phone camera and production capture remain unqualified.
 
-A bounded follow-up at `1cc8804` also waits for the exact mock ID in the selector's
-active-device stream and rechecks its snapshot before starting the session.
-This version passed an independent source review and an actual SDK build.
-Its same acceptance case still failed at `session.start()` with the same error
-and zero frames. Discovery and selector presence alone therefore do not
-establish session eligibility. No acceptance condition, deadline or SDK pin
-was relaxed.
+The passing adapter uses the official sample's `AutoDeviceSelector` path,
+with a Sendable filter that captures only the immutable owned mock identifier.
+Existing exact-ID stream/snapshot checks, epoch fencing, cancellation, the
+20-second watchdog and all test conditions remain in place. It does not wait
+for or invent a `.compatible` state.
 
-All three continuation runs executed one XCTest case; each reported two failure
-records from the timed-out condition and thrown diagnostic error. Their exact
-source, build/test log hashes and cleanup receipts are in
-[the verification record](VERIFICATION.json). All three owned simulators were
-shut down and removed. The original local diagnostic commit `1b6f442` remains
-preserved on its original branch.
+Three earlier continuation cases failed before streaming at `session.start()`
+with `No eligible device available` and zero frames. The diagnostic case showed
+connected/registered state and exact selector/session IDs while compatibility,
+don and hinge metadata were undefined/unknown. Those failed runs remain
+preserved alongside this pass. The comparison does not establish a particular
+internal SDK defect.
 
-The diagnostic-only follow-up at `b982565` also built, then failed the same
-case. Both the pre-start and catch snapshots show `link=connected`, registered
-state, exact selector/session IDs and the correct application bundle, but
-`compatibility=undefined`, `don=unknown` and `hinge=unknown`. These are actual
-public SDK observations, not proof of an SDK defect or all internal eligibility.
-
-The official sample uses `AutoDeviceSelector`. A proposed control keeps that
-selector restricted to the immutable owned mock ID and retains the current
-exact-ID guards. It requires independent source/filter review before one
-bounded comparison. The public sample does not document a separate
-`.compatible` wait; no such wait or fabricated ready state has been added.
-No physical-glasses, frame/OCR or production acceptance pass is claimed.
+[The verification record](VERIFICATION.json) binds every run to its source,
+commands, file/product hashes, raw XCTest log and independent review. All four
+continuation cases used the same acceptance predicates and deadlines; only
+bounded failure diagnostics changed. All four owned simulators were shut down
+and removed. Original local diagnostic commit `1b6f442` remains preserved.
 
 ## Lifecycle and trust
 
