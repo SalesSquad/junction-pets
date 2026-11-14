@@ -13,6 +13,7 @@ import {createOwnedCluster,startOwnedCluster,sigkillOwnedPostmaster,
   recoverySignals,closeOwnedCluster} from './cluster.mjs';
 import {captureOwnedPgFailure,redactPgLine} from './forensics.mjs';
 import {guardPgPool} from './pg-faults.mjs';
+import {auditInterruptedFlights} from './flight-outcomes.mjs';
 
 const workerPath=fileURLToPath(new URL('./flight-worker.mjs',import.meta.url));
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -35,7 +36,8 @@ async function spawnOwnedWorker(dsn,schema) {
   });
   child.once('error',rejectAll);
   child.once('exit',(code,signal)=>{
-    const err=Object.assign(new Error(`Owned test worker stopped: ${code??signal}`),{exitCode:code});
+    const err=Object.assign(new Error(`Owned test worker stopped: ${code??signal}`),
+      {exitCode:code,exitSignal:signal});
     rejectAll(err);
   });
   await ready;
@@ -202,7 +204,8 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     failureStage='SIGKILL_OWNED_POSTMASTER';
     const crash=await sigkillOwnedPostmaster(c);
     for(const w of workers)w.kill();
-    await interruptedOutcomes;
+    const interrupted=await interruptedOutcomes;
+    const interruptedFlightAudit=auditInterruptedFlights(interrupted,workers);
     const unexpectedFlightErrors=workers.flatMap(w=>w.faults.filter(f=>!f.expected));
     assert(unexpectedFlightErrors.length===0,'A flight worker reported non-disconnect PostgreSQL errors during SIGKILL.');
     workers=[];
@@ -280,6 +283,7 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
         observedBackendPids:observedPgSleep.pids,
         matchedFlightIds:observedPgSleep.matchedFlightIds,
         insertQueryMatched:observedPgSleep.queryMatched,
+        interruptedFlightAudit,
         handledExpectedPgDisconnectEvents:controllerPgFaults.filter(f=>f.expected).length,
         ...crash,walRecoverySignals:signals},
       recovery:{priorConfirmedCommits:2,ambiguousCommittedNoAck:1,
