@@ -7,6 +7,7 @@ import {report,aggregate} from './stress/report.mjs';
 let robustness;
 const stressAggregate=()=>robustness??=(report().then(aggregate));
 const files=new Map([['/',['index.html','text/html']],['/style.css',['style.css','text/css']],['/app.mjs',['app.mjs','text/javascript']],['/detector.mjs',['detector.mjs','text/javascript']],['/scenarios.mjs',['scenarios.mjs','text/javascript']],['/generator.mjs',['generator.mjs','text/javascript']]]);
+for(const [path,type] of [['index.html','text/html'],['app.mjs','text/javascript'],['core.mjs','text/javascript'],['style.css','text/css']])files.set('/traffic/'+path,['traffic/'+path,type]);
 export function createServer() {return http.createServer(async(req,res)=>{
  const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"};
  if(!['GET','HEAD'].includes(req.method)){res.writeHead(405,{...headers,Allow:'GET, HEAD'});res.end();return;}
