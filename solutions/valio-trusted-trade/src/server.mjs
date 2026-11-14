@@ -67,7 +67,7 @@ export function createTradeHttpServer(service = createTradeService()) {
         if (payload.buyerId !== undefined && payload.buyerId !== sessions.get(token)) throw new TradeError('BUYER_MISMATCH', 'Capability does not match buyer.', 403);
         const boundQuote = url.pathname.match(/^\/api\/quotes\/([^/]+)\/(?:approval|offer|handshake)$/)?.[1] ?? payload.quoteId;
         const boundPlan = url.pathname.match(/^\/api\/plans\/([^/]+)\/(?:quotes|recover)$/)?.[1];
-        const boundOrder = url.pathname.match(/^\/api\/orders\/([^/]+)\/cancel$/)?.[1];
+        const boundOrder = url.pathname.match(/^\/api\/orders\/([^/]+)\/(?:cancel|payment-approval|settlement)$/)?.[1];
         if ((boundQuote && quoteOwners.get(boundQuote) !== token) || (boundOrder && orderOwners.get(boundOrder) !== token) ||
             (boundPlan && planOwners.get(boundPlan) !== token)) throw new TradeError('BUYER_MISMATCH', 'This demo session does not own these terms.', 403);
         request.demoPayload = payload;
@@ -87,6 +87,13 @@ export function createTradeHttpServer(service = createTradeService()) {
         return send(200, { mode: 'INVENTED_FIXTURE', products: items.filter((item) => `${item.name} ${item.sku}`.toLowerCase().includes(needle)) });
       }
       if (request.method === 'GET' && url.pathname === '/api/policy') return send(200, service.policy());
+      if (request.method === 'GET' && ['/api/demo/wallet', '/api/demo/ledger/verify', '/api/demo/ledger'].includes(url.pathname)) {
+        const buyerToken = request.headers.authorization?.replace(/^Bearer /, '');
+        if (!sessions.has(buyerToken)) throw new TradeError('BUYER_CAPABILITY_REQUIRED', 'Synthetic wallet requires a demo buyer session.', 403);
+        if (url.pathname === '/api/demo/wallet') return send(200, { wallet: service.demoWallet() });
+        if (url.pathname === '/api/demo/ledger/verify') return send(200, service.paymentJournalVerify());
+        return send(200, { entries: service.paymentJournal(), mode: 'IN_MEMORY_SYNTHETIC' });
+      }
       if (request.method === 'GET' && url.pathname === '/api/audit') return send(200, { receipts: service.audit() });
       if (request.method === 'GET' && url.pathname === '/api/audit/verify') return send(200, service.auditVerify());
       if (request.method === 'POST' && url.pathname === '/api/trust/buyer-key') {
@@ -166,6 +173,18 @@ export function createTradeHttpServer(service = createTradeService()) {
       }
       const cancel = url.pathname.match(/^\/api\/orders\/([^/]+)\/cancel$/);
       if (request.method === 'POST' && cancel) return send(200, { order: service.cancelOrder({ ...request.demoPayload, orderId: cancel[1] }) });
+      const paymentApproval = url.pathname.match(/^\/api\/orders\/([^/]+)\/payment-approval$/);
+      if (request.method === 'POST' && paymentApproval) return send(200, service.approvePayment({ ...request.demoPayload, orderId: paymentApproval[1] }));
+      const settlement = url.pathname.match(/^\/api\/orders\/([^/]+)\/settlement$/);
+      if (request.method === 'POST' && settlement) return send(201, service.settlePayment({ ...request.demoPayload, orderId: settlement[1] }));
+      const paymentRead = url.pathname.match(/^\/api\/orders\/([^/]+)\/payment$/);
+      if (request.method === 'GET' && paymentRead) {
+        const buyerToken = request.headers.authorization?.replace(/^Bearer /, '');
+        if (!sessions.has(buyerToken) || orderOwners.get(paymentRead[1]) !== buyerToken) {
+          throw new TradeError('BUYER_MISMATCH', 'Synthetic settlement details belong to the ordering session.', 403);
+        }
+        return send(200, service.payment(paymentRead[1], sessions.get(buyerToken)));
+      }
       const order = url.pathname.match(/^\/api\/orders\/([^/]+)$/);
       if (request.method === 'GET' && order) return send(200, { order: service.order(order[1]) });
       if (request.method === 'POST' && url.pathname === '/api/demo/reprice') return send(200, { product: service.simulatePriceChange(request.demoPayload) });
