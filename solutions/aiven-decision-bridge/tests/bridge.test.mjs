@@ -4,7 +4,7 @@ import { validateResponse, toPendingActions, decisionFor, canonical } from '../b
 
 const ctx = { adoptionId: '11111111-1111-4111-8111-111111111111', agentVersionId: '22222222-2222-4222-8222-222222222222', authorityRevision: '7', conversationId: 'conv-1', chibi: 'junction.aiven' };
 const base = { answer: 'ok', facts: [], assumptions: [], action_proposals: [], executed_actions: [], next_check: 'check lag' };
-const scale = { operation: 'service_update_plan', target: 'orders-kafka', parameters: { plan: 'business-8' }, reason: 'lag', risk: 'medium', reversible: true };
+const scale = { operation: 'service_update_plan', target: 'orders-kafka', parameters: { plan: 'business-8' }, reason: 'lag', risk: 'medium', reversible: true, owner_role: 'platform owner', rollback: 'revert to business-4' };
 
 test('a write request becomes a pending human decision with stable hashes', () => {
   const [p] = toPendingActions({ ...base, action_proposals: [scale] }, ctx);
@@ -28,6 +28,7 @@ test('the bridge refuses executed actions, unknown operations, low-risk deletes 
   assert.ok(validateResponse({ ...base, action_proposals: [{ ...scale, operation: 'drop_everything' }] }).some(e => /unknown operation/.test(e)));
   assert.ok(validateResponse({ ...base, action_proposals: [{ ...scale, operation: 'service_delete', risk: 'low' }] }).some(e => /high risk/.test(e)));
   assert.ok(validateResponse({ ...base, facts: [{ claim: 'x', source_url: 'https://blog.example.com' }] }).some(e => /non-official/.test(e)));
+  assert.ok(validateResponse({ ...base, action_proposals: [{ ...scale, rollback: '' }] }).some(e => /rollback/.test(e)));
   assert.throws(() => toPendingActions({ ...base, executed_actions: ['x'] }, ctx), /invalid companion response/);
   assert.equal(canonical({ b: 1, a: [2, { d: 1, c: 2 }] }), '{"a":[2,{"c":2,"d":1}],"b":1}');
 });

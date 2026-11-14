@@ -24,6 +24,7 @@ export function validateResponse(r) {
   for (const [i, p] of (r.action_proposals ?? []).entries()) {
     if (!OPS.has(p.operation)) errors.push(`proposal ${i}: unknown operation`);
     if (!p.target || !p.reason) errors.push(`proposal ${i}: target and reason required`);
+    if (!p.owner_role || !p.rollback) errors.push(`proposal ${i}: owner_role and rollback required`);
     if (!['low', 'medium', 'high'].includes(p.risk)) errors.push(`proposal ${i}: invalid risk`);
     if (HIGH_RISK.has(p.operation) && p.risk !== 'high') errors.push(`proposal ${i}: ${p.operation} must be high risk`);
     if (typeof p.reversible !== 'boolean') errors.push(`proposal ${i}: reversible must be boolean`);
@@ -53,6 +54,8 @@ export function toPendingActions(response, ctx) {
       preview_available: true,
       decision_available: true,
       title: `${p.operation} on ${p.target}`,
+      owner_role: p.owner_role,
+      rollback: p.rollback,
       chibi: ctx.chibi,
       risk: p.risk
     };
