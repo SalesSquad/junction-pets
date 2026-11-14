@@ -1,0 +1,29 @@
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r3/visual_adapter.py:39: RuntimeWarning: divide by zero encountered in matmul
+  return normalize_rows(x + (x @ a) @ b)
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r3/visual_adapter.py:39: RuntimeWarning: overflow encountered in matmul
+  return normalize_rows(x + (x @ a) @ b)
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r3/visual_adapter.py:39: RuntimeWarning: invalid value encountered in matmul
+  return normalize_rows(x + (x @ a) @ b)
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r4/prepare_candidates.py:218: RuntimeWarning: divide by zero encountered in matmul
+  frozen = query @ gallery.T
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r4/prepare_candidates.py:218: RuntimeWarning: overflow encountered in matmul
+  frozen = query @ gallery.T
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r4/prepare_candidates.py:218: RuntimeWarning: invalid value encountered in matmul
+  frozen = query @ gallery.T
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r4/prepare_candidates.py:219: RuntimeWarning: divide by zero encountered in matmul
+  image_text = query @ text.T
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r4/prepare_candidates.py:219: RuntimeWarning: overflow encountered in matmul
+  image_text = query @ text.T
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r4/prepare_candidates.py:219: RuntimeWarning: invalid value encountered in matmul
+  image_text = query @ text.T
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r4/prepare_candidates.py:221: RuntimeWarning: divide by zero encountered in matmul
+  adapted = frozen if weights is None else visual_module.project_features(query, weights) @ visual_module.project_features(gallery, weights).T
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r4/prepare_candidates.py:221: RuntimeWarning: overflow encountered in matmul
+  adapted = frozen if weights is None else visual_module.project_features(query, weights) @ visual_module.project_features(gallery, weights).T
+/Users/mikaelervamaa/Developer/meta-lens-r4-20261114/services/meta-spatial/retrieval-r4/prepare_candidates.py:221: RuntimeWarning: invalid value encountered in matmul
+  adapted = frozen if weights is None else visual_module.project_features(query, weights) @ visual_module.project_features(gallery, weights).T
+{"stage": "candidate_partition", "split": "train", "queries": 3313, "families": 2058, "rows": 331300, "candidate_limit": 100, "queries_with_truth_candidate": 3223, "queries_missing_truth_candidate": 90, "candidate_recall": 0.9728342891638998, "baseline_complete_gallery_recall": {"1": 0.518865076969514, "5": 0.815876848777543, "10": 0.8988831874434048, "20": 0.9444612134017507, "50": 0.9782674313311198, "100": 0.9900392393600966}, "oracle_positive_injected": false}
+{"stage": "candidate_partition", "split": "dev", "queries": 727, "families": 489, "rows": 72700, "candidate_limit": 100, "queries_with_truth_candidate": 711, "queries_missing_truth_candidate": 16, "candidate_recall": 0.9779917469050894, "baseline_complete_gallery_recall": {"1": 0.624484181568088, "5": 0.8638239339752407, "10": 0.9119669876203577, "20": 0.9449793672627235, "50": 0.9683631361760661, "100": 0.9889958734525447}, "oracle_positive_injected": false}
+{"stage": "candidate_partition", "split": "cal", "queries": 1225, "families": 702, "rows": 122500, "candidate_limit": 100, "queries_with_truth_candidate": 1193, "queries_missing_truth_candidate": 32, "candidate_recall": 0.9738775510204082, "baseline_complete_gallery_recall": {"1": 0.5551020408163265, "5": 0.8424489795918367, "10": 0.8987755102040816, "20": 0.9322448979591836, "50": 0.966530612244898, "100": 0.9820408163265306}, "oracle_positive_injected": false}
+{"stage": "candidate_partition", "split": "test", "queries": 1175, "families": 689, "rows": 117500, "candidate_limit": 100, "queries_with_truth_candidate": 1148, "queries_missing_truth_candidate": 27, "candidate_recall": 0.9770212765957447, "baseline_complete_gallery_recall": {"1": 0.5846808510638298, "5": 0.84, "10": 0.9038297872340425, "20": 0.9378723404255319, "50": 0.9727659574468085, "100": 0.9923404255319149}, "oracle_positive_injected": false}
+{"stage": "CANDIDATES_EXPORTED", "input_sha256": "ae3045b8353c674c65997f725da45fd6aaa5df32e1dbda7169c6565a35e9d988", "counts": {"train": 3313, "dev": 727, "cal": 1225, "test": 1175}, "historical_test_diagnosis_only": true}
