@@ -128,6 +128,9 @@ class V8LearningContracts(unittest.TestCase):
             self.assertNotIn(512001, diagnostics)
             self.assertNotIn(512002, diagnostics)
             self.assertTrue(all(item["train_samples"] >= 0 for item in logs))
+            self.assertTrue(any(item["trained"] and
+                                item["fit_cross_entropy"] <
+                                item["initial_fit_cross_entropy"] for item in logs))
 
     def test_training_sha_mismatch_aborts_before_learning(self):
         with tempfile.TemporaryDirectory(prefix="v8-contract-") as directory:
