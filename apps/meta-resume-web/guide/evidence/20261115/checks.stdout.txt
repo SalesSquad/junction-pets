@@ -1,0 +1,33 @@
+✔ format adapter preserves only explicit note plus export timestamp and safely roundtrips local metadata (5.583729ms)
+✔ user selection, exact format, duplicate JSON, oversize, empty note and time bounds fail closed (1.511925ms)
+✔ unsafe explicit notes require manual sanitization, while markup is preserved only as text (1.093022ms)
+✔ verified bytes remain a proposed association until explicit user confirmation (13.929562ms)
+✔ hash mismatch, old timestamps/watermarks and historical image origins are rejected (4.540973ms)
+✔ caller mutation during SHA cannot change copied input bytes or accepted binding (1.607419ms)
+✔ revocation, forget, reset, task change and pause win against in-flight SHA (4.060687ms)
+✔ expiry is rechecked after SHA and at confirmation; an old expiry callback cannot cancel new request (2.298925ms)
+✔ same image cannot fulfil the next request and concurrent frames cannot both commit (2.753342ms)
+✔ memory correction invalidates pending frames without claiming a new captured view (3.366057ms)
+✔ restore retains user packing progress but no pending frame, capture consent or current presence (2.661302ms)
+✔ explicit local memory consent and epoch gate govern export; forgotten confirmation cannot replay (1.880301ms)
+✔ restore rejects authority escalation, extra data, duplicate keys, oversized and inconsistent saves (6.472818ms)
+✔ selected context accepts only bounded user-selected metadata, persists historically and never confirms items (1.559647ms)
+✔ task item bounds and cloned snapshots protect session state (0.457682ms)
+✔ forget still deletes DATA and checks it when writing the invalidation epoch fails (2.925051ms)
+✔ failed deletion and failed readback never claim saved data was forgotten (0.504963ms)
+✔ a stale tab cannot resurrect metadata after an acknowledged forget (0.489981ms)
+✔ forget interleaved during a save removes only that stale writer’s own bytes (0.490511ms)
+✔ assistant tools register only with consent; retained handles deny reads and proposals after revocation (1.158741ms)
+✔ fresh unconsented UI writes no storage and registers no assistant surface (21.690991ms)
+✔ UI revokes assistant access on off, camera revocation, forget and pagehide (20.108249ms)
+✔ failed opt-out and subsequent single-item forget keep persistent-erasure failure visible (8.983998ms)
+✔ saving can still be turned off after a failed metadata update (24.06502ms)
+✔ Guide serves only fixed assets from its exact loopback origin (39.033873ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 245.055832
