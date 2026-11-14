@@ -4,6 +4,7 @@ import csv
 import hashlib
 import json
 import random
+import re
 import subprocess
 import time
 from datetime import datetime, timezone
@@ -38,6 +39,7 @@ def main():
     ap.add_argument('--max-seconds', type=float, default=3600)
     ap.add_argument('--max-options', type=int, default=60)
     ap.add_argument('--only-smoke', action='store_true')
+    ap.add_argument('--source-commit', help='Exact Git SHA for exported synthetic source; required on Verda without .git')
     args = ap.parse_args()
     counts = [args.train_episodes,args.cal_episodes,args.test_episodes,args.ood_episodes]
     if any(n < 0 or n > 10000 for n in counts) or not 1 <= args.max_options <= 300 or not 0 < args.max_seconds <= 86400:
@@ -73,8 +75,31 @@ def main():
     (args.out/'frozen-config.json').write_text(json.dumps(config, indent=2))
     source_files = sorted(Path(__file__).parent.glob('*.py'))+[SCENE]
     sources = {str(p.relative_to(SCENE.parents[1])): hashlib.sha256(p.read_bytes()).hexdigest() for p in source_files}
-    commit = subprocess.check_output(['git','rev-parse','HEAD'], cwd=SCENE.parent, text=True).strip()
-    dirty = subprocess.check_output(['git','status','--porcelain','--',str(Path(__file__).parent),str(SCENE)], text=True).strip()
+    # A task-owned export to Verda does not contain Git or credentials.
+    try:
+        live_commit = subprocess.check_output(
+            ['git','rev-parse','HEAD'], cwd=SCENE.parent, text=True,
+            stderr=subprocess.DEVNULL).strip()
+    except subprocess.CalledProcessError:
+        live_commit = None
+    if args.source_commit and not re.fullmatch('[0-9a-f]{40}', args.source_commit):
+        raise RuntimeError('source commit must be a full 40-digit hexadecimal SHA')
+    if live_commit and args.source_commit and live_commit != args.source_commit:
+        raise RuntimeError('source SHA differs from local Git HEAD')
+    if not live_commit and not args.source_commit:
+        raise RuntimeError('exported source requires --source-commit')
+    commit = live_commit or args.source_commit
+    if live_commit:
+        dirty = subprocess.check_output(
+            ['git','status','--porcelain','--',
+             str(Path(__file__).parent),str(SCENE)],
+            cwd=SCENE.parent, text=True).strip()
+        if dirty:
+            raise RuntimeError('refuse training on dirty producer source')
+        source_binding = 'LIVE_LOCAL_GIT_CLEAN'
+    else:
+        dirty = 'NOT_AVAILABLE_EXPORTED_FILES'
+        source_binding = 'EXPORTED_FILE_HASHES_AND_COORDINATOR_PROVIDED_GIT_SHA'
     log = (args.out/'episodes.jsonl').open('w')
 
     def episode(split, seed, method, training=False):
@@ -165,7 +190,8 @@ def main():
               and test['episodes'] == args.test_episodes and args.test_episodes > 0
               and test['unsafe'] == 0 and test['success'] > summary['test/heuristic']['success']
               and test['success'] > summary['test/abstain']['success'])
-    receipt = dict(source_commit=commit, source_dirty=dirty, producing_sha256=sources,
+    receipt = dict(source_commit=commit, source_binding=source_binding,
+                   source_dirty=dirty, producing_sha256=sources,
                    completed_at=datetime.now(timezone.utc).isoformat(),
                    input_sha256=hashlib.sha256((args.out/'frozen-config.json').read_bytes()).hexdigest(),
                    torch_version=torch.__version__, mujoco_version=__import__('mujoco').__version__,

@@ -17,7 +17,7 @@ missing pinned wheel into the task-owned layer (NumPy must already be present):
 
 ```sh
 /root/savi-lite-venv/bin/python -m pip install --no-deps --target /root/rokoko-rl-20261114/deps mujoco==3.3.7
-PYTHONPATH=/root/rokoko-rl-20261114/deps /root/savi-lite-venv/bin/python solutions/rokoko-teleoperation-gym/learning/train.py --train-episodes 1000 --cal-episodes 100 --test-episodes 200 --ood-episodes 100 --out /root/rokoko-rl-20261114/run-01 --device cuda --max-seconds 3600
+PYTHONPATH=/root/rokoko-rl-20261114/deps /root/savi-lite-venv/bin/python solutions/rokoko-teleoperation-gym/learning/train.py --train-episodes 1000 --cal-episodes 100 --test-episodes 200 --ood-episodes 100 --out /root/rokoko-rl-20261114/run-01 --device cuda --max-seconds 3600 --source-commit <EXACT_VERIFIED_40_HEX_SHA>
 ```
 
 The headless MuJoCo wheel also requires its normal import dependencies to already
@@ -95,3 +95,9 @@ Two tiny real physics episodes plus seed, shape, forbidden historic seed,
 deadman/model override and non-auto-rearming checks. This does not test PyTorch
 or demonstrate usefulness. No broad historic suite is required for this isolated
 research lane.
+
+For task-owned exports on Verda without Git metadata, supply the exact locally
+verified source commit SHA via --source-commit. The coordinator must compare all
+producing_sha256 entries against exact committed producer bytes before treating
+a GPU training result as source-bound. A real Git checkout additionally rejects
+a mismatched SHA or dirty producer files. No private Git credentials are copied.
