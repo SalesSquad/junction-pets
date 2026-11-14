@@ -109,5 +109,18 @@ class Learning(unittest.TestCase):
         self.assertEqual(learned["modelStats"]["tts"]["live:x"]["meanFidelity"], 0.2)  # the model went off-script
 
 
+class Delivery(unittest.TestCase):
+    def test_icloud_sync_overwrites_and_reports_failures_without_raising(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            src, dst = Path(d) / "a.txt", Path(d) / "out" / "turns" / "a.txt"
+            src.write_text("new")
+            dst.parent.mkdir(parents=True)
+            dst.write_text("old")
+            self.assertEqual(pv.sync_to_icloud([(src, dst)]), [])
+            self.assertEqual(dst.read_text(), "new")
+            self.assertEqual(pv.sync_to_icloud([(Path(d) / "missing", dst)], attempts=1), ["a.txt"])
+
+
 if __name__ == "__main__":
     unittest.main()
