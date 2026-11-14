@@ -52,6 +52,31 @@ class Tests(unittest.TestCase):
         for name in ('mujoco', 'body_mass', 'geom_friction', 'qpos', 'contactForce'):
             self.assertNotIn(name, source)
 
+    def test_route_commitment_no_lane_flips(self):
+        base = observation(0.)
+        plan = planner.RouteCommitment(base)
+        self.assertGreaterEqual(len(plan.points), 1)
+        initial = [p.copy() for p in plan.points]
+        rng = np.random.default_rng(326)
+        for _ in range(50):
+            noisy = base.copy()
+            noisy[:2] += rng.normal(0, .001, size=2)
+            noisy[6:8] += rng.normal(0, .001, size=2)
+            _ = plan.active(noisy)
+        self.assertEqual(len(plan.points), len(initial))
+        for now, old in zip(plan.points, initial):
+            np.testing.assert_array_equal(now,old)
+
+    def test_m6_unreachable_route_halts_progress(self):
+        e=DetourEnv()
+        obs=e.reset(150003,ood=True)
+        e.route_commitment.points=()
+        m=e.mask(obs)
+        self.assertEqual(m.tolist(),[False]*6+[True])
+        old=e.target.copy()
+        e.step(2)
+        np.testing.assert_array_equal(e.target,old)
+
     def test_native_contact_and_replay(self):
         first = run(150001, 'detour')
         self.assertGreater(first['physics_steps'], 0)

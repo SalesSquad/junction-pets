@@ -9,15 +9,31 @@ _spec = importlib.util.spec_from_file_location('frozen_m5', Path(__file__).resol
 frozen = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(frozen)
 ContactEnv, ACTIONS, GOAL = frozen.ContactEnv, frozen.ACTIONS, frozen.GOAL
-from planner import mask, desired, healthy, clear, PUSHER_RADIUS
+from planner import mask, desired, healthy, clear, PUSHER_RADIUS, RouteCommitment
 
 
 class DetourEnv(ContactEnv):
+    def reset(self, seed, ood=False):
+        obs = super().reset(seed, ood=ood)
+        self.route_commitment = RouteCommitment(obs)
+        self.failed_segment_rejections = 0
+        return obs
+
+    def _next_waypoint(self, obs):
+        route = getattr(self, "route_commitment", None)
+        return route.active(obs) if route is not None else None
+
     def mask(self, obs=None):
-        return mask(self.observation() if obs is None else obs)
+        o = self.observation() if obs is None else obs
+        wp = self._next_waypoint(o)
+        if wp is None:
+            return np.array([False]*6 + [True], dtype=bool)
+        return mask(o, wp)
 
     def _desired(self, action):
-        target = desired(self.observation(), action)
+        o = self.observation()
+        wp = self._next_waypoint(o)
+        target = desired(o, action, wp) if wp is not None else None
         return self.target.copy() if target is None else target
 
     def step(self, action):
@@ -52,6 +68,7 @@ class DetourEnv(ContactEnv):
                     self.target = candidate
                 else:
                     self.refusals += 1
+                    self.failed_segment_rejections += 1
             else:
                 self.holds += 1
             self.data.ctrl[:] = [self.target[0]+.06, self.target[1]]
@@ -85,5 +102,9 @@ class DetourEnv(ContactEnv):
         info = dict(success=success, unsafe=bool(self.unsafe), cost=int(self.unsafe),
                     abstained=self.abstained, error=error, peak_impulse=self.peak,
                     contacts=self.contacts, physics_steps=self.physics_steps, holds=self.holds,
-                    acks=self.acks, refusals=self.refusals, requested=int(requested))
+                    acks=self.acks, refusals=self.refusals, requested=int(requested),
+                    route_stage=self.route_commitment.index,
+                    route_advances=self.route_commitment.advances,
+                    route_waypoints=len(self.route_commitment.points),
+                    failed_segment_rejections=self.failed_segment_rejections)
         return self.observation(), reward, bool(self.done), info

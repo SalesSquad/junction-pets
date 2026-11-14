@@ -68,9 +68,11 @@ def waypoint(o):
     return GOAL.copy()
 
 
-def desired(o, action):
-    goal = waypoint(o)
-    if goal is None:
+def desired(o, action, selected_waypoint=None):
+    # A path owner can pin a temporary waypoint, preventing sensor-noise lane
+    # flipping on each 50Hz decision. Pure planner calls retain legacy behavior.
+    goal = np.asarray(selected_waypoint, dtype=float) if selected_waypoint is not None else waypoint(o)
+    if goal is None or not np.all(np.isfinite(goal)):
         return None
     obj, p = o[:2], o[2:4]
     v = goal-obj
@@ -85,13 +87,13 @@ def desired(o, action):
     return p-.035*v
 
 
-def mask(o):
+def mask(o, selected_waypoint=None):
     allowed = np.zeros(7, dtype=bool)
     allowed[6] = True
     if not healthy(o):
         return allowed
     for action in range(6):
-        target = desired(o, action)
+        target = desired(o, action, selected_waypoint)
         if target is not None:
             allowed[action] = clear(o[2:4], target, o[6:8], PUSHER_RADIUS)
     if np.linalg.norm(o[2:4]-o[:2]) < .029:
@@ -99,12 +101,12 @@ def mask(o):
     return allowed
 
 
-def heuristic(o, allowed):
+def heuristic(o, allowed, selected_waypoint=None):
     if not allowed[:5].any():
         return 6
     if np.linalg.norm(o[:2]-GOAL) < .02:
         return 5 if allowed[5] else 6
-    target = desired(o, 0)
+    target = desired(o, 0, selected_waypoint)
     if target is not None and np.linalg.norm(o[2:4]-target) <= .011 and allowed[1]:
         return 1
     # Reposition through the original mirrored approach options when alignment
@@ -113,3 +115,35 @@ def heuristic(o, allowed):
         if allowed[action]:
             return action
     return 6
+
+
+class RouteCommitment:
+    """Only observed-map waypoints, never future reward or hidden physical data.
+
+    Locks the selected side until the puck reaches its waypoint. It fails
+    closed if the *observed* map makes the pinned segment infeasible. It does
+    not silently retune or switch lanes when a sensor sample fluctuates.
+    """
+    def __init__(self, observation):
+        candidates = routes(observation)
+        self.points = tuple(np.asarray(p, dtype=float).copy()
+                            for p in candidates[0]) if candidates else ()
+        self.index = 0
+        self.advances = 0
+
+    def active(self, observation):
+        if not self.points or not healthy(observation):
+            return None
+        # This is a progression threshold for a geometric training task,
+        # NOT the physics/safety success threshold.
+        while (self.index < len(self.points)-1 and
+               np.linalg.norm(observation[:2]-self.points[self.index]) < .014):
+            self.index += 1
+            self.advances += 1
+        goal = self.points[self.index]
+        if not clear(observation[:2],goal,observation[6:8],OBJECT_RADIUS):
+            return None
+        return goal
+
+    def stage(self):
+        return (self.index,self.advances,len(self.points))

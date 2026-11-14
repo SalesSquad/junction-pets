@@ -25,7 +25,7 @@ def run(seed, method, max_options=60):
     while not env.done:
         allowed = env.mask()
         action = (6 if method == 'abstain' else
-                  heuristic(obs, allowed) if method == 'detour' else frozen.heuristic(obs, allowed))
+                  heuristic(obs, allowed, env._next_waypoint(obs)) if method == 'detour' else frozen.heuristic(obs, allowed))
         obs, _, _, info = env.step(action)
         # Outcome-only telemetry; never passed to planner/controller.
         collision |= any(env.bg in {env.data.contact[k].geom1, env.data.contact[k].geom2}
