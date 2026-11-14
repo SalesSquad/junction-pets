@@ -9,7 +9,7 @@ DEPTH = b'\x01\x00' * (480 * 640)
 def observation(t=0.0, **overrides):
     obs = dict(head_rgb=RGB, head_depth=DEPTH, left_wrist_rgb=RGB,
                right_wrist_rgb=RGB, arm_q=[0.1] * 14, arm_dq=[0.0] * 14,
-               hand_q=[0.2] * 14, instruction='put the red block in the left bin', t=t)
+               hand_q=[0.1, 0.1, 0.2, -0.2, -0.2, -0.2, -0.2, 0.1, 0.1, -0.2, 0.2, 0.2, 0.2, 0.2], instruction='put the red block in the left bin', t=t)
     obs.update(overrides)
     return obs
 

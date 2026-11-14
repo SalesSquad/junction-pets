@@ -49,10 +49,36 @@ class PolicyTests(unittest.TestCase):
 
     def test_mirrored_hands_preserve_wire_order(self):
         # Distinct left/right sentinels: never mirror, reverse or swap Dex3 slots.
-        hand = [0.01*i for i in range(7)] + [-0.02*i for i in range(7)]
+        hand = [0.01, 0.02, 0.03, -0.04, -0.05, -0.06, -0.07, -0.08, -0.09, -0.10, 0.11, 0.12, 0.13, 0.14]
         result = HoldPolicy().step(observation(hand_q=hand))
         self.assertEqual(result.action()['hand_q_target'], hand)
         self.assertNotEqual(hand[:7], hand[7:])
+
+    def test_pinned_arm_and_mirrored_hand_position_bounds(self):
+        cases = [
+            ('arm_q', 0, 3.10),
+            ('arm_q', 8, -2.30),
+            ('hand_q', 2, -0.01),
+            ('hand_q', 3, 0.01),
+            ('hand_q', 9, 0.01),
+            ('hand_q', 10, -0.01),
+        ]
+        for field, index, outside in cases:
+            with self.subTest(field=field, index=index):
+                obs = observation()
+                obs[field][index] = outside
+                result = HoldPolicy().step(obs)
+                self.assertEqual(result.state, 'FAULT')
+                with self.assertRaises(ValueError):
+                    result.action()
+        # A later out-of-range observation never overwrites a prior safe hold.
+        policy = HoldPolicy()
+        before = policy.step(observation())
+        bad = observation(1 / 30)
+        bad['hand_q'][3] = 0.01
+        after = policy.step(bad)
+        self.assertEqual(after.state, 'FAULT')
+        self.assertEqual(after.action(), before.action())
 
     def test_trace_immutable_and_input_bound(self):
         p = HoldPolicy()

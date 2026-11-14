@@ -5,6 +5,7 @@ import json
 import math
 import re
 from numbers import Real
+from joint_limits import ARM_BOUNDS, HAND_BOUNDS
 
 UPSTREAM = '36daf5b44dad46b8f448a5124ded7faa9947be1e'
 DATASET = '04046a85586feb5727f991adee3367176015cab0'
@@ -35,6 +36,13 @@ def vector(value, name):
            for x in value):
         raise ValueError(name + ': nonfinite/nonnumeric')
     return tuple(float(x) for x in value)
+
+
+def valid_joint_targets(values, bounds, name):
+    if any(value < lower or value > upper
+           for value, (lower, upper) in zip(values, bounds)):
+        raise ValueError(name + ': outside pinned URDF position limits')
+    return values
 
 
 @dataclass(frozen=True)
@@ -88,9 +96,9 @@ class HoldPolicy:
                 raise ValueError('latched fault; reset required')
             if not isinstance(obs, dict):
                 raise ValueError('observation must be a mapping')
-            arm = vector(obs.get('arm_q'), 'arm_q')
+            arm = valid_joint_targets(vector(obs.get('arm_q'), 'arm_q'), ARM_BOUNDS, 'arm_q')
             vector(obs.get('arm_dq'), 'arm_dq')
-            hand = vector(obs.get('hand_q'), 'hand_q')
+            hand = valid_joint_targets(vector(obs.get('hand_q'), 'hand_q'), HAND_BOUNDS, 'hand_q')
             t = obs.get('t')
             if isinstance(t, bool) or not isinstance(t, Real) or not math.isfinite(t) or t < 0:
                 raise ValueError('invalid time')
