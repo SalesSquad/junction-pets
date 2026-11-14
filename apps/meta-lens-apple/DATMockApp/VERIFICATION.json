@@ -2,7 +2,7 @@
   "schema": "junction.meta.dat-mock.verification/v1",
   "work_id": "junction.meta.dat-mock-20261114",
   "base_commit": "82f17099ae1d52efde6661e69f7ea5e38fdcd407",
-  "code_commit": "a1fefd76a100a23ec4051beec487a61d676e08a9",
+  "code_commit": "27091442ac70632e552aff810376a4be18a6d2fb",
   "dirty_baseline": "clean",
   "owned_paths": [
     "apps/meta-lens-apple/DATMockApp",
@@ -69,6 +69,108 @@
         "DATMockApp/Tests/DATIntegrationTests.swift": "081129d020c346f588c130f3735b16c7f69db39fe89c582d941d514fb6856757",
         "DATMockApp/scripts/generate_project.py": "fc10fc9d03cffc2411eff24d6fe7d8c6e01f23b4321b52f2cd69fd184c35f545"
       }
+    },
+    {
+      "name": "original retained-products SDK bootstrap",
+      "result": "fail",
+      "source_commit": "a1fefd76a100a23ec4051beec487a61d676e08a9",
+      "receipt": "meta-next-20261114-dat-003",
+      "tests": 1,
+      "failures": 1,
+      "test_seconds": 0.161,
+      "xcodebuild_exit": 65,
+      "observed": "configured=false / Internal error, then notReady; no frames were reached.",
+      "log_sha256": "15b2c08bf6b8c1409d15a5f65e92ed6b960f480c5f3b202937eead4edb7d6122",
+      "evidence_url": "https://github.com/SalesSquad/junction-pets/pull/75#issuecomment-6875443653"
+    },
+    {
+      "name": "simulator signing repair build",
+      "result": "pass",
+      "source_commit": "eb2fca3db7ffae363603cccfb79135f132dd82c5",
+      "receipt": "meta-next-20261114-dat-build-005",
+      "elapsed_seconds": 71.619,
+      "log_sha256": "ce43d6773cbb7b34a719e0a44178bab767c9ee558a979e5ba0ca4685f1cdb41f",
+      "scope": "Incremental official SDK harness build for Simulator. App uses ordinary ad-hoc signature with bound Info.plist and sealed resources; TeamIdentifier unset and no extra entitlements. Device/default signing remains disabled."
+    },
+    {
+      "name": "signed original SDK test",
+      "result": "fail",
+      "source_commit": "eb2fca3db7ffae363603cccfb79135f132dd82c5",
+      "receipt": "meta-next-20261114-dat-007",
+      "tests": 1,
+      "failures": 1,
+      "test_seconds": 25.508,
+      "xcodebuild_exit": 65,
+      "log_sha256": "f130921488b16efe04697c685830a61d48ecf0d700403909e187ba240f38a120",
+      "observed": "Bootstrap and early consent/revoke assertions advanced; first combined frame/OCR predicate timed out. This result alone does not identify the failed pipeline stage."
+    },
+    {
+      "name": "diagnostic-only harness build",
+      "result": "pass",
+      "source_commit": "1b6f442ad8075f0ff7093a152f0f5d5b3da2a5f3",
+      "receipt": "meta-next-20261114-dat-build-008",
+      "elapsed_seconds": 21.086,
+      "log_sha256": "a101ae5638a8453a6a4049c43fec769d4e25e37b7561eaecb3d6ead844651ef6",
+      "scope": "Only bounded failure diagnostics changed. Existing test method, predicate, 25-second deadline, 100ms poll and assertions retained; app logic dylib remained byte-identical."
+    },
+    {
+      "name": "diagnostic SDK startup test",
+      "result": "fail",
+      "source_commit": "1b6f442ad8075f0ff7093a152f0f5d5b3da2a5f3",
+      "receipt": "meta-next-20261114-dat-009",
+      "tests": 1,
+      "failures": 1,
+      "test_seconds": 25.507,
+      "xcodebuild_exit": 65,
+      "xcodebuild_seconds": 136.763,
+      "log_sha256": "94ef9c01109667c8b924027b54f90c214d7e788630f8bde30f5a384f912cfbfa",
+      "observed": {
+        "configured": true,
+        "running": false,
+        "cleaning": false,
+        "frameCount": 0,
+        "recognizedText": "",
+        "frameDigestLength": 0,
+        "lastError": "No eligible device available",
+        "statusHistory": [
+          "Connecting simulated glasses",
+          "Could not start Meta test session"
+        ]
+      },
+      "scope": "Failure before streaming/session eligibility; not an OCR failure or a demonstrated absence of SDK raw-frame callbacks.",
+      "evidence_preservation": "Observed by the executor before disconnection. Full original log, receipt and Integration.xcresult remain in /Users/mikaelervamaa/Developer/meta-next-dat-20261114-r9; their later export was blocked."
+    },
+    {
+      "name": "discovery repair independent source review",
+      "result": "pass",
+      "source_commit": "27091442ac70632e552aff810376a4be18a6d2fb",
+      "scope": "Subscribe to SDK device discovery before snapshot, wait and recheck only exact owned mock ID, retain epoch/cancellation guards and watchdog, then create exact selector/session. Configuration and camera/OCR/revocation suffix unchanged.",
+      "reviewed_sha256": {
+        "DATMockApp/Sources/DATCaptureModel.swift": "6827373cfde4a744e4c261a61d9b0b16e1fb1da59bff8c5f40865d8c755ef570",
+        "DATMockApp/Tests/DATIntegrationTests.swift": "4f5572847ef345b587d7ac7a0bf3c4c97fb9cd916c19adb5b6ffda9a0302916b",
+        "DATMockApp/scripts/generate_project.py": "7edef2645b2aae526c17658622b567cfc2c6fe108645942341560468889002a1"
+      }
+    },
+    {
+      "name": "discovery repair Swift syntax",
+      "result": "pass",
+      "source_commit": "27091442ac70632e552aff810376a4be18a6d2fb",
+      "scope": "Swift syntax parse only; no SDK typecheck/link/runtime",
+      "host": "Mikaels-Mac-Mini.local",
+      "source_sha256": "6827373cfde4a744e4c261a61d9b0b16e1fb1da59bff8c5f40865d8c755ef570",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_seconds": 1.144,
+      "owned_temporary_source_removed": true,
+      "ssh_probe_pid_absent": true
+    },
+    {
+      "name": "discovery repair iOS build and runtime",
+      "result": "blocked",
+      "source_commit": "27091442ac70632e552aff810376a4be18a6d2fb",
+      "observed": "MBP RDC timed out; existing Mini Tailscale status independently reports MBP offline since 10:00 UTC. Existing Air SSH route requires an additional provider authentication check. Mini has 12.407 GiB free, below this lane's retained 25 GiB boot / 20 GiB running guards.",
+      "scope": "No iOS typecheck, link or actual XCTest has run on the discovery repair."
     }
   ],
   "not_verified": [
@@ -76,9 +178,59 @@
     "Imported-video UX on a running app",
     "Real Meta glasses or phone camera",
     "Chibi host admission or privileged execution",
-    "Signed/released iOS app"
+    "Signed/released iOS app",
+    "Current discovery repair against the iOS SDK or simulator"
   ],
   "preserved": "Source pushed; exact build logs, original interruption records and cleanup receipts retained on the executing Macs. Clean checkouts and built app kept for a test-without-building resume; no daemon or recurring job added.",
-  "next_action": "On an admitted Apple executor with sufficient stable simulator headroom, generate with the pinned SDK checkout and run the existing DATIntegrationTests once against these source bytes; do not rerun unchanged core/full suites.",
-  "recorded_at": "2026-11-14T00:44:33.046651+00:00"
+  "next_action": "Restore the admitted MBP connection (or complete required authentication/capacity/toolchain checks on an existing Apple executor). Preserve local diagnostic branch 1b6f442, fetch this PR into a separate task branch, regenerate using exact SDK1.0.1, incrementally rebuild changed harness, then run only DATIntegrationTests/testRealSDKVideoFramesOCRRevocationAndDisconnect once with existing guards. Retrieve original r9 artifacts and close the idle owned session after work is preserved.",
+  "recorded_at": "2026-11-14T00:44:33.046651+00:00",
+  "previous_code_commit": "a1fefd76a100a23ec4051beec487a61d676e08a9",
+  "latest_native_test_source_commit": "1b6f442ad8075f0ff7093a152f0f5d5b3da2a5f3",
+  "current_native_status": "blocked_pending_reverification_of_discovery_repair",
+  "source_preservation": {
+    "original_diagnostic_local_commit": "1b6f442ad8075f0ff7093a152f0f5d5b3da2a5f3",
+    "original_local_branch": "codex/meta-next-dat-simulator-signing-20261114",
+    "republished_diagnostic_commit": "16b913394149a503781dbbfe02621ac433cf6eb9",
+    "diagnostic_file_sha256": "4f5572847ef345b587d7ac7a0bf3c4c97fb9cd916c19adb5b6ffda9a0302916b",
+    "note": "Diagnostic file was republished byte-identically through GitHub while the original local commit and its full diff/metadata remain retained. This does not claim that the original Git object was pushed. Preserve that local branch when resuming.",
+    "original_patch_sha256": "1e042792aa22f298b6996cacb123b97d001fcf021263019b04b648eca4e9a40e"
+  },
+  "runner_attempts_without_test_results": [
+    {
+      "receipt": "meta-next-20261114-dat-001",
+      "reason": "Wrapper changed simulator UDID case; xcodebuild rejected destination before XCTest. Owned simulator removed."
+    },
+    {
+      "receipt": "meta-next-20261114-dat-002",
+      "reason": "Admission falsely matched npm xcodebuildmcp process; stopped before simulator creation."
+    },
+    {
+      "receipt": "meta-next-20261114-dat-build-004",
+      "reason": "Native process guard rejected before build; no source/build action."
+    },
+    {
+      "receipt": "meta-next-20261114-dat-006",
+      "reason": "Receipt source-hash path omitted Sources directory; failed preflight before simulator/test."
+    }
+  ],
+  "cleanup": {
+    "owned_simulators": "All task-created simulators shut down/deleted; absence verified before MBP disconnection.",
+    "native_processes": "Actual builds/tests completed before outage; no new native test queued.",
+    "retained_idle_session": "meta-next-dat-20261114 on offline MBP; cannot close until reconnecting.",
+    "ancestor_session": "Untouched.",
+    "mini_ssh_probe": "Ended; PID absence verified. No authentication or permissions changed.",
+    "retained_checkouts": "Clean local diagnostic source and signed products retained for pending native qualification; original unpushed commit must be preserved."
+  },
+  "updated_at": "2026-11-14T10:20:09.974Z",
+  "metrics": {
+    "actual_xctest_cases_this_continuation": 3,
+    "passed_cases": 0,
+    "failed_cases": 3,
+    "incremental_harness_builds": 2,
+    "full_suites_repeated": 0,
+    "provider_allocations": 0,
+    "monetary_cost": null,
+    "tool_call_count": null,
+    "unknowns": "No aggregate connector/model billing or complete call counter was available."
+  }
 }

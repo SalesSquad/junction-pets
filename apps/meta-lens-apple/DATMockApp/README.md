@@ -43,8 +43,15 @@ For the integration test (replace destination with an **owned** simulator):
 xcodebuild test -project .generated/ChibiDATMock.xcodeproj -scheme ChibiDATMock \
   -destination 'platform=iOS Simulator,id=OWNED_UDID' -jobs 1 \
   -parallel-testing-enabled NO -derivedDataPath .native-proof/DerivedData \
-  -resultBundlePath .native-proof/Integration.xcresult CODE_SIGNING_ALLOWED=NO
+  -resultBundlePath .native-proof/Integration.xcresult CODE_SIGN_IDENTITY="-"
 ```
+
+The generated project uses local ad-hoc signing only for Simulator. The SDK
+resolves its own app's Keychain access group during bootstrap, so do not pass
+`CODE_SIGNING_ALLOWED=NO` to simulator builds. No Apple developer account,
+team, provisioning profile or distribution certificate is needed for this
+path; device signing remains disabled in the generator.
+[Upstream bootstrap diagnosis and fix](https://github.com/meta/meta-wearables-dat-ios/issues/197#issuecomment-4549647052).
 
 The real-SDK acceptance test requires frame delivery and OCR, then revocation,
 no late frames, explicit restart, disconnect and cleared preview. It does not
@@ -53,17 +60,37 @@ generation fence also has focused tests in `ChibiLensCoreTests`.
 
 ## Observed verification — 14 November 2026
 
-The official-SDK iOS app and integration test **compile successfully** on Xcode
-27.2 for arm64 Simulator at code commit `a1fefd76`. The two unchanged core
-cancellation-fence tests pass. The simulator frame/OCR/revocation test did not
-reach a test-case result: simulator startup consumed disk headroom and the
-guarded run was interrupted. Its disposable simulator was subsequently shut
-down and deleted successfully. **No end-to-end frame or hardware pass is claimed.**
-See [the source-bound verification record](VERIFICATION.json) for exact hashes,
-review bindings, original interruption limits and the single resume action.
+The official SDK harness builds on Xcode 27.2. Actual XCTest execution exposed
+a bootstrap failure caused by fully disabled signing; simulator-only ad-hoc
+signing fixed that failure at `eb2fca3`. The original failure and its raw log
+remain preserved.
+
+The next actual test, with unchanged acceptance conditions and better failure
+diagnostics, reached `configured=true` but failed before streaming with
+`No eligible device available` and zero admitted frames. This identified the
+session startup/discovery boundary; it did not establish an OCR or SDK
+raw-frame-delivery defect.
+
+The current repair at `2709144` waits for the exact mock ID in the SDK's
+device discovery stream before creating a session. It has independent source
+review and a successful Swift syntax parse. **The repaired iOS build and
+frame/OCR/revoke/disconnect test have not run:** the MBP disconnected; the
+existing Air route requires additional authentication, and the Mini has
+12.407 GiB free, below the retained native execution guards.
+
+Resume on the existing admitted Apple executor: preserve its original local
+diagnostic commit `1b6f442`, fetch the current PR source into a separate task
+branch, regenerate, incrementally rebuild the changed harness, then run the
+existing single integration test. Older built products do not contain this
+discovery repair. See [the source-bound verification record](VERIFICATION.json)
+for exact hashes, original failures, cleanup and remaining qualification.
+No physical-glasses or end-to-end frame/OCR pass is claimed.
 
 ## Lifecycle and trust
 
+- Startup subscribes to SDK discovery before reading its current snapshot,
+  waits only for the owned mock identifier and rechecks generation, cancellation
+  and current device presence before creating the exact-device session.
 - User revocation/backgrounding invalidates the app generation synchronously,
   clears preview/text, cancels pending analysis and stops the camera/session.
 - Camera permission is checked after awaits, before analysis and before result
