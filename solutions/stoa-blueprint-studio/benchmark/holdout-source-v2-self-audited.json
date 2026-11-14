@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "workId": "J26-PF-STOA-M335-M3-20261114",
+  "status": "SOURCE_ADMITTED_SELF_AUDITED_NOT_SPONSOR_GOLD",
+  "evidenceType": "SELF_AUDITED_DRAWING_NOT_SPONSOR_HELDOUT",
+  "source": {
+    "filename": "site1000_bldg2082_floor9385.dxf",
+    "archivePath": "junction-dataset-preview/data/swiss_dwellings/site1000_bldg2082_floor9385.dxf",
+    "sha256": "5e064c774b7034a91c5710220564b0b3a3afd551e9679ffc3d533a161fddc3b5",
+    "license": "CC BY 4.0",
+    "attribution": "Swiss Dwellings v3.0.0, Archilyse AG contributors; doi:10.5281/zenodo.7788422; Stoa/Junction source derivative; noncommercial competition",
+    "originalSourceBytes": 276833,
+    "sourceReview": "Original handles and insertion coordinates scanned independently from raw ASCII DXF; engine parser mapped IDs; not independently adjudicated"
+  },
+  "questions": [
+    {
+      "id": "raw-kuche",
+      "question": "How many rooms labelled Küche?",
+      "reference": {
+        "method": "Separate raw DXF group-code scan, verified ORIGINAL TEXT handles and X/Y before prediction; not sponsor-gold; private researcher self-audit",
+        "sourceLocator": "ROOM_TEXT TEXT handles 25D, 282, 28B, 296"
+      },
+      "expected": {
+        "status": "supported",
+        "answer": "4",
+        "regions": [
+          {
+            "id": "e435",
+            "type": "TEXT",
+            "layer": "ROOM_TEXT",
+            "x": -1.2495384371116862,
+            "y": 19.090840861113858,
+            "text": "Küche"
+          },
+          {
+            "id": "e472",
+            "type": "TEXT",
+            "layer": "ROOM_TEXT",
+            "x": 5.25535898245325,
+            "y": -2.19877150681383,
+            "text": "Küche"
+          },
+          {
+            "id": "e481",
+            "type": "TEXT",
+            "layer": "ROOM_TEXT",
+            "x": -1.6077090971093249,
+            "y": -7.0804879735976485,
+            "text": "Küche"
+          },
+          {
+            "id": "e492",
+            "type": "TEXT",
+            "layer": "ROOM_TEXT",
+            "x": 5.2961478890946205,
+            "y": -11.380158949714858,
+            "text": "Küche"
+          }
+        ]
+      }
+    },
+    {
+      "id": "raw-korridor",
+      "question": "How many rooms labelled Korridor?",
+      "reference": {
+        "method": "Separate raw DXF group-code scan, verified ORIGINAL TEXT handles and X/Y before prediction; not sponsor-gold; private researcher self-audit",
+        "sourceLocator": "ROOM_TEXT TEXT handles 260, 268, 27F, 299, 2AC"
+      },
+      "expected": {
+        "status": "supported",
+        "answer": "5",
+        "regions": [
+          {
+            "id": "e438",
+            "type": "TEXT",
+            "layer": "ROOM_TEXT",
+            "x": -3.24723961161366,
+            "y": 16.54134957189201,
+            "text": "Korridor"
+          },
+          {
+            "id": "e446",
+            "type": "TEXT",
+            "layer": "ROOM_TEXT",
+            "x": -2.918215906511311,
+            "y": 14.726558961319851,
+            "text": "Korridor"
+          },
+          {
+            "id": "e469",
+            "type": "TEXT",
+            "layer": "ROOM_TEXT",
+            "x": 2.240067681695841,
+            "y": -1.3214252820547951,
+            "text": "Korridor"
+          },
+          {
+            "id": "e495",
+            "type": "TEXT",
+            "layer": "ROOM_TEXT",
+            "x": 2.36592705065866,
+            "y": -13.775467239453043,
+            "text": "Korridor"
+          },
+          {
+            "id": "e514",
+            "type": "TEXT",
+            "layer": "ROOM_TEXT",
+            "x": 4.298350662107602,
+            "y": -6.746249801834679,
+            "text": "Korridor"
+          }
+        ]
+      }
+    },
+    {
+      "id": "raw-negative-doors",
+      "question": "How many doors are there?",
+      "reference": {
+        "method": "No source-backed unique door instance mapping; this is an unanswerable class under present contract",
+        "sourceLocator": "DXF arcs/lines not a one-to-one door symbol dataset"
+      },
+      "expected": {
+        "status": "abstained",
+        "answer": null,
+        "regions": []
+      }
+    },
+    {
+      "id": "raw-negative-outside",
+      "question": "What is the area of room 999.99?",
+      "reference": {
+        "method": "Independent raw TEXT room-index scan found no exact 999.99 room number",
+        "sourceLocator": "Source ROOM_TEXT code1 labels, entire selected sheet"
+      },
+      "expected": {
+        "status": "abstained",
+        "answer": null,
+        "regions": []
+      }
+    }
+  ]
+}
