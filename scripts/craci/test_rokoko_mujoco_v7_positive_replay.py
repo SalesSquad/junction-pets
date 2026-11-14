@@ -46,12 +46,17 @@ class FakeExactContactEnv:
 
 
 class ReplayContracts(unittest.TestCase):
+    @staticmethod
+    def fake_policy_factory(_name):
+        return lambda: lambda _obs, _mask: 6
+
     def test_empty_positive_claim_set_is_honest_negative(self):
         with tempfile.TemporaryDirectory(prefix="craci-v7-replay-") as directory:
             root = Path(directory)
             training, full = make_fixture(root)
             persist(root, training, full)
-            result = replay.replay_positive(root, FakeExactContactEnv)
+            result = replay.replay_positive(root, FakeExactContactEnv,
+                                            self.fake_policy_factory)
             self.assertTrue(result["claim_verified"])
             self.assertEqual(result["fully_replayed_positive_train_trials"], 0)
             self.assertEqual(result["verified_near_corridor_success_worlds"], 0)
@@ -66,7 +71,8 @@ class ReplayContracts(unittest.TestCase):
             training["trials"][0]["abstained"] = False
             persist(root, training, full)
             with self.assertRaisesRegex(AssertionError, "REPLAY_|TERMINAL"):
-                replay.replay_positive(root, FakeExactContactEnv)
+                replay.replay_positive(root, FakeExactContactEnv,
+                                       self.fake_policy_factory)
 
     def test_forged_lateral_displacement_cannot_pass_physics_replay(self):
         with tempfile.TemporaryDirectory(prefix="craci-v7-replay-") as directory:
@@ -75,7 +81,8 @@ class ReplayContracts(unittest.TestCase):
             training["trials"][0]["lateral_displacement"] = .03
             persist(root, training, full)
             with self.assertRaisesRegex(AssertionError, "REPLAY_OBSTACLE_AWAY_PROGRESS"):
-                replay.replay_positive(root, FakeExactContactEnv)
+                replay.replay_positive(root, FakeExactContactEnv,
+                                       self.fake_policy_factory)
 
 
 if __name__ == "__main__":
