@@ -78,6 +78,88 @@ def synthetic_frozen():
 
 
 class V8ProspectiveTrainContracts(unittest.TestCase):
+    def test_lossless_640_trial_max_option_summary_below_capture_cap(self):
+        # Deliberately full-precision 18D observations and V7's maximum
+        # 60 options/28 sparse samples per row, not a toy short-action sample.
+        # No real train outcome, hidden data, reduced options or field stripping.
+        long_obs = [float(f"{(-1)**i * (i + 1) / 19:.17f}") for i in range(18)]
+        terminal = [x + 0.0123456789012345 for x in long_obs]
+        full = []
+        for i in range(60):
+            full.append({"observation": long_obs, "mask": [1, 1, 1, 1, 1, 1, 1],
+                         "action": 3, "reward": -0.12345678901234567,
+                         "cost": 0, "done": i == 59,
+                         "contacts_cumulative": i // 10,
+                         "dwell_ticks_current": i,
+                         "dwell_ticks_cumulative": i,
+                         "success_info": False,
+                         "next_observation": terminal})
+        indices = sorted(set(range(12)) | set(range(52, 60)) | set(range(0, 60, 5)))
+        sparse = [full[i] for i in indices]
+        self.assertEqual(len(sparse), 28)
+        trials = []
+        for world in synthetic_cohort():
+            for strategy in rollout.STRATEGIES:
+                trials.append({**world, "strategy": strategy,
+                               "allocation_phase": "all_four_paired_prospective_train",
+                               "success": False, "unsafe": False, "abstained": False,
+                               "zero_physics_abstain": False, "physics_steps": 6000,
+                               "option_steps": 60, "contacts": 5,
+                               "side_contact_option_steps": [1, 10, 20, 30, 40, 50],
+                               "dwell_ticks_final": 59,
+                               "lateral_displacement": 0.12345678901234567,
+                               "away_lateral_displacement": 0.12345678901234567,
+                               "final_error": 0.12345678901234567,
+                               "total_reward": -7.407407340740741,
+                               "side_proposals": 60,
+                               "forward_reopened_after_side": 5,
+                               "forward_reopen_option_steps": [10, 20, 30, 40, 50],
+                               "contact_to_forward_to_dwell": False,
+                               "full_transition_count": 60,
+                               "full_transition_sha256": "a" * 64,
+                               "sparse_trace": True,
+                               "sparse_transition_indices": indices,
+                               "transitions": sparse,
+                               "stage_funnel": {
+                                   "contact": True, "any_signed_lateral25": True,
+                                   "signed_lateral25_after_contact": True,
+                                   "any_forward_reopen_after_side": True,
+                                   "forward_reopen_after_lateral25": True,
+                                   "full_contact_lateral_reopen_goal_dwell": False,
+                                   "contact_first_option": 1,
+                                   "lateral25_first_option": 2,
+                                   "reopen_first_option": 10}})
+        self.assertEqual(len(trials), 640)
+        training = {"schema": rollout.SCHEMA + ".training", "executed_head": "a" * 40,
+                    "actual_physics_engine": "mujoco-3.3.7",
+                    "train_first_seed": 513000,
+                    "selection_seed_limit": 512,
+                    "selected_near_count": 128, "selected_clear_count": 32,
+                    "selection_scan": [{"seed": r["seed"], "world_hash": r["world_hash"],
+                                        "initial_observed_obstacle_y":
+                                        r["initial_observed_obstacle_y"]}
+                                       for r in synthetic_cohort()],
+                    "strategies": list(rollout.STRATEGIES),
+                    "no_dev_evaluation": True,
+                    "actual_transition_count": 640 * 60,
+                    "trials": trials, "dataset_sha256": v8.digest(trials)}
+        with tempfile.TemporaryDirectory(prefix="v8-max-summary-") as directory:
+            path = Path(directory) / "training.json"
+            inflated = len(json.dumps(training, sort_keys=True, indent=2,
+                                      ensure_ascii=False, allow_nan=False).encode("utf8")) + 1
+            self.assertGreater(inflated, rollout.MAX_CAPTURED_JSON_BYTES,
+                               "regression fixture must reproduce old pretty-print capture failure")
+            size = rollout.write_compact_source_bound_training(path, training)
+            self.assertEqual(path.stat().st_size, size)
+            self.assertLessEqual(size, rollout.MAX_CAPTURED_JSON_BYTES)
+            restored = json.loads(path.read_text())
+            self.assertEqual(restored, training)
+            self.assertEqual(v8.digest(restored["trials"]),
+                             restored["dataset_sha256"])
+            self.assertEqual(len(restored["trials"]), 640)
+            with self.assertRaises(FileExistsError):
+                rollout.write_compact_source_bound_training(path, training)
+
     def test_manifest_exact_two_raw_files_readout_only_auxiliary(self):
         with tempfile.TemporaryDirectory(prefix="v8-manifest-") as directory:
             folder = Path(directory)
