@@ -17,7 +17,11 @@ spec.loader.exec_module(qualifier)
 def trial(seed, name, near):
     return {"seed": seed, "strategy": name, "observed_corridor": near,
             "success": name == "frozen_v5" and seed == 515000,
-            "unsafe": False, "abstained": False}
+            "unsafe": False, "abstained": False,
+            "stage_funnel": {
+                "signed_lateral25_after_contact": False,
+                "forward_reopen_after_lateral25": False,
+                "full_contact_lateral_reopen_goal_dwell": False}}
 
 
 def fake_training():
@@ -43,7 +47,10 @@ def fake_readout(training):
                          "safe_goals_near": sum(r["success"] and r["observed_corridor"]
                                                 for r in rows),
                          "safe_goals_clear": sum(r["success"] and
-                                                 not r["observed_corridor"] for r in rows)}
+                                                 not r["observed_corridor"] for r in rows),
+                         "safe_near_lateral25_after_contact": 0,
+                         "safe_near_forward_reopen_after_lateral": 0,
+                         "safe_near_dwell_after_reopen": 0}
     return {"schema": "junction.rokoko.mujoco-v10.prospective-train.v1.readout",
             "executed_head": training["executed_head"],
             "dataset_sha256": training["dataset_sha256"],
@@ -51,6 +58,7 @@ def fake_readout(training):
             "model_promotion_authorized": False, "dev_cal_test_ood_opened": False,
             "strategies": summary,
             "near_seeds": list(range(515000, 515128)),
+            "clear_seeds": list(range(515128, 515160)),
             "lost_baseline_safe_near_goal_seeds": [515000],
             "novel_v10_safe_near_goal_seeds": [],
             "v10_new_unsafe_vs_frozen_controls": []}
@@ -78,6 +86,20 @@ class V10ProspectiveQualificationTest(unittest.TestCase):
         bad = fake_readout(training)
         bad["novel_v10_safe_near_goal_seeds"] = [515020]
         with self.assertRaisesRegex(AssertionError, "WIN_LOSS_NOT_FROM_ORIGINAL"):
+            qualifier.verify_readout(training, bad)
+
+    def test_omitted_failed_world_rejected_before_comparison(self):
+        training = fake_training()
+        bad = fake_readout(training)
+        bad["near_seeds"].remove(515000)
+        with self.assertRaisesRegex(AssertionError, "COHORT_LISTS_NOT_RAW_OBSERVATIONS"):
+            qualifier.verify_readout(training, bad)
+
+    def test_fake_stage_funnel_gain_rejected(self):
+        training = fake_training()
+        bad = fake_readout(training)
+        bad["strategies"]["v10_loss_informed"]["safe_near_forward_reopen_after_lateral"] = 4
+        with self.assertRaisesRegex(AssertionError, "SCIENCE_COUNTS_NOT_RAW"):
             qualifier.verify_readout(training, bad)
 
     def test_product_cannot_claim_promotion_or_unlock_heldout(self):
