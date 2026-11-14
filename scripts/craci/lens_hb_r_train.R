@@ -272,19 +272,20 @@ for (j in seq_along(candidates)) {
   candidates[[j]]$calibration<-calibrate(cal,candidates[[j]]$pcal,
                                         candidates[[j]]$gate_cal)
 }
-order_indices<-order(
-  -vapply(candidates,function(c)c$calibration$metrics$correctKnown,numeric(1)),
-  vapply(candidates,function(c)c$calibration$metrics$wrongTotal,numeric(1)),
-  seq_along(candidates))
-best_idx<-order_indices[[1]]
-chosen<-candidates[[best_idx]]
-# Pick baseline on calibration if no actual improvement in correct known
-# proposals without worsening calibration wrong count. No model promotion
-# is allowed from calibration or a single independent physical scene alone.
-winner_is_baseline <- (
-  chosen$calibration$metrics$correctKnown <= baseline_calibration$metrics$correctKnown ||
-  chosen$calibration$metrics$wrongTotal > baseline_calibration$metrics$wrongTotal
-)
+# Fix source defect from 3f8d57c...: rank ONLY candidates that satisfy
+# all safety/coverage criteria, NOT the highest-recall candidate before
+# checking it against a 0-error/0-coverage baseline. A lower-ranked source
+# candidate may strictly dominate the baseline at no additional risk.
+selector_path<-file.path(Sys.getenv("CRACI_HARNESS_ROOT"),
+  "scripts/craci/lens_hb_selector.R")
+if (!file.exists(selector_path)) stop("Pinned HB selector missing")
+source(selector_path,local=TRUE)
+selection<-select_hb_candidate(
+  candidates,baseline_calibration,
+  total_cal=nrow(cal),known_cal=sum(cal$label!="UNKNOWN"))
+best_idx<-selection$index
+winner_is_baseline<-best_idx==0L
+chosen<-if (winner_is_baseline) NULL else candidates[[best_idx]]
 if (winner_is_baseline) {
   test_probs<-baseline_test
   gate_test<-rep(TRUE,nrow(test))
@@ -353,6 +354,11 @@ result<-list(
         threshold=x$calibration$threshold)),
  selectedCandidate=fitted_name,
  selectedCandidateIndex=if(winner_is_baseline)NULL else best_idx,
+ sourceSelectorRepair="CALIBRATION_FIRST_SAFE_PARETO_FILTER_THEN_RANK",
+ eligibleCandidateIndices=selection$eligibleIndices,
+ calibrationSelectionStatus=selection$status,
+ originalBaselineRejectedAllCalibration=baseline_calibration$metrics$accepted==0,
+ selectionCalibratedWrongBudget=selection$calibrationWrongBudget,
  trainSceneIds=c(5,9),calibrationSceneIds=10,testSceneIds=11,
  trainExamples=nrow(train),calibrationExamples=nrow(cal),testExamples=nrow(test),
  knownClasses=c(12,15),unknownObjectClasses=c(3,22,23),
@@ -373,9 +379,12 @@ result<-list(
  descriptiveSafetyCriteriaMet=safe_diagnostic,
  deploymentAllowed=FALSE,
  scientificClaim=if(safe_diagnostic)
-     "EXPLORATORY_SINGLE_PHYSICAL_SCENE_BENEFIT_NOT_FIELD_QUALIFIED"
+     "EXPLORATORY_SELECTOR_REPAIR_RETEST_NOT_NEW_BLIND_QUALIFICATION"
      else "NO_QUALIFIED_OPEN_SET_GAIN",
+ sourceDefectRepairRetest=TRUE,
+ previouslyReportedHeldoutBaseline=TRUE,
  limitations=c("Only one physical heldout scene with 48 correlated frames",
+   "Same heldout physical scene already appeared in previous baseline-only source run; retest is exploratory, not an independent final qualification",
    "Class 12/15 recognizable in 4 scenes, not broad object identification",
    "Unknown class IDs 3/22/23 shared by calibration and test, still hard negatives",
    "Accepted false rate <=5% calibration is not scene-robust guarantee",

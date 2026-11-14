@@ -47,13 +47,14 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - lens-r3-methods
         - lens-hb-vision
       lane_slice:
-        description: R8 only; pilot first, then seven unique remaining arms
+        description: Bounded matrix slice for R8, R3, HB Vision; selection-repair is HB-only
         type: choice
         default: all
         options:
         - all
         - pilot
         - remaining
+        - selection-repair
       source_sha:
         description: Full product SHA; overrides historical baseline. Tieto uses sponsor_revision.
         type: string
@@ -4300,6 +4301,7 @@ jobs:
           install -qq -y --no-install-recommends r-base-core r-cran-nnet r-cran-jsonlite
         Rscript -e 'stopifnot(requireNamespace("nnet"),requireNamespace("jsonlite"))'
         Rscript -e 'invisible(parse(file=file.path(Sys.getenv("CRACI_HARNESS_ROOT"),"scripts/craci/lens_hb_r_train.R")));cat("HB_R_PARSE_OK\n")'
+        Rscript "$CRACI_HARNESS_ROOT/scripts/craci/lens_hb_selector_test.R" "$CRACI_HARNESS_ROOT/scripts/craci/lens_hb_selector.R"
         test "$(git -C "$CRACI_SOURCE_ROOT" rev-parse HEAD)" = "$CRACI_SOURCE_SHA"
         test "$(git -C "$CRACI_HARNESS_ROOT" rev-parse HEAD)" = "$CRACI_HARNESS_SHA"
     - name: Fit train-only Vision R model and evaluate truly independent physical scene

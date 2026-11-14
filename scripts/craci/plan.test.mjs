@@ -147,3 +147,14 @@ test('HB real AppleVision open-set source is pinned, four models and independent
   assert.throws(()=>resolvePlan({workload:'lens-hb-vision',lane_slice:'invalid'},context),
     /Unsupported HB lane slice/);
 });
+
+test('HB source-defect repair admits only two changed Vision model selection paths', () => {
+  const repair = resolvePlan({workload:'lens-hb-vision', lane_slice:'selection-repair'}, context);
+  assert.equal(repair.jobCount,2);
+  assert.deepEqual(repair.matrix.include.map(x=>x.model), ['vision_prototype','vision_guard']);
+  assert.ok(repair.matrix.include.every(x=>x.source_sha===context.harnessSha));
+  assert.equal(repair.maxParallel,2);
+  assert.throws(()=>resolvePlan({
+    workload:'lens-hb-vision',lane_slice:'selection-repair',source_sha:candidate
+  },context),/exact harness source SHA/);
+});
