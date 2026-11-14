@@ -61,6 +61,13 @@ admission path require separate acceptance. See
 [ARKit and ScreenshotContext reuse](ARKIT_SCREEN_CONTEXT.md) for current SAM3.1 /
 Nemotron evidence, exact screenshot-reference semantics and staged integration.
 
+**14 November source verification:** `4d3dc8665b79b4ac99c290f3c6d9b734f0dca42a`
+passed iOS arm64 module compilation of Core and ARKit with Xcode 27.2 / iPhoneOS
+27.2 SDK, targeting iOS 17. Seven focused macOS observation tests passed using
+generated JPEGs and synthetic geometry. This is module compilation and data-boundary
+testing; ARSession camera/lifecycle behavior was source-reviewed, not run on a
+phone. [Exact evidence and retained preflight failure](evidence/arkit-20261114/VERIFICATION.json).
+
 ## Official Meta SDK mock-video app
 
 The separate [DATMockApp](DATMockApp/README.md) links pinned official Meta DAT
@@ -190,9 +197,13 @@ denial/revocation latency, and real- versus synthetic-device provenance.
 
 - Portable Swift source, SwiftUI UI, deterministic Mac replay and unit-test
   source are present in this increment.
-- **Not yet qualified:** Swift compilation on Apple SDK, native/macOS run,
-  iOS simulator, Meta DAT pairing, physical glasses, real GPU image training,
-  host-signed identity, production memory or calibrated location.
+- **Current targeted qualification:** the new ARKit/Core iOS modules and seven
+  synthetic observation tests are verified above. The separate DAT mock app has
+  its own pinned SDK build/test evidence. Neither result qualifies a physical
+  phone/glasses session or this replay UI's rendered experience.
+- **Still unqualified:** physical capture, ARKit tracking/lifecycle on a phone,
+  replay GUI/parity execution in this work, real GPU image training, host-signed
+  identity, production memory and calibrated glasses location.
 - No existing Taimi/Lens proprietary code, private Chibi secrets or real media
-  is copied here. This package is source-port-only until tested on the chosen
-  Mac/iPhone host.
+  is copied here. On-device behavior must be accepted on the chosen iPhone;
+  optional depth/mesh support must be checked on that device.

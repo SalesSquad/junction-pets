@@ -3,6 +3,12 @@
 Work: `LENS-ARKIT-SCREEN-CONTEXT-20261114`. Source audit: 14 November 2026.
 Admission base: `27fb74b999f41718237958e03404390350f75a65`.
 
+Implementation checkpoint `4d3dc8665b79b4ac99c290f3c6d9b734f0dca42a` passed
+both iOS Core/ARKit module builds and 7/7 focused macOS observation tests.
+The tests use generated JPEGs and synthetic geometry. Physical ARSession,
+glasses and cross-app host behavior were not executed.
+[Verification and original failure](evidence/arkit-20261114/VERIFICATION.json).
+
 The useful product is a task that continues across surfaces: select an assembly
 instruction on the Mac, inspect the actual part with the phone, and resume the
 same confirmed step through the glasses. Keep the selected instruction, the
