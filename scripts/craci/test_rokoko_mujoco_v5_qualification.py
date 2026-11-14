@@ -22,13 +22,13 @@ def fixture():
                  "seed": seed, "world_hash": hashlib.sha256(str(seed).encode()).hexdigest(),
                  "transitions": [dict(event)]}
                 for generation in range(2) for candidate in range(3)
-                for seed in range(5290000, 5290048)]
+                for seed in range(510000, 510048)]
     weights = {"clearance": 0.066, "lane_distance": 0.031}
     digest = validator.canonical_sha256(rollouts)
     wsha = validator.canonical_sha256(weights)
     training = dict(executed_head=SOURCE, dataset_sha256=digest,
                     weights_sha256=wsha, actual_transition_count=len(rollouts),
-                    train_first_seed=5290000, train_episodes=48,
+                    train_first_seed=510000, train_episodes=48,
                     actual_physics_engine="mujoco-3.3.7",
                     rollouts=rollouts, selected={"weights": weights})
     model = dict(executed_head=SOURCE, weights_sha256=wsha,
@@ -171,7 +171,7 @@ class QualificationContracts(unittest.TestCase):
             validator.paired_ci_from_worlds(d["paired_worlds"]))
         result = validator.verify_dev_receipt(t, m, d, SOURCE)
         next_round = result["next_learning_round"]
-        self.assertEqual(next_round["new_train_only_seed_start"], 5291000)
+        self.assertEqual(next_round["new_train_only_seed_start"], 511000)
         self.assertEqual(next_round["new_fresh_dev_seed_start"], 129250)
         self.assertFalse(next_round["dispatch_authorized"])
         self.assertTrue(next_round["requires_new_source_and_weight_hashes"])
