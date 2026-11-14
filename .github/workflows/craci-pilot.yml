@@ -4866,7 +4866,7 @@ jobs:
         remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
         test "$remaining" -gt 3600
         printf 'CRACI_CREDIT_REMAINING_SECONDS=%s\n' "$remaining" >> "$GITHUB_ENV"
-        test "$CRACI_SOURCE_SHA" = '6b6399a54d69c06740ca0c7d1ef66074a5d1732c'
+        test "$CRACI_SOURCE_SHA" = 'ab6df4054ef6ed350b479469590a48046a0c0a68'
         [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       with:
