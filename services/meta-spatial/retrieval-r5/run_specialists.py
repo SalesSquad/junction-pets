@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Run exactly four bounded Nemotron specialist lanes on real admitted images."""
+"""Run four bounded Nemotron roles; allow an explicit subset for isolated repairs."""
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import argparse
 import hashlib
+import itertools
 import json
 from pathlib import Path
 import subprocess
@@ -35,6 +36,24 @@ def source_binding(commit):
     return {p.name: file_hash(p) for p in sorted(ROOT.iterdir()) if p.is_file()}
 
 
+def constrained_format(lane):
+    """Prevent a null proposal from claiming an identified candidate."""
+    output = response_format(lane)
+    if lane == "ocr":
+        return output
+    schema = output["json_schema"]["schema"]
+    permutations = [list(p) for p in itertools.permutations(("c01", "c02", "c03"))]
+    schema["properties"]["ranking"]["enum"] = permutations
+    schema["anyOf"] = [{"properties": {
+        "identifiability": {"enum": ["insufficient"]}, "proposed_candidate": {"type": "null"}}}]
+    for alias in ("c01", "c02", "c03"):
+        schema["anyOf"].append({"properties": {
+            "identifiability": {"enum": ["distinguishable"]},
+            "proposed_candidate": {"enum": [alias]},
+            "ranking": {"enum": [p for p in permutations if p[0] == alias]}}})
+    return output
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cases", type=Path, required=True)
@@ -44,6 +63,7 @@ def main():
     parser.add_argument("--deadline-seconds", type=int, default=900)
     parser.add_argument("--start-index", type=int, default=0)
     parser.add_argument("--case-count", type=int, default=8)
+    parser.add_argument("--lanes", nargs="+", choices=LANES, default=list(LANES))
     args = parser.parse_args()
     if not 256 <= args.max_output_tokens <= 2048 or not 120 <= args.deadline_seconds <= 1800:
         raise ValueError("bounded_call_budget_required")
@@ -56,22 +76,26 @@ def main():
     if not 0 <= args.start_index < 8 or not 1 <= args.case_count <= 8 - args.start_index:
         raise ValueError("bounded_case_slice_required")
     cases = cases[args.start_index:args.start_index + args.case_count]
-    expected_calls = 4 * len(cases)
+    if len(set(args.lanes)) != len(args.lanes):
+        raise ValueError("unique_requested_lanes_required")
+    active_lanes = [lane for lane in LANES if lane in args.lanes]
+    expected_calls = len(active_lanes) * len(cases)
     if tuple(LANES) != ("ocr", "visual", "detail", "critic"):
         raise ValueError("four_declared_lanes_required")
     args.output.mkdir(parents=True, exist_ok=False)
     key = load_nemotron_key()
     started = time.monotonic()
     stop = threading.Event()
-    barrier = threading.Barrier(4)
+    barrier = threading.Barrier(len(active_lanes))
     plan = {"schema_version": 1, "work_id": "META-LENS-R5-NEMOTRON4-20261114",
             "source_commit": args.source_commit, "source_sha256": sources,
             "cases_sha256": input_hash, "provider": NEMOTRON.name, "model": NEMOTRON.model,
-            "lanes": list(LANES), "max_concurrent_calls": 4, "maximum_inference_calls": expected_calls,
+            "lanes": active_lanes, "max_concurrent_calls": len(active_lanes), "maximum_inference_calls": expected_calls,
             "start_index": args.start_index, "case_count": args.case_count,
             "max_output_tokens_per_call": args.max_output_tokens, "max_attempts_per_job": 1,
             "chat_template_kwargs": {"enable_thinking": False},
             "response_format": "json_schema",
+            "semantic_choice_schema": True,
             "deadline_seconds": args.deadline_seconds, "started_utc": datetime.now(timezone.utc).isoformat(),
             "new_gpu_instances": 0, "same_backbone_specialists_are_independent_models": False,
             "verified_cost_usd": None, "qualification": False, "action_authorized": False}
@@ -90,10 +114,16 @@ def main():
             record = {"case_id": case_id, "lane": lane, "split": "dev", "qualification": False}
             try:
                 messages = make_messages(case, lane)
+                if lane != "ocr":
+                    messages[1]["content"][0]["text"] += (
+                        " In this schema distinguishable means one candidate is identified, "
+                        "so proposed_candidate MUST equal ranking[0]. If no candidate matches "
+                        "or identification is uncertain, use insufficient and null. "
+                        "Rank each of c01, c02, c03 exactly once.")
                 payload = {"model": NEMOTRON.model, "messages": messages,
                            "temperature": 0, "max_tokens": args.max_output_tokens, "stream": False,
                            "chat_template_kwargs": {"enable_thinking": False},
-                           "response_format": response_format(lane)}
+                           "response_format": constrained_format(lane)}
                 write_json(folder / (case_id + ".request.json"),
                     {**record, "request_sha256": sha256(canonical(payload)), "cases_sha256": input_hash,
                      "query_image_sha256": case["query"]["image_sha256"],
@@ -131,8 +161,8 @@ def main():
                 "valid_observations": sum(r["status"] == "observed_schema_valid" for r in records),
                 "records": records}
 
-    with ThreadPoolExecutor(max_workers=4, thread_name_prefix="meta-r5-nemotron") as pool:
-        futures = [pool.submit(lane_job, lane) for lane in LANES]
+    with ThreadPoolExecutor(max_workers=len(active_lanes), thread_name_prefix="meta-r5-nemotron") as pool:
+        futures = [pool.submit(lane_job, lane) for lane in active_lanes]
         lanes = [f.result() for f in futures]
     if file_hash(args.cases) != input_hash or source_binding(args.source_commit) != sources:
         raise ValueError("execution_source_or_cases_changed")
