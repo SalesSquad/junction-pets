@@ -139,7 +139,8 @@ def verify_v8_locked_evidence(root: Path):
     require(isinstance(lock, dict), "V9_V8_UNSEEN_NO_IMMUTABLE_REVIEWED_RECEIPT")
     fixed = lock.get("files", {})
     required = {"training.json", "full_transitions.jsonl.gz", "manifest.json",
-                "receipt.json", "independent-qualification.json"}
+                "receipt.json", "independent-qualification.json",
+                "independent-positive-replay.json"}
     require(set(fixed) == required and all(
         isinstance(v, str) and len(v) == 64 and
         all(c in "0123456789abcdef" for c in v) for v in fixed.values()),
@@ -148,6 +149,7 @@ def verify_v8_locked_evidence(root: Path):
                 for f, sha in fixed.items()), "V9_V8_SOURCE_BOUND_BYTES_MISMATCH")
     receipt = json.loads((root / "receipt.json").read_text())
     binding = receipt.get("binding", {})
+    command = receipt.get("command", {})
     require(receipt.get("runId") == lock["run_id"] and
             binding.get("runId") == lock["run_id"] and
             binding.get("sourceSha") == REVIEWED_V8_HEAD and
@@ -156,10 +158,15 @@ def verify_v8_locked_evidence(root: Path):
             receipt.get("status") == "succeeded" and
             receipt.get("sourceVerified") is True and
             receipt.get("harnessVerified") is True and
-            receipt.get("issues") == [],
+            receipt.get("issues") == [] and
+            command.get("exitCode") == 0 and
+            command.get("wrapperExitCode") == 0 and
+            command.get("state") == "completed" and
+            command.get("binding") == binding,
             "V9_V8_REAL_CRACI_RECEIPT_NOT_QUALIFIED")
     training = json.loads((root / "training.json").read_text())
     qualification = json.loads((root / "independent-qualification.json").read_text())
+    replay = json.loads((root / "independent-positive-replay.json").read_text())
     require(training.get("schema") == "junction.rokoko.mujoco-v8.prospective-train.v1.training" and
             training.get("executed_head") == REVIEWED_V8_HEAD and
             training.get("actual_physics_engine") == "mujoco-3.3.7" and
@@ -167,7 +174,14 @@ def verify_v8_locked_evidence(root: Path):
             len(training.get("trials", [])) == 640 and
             training.get("frozen_weights_sha256") == V8_FROZEN_MODEL_SHA256 and
             qualification.get("dev_cal_test_ood_opened") is False and
-            qualification.get("promotion_authorized") is False,
+            qualification.get("promotion_authorized") is False and
+            qualification.get("experiment_complete") is True and
+            qualification.get("producer_exit_code") == 0 and
+            qualification.get("trials") == 640 and
+            replay.get("claim_verified") is True and
+            replay.get("no_dev_cal_test_ood") is True and
+            replay.get("model_promotion_authorized") is False and
+            replay.get("fully_replayed_positive_train_trials", 0) > 0,
             "V9_V8_REAL_TRAIN_CONTRACT_MISMATCH")
     require(training.get("no_dev_evaluation") is True and
             training.get("dev_cal_test_ood_opened") is False and
@@ -213,7 +227,9 @@ def grade_stage_graph(transitions, row):
     """
     require(bool(transitions), "V9_NO_REAL_OPTION_TRANSITIONS")
     first = transitions[0]["observation"]
+    away_sign = -1.0 if first[7] >= first[1] else 1.0
     contact = lateral = reopen = None
+    contact_baseline_y = None
     any_lateral = False
     any_reopen = False
     last_contacts = 0
@@ -230,9 +246,13 @@ def grade_stage_graph(transitions, row):
         last_contacts = contacts
         if contact is None and contacts > 0:
             contact = i
+            contact_baseline_y = float(before[1])
         did_lateral = signed_away(first, after) >= MIN_SAFE_LATERAL
         any_lateral |= did_lateral
-        if contact is not None and lateral is None and i >= contact and did_lateral:
+        post_contact_signed = (float(after[1]) - contact_baseline_y) * away_sign \
+            if contact_baseline_y is not None else 0.0
+        if (contact is not None and lateral is None and i >= contact and
+                post_contact_signed >= MIN_SAFE_LATERAL):
             lateral = i
         did_reopen = bool(i + 1 < len(transitions) and event["action"] in (3, 4) and
                           not (mask[1] or mask[2]) and
@@ -626,6 +646,9 @@ def main(argv=None):
                                  "UNSEEN_PENDING_BYTE_EXACT_INDEPENDENT_CRACI_QUALIFICATION")
         analysis["v9_status"] = "TRAINED_OFFLINE_UNPROMOTED_NO_NEW_PHYSICS"
     output = args.output_dir.resolve()
+    source_checkout_root = Path(__file__).resolve().parents[6]
+    require(not output.is_relative_to(source_checkout_root),
+            "V9_PRIVATE_TRAIN_OUTPUT_MUST_STAY_OUTSIDE_SOURCE_CHECKOUT")
     manifest = save_outputs(output, analysis, model, curriculum)
     print(json.dumps({"status": "offline_train_only", "work_id": WORK_ID,
                       "stage_readout_sha256": manifest["file_sha256"]["stage-readout.json"],
