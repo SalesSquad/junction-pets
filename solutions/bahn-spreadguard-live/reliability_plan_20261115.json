@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "work_id": "bahn-reliability-20261115",
+  "source_base": "957f0c3e2f0e77aef4c9ad045c0b9a9234fecc55",
+  "world_kind": "practice",
+  "level": 8,
+  "board": false,
+  "partitions": {
+    "development": ["bahn-reliability-dev-20261115-01", "bahn-reliability-dev-20261115-02", "bahn-reliability-dev-20261115-03", "bahn-reliability-dev-20261115-04", "bahn-reliability-dev-20261115-05", "bahn-reliability-dev-20261115-06"],
+    "blind": ["bahn-reliability-blind-20261115-01", "bahn-reliability-blind-20261115-02", "bahn-reliability-blind-20261115-03", "bahn-reliability-blind-20261115-04", "bahn-reliability-blind-20261115-05"]
+  },
+  "initial_development_policies": ["baseline", "deadline", "capacity"],
+  "frozen_candidate": null,
+  "decision_rules": {
+    "primary_service_target": 0.98,
+    "stretch_service_target": 0.99,
+    "official_eligibility_floor_per_world": 0.90,
+    "report": ["pooled_on_time_share", "worst_world_share", "paired_margin", "won_volume", "whole_seed_bootstrap", "handler_latency"],
+    "candidate_selection": "Use development only. Prefer higher service while preserving gross margin and volume; explicitly report all tradeoffs. No automatic promotion.",
+    "claim_limit": "Five blind seeds do not establish a 98–99% guarantee or final-world success probability. No retuning against blind outcomes."
+  }
+}
