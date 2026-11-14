@@ -11,7 +11,7 @@ const fail=code=>{throw new Error(code)};
 const root=resolve(process.env.CRACI_SOURCE_ROOT||'');
 const output=resolve(process.env.CRACI_RECEIPT_DIR||'', 'artifacts','valio-wal');
 await mkdir(output,{recursive:false});
-let report=null;
+let report=null,childStdout='',childStderr='';
 try {
   if (process.env.CRACI_SOURCE_SHA!==SOURCE) fail('EXPECTED_SOURCE_SHA_MISMATCH');
   const {stdout:gitHead}=await exec('git',['-C',root,'rev-parse','HEAD'],{timeout:15000});
@@ -51,9 +51,22 @@ try {
   console.log(JSON.stringify(qualification));
   if(!passed)process.exitCode=1;
 }catch(error){
+  // Preserve the actual child failure reason in bounded, sanitized artifacts.
+  // execFile buffers stderr/stdout on nonzero exit; without these we would
+  // misleadingly report a generic failure even for a real WAL invariant bug.
+  const scrub=value=>String(value??'')
+    .replace(/socket:[^\\s"']+/g,'[private-socket]')
+    .replace(/postgres(?:ql)?:\\/\\/[^\\s"']+/gi,'[private-database-url]')
+    .replace(/(password|token|authorization)\\s*[:=]\\s*[^\\s"']+/gi,'$1=[redacted]')
+    .slice(-16000);
+  const savedOut=scrub(error.stdout||childStdout);
+  const savedErr=scrub(error.stderr||childStderr||error.message);
+  if(savedOut)await writeFile(join(output,'child.stdout.log'),savedOut+'\\n',{flag:'wx'});
+  if(savedErr)await writeFile(join(output,'child.stderr.log'),savedErr+'\\n',{flag:'wx'});
   const failure={schema:'junction.valio.wal.craci.qualification.v1',
     source_sha:SOURCE,status:'failed_or_blocked',
     error_code:/^[A-Z_]{4,80}$/.test(error.message||'')?error.message:'WAL_LAB_EXECUTION_FAILED',
+    failure_excerpt:savedErr.slice(-600),
     exit_code:error.code??null};
   await writeFile(join(output,'failed.json'),JSON.stringify(failure,null,2)+'\n',{flag:'wx'});
   console.error(JSON.stringify(failure));
