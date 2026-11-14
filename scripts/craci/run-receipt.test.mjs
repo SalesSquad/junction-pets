@@ -97,6 +97,22 @@ test('child SIGTERM is returned as the same signal and retained as a failed comm
   assert.equal(receipt.command.exitCode, null); assert.equal(record.status, 'failed');
 });
 
+test('wallSeconds agrees with independent command timestamps for a bounded delay', async t => {
+  const f = await fixture(t);
+  assert.equal(invoke(f, 'run', "setTimeout(() => process.stdout.write('synthetic timing sample\\n'), 150)").status, 0);
+  const command = await json(join(f.evidence, 'command.json'));
+  const timestampSeconds = (Date.parse(command.finishedAt) - Date.parse(command.startedAt)) / 1000;
+  assert.ok(timestampSeconds >= 0.15, 'The child must execute its actual delayed workload');
+  t.diagnostic('wallSeconds=' + command.wallSeconds + '; independent timestamp seconds=' + timestampSeconds);
+  assert.ok(Math.abs(command.wallSeconds - timestampSeconds) <= 0.1,
+    'The seconds metric must agree with independently recorded UTC endpoints within 100 ms');
+  assert.equal(invoke(f, 'finalize').status, 0);
+  const {receipt, run} = await published(f);
+  assert.equal(receipt.command.wallSeconds, command.wallSeconds);
+  assert.equal(run.metrics[0].unit, 'seconds');
+  assert.equal(run.metrics[0].value, command.wallSeconds);
+});
+
 test('setup failure without checkout/command produces incomplete evidence, never zero cost or success', async t => {
   const f = await fixture(t);
   f.env.CRACI_SOURCE_ROOT = join(f.base, 'checkout-never-created');

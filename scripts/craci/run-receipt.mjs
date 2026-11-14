@@ -223,7 +223,7 @@ export async function runCommand(argv, env = process.env) {
     }
   }
   result.finishedAt = new Date().toISOString();
-  result.wallSeconds = Math.round((performance.now() - started) * 1000) / 1000;
+  result.wallSeconds = Math.round(performance.now() - started) / 1000;
   try {await exclusiveWrite(join(config.root, 'command.json'), bytes(result));}
   catch (error) {
     // Evidence failure must not replace an already observed child failure.
