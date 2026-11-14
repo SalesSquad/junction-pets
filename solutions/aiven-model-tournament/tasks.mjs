@@ -165,6 +165,115 @@ Return JSON {"services": [service types]}.` + JSON_TAIL,
   }
 };
 
+// Extreme tasks: long context with decoys, designs executed in a fault simulator,
+// exact bin packing under plan limits, and reconciliation across a time zone.
+const hhmm = m => `${String(8 + Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+export function simulateDesign(d, sc) {
+  // 200 actions over orders; tenant T1 produces sc.skew of traffic. Faults: the relay
+  // crashes once between send and mark (or mark and send), a consumer crashes once
+  // between effect and offset commit (or offset commit and effect), and once between
+  // effect and an external dedupe-cache write.
+  const inv = { no_duplicates: true, no_loss: true, per_order_order: true, no_hot_partition: true };
+  if (d.relay_mark === 'before_send') inv.no_loss = false;          // marked, then crashed before send
+  const resent = d.relay_mark !== 'before_send';                     // after_send crash -> resend (new offset)
+  if (d.commit_order === 'offset_then_db') inv.no_loss = false;      // offset committed, effect never happened
+  const redelivered = d.commit_order !== 'offset_then_db';           // db first -> same offset redelivered
+  const dedupeWorks = d.dedupe_on === 'idempotency_key' && d.dedupe_store === 'same_db_transaction_as_effect';
+  if (!dedupeWorks) {
+    if (d.dedupe_on === 'none' || d.dedupe_store === 'none') inv.no_duplicates = !(resent || redelivered) ? true : false;
+    else if (d.dedupe_on === 'kafka_offset') inv.no_duplicates = !resent;             // resend gets a new offset
+    else if (d.dedupe_store === 'separate_cache') inv.no_duplicates = false;          // crash between effect and cache write
+    else inv.no_duplicates = false;
+  }
+  if (d.dedupe_on === 'kafka_offset' && d.dedupe_store === 'separate_cache') inv.no_duplicates = false;
+  if (['idempotency_key', 'random'].includes(d.message_key)) inv.per_order_order = false;
+  if (d.message_key === 'tenant_id' && sc.skew > 0.5) inv.no_hot_partition = false;
+  if (!['tenant_id', 'order_id', 'idempotency_key', 'random'].includes(d.message_key)) inv.per_order_order = false;
+  return inv;
+}
+function minBins(items, cap) { // exact minimum bins by subset DP (n <= 10)
+  const n = items.length, full = (1 << n) - 1, best = new Array(1 << n).fill(null);
+  best[0] = [1, 0];
+  for (let m = 0; m <= full; m++) { const b = best[m]; if (!b) continue;
+    for (let i = 0; i < n; i++) if (!(m & (1 << i))) { const nm = m | (1 << i);
+      const cand = b[1] + items[i] <= cap ? [b[0], b[1] + items[i]] : [b[0] + 1, items[i]];
+      const cur = best[nm]; if (!cur || cand[0] < cur[0] || (cand[0] === cur[0] && cand[1] < cur[1])) best[nm] = cand; } }
+  return best[full][0];
+}
+export const EXTREME_TASKS = {
+  needleLog(r) {
+    const P = 6, mins = 240, off = Array.from({ length: P }, () => int(r, 1e6, 9e6)), rows = [];
+    const stalled = int(r, 0, P - 1); let regress = int(r, 0, P - 1); while (regress === stalled) regress = int(r, 0, P - 1);
+    let decoy = int(r, 0, P - 1); while (decoy === stalled || decoy === regress) decoy = int(r, 0, P - 1);
+    const stallAt = int(r, 120, 200), regressAt = int(r, 30, 110), decoyAt = int(r, 40, 200);
+    for (let m = 0; m < mins; m++) {
+      if (m % 37 === 0) rows.push(`${hhmm(m)} INFO group=ledger rebalance completed members=3`);
+      for (let p = 0; p < P; p++) {
+        const frozen = (p === stalled && m >= stallAt) || (p === decoy && m >= decoyAt && m < decoyAt + 3);
+        if (p === regress && m === regressAt) off[p] -= int(r, 5000, 20000);
+        else if (!frozen) off[p] += int(r, 200, 900);
+        rows.push(`${hhmm(m)} partition=${p} committed_offset=${off[p]} status=OK`);
+      }
+    }
+    const truth = { permanently_stalled: { partition: stalled, from: hhmm(stallAt) }, offset_regressions: [{ partition: regress, at: hhmm(regressAt) }] };
+    return { truth, prompt: `Read-only metrics export for consumer group "ledger", one line per partition per minute from 08:00 to 11:59, plus INFO lines:
+${rows.join('\n')}
+Some partitions pause briefly and recover; that is normal. Find (1) the partition whose committed offset stops advancing permanently until the end of the export, with the first minute its offset equals the previous minute's, and (2) every partition and minute where the committed offset went DOWN compared with the previous minute.
+Return JSON {"permanently_stalled": {"partition": number, "from": "HH:MM"}, "offset_regressions": [{"partition": number, "at": "HH:MM"}]}.` + JSON_TAIL,
+      score: a => { const ps = a.permanently_stalled ?? {}; const regs = Array.isArray(a.offset_regressions) ? a.offset_regressions : [];
+        return (ps.partition === stalled && ps.from === truth.permanently_stalled.from) / 2 + (regs.length === 1 && regs[0].partition === regress && regs[0].at === hhmm(regressAt)) / 2; } };
+  },
+  designSimulation(r) {
+    const skew = pick(r, [0.6, 0.75, 0.9]);
+    const sc = { skew };
+    return { truth: { message_key: 'order_id', dedupe_on: 'idempotency_key', dedupe_store: 'same_db_transaction_as_effect', commit_order: 'db_then_offset', relay_mark: 'after_send' }, prompt: `Design the payment-action pipeline (PostgreSQL outbox → relay → Aiven for Apache Kafka → consumer that charges cards). Facts:
+- Actions belong to orders; each order belongs to a tenant. Actions of the same order must be applied in order; there is no ordering requirement across orders.
+- Tenant T1 produces ${Math.round(skew * 100)} % of all traffic; no partition may carry more than half of the traffic.
+- The relay can crash between publishing a row and marking it published. The consumer can crash between charging and committing its Kafka offset, and between charging and writing to any external cache.
+- A card must never be charged twice and no action may be lost.
+Your design will be executed in a fault simulator. Choose exactly one value per field.
+Return JSON {"message_key": "tenant_id"|"order_id"|"idempotency_key"|"random", "dedupe_on": "idempotency_key"|"kafka_offset"|"none", "dedupe_store": "same_db_transaction_as_effect"|"separate_cache"|"none", "commit_order": "db_then_offset"|"offset_then_db", "relay_mark": "after_send"|"before_send"}.` + JSON_TAIL,
+      score: a => {
+        const allowed = { message_key: ['tenant_id', 'order_id', 'idempotency_key', 'random'], dedupe_on: ['idempotency_key', 'kafka_offset', 'none'], dedupe_store: ['same_db_transaction_as_effect', 'separate_cache', 'none'], commit_order: ['db_then_offset', 'offset_then_db'], relay_mark: ['after_send', 'before_send'] };
+        if (!Object.entries(allowed).every(([k, v]) => v.includes(a[k]))) return 0; // a design that cannot be executed
+        return Object.values(simulateDesign(a, sc)).filter(Boolean).length / 4; } };
+  },
+  binPacking(r) {
+    const cap = pick(r, [1000, 1200, 1500]), n = int(r, 7, 9);
+    const loads = Array.from({ length: n }, () => int(r, 150, Math.round(cap * 0.75)));
+    const over = r() < 0.3; if (over) loads[int(r, 0, n - 1)] = cap + int(r, 50, 400);
+    const names = loads.map((_, i) => `t${i + 1}`);
+    const blocking = over ? names[loads.findIndex(l => l > cap)] : null;
+    const bins = over ? null : minBins(loads, cap);
+    const feasible = !over && bins <= 4; // plan A: at most 2 partitions per topic and 2 topics
+    const truth = { feasible_on_plan_a: feasible, min_partitions: bins, blocking_tenant: blocking };
+    return { truth, prompt: `Tenant event rates (messages/s): ${names.map((t, i) => `${t}=${loads[i]}`).join(', ')}.
+Every tenant's events must stay in one partition (strict per-tenant order). One consumer handles at most ${cap} messages/s and reads one partition. Plan A allows at most 2 partitions per topic and at most 2 topics; tenants may be split across topics.
+Compute the minimum number of partitions that can carry all tenants (exact optimum, not a heuristic), whether Plan A is feasible, and if some single tenant alone exceeds one consumer's capacity, name it (then min_partitions is null and the plan is infeasible).
+Return JSON {"feasible_on_plan_a": boolean, "min_partitions": number|null, "blocking_tenant": string|null}.` + JSON_TAIL,
+      score: a => (a.feasible_on_plan_a === feasible) / 3 + (a.min_partitions === bins) / 3 + (a.blocking_tenant === blocking) / 3 };
+  },
+  timezoneReconcile(r) {
+    const rename = { 'acme-old': 'acme', 'beta-legacy': 'beta' }, tenants = ['acme', 'beta', 'gamma'];
+    const truth = { acme: 0, beta: 0, gamma: 0 }, deliveries = []; let offset = 0;
+    for (let i = 1; i <= 60; i++) {
+      const t = pick(r, [...tenants, 'acme-old', 'beta-legacy']), tok = int(r, 50, 500);
+      const utcMin = int(r, 20 * 60, 26 * 60 + 59); // 2026-11-12 20:00 .. 2026-11-13 02:59 UTC
+      const d = new Date(Date.UTC(2026, 10, 12, 0, utcMin)); const ts = d.toISOString().replace('.000', '');
+      const helsinkiDay = new Date(d.getTime() + 2 * 3600e3).toISOString().slice(0, 10);
+      if (helsinkiDay === '2026-11-13') truth[rename[t] ?? t] += tok;
+      deliveries.push({ offset: ++offset, event_id: `ev${i}`, tenant: t, ts, tokens: tok });
+      if (r() < 0.2) { const later = new Date(d.getTime() + int(r, 30, 300) * 60e3).toISOString().replace('.000', '');
+        deliveries.push({ offset: ++offset, event_id: `ev${i}`, tenant: t, ts: later, tokens: tok }); } // redelivery with a later ts
+    }
+    return { truth, prompt: `Usage deliveries from Kafka in offset order. Rules: an event_id is one real event; its true time is the ts of its FIRST delivery (lowest offset); later deliveries are redeliveries and must be ignored. Tenants were renamed: acme-old → acme, beta-legacy → beta. Billing day is the calendar day in Europe/Helsinki (UTC+2 on these dates).
+${deliveries.map(e => JSON.stringify(e)).join('\n')}
+Compute tokens per tenant for Helsinki day 2026-11-13.
+Return JSON {"acme": number, "beta": number, "gamma": number}.` + JSON_TAIL,
+      score: a => tenants.filter(t => a[t] === truth[t]).length / 3 };
+  }
+};
+
 export function lastJson(text) {
   const blocks = [...text.matchAll(/```json\s*([\s\S]*?)```/g)];
   if (!blocks.length) return null;

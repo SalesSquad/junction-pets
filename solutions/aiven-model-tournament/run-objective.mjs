@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Objective tournament: code-scored Aiven tasks, randomised per seed, each model run
 // twice: with the junction.aiven companion guidance ("pet") and without it ("bare").
-//   --models=haiku,sonnet,opus --arms=pet,compact,bare --tier=basic|hard|all --seeds=3 --concurrency=6 --execute
+//   --models=haiku,sonnet,opus --arms=pet,compact,bare --tier=basic|hard|extreme|all --seeds=3 --concurrency=6 --execute
 // Arms: pet = full AGENTS.md company context; compact = pets/aiven/AGENTS.compact.md; bare = generic assistant.
 // The same seeds are used for every model and arm, so arms differ only by guidance.
 import { spawn } from 'node:child_process';
@@ -10,11 +10,11 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { loadPackages } from '../../lib/catalog.mjs';
 import { companyContext } from '../../lib/company-context.mjs';
-import { TASKS, HARD_TASKS, rng, lastJson } from './tasks.mjs';
+import { TASKS, HARD_TASKS, EXTREME_TASKS, rng, lastJson } from './tasks.mjs';
 
 const arg = (k, d) => process.argv.find(a => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const tier = arg('tier', 'all'), arms = arg('arms', 'pet,compact,bare').split(',');
-const TASKSET = { ...(tier !== 'hard' ? TASKS : {}), ...(tier !== 'basic' ? HARD_TASKS : {}) };
+const TASKSET = { ...(['basic', 'all'].includes(tier) ? TASKS : {}), ...(['hard', 'all'].includes(tier) ? HARD_TASKS : {}), ...(['extreme', 'all'].includes(tier) ? EXTREME_TASKS : {}) };
 const models = arg('models', 'haiku,sonnet,opus').split(','), seeds = Number(arg('seeds', '3')), concurrency = Number(arg('concurrency', '6'));
 const sha = s => createHash('sha256').update(s).digest('hex');
 const root = fileURLToPath(new URL('../../', import.meta.url));
