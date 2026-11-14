@@ -26,7 +26,7 @@ TD_SOURCE = "f7b512d93ca46e6ddf7204f62f118eee800f285b"
 V2_WEIGHTS = "1bab986c10be062cf87a4848916917cbab3a78b53e78cda8c2f8673f62d4cc55"
 TD_WEIGHTS = "3868559e05f81e3148e34ebd99a7d874525e4ceba2ca942779628104d38fef28"
 ARENA_SHA256 = "76b6cbe373323d944e21291fc10352f983ed8cf5d5bbc245ca37aadfda11089f"
-RUN_SHA256 = "0ad2765fef407da181c83b0140de80a6f1fb5a83b7cd7f1fd0cc48fb0ae8f5c589ae35"
+RUN_SHA256 = "0ad2765fef407da181c83b0140de80a6f1d82fa0fa132cf1de73013c9cf9ffe0"
 ARENA_PATH = "solutions/rokoko-teleoperation-gym/learning/action_necessity"
 
 # Distinct from the exposed v1 (320000/420000), v2 (326000/426000),
