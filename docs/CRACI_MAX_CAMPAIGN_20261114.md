@@ -16,7 +16,22 @@ Private SalesSquad/junction-pets; draft integration PR [#138](https://github.com
 | Aalto Recovery Compass | 1a02a0bb650598571b63554312c7b5e82b323c7f | [43603674333](https://github.com/SalesSquad/junction-pets/actions/runs/43603674333) | 3 engines × 2 viewports: consent gate, unsent local-only draft, revoke/erase/reload, recipient safety and zero external requests |
 | AstraZeneca Care Equity | ebff750c176838123311affed06082e8144001f5 | [43603679763](https://github.com/SalesSquad/junction-pets/actions/runs/43603679763) | 3 engines × 2 viewports: small-cohort suppression, overlapping uncertainty, invalid comparison denial, synthetic source digest, draft-only export |
 
-Learner seed stability study: [43603928047](https://github.com/SalesSquad/junction-pets/actions/runs/43603928047), pre-registered seeds 17,23,31,43,59,67,73,89 with the same source and fixed world-prefix/test sets; 1000+100/200/100 episodes per seed. This tests learner variability, NOT fresh independent heldout worlds. Report all seeds, including failures.
+Learner-seed stability study: [SUCCESS 43603928047](https://github.com/SalesSquad/junction-pets/actions/runs/43603928047), eight pre-registered learners 17/23/31/43/59/67/73/89; **8/8 jobs successful**. Each: 1,000 train +100 calibration/200 fixed-world test/100 fixed-world OOD episodes. Source 59479b42; distinct trained weights, total 97,167 gradient updates and 65,746,692 MuJoCo physics steps. Exact outcome by learner:
+
+| Learner seed | Test successes / 200 | Test unsafe | OOD successes / 100 | OOD unsafe |
+|---:|---:|---:|---:|---:|
+| 17 | 110 | 0 | 7 | 1 |
+| 23 | 110 | 0 | 7 | 1 |
+| 31 | 110 | 0 | 7 | 1 |
+| 43 | 110 | 0 | 7 | 1 |
+| 59 | 109 | 0 | 5 | 1 |
+| 67 | 110 | 0 | 7 | 1 |
+| 73 | 110 | 0 | 6 | 1 |
+| 89 | 88 | 0 | 3 | 0 |
+
+Aggregate 857/1,600 *repeated paired learner/world* test successes, 49/800 repeated OOD successes, seven OOD unsafe events. **These are the SAME 200 test and 100 OOD world IDs for each learner, not independent worlds.** The seven unsafe events include repeated failure of world 420030 (near peak impulse 0.00608 > 0.006 threshold). Distinct weight hashes and per-world actions/trajectories confirm the evaluator really executes learned Q-networks; near-identical terminal results suggest a saturated nearly constant PUSH_MEDIUM strategy, not a strong learning uplift.
+
+To test that alternative directly, a *separate* two-learner fresh-world ablation [43605259084](https://github.com/SalesSquad/junction-pets/actions/runs/43605259084) was launched: train 1,000 then compare frozen trained and untrained Q, conservative constant PUSH_MEDIUM, heuristic, masked random and abstain on **300 completely new test world IDs** 321000..321299 and **200 new OOD IDs** 421000..421199. Paired world-level bootstrap 95% CI; pre-registered learners 17/43. This will test added value of learning, not rely on a weak heuristic baseline. Record success/unsafe against *all* baselines including any negative result.
 
 ## Measured conclusions (all synthetic)
 
