@@ -15,11 +15,11 @@ def main() -> int:
     src = Path(os.environ["CRACI_SOURCE_ROOT"]).resolve()
     evidence = (Path(os.environ["CRACI_RECEIPT_DIR"]) / "artifacts" / "rokoko-mujoco-v3").resolve()
     if evidence.exists():
-        raise RuntimeError("NO_OVERWRITE_MUJOCO_V2_PROOF")
+        raise RuntimeError("NO_OVERWRITE_MUJOCO_V3_PROOF")
     evidence.mkdir(parents=True)
     observed = subprocess.check_output(["git", "-C", str(src), "rev-parse", "HEAD"], text=True).strip()
     if observed != SOURCE or os.environ["CRACI_SOURCE_SHA"] != SOURCE:
-        raise RuntimeError("MUJOCO_V2_PIN_MISMATCH")
+        raise RuntimeError("MUJOCO_V3_PIN_MISMATCH")
     python = Path(os.environ["RUNNER_TEMP"]) / "mujoco-venv/bin/python"
     if not python.is_file():
         raise RuntimeError("MUJOCO_VENV_MISSING")
@@ -66,7 +66,7 @@ def main() -> int:
         "actual_physics_source_verified": source_ok,
         "policy_scientific_gate_passed": science_ok,
         "teacher_baseline_negative_historical_run": 43627944236,
-    "v2_scientific_negative_run": 43628857595,
+        "v2_scientific_negative_run": 43628857595,
         "adaptive_success": comparisons["candidate_success"],
         "constant_success": comparisons["constant_success"],
         "unsafe_adaptive": comparisons["candidate_unsafe"],
