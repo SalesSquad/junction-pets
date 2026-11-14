@@ -57,6 +57,22 @@ export function centsToEuros(cents, locale = 'en-FI') {
   return new Intl.NumberFormat(locale, {style: 'currency', currency: 'EUR'}).format(cents / 100);
 }
 
+// Refunds and signed account balances can cancel after an intermediate sum
+// exceeds Number's exact range. Accumulate as BigInt, then check each value
+// exposed by the existing Number-based cent contract before converting back.
+const maxSafeCents = BigInt(Number.MAX_SAFE_INTEGER);
+function exactCents(cents) {
+  if (!Number.isSafeInteger(cents)) throw new Error('Unsafe cent amount');
+  return BigInt(cents);
+}
+function safeCentNumber(cents, message = 'Unsafe total') {
+  if (cents < -maxSafeCents || cents > maxSafeCents) throw new Error(message);
+  return Number(cents);
+}
+function sumSafeCents(values, message = 'Unsafe total') {
+  return safeCentNumber(values.reduce((sum, cents) => sum + exactCents(cents), 0n), message);
+}
+
 function validDay(day) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return false;
   const parsed = new Date(`${day}T12:00:00Z`);
@@ -140,10 +156,11 @@ export function monthBefore(month) {
 export function spendingSummary(rows, month = currentMonth(rows)) {
   if (!/^\d{4}-\d{2}$/.test(month ?? '')) throw new Error('Missing data month');
   const subset = rows.filter(x => x.date.startsWith(month) && x.amountCents !== 0);
-  const totals = Object.fromEntries(BASKETS.map(b => [b.id, 0]));
-  for (const row of subset) totals[row.basket] += row.amountCents;
-  for (const [key, cents] of Object.entries(totals)) if (!Number.isSafeInteger(cents)) throw new Error(`Unsafe total ${key}`);
-  const spentCents = Object.values(totals).reduce((s, n) => s + n, 0);
+  const exactTotals = Object.fromEntries(BASKETS.map(b => [b.id, 0n]));
+  for (const row of subset) exactTotals[row.basket] += exactCents(row.amountCents);
+  const totals = Object.fromEntries(Object.entries(exactTotals)
+    .map(([key, cents]) => [key, safeCentNumber(cents, `Unsafe total ${key}`)]));
+  const spentCents = safeCentNumber(Object.values(exactTotals).reduce((sum, cents) => sum + cents, 0n));
   return {month, totals, spentCents, sources: subset.map(x => x.row), rows: subset};
 }
 
@@ -174,14 +191,14 @@ export function budgetCapacity(rows, assumptions = {}) {
   const reserves = [regularBills, irregularBuffer, emergencyBuffer].map(v => eurosToCents(v));
   if (reserves.some(x => x < 0)) throw new Error('Reserves cannot be negative');
   const accountBalances = latestBalanceByAccount(rows);
-  const balanceCents = accountBalances.reduce((sum, x) => sum + x.balanceCents, 0);
-  const reserveCents = reserves.reduce((sum, x) => sum + x, 0);
-  if (!Number.isSafeInteger(balanceCents) || !Number.isSafeInteger(reserveCents)) throw new Error('Unsafe total');
+  const balanceCents = sumSafeCents(accountBalances.map(x => x.balanceCents));
+  const reserveCents = sumSafeCents(reserves);
+  const netAfterReservesCents = safeCentNumber(exactCents(balanceCents) - exactCents(reserveCents));
   return {
     illustrationOnly: true, balanceCents, reserveCents,
-    netAfterReservesCents: balanceCents - reserveCents,
-    availableCents: Math.max(0, balanceCents - reserveCents),
-    shortfallCents: Math.max(0, reserveCents - balanceCents),
+    netAfterReservesCents,
+    availableCents: Math.max(0, netAfterReservesCents),
+    shortfallCents: Math.max(0, -netAfterReservesCents),
     accountBalanceSources: accountBalances.map(x => x.row),
     asOf: latestDate(rows), reserves: {regularBills: reserves[0], irregularBuffer: reserves[1], emergencyBuffer: reserves[2]},
     caveat: 'Illustrative only. The CSV snapshot does not include pending card holds, future income, upcoming bills or real-time balances; not a spending guarantee.',
@@ -234,7 +251,7 @@ export function answerQuestion(question, rows, assumptions = {}) {
   const focus = /taxi|taks/.test(q) ? 'Taxis' : /coffee|kahvi/.test(q) ? 'Coffee' : /restaurant|ravintol|dining/.test(q) ? 'Dining' : /grocer|ruokakaup|ruokamen|päivittäistavar/.test(q) ? 'Groceries' : /rent|vuokr|housing/.test(q) ? 'Housing' : /electric|sähkö|utilit/.test(q) ? 'Utilities' : /repair|korjau/.test(q) ? 'Repairs' : /health|dent|tervey/.test(q) ? 'Healthcare' : null;
   if (focus) {
     const relevant = summary.rows.filter(x => x.group === focus);
-    const value = relevant.reduce((sum, x) => sum + x.amountCents, 0);
+    const value = sumSafeCents(relevant.map(x => x.amountCents));
     return {type: 'category', title: `${focus} · ${formatMonth(month)}`, message: `${centsToEuros(value)} net spending, using ${relevant.length} matching source rows.`, sources: relevant.map(x => x.row), result: {month, focus, spentCents: value}};
   }
   const basket = /irregular|unexpected|epäsäännöllis/.test(q) ? 'mandatory-irregular'
@@ -243,7 +260,7 @@ export function answerQuestion(question, rows, assumptions = {}) {
   if (basket) {
     const relevant = summary.rows.filter(x => x.basket === basket);
     const label = BASKETS.find(x => x.id === basket).label;
-    const spentCents = relevant.reduce((sum, x) => sum + x.amountCents, 0);
+    const spentCents = sumSafeCents(relevant.map(x => x.amountCents));
     return {type: 'basket', title: `${label} · ${formatMonth(month)}`, message: `${centsToEuros(spentCents)} of observed net outgoings in this basket.`, sources: relevant.map(x => x.row), result: {month, basket, spentCents}};
   }
   if (/spend|spent|money|käyt|kulut|menot|kolme|basket|three|where|mihin|summary|yhteenveto|kuukaus/.test(q)) {
