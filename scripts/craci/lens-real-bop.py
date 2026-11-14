@@ -199,7 +199,7 @@ def export(archive: Path, output: Path, frames_per_scene: int):
     fields = [col for col in table.column_names if col not in
               ("frame_sha256", "crop_group_id")]
     with (output/"real-object-features.csv").open("x", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=fields)
+        w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         w.writeheader()
         for row in rows:
             w.writerow({field: row[field] for field in fields})

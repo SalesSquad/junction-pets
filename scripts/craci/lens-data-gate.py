@@ -13,7 +13,7 @@ from pathlib import Path
 SOURCE_ID = "bop-ycbv-test-public-mit"
 SOURCE_ARCHIVE = "c0c11251849877e7b2f373f6c7acf54739dc69d0fb2649c20050ca977bf5513d"
 LICENSE_PAGE = "https://bop.felk.cvut.cz/datasets/"
-EXPECTED_CSV = "305489bd8fa40623ba5b3aef4c71d86ced65c0cf2f4d62cc0d745910e5189b9e"
+EXPECTED_CSV = "c2374f53bc510b6655623f5fa05bb23d08bd1531f24b0aa4e2bcdccab11899a6"
 EXPECTED_PARQUET = "be31ea09fcbaeb2adb67cdcbd9a248b65bf5444defe293cbc48cf4c29c37b491"
 STATUSES = {"approved_public_benchmark_only", "quarantined_not_training",
             "synthetic_only_not_real_training"}
