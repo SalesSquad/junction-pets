@@ -135,6 +135,24 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
         and counts["learned_v5"]["unsafe"] <= counts["safe_v4"]["unsafe"]
         and ci[0] > 0
     )
+    # A failed *development* world is evidence about a failure category, not
+    # permission to replay that world as new training or a fresh holdout.
+    lost_to_constant = sum(
+        int(w["constant"]["success"] and not w["learned_v5"]["success"])
+        for w in worlds
+    )
+    lost_to_v4 = sum(
+        int(w["safe_v4"]["success"] and not w["learned_v5"]["success"])
+        for w in worlds
+    )
+    failure_priority = (
+        "learn_contact_risk_on_fresh_train_seeds"
+        if counts["learned_v5"]["unsafe"] > min(counts["constant"]["unsafe"],
+                                                  counts["safe_v4"]["unsafe"])
+        else "reduce_safe_refusals_or_stalls_on_fresh_train_seeds"
+        if counts["learned_v5"]["abstain"] or lost_to_constant or lost_to_v4
+        else "increase_robust_success_on_fresh_train_seeds"
+    )
     return {
         "schema": "junction.rokoko.mujoco-v5-learning.craci.dev.v1",
         "exact_source_sha": source,
@@ -146,6 +164,21 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
         "weights_sha256": training["weights_sha256"],
         "counts": counts,
         "paired_bootstrap95_pp": ci,
+        "failure_mining": {
+            "candidate_loses_worlds_constant_wins": lost_to_constant,
+            "candidate_loses_worlds_v4_wins": lost_to_v4,
+            "candidate_unsafe_worlds": counts["learned_v5"]["unsafe"],
+            "candidate_abstained_worlds": counts["learned_v5"]["abstain"],
+        },
+        "next_learning_round": {
+            "suggested_failure_class": failure_priority,
+            "new_train_only_seed_start": 5_291_000,
+            "new_fresh_dev_seed_start": 129_250,
+            "previous_dev_seeds_exposed": True,
+            "requires_new_source_and_weight_hashes": True,
+            "dispatch_authorized": False,
+            "notes": "advisory only; do not train on opened dev/cal/test/OOD worlds",
+        },
         "science_gate_passed": scientific_ok,
         "promotion_authorized": False,
         "independent_review_pending": True,
