@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Chibi Resume: a local synthetic camera-bag task. Only a visible user confirmation completes a step. Observations and assistant proposals do not prove identity or completion. No live glasses, microphone or Chibi host is connected.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Chibi Resume — user confirmation required · local demo</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#task">Skip to your task</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <a href="./" class="brand" aria-label="Chibi Resume home"><span class="brand-symbol" aria-hidden="true">✳</span> chibi<span class="brand-divider">/</span><span class="brand-product">resume</span></a>
+      <nav aria-label="Companion capabilities" class="capability-nav">
+        <span class="nav-active" aria-current="page">Resume</span>
+        <button type="button" disabled title="Future capability: consensual task handover">Relay <span>Later</span></button>
+        <button type="button" disabled title="Future capability: notice meaningful changes">Familiar <span>Later</span></button>
+      </nav>
+      <span class="demo-label"><span aria-hidden="true"></span> Interactive local demo</span>
+    </header>
+
+    <main id="task">
+      <section class="page-heading" aria-labelledby="page-title">
+        <div><p class="eyebrow">A SMALL TASK. ONE LESS THING TO REMEMBER.</p><h1 id="page-title">Right where you left off.</h1><p class="intro">A companion that remembers what you confirmed — and asks about the rest.</p></div>
+        <a class="text-link" href="?display=1" id="displayLink">Open compact view <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <div class="workspace">
+        <section class="display-column" aria-label="Compact task surface">
+          <div class="display-heading"><span class="eyebrow">YOUR NEXT MOMENT</span><span class="surface-note">Display + phone</span></div>
+          <article class="display-surface" id="displaySurface" aria-labelledby="momentTitle">
+            <div class="surface-top"><span class="surface-wordmark"><span aria-hidden="true">✳</span> RESUME</span><span id="phaseLabel" class="phase-label">READY WHEN YOU ARE</span></div>
+            <div class="segments" aria-label="Packing progress"><span></span><span></span><span></span></div>
+            <div class="moment-copy"><h2 id="momentTitle">Start with your camera.</h2><p id="momentDescription">Three essentials. You decide when each one is packed.</p></div>
+            <div class="scene" aria-hidden="true">
+              <svg viewBox="0 0 460 200" role="presentation" class="bag-scene">
+                <defs><linearGradient id="bagShade" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#333d3a"/><stop offset="1" stop-color="#1d2523"/></linearGradient><linearGradient id="lensShade"><stop stop-color="#76958e"/><stop offset="1" stop-color="#253e39"/></linearGradient></defs>
+                <ellipse cx="231" cy="174" rx="166" ry="13" fill="#000" opacity=".35"/>
+                <path d="M137 74c-1-23 13-38 36-38h112c24 0 39 14 39 38" fill="none" stroke="#414d47" stroke-width="10"/>
+                <path d="M90 77c0-10 8-18 18-18h243c10 0 18 8 18 18l-10 83c-1 9-8 15-18 15H117c-9 0-16-6-17-15Z" fill="url(#bagShade)" stroke="#4b5850" stroke-width="1.5"/>
+                <path d="M102 79h255M151 67v99M306 67v99" stroke="#526259" stroke-width="1" opacity=".5"/>
+                <path d="M185 143h91v24h-91z" fill="#17201d" stroke="#44534b"/><path d="M219 148h23" stroke="#b3c2a8" stroke-width="2"/>
+                <g class="scene-item scene-camera" data-item="0"><rect x="111" y="83" width="88" height="53" rx="10" fill="#131a19" stroke="#77877b" stroke-width="1.5"/><path d="M126 83l6-10h27l6 10" fill="#29352e" stroke="#77877b"/><circle cx="155" cy="109" r="23" fill="#1e2b28" stroke="#8aab96" stroke-width="2"/><circle cx="155" cy="109" r="15" fill="url(#lensShade)" stroke="#455f54"/><circle cx="151" cy="104" r="5" fill="#b3dbbe" opacity=".45"/><rect x="175" y="91" width="11" height="5" rx="2" fill="#78977d"/></g>
+                <g class="scene-item scene-mic" data-item="1"><rect x="218" y="73" width="31" height="60" rx="15" fill="#252e2a" stroke="#7b9181" stroke-width="1.5"/><path d="M226 84h15m-15 7h15m-15 7h15m-15 7h15" stroke="#89998a" stroke-width="2"/><path d="M210 106v12c0 29 48 29 48 0v-12m-24 36v12m-12 0h24" fill="none" stroke="#718576" stroke-width="3"/></g>
+                <g class="scene-item scene-charger" data-item="2"><path d="M310 91V73m13 18V73" stroke="#a5b0a4" stroke-width="5"/><rect x="290" y="89" width="52" height="55" rx="10" fill="#c5cbbb" stroke="#edf0db" stroke-width="1.5"/><rect x="307" y="134" width="17" height="4" rx="2" fill="#526253"/><path d="M340 145c35 2 36-39 4-40" fill="none" stroke="#8e9e8b" stroke-width="3"/></g>
+              </svg>
+              <span class="scene-caption">Illustrated fixture · no camera feed</span>
+            </div>
+            <div class="next-step"><div class="step-number" id="nextNumber">01</div><div><span class="small-label" id="nextLabel">NEXT TO PACK</span><h3 id="nextItem">Camera</h3></div><span class="state-pill" id="nextPill">Needs your confirmation</span></div>
+            <div class="context-note" id="contextNote"><span class="context-symbol" aria-hidden="true">↳</span><p id="contextText">Seeing an item is not the same as packing it.</p></div>
+            <div class="surface-actions"><button type="button" class="primary-button" id="primaryAction" data-action="confirm">Confirm camera packed <span aria-hidden="true">↗</span></button><button type="button" class="secondary-button" id="secondaryAction" data-action="pause">Pause task</button></div>
+            <div class="surface-footnote"><span class="connection-dot" aria-hidden="true"></span><span id="surfaceConnection">Glasses disconnected · local controls available</span></div>
+          </article>
+          <p class="display-caption"><span aria-hidden="true">↳</span> A small surface for the next useful action. Full context stays beside it.</p>
+        </section>
+
+        <aside class="context-column" aria-label="Task context and controls">
+          <section class="task-card" aria-labelledby="task-title">
+            <div class="card-kicker"><span class="eyebrow">CAMERA BAG</span><span class="local-badge">LOCAL ONLY</span></div>
+            <div class="task-title-row"><h2 id="task-title">Ready for the day.</h2><span id="countBadge" class="count-badge">0<span>/3</span></span></div>
+            <p class="muted">Three essentials. A saved place to return to.</p>
+            <ol class="packing-list" id="packingList"></ol>
+            <div class="task-bottom"><span id="taskStatus">In progress</span><button type="button" class="link-button" data-action="reset">Restart demo <span aria-hidden="true">↺</span></button></div>
+          </section>
+
+          <section class="evidence-card" aria-labelledby="evidence-title">
+            <div class="card-kicker"><h2 id="evidence-title" class="eyebrow">WHAT WE KNOW</h2><button type="button" class="link-button" id="historyToggle" aria-expanded="false" aria-controls="historyPanel">History <span aria-hidden="true">↗</span></button></div>
+            <div class="legend"><span><i class="confirmed-dot"></i>Confirmed by you</span><span><i class="observed-dot"></i>Observed only</span><span><i class="proposed-dot"></i>Proposed</span></div>
+            <div id="evidenceSummary" class="evidence-summary"><div class="empty-evidence"><span aria-hidden="true">⌁</span><p>Start packing.<br><span>Your confirmations will appear here.</span></p></div></div>
+            <div id="historyPanel" class="history-panel" hidden><h3>Append-only demo history</h3><ol id="eventHistory"></ol></div>
+          </section>
+
+          <section class="connection-card" aria-labelledby="connection-title"><div class="connection-title"><span class="connection-icon" aria-hidden="true">⌁</span><div><h2 id="connection-title">You are in control.</h2><p>No glasses or Chibi host connected.</p></div></div><div class="connection-detail"><span id="captureStatus">Synthetic observations enabled</span><button type="button" class="link-button danger-link" id="revokeButton" data-action="revoke">Revoke</button></div><div class="connection-detail"><span>Voice tools</span><span id="voiceStatus">Unavailable in this browser</span></div><p class="storage-note" id="storageNote">Progress stays in this browser. No uploads.</p></section>
+        </aside>
+      </div>
+
+      <section class="scenario-strip" aria-labelledby="scenario-title"><div class="scenario-heading"><span class="eyebrow" id="scenario-title">TRY THE WHOLE MOMENT</span><p>About a minute. No setup.</p></div><ol><li id="chapter1"><span>01</span><div><strong>Pack two essentials</strong><small>Confirm camera + microphone</small></div></li><li id="chapter2"><span>02</span><div><strong>Get interrupted</strong><small>Your progress stays put</small></div></li><li id="chapter3"><span>03</span><div><strong>Look again</strong><small>A similar charger isn't yours</small></div></li><li id="chapter4"><span>04</span><div><strong>Finish with certainty</strong><small>You check. You confirm.</small></div></li></ol></section>
+
+      <footer class="page-footer"><span>CHIBI · CONTINUITY FOR REAL LIFE</span><p>Resume now. <span>Relay and Familiar are future capabilities.</span></p><a href="./README.md">Prototype notes ↗</a></footer>
+    </main>
+  </div>
+
+  <dialog id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmDescription"><form method="dialog"><div class="dialog-icon" aria-hidden="true">✓</div><p class="eyebrow">YOUR CONFIRMATION</p><h2 id="confirmTitle">Camera packed?</h2><p id="confirmDescription">Check the physical item and your bag. An observation alone cannot complete this step.</p><label class="confirmation-checkbox"><input type="checkbox" id="confirmCheckbox"><span id="confirmCheckboxText">I checked it and put it in the bag.</span></label><div class="dialog-actions"><button class="secondary-button" value="cancel">Go back</button><button class="primary-button" id="commitConfirmation" value="confirm" disabled>Confirm packed</button></div></form></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+  <noscript><p class="no-script">This local interactive demo needs JavaScript. No camera or account is required.</p></noscript>
+</body>
+</html>
