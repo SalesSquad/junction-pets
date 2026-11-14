@@ -134,3 +134,5 @@ origin verification, followed by held-out authenticated Cala qualification.
 There is no browser wiring, live call, automatic maturity increase, sponsor
 claim or deployment in this milestone. Coordinator owns commit/PR; this worker
 only writes `provider/**` and runs its offline tests.
+
+The host bridge must serialize compact canonical JSON with unique keys. Duplicate or ambiguous object members fail closed before any claim is consumed. Raw provider formatting must be normalized by the trusted host without silently discarding conflicting values.

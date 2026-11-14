@@ -96,3 +96,14 @@ test('modified evidence cannot reuse review digest', async () => {
   result.evidence.rounds[0].lead = false;
   assert.equal(reviewPreview(result, { approved: true, evidenceDigest: result.evidenceDigest }).status, 'HOLD');
 });
+
+test('conflicting duplicate JSON members are rejected before evidence admission', async () => {
+  const host=fakeHost(), original=host.callTool;
+  host.callTool=async args => {
+    const raw=await original(args);
+    return args.name==='entity_search' ? '{"entities":[],'+raw.slice(1) : raw;
+  };
+  const result=await run('lead',{host});
+  assert.equal(result.status,'REFUSE');
+  assert.equal(result.reason,'INVALID_JSON');
+});

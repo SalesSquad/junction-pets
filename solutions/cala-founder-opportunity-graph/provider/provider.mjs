@@ -60,7 +60,7 @@ export async function preview({ host, query, approvedEntityId, goal, clock, iden
       const bytes = typeof raw === 'string' ? Buffer.from(raw) : raw;
       require(bytes.byteLength <= lim.maxResponseBytes, 'RESPONSE_TOO_LARGE');
       let data;
-      try { data = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)); } catch { fail('INVALID_JSON'); }
+      try { const normalized = new TextDecoder('utf-8', { fatal: true }).decode(bytes); data = JSON.parse(normalized); require(JSON.stringify(data) === normalized, 'INVALID_JSON'); } catch { fail('INVALID_JSON'); }
       ledger(name, sha(Buffer.from(bytes).toString('utf8')));
       return data;
     };
