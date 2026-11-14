@@ -47,7 +47,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab', 'rokoko-r-tournament', 'meta-r-tournament', 'meta-r-robust', 'lens-real-bop-train', 'lens-r8-meta', 'lens-r3-methods',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab', 'rokoko-r-tournament', 'meta-r-tournament', 'meta-r-robust', 'lens-real-bop-train', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision',
 ]);
 
 function choose(value, choices, label) {
@@ -138,6 +138,13 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     for (const [index, method] of methods.entries()) {
       if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
       add(`lens-r3-${index}-${method}`, harnessSha, {method, iteration: index + 1});
+    }
+  } else if (workload === 'lens-hb-vision') {
+    if (override && override !== harnessSha) throw new Error('HB real Vision study requires exact harness source SHA');
+    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining'], 'HB lane slice');
+    for (const [index, model] of ['color', 'vision_prototype', 'vision_pca', 'vision_guard'].entries()) {
+      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
+      add(`hb-vision-${index}-${model}`, harnessSha, {model});
     }
   } else if (workload === 'rokoko-rl-ablations') {
     for (const learnerSeed of [17,43]) add(`rokoko-ablation-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});

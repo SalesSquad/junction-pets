@@ -128,3 +128,22 @@ test('R3 distinct risk, drift, and hard-negative pilots preserve source and gree
   assert.throws(()=>resolvePlan({workload:'lens-r3-methods',lane_slice:'invalid'},context),
                 /Unsupported R3 lane slice/);
 });
+
+test('HB real AppleVision open-set source is pinned, four models and independently sliceable', () => {
+  const all = resolvePlan({workload:'lens-hb-vision',lane_slice:'all'},context);
+  const pilot = resolvePlan({workload:'lens-hb-vision',lane_slice:'pilot'},context);
+  const remaining = resolvePlan({workload:'lens-hb-vision',lane_slice:'remaining'},context);
+  assert.equal(all.jobCount,4);
+  assert.equal(all.maxParallel,4);
+  assert.deepEqual(all.matrix.include.map(x=>x.model),
+    ['color','vision_prototype','vision_pca','vision_guard']);
+  assert.equal(pilot.jobCount,1);
+  assert.equal(remaining.jobCount,3);
+  assert.deepEqual([...pilot.matrix.include,...remaining.matrix.include].map(x=>x.cell),
+    all.matrix.include.map(x=>x.cell));
+  assert.ok(all.matrix.include.every(x=>x.source_sha===context.harnessSha));
+  assert.throws(()=>resolvePlan({workload:'lens-hb-vision',source_sha:candidate},context),
+    /exact harness source SHA/);
+  assert.throws(()=>resolvePlan({workload:'lens-hb-vision',lane_slice:'invalid'},context),
+    /Unsupported HB lane slice/);
+});
