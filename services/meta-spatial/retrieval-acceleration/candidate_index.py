@@ -23,6 +23,7 @@ MAX_TOP_K = 128
 MAX_BATCH_SIZE = 128
 MAX_ID_UTF8_BYTES = 256
 UNIT_NORM_TOLERANCE = 1e-3
+NORM_VALIDATION_CHUNK_ROWS = 1024
 FEATURE_ENCODING = "little-endian float32, C row-major"
 
 
@@ -64,10 +65,15 @@ def _feature_copy(value, label: str, maximum: int, *, query=False) -> np.ndarray
     copied = _immutable_float32(array)
     if not np.isfinite(copied).all():
         _error("nonfinite_embeddings", f"{label} has a non-finite float32 value")
-    norms = np.linalg.norm(copied.astype(np.float64), axis=1)
-    if not np.isfinite(norms).all() or np.any(norms < 1e-12):
-        _error("zero_embeddings", f"{label} contains a zero or invalid norm")
-    if not np.allclose(norms, 1.0, rtol=0.0, atol=UNIT_NORM_TOLERANCE):
+    nonunit = False
+    for offset in range(0, len(copied), NORM_VALIDATION_CHUNK_ROWS):
+        norms = np.linalg.norm(copied[offset:offset + NORM_VALIDATION_CHUNK_ROWS].astype(np.float64), axis=1)
+        if not np.isfinite(norms).all() or np.any(norms < 1e-12):
+            _error("zero_embeddings", f"{label} contains a zero or invalid norm")
+        # Preserve the original whole-matrix error priority: a later zero/invalid
+        # norm still takes precedence over an earlier merely nonunit row.
+        nonunit |= not np.allclose(norms, 1.0, rtol=0.0, atol=UNIT_NORM_TOLERANCE)
+    if nonunit:
         _error("unnormalized_embeddings", f"{label} must already be unit normalized")
     return copied
 

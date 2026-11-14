@@ -6,6 +6,13 @@ This subtree is an independently usable offline integration. It does not change
 R3 qualification, R4 reranking, R5 prompts, the SAM observation envelope or the
 private host's identity and task authority.
 
+**Follow-up:** [measured scale/failure analysis](FOLLOWUP.md) adds a bounded norm
+validation repair, reducing preparation peak RSS by 27–48% in the two 50,000-row
+cases while preserving 98,304 candidate/score positions exactly. It also verifies
+the newly published real R5 pilot artifacts and identifies the next useful
+quality experiments. The original benchmark and 68-check evidence below remain
+historical evidence for the initial source; follow-up receipts bind the repair.
+
 ## What changes
 
 | Component | Behavior |
@@ -135,7 +142,7 @@ accepted-coverage or 93% product claim. Historical R3 results remain unchanged.
 
 ## Focused verification
 
-Delivered result: **68/68 checks pass, zero skips**, with source hashes unchanged
+Initial source `4210b617` result: **68/68 checks pass, zero skips**, with source hashes unchanged
 during execution and independent review of the final evidence. The final fixed
 synthetic benchmark gives the following median times for 32 streamed queries:
 
