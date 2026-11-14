@@ -36,12 +36,14 @@ const FRONTIER_PINS = Object.freeze({
   'bahn-offline-sweep': 'a4396d5ead2acc3d3db5e9a456af7f48058bb358',
   'rokoko-rl-cpu': '59479b42b177c1829a2e6678adfff1fb68aef09c',
   'rokoko-rl-full': '59479b42b177c1829a2e6678adfff1fb68aef09c',
+  'aalto-consent-browser': '1a02a0bb650598571b63554312c7b5e82b323c7f',
+  'astra-equity-browser': 'ebff750c176838123311affed06082e8144001f5',
 });
 export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser',
 ]);
 
 function choose(value, choices, label) {
@@ -85,6 +87,9 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override) throw new Error('Tieto uses sponsor_revision pins; source_sha is unsupported for this workload');
     const revisions = revision === 'all' ? ['base', '2283', '2234', '2129', '2297'] : revision === 'heads' ? ['2283', '2234', '2129', '2297'] : [revision];
     for (const rev of revisions) add(`tieto-${rev}-${toolchain}`, SPONSOR_PINS[rev], {revision: rev, source_repository: 'te-industry-tech-office/junction26-messagepack-csharp'});
+  } else if (['aalto-consent-browser','astra-equity-browser'].includes(workload)) {
+    const clinicalProduct = workload === 'aalto-consent-browser' ? 'aalto' : 'astra';
+    for (const engine of selectedEngines) add(`${clinicalProduct}-${engine}`, override || FRONTIER_PINS[workload], {browser: engine, product: clinicalProduct});
   } else if (workload === 'bahn-offline-sweep') {
     for (let seedShard = 0; seedShard < 8; seedShard++) add(`bahn-offline-${seedShard}`, override || FRONTIER_PINS[workload], {seed_shard: seedShard});
   } else if (workload === 'valio-settlement-browser') {
