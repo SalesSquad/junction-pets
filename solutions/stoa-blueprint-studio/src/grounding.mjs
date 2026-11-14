@@ -58,7 +58,9 @@ export function answerDrawing(drawing, question) {
     const areaLabels = entities.filter(e => e.layer === 'ROOM_TEXT' && typeof e.text === 'string' && /\b\d+(?:[.,]\d+)?\s*m(?:²|2)(?!\w)/i.test(e.text) && pointInPolygon(e, region.points));
     if (areaLabels.length !== 1) return abstain('There is no unique area annotation inside that room boundary.', drawing);
     const areaText = areaLabels[0];
-    const statedArea = Number(areaText.text.match(/\d+(?:[.,]\d+)?/)[0].replace(',', '.'));
+    const measurements = [...areaText.text.matchAll(/\b(\d+(?:[.,]\d+)?)\s*m(?:²|2)(?!\w)/gi)];
+    if (measurements.length !== 1) return abstain('The area label contains multiple or ambiguous measurements.', drawing);
+    const statedArea = Number(measurements[0][1].replace(',', '.'));
     const factor = supportedUnits[drawing.units];
     if (!factor) return abstain('DXF units are missing or unsupported; the source area cannot be checked.', drawing);
     const computedArea = polygonArea(region.points) * factor ** 2;
