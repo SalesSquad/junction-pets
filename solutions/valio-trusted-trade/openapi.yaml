@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Trusted Trade — implemented SYNTHETIC localhost API",
-    "version": "0.4.0",
-    "description": "All parties, stock, prices, approvals, emission factors, orders and EUR wallet balances invented. No banking, brokerage or commercial effects. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification."
+    "version": "0.5.0",
+    "description": "All parties, stock, prices, approvals, emission factors, orders, scan GTINs and EUR wallet balances invented. No banking, brokerage or commercial effects. Scanner observations are not physical receipt attestation. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification."
   },
   "servers": [
     {
@@ -149,6 +149,217 @@
           },
           "409": {
             "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/scan/resolve": {
+      "get": {
+        "summary": "Resolve a checksum-valid barcode by exact synthetic GTIN; never semantic identity",
+        "parameters": [
+          {
+            "name": "gtin",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exact synthetic product identity, never authority",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "product"
+                  ],
+                  "properties": {
+                    "product": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "gtin",
+                        "sku",
+                        "name",
+                        "family",
+                        "unitsAvailable",
+                        "priceCents",
+                        "stockVersion",
+                        "mode",
+                        "observation",
+                        "authority"
+                      ],
+                      "properties": {
+                        "gtin": {
+                          "type": "string"
+                        },
+                        "sku": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "family": {
+                          "type": "string"
+                        },
+                        "unitsAvailable": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "priceCents": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "stockVersion": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "mode": {
+                          "const": "INVENTED_FIXTURE_EXACT_GTIN"
+                        },
+                        "observation": {
+                          "const": "CHECK_DIGIT_AND_EXACT_CATALOG_MATCH_ONLY"
+                        },
+                        "authority": {
+                          "const": "NONE_SCAN_CANNOT_AUTHORIZE_TRADE"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid barcode or checksum"
+          },
+          "404": {
+            "description": "Unknown barcode"
+          }
+        }
+      }
+    },
+    "/api/scan/ocr": {
+      "post": {
+        "summary": "OPTIONAL demo-server Tesseract image OCR. No image storage; text is untrusted until user confirms.",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OCR text and advisory typed recipe candidates; never an order or approval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "text",
+                    "candidates",
+                    "duplicateFamilies",
+                    "rawExcerpt",
+                    "evidence",
+                    "warning",
+                    "mode",
+                    "persistence",
+                    "requiresHumanConfirmation"
+                  ],
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "candidates": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "family",
+                          "quantityLitres",
+                          "lactoseFree",
+                          "sourceLine",
+                          "requiresHumanReview"
+                        ],
+                        "properties": {
+                          "family": {
+                            "type": "string"
+                          },
+                          "quantityLitres": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "lactoseFree": {
+                            "type": "boolean"
+                          },
+                          "sourceLine": {
+                            "type": "string"
+                          },
+                          "requiresHumanReview": {
+                            "const": true
+                          }
+                        }
+                      }
+                    },
+                    "duplicateFamilies": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "rawExcerpt": {
+                      "type": "string"
+                    },
+                    "evidence": {
+                      "const": "OCR_TEXT_UNTRUSTED_REQUIRES_USER_REVIEW"
+                    },
+                    "warning": {
+                      "type": "string"
+                    },
+                    "mode": {
+                      "const": "LOCAL_TESSERACT_OCR_UNTRUSTED"
+                    },
+                    "persistence": {
+                      "const": "IMAGE_NOT_STORED"
+                    },
+                    "requiresHumanConfirmation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Session required"
+          },
+          "413": {
+            "description": "Image too large"
+          },
+          "503": {
+            "description": "Local OCR unavailable or busy"
           }
         }
       }
@@ -1248,6 +1459,127 @@
         }
       }
     },
+    "/api/orders/{id}/scan": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Record exactly one self-attested GTIN match to an existing signed synthetic order; not physical delivery proof",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "buyerId",
+                  "gtin",
+                  "idempotencyKey"
+                ],
+                "properties": {
+                  "buyerId": {
+                    "type": "string"
+                  },
+                  "gtin": {
+                    "type": "string"
+                  },
+                  "idempotencyKey": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{10,80}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "observation"
+                  ],
+                  "properties": {
+                    "observation": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "orderId",
+                        "sku",
+                        "gtin",
+                        "observedCount",
+                        "orderedCount",
+                        "receiptId",
+                        "matchedSignedOrder",
+                        "evidenceLevel",
+                        "idempotentReplay"
+                      ],
+                      "properties": {
+                        "orderId": {
+                          "type": "string"
+                        },
+                        "sku": {
+                          "type": "string"
+                        },
+                        "gtin": {
+                          "type": "string"
+                        },
+                        "observedCount": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "orderedCount": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "receiptId": {
+                          "type": "string"
+                        },
+                        "matchedSignedOrder": {
+                          "const": true
+                        },
+                        "evidenceLevel": {
+                          "const": "SELF_ATTESTED_SCAN_NOT_PROOF_OF_DELIVERY"
+                        },
+                        "idempotentReplay": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
     "/api/audit": {
       "get": {
         "summary": "Read append-only in-memory demo events",
@@ -1493,6 +1825,9 @@
         ],
         "properties": {
           "sku": {
+            "type": "string"
+          },
+          "gtin": {
             "type": "string"
           },
           "family": {

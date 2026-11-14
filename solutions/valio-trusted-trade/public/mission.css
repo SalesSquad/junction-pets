@@ -30,3 +30,22 @@
 .payment-legal{display:block;color:var(--muted);font-size:10px;line-height:1.5}
 @media(max-width:900px){.payment{padding:17px}}
 @media(max-width:620px){.payment-money strong{font-size:20px}.payment-actions{grid-template-columns:1fr}.payment-actions button{grid-column:1/-1}}
+.scan{padding:21px;display:flex;flex-direction:column;gap:12px;border-color:#426751;background:linear-gradient(130deg,#102e25,#0b221e)}
+.scan .section-kicker{margin-bottom:0}
+.scan h2{font-family:Georgia,serif;font-size:24px;font-weight:500;letter-spacing:-.025em;line-height:1.2;margin:0}
+.scan>p{font-size:12px;color:var(--muted);margin:0;line-height:1.55}
+.scan-controls{display:grid;grid-template-columns:1fr 1.2fr auto;gap:10px;align-items:end}
+.scan .field label,.scan-manual>label{font-size:10px;font-weight:750;letter-spacing:.055em;color:var(--muted)}
+.scan .field select,.scan .field input,.scan-manual input{width:100%;min-width:0;height:44px;color:var(--ink);background:#071e18;border:1px solid #466356;border-radius:9px;padding:9px 10px;font-size:12px}
+.scan .field select{padding-right:5px}.scan .field select option{background:var(--panel)}
+.scan .field input{padding:8px 7px;max-width:100%;font-size:11px}
+.scan .field input::file-selector-button{background:#234536;color:var(--ink);border:1px solid #547062;border-radius:5px;padding:6px 7px;margin-right:6px;cursor:pointer}
+.scan-controls>.outline-button{height:44px}.scan-manual{display:grid;gap:7px}
+.scan-manual-controls{display:flex;gap:9px}.scan-manual-controls input{flex:1;font-size:15px;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.scan-result{background:#081d19;border:1px solid var(--stroke);border-radius:9px;min-height:57px;padding:12px 14px;color:#c7d9c8;font-size:12px;line-height:1.55;display:grid;gap:3px;overflow-wrap:anywhere}
+.scan-result strong{color:var(--lime);font-size:13px}.scan-result.scan-warning{border-color:#947b4f}.scan-result.scan-warning strong{color:var(--amber)}
+.scan-privacy{color:var(--muted);font-size:10px;line-height:1.5}
+.scan #scan-confirm-button{align-self:start}
+.scan button:focus-visible,.scan select:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+@media(max-width:1050px){.scan-controls{grid-template-columns:1fr 1fr}.scan-controls>.outline-button{grid-column:1/-1}}
+@media(max-width:620px){.scan{padding:16px}.scan-controls{grid-template-columns:1fr}.scan-controls>.outline-button{grid-column:auto}.scan-manual-controls{flex-direction:column}.scan-manual-controls>.outline-button{width:100%}.scan .section-kicker{letter-spacing:.055em}.scan h2{font-size:22px}}

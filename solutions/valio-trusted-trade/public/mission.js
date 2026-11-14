@@ -2,7 +2,8 @@
 const BUYER = 'helsinki-hotel-demo';
 const state = { token: null, plan: null, optionId: null, quote: null, proof: null, order: null,
   idempotencyKey: null, paymentKey: null, payment: null, wallet: null,
-  busy: false, browserVerified: false, buyerKey: null, buyerKid: null };
+  busy: false, browserVerified: false, buyerKey: null, buyerKid: null,
+  pendingRecipe: null, scanKey: null, scanInput: null };
 const $ = (id) => document.getElementById(id);
 const euro = (cents) => new Intl.NumberFormat('en-FI', { style: 'currency', currency: 'EUR' }).format(cents / 100);
 const node = (tag, text, cls) => {
@@ -216,7 +217,179 @@ function setPlan(plan) {
   state.paymentKey = null;
   state.browserVerified = false;
   state.idempotencyKey = null;
+  state.scanKey = null;
+  state.scanInput = null;
 }
+
+function scanMessage(heading, lines = [], warning = false) {
+  const result = $('scan-result');
+  result.replaceChildren();
+  result.classList.toggle('scan-warning', warning);
+  result.append(node('strong', heading));
+  for (const line of lines) result.append(node('span', line));
+}
+
+function resetScanObservation() {
+  state.pendingRecipe = null;
+  state.scanKey = null;
+  state.scanInput = null;
+  $('scan-confirm-button').hidden = true;
+}
+
+function scanMode() { return $('scan-purpose').value; }
+
+function readBarcodeCandidates(text) {
+  if (typeof text !== 'string') return [];
+  return [...new Set((text.match(/(?<![0-9])[0-9]{8}(?:[0-9]{4,6})?(?![0-9])/g) ?? []).filter((value) =>
+    [8, 12, 13, 14].includes(value.length)))];
+}
+
+async function detectBrowserBarcode(file) {
+  if (typeof BarcodeDetector === 'undefined' || typeof createImageBitmap !== 'function') return [];
+  let bitmap;
+  try {
+    const supported = await BarcodeDetector.getSupportedFormats();
+    const formats = ['ean_13', 'ean_8', 'upc_a', 'itf'].filter((format) => supported.includes(format));
+    if (!formats.length) return [];
+    bitmap = await createImageBitmap(file);
+    const detector = new BarcodeDetector({ formats });
+    const detected = await detector.detect(bitmap);
+    return [...new Set(detected.map((candidate) => candidate.rawValue).filter((code) =>
+      typeof code === 'string' && /^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/.test(code)))];
+  } catch {
+    // Progressive enhancement: image OCR and explicit typing remain available.
+    return [];
+  } finally { bitmap?.close?.(); }
+}
+
+async function prepareOcrImage(file) {
+  const maxBytes = 1_500_000;
+  if (file.size > 16_000_000) throw Error('Photo exceeds the 16 MB browser processing limit.');
+  if (['image/png', 'image/jpeg'].includes(file.type) && file.size >= 8 && file.size <= maxBytes) return file;
+  if (!['image/png', 'image/jpeg', 'image/heic', 'image/heif'].includes(file.type)) {
+    throw Error('Choose a JPEG, PNG or iPhone HEIC image.');
+  }
+  if (typeof createImageBitmap !== 'function') throw Error('This browser cannot resize the photo; choose a JPEG smaller than 1.5 MB.');
+  const bitmap = await createImageBitmap(file);
+  try {
+    const canvas = document.createElement('canvas');
+    for (const [maxEdge, quality] of [[1600, 0.82], [1200, 0.64], [900, 0.55]]) {
+      const ratio = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+      canvas.width = Math.max(1, Math.round(bitmap.width * ratio));
+      canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
+      canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+      if (blob && blob.size >= 8 && blob.size <= maxBytes) return blob;
+    }
+    throw Error('Photo could not be reduced to the 1.5 MB scan limit.');
+  } finally { bitmap.close?.(); }
+}
+
+async function recognizeScanImage(file) {
+  if (!state.token) throw Error('Start the demo session before uploading an image.');
+  const upload = await prepareOcrImage(file);
+  const response = await fetch('/api/scan/ocr', { method: 'POST',
+    headers: { Authorization: `Bearer ${state.token}`, 'Content-Type': upload.type },
+    body: upload, redirect: 'error', signal: AbortSignal.timeout(9000) });
+  const body = await response.json();
+  if (!response.ok) {
+    const error = Error(body.error?.message ?? `OCR HTTP ${response.status}`);
+    error.code = body.error?.code ?? 'OCR_FAILED';
+    throw error;
+  }
+  return body;
+}
+
+$('scan-purpose').addEventListener('change', () => {
+  resetScanObservation();
+  scanMessage(scanMode() === 'recipe' ? 'Recipe quantities are suggestions until you review them.' :
+    scanMode() === 'delivery' ? 'Commit a signed demo order first, then scan its product GTIN.' :
+      'Scan an exact barcode to look up one fictional catalog product.');
+});
+$('scan-code').addEventListener('input', resetScanObservation);
+$('scan-image').addEventListener('change', resetScanObservation);
+
+$('scan-image-button').addEventListener('click', () => act('Camera / image scan', async () => {
+  resetScanObservation();
+  const file = $('scan-image').files?.[0];
+  if (!file) throw Error('Choose or take a photo first.');
+  if (scanMode() === 'recipe') {
+    const observation = await recognizeScanImage(file);
+    state.pendingRecipe = observation;
+    const eligible = observation.candidates?.filter((item) => !observation.duplicateFamilies.includes(item.family)) ?? [];
+    $('scan-confirm-button').hidden = eligible.length === 0;
+    scanMessage(eligible.length ? 'OCR suggests quantities — please verify the printed recipe.' : 'No supported recipe quantities recognized.', [
+      ...((observation.candidates ?? []).map((item) => `${item.family}: ${item.quantityLitres} L · source: ${item.sourceLine}`)),
+      ...(observation.duplicateFamilies.length ? [`Ambiguous repeated lines: ${observation.duplicateFamilies.join(', ')}. These will not be applied.`] : []),
+      'Only “480 L lactose-free milk” and “240 L oat drink” style lines are parsed. No allergen conclusions.',
+    ], !eligible.length || observation.duplicateFamilies.length > 0);
+    timeline('Untrusted recipe OCR proposed', `${observation.candidates?.length ?? 0} quantity candidate(s) · awaiting human review · image not stored`);
+    return;
+  }
+
+  let codes = await detectBrowserBarcode(file);
+  let source = 'browser barcode detector';
+  if (!codes.length) {
+    const observation = await recognizeScanImage(file);
+    codes = readBarcodeCandidates(observation.text);
+    source = 'untrusted server OCR';
+  }
+  if (codes.length !== 1) {
+    scanMessage(codes.length ? 'Multiple barcode candidates — no automatic selection.' : 'No barcode recognized.',
+      [codes.length ? `Candidates: ${codes.join(', ')}` : 'Enter the package GTIN manually. OCR support is optional.', 'A scan does not prove origin, receipt or allergy status.'], true);
+    return;
+  }
+  $('scan-code').value = codes[0];
+  scanMessage(`Detected ${codes[0]} via ${source}.`, ['Check the code against the packaging, then press “Check exact code”.',
+    scanMode() === 'delivery' ? 'A separate explicit click records one self-attested delivery observation.' : 'No order has been placed.']);
+  timeline('Candidate barcode captured', `${codes[0]} · ${source} · requires explicit exact-match confirmation`);
+}));
+
+$('scan-confirm-button').addEventListener('click', () => act('Recipe observation confirmation', async () => {
+  const observation = state.pendingRecipe;
+  if (!observation || scanMode() !== 'recipe') throw Error('Scan a supported recipe image first.');
+  const accepted = observation.candidates.filter((item) => !observation.duplicateFamilies.includes(item.family));
+  for (const candidate of accepted) {
+    const field = candidate.family === 'dairy-milk' ? 'dairy' : candidate.family === 'oat-drink' ? 'oat' : null;
+    if (field) $(field).value = String(candidate.quantityLitres);
+  }
+  resetScanObservation();
+  scanMessage('Human-confirmed OCR quantities entered.', [
+    ...accepted.map((candidate) => `${candidate.family}: ${candidate.quantityLitres} L`),
+    'Review the quantities, delivery date and budget; press Plan autonomous basket to request a new plan.',
+  ]);
+  timeline('Recipe quantity observations confirmed', `${accepted.length} supported field(s) applied to request · no order or money created`);
+}));
+
+$('scan-code-button').addEventListener('click', () => act('Exact GTIN lookup', async () => {
+  if (scanMode() === 'recipe') throw Error('Choose Product barcode or Delivery mode for a GTIN.');
+  const code = $('scan-code').value.trim();
+  const { product } = await api(`/api/scan/resolve?gtin=${encodeURIComponent(code)}`);
+  if (scanMode() !== 'delivery') {
+    scanMessage('Exact fictional catalog match ✓', [
+      `${product.name} · ${product.sku}`, `${product.gtin} · ${euro(product.priceCents)} per 1 L · ${product.unitsAvailable} L in synthetic stock`,
+      'Checksum + catalog equality only. No claim of package authenticity or dietary suitability.',
+    ]);
+    timeline('Exact product identifier resolved', `${code} → ${product.sku} · fictional source, stock version ${product.stockVersion}`);
+    return;
+  }
+  if (!state.order || state.order.status !== 'SIMULATED_COMMITTED') throw Error('Commit a signed demo order before delivery comparison.');
+  const fingerprint = `${state.order.id}:${product.gtin}`;
+  if (!state.scanKey || state.scanInput !== fingerprint) {
+    state.scanKey = crypto.randomUUID();
+    state.scanInput = fingerprint;
+  }
+  const { observation } = await api(`/api/orders/${encodeURIComponent(state.order.id)}/scan`, {
+    buyerId: BUYER, gtin: product.gtin, idempotencyKey: state.scanKey,
+  });
+  scanMessage(observation.idempotentReplay ? 'Existing observation replayed — no double count ✓' : 'Signed-order item matched ✓', [
+    `${product.sku} · ${product.gtin}`, `Observed ${observation.observedCount} / ${observation.orderedCount} 1 L units`,
+    `${observation.receiptId} · self-attested observation only, not proof of physical delivery.`,
+    'Scan a different image or edit the GTIN for a fresh observation.',
+  ]);
+  timeline(observation.idempotentReplay ? 'Duplicate scan safely replayed' : 'Delivery observation hash-linked',
+    `${observation.receiptId} · ${product.sku} · ${observation.observedCount}/${observation.orderedCount} · NOT physical proof`);
+}));
 
 $('mission-form').addEventListener('submit', (event) => {
   event.preventDefault();

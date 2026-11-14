@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { createTradeService, TradeError, unsignedQuoteBody } from './core.mjs';
 import { createDemoTrustRegistry, TrustFault } from './trust-envelope.mjs';
+import { recognizeImage, ScanFault } from './scanning.mjs';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const publicDir = resolve(currentDir, '../public');
@@ -36,12 +37,24 @@ const readRequest = async (request) => {
   }
 };
 
+const readImage = async (request) => {
+  const chunks = [];
+  let bytes = 0;
+  for await (const chunk of request) {
+    bytes += chunk.length;
+    if (bytes > 1_500_000) throw new TradeError('PAYLOAD_TOO_LARGE', 'Scanned image exceeds 1.5 MB.', 413);
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+};
+
 export function createTradeHttpServer(service = createTradeService()) {
   const sessions = new Map();
   const quoteOwners = new Map();
   const planOwners = new Map();
   const orderOwners = new Map();
   const trust = createDemoTrustRegistry();
+  let ocrRunning = false;
   return createServer(async (request, response) => {
     const url = new URL(request.url ?? '/', 'http://localhost');
     const send = (status, body) => {
@@ -53,6 +66,23 @@ export function createTradeHttpServer(service = createTradeService()) {
       if (request.method === 'GET' && url.pathname === '/.well-known/trusted-trade') return send(200, metadata);
       if (request.method === 'GET' && url.pathname === '/.well-known/trusted-trade/jwks.json') return send(200, trust.publicKeys());
       if (request.method === 'GET' && url.pathname === '/openapi.json') return send(200, openapi);
+      if (request.method === 'POST' && url.pathname === '/api/scan/ocr') {
+        const buyerToken = request.headers.authorization?.replace(/^Bearer /, '');
+        if (!sessions.has(buyerToken)) throw new TradeError('BUYER_CAPABILITY_REQUIRED', 'Scanning requires a synthetic demo session.', 403);
+        if (ocrRunning) throw new TradeError('OCR_BUSY', 'One local OCR request at a time; retry shortly.', 503);
+        ocrRunning = true;
+        try {
+          const mediaType = request.headers['content-type'];
+          if (!['image/jpeg', 'image/png'].includes(mediaType)) throw new TradeError('INVALID_IMAGE', 'Upload a PNG or JPEG only.');
+          const buffer = await readImage(request);
+          const observation = await recognizeImage(buffer, mediaType);
+          return send(200, { ...observation, mode: 'LOCAL_TESSERACT_OCR_UNTRUSTED',
+            persistence: 'IMAGE_NOT_STORED', requiresHumanConfirmation: true });
+        } catch (error) {
+          if (error instanceof ScanFault) throw new TradeError(error.code, error.message, error.status);
+          throw error;
+        } finally { ocrRunning = false; }
+      }
       let token;
       if (request.method === 'POST') {
         const payload = await readRequest(request);
@@ -67,7 +97,7 @@ export function createTradeHttpServer(service = createTradeService()) {
         if (payload.buyerId !== undefined && payload.buyerId !== sessions.get(token)) throw new TradeError('BUYER_MISMATCH', 'Capability does not match buyer.', 403);
         const boundQuote = url.pathname.match(/^\/api\/quotes\/([^/]+)\/(?:approval|offer|handshake)$/)?.[1] ?? payload.quoteId;
         const boundPlan = url.pathname.match(/^\/api\/plans\/([^/]+)\/(?:quotes|recover)$/)?.[1];
-        const boundOrder = url.pathname.match(/^\/api\/orders\/([^/]+)\/(?:cancel|payment-approval|settlement)$/)?.[1];
+        const boundOrder = url.pathname.match(/^\/api\/orders\/([^/]+)\/(?:cancel|payment-approval|settlement|scan)$/)?.[1];
         if ((boundQuote && quoteOwners.get(boundQuote) !== token) || (boundOrder && orderOwners.get(boundOrder) !== token) ||
             (boundPlan && planOwners.get(boundPlan) !== token)) throw new TradeError('BUYER_MISMATCH', 'This demo session does not own these terms.', 403);
         request.demoPayload = payload;
@@ -85,6 +115,9 @@ export function createTradeHttpServer(service = createTradeService()) {
         const items = service.catalog();
         const needle = (url.searchParams.get('q') ?? '').toLocaleLowerCase('en');
         return send(200, { mode: 'INVENTED_FIXTURE', products: items.filter((item) => `${item.name} ${item.sku}`.toLowerCase().includes(needle)) });
+      }
+      if (request.method === 'GET' && url.pathname === '/api/scan/resolve') {
+        return send(200, { product: service.resolveProductScan(url.searchParams.get('gtin')) });
       }
       if (request.method === 'GET' && url.pathname === '/api/policy') return send(200, service.policy());
       if (request.method === 'GET' && ['/api/demo/wallet', '/api/demo/ledger/verify', '/api/demo/ledger'].includes(url.pathname)) {
@@ -177,6 +210,10 @@ export function createTradeHttpServer(service = createTradeService()) {
       if (request.method === 'POST' && paymentApproval) return send(200, service.approvePayment({ ...request.demoPayload, orderId: paymentApproval[1] }));
       const settlement = url.pathname.match(/^\/api\/orders\/([^/]+)\/settlement$/);
       if (request.method === 'POST' && settlement) return send(201, service.settlePayment({ ...request.demoPayload, orderId: settlement[1] }));
+      const deliveryScan = url.pathname.match(/^\/api\/orders\/([^/]+)\/scan$/);
+      if (request.method === 'POST' && deliveryScan) {
+        return send(201, { observation: service.scanDelivery({ ...request.demoPayload, orderId: deliveryScan[1] }) });
+      }
       const paymentRead = url.pathname.match(/^\/api\/orders\/([^/]+)\/payment$/);
       if (request.method === 'GET' && paymentRead) {
         const buyerToken = request.headers.authorization?.replace(/^Bearer /, '');

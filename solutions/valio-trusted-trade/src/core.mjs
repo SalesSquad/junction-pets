@@ -6,13 +6,14 @@
 import { planProcurementPortfolio, PlannerFault } from './procurement-planner.mjs';
 import { digest } from './trust-envelope.mjs';
 import { createSyntheticSettlement } from './settlement.mjs';
+import { resolveGtin, ScanFault } from './scanning.mjs';
 
 export const FIXTURE_CATALOG = Object.freeze([
-  { sku: 'DEMO-LF-1', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 780, priceCents: 174, deliverBy: '2026-11-16', certification: 'Finnish origin · fictional', version: 1, supplierId: 'fictional-north-dairy', reliabilityBps: 9640, emissionsGramsPerL: 1150 },
-  { sku: 'DEMO-LF-2', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 900, priceCents: 189, deliverBy: '2026-11-16', certification: 'Animal welfare · fictional', version: 1, supplierId: 'fictional-coastal-foods', reliabilityBps: 9910, emissionsGramsPerL: 960 },
-  { sku: 'DEMO-LF-3', name: 'Organic lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 140, priceCents: 217, deliverBy: '2026-11-17', certification: 'Organic · fictional', version: 1, supplierId: 'fictional-hill-farm', reliabilityBps: 9700, emissionsGramsPerL: 910 },
-  { sku: 'DEMO-REG-1', name: 'Standard dairy milk · 1 L', family: 'dairy-milk', lactoseFree: false, unitsAvailable: 1900, priceCents: 143, deliverBy: '2026-11-16', certification: 'Finnish origin · fictional', version: 1, supplierId: 'fictional-north-dairy', reliabilityBps: 9640, emissionsGramsPerL: 1120 },
-  { sku: 'DEMO-OAT-1', name: 'Oat drink · 1 L', family: 'oat-drink', lactoseFree: true, unitsAvailable: 2100, priceCents: 162, deliverBy: '2026-11-16', certification: 'Plant-based · fictional', version: 1, supplierId: 'fictional-oatworks', reliabilityBps: 9820, emissionsGramsPerL: 380 },
+  { sku: 'DEMO-LF-1', gtin: '2000000000015', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 780, priceCents: 174, deliverBy: '2026-11-16', certification: 'Finnish origin · fictional', version: 1, supplierId: 'fictional-north-dairy', reliabilityBps: 9640, emissionsGramsPerL: 1150 },
+  { sku: 'DEMO-LF-2', gtin: '2000000000022', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 900, priceCents: 189, deliverBy: '2026-11-16', certification: 'Animal welfare · fictional', version: 1, supplierId: 'fictional-coastal-foods', reliabilityBps: 9910, emissionsGramsPerL: 960 },
+  { sku: 'DEMO-LF-3', gtin: '2000000000039', name: 'Organic lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 140, priceCents: 217, deliverBy: '2026-11-17', certification: 'Organic · fictional', version: 1, supplierId: 'fictional-hill-farm', reliabilityBps: 9700, emissionsGramsPerL: 910 },
+  { sku: 'DEMO-REG-1', gtin: '2000000000046', name: 'Standard dairy milk · 1 L', family: 'dairy-milk', lactoseFree: false, unitsAvailable: 1900, priceCents: 143, deliverBy: '2026-11-16', certification: 'Finnish origin · fictional', version: 1, supplierId: 'fictional-north-dairy', reliabilityBps: 9640, emissionsGramsPerL: 1120 },
+  { sku: 'DEMO-OAT-1', gtin: '2000000000053', name: 'Oat drink · 1 L', family: 'oat-drink', lactoseFree: true, unitsAvailable: 2100, priceCents: 162, deliverBy: '2026-11-16', certification: 'Plant-based · fictional', version: 1, supplierId: 'fictional-oatworks', reliabilityBps: 9820, emissionsGramsPerL: 380 },
 ]);
 
 export const FIXTURE_POLICY = Object.freeze({
@@ -111,6 +112,8 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
   const plans = new Map();
   const orders = new Map();
   const idempotency = new Map();
+  const deliveryObservations = new Map();
+  const deliveryReplay = new Map();
   const audit = [];
   let serial = 0;
   const nextId = (prefix) => `${prefix}-DEMO-${String(++serial).padStart(4, '0')}`;
@@ -133,6 +136,49 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     return o;
   };
   const settlement = createSyntheticSettlement({ getOrder, TradeError, record, clock });
+
+  const resolveProductScan = (gtin) => {
+    try { return resolveGtin(catalogList(), gtin); }
+    catch (error) {
+      if (error instanceof ScanFault) throw new TradeError(error.code, error.message, error.status);
+      throw error;
+    }
+  };
+
+  /** A matching GTIN is an observation, not proof the goods were delivered. */
+  const scanDelivery = ({ orderId, buyerId, gtin, idempotencyKey, ...unknown } = {}) => {
+    if (Object.keys(unknown).length) throw new TradeError('INVALID_DELIVERY_SCAN', 'Only order, buyer, GTIN and idempotency key are accepted.');
+    if (typeof idempotencyKey !== 'string' || !/^[A-Za-z0-9_-]{10,80}$/.test(idempotencyKey)) {
+      throw new TradeError('INVALID_IDEMPOTENCY_KEY', 'Provide a stable 10–80 character scan idempotency key.');
+    }
+    const order = getOrder(orderId);
+    if (order.buyerId !== buyerId) throw new TradeError('BUYER_MISMATCH', 'Only the original demo buyer can record receipt evidence.', 403);
+    if (order.status !== 'SIMULATED_COMMITTED') throw new TradeError('ORDER_NOT_ACTIVE', 'Cannot scan against a cancelled order.', 409);
+    if (!order.verifiedQuoteBodyDigest) throw new TradeError('SIGNED_TRADE_REQUIRED', 'Receipt comparison requires a previously verified signed trade.', 403);
+    const product = resolveProductScan(gtin);
+    const fingerprint = digestLike({ orderId, buyerId, gtin: product.gtin });
+    const prior = deliveryReplay.get(idempotencyKey);
+    if (prior) {
+      if (prior.fingerprint !== fingerprint) throw new TradeError('IDEMPOTENCY_CONFLICT', 'Scan key belongs to another observation.', 409);
+      return { ...structuredClone(prior.result), idempotentReplay: true };
+    }
+    const line = order.lines.find((item) => item.sku === product.sku);
+    if (!line) throw new TradeError('PRODUCT_NOT_ON_ORDER', 'This barcode belongs to another product; no receipt recorded.', 409);
+    const tally = deliveryObservations.get(orderId) ?? new Map();
+    const previousUnits = tally.get(product.sku) ?? 0;
+    if (previousUnits >= line.quantityLitres) throw new TradeError('RECEIPT_OVER_COUNT', 'The ordered quantity has already been observed.', 409);
+    tally.set(product.sku, previousUnits + 1);
+    deliveryObservations.set(orderId, tally);
+    const receipt = record('ORDER_GTIN_OBSERVED', { orderId, sku: product.sku, gtin: product.gtin,
+      observedCount: previousUnits + 1, orderedCount: line.quantityLitres, signedQuoteBodyDigest: order.verifiedQuoteBodyDigest,
+      evidenceLevel: 'SELF_ATTESTED_SCAN_NOT_PROOF_OF_DELIVERY' });
+    const result = { orderId, sku: product.sku, gtin: product.gtin,
+      observedCount: previousUnits + 1, orderedCount: line.quantityLitres, receiptId: receipt.id,
+      matchedSignedOrder: true, evidenceLevel: 'SELF_ATTESTED_SCAN_NOT_PROOF_OF_DELIVERY',
+      idempotentReplay: false };
+    deliveryReplay.set(idempotencyKey, { fingerprint, result });
+    return structuredClone(result);
+  };
 
   const requestQuote = ({ buyerId, requestText, need, budgetCents = policy.perOrderBudgetCents } = {}) => {
     if (buyerId !== policy.buyerId) throw new TradeError('BUYER_NOT_FOUND', 'Only the fictional demo buyer is available.', 403);
@@ -370,6 +416,8 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
 
   return Object.freeze({
     catalog: catalogList,
+    resolveProductScan,
+    scanDelivery,
     policy: () => ({ ...policy, provider: 'FIXTURE_ONLY', approverAuthentication: 'NOT_IMPLEMENTED' }),
     requestQuote,
     planBasket,

@@ -24,6 +24,7 @@
           <a href="#overview" class="side-link">⌂ <span>Overview</span></a>
           <a href="#mission" class="side-link current">◎ <span>Missions</span></a>
           <span class="side-mission"><span class="online-dot"></span> HOTEL NORTH · 16 NOV</span>
+          <a href="#scan" class="side-link">▣ <span>Scan</span></a>
           <a href="#options" class="side-link">◇ <span>Offers</span></a>
           <a href="#trust" class="side-link">⟷ <span>Handshakes</span></a>
           <a href="#settlement" class="side-link">€ <span>Payments</span></a>
@@ -49,6 +50,21 @@
                 <button id="plan-button" type="submit" class="primary-button">✦ &nbsp; Plan autonomous basket <span>↗</span></button>
               </form>
               <p class="microcopy"><span class="online-dot"></span> No LLM invents prices, stock, authority or product eligibility. Synthetic data only.</p>
+            </section>
+
+            <section class="scan surface" id="scan" aria-labelledby="scan-title">
+              <div class="section-kicker"><span>FIELD SCAN / RECIPE · PRODUCT · RECEIPT</span><span class="tag">LOCAL-FIRST</span></div>
+              <h2 id="scan-title">From the kitchen floor to verified trade.</h2>
+              <p>Capture a printed recipe, scan a package code or check goods against a signed demo order. Observations are always reviewed before they affect a plan.</p>
+              <div class="scan-controls">
+                <div class="field"><label for="scan-purpose">Scan mode</label><select id="scan-purpose"><option value="recipe">Recipe / menu OCR</option><option value="product">Product barcode</option><option value="delivery">Delivery against order</option></select></div>
+                <div class="field"><label for="scan-image">Camera / image</label><input id="scan-image" type="file" accept="image/jpeg,image/png,image/heic,image/heif" capture="environment" aria-describedby="scan-privacy" /></div>
+                <button type="button" id="scan-image-button" class="outline-button">◎ Scan image ↗</button>
+              </div>
+              <div class="scan-manual"><label for="scan-code">GTIN / EAN (manual fallback)</label><div class="scan-manual-controls"><input id="scan-code" inputmode="numeric" maxlength="14" placeholder="13-digit product barcode" /><button type="button" id="scan-code-button" class="outline-button">Check exact code ↗</button></div></div>
+              <div class="scan-result" id="scan-result" role="status" aria-live="polite">No scan yet. Example invented fixture GTIN: <code>2000000000015</code>.</div>
+              <button type="button" id="scan-confirm-button" class="primary-button" hidden>Apply recognized quantities to request ✓</button>
+              <small id="scan-privacy" class="scan-privacy">Browser barcode recognition runs on-device when supported. Optional OCR runs on this demo server; uploaded images are processed transiently and not saved. Neither OCR nor scanning verifies allergens, delivery or spending authority. Meta glasses are not connected.</small>
             </section>
 
             <section class="options-section" id="options" aria-labelledby="options-title">

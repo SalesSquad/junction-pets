@@ -1,11 +1,12 @@
 // Implemented localhost contract. No sponsor API or authentication claim.
-export const endpoints = Object.freeze({ session: '/api/demo/session', catalog: '/api/catalog', policy: '/api/policy', quotes: '/api/quotes', orders: '/api/orders', audit: '/api/audit', auditVerify: '/api/audit/verify', reprice: '/api/demo/reprice', plans: '/api/plans', shock: '/api/demo/shock', jwks: '/.well-known/trusted-trade/jwks.json', buyerKey: '/api/trust/buyer-key', wallet: '/api/demo/wallet', ledger: '/api/demo/ledger', ledgerVerify: '/api/demo/ledger/verify' });
+export const endpoints = Object.freeze({ session: '/api/demo/session', catalog: '/api/catalog', scanResolve: '/api/scan/resolve', scanOcr: '/api/scan/ocr', policy: '/api/policy', quotes: '/api/quotes', orders: '/api/orders', audit: '/api/audit', auditVerify: '/api/audit/verify', reprice: '/api/demo/reprice', plans: '/api/plans', shock: '/api/demo/shock', jwks: '/.well-known/trusted-trade/jwks.json', buyerKey: '/api/trust/buyer-key', wallet: '/api/demo/wallet', ledger: '/api/demo/ledger', ledgerVerify: '/api/demo/ledger/verify' });
 export const metadata = Object.freeze({ mode: 'SYNTHETIC_NONCOMMERCIAL', supplier_id: 'supplier-demo', openapi: '/openapi.json', endpoints,
   approval: 'UNAUTHENTICATED_SYNTHETIC_HUMAN_DECISION', session: 'EPHEMERAL_DEMO_CAPABILITY_NOT_REAL_IDENTITY',
   quoteBody: 'UNSIGNED_kattely.procurement.quote.v2', tradeProof: 'Ed25519_SIGNED_LOCAL_DEMO_KEYS_NOT_REAL_KATTELY_OR_AP2',
   portfolio: 'DETERMINISTIC_MULTI_PRODUCT_OPTIONS_WITH_SYNTHETIC_METRICS', recovery: 'STOCK_SHOCK_REPLANS_WITH_FRESH_APPROVAL',
   settlement: 'DOUBLE_ENTRY_SYNTHETIC_WALLET_REQUIRES_SEPARATE_DEMO_PAYMENT_APPROVAL_NO_PSP',
-  families: ['dairy-milk', 'oat-drink'], fixtureDeliveryDate: '2026-11-16' });
+  families: ['dairy-milk', 'oat-drink'], fixtureDeliveryDate: '2026-11-16',
+  scanning: 'EXACT_SYNTHETIC_GTIN_AND_OPTIONAL_TRANSIENT_SERVER_OCR_UNTRUSTED; NO_META_DEVICE_OR_PHYSICAL_DELIVERY_ATTESTATION' });
 const json = (schema) => ({ 'application/json': { schema } });
 const ref = (name) => ({ $ref: `#/components/schemas/${name}` });
 const object = (properties, required = Object.keys(properties)) => ({ type: 'object', additionalProperties: false, required, properties });
@@ -17,12 +18,19 @@ const operation = (summary, schema, status = '200', secured = false) => ({ summa
   responses: { [status]: { description: 'Synthetic result only' }, '400': { description: 'Invalid terms' }, '403': { description: 'Buyer capability or approval refused' }, '409': { description: 'Budget, stock, expiry, state or replay conflict' } } });
 const parameter = (name) => ({ name, in: 'path', required: true, schema: str });
 export const openapi = {
-  openapi: '3.1.0', info: { title: 'Trusted Trade — implemented SYNTHETIC localhost API', version: '0.4.0', description: 'All parties, stock, prices, approvals, emission factors, orders and EUR wallet balances invented. No banking, brokerage or commercial effects. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification.' },
+  openapi: '3.1.0', info: { title: 'Trusted Trade — implemented SYNTHETIC localhost API', version: '0.5.0', description: 'All parties, stock, prices, approvals, emission factors, orders, scan GTINs and EUR wallet balances invented. No banking, brokerage or commercial effects. Scanner observations are not physical receipt attestation. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification.' },
   servers: [{ url: '/' }], paths: {
     '/.well-known/trusted-trade': { get: operation('Discover synthetic capabilities') },
     [endpoints.jwks]: { get: operation('Publish ephemeral self-attested demo verification keys, NOT a trusted identity registry') },
     [endpoints.session]: { post: operation('Issue an ephemeral demo buyer capability (not login)', object({ buyerId: str }), '201') },
     [endpoints.catalog]: { get: operation('Read current synthetic product prices, stock and versions') },
+    [endpoints.scanResolve]: { get: { summary: 'Resolve a checksum-valid barcode by exact synthetic GTIN; never semantic identity',
+      parameters: [{ name: 'gtin', in: 'query', required: true, schema: str }],
+      responses: { '200': { description: 'Exact synthetic product identity, never authority' }, '400': { description: 'Invalid barcode or checksum' }, '404': { description: 'Unknown barcode' } } } },
+    [endpoints.scanOcr]: { post: { summary: 'OPTIONAL demo-server Tesseract image OCR. No image storage; text is untrusted until user confirms.',
+      security: [{ demoCapability: [] }],
+      requestBody: { required: true, content: { 'image/png': { schema: { type: 'string', format: 'binary' } }, 'image/jpeg': { schema: { type: 'string', format: 'binary' } } } },
+      responses: { '200': { description: 'OCR text and advisory typed recipe candidates; never an order or approval' }, '403': { description: 'Session required' }, '413': { description: 'Image too large' }, '503': { description: 'Local OCR unavailable or busy' } } } },
     [endpoints.buyerKey]: { post: operation('Register independent buyer agent PUBLIC Ed25519 key in its demo session', object({ buyerId: str, publicJwk: object({ kty: { const: 'OKP' }, crv: { const: 'Ed25519' }, x: str }) }), '201', true) },
     [endpoints.policy]: { get: operation('Read server-owned demo budget and approval threshold') },
     [endpoints.wallet]: { get: operation('Read fictional buyer and supplier wallet balances; demo session required', null, '200', true) },
@@ -43,6 +51,7 @@ export const openapi = {
     '/api/orders/{id}/payment': { parameters: [parameter('id')], get: operation('Read owner-session synthetic payment approval, transfer and balances', null, '200', true) },
     '/api/orders/{id}/payment-approval': { parameters: [parameter('id')], post: operation('New fictional human click bound to server-owned supplier payout proposal digest; signed portfolio trade required', object({ buyerId: str, decision: { enum: ['approve', 'reject'] }, proposalDigest: str }), '200', true) },
     '/api/orders/{id}/settlement': { parameters: [parameter('id')], post: operation('Transfer invented EUR from buyer fixture wallet to order-derived fictional suppliers exactly once', object({ buyerId: str, idempotencyKey: { type: 'string', pattern: '^[A-Za-z0-9_-]{10,80}$' } }), '201', true) },
+    '/api/orders/{id}/scan': { parameters: [parameter('id')], post: operation('Record exactly one self-attested GTIN match to an existing signed synthetic order; not physical delivery proof', object({ buyerId: str, gtin: str, idempotencyKey: { type: 'string', pattern: '^[A-Za-z0-9_-]{10,80}$' } }), '201', true) },
     [endpoints.audit]: { get: operation('Read append-only in-memory demo events') },
     [endpoints.auditVerify]: { get: operation('Verify the in-memory SHA-256 receipt hash chain; no external anchoring') },
     [endpoints.reprice]: { post: operation('Demo-only mutation; invalidates old source versions', object({ sku: str, priceCents: { ...int, maximum: 100000 } }), '200', true) },
@@ -54,7 +63,7 @@ export const openapi = {
       lines: { type: 'array', minItems: 1, items: object({ sku: str, quantity: int, unit: { const: 'L' }, unit_price_cents: int, stock_version: int, supplier_id: str }) },
       total_cents: { ...int, description: 'Sum of quantity * unit_price_cents; all values synthetic net cents.' } }),
     Product: { type: 'object', required: ['sku', 'family', 'lactoseFree', 'unitsAvailable', 'priceCents', 'version', 'deliverBy'], properties: {
-      sku: str, family: { enum: ['dairy-milk', 'oat-drink'] }, lactoseFree: { type: 'boolean' }, unitsAvailable: { type: 'integer', minimum: 0 }, priceCents: int, version: int, deliverBy: { type: 'string', format: 'date' } } },
+      sku: str, gtin: str, family: { enum: ['dairy-milk', 'oat-drink'] }, lactoseFree: { type: 'boolean' }, unitsAvailable: { type: 'integer', minimum: 0 }, priceCents: int, version: int, deliverBy: { type: 'string', format: 'date' } } },
     Quote: { type: 'object', required: ['id', 'buyerId', 'lines', 'totalCents', 'approvalRequired', 'status', 'createdAtMs', 'expiresAtMs', 'explanation'], properties: {
       id: str, buyerId: str, totalCents: int, approvalRequired: { type: 'boolean' }, status: str, createdAtMs: { type: 'integer' }, expiresAtMs: { type: 'integer' }, explanation: str,
       lines: { type: 'array', items: ref('QuoteLine') } } },
@@ -105,6 +114,22 @@ const successSchema = (path, method, schema) => {
 };
 successSchema(endpoints.session, 'post', object({ token: str, buyerId: str, mode: { const: 'SYNTHETIC_NOT_AUTHENTICATED' } }));
 successSchema(endpoints.catalog, 'get', object({ mode: { const: 'INVENTED_FIXTURE' }, products: { type: 'array', items: ref('Product') } }));
+successSchema(endpoints.scanResolve, 'get', object({ product: object({
+  gtin: str, sku: str, name: str, family: str, unitsAvailable: { type: 'integer', minimum: 0 },
+  priceCents: int, stockVersion: int, mode: { const: 'INVENTED_FIXTURE_EXACT_GTIN' },
+  observation: { const: 'CHECK_DIGIT_AND_EXACT_CATALOG_MATCH_ONLY' }, authority: { const: 'NONE_SCAN_CANNOT_AUTHORIZE_TRADE' },
+}) }));
+successSchema(endpoints.scanOcr, 'post', object({
+  text: str, candidates: { type: 'array', items: object({ family: str, quantityLitres: int, lactoseFree: { type: 'boolean' }, sourceLine: str, requiresHumanReview: { const: true } }) },
+  duplicateFamilies: { type: 'array', items: str }, rawExcerpt: str,
+  evidence: { const: 'OCR_TEXT_UNTRUSTED_REQUIRES_USER_REVIEW' }, warning: str,
+  mode: { const: 'LOCAL_TESSERACT_OCR_UNTRUSTED' }, persistence: { const: 'IMAGE_NOT_STORED' }, requiresHumanConfirmation: { const: true },
+}));
+successSchema('/api/orders/{id}/scan', 'post', object({ observation: object({
+  orderId: str, sku: str, gtin: str, observedCount: int, orderedCount: int, receiptId: str,
+  matchedSignedOrder: { const: true }, evidenceLevel: { const: 'SELF_ATTESTED_SCAN_NOT_PROOF_OF_DELIVERY' },
+  idempotentReplay: { type: 'boolean' },
+}) }));
 for (const [path, method] of [[endpoints.quotes, 'post'], ['/api/quotes/{id}', 'get'], ['/api/quotes/{id}/approval', 'post']]) successSchema(path, method, object({ quote: ref('Quote') }));
 successSchema(endpoints.plans, 'post', object({ plan: ref('PortfolioPlan') }));
 successSchema('/api/plans/{id}/recover', 'post', object({ plan: ref('PortfolioPlan') }));

@@ -17,6 +17,8 @@
 6. Commit one simulated order. An identical idempotency-key replay returns the original receipt, never a second stock deduction. Every local receipt also extends a verifiable SHA-256 hash chain.
 7. Independently approve the **payment** for a portfolio order that **already passed signed Kättely verification**. The seller IDs are bound into the signed v2 quote body; the separate fictional payment click submits the digest of a complete order/supplier/EUR payout proposal. The local double-entry journal distributes invented EUR cents, records equal debit/credit amounts, blocks duplicate payments, and compensates cancellations with matching reversal entries. Legacy unsigned orders explicitly cannot pay. No financial institution is contacted.
 
+8. Scan a printed recipe, a package GTIN, or a package compared with a previously **signed** synthetic order. Browser `BarcodeDetector` is optional. Tesseract OCR runs on the demo server only when installed; input images are not saved. Recipe quantities require human confirmation. Delivery scans are idempotent, self-attested observations, **not** proof of physical delivery.
+
 No LLM, anonymous browser button, or agent can grant itself spending rights. Price, stock and agreement validity are rechecked by deterministic server code.
 
 ## Run
@@ -27,6 +29,8 @@ npm test
 npm start
 # Open http://127.0.0.1:4177/ — new responsive Mission Control
 # Open http://127.0.0.1:4177/classic — preserved previous demonstration
+# Optional OCR: install Tesseract CLI on this server. Camera barcode detection
+# and manual exact GTIN entry can still work without the OCR executable.
 ```
 
 Run the separate process in another terminal:
@@ -45,6 +49,14 @@ npm run demo:frontier -- happy --decision=approve --payment-decision=approve --r
 ```
 
 `--decision=approve` and `--payment-decision=approve` are **two separate scripted fictional human decisions**, not real authentication, funds or payment consent. The second flag is optional and must be supplied explicitly; the agent never self-authorizes payment. Without the first flag, the independent buyer agent prompts for an explicit purchase approval or rejection. Every scenario uses actual HTTP between an independent Node buyer process and the localhost supplier process; the buyer private key never leaves the agent process. The browser demonstration likewise creates a local WebCrypto key, publishes only the public JWK, signs locally and independently verifies signatures where supported.
+
+## Three scan modes — one Valio-only data boundary
+
+1. **Recipe / menu OCR:** photograph e.g. `480 L lactose-free milk` and `240 L oat drink`, one item per line, and press **Scan image**. Local browser resizing can compress larger JPEG/PNG or HEIC files; optional server Tesseract recognizes quantities. Review suggested fields and press **Apply recognized quantities**. This only edits the purchase form; it cannot authorize an order.
+2. **Product barcode:** enter fixture GTIN `2000000000015` or scan a matching code with an available camera/image. Press **Check exact code** to verify check digit and exact SKU `DEMO-LF-1`. Unknown, malformed or ambiguous codes fail closed; a nearest semantic neighbour never substitutes for exact identity. **All GTINs are invented demo fixture identifiers**, not manufacturer registrations.
+3. **Delivery against order:** first commit a signed simulated purchase, select delivery mode, scan a matching package and explicitly check the code. Each confirmed fresh action records a **single 1 L observed unit** against a product on that signed order. A repeat with the same code/idempotency key returns the same event without double counting. Change the code or select a fresh image to start a new observation. An observation does not prove custody, delivery, authentic packaging or actual warehouse inventory.
+
+`BarcodeDetector` is browser-dependent; an OCR fallback needs the local `tesseract` executable on the running server. On unsupported browsers, the manual GTIN field remains available. Images are transient on the application server; no third-party vision API or Meta device is connected. This Valio data domain does **not** import BIM, Valmet spatial assets or Taimi household data.
 
 ## 110-second judge story — trade and fictional EUR included
 
@@ -82,6 +94,9 @@ The audit receipts form a SHA-256 hash chain, independently recomputed by the bu
 - `GET /api/orders/{id}/payment`, `GET /api/demo/wallet`: owner-session fictional transfer and balances.
 - `GET /api/demo/ledger`, `GET /api/demo/ledger/verify`: inspect in-memory double-entry postings and validate the hash-linked EUR journal.
 - `POST /api/orders/{id}/cancel`: restock and issue compensating **fictional refund** journal entries if previously settled.
+- `GET /api/scan/resolve?gtin=...`: check-digit plus exact invented GTIN-to-SKU mapping, never an authorization.
+- `POST /api/scan/ocr`: ephemeral session, PNG/JPEG bytes, 1.5 MB size bound, optional Tesseract; images not persisted; output untrusted.
+- `POST /api/orders/{id}/scan`: signed order and buyer session checks, one-unit GTIN observation, idempotent replay and hash-linked local receipt.
 - `GET /api/audit`: in-memory evidence events.
 - `GET /api/audit/verify`: local hash-chain verification; the buyer independently recomputes each receipt.
 
