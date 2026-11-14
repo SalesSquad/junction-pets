@@ -22,6 +22,9 @@ export function createSyntheticSettlement({ getOrder, TradeError, record, clock 
   const matchOrder = (orderId, buyerId) => {
     const order = getOrder(orderId);
     if (buyerId !== order.buyerId) fail('BUYER_MISMATCH', 'Payment must belong to the committed demo buyer.', 403);
+    if (!order.paymentEligible || !order.verifiedQuoteBodyDigest) {
+      fail('SIGNED_TRADE_REQUIRED', 'A valid signed portfolio handshake must precede any synthetic payment.', 403);
+    }
     return order;
   };
   const allocations = (order) => {
@@ -58,25 +61,36 @@ export function createSyntheticSettlement({ getOrder, TradeError, record, clock 
     buyerBalanceCents: balances.get(BUYER_WALLET),
     suppliers: [...balances].filter(([account]) => account.startsWith('demo:supplier:'))
       .map(([account, balanceCents]) => ({ account, balanceCents })) });
+  const transferProposal = (order) => {
+    const body = { orderId: order.id, amountCents: order.totalCents, currency: 'EUR',
+      allocations: allocations(order), signedQuoteBodyDigest: order.verifiedQuoteBodyDigest,
+      rail: 'IN_MEMORY_NO_BANK_OR_PSP' };
+    return { ...body, digest: digest(body) };
+  };
   const payment = (orderId, buyerId) => {
-    matchOrder(orderId, buyerId);
-    return { approval: structuredClone(approvals.get(orderId) ?? null),
+    const order = matchOrder(orderId, buyerId);
+    return { proposal: transferProposal(order), approval: structuredClone(approvals.get(orderId) ?? null),
       transfer: structuredClone(transfers.get(orderId) ?? null), wallet: snapshot() };
   };
-  const decidePayment = ({ orderId, buyerId, decision, ...extra } = {}) => {
-    if (Object.keys(extra).length) fail('PAYMENT_TERMS_FORBIDDEN', 'Only orderId, buyerId and decision can authorize fictional payment.', 400);
+  const decidePayment = ({ orderId, buyerId, decision, proposalDigest, ...extra } = {}) => {
+    if (Object.keys(extra).length) fail('PAYMENT_TERMS_FORBIDDEN', 'Only orderId, buyerId, decision and proposalDigest can authorize fictional payment.', 400);
     const order = matchOrder(orderId, buyerId);
     if (order.status !== 'SIMULATED_COMMITTED') fail('ORDER_NOT_PAYABLE', 'Only active simulated orders may be paid.');
     if (!['approve', 'reject'].includes(decision)) fail('INVALID_DECISION', 'Approve or reject this fictional payment.', 400);
+    const proposal = transferProposal(order);
+    if (typeof proposalDigest !== 'string' || proposalDigest !== proposal.digest) {
+      fail('PAYMENT_TERMS_STALE', 'Fictional payment approval must bind the exact order, suppliers and EUR cents.');
+    }
     const existing = approvals.get(order.id);
     if (existing) {
       if (existing.decision !== decision) fail('PAYMENT_DECISION_FINAL', 'Payment authorization cannot be reversed without a new order.');
       return payment(order.id, buyerId);
     }
-    const approval = { orderId, decision, amountCents: order.totalCents, currency: 'EUR',
+    const approval = { orderId, decision, amountCents: order.totalCents, currency: 'EUR', proposalDigest,
       at: new Date(clock()).toISOString(), identity: 'UNAUTHENTICATED_DEMO_CLICK' };
     approvals.set(order.id, approval);
-    record('DEMO_PAYMENT_DECISION', { orderId, decision, amountCents: order.totalCents, mode: approval.identity });
+    record('DEMO_PAYMENT_DECISION', { orderId, decision, amountCents: order.totalCents,
+      proposalDigest, mode: approval.identity });
     return payment(order.id, buyerId);
   };
   const settle = ({ orderId, buyerId, idempotencyKey, ...extra } = {}) => {
@@ -91,7 +105,10 @@ export function createSyntheticSettlement({ getOrder, TradeError, record, clock 
       return { ...payment(orderId, buyerId), idempotentReplay: true };
     }
     if (order.status !== 'SIMULATED_COMMITTED') fail('ORDER_NOT_PAYABLE', 'Canceled orders cannot transfer fictional money.');
-    if (approvals.get(orderId)?.decision !== 'approve') fail('PAYMENT_APPROVAL_REQUIRED', 'A separate explicit fictional payment approval is required.', 403);
+    if (approvals.get(orderId)?.decision !== 'approve' ||
+        approvals.get(orderId)?.proposalDigest !== transferProposal(order).digest) {
+      fail('PAYMENT_APPROVAL_REQUIRED', 'A separate exact-proposal fictional payment approval is required.', 403);
+    }
     if (transfers.has(orderId)) fail('PAYMENT_ALREADY_SETTLED', 'An order can transfer simulated EUR only once.');
     const split = allocations(order);
     if ((balances.get(BUYER_WALLET) ?? 0) < order.totalCents) fail('INSUFFICIENT_DEMO_FUNDS', 'Fictional buyer wallet has insufficient funds.');
