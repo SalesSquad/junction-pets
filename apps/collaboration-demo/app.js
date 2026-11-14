@@ -242,6 +242,13 @@ async function setup(){
   $('play').addEventListener('click',play);
   $('next').addEventListener('click',()=>{stop();next();});
   $('reset').addEventListener('click',reset);
+  // Atlas availability must not depend on the independent synthetic trace.
+  const atlas=new Image();
+  atlas.addEventListener('load',()=>{
+    atlasReady=true;
+    for(const avatar of document.querySelectorAll('.pet-logo[data-art-index]'))paintAvatar(avatar);
+  });
+  atlas.src='./company-mascots.png';
   try{
     const response=await fetch('./trace.json',{cache:'no-store'});
     if(!response.ok)throw new Error(`HTTP ${response.status}`);
@@ -252,13 +259,6 @@ async function setup(){
     trace=parsed;
     for(const person of trace.participants){names.set(person.id,person.company);companions.set(person.id,person);}
     renderPeople();renderOrbitAvatars();reset();
-    // Show initials until the *local* canonical atlas has actually loaded.
-    const atlas=new Image();
-    atlas.addEventListener('load',()=>{
-      atlasReady=true;
-      for(const avatar of document.querySelectorAll('.pet-logo[data-art-index]'))paintAvatar(avatar);
-    });
-    atlas.src='./company-mascots.png';
     notice('Deterministic fixture loaded · source commit not verified.');
   }catch(error){failure(error instanceof Error?error.message:'Unknown load error');}
   await loadSolutionTeams(); // Independent of the synthetic trace's availability.
