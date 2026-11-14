@@ -9,6 +9,14 @@
   "candidateStrategy": "v8_hierarchical",
   "baselineStrategy": "frozen_v5",
   "protectedControls": ["frozen_v5", "frozen_v6"],
+  "unsafeReferenceStrategies": ["frozen_v5", "frozen_v6", "repeat_left"],
+  "selectionContract": {
+    "firstSeed": 513000,
+    "scanLimit": 512,
+    "nearTarget": 128,
+    "clearTarget": 32,
+    "nearAbsThreshold": 0.122
+  },
   "readoutKeys": {
     "lost": "lost_frozen_v5_v6_safe_near_goal_seeds",
     "novel": "novel_v8_safe_near_goal_seeds",
