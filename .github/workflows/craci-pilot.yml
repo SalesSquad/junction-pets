@@ -11,7 +11,7 @@ on:
         description: Fixed qualification workload
         type: choice
         default: portable
-        options: [portable, product-browser, sbank-sponsor]
+        options: [portable, product-browser, sbank-sponsor, portfolio-browser, tieto-sponsor]
       source_sha:
         description: Full source commit; required for product browser and sponsor jobs
         type: string
@@ -20,12 +20,22 @@ on:
         description: Product for the browser workload
         type: choice
         default: stoa
-        options: [stoa, valio]
+        options: [stoa, valio, sbank, hostinger, espoo, all]
       browser:
         description: Run all engines or only the engine needing qualification
         type: choice
         default: all
         options: [all, chromium, firefox, webkit]
+      sponsor_revision:
+        description: Tieto sponsor canary or fixed five-commit matrix
+        type: choice
+        default: base
+        options: [base, '2283', '2234', '2129', '2297', heads, all]
+      shard:
+        description: Fixed scenario shard; use all only for new scenario coverage
+        type: choice
+        default: all
+        options: [all, '0', '1', '2', '3']
 
 permissions:
   contents: read
@@ -244,3 +254,170 @@ jobs:
           git -C sponsor rev-parse HEAD
           python3 harness/scripts/craci/sbank-sponsor-check.py --csv "$GITHUB_WORKSPACE/sponsor/tx_junction_transactions.csv" --source-root "$GITHUB_WORKSPACE/source" --output "$RUNNER_TEMP/sponsor-customer.json"
 
+
+  tieto-sponsor:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'tieto-sponsor' }}
+    name: Tieto MessagePack / ${{ matrix.revision }} / .NET 8
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-tieto-${{ matrix.revision }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        revision: ${{ fromJSON(inputs.sponsor_revision == 'all' && '["base","2283","2234","2129","2297"]' || inputs.sponsor_revision == 'heads' && '["2283","2234","2129","2297"]' || inputs.sponsor_revision == '2283' && '["2283"]' || inputs.sponsor_revision == '2234' && '["2234"]' || inputs.sponsor_revision == '2129' && '["2129"]' || inputs.sponsor_revision == '2297' && '["2297"]' || '["base"]') }}
+    env:
+      SPONSOR_SHA: ${{ fromJSON('{"base":"32258fdbee4bcd653c79f51b4376b5103c6f4d27","2283":"9df83c38409c8bfad0517aebffe48211eda4a5b4","2234":"9007cee1163c4a274fd60c3cc20c21ae63622786","2129":"083afd994c1c9a994cb2cd5aa0b6ad805a621457","2297":"a0aa5ab2de7f5a669d97e37184a89034c1de82b6"}')[matrix.revision] }}
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+    steps:
+      - name: Configure public sponsor and SDK downloads
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '8'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github]
+            connections:
+              - tls:
+                  serverNamePatterns:
+                    - builds.dotnet.microsoft.com
+                    - ci.dot.net
+                    - dotnetcli.azureedge.net
+                    - dotnetcli.blob.core.windows.net
+                    - api.nuget.org
+                    - globalcdn.nuget.org
+                    - pkgs.dev.azure.com
+                    - dnceng.pkgs.visualstudio.com
+                  ports: [443]
+      - name: Enforce the credit window
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+          [[ "$SPONSOR_SHA" =~ ^[0-9a-f]{40}$ ]]
+      - name: Check out the pinned campaign harness
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Check out official sponsor history for versioning
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: te-industry-tech-office/junction26-messagepack-csharp
+          path: sponsor
+          ref: ${{ env.SPONSOR_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install the sponsor-pinned .NET SDK
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          global-json-file: sponsor/global.json
+      - name: Build and test four actual sponsor suites
+        working-directory: sponsor
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SPONSOR_SHA"
+          git rev-parse HEAD
+          git -C ../harness rev-parse HEAD
+          dotnet --version
+          sha256sum global.json nuget.config LICENSE
+          mkdir -p "$RUNNER_TEMP/tieto-results"
+          result=0
+          for suite in MessagePack.SourceGenerator.Tests MessagePack.SourceGenerator.ExecutionTests MessagePack.SourceGenerator.MapModeExecutionTests MessagePack.Tests; do
+            if dotnet test "tests/$suite/$suite.csproj" -c Release -f net8.0 --logger "trx;LogFileName=$suite.trx" --results-directory "$RUNNER_TEMP/tieto-results" --blame-hang-timeout 3m; then
+              printf 'SUITE_PASS %s\n' "$suite"
+            else
+              printf 'SUITE_FAIL %s\n' "$suite"
+              result=1
+            fi
+          done
+          python3 ../harness/scripts/craci/summarize-trx.py "$RUNNER_TEMP/tieto-results" "$SPONSOR_SHA"
+          exit "$result"
+
+  portfolio-browser:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'portfolio-browser' }}
+    name: Portfolio ${{ matrix.product }} / ${{ matrix.browser }}
+    runs-on: craci
+    timeout-minutes: 20
+    concurrency:
+      group: craci-portfolio-browser-${{ matrix.product }}-${{ matrix.browser }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        product: ${{ fromJSON(inputs.product == 'sbank' && '["sbank"]' || inputs.product == 'hostinger' && '["hostinger"]' || inputs.product == 'espoo' && '["espoo"]' || '["sbank","hostinger","espoo"]') }}
+        browser: ${{ fromJSON(inputs.browser == 'chromium' && '["chromium"]' || inputs.browser == 'firefox' && '["firefox"]' || inputs.browser == 'webkit' && '["webkit"]' || '["chromium","firefox","webkit"]') }}
+    env:
+      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || fromJSON('{"sbank":"8baf32ebbe4c50e92f3230fa38c843b92b48a0b4","hostinger":"23a029a48794ba275a0309584bf9968f7f5b665c","espoo":"40d7be0dbb3ab601443c5d79290979e58288edc8"}')[matrix.product] }}
+    steps:
+      - name: Configure browser installation networking
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '4'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, npm, ubuntu]
+            sources:
+              - apt:
+                  urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
+            connections:
+              - tls:
+                  serverNamePatterns:
+                    - cdn.playwright.dev
+                    - playwright.download.prss.microsoft.com
+                    - storage.googleapis.com
+                  ports: [443]
+      - name: Enforce window and unambiguous source selection
+        env:
+          SELECTED_PRODUCT: ${{ inputs.product }}
+          SOURCE_OVERRIDE: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+          [[ "$PRODUCT_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          if [ -n "$SOURCE_OVERRIDE" ]; then
+            case "$SELECTED_PRODUCT" in sbank|hostinger|espoo) ;; *) exit 1;; esac
+          fi
+      - name: Check out the pinned harness
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Check out the product's own PR source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          ref: ${{ env.PRODUCT_SOURCE_SHA }}
+          persist-credentials: false
+      - name: Set up Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install the locked harness and selected browser
+        working-directory: harness
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          git -C ../source rev-parse HEAD
+          npm ci --ignore-scripts
+          npx --no-install playwright install --with-deps "$BROWSER"
+      - name: Exercise consequential local product workflows
+        working-directory: harness
+        env:
+          CRACI_PRODUCT: ${{ matrix.product }}
+          CRACI_BROWSER: ${{ matrix.browser }}
+          SOURCE_DIR: ${{ github.workspace }}/source
+          EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
+        run: |
+          set -euo pipefail
+          export CRACI_BROWSER_OUTPUT="$RUNNER_TEMP/craci-portfolio-browser-results"
+          node scripts/craci/portfolio-browser.mjs
