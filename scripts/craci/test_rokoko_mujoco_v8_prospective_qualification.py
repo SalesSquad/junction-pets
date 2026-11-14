@@ -2,10 +2,15 @@
 from __future__ import annotations
 
 import importlib.util
+import gzip
+import json
 from pathlib import Path
 from types import SimpleNamespace
+import tempfile
 import unittest
 from unittest.mock import patch
+
+import numpy as np
 
 
 MODULE = Path(__file__).with_name("rokoko-mujoco-v8-prospective-qualification.py")
@@ -68,7 +73,7 @@ class V8StrictProspectiveQualification(unittest.TestCase):
         trials = [{
             "strategy": name, "observed_corridor": index < 128,
             "success": False, "unsafe": False,
-            "away_lateral_displacement": 0.0,
+            "lateral_displacement": 0.0,
             "forward_reopened_after_side": 0,
         } for index in range(160) for name in qualification.STRATEGIES]
         training = {
@@ -99,6 +104,52 @@ class V8StrictProspectiveQualification(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "COHORT_CHANGED"):
             qualification.verify_paired_train_result(
                 training, {}, "a" * 40, Path("evidence"), previous)
+
+    def test_all_raw_option_masks_and_reopen_indices_are_independently_checked(self):
+        class PublicOnlyMask:
+            def reset(self, seed, ood):
+                return None
+
+            def mask(self, observation):
+                return np.array([1, int(observation[0] >= .5), 0, 1, 1, 1, 1],
+                                dtype=bool)
+
+        before = [0.0] * 18
+        after = [1.0] + [0.0] * 17
+        row = {
+            "seed": 513000, "strategy": "repeat_left", "observed_corridor": True,
+            "forward_reopened_after_side": 1,
+            "forward_reopen_option_steps": [1],
+            "stage_funnel": {"any_forward_reopen_after_side": True},
+        }
+        event = {"observation": before, "next_observation": after,
+                 "mask": [1, 0, 0, 1, 1, 1, 1], "action": 3}
+        with tempfile.TemporaryDirectory(prefix="v8-raw-replay-") as tmp:
+            evidence = Path(tmp)
+            with gzip.open(evidence / "full_transitions.jsonl.gz",
+                           "wt", encoding="utf8") as stream:
+                stream.write(json.dumps({"seed": 513000, "strategy": "repeat_left",
+                                         "transitions": [event]}) + "\n")
+            result = qualification.independently_verify_all_masks_and_reopening(
+                evidence, {"trials": [row]}, PublicOnlyMask)
+            self.assertEqual(result["repeat_left"], 1)
+            self.assertEqual(result["v8_hierarchical"], 0)
+
+            row["forward_reopened_after_side"] = 2
+            with self.assertRaisesRegex(
+                    AssertionError, "REOPEN_COUNTER_NOT_DERIVED"):
+                qualification.independently_verify_all_masks_and_reopening(
+                    evidence, {"trials": [row]}, PublicOnlyMask)
+            row["forward_reopened_after_side"] = 1
+            event["mask"][1] = 1
+            with gzip.open(evidence / "full_transitions.jsonl.gz",
+                           "wt", encoding="utf8") as stream:
+                stream.write(json.dumps({"seed": 513000, "strategy": "repeat_left",
+                                         "transitions": [event]}) + "\n")
+            with self.assertRaisesRegex(
+                    AssertionError, "SHIELD_NOT_REAL_PHYSICS"):
+                qualification.independently_verify_all_masks_and_reopening(
+                    evidence, {"trials": [row]}, PublicOnlyMask)
 
 
 if __name__ == "__main__":
