@@ -28,3 +28,28 @@ The cohort runs exactly **18 synthetic comparisons** (six predefined faults at t
 Integrate the M3 operator studio only after a single owner handles the PR stack; qualify the actual Intel station (SO-101 sensors, Anomalib output, VLA command staging, OpenVINO on Intel hardware) separately with physical safety authority and hardwired interlocks. Report true robot cycle time, correct-bowl rate and fault recovery on held-out physical runs with an approved supervisor and operator. No physical action may be inferred from a software STOP receipt.
 
 **Model evidence:** MBP Verda-hosted Nemotron 3.5 Super VL generated two bounded **read-only** design/red-team analyses on 14 Nov 2026 (CLI exits 0). The first draft erroneously treated local STOP as global; the second explicitly corrected that. Implemented core here is human-reviewed source, **not model self-certification**. Provider token billing/actual cost unknown; no new GPU VM or credential export.
+
+
+## Independent safety review repair — exact follow-up
+
+An independent **Codex Plus read-only** review of original M5 commit
+`399a491a0791dc3c319f1b4660d1c4c445791363` reproduced two defects:
+
+- **P1:** a caller could mutate its LATCHED snapshot while asynchronous host
+  authorization was pending, allowing an invalid software bowl before replay
+  rejected the chain. **Fixed:** the snapshot is synchronously copied and
+  rebuilt from its event history before further awaits; later logic uses ONLY
+  the verified immutable rebuilt snapshot. The request and eventual host
+  envelope are detached and validated too.
+- **P2:** a JavaScript sparse item-ID array could bypass `.some()`, and
+  unsigned hashing could equate `[undefined]` with `[]`. **Fixed:** strict
+  dense/plain/finite JSON boundary validation before hashing or replay;
+  unsupported values, sparse arrays, cyclic values and forbidden object
+  properties are rejected.
+
+The source-bound reproductions are retained as negative Node tests. The M5
+cohort generator and demo were rerun on the corrected bytes: **15/15
+targeted tests PASS**, live local software demo PASS, 18 fixed synthetic
+comparisons **144 → 0** cross-batch software bowl outputs. This is **not**
+physical safety validation. The host must still provide trusted durable CAS,
+identity, operator proof, hardware E-stop and calibrated real sensors.

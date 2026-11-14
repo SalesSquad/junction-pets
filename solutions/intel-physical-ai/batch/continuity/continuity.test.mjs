@@ -218,3 +218,51 @@ test('explicit GLOBAL operator STOP is latched, host-approved new epoch unblocks
   state=await admit(state,run(state,'newbatch'));
   assert.equal(state.state.phase,'READY');
 });
+
+test('regression: mutable caller snapshot cannot clear latch while host authorization awaits',async()=>{
+  let state=await genesis();
+  state=await admit(state,run(state,'race-trip',plan()));
+  assert.equal(state.state.phase,'LATCHED');
+  const mutable=structuredClone(state);
+  let notifyStarted,release;
+  const started=new Promise(resolve=>notifyStarted=resolve);
+  const delayed=async args=>{
+    notifyStarted();
+    await new Promise(resolve=>{release=resolve;});
+    return {...args,permit:true,reference:'test-host-proof'};
+  };
+  const pending=dispatch(mutable,run(mutable,'race-bypass',healthy(444)),{authorize:delayed});
+  await started;
+  mutable.state.phase='READY';
+  mutable.state.latch=null;
+  release();
+  const result=await pending;
+  assert.equal(result.status,'DENIED');
+  assert.equal(result.reason,'GLOBAL_STOP_LATCHED');
+  assert.equal(result.state.state.phase,'LATCHED');
+  assert.equal(result.state.root,state.root);
+  assert.equal(result.state.events.length,state.events.length);
+});
+
+test('regression: sparse and non-JSON item IDs are rejected; holes cannot forge a replayable ledger',async()=>{
+  const state=await genesis();
+  const sparse=run(state,'sparse',healthy(55));
+  sparse.itemIds=new Array(8);
+  const rejected=await dispatch(state,sparse,{authorize:permit});
+  assert.equal(rejected.status,'DENIED');
+  assert.equal(rejected.reason,'INVALID_REQUEST');
+  assert.equal(rejected.state.root,state.root);
+  const partial=run(state,'partial',healthy(55));
+  delete partial.itemIds[0];
+  assert.equal((await dispatch(state,partial,{authorize:permit})).status,'DENIED');
+  const noReason=run(state,'nullref',healthy(55));
+  noReason.batchRequest.episodes[0].operator.reason=undefined;
+  assert.equal((await dispatch(state,noReason,{authorize:permit})).reason,'INVALID_REQUEST');
+  const nan=run(state,'nan',healthy(55));
+  nan.batchRequest.episodes[0].at=NaN;
+  assert.equal((await dispatch(state,nan,{authorize:permit})).status,'DENIED');
+  const admitted=await admit(state,run(state,'clean-a',healthy(55)));
+  const badLedger=structuredClone(admitted);
+  delete badLedger.state.usedItemIds[0];
+  await assert.rejects(()=>verifyLedger(badLedger));
+});

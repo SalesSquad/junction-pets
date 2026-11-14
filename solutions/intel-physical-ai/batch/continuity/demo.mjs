@@ -14,7 +14,7 @@ const healthy=(seed)=>{
 const run=(state,name,batchRequest)=>({
   kind:'RUN',eventId:`ev-${name}`,expectedRevision:state.state.revision,
   expectedEpoch:state.state.epoch,batchId:`batch-${name}`,
-  itemIds:Array.from({length:8},(_,i)=>`${name}-item-${i+1}`),batchRequest
+  itemIds:Array.from({length:8},(_,i)=>`${name}-item-${i+1}`),batchRequest,batchControl:{}
 });
 const rearm=(state,kind)=>({
   kind,eventId:kind==='PROPOSE_REARM'?'ev-propose-demonstration':'ev-confirm-demonstration',

@@ -7,6 +7,38 @@ export const MAX_EVENTS=64;
 export const MAX_ITEMS=1024;
 const fmt='intel-batch-epoch-ledger/v1';
 const copy=x=>structuredClone(x);
+// Trust-boundary data must be dense, acyclic, plain JSON. In particular,
+// JSON.stringify/canonical must NEVER collapse [undefined] into [].
+function checkedJsonClone(input) {
+  const visiting=new WeakSet();
+  const visit=(value,depth)=>{
+    if(depth>64)reject('NON_JSON_VALUE');
+    if(value===null||typeof value==='boolean'||typeof value==='string')return;
+    if(typeof value==='number'&&Number.isFinite(value))return;
+    if(typeof value!=='object'||visiting.has(value))reject('NON_JSON_VALUE');
+    visiting.add(value);
+    if(Array.isArray(value)){
+      if(value.length>100000||Object.keys(value).length!==value.length)
+        reject('NON_JSON_ARRAY');
+      for(let i=0;i<value.length;i++){
+        if(!Object.prototype.hasOwnProperty.call(value,i))reject('NON_JSON_ARRAY');
+        visit(value[i],depth+1);
+      }
+    }else{
+      if(![Object.prototype,null].includes(Object.getPrototypeOf(value)))
+        reject('NON_JSON_VALUE');
+      for(const key of Reflect.ownKeys(value)){
+        if(typeof key!=='string'||['__proto__','constructor','prototype'].includes(key)||
+           !Object.prototype.propertyIsEnumerable.call(value,key))
+          reject('NON_JSON_VALUE');
+        visit(value[key],depth+1);
+      }
+    }
+    visiting.delete(value);
+  };
+  visit(input,0);
+  return JSON.parse(JSON.stringify(input));
+}
 const freeze=x=>{
   if(x&&typeof x==='object'){for(const v of Object.values(x))freeze(v);Object.freeze(x);}
   return x;
@@ -23,7 +55,8 @@ function validRequest(r) {
   if(r.kind==='RUN'){
     if(!hasKeys(r,['kind','eventId','expectedRevision','expectedEpoch','batchId','itemIds','batchRequest','batchControl']) ||
        !validId(r.batchId)||!Array.isArray(r.itemIds) ||
-       !r.itemIds.length||r.itemIds.length>64||r.itemIds.some(x=>!validId(x))||
+       !r.itemIds.length||r.itemIds.length>64||Object.keys(r.itemIds).length!==r.itemIds.length||
+       Array.from(r.itemIds).some(x=>!validId(x))||
        new Set(r.itemIds).size!==r.itemIds.length ||
        !record(r.batchRequest)||!hasKeys(r.batchControl,[])&&!hasKeys(r.batchControl,['globalStopEpisodeId'])||!Array.isArray(r.batchRequest.episodes)||
        r.batchRequest.episodes.length!==r.itemIds.length)reject('INVALID_RUN_INPUT');
@@ -105,6 +138,8 @@ async function advance(snapshot,request,gate) {
 // Verifies recomputed source decisions, replay sequence, source receipts, and all
 // changes in the local ledger. No cryptographic identity/host trust is provided.
 export async function verifyLedger(snapshot){
+  // Snapshot is detached synchronously, before replay's first await.
+  snapshot=checkedJsonClone(snapshot);
   if(!record(snapshot)||snapshot.format!==fmt||snapshot.version!==VERSION||
      !record(snapshot.state)||!Array.isArray(snapshot.events)||
      snapshot.events.length>MAX_EVENTS||typeof snapshot.root!=='string')
@@ -133,7 +168,16 @@ async function denied(snapshot,request,reason){
 // and durably compare-and-swap the returned state against previousRoot BEFORE
 // acknowledging. Without CAS/host admission, this is a synthetic algorithm.
 export async function dispatch(snapshot,request,{authorize}={}){
-  await verifyLedger(snapshot);
+  // Snapshot and request may be caller-owned mutable objects. Copy the request
+  // before the first await; use the rebuilt immutable ledger, not the caller's
+  // snapshot. Otherwise a concurrent mutation can clear a LATCHED state while
+  // the asynchronous host admission callback is waiting.
+  let immutableRequest;
+  try{immutableRequest=checkedJsonClone(request);}
+  catch{immutableRequest=null;}
+  snapshot=await verifyLedger(snapshot);
+  if(immutableRequest===null)return denied(snapshot,null,'INVALID_REQUEST');
+  request=immutableRequest;
   try{validRequest(request);}catch(e){return denied(snapshot,request,e.message);}
   const earlier=snapshot.events.find(e=>e.request.eventId===request.eventId);
   if(earlier){
@@ -154,7 +198,7 @@ export async function dispatch(snapshot,request,{authorize}={}){
       epoch:snapshot.state.epoch});
     try{
       if(typeof authorize!=='function')reject('HOST_AUTHORIZATION_MISSING');
-      gate=await authorize(hostInput);
+      gate=checkedJsonClone(await authorize(hostInput));
       validateGate(gate,scope,hostInput.requestHash,snapshot);
     }catch{return denied(snapshot,request,'HOST_AUTHORIZATION_MISSING');}
   }
