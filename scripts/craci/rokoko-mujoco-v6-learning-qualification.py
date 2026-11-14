@@ -213,6 +213,11 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
         int(w["learned_v6"]["success"] and not w["learned_v5"]["success"])
         for w in worlds
     )
+    novel_wins_over_both = sum(
+        int(w["learned_v6"]["success"] and not w["learned_v5"]["success"]
+            and not w["constant"]["success"])
+        for w in worlds
+    )
     # Aggregate hazard counts can conceal a different newly hazardous world.
     # A candidate may be unsafe only where *both* frozen arms were already
     # unsafe in the exact paired world, never trade one incident for another.
@@ -224,7 +229,7 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
     # Reject net-positive numbers that silently sacrifice worlds already solved
     # by either frozen baseline; demand a genuine prospective new skill.
     scientific_ok = (scientific_ok and lost_to_constant == 0 and
-                     lost_to_v5 == 0 and novel_wins_over_v5 >= 5 and
+                     lost_to_v5 == 0 and novel_wins_over_both >= 5 and
                      novel_unsafe_vs_baselines == 0)
     failure_priority = (
         "learn_contact_risk_on_fresh_train_seeds"
@@ -249,6 +254,7 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
             "candidate_loses_worlds_constant_wins": lost_to_constant,
             "candidate_loses_worlds_v5_wins": lost_to_v5,
             "candidate_new_wins_v5_misses": novel_wins_over_v5,
+            "candidate_new_wins_both_baselines_miss": novel_wins_over_both,
             "candidate_new_hazard_worlds_vs_baselines": novel_unsafe_vs_baselines,
             "candidate_unsafe_worlds": counts["learned_v6"]["unsafe"],
             "candidate_abstained_worlds": counts["learned_v6"]["abstain"],
