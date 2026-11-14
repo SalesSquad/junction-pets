@@ -259,7 +259,7 @@ Ensimmäisen kokonaisuuden merkitykselliset tapaukset ovat:
 
 Jokainen on kohdennettu toteutushetken riskiin. Ne eivät tarkoita uuden suuren testikehyksen rakentamista. Tavallinen UI-teksti voidaan katsoa läpi. Ympäristöongelma kirjataan ympäristöongelmaksi; lähdevirhe korjataan oikeassa kerroksessa.
 
-Tämän suunnitelmadokumentin toimitus tarkistetaan etä-HEADin, yhden muuttuneen tiedoston ja sisällön vastaavuuden avulla. Tuotekoodin testejä ei ajeta dokumentin vuoksi.
+Tämän suunnitelmadokumentin toimitus tarkistetaan etä-HEADin, yhden muuttuneen tiedoston ja sisällön vastaavuuden avulla. Dokumentin vuoksi ei pyydetä erillisiä tuotekoodin testiajoja. Repon automaattisesti käynnistämien tarkistusten tila luetaan erikseen ja sidotaan niiden todelliseen HEADiin.
 
 ## 12. Tuotteen mittarit ja lopettamiskriteerit
 
