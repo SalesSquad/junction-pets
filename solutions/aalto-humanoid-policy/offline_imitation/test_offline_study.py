@@ -86,7 +86,8 @@ class MetadataGuard(unittest.TestCase):
             (root / "README.md").write_text("sponsor card", encoding="utf-8")
             (root / "data/chunk-000/file-000.parquet").write_bytes(b"stub")
             with patch.object(s, "INFO_SHA256", hashlib.sha256(raw).hexdigest()), \
-                 patch.object(s, "README_SHA256", hashlib.sha256(b"sponsor card").hexdigest()):
+                 patch.object(s, "README_SHA256", hashlib.sha256(b"sponsor card").hexdigest()), \
+                 patch.object(s, "PARQUET_SHA256", {"data/chunk-000/file-000.parquet": hashlib.sha256(b"stub").hexdigest()}):
                 good = s.dataset_preflight(root)
                 self.assertEqual(len(good["joint_names"]), 28)
                 info["features"]["action"] = {**feature, "names": [list(reversed(feature["names"][0]))]}
@@ -95,6 +96,11 @@ class MetadataGuard(unittest.TestCase):
                 with patch.object(s, "INFO_SHA256", hashlib.sha256(edited).hexdigest()):
                     with self.assertRaisesRegex(ValueError, "joint order"):
                         s.dataset_preflight(root)
+
+                (root / "meta/info.json").write_bytes(raw)
+                (root / "data/chunk-000/file-000.parquet").write_bytes(b"corrupted")
+                with self.assertRaisesRegex(ValueError, "Parquet bytes differ"):
+                    s.dataset_preflight(root)
 
     def test_unsafe_data_symlink_rejected(self):
         with tempfile.TemporaryDirectory() as d:
@@ -115,6 +121,32 @@ class MetadataGuard(unittest.TestCase):
             with patch.object(s, "INFO_SHA256", hashlib.sha256(raw).hexdigest()), \
                  patch.object(s, "README_SHA256", hashlib.sha256(b"card").hexdigest()):
                 with self.assertRaisesRegex(ValueError, "escapes"):
+                    s.dataset_preflight(root)
+
+    def test_pinned_shared_hf_xet_blob_is_accepted(self):
+        with tempfile.TemporaryDirectory() as d:
+            hub = Path(d) / "hub"
+            root = hub / "datasets--zupermiez--g1_pick_cube" / "snapshots" / s.DATASET_COMMIT
+            (root / "meta").mkdir(parents=True)
+            (root / "data/chunk-000").mkdir(parents=True)
+            shared = hub / "blobs" / "10" / "sha256-blob"
+            shared.parent.mkdir(parents=True)
+            shared.write_bytes(b"exact public fixture")
+            (root / "data/chunk-000/file-000.parquet").symlink_to(shared)
+            names = [[f"joint{i}" for i in range(28)]]
+            feature = {"dtype": "float32", "shape": [28], "names": names}
+            info = {"codebase_version": "v3.0", "total_episodes": 20,
+                    "total_frames": 11720, "fps": 30,
+                    "features": {"observation.state": feature, "action": feature}}
+            raw = json.dumps(info).encode()
+            (root / "meta/info.json").write_bytes(raw)
+            (root / "README.md").write_bytes(b"card")
+            with patch.object(s, "INFO_SHA256", hashlib.sha256(raw).hexdigest()), \
+                 patch.object(s, "README_SHA256", hashlib.sha256(b"card").hexdigest()), \
+                 patch.object(s, "PARQUET_SHA256", {"data/chunk-000/file-000.parquet": hashlib.sha256(shared.read_bytes()).hexdigest()}):
+                self.assertEqual(s.dataset_preflight(root)["parquet_sha256"], s.PARQUET_SHA256)
+                shared.write_bytes(b"different public fixture")
+                with self.assertRaisesRegex(ValueError, "Parquet bytes differ"):
                     s.dataset_preflight(root)
 
 
