@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
+from subprocess import CompletedProcess
 
 SOURCE = Path(__file__).with_name("auto_sync.py")
 spec = importlib.util.spec_from_file_location("auto_sync", SOURCE)
@@ -46,6 +48,28 @@ class SyncTests(unittest.TestCase):
         target.write_text(json.dumps({"runId": "verda.auto-conflict", "status": "succeeded"}))
         self.assertEqual(api.archive_merged_envelopes(self.owner, self.source), 0)
         self.assertTrue(file.exists())
+
+    def test_remote_main_must_match_local_after_ff_merge(self):
+        checkout = self.root / "dedicated"
+        (checkout / ".git").mkdir(parents=True)
+        def fake(command, **kwargs):
+            last = command[-1]
+            if command[:3] == ["git", "remote", "get-url"]:
+                value = api.SOURCE_URL
+            elif command[:3] == ["git", "branch", "--show-current"]:
+                value = "main"
+            elif command[:3] == ["git", "status", "--porcelain"]:
+                value = ""
+            elif command[:3] == ["git", "rev-parse", "HEAD"]:
+                value = "a" * 40
+            elif command[:3] == ["git", "rev-parse", "refs/remotes/origin/main"]:
+                value = "b" * 40
+            else:
+                value = ""
+            return CompletedProcess(command, 0, stdout=value + ("\n" if value else ""), stderr="")
+        with patch.object(api, "call", side_effect=fake):
+            with self.assertRaisesRegex(RuntimeError, "diverges"):
+                api.ensure_checkout(checkout)
 
     def test_rejects_untrusted_owner_folder_permissions(self):
         bad = self.root / "bad"

@@ -71,6 +71,12 @@ def ensure_checkout(src: Path):
         raise RuntimeError("dedicated main checkout is dirty")
     call(["git", "fetch", "--no-tags", "origin", "main"], cwd=src, timeout=55)
     call(["git", "merge", "--ff-only", "origin/main"], cwd=src, timeout=30)
+    # A local ahead-only main also passes ff-only. Never treat its unpushed
+    # records as authoritative when archiving inbox evidence.
+    actual = call(["git", "rev-parse", "HEAD"], cwd=src, timeout=10).stdout.strip()
+    remote = call(["git", "rev-parse", "refs/remotes/origin/main"], cwd=src, timeout=10).stdout.strip()
+    if actual != remote:
+        raise RuntimeError("dedicated main diverges from verified origin/main")
 
 
 def open_experiment_prs() -> list:
