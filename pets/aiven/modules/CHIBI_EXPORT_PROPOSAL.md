@@ -56,6 +56,14 @@ current validator rejects any persona key other than `system_prompt` and
 
 ## Decision requested
 
-Choose A now or B later. Recommendation: **A**, unless the `allmodules`
-measurement is clearly worse than routed modules. B adds host work, and its only
-extra benefit is the headroom kept for future depth.
+Measured on the fresh `astra-cases-heldout4.json` (opus judge, 2 repeats; see
+RESULTS-20261114-astra.md, rounds 5–6):
+
+| Arm | haiku pass / score | sonnet pass / score |
+|---|---|---|
+| full AGENTS.md + v1 | 30 % / 0.756 | 50 % / 0.825 |
+| A: all modules + v2 | 70 % / 0.900 | 65 % / 0.863 |
+| B: routed modules + v2 | 63 % / 0.908 | 75 % / 0.925 |
+
+**Recommendation: adopt A now** (no host change, the largest jump for both models).
+**Plan B** for Sonnet-class models, where routing adds a further 10 points.

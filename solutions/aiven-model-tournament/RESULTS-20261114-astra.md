@@ -74,3 +74,21 @@ Fresh, unread Astra set `astra-cases-heldout3.json`, source `32a471a`, 2026-11-1
 - **Haiku with modules is the best value:** the highest mean score at about half Sonnet's cost.
 - **The largest gains are on the hardest cases:** `ambiguous-evidence-rural` (haiku 0.31 → 0.75), `injection-in-log` and `residency-us-region`. These are exactly the depth the 20k monolith could not hold.
 - **Still weak:** `residency-us-region`, `small-counts-ranking` and `injection-in-log` (sonnet). These are the next module refinements.
+
+## Rounds 5–6 — refined modules, three arms, fresh unread set `astra-cases-heldout4.json`
+
+Modules at `313e6d3`, allmodules arm at `083ac90`; 2026-11-14T15:56Z – 16:05Z; opus judge; 2 repeats.
+
+| Model / arm | Pass | Mean score | Schema-valid | Proposal when expected | Cost (USD) |
+|---|---|---|---|---|---|
+| haiku / full AGENTS.md + v1 | 30 % | 0.756 | 19/20 | 16/20 | 0.72 |
+| haiku / routed modules + v2 | 63 % (19 runs) | **0.908** | 19/19 | 19/19 | 0.72 |
+| haiku / all modules + v2 | **70 %** | 0.900 | 20/20 | 20/20 | 0.77 |
+| sonnet / full AGENTS.md + v1 | 50 % | 0.825 | 18/20 | 17/20 | 1.52 |
+| sonnet / routed modules + v2 | **75 %** | **0.925** | 20/20 | 20/20 | 1.53 |
+| sonnet / all modules + v2 | 65 % | 0.863 | 20/20 | 17/20 | 1.38 |
+
+- **The module content and the v2 contract carry the improvement.** On an unseen set, both module arms beat the monolith for both models: haiku 30 % → 63–70 %, sonnet 50 % → 65–75 %.
+- **Routing versus loading everything:** a tie for haiku (0.908 vs 0.900). For sonnet, routing is clearly better (0.925 vs 0.863, +10 pp pass), probably because irrelevant modules distract it.
+- **Recommendation:** adopt option A (all modules in `persona.system_prompt`) now, which needs no host change. Plan option B (host routing) as the next step for Sonnet-class models.
+- **Still weakest:** `delete-opensearch-index` and `valkey-ai-gateway-cache` (both about 0.75) and `mcp-write-pressure`.
