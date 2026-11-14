@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "work_id": "META-LENS-TRAIN-20261114-R2",
+  "kind": "public-image-metadata-retrieval-experiment",
+  "source_base": "27fb74b999f41718237958e03404390350f75a65",
+  "model": {
+    "id": "google/siglip2-base-patch16-224",
+    "revision": "75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2",
+    "weights_sha256": "612923381c76ec5a9bed335d1c48827e3f2e506ac31b044b63b2031fadee6a0b",
+    "license": "Apache-2.0",
+    "trust_remote_code": false,
+    "encoder_frozen": true
+  },
+  "data": {
+    "id": "Amazon Berkeley Objects",
+    "source": "https://amazon-berkeley-objects.s3.amazonaws.com/index.html",
+    "license": "CC-BY-4.0",
+    "private_data_allowed": false,
+    "max_download_bytes": 3000000000,
+    "max_products": 6000,
+    "views_per_product": 2,
+    "split_unit": "connected product families and image-byte duplicates",
+    "partitions": ["train", "dev", "cal", "test", "ood"],
+    "images_are_real_catalog_photographs": true,
+    "captions_are_product_metadata_not_human_image_captions": true
+  },
+  "training": {
+    "kind": "learned_residual_projection_on_frozen_pixel_derived_embeddings",
+    "encoder_finetuning_claim": false,
+    "rank": 64,
+    "epochs": 12,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "seeds": [17, 31, 53],
+    "max_runtime_seconds": 10800,
+    "selection_partition": "dev",
+    "threshold_partition": "cal",
+    "sealed_report_partitions": ["test", "ood"]
+  },
+  "evaluation": {
+    "primary": "alternate_catalog_view_to_product_metadata",
+    "baselines": ["frozen_image_text", "frozen_image_image", "frozen_image_hybrid", "bm25_text_hint", "frozen_text_hint", "frozen_multimodal_hint"],
+    "text_hints": "generated_from_published_attributes; not observed OCR",
+    "refusal": "calibrated confidence threshold with absent-family negatives",
+    "absent_family_false_accept_rate_target": 0.01,
+    "present_error_check": "all_query_rows_and_family_any_error; zero_observed_is_not_conditional_error_certification",
+    "deployment_authorized": false,
+    "identity_verified": false,
+    "action_authorized": false,
+    "egocentric_real_world_qualification": false
+  },
+  "references": [
+    "https://github.com/NVIDIA/skills/tree/894f2d7dfee49085e84e21c1aad2513bc44a5b6d/skills/tao-finetune-clip",
+    "https://github.com/NVIDIA/skills/tree/894f2d7dfee49085e84e21c1aad2513bc44a5b6d/skills/nemotron-retrieval-recipes",
+    "https://aws.amazon.com/blogs/machine-learning/implement-unified-text-and-image-search-with-a-clip-model-using-amazon-sagemaker-and-amazon-opensearch-service/"
+  ]
+}
