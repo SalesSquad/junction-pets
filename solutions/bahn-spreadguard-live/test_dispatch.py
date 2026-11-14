@@ -92,6 +92,27 @@ class SpreadGuardSDKContract(unittest.TestCase):
         self.desk.quote(self.request)
         self.assertEqual(self.desk.outbox[0]["prices"]["same_day"], 900000)
 
+    def test_closed_weekend_delivery_waits_until_monday(self):
+        place = {"placeId": "B", "privateAddress": False,
+                 "window": {"from": 0, "to": 11000},
+                 "hours": {"opens": 540, "closes": 1020,
+                           "weekdays": [0, 1, 2, 3, 4], "saturday": None}}
+        # Saturday, Sunday closed: first accepted dealer delivery is Monday 09:00.
+        saturday_noon = 5 * 1440 + 720
+        monday_open = 7 * 1440 + 540
+        self.assertEqual(self.desk._open_at(place, saturday_noon,
+                                             monday_open + 100, None, "delivery"),
+                         monday_open)
+        self.assertIsNone(self.desk._open_at(place, saturday_noon,
+                                             monday_open - 1, None, "delivery"))
+
+    def test_private_trade_in_pickup_may_follow_original_slot(self):
+        place = {"placeId": "B", "privateAddress": True,
+                 "window": {"from": 990, "to": 1050}, "hours": None}
+        self.assertIsNone(self.desk._open_at(place, 1100, 1300, None, "pickup"))
+        self.assertEqual(self.desk._open_at(place, 1100, 1300, None, "pickup",
+                                            trade_in_customer_pickup=True), 1100)
+
     def test_drop_then_deadline_rescue_is_repriced(self):
         self.desk.quote(self.request)
         self.desk.handle({"kind": "order_won", "seq": 1, "at": 495,
