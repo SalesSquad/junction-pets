@@ -4,7 +4,6 @@ import csv
 import hashlib
 import io
 import json
-import math
 import os
 from pathlib import Path, PurePosixPath
 import random
@@ -17,6 +16,10 @@ from PIL import Image, ImageOps
 
 SOURCE = '2a692ab575001cbde74d402d897a7286086c6199'
 SPLIT_SHA = 'a48557e6033318cb90556f706196bc9d247a776a23ea51aecee5a80dd0332995'
+MANIFEST_SHA = 'e45d2caa0107fdc2c4fa973fd378d41d87559d9c2b0cc0f6977db4736a71df26'
+BACKBONE_REPO = 'timm/resnet18.a1_in1k'
+BACKBONE_REV = '491b427b45c94c7fb0e78b5474cc919aff584bbf'
+BACKBONE_SHA = '80c49dee3da4822c009c5a7fe591e9223c5a2cfcf95a4067ca4dfb5a7b89c612'
 PREPROCESS = dict(size=[128, 128], color='RGB', exif_transpose=True,
                   resize='Pillow bilinear', mean=[.485,.456,.406], std=[.229,.224,.225])
 CONFIG = dict(seed=330, backbone='resnet18', features=50, threads=2,
@@ -77,8 +80,21 @@ def safe_file(root, name):
     return resolved
 
 
-def validate_manifest(path, root):
+def benchmark_bytes(path):
     raw = Path(path).read_bytes()
+    if digest(raw) != MANIFEST_SHA:
+        raise ValueError('Frozen benchmark manifest bytes mismatch')
+    return raw
+
+
+def validate_benchmark(path, root):
+    raw = benchmark_bytes(path)
+    return validate_manifest(path, root, raw=raw)
+
+
+def validate_manifest(path, root, *, raw=None):
+    """Structural plumbing helper only; REAL_DATA_OFFLINE requires validate_benchmark."""
+    raw = Path(path).read_bytes() if raw is None else raw
     manifest = json.loads(raw)
     if (manifest.get('schema') != 1 or manifest.get('dataset') != 'VisA_20220922'
         or manifest.get('category') != 'candle' or manifest.get('license') != 'CC-BY-4.0'
@@ -135,8 +151,7 @@ def verify_selection(manifest, split_path):
         raise ValueError('Selection differs from frozen official CSV')
 
 
-def image_tensor(root, row):
-    import torch
+def image_array(root, row):
     p = safe_file(root, row['image'])
     b = image_bytes(p)
     if len(b) > 8*1024*1024 or digest(b) != row['sha256']:
@@ -147,7 +162,36 @@ def image_tensor(root, row):
         im = ImageOps.exif_transpose(im).convert('RGB').resize((128,128), Image.Resampling.BILINEAR)
         x = np.asarray(im, dtype=np.float32)/255
     x = (x-np.array(PREPROCESS['mean'],dtype=np.float32))/np.array(PREPROCESS['std'],dtype=np.float32)
-    return torch.from_numpy(finite(x).transpose(2,0,1).copy()).unsqueeze(0)
+    return finite(x).transpose(2,0,1).copy()[None]
+
+
+def image_tensor(root, row):
+    import torch
+    return torch.from_numpy(image_array(root,row))
+
+
+def pinned_model(cache):
+    """Offline, exact public safetensors bytes; never resolves mutable main."""
+    from huggingface_hub import hf_hub_download
+    from safetensors.torch import load_file
+    from anomalib.models.image.padim.torch_model import PadimModel
+    path = Path(hf_hub_download(BACKBONE_REPO,'model.safetensors',revision=BACKBONE_REV,
+                cache_dir=cache,local_files_only=True,token=False))
+    if path.stat().st_size > 256*1024*1024 or digest(path.read_bytes()) != BACKBONE_SHA:
+        raise ValueError('Pinned backbone byte hash mismatch')
+    state = load_file(str(path),device='cpu')
+    model = PadimModel(n_features=50,backbone='resnet18',pre_trained=False).cpu()
+    extractor = model.feature_extractor.feature_extractor
+    # Timm FeatureListNet may flatten layer1.0 to layer1_0. Strict target load;
+    # only the original backbone's unused layer4/classifier tensors are omitted.
+    selected = {}
+    for key in extractor.state_dict():
+        first,sep,tail = key.partition('.')
+        source_key = key if key in state else first.replace('_','.')+sep+tail
+        selected[key] = state[source_key]
+        finite(selected[key].numpy())
+    extractor.load_state_dict(selected,strict=True)
+    return model
 
 
 def thresholds(scores):
@@ -210,17 +254,42 @@ def load_fitted(out):
 
 
 def inspect_image(args):
-    import torch
-    torch.set_num_threads(2);torch.set_num_interop_threads(2)
-    model,t = load_fitted(args.artifact_dir)
+    artifact = Path(args.artifact_dir)
+    verify(artifact)
+    config = json.loads((artifact/'config.json').read_text())
+    if config['config'] != CONFIG or config['preprocess'] != PREPROCESS:
+        raise ValueError('Run configuration mismatch')
+    benchmark_bytes(artifact/'manifest.json')
+    if config['manifest_sha256']!=MANIFEST_SHA: raise ValueError('Run manifest identity mismatch')
+    if (artifact/'failure.json').exists(): raise ValueError('Failed run bundle')
+    parity=json.loads((artifact/'parity.json').read_text())
+    if parity.get('status')!='pass' or parity.get('count')!=200 or parity.get('device')!='CPU':
+        raise ValueError('Run lacks complete heldout CPU parity')
+    t = json.loads((artifact/'thresholds.json').read_text())['values'];proposal(0.,t)
+    frozen = json.loads((artifact/'frozen.json').read_text())
+    if frozen != dict(model=digest((artifact/'model.safetensors').read_bytes()),
+                      thresholds=digest((artifact/'thresholds.json').read_bytes())):
+        raise ValueError('Frozen run identity mismatch')
+    import openvino as ov
+    core=ov.Core()
+    model=core.compile_model(core.read_model(safe_file(artifact,'model.xml'),safe_file(artifact,'model.bin')),'CPU',
+             {'INFERENCE_NUM_THREADS':2,'INFERENCE_PRECISION_HINT':'f32'})
     root = Path(args.image).absolute().parent
     image = Path(args.image).name
     out = new_output(args.output_dir)
-    score,amap = infer(model,image_tensor(root,dict(image=image,sha256=args.sha256)))
+    x=image_array(root,dict(image=image,sha256=args.sha256))
+    began=time.perf_counter();score,amap=ov_outputs(model,model([x]))
+    seconds=time.perf_counter()-began
     np.save(out/'map.npy',amap,allow_pickle=False)
-    write_json(out/'inspection.json',dict(mode='REAL_DATA_OFFLINE',robot='NO ROBOT',
+    write_json(out/'inspection.json',dict(mode='USER_IMAGE_OFFLINE',robot='NO ROBOT',actuation=False,
+               source='USER_SUPPLIED_UNVERIFIED_DOMAIN',forward_processing_seconds=seconds,
+               executor=dict(system=platform.system(),machine=platform.machine(),openvino=metadata.version('openvino')),
                image=image,sha256=args.sha256,score=score,proposal=proposal(score,t),
                binary_defect=score>t['binary'],map_sha256=digest(amap.tobytes()),
+               model_sha256=digest((artifact/'model.xml').read_bytes()),
+               model_bin_sha256=digest((artifact/'model.bin').read_bytes()),
+               thresholds_sha256=digest((artifact/'thresholds.json').read_bytes()),
+               preprocess_sha256=digest(encoded(PREPROCESS)),
                source_artifact_ledger=digest((Path(args.artifact_dir)/'artifacts.json').read_bytes())))
     seal(out)
 
@@ -260,25 +329,25 @@ def evaluate(rows):
 
 def run(args):
     import torch
-    from anomalib.models.image.padim.torch_model import PadimModel
     started = time.time()
     out = new_output(args.output_dir)  # Never overwrite a prior experiment.
     try:
-        manifest, raw = validate_manifest(args.manifest,args.data_root)
+        manifest, raw = validate_benchmark(args.manifest,args.data_root)
         verify_selection(manifest,args.split_csv)
         (out/'manifest.json').write_bytes(raw)
         torch.set_num_threads(2); torch.set_num_interop_threads(2)
         torch.manual_seed(330); random.seed(330); np.random.seed(330)
-        versions = {k:metadata.version(k) for k in ('anomalib','torch','torchvision','timm','openvino','numpy','Pillow','safetensors')}
+        versions = {k:metadata.version(k) for k in ('anomalib','torch','torchvision','timm','openvino','numpy','Pillow','safetensors','huggingface-hub')}
         write_json(out/'config.json',dict(config=CONFIG, preprocess=PREPROCESS, versions=versions,
                    executor=dict(system=platform.system(),machine=platform.machine(),python=platform.python_version()),
                    manifest_sha256=digest(raw), preprocess_sha256=digest(encoded(PREPROCESS)),
                    config_sha256=digest(encoded(CONFIG)), pipeline_sha256=digest(Path(__file__).read_bytes())))
-        model = PadimModel(n_features=50,backbone='resnet18',pre_trained=True).cpu()
+        model = pinned_model(args.backbone_cache)
         backbone = tensor_hashes(model.feature_extractor.state_dict())
         pretrained = model.feature_extractor.feature_extractor.pretrained_cfg
         write_json(out/'backbone.json',dict(config=pretrained,tensors=backbone,
-                   limits='timm Apache-2.0 code; pretrained ImageNet weights/data have separate upstream terms. Not a license grant.'))
+                   repository=BACKBONE_REPO,revision=BACKBONE_REV,safetensors_sha256=BACKBONE_SHA,
+                   limits='Upstream model card declares Apache-2.0; ImageNet/data rights remain separate. Not a license grant.'))
         model.train()
         for r in manifest['samples']:
             if r['partition']=='train':
@@ -289,10 +358,15 @@ def run(args):
         save_file(state,str(out/'model.safetensors'))
         write_json(out/'model-tensors.json',tensor_hashes(state))
         fit_seconds = time.time()-started
-        predictions = {}
+        predictions = {};latencies={}
+        def predict(r):
+            x=image_tensor(args.data_root,r)
+            began=time.perf_counter();result=infer(model,x)
+            latencies[r['image']]=time.perf_counter()-began
+            return result
         for r in manifest['samples']:
             if r['partition']=='calibration':
-                predictions[r['image']] = infer(model,image_tensor(args.data_root,r))
+                predictions[r['image']] = predict(r)
         t = thresholds([v[0] for v in predictions.values()])
         write_json(out/'thresholds.json',dict(values=t,meaning='Normal-only empirical quantiles, not probabilities or escape guarantees'))
         # Freeze model and thresholds before any heldout inference or label join.
@@ -300,19 +374,26 @@ def run(args):
         write_json(out/'frozen.json',frozen)
         for r in manifest['samples']:
             if r['partition']=='heldout':
-                predictions[r['image']] = infer(model,image_tensor(args.data_root,r))
+                predictions[r['image']] = predict(r)
         parity = export_parity(model,manifest,args.data_root,out,predictions,t)
         # Labels are used for reporting only after inference has finished.
-        rows = []
+        rows = []; (out/'maps').mkdir()
         for r in manifest['samples']:
             if r['partition']=='train': continue
             score, amap = predictions[r['image']]
+            map_path='maps/'+digest(r['image'].encode())+'.npy'
+            np.save(out/map_path,amap,allow_pickle=False)
             rows.append(dict(image=r['image'],sha256=r['sha256'],partition=r['partition'],label=r['label'],
-                             score=score,map_sha256=digest(amap.tobytes()),proposal=proposal(score,t),binary_defect=score>t['binary']))
+                             score=score,map_path=map_path,map_sha256=digest(amap.tobytes()),
+                             forward_processing_seconds=latencies[r['image']],
+                             proposal=proposal(score,t),binary_defect=score>t['binary']))
         with (out/'predictions.csv').open('x',newline='') as f:
             writer=csv.DictWriter(f,fieldnames=list(rows[0])); writer.writeheader(); writer.writerows(rows)
         write_json(out/'report.json',dict(mode='REAL_DATA_OFFLINE',robot='NO ROBOT',metrics=evaluate(rows),
+                   actuation=False,
                    parity=parity,fit_seconds=fit_seconds,total_seconds=time.time()-started,
+                   latency_mean_seconds=float(np.mean(list(latencies.values()))),
+                   latency_meaning='Per-forward plus output validation, excludes preprocessing; descriptive, not robot throughput',
                    physical_object_ids='UNKNOWN',session_ids='UNKNOWN',cost='unknown',
                    limits='File-level only. VisA candle is not Intel/robot evidence. CPU is not Intel NPU/iGPU. No cycles/min or reliability bounds.'))
         seal(out); verify(out)
@@ -323,9 +404,18 @@ def run(args):
         raise
 
 
+def ov_outputs(compiled,result):
+    if len(compiled.outputs)!=2: raise ValueError('Expected exactly score/map outputs')
+    scores=np.asarray(result[compiled.output(0)])
+    amap=np.asarray(result[compiled.output(1)])
+    if scores.shape!=(1,1) or amap.shape!=(1,1,128,128):
+        raise ValueError('Unexpected OpenVINO score/map shape')
+    finite(scores);finite(amap)
+    return float(scores[0,0]),amap.astype('<f4')
+
+
 def export_parity(model,manifest,root,out,predictions,t):
     import torch
-    import openvino as ov
     class Outputs(torch.nn.Module):
         def __init__(self,m):
             super().__init__(); self.m=m
@@ -334,18 +424,18 @@ def export_parity(model,manifest,root,out,predictions,t):
             return y.pred_score,y.anomaly_map
     phase='conversion'
     try:
+        import openvino as ov
         converted=ov.convert_model(Outputs(model).eval(),example_input=torch.zeros(1,3,128,128),input=[1,3,128,128])
         ov.save_model(converted,out/'model.xml',compress_to_fp16=False)
         phase='CPU readback'
-        core=ov.Core(); loaded=core.read_model(out/'model.xml')
+        core=ov.Core(); loaded=core.read_model(out/'model.xml',out/'model.bin')
         compiled=core.compile_model(loaded,'CPU',{'INFERENCE_NUM_THREADS':2,'INFERENCE_PRECISION_HINT':'f32'})
         failures=[]; max_score=0.; max_map=0.; count=0
+        phase='parity'
         for r in manifest['samples']:
             if r['partition']!='heldout': continue
             result=compiled([image_tensor(root,r).numpy()])
-            score=float(np.asarray(result[compiled.output(0)]).reshape(-1)[0])
-            amap=np.asarray(result[compiled.output(1)])
-            finite([score]);finite(amap)
+            score,amap=ov_outputs(compiled,result)
             ref,m=predictions[r['image']]
             se=abs(score-ref); me=float(np.max(np.abs(amap-m)))
             max_score=max(max_score,se);max_map=max(max_map,me);count+=1
@@ -355,7 +445,8 @@ def export_parity(model,manifest,root,out,predictions,t):
         record=dict(status='fail' if failures else 'pass',device='CPU',count=count,
                     atol=.001,rtol=.001,max_score_error=max_score,max_map_error=max_map,failures=failures)
     except Exception as e:
-        record=dict(status='blocked',phase=phase,error_type=type(e).__name__,error=str(e))
+        record=dict(status='fail' if phase=='parity' and isinstance(e,ValueError) else 'blocked',
+                    phase=phase,error_type=type(e).__name__,error=str(e))
     write_json(out/'parity.json',record)
     return record
 
@@ -366,6 +457,7 @@ def main():
     r=sub.add_parser('run',aliases=['train']);r.add_argument('--manifest',required=True)
     r.add_argument('--data-root',required=True);r.add_argument('--output-dir',required=True)
     r.add_argument('--split-csv',required=True)
+    r.add_argument('--backbone-cache',default=os.environ.get('HF_HUB_CACHE'))
     v=sub.add_parser('verify');v.add_argument('--output-dir',required=True)
     i=sub.add_parser('inspect');i.add_argument('--artifact-dir',required=True)
     i.add_argument('--image',required=True);i.add_argument('--sha256',required=True)
@@ -376,7 +468,7 @@ def main():
     if args.command=='verify': verify(args.output_dir);print('ARTIFACT_HASHES_VERIFIED (integrity, not authenticity)')
     elif args.command=='inspect': inspect_image(args)
     elif args.command=='validate-manifest':
-        manifest,_=validate_manifest(args.manifest,args.data_root)
+        manifest,_=validate_benchmark(args.manifest,args.data_root)
         verify_selection(manifest,args.split_csv);print('FROZEN_SELECTION_AND_392_IMAGE_HASHES_VERIFIED')
     else: run(args)
 

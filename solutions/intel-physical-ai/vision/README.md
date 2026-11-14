@@ -18,8 +18,12 @@ Official `split_csv/1cls.csv` SHA256:
 
 From 900 official training normals, sort SHA256(`330|image`), take 128 fit
 and next 64 normal calibration images. All 200 official test images are heldout
-(100 normal/100 anomaly). Actual bytes and official CSV membership are verified.
-This code does not acquire or substitute datasets. Object/session identities are
+(100 normal/100 anomaly). Actual bytes and official CSV membership are verified. The entire benchmark
+manifest must also match SHA256
+`e45d2caa0107fdc2c4fa973fd378d41d87559d9c2b0cc0f6977db4736a71df26`
+byte-for-byte, including labels and JSON formatting. Structural fixture helpers
+cannot admit synthetic pixels as this benchmark.
+The runner does not acquire or substitute datasets; optional `prepare.py` reproduces the pinned public selection. Object/session identities are
 unknown: unique files do not establish physical independence or reinspection.
 VisA is neither Intel sponsor evidence nor robot/station evidence.
 
@@ -31,10 +35,14 @@ good strictly below q90; defect strictly above q99; otherwise hold (including
 ties). These are proposals, not probabilities, calibrated defect guarantees,
 or instructions to hardware. No heldout-driven tuning or automatic retry.
 
-Timm's default backbone is `resnet18.a1_in1k`; only its official pretrained
-loader is used, never caller-supplied URLs. Timm/Anomalib code is Apache-2.0;
-ImageNet pretrained weights and underlying data have separate upstream terms,
-not a license grant from this project. A successful run records upstream
+The backbone is `timm/resnet18.a1_in1k`, immutable revision
+`491b427b45c94c7fb0e78b5474cc919aff584bbf`, safetensors SHA256
+`80c49dee3da4822c009c5a7fe591e9223c5a2cfcf95a4067ca4dfb5a7b89c612`.
+The runner resolves only that cached revision, checks exact bytes and loads
+safetensors into the same ResNet18 feature extractor, without pickle. It never
+downloads, resolves mutable `main`, or accepts a caller model URL.
+The upstream model card declares Apache-2.0; underlying data rights remain
+separate. This project makes no additional license grant. A successful run records upstream
 pretrained configuration, tensor hashes, fitted safetensors, producer versions,
 source/config/preprocess/manifest digests and a frozen model/threshold record.
 
@@ -46,18 +54,19 @@ Use the already provisioned lab environment; do not reinstall it. From repo root
 PY=/Users/mikaelervamaa/Developer/j26-intel-vision-lab-20261114/.venv/bin/python
 LAB=/Users/mikaelervamaa/Developer/j26-intel-vision-lab-20261114
 VISION=solutions/intel-physical-ai/vision
-export PYTHONDONTWRITEBYTECODE=1 MPLCONFIGDIR=/private/tmp/m7-mpl
-# Optional writable cache for the official timm download; no credentials needed.
-export HF_HOME="$LAB/hf-cache"
+export PYTHONDONTWRITEBYTECODE=1 MPLCONFIGDIR="$LAB/mpl-cache"
+export HF_HUB_CACHE="$LAB/hf-cache" HF_HUB_OFFLINE=1
 "$PY" "$VISION/pipeline.py" validate-manifest --manifest "$LAB/manifest.json" \
   --data-root "$LAB/data" --split-csv "$LAB/visa-1cls.csv"
 # Initial run-m7 failed before fitting and MUST be retained. Fresh destination:
+(set -C
 "$PY" "$VISION/pipeline.py" run --manifest "$LAB/manifest.json" \
   --data-root "$LAB/data" --split-csv "$LAB/visa-1cls.csv" \
-  --output-dir "$LAB/run-m7-network-restored" > "$LAB/run-m7-network-restored.log" 2>&1
+  --backbone-cache "$LAB/hf-cache" --output-dir "$LAB/run-m7-network-restored" > "$LAB/run-m7-network-restored.log" 2>&1
+)
 "$PY" "$VISION/pipeline.py" verify --output-dir "$LAB/run-m7-network-restored"
 /opt/homebrew/bin/Rscript "$VISION/analyze.R" "$LAB/run-m7-network-restored/predictions.csv"
-# Inspect a new file using this locally produced, trusted artifact directory:
+# Requires a sealed successful run with complete 200-image CPU parity:
 "$PY" "$VISION/pipeline.py" inspect --artifact-dir "$LAB/run-m7-network-restored" \
   --image /absolute/path/image.png --sha256 ACTUAL_IMAGE_SHA256 \
   --output-dir "$LAB/inspection-new"
@@ -66,12 +75,20 @@ export HF_HOME="$LAB/hf-cache"
 Output directories must be outside this checkout, absent, with an existing
 parent. No overwrite flag exists. Safetensors loading uses no pickle and does
 not download weights. `verify` checks unsigned local integrity, not authenticity;
-only inspect artifacts from a trusted local producer. Inspection receives no
+only inspect artifacts from a trusted local producer. `inspect` loads only
+verified local OpenVINO IR/bin with a complete recorded CPU parity pass, checks
+frozen configuration/threshold identity, output shapes and finite values. Its
+output is `USER_IMAGE_OFFLINE`, `source=USER_SUPPLIED_UNVERIFIED_DOMAIN`,
+`actuation:false`; a user image has no inferred VisA license, station/camera or
+SO101 provenance. Inspection receives no
 caller scores/confidence. Dataset labels join reporting after predictions freeze.
 `predictions.csv` contains calibration/heldout rows, image scores, map hashes,
-labels, partition and proposals. `report.json` reports heldout image AUROC,
+labels, partition, per-forward processing latency and proposals. `report.json` reports heldout image AUROC,
 confusion, ternary counts, coverage and timing; no pixel-segmentation claims.
-Map bytes have float32 little-endian hashes; inspection also saves a safe `.npy`.
+Every calibration/heldout map is persisted in `maps/*.npy`, numeric float32,
+`allow_pickle=False`, indexed by `map_path` and little-endian tensor hash in CSV.
+Inspection also saves `map.npy`. Latencies include forward/output validation,
+exclude preprocessing and describe this CPU/runtime only; no robot throughput.
 
 OpenVINO wraps actual `(score, map)` outputs, fixed batch 1, full-precision IR
 (`compress_to_fp16=False`), then reads the IR back on CPU with f32 precision.
@@ -80,10 +97,31 @@ at predeclared atol=rtol=1e-3. Failed comparisons remain `fail`; conversion or C
 execution errors remain `blocked` without discarding PyTorch results. Mac CPU
 is not Intel NPU/iGPU qualification; timing is not robot cycles/min.
 
+## Portable preparation (optional; do not repeat the existing lab download)
+
+On another authorized host, choose fresh directories outside the checkout:
+
+```sh
+# Public downloads, token=False, no private account credentials or mutable main.
+# Unset offline mode only for these explicit preparation commands.
+HF_HUB_OFFLINE=0 "$PY" "$VISION/prepare.py" backbone \
+  --cache-dir /chosen/hf-cache --output-dir /chosen/backbone-source-new
+"$PY" "$VISION/prepare.py" data --output-dir /chosen/visa-frozen-new
+```
+
+Data preparation downloads the source-commit-pinned CSV (1 MiB cap) and reads
+at most the first 256 MiB of the public tar, requiring HTTP 206. Only the 392
+selected regular-file members (8 MiB each) are written exclusively, without tar
+extraction, links or traversal. Final exact manifest hash must match. Partial
+failed preparations stay available for investigation. Dataset attribution is
+written alongside it; no binaries/dataset are committed. Backbone source JSON
+records revision, exact weights hash and pinned model-card/config hashes.
+
 ## Focused checks and current evidence
 
 ```sh
-"$PY" -m unittest discover -s "$VISION" -p 'test_*.py'
+(cd "$VISION" && "$PY" -B -m unittest test_pipeline.FrozenBenchmark -v)
+# Full model/native qualification is owned by coordinator, not this repair.
 ```
 
 Synthetic test pixels/random weights only exercise plumbing. The OpenVINO CPU

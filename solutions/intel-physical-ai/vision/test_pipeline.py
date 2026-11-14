@@ -86,4 +86,46 @@ class Boundaries(unittest.TestCase):
         self.assertEqual(m['binary_confusion'],dict(tp=1,fp=0,tn=1,fn=0))
 
 
+class FrozenBenchmark(unittest.TestCase):
+    """Structural regression only: no decode, model, network or OpenVINO."""
+    def test_exact_bytes_and_label_swap_refusal(self):
+        from unittest.mock import patch
+        rows=[dict(image='Normal/0790.JPG',label='normal',partition='heldout'),
+              dict(image='Anomaly/000.JPG',label='anomaly',partition='heldout')]
+        original=p.encoded(dict(split_csv_sha256=p.SPLIT_SHA,samples=rows))
+        with tempfile.TemporaryDirectory() as d:
+            path=Path(d)/'manifest.json';path.write_bytes(original)
+            # Test-only oracle for this miniature structural fixture. Production
+            # MANIFEST_SHA is never parameterized by a caller or changed on disk.
+            with patch.object(p,'MANIFEST_SHA',p.digest(original)):
+                self.assertEqual(p.benchmark_bytes(path),original)
+                rows[0]['label'],rows[1]['label']=rows[1]['label'],rows[0]['label']
+                path.write_bytes(p.encoded(dict(split_csv_sha256=p.SPLIT_SHA,samples=rows)))
+                with self.assertRaisesRegex(ValueError,'manifest bytes mismatch'):
+                    p.validate_benchmark(path,Path(d)/'does-not-exist')
+                path.write_bytes(original+b' ')
+                with self.assertRaisesRegex(ValueError,'manifest bytes mismatch'):p.benchmark_bytes(path)
+            path.write_bytes(original)
+            with self.assertRaisesRegex(ValueError,'manifest bytes mismatch'):p.benchmark_bytes(path)
+
+    def test_export_shape_and_nonfinite_refusal(self):
+        class Compiled:
+            outputs=[0,1]
+            def output(self,i):return i
+        c=Compiled();good={0:np.zeros((1,1)),1:np.zeros((1,1,128,128))}
+        self.assertEqual(p.ov_outputs(c,good)[0],0.)
+        for bad in ({0:np.zeros((1,)),1:good[1]},
+                    {0:good[0],1:np.zeros((128,128))},
+                    {0:np.full((1,1),np.nan),1:good[1]}):
+            with self.assertRaises(ValueError):p.ov_outputs(c,bad)
+
+    def test_inspect_refuses_mutated_bundle_before_runtime_load(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as d:
+            out=Path(d);(out/'model.xml').write_bytes(b'original')
+            p.seal(out);(out/'model.xml').write_bytes(b'mutated')
+            with self.assertRaisesRegex(ValueError,'Corrupted artifact'):
+                p.inspect_image(SimpleNamespace(artifact_dir=str(out)))
+
+
 if __name__=='__main__':unittest.main()
