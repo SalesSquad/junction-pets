@@ -11,7 +11,7 @@ on:
         description: Fixed qualification workload
         type: choice
         default: portable
-        options: [portable, product-browser, sbank-sponsor, portfolio-browser, sbank-properties, tieto-sponsor, council-postgres, meta-seeds]
+        options: [portable, product-browser, sbank-sponsor, portfolio-browser, sbank-properties, tieto-sponsor, council-postgres, meta-seeds, new-products-browser, native-probe, cache-proof, mariadb-runtime]
       source_sha:
         description: Full source commit; required for product browser and sponsor jobs
         type: string
@@ -20,7 +20,7 @@ on:
         description: Product for the browser workload
         type: choice
         default: stoa
-        options: [stoa, valio, sbank, hostinger, espoo, exa, all]
+        options: [stoa, valio, sbank, hostinger, espoo, exa, cala, context, all]
       browser:
         description: Run all engines or only the engine needing qualification
         type: choice
@@ -605,3 +605,295 @@ jobs:
           git -C harness rev-parse HEAD
           "$RUNNER_TEMP/council-venv/bin/python" -m pytest -q source/services/council/tests
           "$RUNNER_TEMP/council-venv/bin/python" harness/scripts/craci/council-postgres.py
+
+
+
+  new-products-browser:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'new-products-browser' }}
+    name: New product ${{ matrix.product }} / ${{ matrix.browser }}
+    runs-on: craci
+    timeout-minutes: 20
+    concurrency:
+      group: craci-new-browser-${{ matrix.product }}-${{ matrix.browser }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        product: ${{ fromJSON(inputs.product == 'cala' && '["cala"]' || inputs.product == 'context' && '["context"]' || '["cala","context"]') }}
+        browser: ${{ fromJSON(inputs.browser == 'chromium' && '["chromium"]' || inputs.browser == 'firefox' && '["firefox"]' || inputs.browser == 'webkit' && '["webkit"]' || '["chromium","firefox","webkit"]') }}
+    env:
+      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || fromJSON('{"cala":"ff6b0bacb1d796a098dba6798d61f59dc977420c","context":"76f0405ac49f2017129ec11d891c2a2cbe7d1838"}')[matrix.product] }}
+    steps:
+      - name: Configure monitored packages and bounded browser downloads
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '4'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, npm, ubuntu]
+            sources:
+              - apt:
+                  urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
+            connections:
+              - tls:
+                  serverNamePatterns: [cdn.playwright.dev, playwright.download.prss.microsoft.com, storage.googleapis.com]
+                  ports: [443]
+      - name: Enforce credit window and exact product selection
+        env:
+          SELECTED_PRODUCT: ${{ inputs.product }}
+          SOURCE_OVERRIDE: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+          [[ "$PRODUCT_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          case "$SELECTED_PRODUCT" in cala|context|all) ;; *) exit 1;; esac
+          if [ -n "$SOURCE_OVERRIDE" ]; then
+            case "$SELECTED_PRODUCT" in cala|context) ;; *) exit 1;; esac
+          fi
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          ref: ${{ env.PRODUCT_SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install locked browser harness
+        working-directory: harness
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          npm ci --ignore-scripts
+          npx --no-install playwright install --with-deps "$BROWSER"
+      - name: Exercise actual local HTTP product journeys
+        working-directory: harness
+        env:
+          CRACI_PRODUCT: ${{ matrix.product }}
+          CRACI_BROWSER: ${{ matrix.browser }}
+          SOURCE_DIR: ${{ github.workspace }}/source
+          EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
+        run: |
+          set -euo pipefail
+          export CRACI_BROWSER_OUTPUT="$RUNNER_TEMP/craci-new-product-results"
+          node scripts/craci/new-products-browser.mjs
+
+  native-probe:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'native-probe' }}
+    name: Native product behavior / ${{ matrix.arch }}
+    runs-on: craci
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - arch: x64
+            image: default
+          - arch: arm64
+            image: craci-slim-arm
+    env:
+      PRODUCT_SOURCE_SHA: 'd0be3abf66c86d6817f82ca5ae5598ae003b5360'
+    steps:
+      - name: Select native runner architecture
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: ${{ matrix.image }}
+          network: |
+            default: deny
+            presets: [github]
+      - name: Enforce credit window
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          ref: ${{ env.PRODUCT_SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Check independent expected answers and publish canonical digest
+        env:
+          SOURCE_DIR: ${{ github.workspace }}/source
+          EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
+          EXPECTED_ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          git -C harness rev-parse HEAD
+          node harness/scripts/craci/platform-probe.mjs native
+
+  cache-cold:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'cache-proof' }}
+    name: Monitored dependency cache / cold producer
+    runs-on: craci
+    timeout-minutes: 10
+    outputs:
+      cache_key: ${{ steps.key.outputs.key }}
+      graph_sha: ${{ steps.probe.outputs.graph_sha }}
+      lock_sha: ${{ steps.probe.outputs.lock_sha }}
+      node_version: ${{ steps.node.outputs.node-version }}
+    steps:
+      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: default
+          network: |
+            default: deny
+            presets: [github, npm]
+      - name: Enforce credit window
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          ref: '98d5a524d61e431ca36acd62b268ede343fc7fe2'
+          persist-credentials: false
+      - id: node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Select one run-specific lockfile and architecture cache key
+        id: key
+        env:
+          KEY: j26-craci-probe-v1-${{ github.run_id }}-${{ github.run_attempt }}-${{ runner.os }}-${{ runner.arch }}-${{ steps.node.outputs.node-version }}-${{ hashFiles('source/package-lock.json') }}
+        run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
+      - name: Prove the producer starts without a cache hit
+        id: lookup
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ${{ runner.temp }}/craci-npm-cache
+          key: ${{ steps.key.outputs.key }}
+          lookup-only: true
+      - name: Install through monitored npm and fingerprint actual dependencies
+        id: probe
+        env:
+          SOURCE_DIR: ${{ github.workspace }}/source
+          EXPECTED_SOURCE_SHA: '98d5a524d61e431ca36acd62b268ede343fc7fe2'
+          CACHE_MODE: cold
+          CACHE_HIT: ${{ steps.lookup.outputs.cache-hit }}
+          CACHE_KEY: ${{ steps.key.outputs.key }}
+          CRACI_NPM_CACHE: ${{ runner.temp }}/craci-npm-cache
+        run: node harness/scripts/craci/platform-probe.mjs cache
+      - name: Save exactly one monitored cache
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ${{ runner.temp }}/craci-npm-cache
+          key: ${{ steps.key.outputs.key }}
+
+  cache-warm:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'cache-proof' }}
+    needs: cache-cold
+    name: Monitored dependency cache / warm offline consumer
+    runs-on: craci
+    timeout-minutes: 10
+    steps:
+      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: default
+          network: |
+            default: deny
+            presets: [github]
+      - name: Enforce credit window
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          ref: '98d5a524d61e431ca36acd62b268ede343fc7fe2'
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: ${{ needs.cache-cold.outputs.node_version }}
+      - name: Require the exact producer cache
+        id: restore
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ${{ runner.temp }}/craci-npm-cache
+          key: ${{ needs.cache-cold.outputs.cache_key }}
+          fail-on-cache-miss: true
+      - name: Install offline and compare source validation and dependency graph
+        env:
+          SOURCE_DIR: ${{ github.workspace }}/source
+          EXPECTED_SOURCE_SHA: '98d5a524d61e431ca36acd62b268ede343fc7fe2'
+          CACHE_MODE: warm
+          CACHE_HIT: ${{ steps.restore.outputs.cache-hit }}
+          CACHE_KEY: ${{ needs.cache-cold.outputs.cache_key }}
+          CRACI_NPM_CACHE: ${{ runner.temp }}/craci-npm-cache
+          EXPECTED_CACHE_GRAPH_SHA: ${{ needs.cache-cold.outputs.graph_sha }}
+          EXPECTED_CACHE_LOCK_SHA: ${{ needs.cache-cold.outputs.lock_sha }}
+        run: node harness/scripts/craci/platform-probe.mjs cache
+
+  mariadb-runtime:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'mariadb-runtime' }}
+    name: Actual MariaDB temporal schema and durability
+    runs-on: craci
+    timeout-minutes: 15
+    concurrency:
+      group: craci-mariadb-runtime
+      cancel-in-progress: false
+    env:
+      PRODUCT_SOURCE_SHA: 'd0be3abf66c86d6817f82ca5ae5598ae003b5360'
+      CRACI_MARIADB_IMAGE: mariadb@sha256:75b300c790eec33cd4386d80fc1a938e27604ba70f3eeda25e52874be2aae424
+    steps:
+      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '4'
+          image: default
+          network: |
+            default: deny
+            presets: [github, dockerhub]
+      - name: Enforce credit window
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          ref: ${{ env.PRODUCT_SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Run actual unchanged DDL, temporal comparisons and restart durability
+        env:
+          SOURCE_DIR: ${{ github.workspace }}/source
+          EXPECTED_SOURCE_SHA: ${{ env.PRODUCT_SOURCE_SHA }}
+        run: |
+          set -euo pipefail
+          git -C harness rev-parse HEAD
+          export CRACI_MARIADB_OUTPUT="$RUNNER_TEMP/craci-mariadb-results"
+          python3 harness/scripts/craci/mariadb-runtime.py

@@ -1,0 +1,25 @@
+services:
+  db:
+    image: "${CRACI_MARIADB_IMAGE:?Supply an official MariaDB image pinned by digest}"
+    environment:
+      MARIADB_DATABASE: "${CRACI_MARIADB_DATABASE:?Set by mariadb-runtime.py}"
+      # A disposable, network-isolated test database; no provider credentials.
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "1"
+      TZ: UTC
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 2s
+      timeout: 3s
+      retries: 45
+      start_period: 10s
+    stop_grace_period: 15s
+    # No host ports, privileged mode, Docker socket or host data mounts.
+networks:
+  private:
+    internal: true
+volumes:
+  db-data:
