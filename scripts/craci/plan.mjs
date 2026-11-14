@@ -33,7 +33,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml',
+  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta',
 ]);
 
 function choose(value, choices, label) {
@@ -86,6 +86,15 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     for (let cohort = 0; cohort < n; cohort++) {
       const prefix = hard ? 'meta-r-hardshift-2x' : workload === 'meta-r-robust' ? 'meta-r-robust' : 'meta-r';
       add(`${prefix}-${cohort}`, meta, {cohort});
+    }
+  } else if (workload === 'lens-r8-meta') {
+    if (override && override !== harnessSha) throw new Error('Lens R8 requires the pinned immutable harness');
+    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining'], 'R8 lane slice');
+    const arms = ['color-logit','color-balanced','fusion-logit','fusion-balanced',
+      'texture-tree','quality-logit','centroid-shrink','consensus-ensemble'];
+    for (const [index, arm] of arms.entries()) {
+      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
+      add(`lens-r8-${index}-${arm}`, harnessSha, {arm, iteration: index + 1});
     }
   } else if (workload === 'lens-six-ml') {
     // Exactly six pretrained hypotheses on public numeric BOP features.
