@@ -9,6 +9,7 @@ import json
 import numpy as np
 
 import offline_study as s
+import sensitivity_suite as suite
 import vision_probe as v
 
 
@@ -194,6 +195,45 @@ class VisionHelpers(unittest.TestCase):
             rows, features = v.recover_progress(root, np.array([1, 2]))
             self.assertEqual(rows, [])
             self.assertEqual(features, [])
+
+
+class SensitivityGuards(unittest.TestCase):
+    @staticmethod
+    def fixture(seed, gain):
+        ep = str(seed - suite.SEEDS[0])
+        return {"split_seed": seed, "dataset": {"revision": s.DATASET_COMMIT},
+                "code_sha256": "pinned-script", "split": {"train": [17], "validation": [18],
+                                                      "test": [int(ep)]},
+                "frame_counts": {"test": 20},
+                "selection": {"ridge_alpha": 10.0,
+                              "validation_macro_mae_by_alpha": {"10.0": 0.04}},
+                "metrics": {
+                    "train_mean": {"episode_macro_mae_rad": 0.6, "per_episode_mae_rad": {ep: 0.6}},
+                    "state_identity": {"episode_macro_mae_rad": 0.1, "per_episode_mae_rad": {ep: 0.1}},
+                    "nearest_state_1nn": {"episode_macro_mae_rad": 0.3, "per_episode_mae_rad": {ep: 0.3}},
+                    "ridge": {"episode_macro_mae_rad": 0.1 * (1 - gain),
+                              "per_episode_mae_rad": {ep: 0.1 * (1 - gain)}}},
+                "ridge_relative_gain_over_best_deployable_baseline": gain}
+
+    def test_all_five_seeds_retained_and_worst_negative_rejected(self):
+        gains = [0.1, -0.5, 0.05, 0.2, -0.1]
+        reports = [self.fixture(seed, gain) for seed, gain in zip(suite.SEEDS, gains)]
+        summary = suite.aggregate(reports)
+        for observed, expected in zip(summary["per_seed"], gains):
+            self.assertAlmostEqual(observed["ridge_gain_fraction"], expected)
+        self.assertFalse(summary["summary"]["robust_improvement_pass"])
+        self.assertAlmostEqual(summary["summary"]["worst_gain_fraction"], -0.5)
+        self.assertAlmostEqual(summary["summary"]["median_gain_fraction"], 0.05)
+        self.assertEqual(summary["summary"]["episodes_ever_tested"], 5)
+        self.assertEqual(summary["per_episode_heldout_exposures"]["0"]["test_exposures"], 1)
+
+    def test_missing_seed_or_changed_source_rejected(self):
+        reports = [self.fixture(seed, 0.1) for seed in suite.SEEDS]
+        with self.assertRaisesRegex(ValueError, "five fixed"):
+            suite.aggregate(reports[:-1])
+        reports[2]["dataset"] = {"revision": "changed"}
+        with self.assertRaisesRegex(ValueError, "provenance changed"):
+            suite.aggregate(reports)
 
 
 if __name__ == "__main__":
