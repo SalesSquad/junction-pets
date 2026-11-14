@@ -108,9 +108,9 @@ export function dataPlanHtml(app) {
     scope('p', K, `A simulated sample in this format holds ${n(e.sample.episodes)} episodes and ${n(e.sample.events)} event rows and passes the validator with ${n(e.sample.chronology_violations)} order violations.`),
     `<h3>How many records make it useful</h3>`,
     scope('p', K, `To detect that a county is slower by a given ratio in one interval, at ${pc(ss.targetPower, 0)} power and with ${n(ss.comparisons)} county-by-interval comparisons (${n(ss.counties)} counties) controlled together:`),
-    figure(K, requiredChart(ss), `Complete episodes needed per county and period, for one look, against a very large reference. Logarithmic scale. The spread of each interval is measured in ${n(e.calibrationEpisodes)} simulated episodes; with the wider single-step spread implied by the published cohort the rows would need ${perRow((r) => n(r.cohort_spread))}.`),
+    figure(K, requiredChart(ss), `Complete episodes needed per county and period, for one look, against a very large reference. Logarithmic scale. The spread of each interval is measured in ${n(e.calibrationEpisodes)} simulated episodes; with the wider single-step spread implied by the cohort (its Figure 1 mean and its text median) the rows would need ${perRow((r) => n(r.cohort_spread))}.`),
     scope('p', K, `Checked by simulation at exactly those sizes: the test as run reaches ${pc(det.min_power, 1)} to ${pc(det.max_power, 1)} power where the formula promises ${pc(ss.targetPower, 0)}. Against the rest of the country in one quarter instead of an infinite reference, the diagnostic interval needs ${perRow((r) => `${n(r.rest_of_country.quarter.diagnostic)} instead of ${n(r.diagnostic)}`)} episodes.`),
-    scope('p', K, `The simulator matches the published mean of the cohort it was calibrated to (${n(co.simulated_mean_days, 1)} against ${n(co.published_mean_days)} days on the public route) but not its median (${n(co.simulated_median_days, 1)} against ${n(co.published_median_days)} days). Real waits are probably more spread than the simulated ones, which would raise every figure here.`),
+    scope('p', K, `The simulator matches the mean read from Figure 1 of the cohort paper it was calibrated to (${n(co.simulated_mean_days, 1)} against ${n(co.published_mean_days)} days on the public route${evRow(app, 'kuitunen-2026-route-medians')?.figures?.publicMeanDays != null ? `; the paper's text gives a mean of ${n(evRow(app, 'kuitunen-2026-route-medians').figures.publicMeanDays)}` : ''}) but not its median (${n(co.simulated_median_days, 1)} against ${n(co.published_median_days)} days). Real waits are probably more spread than the simulated ones, which would raise every figure here.`),
     `<h3>What that means county by county</h3>`,
     figure(K, countyChart(e.counties, refs), `Smallest slowdown each county could detect in every interval: filled dot within one year, hollow dot within one quarter; the last figure is the assumed number of new cases a year. County sizes share an assumed ${n(ss.nationalCasesAssumed)} cases a year by ${raw(e.countyPopulationYear)} population; that total is an assumption, not an observed incidence. Dashed lines mark the slowdowns of the sizing table.`),
     table(K, `Counties (of ${n(e.counties.length)}) that could detect each slowdown in every interval, under these assumptions.`, ['County slower by', 'Within one quarter', 'Within one year'],
@@ -251,7 +251,7 @@ function teachingHtml(t, K) {
     step('Gate', `Jev, question set ${esc(j.questionSet)}`, `${frac(g.acceptedOfJudged)} accepted`),
     step('Training set', 'code', `${n(d.trainRows)} notes: ${n(d.fromV2)} earlier + ${n(d.fromRound2)} round 2`),
     step('Student', 'Gemma + LoRA', `trained and compared above`),
-    step('Cascade', `student + Jev`, `which notes may skip a person`),
+    step('Cascade', `student + Jev`, `which notes can be pre-filled for one-click confirmation`),
   ].join('')}</ol><p class="caption">${chip(K)} Measured alongside, not in the gate rule: OpenAI Decisions accepted ${frac(g.decisionsAccepted)} of the notes it was asked about. Audited afterwards by Claude Haiku: ${frac(a.accepted.wrongLabel)} wrong labels among sampled accepted notes. Different model families on purpose: a model reads its own writing too kindly.</p></div>`;
   const ruleRows = j.rules.map((r) => [esc(r.label), kn(r.caught), kn(r.falseReject)]);
   const curr = g.byCurriculum.map((x) => [words(x.curriculum), frac(x.accepted)]);
@@ -262,10 +262,10 @@ function teachingHtml(t, K) {
       b.vsStudent ? `${band(b.vsStudent.errorDifference95)}; re-chosen ${band(b.vsStudent.errorDifferenceRechosen95)}` : '—']; }));
   const errChart = intervalChart(c.targets.map((tg) => ({ label: `${f(tg)}% target`, mark: tg / 100, series: c.signals.map((x, i) => ({ ...wv(x.byTarget.find((y) => y.target === tg).pooled.error), cls: ['base', 'adapter', 'third'][i] })) })),
     { min: 0, max: Math.max(...c.signals.flatMap((x) => x.byTarget.map((y) => y.pooled.error.wilson95[1]))) * 1.1, scale: 100, unit: '%', digits: 0, left: 120,
-      legend: c.signals.map((x, i) => ({ cls: ['base', 'adapter', 'third'][i], label: x.label })), aria: 'Error among the test notes that skipped review, by signal and target, with Wilson 95% intervals; dashed line: the target' });
+      legend: c.signals.map((x, i) => ({ cls: ['base', 'adapter', 'third'][i], label: x.label })), aria: 'Error among the test notes pre-filled for one-click confirmation, by signal and target, with Wilson 95% intervals; dashed line: the target' });
   return [
     `<h3>The teaching loop</h3>`,
-    scope('p', K, `How a large teacher, two judges and an independent auditor teach the small model, and whether a judge can let some notes skip the person at inference. Source: <code>${esc(t.source[0].file)}</code>, written ${raw(t.generatedUtc)} by <code>scribe/v3/summarise.py</code>; method in <code>scribe/TEACHING.md</code>.`),
+    scope('p', K, `How a large teacher, two judges and an independent auditor teach the small model, and whether a judge can pre-fill more notes for one-click confirmation at inference. A person still confirms every note. Source: <code>${esc(t.source[0].file)}</code>, written ${raw(t.generatedUtc)} by <code>scribe/v3/summarise.py</code>; method in <code>scribe/TEACHING.md</code>.`),
     flow,
     `<h4>Teacher, round 2</h4>`,
     scope('p', K, `${n(tc.completed)} of ${n(tc.specifications)} specifications completed. First attempt: ${frac(tc.codeCheckFirst)} passed the code check; after one repair ${frac(tc.codeCheckFinal)}. A repair was tried for ${n(tc.repairAttempted.n)} notes and worked for ${frac(tc.repairSuccess)}. Hardest: notes that should contain no event, where only ${frac(tc.noEventReadback)} were read back as specified.`),
@@ -279,12 +279,12 @@ function teachingHtml(t, K) {
     table(K, `Audit of sampled round-2 notes. ${esc(cap(t.docs['audit.*']))}`, ['Gate decision', 'Notes audited', 'Wrong label', 'Route not right', 'Either'],
       [['Accepted', `${n(a.accepted.wrongLabel.d)} of ${n(a.sampling.accepted.available)}`, kn(a.accepted.wrongLabel), kn(a.accepted.routeNotOk), kn(a.accepted.either)],
         ['Rejected', `${n(a.rejected.wrongLabel.d)} of ${n(a.sampling.rejected.available)}`, kn(a.rejected.wrongLabel), kn(a.rejected.routeNotOk), kn(a.rejected.either)]]),
-    `<h4>Cascade: can a judge let notes skip the person?</h4>`,
+    `<h4>Cascade: can a judge pre-fill more notes for one-click confirmation?</h4>`,
     scope('p', K, `Student: <code>${esc(c.chosenStudent)}</code>. ${esc(cap(c.choiceReason))} Threshold rule, ${esc(cap(c.thresholdRule))} ${esc(cap(c.empiricalNotGuaranteed))}`),
     `<ul>${c.verdict.map((v) => scope('li', K, esc(v))).join('')}</ul>`,
-    figure(K, errChart, `Error among the held-out test notes that skipped review, pooled over both writers. The dashed line is the target the threshold was set for on validation notes; a dot right of it means the target did not hold on test.`),
+    figure(K, errChart, `Error among the held-out test notes pre-filled for one-click confirmation, pooled over both writers. The dashed line is the target the threshold was set for on validation notes; a dot right of it means the target did not hold on test.`),
     table(K, `All ${n(sig.student.byTarget[0].pooled.coverage.d)} test notes. Differences are paired bootstrap 95% intervals in percentage points; "re-chosen" also re-chooses the thresholds on resampled validation notes. Source: <code>data/scribe/v3/cascade/cascade-v1.json</code> via the summary.`,
-      ['Target · signal', 'Skip review', 'Wrong among skipped', 'Of them, other writer', 'Coverage vs student', 'Error vs student'], cascadeRows),
+      ['Target · signal', 'Pre-filled for one-click confirmation', 'Wrong among pre-filled', 'Of them, other writer', 'Coverage vs student', 'Error vs student'], cascadeRows),
     scope('p', K, `Spend recorded for this loop: TypeSafe USD ${n(t.cost.typesafe.usd, 4)} over ${n(t.cost.typesafe.requests)} requests; OpenAI ${n(t.cost.openai.tokens)} tokens over ${n(t.cost.openai.requests)} requests (USD ${n(t.cost.openai.usdListRate, 4)} at the list rate). The Nemotron teacher (${n(t.cost.nemotron.requests)} requests) is not priced: ${esc(t.cost.nemotron.usdMissingBecause)}. The Haiku audit is not priced: ${esc(t.cost.haikuAudit.missingBecause)}.`),
   ].join('');
 }
@@ -305,7 +305,7 @@ function historyHtml(h, K) {
   if (h.examples?.length) out.push(`<div class="examples">${h.examples.map((x) => scope('article', K, `<p class="kicker">${x.adapterCorrect ? 'Read correctly' : 'Read wrongly'} · note dated ${esc(x.noteDate)}</p><p lang="fi" class="note">${esc(x.noteText)}</p><dl><dt>Ground truth</dt><dd>${eventsList(x.truth)}</dd><dt>Adapter</dt><dd>${eventsList(x.adapter)}</dd></dl>`)).join('')}</div>`);
   if (sel) {
     const [lo, hi] = Object.keys(sel.limits).sort((x, y) => Number(x) - Number(y)), one = sel.limits[lo], five = sel.limits[hi], need = sel.notes_needed_without_error_for_claim;
-    out.push(scope('p', K, `<strong>How much could skip human review in version 1? None, on this evidence.</strong> A confidence cut-off was fixed on ${n(sel.validation_notes)} validation notes and applied unchanged to the test notes. Aimed at ${pc(Number(lo), 0)} error it admits ${n(one.test_all.admitted)} of ${n(one.test_all.n)} test notes with ${n(one.test_all.errors_among_admitted)} wrong, compatible with an error rate up to ${pc(one.test_all.error_upper_bound_95_one_sided)}. Aimed at ${pc(Number(hi), 0)} it admits ${n(five.test_all.admitted)} with ${n(five.test_all.errors_among_admitted)} wrong (${pc(five.test_all.error_rate_among_admitted)}). A claim of at most ${pc(Number(lo), 0)} error would need ${n(need[lo])} admitted notes without one error. Superseded by the cascade above.`),
+    out.push(scope('p', K, `<strong>How many notes could be pre-filled for one-click confirmation in version 1? None, on this evidence.</strong> A confidence cut-off was fixed on ${n(sel.validation_notes)} validation notes and applied unchanged to the test notes. Aimed at ${pc(Number(lo), 0)} error it admits ${n(one.test_all.admitted)} of ${n(one.test_all.n)} test notes with ${n(one.test_all.errors_among_admitted)} wrong, compatible with an error rate up to ${pc(one.test_all.error_upper_bound_95_one_sided)}. Aimed at ${pc(Number(hi), 0)} it admits ${n(five.test_all.admitted)} with ${n(five.test_all.errors_among_admitted)} wrong (${pc(five.test_all.error_rate_among_admitted)}). A claim of at most ${pc(Number(lo), 0)} error would need ${n(need[lo])} admitted notes without one error. Superseded by the cascade above.`),
       table(K, '"At most" is the exact one-sided 95% upper bound on the error among admitted notes.', ['Target error', 'Validation notes (cut-off set here)', 'All test notes', 'Notes by a different writer'],
         Object.entries(sel.limits).map(([lim, v]) => [`at most ${pc(Number(lim), 0)}`, cell(v.validation), cell(v.test_all), cell(v.haiku)])));
   }
@@ -365,4 +365,132 @@ export function genomicsHtml(app) {
   out.push(`<h3>Limits</h3>${details(K, `All ${n(g.limits.length)} limits recorded with the result`, `<ul>${g.limits.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`)}`,
     `<p class="caption">Model: <code>${esc(g.model.repository)}</code> revision <code>${esc((g.model.revision || '').slice(0, 12))}</code>, open weights (${esc(g.model.licence)}), ${esc(g.model.route)}. Every table and limit: <code>${esc(g.source.readme)}</code>.</p>`);
   return out.join('');
+}
+
+// ------------------------------------------------------------------ product panels (main AstraZeneca page)
+// Pure renderers for the "who, how and where" panel, the process headline, the pilot card and the roadmap line
+// on every action. Every figure is read from app.json: the analysis, the roadmap block (src/roadmap.mjs via
+// src/build.mjs) or a verified row of data/evidence/literature-v1.json. Nothing is typed here.
+const evRow = (app, id) => (app?.evidence || []).find((r) => r.id === id && r.verified) || null;
+const evLink = (r) => (r && /^https?:\/\//.test(r.url || '') ? `<a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.citation)}</a>` : esc(r?.citation ?? ''));
+const mLink = (m) => (m ? `<a href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">${esc(m.id)}</a>` : '');
+const pages = (m) => (m?.pages || []).join('–');
+const CAPITAL_REGION = new Set(['HVA01', 'HVA02', 'HVA03', 'HVA04', 'HVA90']); // the four Uusimaa counties and Helsinki (STM counties page)
+const SHORT = { screen_breast: 'Breast screening attendance', screen_cervix: 'Cervical screening attendance', screen_colorectal: 'Colorectal screening attendance', gp_wait_over_7d: 'GP visit waits over 7 days', gp_wait_over_3m: 'GP visit waits over 3 months', specialist_wait_over_6m: 'Waiting over 6 months for specialised care' };
+const shortLabel = (g) => SHORT[g.id] || String(g.label || g.id).replace('Age-standardised mortality ratio, ', 'Cancer mortality ratio, ');
+
+// The roadmap measure an action serves, shown on every action card and table row.
+export function roadmapLine(app, actionId) {
+  const r = app?.roadmap?.actions?.[actionId];
+  if (!r) return '<span class="missing-label">Roadmap measure not mapped</span>';
+  if (r.fit === 'none' || !r.primary) return 'No roadmap measure';
+  return `${mLink(r.primary)} ${esc(r.primary.title_en)} <span class="caption">(roadmap p. ${esc(pages(r.primary))}; ${esc(r.fit === 'named' ? 'the roadmap names this action' : 'serves this measure; the roadmap does not name this action')})</span>`;
+}
+
+function pairBars(rows, max) {
+  const w = 230, x = (v) => (v / max) * w;
+  return `<svg viewBox="0 0 ${w + 10} ${rows.length * 22}" class="pair" role="img" aria-label="${esc(rows.map((r) => `${r.label} ${r.value}`).join(', '))}">${rows.map((r, i) => `<rect x="0" y="${i * 22 + 4}" width="${x(r.value).toFixed(1)}" height="12" class="${r.cls}"/>`).join('')}</svg>`;
+}
+
+export function whoHtml(app) {
+  const a = app?.analysis;
+  const grads = a?.gradients || [];
+  if (!a || !grads.length) return '<p class="missing-label">The county gradients are not in this snapshot.</p>';
+  const counties = evRow(app, 'stm-wellbeing-services-counties');
+  const incl = grads.filter((g) => g.siiLow != null && g.siiLow <= 0 && g.siiHigh >= 0).length;
+  const allZero = incl === grads.length;
+  const ecoRows = grads.map((g) => {
+    const span = Math.max(Math.abs(g.siiLow), Math.abs(g.siiHigh)) || 1, X = (v) => 60 + (v / span) * 55;
+    const svg = `<svg viewBox="0 0 120 14" class="mini-interval" role="img" aria-label="interval ${g.siiLow} to ${g.siiHigh}, zero marked"><line x1="60" x2="60" y1="0" y2="14" class="reference"/><line x1="${X(g.siiLow).toFixed(1)}" x2="${X(g.siiHigh).toFixed(1)}" y1="7" y2="7" class="ci"/><circle cx="${X(g.sii).toFixed(1)}" cy="7" r="3"/></svg>`;
+    return `<tr><th scope="row">${esc(shortLabel(g))}</th><td>${n(g.sii, 2)} <span class="range">(${n(g.siiLow, 2)} to ${n(g.siiHigh, 2)})</span></td><td>${svg}</td><td>${g.excludesZero ? 'excludes zero' : 'includes zero'}</td><td>${n(g.n)}</td></tr>`;
+  }).join('');
+  const breast = a.indicators?.screen_breast, fb = a.indicators?.foreign_background;
+  const low = breast ? breast.rows.filter((r) => r.value != null).sort((p, q) => p.value - q.value).slice(0, 5) : [];
+  const inCapital = low.filter((r) => CAPITAL_REGION.has(r.regionId)).length;
+  const nm = (id) => (a.regions.find((r) => r.regionId === id)?.name || id).replace(' wellbeing services county', '').replace('City of ', '');
+  const opp = evRow(app, 'oecd-2025-helsinki-opportunistic');
+  const left = `<div class="who-col" data-kind="ECOLOGICAL"><p class="kicker">${chip('ECOLOGICAL')} Where: county averages</p>
+<h3>${allZero ? `All ${n(grads.length)} county education gradients include zero` : `${n(incl)} of ${n(grads.length)} county education gradients include zero`}</h3>
+<p>Slope from the least to the most educated end of the country (counties ordered by an education index), with its 95% interval. This describes places, not people.</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">Indicator</th><th scope="col">Slope (95% interval)</th><th scope="col">Interval, zero dashed</th><th scope="col">Reading</th><th scope="col">Areas</th></tr></thead><tbody>${ecoRows}</tbody></table></div>
+${low.length ? `<h4>The lowest breast-screening attendance is in the capital region</h4><div class="table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">Attendance, % (latest year)</th><th scope="col">Foreign background${fb?.unit ? `, ${esc(fb.unit)}` : ''} (latest year)</th></tr></thead><tbody>${low.map((r) => { const f = fb?.rows.find((x) => x.regionId === r.regionId); return `<tr><th scope="row">${esc(nm(r.regionId))}${CAPITAL_REGION.has(r.regionId) ? ' · Uusimaa' : ''}</th><td>${n(r.value, 1)} <span class="caption">(${raw(r.year)})</span></td><td>${f ? `${n(f.value, 1)} <span class="caption">(${raw(f.year)})</span>` : 'n/a'}</td></tr>`; }).join('')}</tbody></table></div>
+<p class="caption">${chip('ECOLOGICAL')} ${n(inCapital)} of the ${n(low.length)} lowest-attending areas are in Uusimaa (its four counties and Helsinki). ${opp ? `The OECD/EU profile says Helsinki's low programme attendance is likely due to more screening outside the programme (${evLink(opp)}).` : ''} The table also shows their foreign-background shares. A county league table measures recording and population mix; it cannot show who is missed.</p>` : ''}
+<p class="caption">${chip('ECOLOGICAL')} Source: THL Sotkanet and Statistics Finland county series in the public snapshot, analysed by <code>src/analysis.mjs</code> (slope index of inequality). ${counties ? `SAMA's ${n(a.regions.length)} areas are Finland's ${n(counties.value)} wellbeing services counties, the City of Helsinki (which organises its own services) and Åland (${evLink(counties)}).` : ''}</p></div>`;
+
+  const pair = (id, label, loLabel, loKey, hiLabel, hiKey, unit = '%') => {
+    const r = evRow(app, id); if (!r?.figures) return '';
+    const lo = r.figures[loKey], hi = r.figures[hiKey];
+    return `<article class="pair-row"><h4>${esc(label)}${r.figures.period ? ` <span class="caption">(${esc(r.figures.period)})</span>` : ''}</h4>${pairBars([{ label: loLabel, value: lo, cls: 'lo' }, { label: hiLabel, value: hi, cls: 'hi' }], 100)}<p>${esc(loLabel)} ${n(lo)}${unit} · ${esc(hiLabel)} ${n(hi)}${unit}</p><p class="caption">${evLink(r)}</p></article>`;
+  };
+  const surv = evRow(app, 'oecd-2025-survival-education'), route = evRow(app, 'kuitunen-2026-route-medians');
+  const rf = route?.figures;
+  const routeHtml = rf ? `<article class="pair-row"><h4>How you enter care: median days from first symptom to treatment</h4>${pairBars([{ label: 'public primary-care appointment', value: rf.publicMedianDays, cls: 'lo' }, { label: 'private or occupational care', value: rf.privateOccupationalMedianDays, cls: 'hi' }], Math.max(rf.publicMedianDays, rf.privateOccupationalMedianDays))}<p>Public primary-care appointment ${n(rf.publicMedianDays)} days (${n(rf.publicPatients)} patients) · private or occupational care ${n(rf.privateOccupationalMedianDays)} days (${n(rf.privateOccupationalPatients)} patients); p = ${n(rf.p, 3)}.</p><p class="caption">One Finnish lymphoma (DLBCL) cohort, observational. ${evLink(route)}</p></article>` : '';
+  const right = `<div class="who-col" data-kind="PUBLISHED"><p class="kicker">${chip('PUBLISHED')} Who and how: individual-level figures</p>
+<h3>The documented gaps are by education, mother tongue and entry route</h3>
+${surv ? `<p>${surv.quote ? `On regions, the OECD/EU profile: “${esc(surv.quote)}”.` : ''} By education, five-year relative survival differs:</p>` : ''}
+${pair('oecd-2025-survival-education', 'Five-year relative survival, men, by education', 'lower education', 'lowerEducationMen', 'higher education', 'higherEducationMen')}
+${pair('oecd-2025-survival-education', 'Five-year relative survival, women, by education', 'lower education', 'lowerEducationWomen', 'higher education', 'higherEducationWomen')}
+${pair('oecd-2025-breast-screening-education', 'Breast screening participation, by education', 'lower education', 'lower', 'higher education', 'higher')}
+${pair('oecd-2025-breast-screening-language', 'Breast screening participation, by mother tongue', 'other mother tongue', 'nonDomesticLanguage', 'Finnish, Swedish or Sámi', 'domesticLanguage')}
+${pair('oecd-2025-cervical-screening-education', 'Cervical screening participation, by education', 'lower education', 'lower', 'higher education', 'higher')}
+${pair('oecd-2025-cervical-screening-language', 'Cervical screening participation, by mother tongue', 'other mother tongue', 'nonDomesticLanguage', 'domestic language', 'domesticLanguage')}
+${routeHtml}
+<p class="caption">${chip('PUBLISHED')} Figures as published (Finnish Cancer Registry via the OECD/EU Country Cancer Profile Finland 2025; Kuitunen J et al. 2026), entered as verified rows of the evidence register.</p></div>`;
+
+  const r131 = app.roadmap?.measures?.['1.3.1'];
+  const v11 = evRow(app, 'virtanen-2011-selfsampling-fi'), arb = evRow(app, 'arbyn-2018-selfsampling');
+  const ci3 = (r) => (r ? `${n(r.value, 2)} <span class="range">(${n(r.ciLow, 2)}–${n(r.ciHigh, 2)})</span>` : 'n/a');
+  const actions = `<div class="who-actions" data-kind="PUBLISHED"><p class="kicker">${chip('PUBLISHED')} The actions that already target it</p><ul>
+${r131 ? `<li><strong>Mother tongue:</strong> roadmap measure ${mLink(r131)}, ${esc(r131.title_en)} (p. ${esc(pages(r131))}); SAMA's multilingual re-invitation serves it.</li>` : ''}
+${v11 ? `<li><strong>Education and non-attenders:</strong> mailed HPV self-sampling kits. Finnish randomised trial: relative participation ${ci3(v11)} (${evLink(v11)})${arb ? `; pooled trials ${ci3(arb)} (${evLink(arb)})` : ''}. Roadmap: ${roadmapLine(app, 'self-sampling')}.</li>` : ''}
+<li><strong>Entry route:</strong> the same fast lane in public primary care. Roadmap: ${roadmapLine(app, 'equal-fast-lane')}.</li>
+<li><strong>Stalled work-ups:</strong> a named navigator. Roadmap: ${roadmapLine(app, 'navigation')}.</li>
+</ul><p class="caption">After the hackathon: report every Goal 3 indicator by education, entry route and mother tongue within each county, linked at analysis time under a Findata permit; aggregates only, small cells suppressed.</p></div>`;
+  return `<div class="who-grid">${left}${right}</div>${actions}`;
+}
+
+// The headline is a process metric. The modelled deaths stay below it, labelled as an upper-bound scenario.
+export function processHtml(app) {
+  const a = app?.analysis; if (!a) return '';
+  const six = evRow(app, 'oecd-2025-six-week-target'), law = evRow(app, 'stm-2026-care-guarantee');
+  const relabel = (app.roadmap?.thresholdRelabels || [])[0];
+  const target = a.indicators?.screen_breast?.target;
+  const progs = ['screen_breast', 'screen_cervix', 'screen_colorectal'].filter((k) => a.indicators?.[k]);
+  return `<div class="process" data-kind="TARGET"><p class="kicker">${chip('TARGET')} The headline is a process metric</p>
+<div class="process-grid"><article><h3>Share of patients treated within the placeholder threshold</h3><p class="large-claim">Not measurable in any of the ${n(a.regions.length)} areas today.</p>
+<p>${six ? `Placeholder threshold ${n(six.value)} days: the six-week target from suspected-cancer referral to start of treatment that the OECD/EU reports for Finland (${evLink(six)}).` : ''} ${law ? `The law is looser: non-urgent specialised care must start within ${n(law.figures.treatmentMonths)} months of the need being established, and the treatment-guarantee page names no cancer-specific limit (${evLink(law)}).` : ''}</p>
+${relabel ? `<p class="caption">${esc(relabel.relabel_en)}</p>` : ''}<p>Enabled by action 1, recording the pathway dates${app.roadmap?.actions?.['pathway-timestamps']?.primary ? `: roadmap measure ${mLink(app.roadmap.actions['pathway-timestamps'].primary)}` : ''}.</p></article>
+<article><h3>Share of overdue suspected-cancer referrals followed up on time</h3><p class="large-claim">Not measured today.</p><p>The county worklist in the pilot below produces it: every referral with no next step after the placeholder time, confirmed and called by a nurse.</p></article>
+<article data-kind="MEASURED"><h3>Screening participation below the target ${chip('MEASURED')}</h3><p class="large-claim">${progs.map((k) => `${n(a.indicators[k].countiesMissingTarget)} <small>${esc(k.split('_')[1])}</small>`).join(' / ')}</p><p>Areas confidently below the ${n(target)}% target, per programme.</p></article></div></div>`;
+}
+
+export function routeDisclosure(app) {
+  const means = evRow(app, 'kuitunen-2026-route-means'), med = evRow(app, 'kuitunen-2026-route-medians');
+  if (!means || !med?.figures) return '';
+  const f = med.figures;
+  return `The route-gap prior of ${n(means.value)} days is read from Figure 1 of Kuitunen J 2026; the paper's text means differ by ${n(f.publicMeanDays - f.privateOccupationalMeanDays)} days and its medians by ${n(f.publicMedianDays - f.privateOccupationalMedianDays)}.`;
+}
+
+export function pilotHtml(app) {
+  const c = app?.roadmap?.pilotCard;
+  if (!c) return '<p class="missing-label">The pilot card is not in this snapshot.</p>';
+  const e = c.snapshotEvidence || {};
+  const lung = app.analysis?.mortality?.lung;
+  const ranked = lung ? lung.rows.filter((r) => !r.suppressed && r.shrunk != null).sort((p, q) => q.shrunk - p.shrunk) : [];
+  const li = ranked.findIndex((r) => r.regionId === c.county.id), lr = ranked[li];
+  return `<article class="pilot" id="pilot-card" data-kind="DRAFT"><p class="kicker">${chip('DRAFT')} The ask · pilot card · ${esc(c.choice)}</p>
+<h3>${esc(c.county.nameEn)}: one county, a 2027 pilot inside the national roadmap</h3>
+<p>${esc(c.ask_en)}</p>
+<h4>Why ${esc(c.county.nameEn.replace(' wellbeing services county', ''))}, on process grounds</h4><ul>
+<li>${esc(c.rationale_en)}</li>
+${lr ? `<li>Mortality from ${esc(lung.label.charAt(0).toLowerCase() + lung.label.slice(1))}: shrunk ratio ${n(lr.shrunk, 3)} <span class="range">(${n(lr.shrunkLow, 3)}–${n(lr.shrunkHigh, 3)})</span>, rank ${n(li + 1)} of ${n(ranked.length)}; high, not the highest. Regional lung mortality largely follows incidence, so the case is closing follow-up loops, not excess deaths.</li>` : ''}
+</ul>
+${e.display_en ? `<p class="caption">${chip('MEASURED')} ${esc(e.display_en)}</p>` : ''}
+<h4>Roadmap measures it plugs into</h4><ul>${c.roadmapHooks.map((h) => `<li>${mLink(h)} ${esc(h.title_en)} (p. ${esc(pages(h))}): ${esc(h.why_en)}</li>`).join('')}</ul>
+<h4>What it reports</h4><ul>${c.indicators_en.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+<p><strong>Language.</strong> ${esc(c.languageScope_en)}</p>
+<p><strong>A person decides.</strong> ${esc(c.humanReview_en)}</p>
+<p><strong>Governance.</strong> The county owns the list and the care. No patient data leaves the county. SAMA is sponsor-independent; any company role would be a documented, non-promotional collaboration owned by the county.</p>
+<p><strong>Regulation.</strong> A workflow aid: it copies what a clinician wrote, computes a date and a nurse decides. Its medical-device status is to be confirmed with Fimea before any pilot (not yet checked).</p>
+<p class="caption">${esc(c.dataNote_en)} Source: ${c.source?.url ? `<a href="${esc(c.source.url)}" target="_blank" rel="noopener noreferrer">${esc(c.source.titleEn)}</a>` : ''}; mapping <code>data/roadmap/mapping-v1.json</code>; snapshot ${esc(String(e.sourceSha256 || '').slice(0, 12))}.</p></article>`;
 }

@@ -38,6 +38,15 @@ deleted with its disk at 19:27; list price times wall time USD 5.98, not the inv
 | 19:38-19:46 | cascade: Jev on 1,007 notes, Decisions on 186 (`runs/cascade-v3.jsonl`) | MacBook Pro → TypeSafe, OpenAI | TypeSafe USD 0.0574; OpenAI 245,314 tokens | `data/scribe/v3/cascade/cascade-v1.json`, `data/scribe/v3/summary-v1.json` |
 | 18:58-20:24 | `TRAINING.md`, training figures and version-2 review fixes (`runs/training-md.jsonl`) | MacBook Pro | 0 | `TRAINING.md`, `data/scribe/v2/training-figures-v1.json` |
 | 20:30-20:53 | product integration of the three tracks, build, 72 node tests, server check (`runs/integrate-tracks-v3.jsonl`) | MacBook Pro | 0 | `web/data/app.json` |
+| 22:54-23:06 | ship wave, page: who/how/where panel, process headline, Satakunta pilot card, Nemotron planner and Gemma demo on the page, Evo 2 moved to `/research.html`; `npm test` 101/101 (`runs/ship-page.jsonl`) | MacBook Pro | 0 (local) | `web/data/app.json`, `web/research.html` |
+| 22:55-23:08 | ship wave, safety net: rule `forward-v1` frozen, 60 SYNTHETIC report lines 60/60, second check on 5,002 lines (0 wrong or invented dates, 40 dated lines sent to a person), worklist join; Satakunta 120 open loops, 16 overdue (`runs/ship-safetynet.jsonl`) | MacBook Pro | 0 (local) | `data/safetynet/safetynet-v1.json` |
+| 22:57-23:05 | ship wave, FLARE gate: NVIDIA FLARE 2.9.1 simulator, 23 SYNTHETIC county sites, 179.63 s; 253/253 cells equal the central table; not comparable 15/23 (raw scribe) and 1/23 (code resolver) (`runs/ship-flare.jsonl`) | MacBook Pro | 0 (local) | `data/flare/gate-v1.json` |
+| 22:53-23:09 | ship wave, deck: submission drafts rewritten; `submission/check_numbers.py` 250 facts, 0 failures, 1 pending placeholder (`runs/ship-deck.jsonl`) | MacBook Pro | 0 (local; public pages re-opened) | `submission/` |
+| 23:10-23:20 | ship wave, integration: safety net and gate bundled into `app.json` (`safetyNet`, `flareGate`) and mounted in section 05; `npm test` 113/113; own server on port 4185 checked with curl and the browser pane, then stopped (`runs/ship-integrate.jsonl`) | MacBook Pro | 0 (local) | `web/data/app.json` |
+
+Runs of Lanes A, B and C between 20:53 and 22:50 UTC (MLX training, Nemotron reader and planner,
+scribe demo) are logged in `runs/laneA-*.jsonl`, `runs/laneB-*.jsonl` and `runs/laneC-*.jsonl` and are
+not summarised in this table.
 
 Totals recorded in files: TypeSafe USD 0.5758 over the three scribe ledgers
 (`data/scribe/v2/training-figures-v1.json` `api_spend`); OpenAI 1,283,798 tokens over 876 requests,

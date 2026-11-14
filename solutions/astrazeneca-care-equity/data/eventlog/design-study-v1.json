@@ -32913,6 +32913,1926 @@
       "The confirmed condition assumes that a person removes every error; that was not measured."
     ]
   },
+  "measured_interval_extraction": {
+    "run": "C-270m-all-v2data",
+    "note_exact_match": {
+      "source": "data/scribe/v4/resolver/reproduce-v1.json",
+      "run": "C-270m-all-v2data",
+      "arm": "A",
+      "reproduced_exactly": true,
+      "notes_made_worse_all_runs": 0,
+      "validation": {
+        "role": "selection result",
+        "as_is": {
+          "k": 134,
+          "n": 310,
+          "value": 0.4323,
+          "wilson95": [
+            0.3783,
+            0.4879
+          ]
+        },
+        "resolver": {
+          "k": 289,
+          "n": 310,
+          "value": 0.9323,
+          "wilson95": [
+            0.8987,
+            0.9553
+          ]
+        }
+      },
+      "test": {
+        "role": "already seen, post hoc",
+        "as_is": {
+          "k": 305,
+          "n": 700,
+          "value": 0.4357,
+          "wilson95": [
+            0.3994,
+            0.4727
+          ]
+        },
+        "resolver": {
+          "k": 651,
+          "n": 700,
+          "value": 0.93,
+          "wilson95": [
+            0.9087,
+            0.9466
+          ]
+        },
+        "resolver_by_writer": {
+          "nemotron": {
+            "k": 481,
+            "n": 500,
+            "value": 0.962,
+            "wilson95": [
+              0.9414,
+              0.9755
+            ]
+          },
+          "haiku": {
+            "k": 170,
+            "n": 200,
+            "value": 0.85,
+            "wilson95": [
+              0.7939,
+              0.8929
+            ]
+          }
+        }
+      }
+    },
+    "profiles": [
+      {
+        "arm": "off",
+        "arm_label": "as is",
+        "writer": "all",
+        "notes": 700,
+        "gold_events": 1658,
+        "pairs": 1131,
+        "found": 1095,
+        "keep": 0.9681697612732095,
+        "exact_interval": 0.3744292237442922,
+        "mean_err": -4.685844748858448,
+        "sd_err": 68.36969304755186,
+        "mad_err": 17.0,
+        "p90_abs": 115.0,
+        "extra_events": 19,
+        "extra_events_by_type": {
+          "SYMPTOM_ONSET_REPORTED": 1,
+          "FIRST_CONTACT": 10,
+          "PHYSICIAN_ASSESSMENT": 1,
+          "REFERRAL_SENT": 5,
+          "SPECIALIST_VISIT": 1,
+          "TREATMENT_START": 1
+        },
+        "extra_slot_probability": [
+          0.005413520577833286,
+          0.05283528532764148,
+          0.005413520577833286,
+          0.026776123046521993,
+          0.0,
+          0.0,
+          0.0,
+          0.005413520577833286,
+          0.005413520577833286
+        ]
+      },
+      {
+        "arm": "off",
+        "arm_label": "as is",
+        "writer": "nemotron",
+        "notes": 500,
+        "gold_events": 1251,
+        "pairs": 857,
+        "found": 839,
+        "keep": 0.9789964994165694,
+        "exact_interval": 0.3766388557806913,
+        "mean_err": -5.949940405244338,
+        "sd_err": 69.18523351404276,
+        "mad_err": 15.0,
+        "p90_abs": 114.20000000000005,
+        "extra_events": 7,
+        "extra_events_by_type": {
+          "FIRST_CONTACT": 4,
+          "REFERRAL_SENT": 3
+        },
+        "extra_slot_probability": [
+          0.0,
+          0.028366864535739778,
+          0.0,
+          0.021351493202817262,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "arm": "off",
+        "arm_label": "as is",
+        "writer": "haiku",
+        "notes": 200,
+        "gold_events": 407,
+        "pairs": 274,
+        "found": 256,
+        "keep": 0.9343065693430657,
+        "exact_interval": 0.3671875,
+        "mean_err": -0.54296875,
+        "sd_err": 65.58656986339565,
+        "mad_err": 19.5,
+        "p90_abs": 123.0,
+        "extra_events": 12,
+        "extra_events_by_type": {
+          "SYMPTOM_ONSET_REPORTED": 1,
+          "FIRST_CONTACT": 6,
+          "PHYSICIAN_ASSESSMENT": 1,
+          "REFERRAL_SENT": 2,
+          "SPECIALIST_VISIT": 1,
+          "TREATMENT_START": 1
+        },
+        "extra_slot_probability": [
+          0.0218703214794147,
+          0.12425307893331061,
+          0.0218703214794147,
+          0.04326233199721641,
+          0.0,
+          0.0,
+          0.0,
+          0.0218703214794147,
+          0.0218703214794147
+        ]
+      },
+      {
+        "arm": "A",
+        "arm_label": "with the code date resolver (arm A)",
+        "writer": "all",
+        "notes": 700,
+        "gold_events": 1658,
+        "pairs": 1131,
+        "found": 1095,
+        "keep": 0.9681697612732095,
+        "exact_interval": 0.9908675799086758,
+        "mean_err": -1.3342465753424657,
+        "sd_err": 27.793237405499383,
+        "mad_err": 0.0,
+        "p90_abs": 0.0,
+        "extra_events": 16,
+        "extra_events_by_type": {
+          "SYMPTOM_ONSET_REPORTED": 1,
+          "FIRST_CONTACT": 10,
+          "PHYSICIAN_ASSESSMENT": 1,
+          "REFERRAL_SENT": 2,
+          "SPECIALIST_VISIT": 1,
+          "TREATMENT_START": 1
+        },
+        "extra_slot_probability": [
+          0.005413520577833286,
+          0.05283528532764148,
+          0.005413520577833286,
+          0.010797734950619864,
+          0.0,
+          0.0,
+          0.0,
+          0.005413520577833286,
+          0.005413520577833286
+        ]
+      },
+      {
+        "arm": "A",
+        "arm_label": "with the code date resolver (arm A)",
+        "writer": "nemotron",
+        "notes": 500,
+        "gold_events": 1251,
+        "pairs": 857,
+        "found": 839,
+        "keep": 0.9789964994165694,
+        "exact_interval": 0.9904648390941597,
+        "mean_err": -1.7413587604290823,
+        "sd_err": 31.43886128072857,
+        "mad_err": 0.0,
+        "p90_abs": 0.0,
+        "extra_events": 4,
+        "extra_events_by_type": {
+          "FIRST_CONTACT": 4
+        },
+        "extra_slot_probability": [
+          0.0,
+          0.028366864535739778,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "arm": "A",
+        "arm_label": "with the code date resolver (arm A)",
+        "writer": "haiku",
+        "notes": 200,
+        "gold_events": 407,
+        "pairs": 274,
+        "found": 256,
+        "keep": 0.9343065693430657,
+        "exact_interval": 0.9921875,
+        "mean_err": 0.0,
+        "sd_err": 7.970533969860858,
+        "mad_err": 0.0,
+        "p90_abs": 0.0,
+        "extra_events": 12,
+        "extra_events_by_type": {
+          "SYMPTOM_ONSET_REPORTED": 1,
+          "FIRST_CONTACT": 6,
+          "PHYSICIAN_ASSESSMENT": 1,
+          "REFERRAL_SENT": 2,
+          "SPECIALIST_VISIT": 1,
+          "TREATMENT_START": 1
+        },
+        "extra_slot_probability": [
+          0.0218703214794147,
+          0.12425307893331061,
+          0.0218703214794147,
+          0.04326233199721641,
+          0.0,
+          0.0,
+          0.0,
+          0.0218703214794147,
+          0.0218703214794147
+        ]
+      }
+    ],
+    "sources": {
+      "data/scribe/v3/student/C-270m-all-v2data/eval-test.json": "f7fc832d63c7b901615289f2a701aaa4c975966e5ea8aef1515707e82228005a",
+      "data/scribe/v3/dataset/test_nemotron.parquet": "9f5b4a3a713b47ce13a8029fe7dc0dd3eefa5a8871f16ec4fbfd377130c8482c",
+      "data/scribe/v3/dataset/test_haiku.parquet": "1539d8b71a8cd631d37ad7deee045df2d352692581dac2c6b74c8568e3ad73c0",
+      "runs/diagnose/diagnose.py": "ddc1c5f77ee1d5596e666d5c96b9f9c245f0a7fd3270d88a838578052cbd8006",
+      "scribe/v3/resolve.py": "0ca753f81bfc374579e67dedfcde5b7abf0715cc88db5ca76810e4de8b0f2ec8",
+      "scribe/v3/lexicon.py": "2cef63da47473e2825bdfef1100d50bb32c9b77b5c5613c4b8ea4b5e2db32260",
+      "data/scribe/v4/resolver/freeze.json": "0e8e4d70dc879bee3009ae16418e6edd7b551bee24703ff73c527d5aeb9b29c3",
+      "runs/diagnose/intervals-C-270m-all-v2data.json": "03db2a6ee0113ca961f6d0e49dd0e4a79538f3eaa4ab5d4e95a42f25f5c11a99",
+      "runs/diagnose/intervals-C-270m-all-v2data-resolved.json": "e11c6f68a54731db8d9c7dd83979fc8384ea5f4711afad773f2fd528843146ab",
+      "runs/diagnose/interval-impact-v1.json": "cddb7929f5bef52c4cb770df68c8e27c78157db3651ac3d8a80dfceadf4d09d3",
+      "data/scribe/v4/resolver/reproduce-v1.json": "02a4c2db5eafca17c19560fdfa317ce731305fcbb9fbf9ea70a1a60b30f450d6"
+    },
+    "checks": {
+      "recomputed_equals_stored": {
+        "off": "recomputed 1,131 within-note pairs equal runs/diagnose/intervals-C-270m-all-v2data.json",
+        "A": "recomputed 1,131 within-note pairs equal runs/diagnose/intervals-C-270m-all-v2data-resolved.json"
+      },
+      "resolver_frozen": {
+        "scribe/v3/resolve.py": true,
+        "scribe/v3/lexicon.py": true
+      },
+      "frozen_at_utc": "2026-11-14T21:37:24Z",
+      "rule": "scribe-v3-relative-resolver-v1",
+      "product_default_arm_Aprime_equals_A_on_these_notes": true,
+      "profiles_equal_interval_impact_v1": true
+    },
+    "reference_episodes": 100000,
+    "rows": [
+      {
+        "kind": "planted",
+        "condition": "confirmed",
+        "arm": null,
+        "writer": "all",
+        "extras_modelled": false,
+        "label": "every event confirmed by a person",
+        "n": 500,
+        "slowdown": 1.3,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 0.995,
+            "located_ci95": [
+              0.9883490446266249,
+              0.9978624644726756
+            ],
+            "planted_test_power": 0.995,
+            "any_flag": 0.995,
+            "median_bias_days": 0.0,
+            "true_median_days": 50.762,
+            "testable_mean": 500.0,
+            "negative_span_share": 0.0,
+            "log_sd_noisy": 0.9368914132020718
+          },
+          "diagnostic": {
+            "located": 0.996,
+            "located_ci95": [
+              0.9897604437227377,
+              0.9984434118595916
+            ],
+            "planted_test_power": 0.996,
+            "any_flag": 0.996,
+            "median_bias_days": 0.0,
+            "true_median_days": 24.269,
+            "testable_mean": 500.0,
+            "negative_span_share": 0.0,
+            "log_sd_noisy": 0.975488737905187
+          },
+          "treatment": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.0,
+            "true_median_days": 21.578,
+            "testable_mean": 500.0,
+            "negative_span_share": 0.0,
+            "log_sd_noisy": 0.8016703709682321
+          }
+        }
+      },
+      {
+        "kind": "planted",
+        "condition": "measured_everywhere",
+        "arm": "off",
+        "writer": "all",
+        "extras_modelled": false,
+        "label": "as is",
+        "n": 500,
+        "slowdown": 1.3,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 0.705,
+            "located_ci95": [
+              0.6759934395775895,
+              0.7324375894433328
+            ],
+            "planted_test_power": 0.705,
+            "any_flag": 0.705,
+            "median_bias_days": 17.5825,
+            "true_median_days": 50.762,
+            "testable_mean": 409.963,
+            "negative_span_share": 0.148564,
+            "log_sd_noisy": 1.0307409946466586
+          },
+          "diagnostic": {
+            "located": 0.429,
+            "located_ci95": [
+              0.3986535230179055,
+              0.45988987668704334
+            ],
+            "planted_test_power": 0.429,
+            "any_flag": 0.429,
+            "median_bias_days": 15.6275,
+            "true_median_days": 24.269,
+            "testable_mean": 381.776,
+            "negative_span_share": 0.204754,
+            "log_sd_noisy": 1.1127849428122027
+          },
+          "treatment": {
+            "located": 0.442,
+            "located_ci95": [
+              0.411499555136933,
+              0.4729443488473914
+            ],
+            "planted_test_power": 0.442,
+            "any_flag": 0.443,
+            "median_bias_days": 12.4965,
+            "true_median_days": 21.578,
+            "testable_mean": 375.58,
+            "negative_span_share": 0.216718,
+            "log_sd_noisy": 1.0327485757535153
+          }
+        }
+      },
+      {
+        "kind": "planted",
+        "condition": "measured_everywhere",
+        "arm": "off",
+        "writer": "all",
+        "extras_modelled": true,
+        "label": "as is, extra events modelled",
+        "n": 500,
+        "slowdown": 1.3,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 0.648,
+            "located_ci95": [
+              0.6178838670299425,
+              0.6769834124583332
+            ],
+            "planted_test_power": 0.648,
+            "any_flag": 0.648,
+            "median_bias_days": 17.7675,
+            "true_median_days": 50.762,
+            "testable_mean": 377.402,
+            "negative_span_share": 0.13775,
+            "log_sd_noisy": 1.031939131368084
+          },
+          "diagnostic": {
+            "located": 0.398,
+            "located_ci95": [
+              0.36810785286312253,
+              0.4286728058679308
+            ],
+            "planted_test_power": 0.399,
+            "any_flag": 0.399,
+            "median_bias_days": 15.7595,
+            "true_median_days": 24.269,
+            "testable_mean": 371.514,
+            "negative_span_share": 0.198898,
+            "log_sd_noisy": 1.112168300757917
+          },
+          "treatment": {
+            "located": 0.464,
+            "located_ci95": [
+              0.43328733184788387,
+              0.49498819476307615
+            ],
+            "planted_test_power": 0.464,
+            "any_flag": 0.464,
+            "median_bias_days": 12.514,
+            "true_median_days": 21.578,
+            "testable_mean": 373.237,
+            "negative_span_share": 0.216658,
+            "log_sd_noisy": 1.0323475243500246
+          }
+        }
+      },
+      {
+        "kind": "planted",
+        "condition": "measured_everywhere",
+        "arm": "A",
+        "writer": "all",
+        "extras_modelled": false,
+        "label": "with the code date resolver (arm A)",
+        "n": 500,
+        "slowdown": 1.3,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 0.993,
+            "located_ci95": [
+              0.9856216845342334,
+              0.9966051315990092
+            ],
+            "planted_test_power": 0.993,
+            "any_flag": 0.993,
+            "median_bias_days": 0.182,
+            "true_median_days": 50.762,
+            "testable_mean": 481.364,
+            "negative_span_share": 0.005702,
+            "log_sd_noisy": 0.9399477303483341
+          },
+          "diagnostic": {
+            "located": 0.994,
+            "located_ci95": [
+              0.986971831758148,
+              0.9972473308581236
+            ],
+            "planted_test_power": 0.994,
+            "any_flag": 0.994,
+            "median_bias_days": 0.0845,
+            "true_median_days": 24.269,
+            "testable_mean": 481.21,
+            "negative_span_share": 0.006006,
+            "log_sd_noisy": 0.9809642676020883
+          },
+          "treatment": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.075,
+            "true_median_days": 21.578,
+            "testable_mean": 480.787,
+            "negative_span_share": 0.006374,
+            "log_sd_noisy": 0.808729790836427
+          }
+        }
+      },
+      {
+        "kind": "planted",
+        "condition": "measured_everywhere",
+        "arm": "A",
+        "writer": "all",
+        "extras_modelled": true,
+        "label": "with the code date resolver (arm A), extra events modelled",
+        "n": 500,
+        "slowdown": 1.3,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 0.995,
+            "located_ci95": [
+              0.9883490446266249,
+              0.9978624644726756
+            ],
+            "planted_test_power": 0.995,
+            "any_flag": 0.995,
+            "median_bias_days": 0.1995,
+            "true_median_days": 50.762,
+            "testable_mean": 450.509,
+            "negative_span_share": 0.00542,
+            "log_sd_noisy": 0.9400707706955072
+          },
+          "diagnostic": {
+            "located": 0.996,
+            "located_ci95": [
+              0.9897604437227377,
+              0.9984434118595916
+            ],
+            "planted_test_power": 0.996,
+            "any_flag": 0.997,
+            "median_bias_days": 0.0915,
+            "true_median_days": 24.269,
+            "testable_mean": 475.807,
+            "negative_span_share": 0.005962,
+            "log_sd_noisy": 0.9807398270269393
+          },
+          "treatment": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.0635,
+            "true_median_days": 21.578,
+            "testable_mean": 478.512,
+            "negative_span_share": 0.006146,
+            "log_sd_noisy": 0.8089589176840172
+          }
+        }
+      },
+      {
+        "kind": "planted",
+        "condition": "confirmed",
+        "arm": null,
+        "writer": "all",
+        "extras_modelled": false,
+        "label": "every event confirmed by a person",
+        "n": 2000,
+        "slowdown": 1.3,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.0,
+            "true_median_days": 50.7325,
+            "testable_mean": 2000.0,
+            "negative_span_share": 0.0,
+            "log_sd_noisy": 0.9387525498466991
+          },
+          "diagnostic": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.0,
+            "true_median_days": 24.179,
+            "testable_mean": 2000.0,
+            "negative_span_share": 0.0,
+            "log_sd_noisy": 0.9766164460506082
+          },
+          "treatment": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.0,
+            "true_median_days": 21.523,
+            "testable_mean": 2000.0,
+            "negative_span_share": 0.0,
+            "log_sd_noisy": 0.8028633816318054
+          }
+        }
+      },
+      {
+        "kind": "planted",
+        "condition": "measured_everywhere",
+        "arm": "off",
+        "writer": "all",
+        "extras_modelled": false,
+        "label": "as is",
+        "n": 2000,
+        "slowdown": 1.3,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 17.617,
+            "true_median_days": 50.7325,
+            "testable_mean": 1639.839,
+            "negative_span_share": 0.1481475,
+            "log_sd_noisy": 1.0329349188049013
+          },
+          "diagnostic": {
+            "located": 0.998,
+            "located_ci95": [
+              0.9927371921365079,
+              0.9994513564118793
+            ],
+            "planted_test_power": 0.998,
+            "any_flag": 0.998,
+            "median_bias_days": 15.702,
+            "true_median_days": 24.179,
+            "testable_mean": 1526.73,
+            "negative_span_share": 0.204956,
+            "log_sd_noisy": 1.1129591914258974
+          },
+          "treatment": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 12.498,
+            "true_median_days": 21.523,
+            "testable_mean": 1500.621,
+            "negative_span_share": 0.217661,
+            "log_sd_noisy": 1.0323584133986017
+          }
+        }
+      },
+      {
+        "kind": "planted",
+        "condition": "measured_everywhere",
+        "arm": "off",
+        "writer": "all",
+        "extras_modelled": true,
+        "label": "as is, extra events modelled",
+        "n": 2000,
+        "slowdown": 1.3,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 17.574,
+            "true_median_days": 50.7325,
+            "testable_mean": 1510.292,
+            "negative_span_share": 0.1368835,
+            "log_sd_noisy": 1.0328197526203846
+          },
+          "diagnostic": {
+            "located": 0.997,
+            "located_ci95": [
+              0.9912169859464969,
+              0.9989792161188614
+            ],
+            "planted_test_power": 0.997,
+            "any_flag": 0.997,
+            "median_bias_days": 15.6915,
+            "true_median_days": 24.179,
+            "testable_mean": 1486.413,
+            "negative_span_share": 0.199208,
+            "log_sd_noisy": 1.1125071803992006
+          },
+          "treatment": {
+            "located": 0.997,
+            "located_ci95": [
+              0.9912169859464969,
+              0.9989792161188614
+            ],
+            "planted_test_power": 0.997,
+            "any_flag": 0.997,
+            "median_bias_days": 12.432,
+            "true_median_days": 21.523,
+            "testable_mean": 1493.738,
+            "negative_span_share": 0.2160545,
+            "log_sd_noisy": 1.0343999773601613
+          }
+        }
+      },
+      {
+        "kind": "planted",
+        "condition": "measured_everywhere",
+        "arm": "A",
+        "writer": "all",
+        "extras_modelled": false,
+        "label": "with the code date resolver (arm A)",
+        "n": 2000,
+        "slowdown": 1.3,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.147,
+            "true_median_days": 50.7325,
+            "testable_mean": 1924.927,
+            "negative_span_share": 0.0057165,
+            "log_sd_noisy": 0.9416250634105457
+          },
+          "diagnostic": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.089,
+            "true_median_days": 24.179,
+            "testable_mean": 1924.259,
+            "negative_span_share": 0.0061115,
+            "log_sd_noisy": 0.9820662966684488
+          },
+          "treatment": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.0505,
+            "true_median_days": 21.523,
+            "testable_mean": 1924.036,
+            "negative_span_share": 0.0061385,
+            "log_sd_noisy": 0.8100655183215274
+          }
+        }
+      },
+      {
+        "kind": "planted",
+        "condition": "measured_everywhere",
+        "arm": "A",
+        "writer": "all",
+        "extras_modelled": true,
+        "label": "with the code date resolver (arm A), extra events modelled",
+        "n": 2000,
+        "slowdown": 1.3,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.172,
+            "true_median_days": 50.7325,
+            "testable_mean": 1803.787,
+            "negative_span_share": 0.0054045,
+            "log_sd_noisy": 0.9416124205294977
+          },
+          "diagnostic": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.0745,
+            "true_median_days": 24.179,
+            "testable_mean": 1903.545,
+            "negative_span_share": 0.0059295,
+            "log_sd_noisy": 0.9819583655126812
+          },
+          "treatment": {
+            "located": 1.0,
+            "located_ci95": [
+              0.996173241514445,
+              1.0
+            ],
+            "planted_test_power": 1.0,
+            "any_flag": 1.0,
+            "median_bias_days": 0.056,
+            "true_median_days": 21.523,
+            "testable_mean": 1913.504,
+            "negative_span_share": 0.0061385,
+            "log_sd_noisy": 0.8100195334948378
+          }
+        }
+      },
+      {
+        "kind": "planted_table_n",
+        "condition": "confirmed",
+        "arm": null,
+        "writer": "all",
+        "extras_modelled": false,
+        "label": "every event confirmed by a person",
+        "n": {
+          "primary_care": 473,
+          "diagnostic": 513,
+          "treatment": 347
+        },
+        "slowdown": 1.2,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 0.786,
+            "located_ci95": [
+              0.7595111793607143,
+              0.8102999147855483
+            ],
+            "planted_test_power": 0.786,
+            "any_flag": 0.786,
+            "median_bias_days": 0.0,
+            "true_median_days": 46.69,
+            "testable_mean": 473.0,
+            "negative_span_share": 0.0,
+            "log_sd_noisy": 0.9395126503682103
+          },
+          "diagnostic": {
+            "located": 0.745,
+            "located_ci95": [
+              0.7170834253930005,
+              0.7710414629490774
+            ],
+            "planted_test_power": 0.745,
+            "any_flag": 0.747,
+            "median_bias_days": 0.0,
+            "true_median_days": 22.355,
+            "testable_mean": 513.0,
+            "negative_span_share": 0.0,
+            "log_sd_noisy": 0.9776764413948369
+          },
+          "treatment": {
+            "located": 0.759,
+            "located_ci95": [
+              0.7315330470912915,
+              0.7844846920131909
+            ],
+            "planted_test_power": 0.759,
+            "any_flag": 0.762,
+            "median_bias_days": 0.0,
+            "true_median_days": 19.884,
+            "testable_mean": 347.0,
+            "negative_span_share": 0.0,
+            "log_sd_noisy": 0.801812663167057
+          }
+        }
+      },
+      {
+        "kind": "planted_table_n",
+        "condition": "measured_everywhere",
+        "arm": "off",
+        "writer": "all",
+        "extras_modelled": false,
+        "label": "as is",
+        "n": {
+          "primary_care": 473,
+          "diagnostic": 513,
+          "treatment": 347
+        },
+        "slowdown": 1.2,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 0.232,
+            "located_ci95": [
+              0.20689343939858929,
+              0.2591577031496683
+            ],
+            "planted_test_power": 0.232,
+            "any_flag": 0.233,
+            "median_bias_days": 17.0895,
+            "true_median_days": 46.978,
+            "testable_mean": 384.556,
+            "negative_span_share": 0.1550739957716702,
+            "log_sd_noisy": 1.03473867639525
+          },
+          "diagnostic": {
+            "located": 0.127,
+            "located_ci95": [
+              0.10778000925843849,
+              0.14907475257178568
+            ],
+            "planted_test_power": 0.127,
+            "any_flag": 0.127,
+            "median_bias_days": 15.247,
+            "true_median_days": 22.375,
+            "testable_mean": 388.733,
+            "negative_span_share": 0.210495126705653,
+            "log_sd_noisy": 1.1210079926028627
+          },
+          "treatment": {
+            "located": 0.049,
+            "located_ci95": [
+              0.037261034647360615,
+              0.06419070150661012
+            ],
+            "planted_test_power": 0.049,
+            "any_flag": 0.05,
+            "median_bias_days": 11.985,
+            "true_median_days": 19.935,
+            "testable_mean": 258.415,
+            "negative_span_share": 0.2234899135446686,
+            "log_sd_noisy": 1.042665653092833
+          }
+        }
+      },
+      {
+        "kind": "planted_table_n",
+        "condition": "measured_everywhere",
+        "arm": "off",
+        "writer": "all",
+        "extras_modelled": true,
+        "label": "as is, extra events modelled",
+        "n": {
+          "primary_care": 473,
+          "diagnostic": 513,
+          "treatment": 347
+        },
+        "slowdown": 1.2,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 0.212,
+            "located_ci95": [
+              0.18779405230733132,
+              0.23841016058034847
+            ],
+            "planted_test_power": 0.212,
+            "any_flag": 0.212,
+            "median_bias_days": 17.4765,
+            "true_median_days": 46.805,
+            "testable_mean": 353.714,
+            "negative_span_share": 0.143276955602537,
+            "log_sd_noisy": 1.0367130345831117
+          },
+          "diagnostic": {
+            "located": 0.114,
+            "located_ci95": [
+              0.09576165709721693,
+              0.13519260045363163
+            ],
+            "planted_test_power": 0.114,
+            "any_flag": 0.117,
+            "median_bias_days": 15.3455,
+            "true_median_days": 22.29,
+            "testable_mean": 378.362,
+            "negative_span_share": 0.20450487329434697,
+            "log_sd_noisy": 1.1217831047322522
+          },
+          "treatment": {
+            "located": 0.073,
+            "located_ci95": [
+              0.058459026212413355,
+              0.09080902553425069
+            ],
+            "planted_test_power": 0.073,
+            "any_flag": 0.075,
+            "median_bias_days": 12.1925,
+            "true_median_days": 19.924,
+            "testable_mean": 257.383,
+            "negative_span_share": 0.2217665706051873,
+            "log_sd_noisy": 1.0446912929279106
+          }
+        }
+      },
+      {
+        "kind": "planted_table_n",
+        "condition": "measured_everywhere",
+        "arm": "A",
+        "writer": "all",
+        "extras_modelled": false,
+        "label": "with the code date resolver (arm A)",
+        "n": {
+          "primary_care": 473,
+          "diagnostic": 513,
+          "treatment": 347
+        },
+        "slowdown": 1.2,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 0.772,
+            "located_ci95": [
+              0.7449850163320579,
+              0.7969332270518001
+            ],
+            "planted_test_power": 0.772,
+            "any_flag": 0.772,
+            "median_bias_days": 0.141,
+            "true_median_days": 46.852,
+            "testable_mean": 455.181,
+            "negative_span_share": 0.005765327695560253,
+            "log_sd_noisy": 0.9408594717253972
+          },
+          "diagnostic": {
+            "located": 0.704,
+            "located_ci95": [
+              0.6749696568758727,
+              0.7314690256620207
+            ],
+            "planted_test_power": 0.704,
+            "any_flag": 0.704,
+            "median_bias_days": 0.0865,
+            "true_median_days": 22.326,
+            "testable_mean": 493.618,
+            "negative_span_share": 0.005961013645224171,
+            "log_sd_noisy": 0.9798880747351322
+          },
+          "treatment": {
+            "located": 0.708,
+            "located_ci95": [
+              0.679065763076869,
+              0.7353423053931402
+            ],
+            "planted_test_power": 0.708,
+            "any_flag": 0.709,
+            "median_bias_days": 0.057,
+            "true_median_days": 19.913,
+            "testable_mean": 333.878,
+            "negative_span_share": 0.006011527377521614,
+            "log_sd_noisy": 0.8123960689368633
+          }
+        }
+      },
+      {
+        "kind": "planted_table_n",
+        "condition": "measured_everywhere",
+        "arm": "A",
+        "writer": "all",
+        "extras_modelled": true,
+        "label": "with the code date resolver (arm A), extra events modelled",
+        "n": {
+          "primary_care": 473,
+          "diagnostic": 513,
+          "treatment": 347
+        },
+        "slowdown": 1.2,
+        "replications": 1000,
+        "intervals": {
+          "primary_care": {
+            "located": 0.731,
+            "located_ci95": [
+              0.7026702288645861,
+              0.7575618087150875
+            ],
+            "planted_test_power": 0.731,
+            "any_flag": 0.731,
+            "median_bias_days": 0.152,
+            "true_median_days": 46.896,
+            "testable_mean": 426.582,
+            "negative_span_share": 0.005477801268498943,
+            "log_sd_noisy": 0.9399885535032289
+          },
+          "diagnostic": {
+            "located": 0.712,
+            "located_ci95": [
+              0.6831644885571975,
+              0.7392129658449271
+            ],
+            "planted_test_power": 0.712,
+            "any_flag": 0.713,
+            "median_bias_days": 0.0795,
+            "true_median_days": 22.401,
+            "testable_mean": 488.217,
+            "negative_span_share": 0.005998050682261209,
+            "log_sd_noisy": 0.9823107222580706
+          },
+          "treatment": {
+            "located": 0.703,
+            "located_ci95": [
+              0.6739460359438715,
+              0.730500300110993
+            ],
+            "planted_test_power": 0.703,
+            "any_flag": 0.703,
+            "median_bias_days": 0.049,
+            "true_median_days": 19.909,
+            "testable_mean": 331.803,
+            "negative_span_share": 0.006066282420749279,
+            "log_sd_noisy": 0.8110593507378647
+          }
+        }
+      },
+      {
+        "kind": "null",
+        "condition": "confirmed",
+        "arm": null,
+        "writer": null,
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.003,
+        "county_false_positive_rate_ci95": [
+          0.001020783881138619,
+          0.008783014053503171
+        ],
+        "mean_testable": [
+          500.0,
+          500.0,
+          500.0
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "measured_everywhere",
+        "arm": "off",
+        "writer": "all",
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.003,
+        "county_false_positive_rate_ci95": [
+          0.001020783881138619,
+          0.008783014053503171
+        ],
+        "mean_testable": [
+          398.325,
+          373.652,
+          366.661
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "off",
+        "writer": "all",
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 1.0,
+        "county_false_positive_rate_ci95": [
+          0.996173241514445,
+          1.0
+        ],
+        "mean_testable": [
+          398.252,
+          372.999,
+          367.106
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "off",
+        "writer": "nemotron",
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 1.0,
+        "county_false_positive_rate_ci95": [
+          0.996173241514445,
+          1.0
+        ],
+        "mean_testable": [
+          401.808,
+          375.4,
+          368.92
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "off",
+        "writer": "haiku",
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 1.0,
+        "county_false_positive_rate_ci95": [
+          0.996173241514445,
+          1.0
+        ],
+        "mean_testable": [
+          388.663,
+          365.174,
+          360.581
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_haiku_like_country_nemotron_like",
+        "arm": "off",
+        "writer": "haiku vs nemotron",
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.018,
+        "county_false_positive_rate_ci95": [
+          0.01141574000956779,
+          0.02827325517050734
+        ],
+        "mean_testable": [
+          388.744,
+          365.444,
+          360.491
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "measured_everywhere",
+        "arm": "off",
+        "writer": "all",
+        "extras_modelled": true,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.002,
+        "county_false_positive_rate_ci95": [
+          0.0005486435881207276,
+          0.007262807863492173
+        ],
+        "mean_testable": [
+          367.474,
+          362.932,
+          364.791
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "off",
+        "writer": "all",
+        "extras_modelled": true,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 1.0,
+        "county_false_positive_rate_ci95": [
+          0.996173241514445,
+          1.0
+        ],
+        "mean_testable": [
+          367.601,
+          362.906,
+          365.566
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "off",
+        "writer": "nemotron",
+        "extras_modelled": true,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 1.0,
+        "county_false_positive_rate_ci95": [
+          0.996173241514445,
+          1.0
+        ],
+        "mean_testable": [
+          381.87,
+          367.42,
+          369.504
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "off",
+        "writer": "haiku",
+        "extras_modelled": true,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 1.0,
+        "county_false_positive_rate_ci95": [
+          0.996173241514445,
+          1.0
+        ],
+        "mean_testable": [
+          325.625,
+          350.459,
+          352.347
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_haiku_like_country_nemotron_like",
+        "arm": "off",
+        "writer": "haiku vs nemotron",
+        "extras_modelled": true,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.015,
+        "county_false_positive_rate_ci95": [
+          0.009110978804081672,
+          0.024600976926906794
+        ],
+        "mean_testable": [
+          324.993,
+          349.904,
+          352.183
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "measured_everywhere",
+        "arm": "A",
+        "writer": "all",
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.004,
+        "county_false_positive_rate_ci95": [
+          0.0015565881404084308,
+          0.01023955627726225
+        ],
+        "mean_testable": [
+          481.214,
+          481.304,
+          481.089
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "A",
+        "writer": "all",
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.003,
+        "county_false_positive_rate_ci95": [
+          0.001020783881138619,
+          0.008783014053503171
+        ],
+        "mean_testable": [
+          481.179,
+          480.844,
+          480.704
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "A",
+        "writer": "nemotron",
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.005,
+        "county_false_positive_rate_ci95": [
+          0.0021375355273244604,
+          0.01165095537337511
+        ],
+        "mean_testable": [
+          485.989,
+          485.966,
+          486.329
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "A",
+        "writer": "haiku",
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.005,
+        "county_false_positive_rate_ci95": [
+          0.0021375355273244604,
+          0.01165095537337511
+        ],
+        "mean_testable": [
+          465.71,
+          465.467,
+          465.27
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_haiku_like_country_nemotron_like",
+        "arm": "A",
+        "writer": "haiku vs nemotron",
+        "extras_modelled": false,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.004,
+        "county_false_positive_rate_ci95": [
+          0.0015565881404084308,
+          0.01023955627726225
+        ],
+        "mean_testable": [
+          465.544,
+          465.496,
+          465.281
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "measured_everywhere",
+        "arm": "A",
+        "writer": "all",
+        "extras_modelled": true,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.002,
+        "county_false_positive_rate_ci95": [
+          0.0005486435881207276,
+          0.007262807863492173
+        ],
+        "mean_testable": [
+          450.691,
+          475.765,
+          478.279
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "A",
+        "writer": "all",
+        "extras_modelled": true,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.002,
+        "county_false_positive_rate_ci95": [
+          0.0005486435881207276,
+          0.007262807863492173
+        ],
+        "mean_testable": [
+          450.52,
+          475.736,
+          478.262
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "A",
+        "writer": "nemotron",
+        "extras_modelled": true,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.003,
+        "county_false_positive_rate_ci95": [
+          0.001020783881138619,
+          0.008783014053503171
+        ],
+        "mean_testable": [
+          472.366,
+          486.061,
+          486.003
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_extracted_country_structured",
+        "arm": "A",
+        "writer": "haiku",
+        "extras_modelled": true,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.003,
+        "county_false_positive_rate_ci95": [
+          0.001020783881138619,
+          0.008783014053503171
+        ],
+        "mean_testable": [
+          390.264,
+          445.286,
+          455.404
+        ]
+      },
+      {
+        "kind": "null",
+        "condition": "county_haiku_like_country_nemotron_like",
+        "arm": "A",
+        "writer": "haiku vs nemotron",
+        "extras_modelled": true,
+        "n": 500,
+        "replications": 1000,
+        "county_false_positive_rate": 0.004,
+        "county_false_positive_rate_ci95": [
+          0.0015565881404084308,
+          0.01023955627726225
+        ],
+        "mean_testable": [
+          390.081,
+          445.131,
+          455.218
+        ]
+      }
+    ],
+    "error_model": "Each core interval of a simulated episode gets an error drawn from the measured within-note interval errors of the profile (predicted span minus true span over pairs of DAY-precision gold events of one note whose two endpoints were found) and is lost with the measured lost share. Negative spans are excluded, never repaired.",
+    "extra_events_model": "Measured per writer and event type; an episode slot receives an extra with probability 1 - exp(-9 x extras of the type / gold events). An extra makes both core intervals that use the slot underivable, because eventlog.intervals.derive needs exactly one start and one end event. An extra that stands in for a true event missing from the record is not modelled.",
+    "limits": [
+      "The error profiles come from 700 SYNTHETIC test notes written and labelled by language models, not from clinical text; the test notes had been read before (post hoc).",
+      "The resolver was designed on the generator's own six date forms; notes with other relative phrasings are not represented.",
+      "Interval errors are drawn from all within-note pairs, not per interval type; extra events that stand in for a missing true event are not modelled.",
+      "The confirmed condition assumes that a person removes every error; that was not measured."
+    ],
+    "agreement_with_interval_impact_v1": {
+      "source": "runs/diagnose/interval-impact-v1.json",
+      "compared_rates": 34,
+      "beyond_3_se": 0,
+      "largest_rate_difference": 0.04300000000000004,
+      "largest_median_bias_difference_days": 0.28049999999999997,
+      "note": "Different random streams; the reference pool of 100,000 episodes is drawn once per study, so its error is shared by all cells of one study and is not in the binomial SE.",
+      "rows": [
+        {
+          "cell": "planted 30%, n=500, None, primary_care",
+          "this_study": 0.995,
+          "interval_impact_v1": 0.995,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "cell": "planted 30%, n=500, None, diagnostic",
+          "this_study": 0.996,
+          "interval_impact_v1": 0.994,
+          "difference": 0.0020000000000000018,
+          "difference_in_se": 0.6341063574331942,
+          "median_bias_days": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "cell": "planted 30%, n=500, None, treatment",
+          "this_study": 1.0,
+          "interval_impact_v1": 1.0,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "cell": "planted 30%, n=500, off, primary_care",
+          "this_study": 0.705,
+          "interval_impact_v1": 0.689,
+          "difference": 0.016000000000000014,
+          "difference_in_se": 0.7786335207701576,
+          "median_bias_days": [
+            17.5825,
+            17.44
+          ]
+        },
+        {
+          "cell": "planted 30%, n=500, off, diagnostic",
+          "this_study": 0.429,
+          "interval_impact_v1": 0.43,
+          "difference": -0.0010000000000000009,
+          "difference_in_se": 0.04517267564767031,
+          "median_bias_days": [
+            15.6275,
+            15.55
+          ]
+        },
+        {
+          "cell": "planted 30%, n=500, off, treatment",
+          "this_study": 0.442,
+          "interval_impact_v1": 0.415,
+          "difference": 0.027000000000000024,
+          "difference_in_se": 1.2204694165138947,
+          "median_bias_days": [
+            12.4965,
+            12.58
+          ]
+        },
+        {
+          "cell": "planted 30%, n=500, A, primary_care",
+          "this_study": 0.993,
+          "interval_impact_v1": 0.996,
+          "difference": -0.0030000000000000027,
+          "difference_in_se": 0.9072184232530294,
+          "median_bias_days": [
+            0.182,
+            0.17
+          ]
+        },
+        {
+          "cell": "planted 30%, n=500, A, diagnostic",
+          "this_study": 0.994,
+          "interval_impact_v1": 0.993,
+          "difference": 0.0010000000000000009,
+          "difference_in_se": 0.2782612903765609,
+          "median_bias_days": [
+            0.0845,
+            0.09
+          ]
+        },
+        {
+          "cell": "planted 30%, n=500, A, treatment",
+          "this_study": 1.0,
+          "interval_impact_v1": 1.0,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            0.075,
+            0.06
+          ]
+        },
+        {
+          "cell": "planted 30%, n=2000, None, primary_care",
+          "this_study": 1.0,
+          "interval_impact_v1": 1.0,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "cell": "planted 30%, n=2000, None, diagnostic",
+          "this_study": 1.0,
+          "interval_impact_v1": 1.0,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "cell": "planted 30%, n=2000, None, treatment",
+          "this_study": 1.0,
+          "interval_impact_v1": 1.0,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "cell": "planted 30%, n=2000, off, primary_care",
+          "this_study": 1.0,
+          "interval_impact_v1": 1.0,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            17.617,
+            17.48
+          ]
+        },
+        {
+          "cell": "planted 30%, n=2000, off, diagnostic",
+          "this_study": 0.998,
+          "interval_impact_v1": 0.998,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            15.702,
+            15.74
+          ]
+        },
+        {
+          "cell": "planted 30%, n=2000, off, treatment",
+          "this_study": 1.0,
+          "interval_impact_v1": 0.997,
+          "difference": 0.0030000000000000027,
+          "difference_in_se": 1.605690660753357,
+          "median_bias_days": [
+            12.498,
+            12.44
+          ]
+        },
+        {
+          "cell": "planted 30%, n=2000, A, primary_care",
+          "this_study": 1.0,
+          "interval_impact_v1": 1.0,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            0.147,
+            0.15
+          ]
+        },
+        {
+          "cell": "planted 30%, n=2000, A, diagnostic",
+          "this_study": 1.0,
+          "interval_impact_v1": 1.0,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            0.089,
+            0.08
+          ]
+        },
+        {
+          "cell": "planted 30%, n=2000, A, treatment",
+          "this_study": 1.0,
+          "interval_impact_v1": 1.0,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": [
+            0.0505,
+            0.07
+          ]
+        },
+        {
+          "cell": "planted 20% at the table n, None, primary_care",
+          "this_study": 0.786,
+          "interval_impact_v1": 0.765,
+          "difference": 0.02100000000000002,
+          "difference_in_se": 1.1257521287511862,
+          "median_bias_days": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "cell": "planted 20% at the table n, None, diagnostic",
+          "this_study": 0.745,
+          "interval_impact_v1": 0.77,
+          "difference": -0.025000000000000022,
+          "difference_in_se": 1.3048560542625278,
+          "median_bias_days": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "cell": "planted 20% at the table n, None, treatment",
+          "this_study": 0.759,
+          "interval_impact_v1": 0.758,
+          "difference": 0.0010000000000000009,
+          "difference_in_se": 0.05224550584712307,
+          "median_bias_days": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "cell": "planted 20% at the table n, off, primary_care",
+          "this_study": 0.232,
+          "interval_impact_v1": 0.234,
+          "difference": -0.0020000000000000018,
+          "difference_in_se": 0.1057890142649115,
+          "median_bias_days": [
+            17.0895,
+            17.37
+          ]
+        },
+        {
+          "cell": "planted 20% at the table n, off, diagnostic",
+          "this_study": 0.127,
+          "interval_impact_v1": 0.131,
+          "difference": -0.0040000000000000036,
+          "difference_in_se": 0.2668386848206059,
+          "median_bias_days": [
+            15.247,
+            15.34
+          ]
+        },
+        {
+          "cell": "planted 20% at the table n, off, treatment",
+          "this_study": 0.049,
+          "interval_impact_v1": 0.08,
+          "difference": -0.031,
+          "difference_in_se": 2.8275563361732035,
+          "median_bias_days": [
+            11.985,
+            12.17
+          ]
+        },
+        {
+          "cell": "planted 20% at the table n, A, primary_care",
+          "this_study": 0.772,
+          "interval_impact_v1": 0.743,
+          "difference": 0.029000000000000026,
+          "difference_in_se": 1.5138557409826512,
+          "median_bias_days": [
+            0.141,
+            0.18
+          ]
+        },
+        {
+          "cell": "planted 20% at the table n, A, diagnostic",
+          "this_study": 0.704,
+          "interval_impact_v1": 0.742,
+          "difference": -0.038000000000000034,
+          "difference_in_se": 1.9004276443353785,
+          "median_bias_days": [
+            0.0865,
+            0.09
+          ]
+        },
+        {
+          "cell": "planted 20% at the table n, A, treatment",
+          "this_study": 0.708,
+          "interval_impact_v1": 0.751,
+          "difference": -0.04300000000000004,
+          "difference_in_se": 2.1670375892191536,
+          "median_bias_days": [
+            0.057,
+            0.06
+          ]
+        },
+        {
+          "cell": "null, confirmed, None",
+          "this_study": 0.003,
+          "interval_impact_v1": 0.002,
+          "difference": 0.001,
+          "difference_in_se": 0.44779610932249436,
+          "median_bias_days": null
+        },
+        {
+          "cell": "null, measured_everywhere, off",
+          "this_study": 0.003,
+          "interval_impact_v1": 0.002,
+          "difference": 0.001,
+          "difference_in_se": 0.44779610932249436,
+          "median_bias_days": null
+        },
+        {
+          "cell": "null, county_extracted_country_structured, off",
+          "this_study": 1.0,
+          "interval_impact_v1": 1.0,
+          "difference": 0.0,
+          "difference_in_se": 0.0,
+          "median_bias_days": null
+        },
+        {
+          "cell": "null, county_haiku_like_country_nemotron_like, off",
+          "this_study": 0.018,
+          "interval_impact_v1": 0.022,
+          "difference": -0.004,
+          "difference_in_se": 0.6389417664661505,
+          "median_bias_days": null
+        },
+        {
+          "cell": "null, measured_everywhere, A",
+          "this_study": 0.004,
+          "interval_impact_v1": 0.001,
+          "difference": 0.003,
+          "difference_in_se": 1.3439274083776107,
+          "median_bias_days": null
+        },
+        {
+          "cell": "null, county_extracted_country_structured, A",
+          "this_study": 0.003,
+          "interval_impact_v1": 0.001,
+          "difference": 0.002,
+          "difference_in_se": 1.0012523486435176,
+          "median_bias_days": null
+        },
+        {
+          "cell": "null, county_haiku_like_country_nemotron_like, A",
+          "this_study": 0.004,
+          "interval_impact_v1": 0.001,
+          "difference": 0.003,
+          "difference_in_se": 1.3439274083776107,
+          "median_bias_days": null
+        }
+      ]
+    }
+  },
   "findings": [
     "One pathway order is used by simulator, validator and document: SYMPTOM_ONSET_REPORTED <= FIRST_CONTACT <= PHYSICIAN_ASSESSMENT <= REFERRAL_SENT <= REFERRAL_RECEIVED <= DIAGNOSIS <= MDT_DECISION <= SPECIALIST_VISIT <= TREATMENT_START. In 50000000 simulated episodes rounded to whole days it is violated 0 times.",
     "The synthetic Parquet sample of 20000 episodes and 177958 events validates with 0 chronology violations, 0 duplicates and 0 impossible dates.",
@@ -32947,6 +34867,7 @@
     "D1 has 240 structurally unidentifiable cells; D2 also cannot localise among the three core stages.",
     "Where each s comes from: computed from the cohort (sqrt(2 ln(mean/median)) of the published symptom-to-treatment figures) it is 0.988 on the public route and 0.981 on the private or occupational route; computed from the simulator it is the per-interval value above; the simulator's step value 0.96 is an input that neither route reproduces.",
     "One county with half of its dates at month precision (those pairs not tested), no slowdown, against a large reference: n = 30: any test rejects in 0.00000 of counties, no county is tested; n = 50: any test rejects in 0.00000 of counties, no county is tested; n = 100: any test rejects in 0.00036 of counties, 0.00101 among the 0.350 with at least one test; n = 250: any test rejects in 0.00203 of counties, 0.00203 among the 1.000 with at least one test; n = 1000: any test rejects in 0.00218 of counties, 0.00218 among the 1.000 with at least one test (nominal at most 0.00217).",
+    "Extraction errors manufacture fake county inequality (simulation on SYNTHETIC error profiles). With no real difference anywhere, one county of 500 episodes whose dates are read from notes by the current scribe (C-270m-all-v2data) while the rest of the country comes from structured fields is flagged in 1.000 of 1,000 runs as is and in 0.003 with the code date resolver (every event confirmed: 0.003; nominal at most 0.00217). If both are read from notes, but the county's notes are written like the Haiku-written test notes and the country's like the Nemotron-written ones, the county is flagged in 0.018 of runs as is and 0.004 with the resolver. Extra predicted events are modelled at the measured rate per writer and event type (an extra makes the interval underivable, as eventlog.intervals.derive does): then 1.000 and 0.002 for the first comparison, 0.015 and 0.004 for the second. An extra that stands in for a true event missing from the record is not modelled.",
     "Measured per-event error, selected version-2 adapter, Gemma 3 270M LoRA r16, 500 Nemotron-written test notes (0.317 of the found events with a wrong date, up to 365 days; 0.015 of true events not found), drawn independently per date: in a county of 500 episodes a 30% slowdown is located in its interval in 0.777, 0.486, 0.597 of runs (primary care, diagnostic, treatment) against 0.997, 0.998, 0.999 with every event confirmed; in a county of 2000 episodes a 30% slowdown is located in its interval in 1.000, 1.000, 1.000 of runs (primary care, diagnostic, treatment) against 1.000, 1.000, 1.000 with every event confirmed. With no slowdown, a county whose dates are extracted while the rest of the country uses structured dates is flagged in 1.000 (n = 500) and 1.000 (n = 2000) of runs.",
     "Measured per-event error, selected version-2 adapter, Gemma 3 270M LoRA r16, 200 Haiku-written test notes (0.393 of the found events with a wrong date, up to 281 days; 0.275 of true events not found), drawn independently per date: in a county of 500 episodes a 30% slowdown is located in its interval in 0.269, 0.090, 0.103 of runs (primary care, diagnostic, treatment) against 0.997, 0.998, 0.999 with every event confirmed; in a county of 2000 episodes a 30% slowdown is located in its interval in 0.950, 0.830, 0.818 of runs (primary care, diagnostic, treatment) against 1.000, 1.000, 1.000 with every event confirmed. With no slowdown, a county whose dates are extracted while the rest of the country uses structured dates is flagged in 1.000 (n = 500) and 1.000 (n = 2000) of runs.",
     "Measured per-event error, version-1 adapter, Gemma 3 1B LoRA (MLX), 200 Nemotron-written test notes (0.330 of the found events with a wrong date, up to 277 days; 0.081 of true events not found), drawn independently per date: in a county of 500 episodes a 30% slowdown is located in its interval in 0.642, 0.439, 0.469 of runs (primary care, diagnostic, treatment) against 0.997, 0.998, 0.999 with every event confirmed; in a county of 2000 episodes a 30% slowdown is located in its interval in 1.000, 0.998, 0.999 of runs (primary care, diagnostic, treatment) against 1.000, 1.000, 1.000 with every event confirmed. With no slowdown, a county whose dates are extracted while the rest of the country uses structured dates is flagged in 1.000 (n = 500) and 1.000 (n = 2000) of runs."

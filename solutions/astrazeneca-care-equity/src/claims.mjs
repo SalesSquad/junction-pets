@@ -4,6 +4,26 @@
 import { INTERVENTIONS } from './recommend.mjs';
 
 const STAGE_TEXT = { detection: 'early detection (screening participation)', primary_care: 'first contact and primary care access', referral: 'referral into specialist care' };
+const STAGES = ['detection', 'primary_care', 'referral'];
+
+// A flag rests on the three-year mean. It is 'confirmed' only when the latest year is also worse than the
+// national value; otherwise it is a 'possible' signal (for example a whole-percent indicator whose latest
+// value equals the national one). Direction: indicator.direction aligns 'worse' as in src/analysis.mjs.
+export function flagSignal(ind, row) {
+  if (!ind || !row || row.value == null || ind.national == null || !ind.direction) return 'possible';
+  return (ind.national - row.value) * ind.direction > 0 ? 'confirmed' : 'possible';
+}
+
+// The earliest measurable stage with a confirmed flag, else the earliest with a possible signal.
+export function locateGap(app, regionId) {
+  const a = app.analysis; const region = a.regions.find((r) => r.regionId === regionId);
+  if (!region) return null;
+  const flags = (stage) => region.stages[stage].flagged.map((key) => ({ key, signal: flagSignal(a.indicators[key], a.indicators[key].rows.find((r) => r.regionId === regionId)) }));
+  const confirmed = STAGES.find((s) => flags(s).some((f) => f.signal === 'confirmed'));
+  if (confirmed) return { stage: confirmed, signal: 'confirmed', label: STAGE_TEXT[confirmed] };
+  const possible = STAGES.find((s) => flags(s).length > 0);
+  return possible ? { stage: possible, signal: 'possible', label: STAGE_TEXT[possible] } : { stage: null, signal: null, label: null };
+}
 
 export function buildBrief(app, regionId) {
   const a = app.analysis;
@@ -26,9 +46,18 @@ export function buildBrief(app, regionId) {
         deaths_per_year_compared_with_expected_from_age_structure: `${excess} ${above ? 'more' : 'fewer'}`,
       });
   }
-  for (const stage of ['detection', 'primary_care', 'referral']) {
+  for (const stage of STAGES) {
     for (const key of region.stages[stage].flagged) {
       const ind = a.indicators[key]; const row = ind.rows.find((r) => r.regionId === regionId);
+      if (flagSignal(ind, row) === 'possible') {
+        add(`flag-${key}-possible`, 'MEASURED',
+          `${ind.title}: a possible signal only. ${region.name}'s three-year mean to ${ind.year} is ${row.level} against ${ind.national} nationally, but its latest value (${row.value} in ${row.year}) is not worse than the national value.`,
+          [], [src(key)], {
+            county: region.name, indicator: ind.title, unit: ind.unit, county_three_year_mean: row.level, latest_year: row.year, county_latest_value: row.value,
+            national_value: ind.national, county_latest_value_is_worse_than_national_value: false, reading: 'possible signal, not confirmed by the latest year',
+          });
+        continue;
+      }
       add(`flag-${key}`, 'MEASURED',
         `${ind.title}: ${region.name} is at ${row.level} (three-year mean to ${ind.year}) against ${ind.national} nationally${ind.target ? ` and a target of ${ind.target}` : ''}.`,
         ind.target ? ['fi-strategy-goal2-screening'] : [], [src(key)], {
@@ -38,8 +67,17 @@ export function buildBrief(app, regionId) {
         });
     }
   }
-  const flaggedStages = ['detection', 'primary_care', 'referral'].filter((s) => region.stages[s].flagged.length > 0).map((s) => STAGE_TEXT[s]);
-  add('locate', 'MEASURED', region.gapEmergesAt
+  const flaggedStages = STAGES.filter((s) => region.stages[s].flagged.length > 0).map((s) => STAGE_TEXT[s]);
+  const gap = locateGap(app, regionId);
+  if (gap.signal === 'possible' || (gap.signal === 'confirmed' && gap.stage !== region.gapEmergesAt)) {
+    add('locate-signal', 'MEASURED', gap.signal === 'possible'
+      ? `Among the stages that public data can measure, none shows ${region.name} worse than the country in both the three-year mean and the latest year; the earliest possible signal is at ${gap.label}.`
+      : `Among the stages that public data can measure, the earliest one where ${region.name} is worse than the country in both the three-year mean and the latest year is ${gap.label}.`,
+      [], [], {
+        county: region.name, pathway_stages_measurable_from_public_data_in_order: Object.values(STAGE_TEXT),
+        stages_with_a_flag_on_the_three_year_mean: flaggedStages, earliest_stage: gap.label, reading: gap.signal === 'possible' ? 'possible signal: the latest year does not confirm it' : 'confirmed by the latest year',
+      });
+  } else add('locate', 'MEASURED', region.gapEmergesAt
     ? `Among the stages that public data can measure, the earliest one where ${region.name} is clearly worse than the country is ${STAGE_TEXT[region.gapEmergesAt]}.`
     : `No measured pathway stage shows ${region.name} clearly worse than the country; if outcomes differ, the cause is not locatable from public data.`,
     [], [], {

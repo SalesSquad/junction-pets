@@ -29,6 +29,7 @@ from .power import analytic_power, sample_size, binomial_size, critical, min_det
 from .schema import INTERVALS, ENDPOINTS, D2_ENDPOINTS, PATHWAY_ORDER
 from .aggregate import wilson
 from .log import log as _log
+from .extraction_intervals import interval_extraction_study, fake_inequality
 DESIGNS=['D1','D2','D3','D4']
 RATIOS=[1.1,1.2,1.3,1.5]
 SIZES=[100,250,500,1000,2000]
@@ -433,6 +434,15 @@ def run(replications=1000,seed=20261114,reference_size=4_000_000,calibration_siz
         stage_power={f"{x['condition']} {x['profile']} n={x['n']} {x['stage']}":x['stage_power'] for x in measured['rows'] if x['kind']=='planted'},
         null_rate={f"{x['condition']} {x['profile']} n={x['n']}":x['county_false_positive_rate'] for x in measured['rows'] if x['kind']=='null'},
         elapsed_seconds=time.monotonic()-started))
+    # Added for the current adapter: within-note interval errors as is and with the product's code date
+    # resolver, extra predicted events per writer. Own random stream: every earlier experiment keeps its draws.
+    row20=next(x for x in sizes if x['slowdown']==1.2)
+    intervals_study=interval_extraction_study(np.random.default_rng([seed,3]),replications,pathways,{k:row20[k] for k in CORE})
+    log('interval_extraction_study','python -m eventlog.run_all',inputs=sorted(intervals_study['sources']),metrics=dict(
+        checks=intervals_study['checks'],
+        null_rate={f"{x['condition']} {x['arm']} {x['writer']} extras={x['extras_modelled']}":x['county_false_positive_rate'] for x in intervals_study['rows'] if x['kind']=='null'},
+        agreement_with_interval_impact_v1={k:v for k,v in intervals_study['agreement_with_interval_impact_v1'].items() if k!='rows'},
+        elapsed_seconds=time.monotonic()-started))
     gaps=gap_summary(tables)
     clean=gaps[0]; worst=max(gaps,key=lambda x:x['largest_gap'])
     def side(power,gap,z):
@@ -480,7 +490,7 @@ def run(replications=1000,seed=20261114,reference_size=4_000_000,calibration_siz
       largest_sample_size_check_gap=check_summary['detector']['largest_gap'],
       largest_idealised_power_gap=max(x['largest_idealised_gap'] for x in gaps),
       largest_calibrated_absolute_gap=max(r['absolute_gap'] for r in calibration_check),
-      early_warning=early,text_extraction=extraction,measured_text_extraction=measured,findings=[])
+      early_warning=early,text_extraction=extraction,measured_text_extraction=measured,measured_interval_extraction=intervals_study,findings=[])
     I=calibration['intervals']; K=check_summary['known_sd']; W=check_summary['detector']; M=check_summary['detector_mean_signed_gap_by_interval']
     representative=[x for x in tables if x['design']=='D3' and x['n']==500 and x['slowdown']==1.2 and x['missingness']==0 and x['month_share']==0]
     row=lambda r:next(x for x in sizes if x['slowdown']==r)
@@ -532,6 +542,7 @@ def run(replications=1000,seed=20261114,reference_size=4_000_000,calibration_siz
       "One county with half of its dates at month precision (those pairs not tested), no slowdown, against a large reference: "
         +"; ".join(f"n = {x['n']}: any test rejects in {x['false_positive_rate_t']:.5f} of counties, "+(f"{x['false_positive_rate_among_tested']:.5f} among the {x['counties_with_a_test_share']:.3f} with at least one test" if x['false_positive_rate_among_tested'] is not None else 'no county is tested') for x in month_null)
         +f" (nominal at most {month_null[0]['nominal_at_most']:.5f}).",
+      (lambda F:f"{F['headline']} {F['text']}")(fake_inequality(intervals_study)),
       *[(lambda E,P,N:f"Measured per-event error, {E['system']} ({E['wrong_date_share']:.3f} of the found events with a wrong date, up to {E['largest_absolute_error_days']} days; {E['missing_share']:.3f} of true events not found), drawn independently per date: "
         +"; ".join(f"in a county of {n} episodes a 30% slowdown is located in its interval in "+", ".join(f"{P(E['profile'],n,k):.3f}" for k in CORE)+" of runs (primary care, diagnostic, treatment) against "+", ".join(f"{P(None,n,k):.3f}" for k in CORE)+" with every event confirmed" for n in sorted({x['n'] for x in measured['rows']}))
         +". With no slowdown, a county whose dates are extracted while the rest of the country uses structured dates is flagged in "+" and ".join(f"{N(E['profile'],n):.3f} (n = {n})" for n in sorted({x['n'] for x in measured['rows']}))+" of runs.")(

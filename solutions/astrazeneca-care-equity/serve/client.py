@@ -11,7 +11,10 @@ What this file does, in order:
   2. calls an OpenAI-compatible /v1/chat/completions endpoint (vLLM) with greedy
      decoding, guided JSON (serve/schema.json) and token log-probabilities;
   3. validates the answer against the schema, resolves date expressions in code
-     (expression format) and canonicalises with the training-time function;
+     (expression format), re-dates events from the note's relative phrases with
+     the frozen rule in scribe/v3/resolve.py ("Gemma reads, code counts"; phrases
+     it cannot place on one day are flagged for a person) and canonicalises with
+     the training-time function;
   4. turns token log-probabilities into a confidence score;
   5. applies an auto-accept threshold. Without a calibrated threshold nothing is
      auto-accepted.
@@ -43,6 +46,11 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 DEFAULT_PROMPTS = ROOT / "scribe" / "prompts.py"
 SCHEMA_PATH = HERE / "schema.json"
+DATE_RESOLVER_PATH = ROOT / "scribe" / "v3" / "resolve.py"
+RELATIVE_DATE_ARMS = ("A", "A'", "off")
+# Chosen by the rule frozen in data/scribe/v4/resolver/freeze.json and applied on
+# validation notes only (data/scribe/v4/resolver/reproduce-v1.json).
+DEFAULT_RELATIVE_DATES = "A'"
 
 DEFAULT_MODEL = "pathway-scribe"
 FORMATS = ("absolute", "expression")
@@ -120,6 +128,46 @@ def load_prompts(path=DEFAULT_PROMPTS):
         del sys.modules[name]
         raise
     return module
+
+
+def load_date_resolver(path=DATE_RESOLVER_PATH):
+    """Import the relative-date resolver (scribe/v3/resolve.py, standard library only)."""
+    path = pathlib.Path(path).resolve()
+    if not path.is_file():
+        raise ScribeError(f"date resolver not found: {path}")
+    name = "sama_scribe_resolve_" + hashlib.sha256(str(path).encode()).hexdigest()[:12]
+    if name in sys.modules:
+        return sys.modules[name]
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        del sys.modules[name]
+        raise
+    return module
+
+
+def apply_relative_dates(absolute, note_text, note_date, arm, resolver=None):
+    """Re-date events from the note's relative phrases (scribe/v3/resolve.py).
+
+    Returns (absolute with events in the same order, report). The report lists
+    every changed event and every phrase a person must date. arm "off" or no
+    note text returns the input unchanged and report None.
+    """
+    if not arm or arm == "off" or note_text is None:
+        return absolute, None
+    module = resolver or load_date_resolver()
+    events, changes = module.resolve_events(absolute["events"], note_text, note_date, arm)
+    needs = module.needs_person_spans(note_text, arm)
+    report = {
+        "rule": module.RULE,
+        "arm": arm,
+        "changes": changes,
+        "needs_person": [{"phrase": s["phrase"], "start": s["start"], "end": s["end"]} for s in needs],
+    }
+    return dict(absolute, events=events), report
 
 
 # What a prompt module may provide, by role. The expression names are the ones
@@ -367,18 +415,24 @@ def resolve_object(obj, note_date):
     return {"entry_route": obj["entry_route"], "events": events}
 
 
-def decode_output(content, fmt, note_date, canonicalise, schema, max_lookback_days=1826, resolver=None):
+def decode_output(content, fmt, note_date, canonicalise, schema, max_lookback_days=1826, resolver=None,
+                  note_text=None, relative_dates="off", date_resolver=None):
     """Parse, validate, resolve and canonicalise one model answer.
 
     resolver(obj, note_date) turns an expression-format answer into the absolute
     form; the default is resolve_object above. A training-side resolver (for
     example scribe/v2/data_tools.py) can be passed instead.
 
+    relative_dates ("A", "A'" or "off") applies scribe/v3/resolve.py after schema
+    validation: events whose date is not written in note_text are re-dated from
+    the note's relative phrases. Phrases it cannot place on one day add the flag
+    relative_date_needs_person. Off when note_text is None.
+
     Returns {"canonical": dict or None, "raw_object": ..., "errors": [...],
-    "flags": [...]}. errors mean the answer is unusable; flags mean it parsed
-    but must not be auto-accepted.
+    "flags": [...], "date_resolution": report or None}. errors mean the answer is
+    unusable; flags mean it parsed but must not be auto-accepted.
     """
-    out = {"canonical": None, "raw_object": None, "errors": [], "flags": []}
+    out = {"canonical": None, "raw_object": None, "errors": [], "flags": [], "date_resolution": None}
     try:
         obj = json.loads(strip_fences(content))
     except (ValueError, TypeError) as exc:
@@ -396,13 +450,31 @@ def decode_output(content, fmt, note_date, canonicalise, schema, max_lookback_da
         except (ValueError, KeyError, TypeError, AttributeError, IndexError) as exc:
             out["errors"].append(f"unresolved_expression: {exc}")
             return out
+    # The model's own dates keep their warnings even when the resolver re-dates them:
+    # a person should see that the model proposed a future or too old date.
+    note = _as_date(note_date)
+    for event in absolute.get("events") or []:
+        try:
+            day = datetime.date.fromisoformat(event["date"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if day > note:
+            out["flags"].append("event_after_note_date")
+        if (note - day).days > max_lookback_days:
+            out["flags"].append("event_older_than_lookback")
+    try:
+        absolute, out["date_resolution"] = apply_relative_dates(absolute, note_text, note_date, relative_dates, date_resolver)
+    except (ValueError, KeyError, TypeError, AttributeError, IndexError) as exc:
+        out["flags"].append("relative_date_resolver_failed")
+        out["date_resolution"] = {"error": f"{type(exc).__name__}: {exc}"}
+    if out["date_resolution"] and out["date_resolution"].get("needs_person"):
+        out["flags"].append("relative_date_needs_person")
     try:
         canonical = canonicalise(absolute)
     except (ValueError, KeyError, TypeError) as exc:
         out["errors"].append(f"not_canonical: {exc}")
         return out
     out["canonical"] = canonical
-    note = _as_date(note_date)
     seen = set()
     for event in canonical["events"]:
         day = datetime.date.fromisoformat(event["date"])
@@ -681,6 +753,7 @@ class ScribeClient:
         strict_prompt_check=True,
         max_lookback_days=1826,
         sleep=time.sleep,
+        relative_dates=DEFAULT_RELATIVE_DATES,
     ):
         if not base_url:
             raise ScribeError("base_url is required")
@@ -690,6 +763,13 @@ class ScribeClient:
             raise ScribeError(f"confidence_kind must be one of {CONFIDENCE_KINDS}")
         if threshold is not None and not 0.0 <= threshold <= 1.0:
             raise ScribeError("threshold must be within [0, 1]")
+        if relative_dates not in RELATIVE_DATE_ARMS:
+            raise ScribeError(f"relative_dates must be one of {RELATIVE_DATE_ARMS}")
+        self.relative_dates = relative_dates
+        self.date_resolver = load_date_resolver() if relative_dates != "off" else None
+        self.date_resolver_source = (
+            f"scribe/v3/resolve.py:{self.date_resolver.RULE} arm {relative_dates}" if self.date_resolver else None
+        )
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
@@ -848,7 +928,9 @@ class ScribeClient:
             "attempts": None,
             "usage": None,
             "settings": dict(self.calibration_key(), prompts=self.prompts_path, messages=self.messages_name,
-                             schema=self.schema_source, resolver=self.resolver_source if self.fmt == "expression" else None),
+                             schema=self.schema_source, resolver=self.resolver_source if self.fmt == "expression" else None,
+                             relative_dates=self.date_resolver_source),
+            "date_resolution": None,
             "synthetic": bool(synthetic),
         }
         called = self.call(self.build_request(row))
@@ -883,11 +965,16 @@ class ScribeClient:
             self.schema,
             self.max_lookback_days,
             self.resolver,
+            note_text=row.get("note_text"),
+            relative_dates=self.relative_dates,
+            date_resolver=self.date_resolver,
         )
+        result["date_resolution"] = decoded["date_resolution"]
         confidence = confidence_from_logprobs(content, (choice.get("logprobs") or {}).get("content"))
         if confidence and decoded["canonical"] and confidence["event_probs_output_order"] is not None:
             confidence["event_probs"] = _reorder_event_scores(
-                decoded, self.fmt, row["note_date"], confidence["event_probs_output_order"], self.resolver
+                decoded, self.fmt, row["note_date"], confidence["event_probs_output_order"], self.resolver,
+                row.get("note_text"), self.relative_dates, self.date_resolver,
             )
         decision, reasons, score = route_decision(
             decoded, confidence, result["finish_reason"], self.threshold, self.confidence_kind, episode_id
@@ -904,14 +991,19 @@ class ScribeClient:
         return result
 
 
-def _reorder_event_scores(decoded, fmt, note_date, scores, resolver=None):
+def _reorder_event_scores(decoded, fmt, note_date, scores, resolver=None, note_text=None, relative_dates="off",
+                          date_resolver=None):
     """Map per-event scores from output order to canonical order (date, then type).
 
-    Best effort: returns None when the answer's events cannot be matched one to one.
+    The relative-date rule is applied exactly as in decode_output, so a re-dated
+    event keeps its own score. Best effort: returns None when the answer's events
+    cannot be matched one to one.
     """
     try:
         raw = decoded["raw_object"]
         absolute = raw if fmt != "expression" else (resolver or resolve_object)(raw, note_date)
+        if decoded.get("date_resolution") and "error" not in decoded["date_resolution"]:
+            absolute, _ = apply_relative_dates(absolute, note_text, note_date, relative_dates, date_resolver)
         events = absolute["events"]
         if len(events) != len(scores) or len(events) != len(decoded["canonical"]["events"]):
             return None
@@ -987,6 +1079,8 @@ def add_endpoint_arguments(parser):
     parser.add_argument("--timeout", type=float, default=300.0)
     parser.add_argument("--retries", type=int, default=4)
     parser.add_argument("--concurrency", type=int, default=4)
+    parser.add_argument("--relative-dates", choices=RELATIVE_DATE_ARMS, default=DEFAULT_RELATIVE_DATES,
+                        help="re-date events from the note's relative phrases (scribe/v3/resolve.py arm); 'off' disables")
 
 
 def client_from_arguments(args):
@@ -1007,6 +1101,7 @@ def client_from_arguments(args):
         timeout=args.timeout,
         retries=args.retries,
         strict_prompt_check=not args.no_prompt_check,
+        relative_dates=getattr(args, "relative_dates", DEFAULT_RELATIVE_DATES),
     )
     if args.threshold_file:
         client.threshold, _ = load_threshold(args.threshold_file, client.calibration_key())

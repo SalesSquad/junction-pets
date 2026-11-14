@@ -1,12 +1,85 @@
 # SAMA: Care Equity Navigator
 
 **Junction 2026, AstraZeneca challenge M344 "Equal Care Across Finland".** *Sama* is Finnish for
-"the same": the same cancer pathway for everyone, wherever they live and however they enter care.
+"the same": the same cancer pathway for everyone, wherever they live, whoever they are, however they
+enter care.
+
+## The story
+
+**Where you live is not the main cancer gap in Finland. Who you are and how you enter care is.** No
+significant regional difference in five-year survival was found, but there is one by education, and
+one by the door a patient comes in through. Finland has a target nobody can check: the OECD/EU
+reports six weeks from a suspected-cancer referral to treatment, the treatment guarantee in law
+allows up to six months, and no county publishes the time for any cancer. SAMA is the missing
+measurement and action layer:
+
+1. **See who, how and where** on public data (the panel right after the map).
+2. **Measure it only where it can be seen.** A county computes its own referral-to-treatment clock
+   where its data live (NVIDIA FLARE, on SYNTHETIC data), and it is compared only when it can see
+   itself.
+3. **Close loops, don't count them.** The same clock becomes a nurse's daily list of people whose
+   next step is overdue. A nurse confirms every item; SAMA never decides what follow-up is due.
+4. **Pilot: Satakunta, lung follow-up first**, chosen on process grounds, inside the national cancer
+   roadmap. The county owns the list and the care; no patient data leaves the county.
+
+Everything patient-like in SAMA is SYNTHETIC and labelled so on the page.
+
+## The finding: who and how, not only where
+
+| Finding | Value | Source |
+| --- | --- | --- |
+| Five-year relative survival by education (individual level) | lower 64% (men) and 65% (women) vs higher 77% and 78%; no significant regional difference | OECD/EU Country Cancer Profile Finland 2025, p. 20 (evidence row `oecd-2025-survival-education`) |
+| Screening participation by education and mother tongue | breast 66% vs 85% by education, 63% vs 82% by mother tongue (2020-21); cervical 51% vs 78% and 57% vs 73% | same profile (rows `oecd-2025-*-screening-*`) |
+| Symptom to treatment by entry route | median 127 vs 76 days, public primary-care appointment vs private or occupational care, 48 vs 39 patients, p = 0.027, one Finnish DLBCL cohort | Kuitunen J et al. 2026 (row `kuitunen-2026-route-medians`) |
+| County education gradients (ecological) | all 10 slope intervals include zero | `web/data/app.json` `analysis.gradients` |
+| Lowest breast-screening attendance, 2024 | the five lowest areas are all in Uusimaa: Helsinki 74.3%, West Uusimaa 76.1%, Vantaa-Kerava 76.7%, East Uusimaa 79.8%, Central Uusimaa 80.5% | `web/data/app.json` `analysis.indicators.screen_breast` |
+
+County averages cannot show who is missed. Programme attendance is lowest in the capital region:
+the OECD/EU profile says Helsinki's low participation is likely because screening outside the
+programme is more frequent there, and Vantaa-Kerava, Helsinki and West Uusimaa have the highest
+foreign-background shares in the snapshot (288.9, 216.1 and 199.8 per 1,000 inhabitants, 2025,
+`analysis.indicators.foreign_background`). A county league table therefore measures recording and
+population mix as much as access. The page labels the county gradients
+ECOLOGICAL and puts the published individual-level figures beside them, then the actions that
+already target the gap (roadmap measure 1.3.1, mailed HPV self-sampling).
+
+## The two new panels (section 05 of the page, all SYNTHETIC)
+
+**Close the loop: the county safety-net worklist** (`data/safetynet/safetynet-v1.json`, built by
+`safetynet/build.py`, rendered by `web/safetynet.mjs`). A frozen code rule (`forward-v1`) copies the
+follow-up date a radiologist wrote; ranges and vague phrases go to a person. On 60 SYNTHETIC report
+lines it got 60 of 60 right; on 5,002 more lines rendered from the same templates with new seeds it
+made 0 wrong or invented dates and missed 0 recommendations, and sent 40 dated lines to a person
+instead. The rule and its test lines come from the same step, so this covers its own templates, not
+real reports. Satakunta, replayed as of 2025-12-01: 120 open loops, 16 overdue; 305 of 375
+referrals had a diagnosis by day 42 (a placeholder). Counts come first, then at most three unnamed
+SYNTHETIC rows. The list follows the county selected on the page; Satakunta is the proposed pilot.
+
+**Measure it only where it can be seen: the comparability gate** (`data/flare/gate-v1.json`, built
+by `flare/build_gate.py`, rendered by `web/flare.mjs`). NVIDIA FLARE 2.9.1 ran on 23 simulated county
+sites on this Mac; only filtered totals left each site, and FLARE equals the plain-Python central
+table in 253 of 253 cells (tolerance 1e-6). Nationally 11,510 of 19,581 SYNTHETIC pathways (58.8%)
+started treatment within 42 days of the referral being sent; 42 days is a placeholder for the
+OECD/EU-reported target. If a county's dates were read from notes by the raw Gemma scribe, 15 of 23
+counties would be "not comparable"; with the code date resolver, 1 of 23. Differences between
+counties within one arm are sampling noise on 30-31 notes per county, not county effects. Beside it,
+one MEASURED chip on public data asks "Can this area see its cancer stage?": stage is recorded for
+42% of cancers in the whole country, 72% in Pirkanmaa, 60% in the Sisä-Suomi area and 33-42% in the
+other areas, against an aim of at least 70% (Syöpäjärjestöt, 17 Jun 2026, as stored in the gate
+file).
+
+Both panels are bundled into `web/data/app.json` (`safetyNet`, `flareGate`) by `src/tracks.mjs`
+with the same rules as the other tracks: a missing file leaves the panel out with the reason in
+`app.trackProblems`, and a file without a field the panel reads fails the build.
+
+## What SAMA does on public data
 
 SAMA answers the three questions of the brief on real public data, with a source for every number:
 
-1. **Identify the gap.** 23 wellbeing services counties, 20 open indicators, cancer deaths by site
-   2021-2025, and Nordic survival benchmarks.
+1. **Identify the gap.** 23 areas (Finland's 21 wellbeing services counties, the City of Helsinki,
+   which organises its own services, and Åland), 20 open indicators, cancer deaths by site 2021-2025,
+   Nordic survival benchmarks, and the published individual-level gaps by education, mother tongue
+   and entry route. National measures and the 2026 law are not claimed for Åland.
 2. **Locate it on the pathway.** Detection, primary care, referral, diagnosis, treatment start,
    outcome. Where public data cannot see a stage, the tool says so and treats that as a finding.
 3. **Recommend what to do.** Eight evidence-bound actions with owner, mechanism, cost assumption,
@@ -24,10 +97,14 @@ causal claim about a county.
 | Cancer deaths per year, 2021-2025 mean | 13,289; strategy target 11,960 (minus 10%) | Statistics Finland |
 | Same age-specific death rates on the 2035 population | 15,798 deaths a year | Statistics Finland projection |
 | Colorectal screening below the 80% target | 22 of 22 counties with data | THL Sotkanet |
-| Cervical screening below the 80% target | 20 of 23 counties | THL Sotkanet |
+| Cervical screening below the 80% target | 20 of 23 areas | THL Sotkanet |
 | Highest age-standardised cancer mortality | Satakunta 1.10 and Kymenlaakso 1.10 times the national level, about 59 and 46 more deaths a year | Statistics Finland |
-| Lung cancer mortality, Lapland | 1.24 times the national level | Statistics Finland |
-| Symptom to treatment, public vs private or occupational route | mean 207 vs 123 days in a Finnish DLBCL cohort | Kuitunen et al. 2026 |
+| Lung cancer mortality (larynx, trachea and lung, C32-C34), Lapland | 1.24 times the national level | Statistics Finland |
+| Symptom to treatment, public primary-care appointment vs private or occupational care | median 127 vs 76 days, 48 vs 39 patients, p = 0.027, one Finnish DLBCL cohort | Kuitunen J et al. 2026, p. 4 |
+| Five-year relative survival by education (individual level) | lower 64% (men) and 65% (women) vs higher 77% and 78%; no significant regional difference | OECD/EU Country Cancer Profile Finland 2025, p. 20 |
+| Screening participation by education and mother tongue | breast 66% vs 85% by education, 63% vs 82% by mother tongue (2020-21); cervical 51% vs 78% and 57% vs 73% | same profile, p. 15 |
+| County education gradients (ecological) | all 10 slope intervals include zero; the five lowest breast-screening areas are all in Uusimaa | `web/data/app.json` `analysis.gradients` |
+| Target from suspected-cancer referral to treatment | six weeks as reported by the OECD/EU (p. 19); the treatment guarantee in law allows up to six months for non-urgent specialised care and names no cancer-specific limit | OECD/EU 2025; STM hoitotakuu, updated 29 Oct 2026 |
 | Time from referral to treatment, by county | not published for any cancer | (data gap) |
 
 Goal 3 of the National Cancer Strategy 2026-2035 ("Ensuring equal and effective cancer care") is
@@ -36,11 +113,33 @@ mortality minus 10%, and treatment within target times. The third cannot be comp
 data, which is why the first recommended action is to record four pathway timestamps nationally.
 
 All figures in this table are in `web/data/app.json` (built from `data/snapshot/public-v1.json` and
-`data/evidence/literature-v1.json`).
+`data/evidence/literature-v1.json`; every external figure is a verified evidence row with the page it
+was read from).
+
+## The page, in order
+
+1. **The gap** (map) and **who, how and where**: county education gradients labelled ECOLOGICAL
+   with their intervals, beside the published individual-level figures and the route medians.
+2. **The county pathway** and **Goal 3**. A flag that the latest year does not confirm is shown as a
+   possible signal (Satakunta's referral indicator, a whole-percent value equal to the national one
+   in 2025).
+3. **What to do**: the headline is a process metric (share treated within the placeholder threshold;
+   share of overdue referrals followed up on time), then the Satakunta pilot card, then the
+   portfolio model, labelled as an upper-bound SCENARIO. Every action names its roadmap measure id
+   (`src/roadmap.mjs`). After the pilot card: the safety-net worklist (`#safety-net`, follows the
+   selected county) and the FLARE comparability gate (`#comparability-gate`), both SYNTHETIC.
+4. **County plan draft**: the stored Nemotron 3.5 Super VL drafts (`data/planner/plans-v1.json`),
+   labelled "Draft for a planner, drafted by Nemotron 3.5 Super VL; numbers checked"; draft input on
+   public data, not an assessment.
+5. **Analyst brief**, then the two SYNTHETIC tracks; the scribe section opens with the Gemma demo
+   (`POST /api/scribe`; the stored CPU outputs in `data/scribe/demo/` are shown first and used when
+   the route is unavailable).
+6. The Evo 2 benchmark is not on this page: it is a separate research appendix (`/research.html`).
 
 ## Supporting tracks (below the product, never feeding it)
 
-Three studies sit under the product on the same page. None of them changes a county figure, a
+Two SYNTHETIC studies sit under the product on the same page, and one RESEARCH benchmark sits on a
+separate appendix page (`web/research.html`). None of them changes a county figure, a
 recommendation or the brief (`tests/tracks.test.mjs` checks this). Each is labelled on the page and
 in `app.json` as `SYNTHETIC` or `RESEARCH` and names the JSON file every figure is copied from.
 `src/build.mjs` fails if a cited file lacks a field it needs, and leaves a part out, with the reason
@@ -82,14 +181,14 @@ person confirms each one. Every note was written by a language model.
   and the Jev gate accepted 1,506 of 1,589. On planted errors the Jev rule caught 66/80 and rejected
   0/80 clean notes (its question set was designed after earlier results were seen); OpenAI Decisions
   caught 58/80 and rejected 11/80. A Haiku audit found 2/160 wrong labels among sampled accepted
-  notes. Cascade at a 5% target on 700 test notes: the student's own confidence let 270 notes skip
-  review with 28 of them wrong (10.4%, above the target); the Jev score let 263 skip with 7 wrong
-  (2.7%). More notes skipping review: no, within noise. Lower error among them: outside
-  test-sampling noise, but within noise once the thresholds are re-chosen on resampled validation
-  notes.
+  notes. Cascade experiment at a 5% target on 700 test notes (on the page a person still confirms
+  every note): the student's own confidence would have accepted 270 notes with 28 of them wrong
+  (10.4%, above the target); the Jev score 263 with 7 wrong (2.7%). More notes accepted: no, within
+  noise. Lower error among them: outside test-sampling noise, but within noise once the thresholds
+  are re-chosen on resampled validation notes.
 - Version 1 (laptop fallback, Gemma 3 1B on MLX) stays on the page as history, marked superseded.
 
-**3. Same variant, same answer? Evo 2 on BRCA1** (RESEARCH; `data/genomics/brca1-evo2-v1.json`,
+**3. Research appendix, separate page: Evo 2 on BRCA1** (RESEARCH; `data/genomics/brca1-evo2-v1.json`,
 `genomics/README.md`). The open Evo 2 7B model scored 2,150 of 3,893 single-letter BRCA1 changes (a
 partial run, 4,096 bp window instead of the published 8,192) against the laboratory assay of
 Findlay et al. 2018. Headline, missense variants only: the strongest evidence level reached is
@@ -97,12 +196,12 @@ Findlay et al. 2018. Headline, missense variants only: the strongest evidence le
 2018 and the Pejaver 2022 thresholds; missense AUROC 0.709 (0.658 to 0.759); Evo 2 minus CADD on the
 same variants -0.048 (-0.103 to 0.004). Over all types of change the AUROC is 0.822 (0.790 to 0.855)
 and the level "moderate", for reference only. Research use only; nothing here classifies a variant
-or decides eligibility for any treatment.
+or informs any clinical choice.
 
 ## Run it
 
 ```bash
-npm test            # 72 tests: statistics, real-data analysis, optimiser, evidence binding, guardrails, supporting tracks
+npm test            # 113 tests: statistics, real-data analysis, optimiser, evidence binding, guardrails, roadmap, planner, page panels, safety net and gate, supporting tracks
 npm run data        # refetch the public snapshot (THL Sotkanet, Statistics Finland, NORDCAN)
 npm run build       # analysis + recommendations + supporting tracks -> web/data/app.json
 npm start           # http://127.0.0.1:4179
@@ -142,7 +241,12 @@ needs the Python environments, services and GPU described in `DATA_COLLECTION.md
   winner per indicator: a baseline for 6 of 8. For yearly indicators the limit is the data.
 - `src/tracks.mjs`, `web/tracks.mjs`: the three supporting tracks, copied from their result files
   with a source and a label for every figure. A test fails if a figure on those sections is typed
-  into the code instead of read from data.
+  into the code instead of read from data. `src/tracks.mjs` also bundles the safety-net worklist
+  and the comparability gate; `web/safetynet.mjs` and `web/flare.mjs` render them
+  (`tests/ship-panels.test.mjs`; `tests/flare-panel.test.mjs` runs the FLARE lane's own panel tests).
+- `safetynet/` (Python standard library, pyarrow, and `eventlog/schema.py` read only): the frozen follow-up rule, the SYNTHETIC
+  report lines and the worklist join. `flare/`: the NVIDIA FLARE job, its site partitions and the
+  gate. Rebuild commands are in `data/safetynet/SCHEMA.md` and `flare/README.md`.
 - `web/`: static demo with a self-only content security policy. The main product comes first; the
   supporting tracks follow it.
 
@@ -154,13 +258,23 @@ and [runs/RUNLOG.md](runs/RUNLOG.md) for one line per run.
 
 - A county difference is a measured difference between populations, not proof of worse care and
   not a statement about any patient.
-- "Deaths postponed" is a scenario under stated assumptions. Its honest lower bound is zero.
-- The route gap comes from one Finnish cohort of one cancer (n=160) and is used as a prior.
+- "Deaths postponed" is an upper-bound scenario under stated assumptions, shown below the process
+  headline. Its honest lower bound is zero.
+- The route gap comes from one Finnish cohort of one cancer (87 patients in the two route groups) and
+  is used as a prior. The model's 84-day central value is read from Figure 1 of the paper (means 207 vs 123 days); the paper's text gives means of 201 vs 126 and medians of 127 vs 76.
 - Costs are placeholders for planning, not prices.
+- The safety-net rule was measured on SYNTHETIC lines from its own templates, not on real radiology
+  reports. A nurse confirms every worklist item; SAMA never decides what follow-up is due. Whether
+  the 1 June 2026 law covers the timing of pathway steps is not confirmed.
+- The FLARE run is a simulation: 23 sites on one Mac reading partitions of one folder, no network or
+  site approval. FLARE is not a legal permit, and aggregates still need a disclosure policy.
+- Every 42-day threshold is a placeholder for the OECD/EU-reported six-week target; Finnish law names
+  no cancer-specific limit.
 - Nothing from simulated people or model-written notes is a finding about Finnish patients, and no
   scribe result shows that the method works on real clinical text. Judges and auditors are models;
   their agreement is not ground truth.
-- The genomics benchmark is research only: no variant classification, no treatment eligibility.
+- The genomics benchmark is research only and sits on a separate appendix page: no variant
+  classification, no clinical use.
 - AstraZeneca sponsors the challenge. No AstraZeneca data or product information is used, and no
   medicine is recommended.
 

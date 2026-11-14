@@ -305,6 +305,41 @@ class EventlogTests(unittest.TestCase):
             self.assertEqual(len(p['date_errors_days']),p['events_with_type_found'])
             self.assertGreater(p['wrong_date_share'],.1)                   # far above the assumed rates of the first extraction study
 
+    def test_interval_profiles_reproduce_the_diagnosis(self):
+        from eventlog import extraction_intervals as X
+        needed=[ROOT/X.PREDICTIONS,*[ROOT/x for x in X.LABELS],ROOT/X.DIAGNOSE,ROOT/X.RESOLVER,ROOT/X.FREEZE,*[ROOT/x for x in X.STORED.values()],ROOT/X.IMPACT]
+        if not all(x.exists() for x in needed): self.skipTest('scribe files not present')
+        measured,errors=X.measured_interval_profiles()   # raises if a recomputation differs from the stored lists of runs/diagnose/
+        P=measured['profiles']
+        self.assertEqual((P['off|all']['pairs'],P['off|all']['found']),(1131,1095))
+        self.assertEqual((round(P['off|all']['exact_interval'],4),round(P['A|all']['exact_interval'],4)),(.3744,.9909))
+        self.assertTrue(measured['checks']['product_default_arm_Aprime_equals_A_on_these_notes'])
+        self.assertTrue(all(measured['checks']['resolver_frozen'].values()))
+        for arm in ['off','A']:
+            self.assertEqual(P[f'{arm}|nemotron']['gold_events']+P[f'{arm}|haiku']['gold_events'],P[f'{arm}|all']['gold_events'])
+            self.assertEqual(P[f'{arm}|nemotron']['extra_events']+P[f'{arm}|haiku']['extra_events'],P[f'{arm}|all']['extra_events'])
+        for k,prof in P.items(): self.assertEqual(len(errors[k]),prof['found'])
+
+    def test_extra_events_make_intervals_underivable(self):
+        from eventlog.extraction_intervals import core_logs
+        t,_=latent(np.random.default_rng(21),(2000,))
+        err=np.array([0.]); prof=dict(keep=1.,extra_slot_probability=[0.]*9)
+        logs,_,spans=core_logs(np.random.default_rng(1),t,prof,err,extras=True)
+        np.testing.assert_array_equal(logs,log_days(spans))          # no error, no extra: the clean log-durations
+        prof['extra_slot_probability'][INDEX['FIRST_CONTACT']]=1.
+        logs,_,_=core_logs(np.random.default_rng(1),t,prof,err,extras=True)
+        self.assertTrue(np.isnan(logs[:,0]).all())                     # primary care starts at FIRST_CONTACT
+        self.assertTrue(np.isfinite(logs[:,1:]).all())
+
+    def test_derive_needs_one_start_and_one_end(self):
+        # The rule the extra-event model relies on: a second FIRST_CONTACT makes primary care underivable.
+        table,roster=simulate(national_cases=5,seed=11)
+        rows=table.to_pylist(); ep=roster[0]['episode_id']
+        first=next(r for r in rows if r['episode_id']==ep and r['event_type']=='FIRST_CONTACT')
+        derived={r['episode_id']:r for r in derive(events_table(rows+[dict(first,event_date=first['event_date']-timedelta(days=3))]),roster).to_pylist()}
+        self.assertIsNone(derived[ep]['days_primary_care'])
+        self.assertIsNotNone(derived[ep]['days_diagnostic'])
+
     def test_month_precision_single_county_null(self):
         rng=np.random.default_rng(18)
         ref,_=latent(rng,(400_000,));reference=moments(log_spans(np.rint(ref)))

@@ -1,0 +1,442 @@
+{
+ "schema": "scribe-v4-resolver-reproduce-v1",
+ "synthetic": true,
+ "created_utc": "2026-11-14T21:37:29Z",
+ "freeze": {
+  "file": "data/scribe/v4/resolver/freeze.json",
+  "frozen_at_utc": "2026-11-14T21:37:24Z",
+  "files": {
+   "scribe/v3/resolve.py": "0ca753f81bfc374579e67dedfcde5b7abf0715cc88db5ca76810e4de8b0f2ec8",
+   "scribe/v3/lexicon.py": "2cef63da47473e2825bdfef1100d50bb32c9b77b5c5613c4b8ea4b5e2db32260"
+  }
+ },
+ "rule": "scribe-v3-relative-resolver-v1",
+ "primary": {
+  "run": "C-270m-all-v2data",
+  "arm": "A",
+  "validation": {
+   "k": 289,
+   "n": 310,
+   "value": 0.9323,
+   "wilson95": [
+    0.8987,
+    0.9553
+   ],
+   "role": "selection result",
+   "before": {
+    "k": 134,
+    "n": 310,
+    "value": 0.4323,
+    "wilson95": [
+     0.3783,
+     0.4879
+    ]
+   }
+  },
+  "test": {
+   "k": 651,
+   "n": 700,
+   "value": 0.93,
+   "wilson95": [
+    0.9087,
+    0.9466
+   ],
+   "role": "already seen, post hoc",
+   "before": {
+    "k": 305,
+    "n": 700,
+    "value": 0.4357,
+    "wilson95": [
+     0.3994,
+     0.4727
+    ]
+   },
+   "by_writer": {
+    "nemotron": {
+     "k": 481,
+     "n": 500,
+     "value": 0.962,
+     "wilson95": [
+      0.9414,
+      0.9755
+     ]
+    },
+    "haiku": {
+     "k": 170,
+     "n": 200,
+     "value": 0.85,
+     "wilson95": [
+      0.7939,
+      0.8929
+     ]
+    }
+   }
+  },
+  "expected": {
+   "validation": [
+    289,
+    310
+   ],
+   "test": [
+    651,
+    700
+   ]
+  },
+  "reproduced_exactly": true
+ },
+ "notes_made_worse_arm_A_all_runs": 0,
+ "port_identical_to_diagnose_rule": {
+  "notes_compared": 5050,
+  "mismatches": 0
+ },
+ "all_runs_match_resolve_relative_v1": true,
+ "arm_Aprime": {
+  "lexicon": "fi-relative-lexicon-v1",
+  "selection_rule": "Product default arm: A' only if, on the 310 SYNTHETIC validation notes of C-270m-all-v2data (stored predictions), A' exact match >= arm A exact match AND A' makes 0 notes worse than arm A; otherwise arm A. Test notes are not used for this choice (they were already seen; test numbers are post hoc).",
+  "validation_primary": {
+   "A": {
+    "k": 289,
+    "n": 310,
+    "value": 0.9323,
+    "wilson95": [
+     0.8987,
+     0.9553
+    ]
+   },
+   "Aprime": {
+    "k": 289,
+    "n": 310,
+    "value": 0.9323,
+    "wilson95": [
+     0.8987,
+     0.9553
+    ]
+   },
+   "Aprime_better_than_A": 0,
+   "Aprime_worse_than_A": 0,
+   "Aprime_differs_from_A": 0
+  },
+  "product_default_arm": "A'",
+  "notes_made_worse_vs_student_all_runs": 0,
+  "lexicon_firing_on_note_texts": {
+   "val": {
+    "notes": 310,
+    "with_lexicon_resolved_phrase": 0,
+    "with_phrase_for_a_person": 0
+   },
+   "test_nemotron": {
+    "notes": 500,
+    "with_lexicon_resolved_phrase": 0,
+    "with_phrase_for_a_person": 0
+   },
+   "test_haiku": {
+    "notes": 200,
+    "with_lexicon_resolved_phrase": 0,
+    "with_phrase_for_a_person": 0
+   }
+  },
+  "caveat": "The generator (scribe/sample.py) writes relative dates with digits only, so the lexicon fires only where a model writer paraphrased a phrase. Its real test is the frozen stress set (step 5)."
+ },
+ "runs": {
+  "v2-selected": {
+   "val": {
+    "n": 310,
+    "before": 112,
+    "A": 251,
+    "Aprime": 251,
+    "A_helped": 139,
+    "A_hurt": 0,
+    "Aprime_helped": 139,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 310
+   },
+   "test_nemotron": {
+    "n": 500,
+    "before": 210,
+    "A": 477,
+    "Aprime": 477,
+    "A_helped": 267,
+    "A_hurt": 0,
+    "Aprime_helped": 267,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 500
+   },
+   "test_haiku": {
+    "n": 200,
+    "before": 26,
+    "A": 45,
+    "Aprime": 45,
+    "A_helped": 19,
+    "A_hurt": 0,
+    "Aprime_helped": 19,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 200
+   },
+   "test_pooled": {
+    "n": 700,
+    "before": 236,
+    "A": 522,
+    "Aprime": 522,
+    "A_helped": 286,
+    "A_hurt": 0,
+    "Aprime_helped": 286,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 700
+   },
+   "matches_diagnose_v1": true
+  },
+  "V3-270m-nemotron": {
+   "val": {
+    "n": 310,
+    "before": 124,
+    "A": 269,
+    "Aprime": 269,
+    "A_helped": 145,
+    "A_hurt": 0,
+    "Aprime_helped": 145,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 310
+   },
+   "test_nemotron": {
+    "n": 500,
+    "before": 209,
+    "A": 471,
+    "Aprime": 471,
+    "A_helped": 262,
+    "A_hurt": 0,
+    "Aprime_helped": 262,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 500
+   },
+   "test_haiku": {
+    "n": 200,
+    "before": 58,
+    "A": 93,
+    "Aprime": 93,
+    "A_helped": 35,
+    "A_hurt": 0,
+    "Aprime_helped": 35,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 200
+   },
+   "test_pooled": {
+    "n": 700,
+    "before": 267,
+    "A": 564,
+    "Aprime": 564,
+    "A_helped": 297,
+    "A_hurt": 0,
+    "Aprime_helped": 297,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 700
+   },
+   "matches_diagnose_v1": true
+  },
+  "V3-270m-all": {
+   "val": {
+    "n": 310,
+    "before": 125,
+    "A": 277,
+    "Aprime": 277,
+    "A_helped": 152,
+    "A_hurt": 0,
+    "Aprime_helped": 152,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 310
+   },
+   "test_nemotron": {
+    "n": 500,
+    "before": 197,
+    "A": 465,
+    "Aprime": 465,
+    "A_helped": 268,
+    "A_hurt": 0,
+    "Aprime_helped": 268,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 500
+   },
+   "test_haiku": {
+    "n": 200,
+    "before": 80,
+    "A": 148,
+    "Aprime": 148,
+    "A_helped": 68,
+    "A_hurt": 0,
+    "Aprime_helped": 68,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 200
+   },
+   "test_pooled": {
+    "n": 700,
+    "before": 277,
+    "A": 613,
+    "Aprime": 613,
+    "A_helped": 336,
+    "A_hurt": 0,
+    "Aprime_helped": 336,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 700
+   },
+   "matches_diagnose_v1": true
+  },
+  "C-270m-all-v2data": {
+   "val": {
+    "n": 310,
+    "before": 134,
+    "A": 289,
+    "Aprime": 289,
+    "A_helped": 155,
+    "A_hurt": 0,
+    "Aprime_helped": 155,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 310
+   },
+   "test_nemotron": {
+    "n": 500,
+    "before": 210,
+    "A": 481,
+    "Aprime": 481,
+    "A_helped": 271,
+    "A_hurt": 0,
+    "Aprime_helped": 271,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 500
+   },
+   "test_haiku": {
+    "n": 200,
+    "before": 95,
+    "A": 170,
+    "Aprime": 170,
+    "A_helped": 75,
+    "A_hurt": 0,
+    "Aprime_helped": 75,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 200
+   },
+   "test_pooled": {
+    "n": 700,
+    "before": 305,
+    "A": 651,
+    "Aprime": 651,
+    "A_helped": 346,
+    "A_hurt": 0,
+    "Aprime_helped": 346,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 700
+   },
+   "matches_diagnose_v1": true
+  },
+  "S-1b-lora-r16": {
+   "val": {
+    "n": 310,
+    "before": 125,
+    "A": 274,
+    "Aprime": 274,
+    "A_helped": 149,
+    "A_hurt": 0,
+    "Aprime_helped": 149,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 310
+   },
+   "test_nemotron": {
+    "n": 500,
+    "before": 216,
+    "A": 487,
+    "Aprime": 487,
+    "A_helped": 271,
+    "A_hurt": 0,
+    "Aprime_helped": 271,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 500
+   },
+   "test_haiku": {
+    "n": 200,
+    "before": 54,
+    "A": 99,
+    "Aprime": 99,
+    "A_helped": 45,
+    "A_hurt": 0,
+    "Aprime_helped": 45,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 200
+   },
+   "test_pooled": {
+    "n": 700,
+    "before": 270,
+    "A": 586,
+    "Aprime": 586,
+    "A_helped": 316,
+    "A_hurt": 0,
+    "Aprime_helped": 316,
+    "Aprime_hurt": 0,
+    "Aprime_better_than_A": 0,
+    "Aprime_worse_than_A": 0,
+    "Aprime_differs_from_A": 0,
+    "port_equal": 700
+   },
+   "matches_diagnose_v1": true
+  }
+ },
+ "caveats": [
+  "SYNTHETIC notes and model-written labels; exact match of the whole answer.",
+  "Validation is the selection result. Test notes were read several times before: test numbers are post hoc.",
+  "A person confirms every extracted event; the resolver output is pre-filled for one-click confirmation or needs editing."
+ ]
+}

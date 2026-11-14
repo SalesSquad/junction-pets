@@ -1,5 +1,73 @@
 # Progress
 
+## Ship wave 23:00-02:00 UTC (14-15 November 2026)
+
+Written 23:20 UTC by the ship-integrate step (Lane C; log `runs/ship-integrate.jsonl`). Nothing was
+committed or pushed. No model, MLX or torch process was started by this step.
+
+**On the page now, in order** (`web/index.html`; section order is pinned by `tests/tracks.test.mjs`):
+
+| Section | Panel | Data | Added by |
+| --- | --- | --- | --- |
+| 01 | Map and ranking (real data) | `web/data/app.json` `analysis` | earlier |
+| 02 | Who, how and where: ECOLOGICAL county gradients beside the published individual-level figures and the route medians | `analysis.gradients`, evidence rows in `data/evidence/literature-v1.json` | ship-page, 23:02 |
+| 05 | Process headline, Satakunta pilot card | `app.json` `roadmap` | ship-page, 23:02 |
+| 05 `#safety-net` | **Close the loop: county safety-net worklist** (SYNTHETIC; follows the selected county, Satakunta is the pilot) | `app.json` `safetyNet`, bundled from `data/safetynet/safetynet-v1.json` | mounted by this step |
+| 05 `#comparability-gate` | **Measure it only where it can be seen: FLARE comparability gate** (SYNTHETIC clock and gate; MEASURED public stage chip) | `app.json` `flareGate`, bundled from `data/flare/gate-v1.json` | mounted by this step |
+| 06 | Nemotron county plan draft | `data/planner/plans-v1.json` (fetched) | ship-page, 23:02 |
+| 09 | Gemma scribe demo (stored output first; "Run live" calls `POST /api/scribe`) | `data/scribe/demo/` | ship-page, 23:02 |
+| footer | Evo 2 benchmark moved to `/research.html` | `data/genomics/brca1-evo2-v1.json` | ship-page, 23:02 |
+
+**What this step changed.**
+- `src/tracks.mjs`: `buildSafetyNet` and `buildFlareGate` with the same rules as the other tracks: an
+  absent file leaves the panel out with the reason in `app.trackProblems`; a file without a field its
+  panel reads fails the build. Extra guards: both files must be marked SYNTHETIC, at most three
+  example rows per county, every numeric worklist threshold labelled PLACEHOLDER, the 42-day clock
+  labelled a placeholder, every county an area of the public snapshot.
+- `web/app.mjs` imports `web/safetynet.mjs` and `web/flare.mjs` (both unchanged, owned by their lanes)
+  and fills the two mount points from `app.json`; a missing bundle or a failed render shows its reason.
+- `web/index.html`: two nav links ("Close the loop", "Comparability gate"), section 05 intro.
+  `web/styles.css`: panel layout. `src/build.mjs`: build summary names both panels.
+- Tests: `tests/ship-panels.test.mjs` (7 tests) and `tests/flare-panel.test.mjs` (runs the FLARE lane's
+  5 panel tests inside `npm test`); the stale-`app.json` check now covers both bundles.
+
+**Checks run.** `node src/build.mjs`: 23 regions, 36 evidence rows, `safetyNet` and `flareGate`
+present, `trackProblems` empty. `npm test`: 113 of 113 pass (101 before this step). `node --check`: 9
+web modules and `src/build.mjs`, `src/tracks.mjs`, `src/claims.mjs`, `src/recommend.mjs`, all OK.
+Own server `node web/serve.mjs` on port 4185 with `SAMA_SCRIBE_LIVE=0` (4179 was held by another
+process, left alone): `/`, the modules and `/data/app.json` returned 200, and the served `app.json`
+was byte-identical to the file; server stopped. Browser pane: no console errors; Satakunta tiles 120
+open loops, 16 overdue, 30 of 50 imaging follow-ups done by the due date, 305 of 375 referrals with a
+diagnosis by day 42 (placeholder); 23 gate rows; no horizontal page scroll at 375 px; tab closed.
+Not tested: the live Gemma route.
+
+**Headline numbers of the two panels** (all SYNTHETIC unless marked):
+- Safety net (`data/safetynet/safetynet-v1.json`): rule `forward-v1` 60 of 60 on 60 lines; second
+  check on 5,002 lines: 0 wrong or invented dates, 0 missed recommendations, 40 dated lines sent to a
+  person; national 3,081 open loops, 496 overdue; Satakunta 120 and 16, replay date 2025-12-01.
+- Gate (`data/flare/gate-v1.json`): NVIDIA FLARE 2.9.1, 23 simulated sites, 253 of 253 cells equal to
+  the central table; 11,510 of 19,581 pathways (58.8%) within the 42-day placeholder; not comparable
+  15 of 23 with the raw scribe, 1 of 23 with the code resolver; MEASURED stage chip (Syöpäjärjestöt,
+  17 Jun 2026): country 42%, Pirkanmaa 72%, Sisä-Suomi 60%, other areas 33-42%, aim 70%.
+
+**Rule for the first-wave integrator (02:00-03:15 UTC).** Keep these panels as they are: the section
+order, the `#safety-net` and `#comparability-gate` mount points, the imports in `web/app.mjs`, the
+`safetyNet` and `flareGate` keys of `app.json`, and `tests/ship-panels.test.mjs` and
+`tests/flare-panel.test.mjs`. Only add the Lane A evaluation results
+(`data/scribe/v4/eval/results-v1.json`, not present at 23:20 UTC) to the scribe section, then run
+`node src/build.mjs` and `npm test` once on the final source. If the safety-net or FLARE lane rebuilds
+its JSON, rebuild `app.json`: the stale check in `tests/tracks.test.mjs` fails until you do.
+
+**Open after this step.**
+- The live `POST /api/scribe` path was not exercised (memory rule).
+- The stored Nemotron draft for Satakunta still says the county is "clearly worse" at referral; the
+  page shows a "Read with care" note under it (`data/planner/plans-v1.json` belongs to Lane B).
+- The safety-net file's legal line says a county may identify such patients "and contact them"; the
+  deck lane reports that the re-opened STM page puts contacting only in a separate data-protection
+  paragraph and writes "identify" (`runs/ship-deck.jsonl`). The wording belongs to the safety-net lane.
+- Within one gate arm, county differences are sampling noise on 30-31 notes per county; the gate
+  panel says so. The worklist's imaging completion is the same assumed 70% on time in every county.
+
 **Stage:** working demo on real public data, with three supporting tracks. **Owner:** `astrazeneca`.
 **PR:** SalesSquad/junction-pets#113. **Branch:** `codex/j26-astra-equity-m1-20261114`.
 Last updated 14 November 2026, 20:53 UTC. Nothing in this update was committed or pushed.

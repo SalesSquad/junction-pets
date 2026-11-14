@@ -1,0 +1,19 @@
+{
+ "schema": "scribe-v4-resolver-freeze-v1",
+ "synthetic": true,
+ "frozen_at_utc": "2026-11-14T21:37:24Z",
+ "rule": "scribe-v3-relative-resolver-v1",
+ "arms": [
+  "A",
+  "A'"
+ ],
+ "lexicon_version": "fi-relative-lexicon-v1",
+ "files": {
+  "scribe/v3/resolve.py": "0ca753f81bfc374579e67dedfcde5b7abf0715cc88db5ca76810e4de8b0f2ec8",
+  "scribe/v3/lexicon.py": "2cef63da47473e2825bdfef1100d50bb32c9b77b5c5613c4b8ea4b5e2db32260"
+ },
+ "selection_rule": "Product default arm: A' only if, on the 310 SYNTHETIC validation notes of C-270m-all-v2data (stored predictions), A' exact match >= arm A exact match AND A' makes 0 notes worse than arm A; otherwise arm A. Test notes are not used for this choice (they were already seen; test numbers are post hoc).",
+ "reason": "first freeze of arm A' (step 1)",
+ "held_out_from_lexicon": "number words seven to twelve and the day-before-yesterday adverb (stress set)",
+ "note": "Frozen after unit tests on constructed strings and before the rule saw any stored student output or any stress note. A person confirms every extracted event."
+}

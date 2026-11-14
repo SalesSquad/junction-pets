@@ -1,0 +1,2813 @@
+{
+ "schemaVersion": "1.0",
+ "schemaDoc": "data/safetynet/SCHEMA.md",
+ "dataClass": "SYNTHETIC",
+ "synthetic": true,
+ "generatedAt": "2026-11-14T23:43:03Z",
+ "asOf": "2025-12-01",
+ "pilotRegionId": "HVA06",
+ "text": {
+  "title": "Close loops, don’t count them",
+  "synthetic": "SYNTHETIC: every row, count and report line in this panel is simulated. No real patient, report or county record.",
+  "clock": "The referral clock starts when the referral is sent (event REFERRAL_SENT), not when it is received.",
+  "as_of": "Replay date: the worklist sees only SYNTHETIC events dated on or before this date.",
+  "governance": "The county owns the list and the care. Nurses call. No patient data leaves the county or goes to any sponsor. Any company role is a documented, non-promotional collaboration owned by the county.",
+  "legal": "Since 1 June 2026 a county may identify patients whose care does not follow recommendations (“joiden hoito ei vastaa suosituksia”); processing their data and contacting them must respect data protection and self-determination (STM, 21 May 2026). Scope for pathway timing to be confirmed with STM/THL.",
+  "legal_url": "https://valtioneuvosto.fi/-/1271139/lakimuutokset-parantavat-hyvinvointialueiden-mahdollisuuksia-ennakoivaan-terveydenhuoltoon",
+  "regulatory": "A workflow aid: it copies the radiologist's written recommendation, computes a date, and a nurse decides. Device qualification under the MDR to be confirmed with Fimea before the pilot (UNVERIFIED). AI Act high-risk dates 2 Dec 2027 and 2 Aug 2028 tracked.",
+  "pilot": "Pilot: Satakunta, every overdue suspected-cancer referral, lung follow-up first. Chosen on process grounds: Finnish-language services, not under the state assessment procedure, already the default on SAMA’s pilot card (data/roadmap/mapping-v1.json). Not chosen as “highest lung mortality”. Whether Satakunta is in the national lung screening pilot is UNVERIFIED; if it is in a randomised arm, the evaluation design must change.",
+  "scope": "Finnish report lines only; lines in other languages go to manual entry.",
+  "rule": "A code rule reads the follow-up recommendation (no model). It copies the written phrase and computes the due date; ranges, approximate, vague or conditional wording go to a person. A nurse confirms every item.",
+  "neutrality": "Vendor- and product-neutral. No drug or biomarker content.",
+  "aland": "The 1 June 2026 amendment and national measures are not claimed for Åland (separate health legislation; UNVERIFIED).",
+  "roadmap": "Operational form of SAMA’s navigation action (roadmap 1.2.3, named care-coordinating worker) with digital pathways (3.5.3)."
+ },
+ "thresholds": [
+  {
+   "clock": "Suspected-cancer referral to DIAGNOSIS (worklist trigger)",
+   "days": 42,
+   "label": "PLACEHOLDER",
+   "source": "Placeholder taken from the OECD/EU-reported six-week referral-to-treatment target (OECD/EU Country Cancer Profile Finland 2025, p. 19; evidence row oecd-2025-six-week-target). The law (STM hoitotakuu) allows up to six months for treatment and names no cancer-specific limit. Not a SAMA decision: cancer-specific access times are to be set under roadmap measure 3.1.2 (p. 57); quality targets and indicators under 3.1.4 (p. 58)."
+  },
+  {
+   "clock": "Same, sensitivity",
+   "days": 90,
+   "label": "PLACEHOLDER",
+   "source": "SAMA's navigation action flags a stalled work-up at 90 days, also a placeholder. Shown only as a count, so the two placeholders do not compete."
+  },
+  {
+   "clock": "Imaging follow-up",
+   "days": null,
+   "label": "COPIED",
+   "source": "The due date the radiologist wrote, copied by the rule and computed by calendar arithmetic. Never decided by SAMA. Ranges and vague wording go to a person."
+  }
+ ],
+ "kpis": [
+  {
+   "name": "Share of imaging follow-ups done by the due date",
+   "target": "DESIGN TARGET, set by the county at pilot start; not set or measured by SAMA"
+  },
+  {
+   "name": "Share of worklist items resolved within 14 days of appearing",
+   "target": "DESIGN TARGET, set by the county; not measured"
+  },
+  {
+   "name": "Share of suspected-cancer referrals with a diagnosis recorded by day 42 (placeholder)",
+   "target": "DESIGN TARGET; not measured"
+  },
+  {
+   "name": "Stage at diagnosis among people found through the worklist",
+   "target": "DESIGN TARGET; not measured"
+  },
+  {
+   "name": "Every KPI reported by entry route, education and contact language, so the safety net cannot reproduce the gap",
+   "target": "DESIGN REQUIREMENT"
+  }
+ ],
+ "suppression": {
+  "below": 5,
+  "rule": "Counts 1-4 are displayed as \"<5\"; raw SYNTHETIC counts stay in this file. National totals are summed from county rows."
+ },
+ "rule": {
+  "version": "forward-v1",
+  "sha256": "7c12c0e2ff3cae86cad337dbbb474289e59eaaa7b0521f9516910d3f9d2afc51",
+  "evaluation": "data/safetynet/rule-eval-v1.json",
+  "metrics": {
+   "lines": 60,
+   "gold_counts": {
+    "DUE_DATE": 30,
+    "PERSON": 20,
+    "NONE": 10
+   },
+   "exact_due_date": {
+    "k": 30,
+    "n": 30,
+    "share": 1.0,
+    "wilson95": [
+     0.8865,
+     1.0
+    ]
+   },
+   "sent_to_person_when_gold_person": {
+    "k": 20,
+    "n": 20,
+    "share": 1.0,
+    "wilson95": [
+     0.8389,
+     1.0
+    ]
+   },
+   "none_correct": {
+    "k": 10,
+    "n": 10
+   },
+   "all_correct": {
+    "k": 60,
+    "n": 60
+   },
+   "errors": {
+    "wrong_due_date": 0,
+    "invented_date_for_person_line": 0,
+    "invented_date_for_none_line": 0,
+    "missed_recommendation": 0,
+    "due_line_sent_to_person": 0
+   }
+  },
+  "caveat": "Measured on 60 SYNTHETIC lines from code templates written by the same step after the rule was frozen; not a result on real reports."
+ },
+ "cohort": {
+  "imaging_loops": {
+   "loops": 5002,
+   "rule_outcomes": {
+    "DUE_DATE": 2459,
+    "PERSON": 1712,
+    "NONE": 831
+   },
+   "gold_outcomes": {
+    "DUE_DATE": 2499,
+    "PERSON": 1672,
+    "NONE": 831
+   },
+   "rule_matches_gold": 4962,
+   "exact_due_date": 2459,
+   "errors": {
+    "wrong_due_date": 0,
+    "invented_date_for_person_line": 0,
+    "invented_date_for_none_line": 0,
+    "missed_recommendation": 0,
+    "due_line_sent_to_person": 40
+   },
+   "due_line_sent_to_person_reasons": {
+    "backward_reference": 40
+   },
+   "note": "Second check, after the 60-line evaluation: the cohort lines are rendered from the same templates with new seeds and dates, so new combinations of finding and recommendation sentences occur. Same caveat: not real reports."
+  },
+  "referral_loops": 19792,
+  "event_log_episodes": 20000,
+  "assumptions": {
+   "imaging_loops_per_event_log_episode": 0.25,
+   "report_window_days": 365,
+   "p_followup_on_time": 0.7,
+   "p_followup_late": 0.2,
+   "p_followup_not_done": 0.1,
+   "on_time_done_up_to_days_before_due": 14,
+   "late_delay_mean_days": 45,
+   "imaging_age_bands": [
+    "40-44",
+    "45-49",
+    "50-54",
+    "55-59",
+    "60-64",
+    "65-69",
+    "70-74",
+    "75-79",
+    "80-84"
+   ],
+   "contact_language_shares": {
+    "fi": 0.85,
+    "sv": 0.05,
+    "se": 0.002,
+    "other": 0.098
+   },
+   "interpreter_flag": "set when contact language is other",
+   "person_window_days": 14
+  },
+  "assumption_notes": [
+   "Every value in ASSUMPTIONS is a simulation choice made for this demo, not an estimate about Finland.",
+   "Imaging follow-up completion (70% on time, 20% late, 10% not done) is the same in every county and route, so the share done by the due date reproduces 0.70 up to sampling noise; it is not a finding.",
+   "The imaging cohort reuses the 60-line test family mix (30 dated, 20 for a person, 10 no follow-up per 60); that mix is a design choice, not an observed report mix.",
+   "Contact language is drawn from one fixed share for every county; it is not Statistics Finland data.",
+   "Age bands of imaging loops are drawn uniformly from 40-44 to 80-84; event-log age bands come from its simulator, which draws them uniformly from 0-4 to 100+."
+  ]
+ },
+ "national": {
+  "open_loops": 3081,
+  "overdue": 496,
+  "imaging": {
+   "open": 1450,
+   "overdue": 146,
+   "due_passed": 1133,
+   "done_by_due": 815,
+   "awaiting_person": 53,
+   "reports_with_recommendation": 4171,
+   "share_done_by_due": 0.7193
+  },
+  "referral": {
+   "open": 1578,
+   "overdue": 350,
+   "overdue_at_sensitivity_days": 114,
+   "clock_passed": 10098,
+   "diagnosed_by_threshold": 8159,
+   "share_diagnosed_by_threshold": 0.808
+  }
+ },
+ "counties": [
+  {
+   "regionId": "HVA01",
+   "counts": {
+    "imaging": {
+     "open": 27,
+     "overdue": 3,
+     "due_passed": 25,
+     "done_by_due": 17,
+     "awaiting_person": 0,
+     "reports_with_recommendation": 80,
+     "share_done_by_due": 0.68
+    },
+    "referral": {
+     "open": 31,
+     "overdue": 6,
+     "overdue_at_sensitivity_days": 1,
+     "clock_passed": 191,
+     "diagnosed_by_threshold": 152,
+     "share_diagnosed_by_threshold": 0.7958
+    },
+    "open_loops": 58,
+    "overdue": 9
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 37,
+     "overdue": 6
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 7,
+     "overdue": 1
+    },
+    {
+     "route": "PRIVATE",
+     "open": 14,
+     "overdue": 2
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 48,
+     "overdue": 7,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 2,
+     "overdue": 0,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 8,
+     "overdue": 2,
+     "interpreter": 8
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA01-0086",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "80-84",
+     "route": "PRIVATE",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 109,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrolli-TT 14.8.2025.",
+     "due_date": "2025-08-14",
+     "referral_sent": null,
+     "report_date": "2025-01-26",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA01-323",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "55-59",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 93,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-07-19",
+     "report_date": null,
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "East Uusimaa"
+  },
+  {
+   "regionId": "HVA02",
+   "counts": {
+    "imaging": {
+     "open": 45,
+     "overdue": 4,
+     "due_passed": 37,
+     "done_by_due": 22,
+     "awaiting_person": 5,
+     "reports_with_recommendation": 153,
+     "share_done_by_due": 0.5946
+    },
+    "referral": {
+     "open": 60,
+     "overdue": 7,
+     "overdue_at_sensitivity_days": 3,
+     "clock_passed": 367,
+     "diagnosed_by_threshold": 300,
+     "share_diagnosed_by_threshold": 0.8174
+    },
+    "open_loops": 110,
+    "overdue": 11
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 56,
+     "overdue": 4
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 32,
+     "overdue": 4
+    },
+    {
+     "route": "PRIVATE",
+     "open": 22,
+     "overdue": 3
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 93,
+     "overdue": 10,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 4,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 13,
+     "overdue": 0,
+     "interpreter": 13
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA02-0029",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "60-64",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 178,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrolli-TT puolen vuoden kuluttua.",
+     "due_date": "2025-06-06",
+     "referral_sent": null,
+     "report_date": "2024-12-06",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA02-707",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "60-64",
+     "route": "OCCUPATIONAL",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 84,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-07-28",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA02-0156",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "80-84",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT 6–12 kk kuluttua.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Central Uusimaa"
+  },
+  {
+   "regionId": "HVA03",
+   "counts": {
+    "imaging": {
+     "open": 128,
+     "overdue": 13,
+     "due_passed": 101,
+     "done_by_due": 74,
+     "awaiting_person": 5,
+     "reports_with_recommendation": 368,
+     "share_done_by_due": 0.7327
+    },
+    "referral": {
+     "open": 159,
+     "overdue": 45,
+     "overdue_at_sensitivity_days": 16,
+     "clock_passed": 896,
+     "diagnosed_by_threshold": 713,
+     "share_diagnosed_by_threshold": 0.7958
+    },
+    "open_loops": 292,
+    "overdue": 58
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 171,
+     "overdue": 40
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 49,
+     "overdue": 8
+    },
+    {
+     "route": "PRIVATE",
+     "open": 72,
+     "overdue": 10
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 235,
+     "overdue": 48,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 22,
+     "overdue": 5,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 35,
+     "overdue": 5,
+     "interpreter": 35
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA03-0371",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "70-74",
+     "route": "OCCUPATIONAL",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 284,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrollikuvaus 4 viikon kuluttua.",
+     "due_date": "2025-02-20",
+     "referral_sent": null,
+     "report_date": "2025-01-23",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA03-790",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "95-99",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": 137,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-06-05",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA03-0241",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "65-69",
+     "route": "PRIVATE",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT helmikuussa 2026.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "West Uusimaa"
+  },
+  {
+   "regionId": "HVA04",
+   "counts": {
+    "imaging": {
+     "open": 62,
+     "overdue": 8,
+     "due_passed": 58,
+     "done_by_due": 40,
+     "awaiting_person": 2,
+     "reports_with_recommendation": 207,
+     "share_done_by_due": 0.6897
+    },
+    "referral": {
+     "open": 71,
+     "overdue": 15,
+     "overdue_at_sensitivity_days": 5,
+     "clock_passed": 543,
+     "diagnosed_by_threshold": 438,
+     "share_diagnosed_by_threshold": 0.8066
+    },
+    "open_loops": 135,
+    "overdue": 23
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 73,
+     "overdue": 13
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 36,
+     "overdue": 7
+    },
+    {
+     "route": "PRIVATE",
+     "open": 26,
+     "overdue": 3
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 118,
+     "overdue": 20,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 4,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 13,
+     "overdue": 2,
+     "interpreter": 13
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA04-0239",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "45-49",
+     "route": "OCCUPATIONAL",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 283,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrollikuvaus 8 viikon kuluttua.",
+     "due_date": "2025-02-21",
+     "referral_sent": null,
+     "report_date": "2024-12-27",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA04-140",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "100+",
+     "route": "OCCUPATIONAL",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": 102,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-07-10",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA04-0229",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "80-84",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT helmikuussa 2026.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Vantaa and Kerava"
+  },
+  {
+   "regionId": "HVA05",
+   "counts": {
+    "imaging": {
+     "open": 139,
+     "overdue": 13,
+     "due_passed": 98,
+     "done_by_due": 78,
+     "awaiting_person": 4,
+     "reports_with_recommendation": 376,
+     "share_done_by_due": 0.7959
+    },
+    "referral": {
+     "open": 157,
+     "overdue": 36,
+     "overdue_at_sensitivity_days": 11,
+     "clock_passed": 893,
+     "diagnosed_by_threshold": 708,
+     "share_diagnosed_by_threshold": 0.7928
+    },
+    "open_loops": 300,
+    "overdue": 49
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 178,
+     "overdue": 33
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 75,
+     "overdue": 12
+    },
+    {
+     "route": "PRIVATE",
+     "open": 47,
+     "overdue": 4
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 255,
+     "overdue": 37,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 21,
+     "overdue": 8,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 24,
+     "overdue": 4,
+     "interpreter": 24
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA05-0140",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "75-79",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 294,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrollikuvaus 8 viikon kuluttua.",
+     "due_date": "2025-02-10",
+     "referral_sent": null,
+     "report_date": "2024-12-16",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA05-236",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "75-79",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 113,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-06-29",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA05-0145",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "80-84",
+     "route": "PRIVATE",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT 6–12 kk kuluttua.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Southwest Finland"
+  },
+  {
+   "regionId": "HVA06",
+   "counts": {
+    "imaging": {
+     "open": 61,
+     "overdue": 10,
+     "due_passed": 50,
+     "done_by_due": 30,
+     "awaiting_person": 4,
+     "reports_with_recommendation": 169,
+     "share_done_by_due": 0.6
+    },
+    "referral": {
+     "open": 55,
+     "overdue": 6,
+     "overdue_at_sensitivity_days": 1,
+     "clock_passed": 375,
+     "diagnosed_by_threshold": 305,
+     "share_diagnosed_by_threshold": 0.8133
+    },
+    "open_loops": 120,
+    "overdue": 16
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 67,
+     "overdue": 8
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 20,
+     "overdue": 0
+    },
+    {
+     "route": "PRIVATE",
+     "open": 33,
+     "overdue": 8
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 101,
+     "overdue": 13,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 5,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 14,
+     "overdue": 2,
+     "interpreter": 14
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA06-0128",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "40-44",
+     "route": "PRIVATE",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": 154,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Seuranta-TT kuuden kuukauden kuluttua.",
+     "due_date": "2025-06-30",
+     "referral_sent": null,
+     "report_date": "2024-12-31",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA06-310",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "70-74",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 118,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-06-24",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA06-0152",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "55-59",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Mikäli kliinisesti aiheellista, kontrolli-TT 3 kk kuluttua.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-29",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Satakunta"
+  },
+  {
+   "regionId": "HVA07",
+   "counts": {
+    "imaging": {
+     "open": 46,
+     "overdue": 2,
+     "due_passed": 33,
+     "done_by_due": 21,
+     "awaiting_person": 2,
+     "reports_with_recommendation": 127,
+     "share_done_by_due": 0.6364
+    },
+    "referral": {
+     "open": 39,
+     "overdue": 10,
+     "overdue_at_sensitivity_days": 2,
+     "clock_passed": 294,
+     "diagnosed_by_threshold": 241,
+     "share_diagnosed_by_threshold": 0.8197
+    },
+    "open_loops": 87,
+    "overdue": 12
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 45,
+     "overdue": 9
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 18,
+     "overdue": 1
+    },
+    {
+     "route": "PRIVATE",
+     "open": 24,
+     "overdue": 2
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 73,
+     "overdue": 10,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 5,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 9,
+     "overdue": 1,
+     "interpreter": 9
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA07-0134",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "50-54",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 57,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrollikuvaus 4 viikon kuluttua.",
+     "due_date": "2025-10-05",
+     "referral_sent": null,
+     "report_date": "2025-09-07",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA07-437",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "95-99",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 75,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-08-06",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA07-0122",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "50-54",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli harkinnan mukaan.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-24",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Kanta-Häme"
+  },
+  {
+   "regionId": "HVA08",
+   "counts": {
+    "imaging": {
+     "open": 140,
+     "overdue": 16,
+     "due_passed": 113,
+     "done_by_due": 87,
+     "awaiting_person": 7,
+     "reports_with_recommendation": 405,
+     "share_done_by_due": 0.7699
+    },
+    "referral": {
+     "open": 156,
+     "overdue": 40,
+     "overdue_at_sensitivity_days": 14,
+     "clock_passed": 955,
+     "diagnosed_by_threshold": 770,
+     "share_diagnosed_by_threshold": 0.8063
+    },
+    "open_loops": 303,
+    "overdue": 56
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 165,
+     "overdue": 31
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 74,
+     "overdue": 16
+    },
+    {
+     "route": "PRIVATE",
+     "open": 64,
+     "overdue": 9
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 273,
+     "overdue": 52,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 9,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 21,
+     "overdue": 3,
+     "interpreter": 21
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA08-0482",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "80-84",
+     "route": "OCCUPATIONAL",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 288,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrollikuvaus 6 viikon kuluttua.",
+     "due_date": "2025-02-16",
+     "referral_sent": null,
+     "report_date": "2025-01-05",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA08-1837",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "90-94",
+     "route": "OCCUPATIONAL",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 193,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-04-10",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA08-0483",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "70-74",
+     "route": "PRIVATE",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT 6–12 kk kuluttua.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Pirkanmaa"
+  },
+  {
+   "regionId": "HVA09",
+   "counts": {
+    "imaging": {
+     "open": 47,
+     "overdue": 4,
+     "due_passed": 47,
+     "done_by_due": 37,
+     "awaiting_person": 3,
+     "reports_with_recommendation": 150,
+     "share_done_by_due": 0.7872
+    },
+    "referral": {
+     "open": 59,
+     "overdue": 11,
+     "overdue_at_sensitivity_days": 4,
+     "clock_passed": 363,
+     "diagnosed_by_threshold": 293,
+     "share_diagnosed_by_threshold": 0.8072
+    },
+    "open_loops": 109,
+    "overdue": 15
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 64,
+     "overdue": 7
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 21,
+     "overdue": 4
+    },
+    {
+     "route": "PRIVATE",
+     "open": 24,
+     "overdue": 4
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 97,
+     "overdue": 14,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 5,
+     "overdue": 0,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 7,
+     "overdue": 1,
+     "interpreter": 7
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA09-0168",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "50-54",
+     "route": "OCCUPATIONAL",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 215,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Suositellaan kontrolli-TT 3 kk kuluttua.",
+     "due_date": "2025-04-30",
+     "referral_sent": null,
+     "report_date": "2025-01-31",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA09-102",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "50-54",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 75,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-08-06",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA09-0048",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "55-59",
+     "route": "PRIVATE",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT helmikuussa 2026.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Päijät-Häme"
+  },
+  {
+   "regionId": "HVA10",
+   "counts": {
+    "imaging": {
+     "open": 44,
+     "overdue": 5,
+     "due_passed": 36,
+     "done_by_due": 26,
+     "awaiting_person": 1,
+     "reports_with_recommendation": 118,
+     "share_done_by_due": 0.7222
+    },
+    "referral": {
+     "open": 30,
+     "overdue": 6,
+     "overdue_at_sensitivity_days": 4,
+     "clock_passed": 283,
+     "diagnosed_by_threshold": 241,
+     "share_diagnosed_by_threshold": 0.8516
+    },
+    "open_loops": 75,
+    "overdue": 11
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 43,
+     "overdue": 8
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 17,
+     "overdue": 3
+    },
+    {
+     "route": "PRIVATE",
+     "open": 15,
+     "overdue": 0
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 67,
+     "overdue": 11,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 3,
+     "overdue": 0,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 5,
+     "overdue": 0,
+     "interpreter": 5
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA10-0042",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "50-54",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 280,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrollikuvaus 4 viikon kuluttua.",
+     "due_date": "2025-02-24",
+     "referral_sent": null,
+     "report_date": "2025-01-27",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA10-120",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "90-94",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 123,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-06-19",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA10-0137",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "70-74",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Seuranta-TT myöhemmin.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-18",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Kymenlaakso"
+  },
+  {
+   "regionId": "HVA11",
+   "counts": {
+    "imaging": {
+     "open": 32,
+     "overdue": 3,
+     "due_passed": 29,
+     "done_by_due": 21,
+     "awaiting_person": 1,
+     "reports_with_recommendation": 93,
+     "share_done_by_due": 0.7241
+    },
+    "referral": {
+     "open": 31,
+     "overdue": 6,
+     "overdue_at_sensitivity_days": 2,
+     "clock_passed": 214,
+     "diagnosed_by_threshold": 173,
+     "share_diagnosed_by_threshold": 0.8084
+    },
+    "open_loops": 64,
+    "overdue": 9
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 32,
+     "overdue": 8
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 18,
+     "overdue": 0
+    },
+    {
+     "route": "PRIVATE",
+     "open": 14,
+     "overdue": 1
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 57,
+     "overdue": 9,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 3,
+     "overdue": 0,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 4,
+     "overdue": 0,
+     "interpreter": 4
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA11-0005",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "45-49",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 154,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrolli-TT puolen vuoden kuluttua.",
+     "due_date": "2025-06-30",
+     "referral_sent": null,
+     "report_date": "2024-12-31",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA11-355",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "75-79",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 70,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-08-11",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA11-0092",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "40-44",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT 6–12 kk kuluttua.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "South Karelia"
+  },
+  {
+   "regionId": "HVA12",
+   "counts": {
+    "imaging": {
+     "open": 31,
+     "overdue": 1,
+     "due_passed": 30,
+     "done_by_due": 22,
+     "awaiting_person": 1,
+     "reports_with_recommendation": 92,
+     "share_done_by_due": 0.7333
+    },
+    "referral": {
+     "open": 40,
+     "overdue": 14,
+     "overdue_at_sensitivity_days": 5,
+     "clock_passed": 235,
+     "diagnosed_by_threshold": 193,
+     "share_diagnosed_by_threshold": 0.8213
+    },
+    "open_loops": 72,
+    "overdue": 15
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 46,
+     "overdue": 12
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 10,
+     "overdue": 1
+    },
+    {
+     "route": "PRIVATE",
+     "open": 16,
+     "overdue": 2
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 62,
+     "overdue": 12,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 2,
+     "overdue": 0,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 8,
+     "overdue": 3,
+     "interpreter": 8
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA12-0059",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "80-84",
+     "route": "PRIVATE",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 77,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrollikuvaus 8 viikon kuluttua.",
+     "due_date": "2025-09-15",
+     "referral_sent": null,
+     "report_date": "2025-07-21",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA12-43",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "85-89",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": 123,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-06-19",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA12-0099",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "40-44",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT helmikuussa 2026.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "South Savo"
+  },
+  {
+   "regionId": "HVA13",
+   "counts": {
+    "imaging": {
+     "open": 69,
+     "overdue": 6,
+     "due_passed": 41,
+     "done_by_due": 27,
+     "awaiting_person": 2,
+     "reports_with_recommendation": 183,
+     "share_done_by_due": 0.6585
+    },
+    "referral": {
+     "open": 61,
+     "overdue": 18,
+     "overdue_at_sensitivity_days": 5,
+     "clock_passed": 446,
+     "diagnosed_by_threshold": 354,
+     "share_diagnosed_by_threshold": 0.7937
+    },
+    "open_loops": 132,
+    "overdue": 24
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 81,
+     "overdue": 18
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 19,
+     "overdue": 2
+    },
+    {
+     "route": "PRIVATE",
+     "open": 32,
+     "overdue": 4
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 115,
+     "overdue": 19,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 8,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 9,
+     "overdue": 4,
+     "interpreter": 9
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA13-0001",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "70-74",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 204,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrolli-TT 3 kuukauden kuluttua.",
+     "due_date": "2025-05-11",
+     "referral_sent": null,
+     "report_date": "2025-02-11",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA13-301",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "80-84",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 74,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-08-07",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA13-0065",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "70-74",
+     "route": "PRIVATE",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Mikäli kliinisesti aiheellista, kontrolli-TT 3 kk kuluttua.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "North Savo"
+  },
+  {
+   "regionId": "HVA14",
+   "counts": {
+    "imaging": {
+     "open": 37,
+     "overdue": 3,
+     "due_passed": 31,
+     "done_by_due": 23,
+     "awaiting_person": 1,
+     "reports_with_recommendation": 116,
+     "share_done_by_due": 0.7419
+    },
+    "referral": {
+     "open": 38,
+     "overdue": 11,
+     "overdue_at_sensitivity_days": 3,
+     "clock_passed": 288,
+     "diagnosed_by_threshold": 224,
+     "share_diagnosed_by_threshold": 0.7778
+    },
+    "open_loops": 76,
+    "overdue": 14
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 43,
+     "overdue": 10
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 19,
+     "overdue": 2
+    },
+    {
+     "route": "PRIVATE",
+     "open": 14,
+     "overdue": 2
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 69,
+     "overdue": 13,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 1,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 6,
+     "overdue": 0,
+     "interpreter": 6
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA14-0071",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "40-44",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 237,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrolli-TT 8.4.2025.",
+     "due_date": "2025-04-08",
+     "referral_sent": null,
+     "report_date": "2024-12-09",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA14-364",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "75-79",
+     "route": "OCCUPATIONAL",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 193,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-04-10",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA14-0072",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "50-54",
+     "route": "PRIVATE",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT noin 12 kk kuluttua.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "North Karelia"
+  },
+  {
+   "regionId": "HVA15",
+   "counts": {
+    "imaging": {
+     "open": 76,
+     "overdue": 5,
+     "due_passed": 47,
+     "done_by_due": 32,
+     "awaiting_person": 4,
+     "reports_with_recommendation": 199,
+     "share_done_by_due": 0.6809
+    },
+    "referral": {
+     "open": 81,
+     "overdue": 22,
+     "overdue_at_sensitivity_days": 4,
+     "clock_passed": 495,
+     "diagnosed_by_threshold": 402,
+     "share_diagnosed_by_threshold": 0.8121
+    },
+    "open_loops": 161,
+    "overdue": 27
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 94,
+     "overdue": 19
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 33,
+     "overdue": 4
+    },
+    {
+     "route": "PRIVATE",
+     "open": 34,
+     "overdue": 4
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 133,
+     "overdue": 22,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 8,
+     "overdue": 0,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 20,
+     "overdue": 5,
+     "interpreter": 20
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA15-0151",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "45-49",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 136,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrollikuvaus 8 viikon kuluttua.",
+     "due_date": "2025-07-18",
+     "referral_sent": null,
+     "report_date": "2025-05-23",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA15-778",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "60-64",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": 109,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-07-03",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA15-0004",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "45-49",
+     "route": "PRIVATE",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Jos oireet jatkuvat, uusintakuvaus.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Central Finland"
+  },
+  {
+   "regionId": "HVA16",
+   "counts": {
+    "imaging": {
+     "open": 48,
+     "overdue": 6,
+     "due_passed": 43,
+     "done_by_due": 29,
+     "awaiting_person": 1,
+     "reports_with_recommendation": 144,
+     "share_done_by_due": 0.6744
+    },
+    "referral": {
+     "open": 48,
+     "overdue": 9,
+     "overdue_at_sensitivity_days": 3,
+     "clock_passed": 321,
+     "diagnosed_by_threshold": 265,
+     "share_diagnosed_by_threshold": 0.8255
+    },
+    "open_loops": 97,
+    "overdue": 15
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 54,
+     "overdue": 6
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 21,
+     "overdue": 5
+    },
+    {
+     "route": "PRIVATE",
+     "open": 22,
+     "overdue": 4
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 75,
+     "overdue": 9,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 6,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 16,
+     "overdue": 5,
+     "interpreter": 16
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA16-0108",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "70-74",
+     "route": "OCCUPATIONAL",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": 162,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Suositellaan kontrolli-TT 3 kk kuluttua.",
+     "due_date": "2025-06-22",
+     "referral_sent": null,
+     "report_date": "2025-03-22",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA16-104",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "90-94",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": 108,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-07-04",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA16-0053",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "80-84",
+     "route": "PRIVATE",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Seuranta-TT kuuden tai kahdentoista kuukauden kuluttua.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-24",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "South Ostrobothnia"
+  },
+  {
+   "regionId": "HVA17",
+   "counts": {
+    "imaging": {
+     "open": 47,
+     "overdue": 3,
+     "due_passed": 30,
+     "done_by_due": 24,
+     "awaiting_person": 2,
+     "reports_with_recommendation": 122,
+     "share_done_by_due": 0.8
+    },
+    "referral": {
+     "open": 42,
+     "overdue": 14,
+     "overdue_at_sensitivity_days": 3,
+     "clock_passed": 314,
+     "diagnosed_by_threshold": 252,
+     "share_diagnosed_by_threshold": 0.8025
+    },
+    "open_loops": 91,
+    "overdue": 17
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 56,
+     "overdue": 12
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 17,
+     "overdue": 2
+    },
+    {
+     "route": "PRIVATE",
+     "open": 18,
+     "overdue": 3
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 76,
+     "overdue": 14,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 2,
+     "overdue": 0,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 13,
+     "overdue": 3,
+     "interpreter": 13
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA17-0095",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "70-74",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 234,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrollikuvaus 8 viikon kuluttua.",
+     "due_date": "2025-04-11",
+     "referral_sent": null,
+     "report_date": "2025-02-14",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA17-248",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "50-54",
+     "route": "OCCUPATIONAL",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 76,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-08-05",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA17-0079",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "75-79",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT helmikuussa 2026.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Ostrobothnia"
+  },
+  {
+   "regionId": "HVA18",
+   "counts": {
+    "imaging": {
+     "open": 19,
+     "overdue": 2,
+     "due_passed": 12,
+     "done_by_due": 7,
+     "awaiting_person": 0,
+     "reports_with_recommendation": 51,
+     "share_done_by_due": 0.5833
+    },
+    "referral": {
+     "open": 22,
+     "overdue": 5,
+     "overdue_at_sensitivity_days": 1,
+     "clock_passed": 123,
+     "diagnosed_by_threshold": 101,
+     "share_diagnosed_by_threshold": 0.8211
+    },
+    "open_loops": 41,
+    "overdue": 7
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 18,
+     "overdue": 5
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 13,
+     "overdue": 0
+    },
+    {
+     "route": "PRIVATE",
+     "open": 10,
+     "overdue": 2
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 34,
+     "overdue": 5,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 1,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 6,
+     "overdue": 1,
+     "interpreter": 6
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA18-0015",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "55-59",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "sv",
+     "interpreter": false,
+     "days_overdue": 239,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrolli-TT 3 kk:n päästä.",
+     "due_date": "2025-04-06",
+     "referral_sent": null,
+     "report_date": "2025-01-06",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA18-18",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "65-69",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 36,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-09-14",
+     "report_date": null,
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Central Ostrobothnia"
+  },
+  {
+   "regionId": "HVA19",
+   "counts": {
+    "imaging": {
+     "open": 114,
+     "overdue": 16,
+     "due_passed": 81,
+     "done_by_due": 54,
+     "awaiting_person": 5,
+     "reports_with_recommendation": 304,
+     "share_done_by_due": 0.6667
+    },
+    "referral": {
+     "open": 132,
+     "overdue": 24,
+     "overdue_at_sensitivity_days": 8,
+     "clock_passed": 735,
+     "diagnosed_by_threshold": 598,
+     "share_diagnosed_by_threshold": 0.8136
+    },
+    "open_loops": 251,
+    "overdue": 40
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 132,
+     "overdue": 27
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 60,
+     "overdue": 5
+    },
+    {
+     "route": "PRIVATE",
+     "open": 59,
+     "overdue": 8
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 211,
+     "overdue": 32,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 13,
+     "overdue": 2,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 27,
+     "overdue": 6,
+     "interpreter": 27
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA19-0173",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "55-59",
+     "route": "PRIVATE",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": 243,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrollikuvaus 8 viikon kuluttua.",
+     "due_date": "2025-04-02",
+     "referral_sent": null,
+     "report_date": "2025-02-05",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA19-1398",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "40-44",
+     "route": "PRIVATE",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 94,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-07-18",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA19-0046",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "75-79",
+     "route": "OCCUPATIONAL",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT 6 kk kuluttua; lisäksi vatsan TT 12 kk kuluttua.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-26",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "North Ostrobothnia"
+  },
+  {
+   "regionId": "HVA20",
+   "counts": {
+    "imaging": {
+     "open": 11,
+     "overdue": 1,
+     "due_passed": 11,
+     "done_by_due": 10,
+     "awaiting_person": 0,
+     "reports_with_recommendation": 54,
+     "share_done_by_due": 0.9091
+    },
+    "referral": {
+     "open": 18,
+     "overdue": 1,
+     "overdue_at_sensitivity_days": 0,
+     "clock_passed": 130,
+     "diagnosed_by_threshold": 110,
+     "share_diagnosed_by_threshold": 0.8462
+    },
+    "open_loops": 29,
+    "overdue": 2
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 22,
+     "overdue": 1
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 5,
+     "overdue": 1
+    },
+    {
+     "route": "PRIVATE",
+     "open": 2,
+     "overdue": 0
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 21,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 2,
+     "overdue": 0,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 6,
+     "overdue": 1,
+     "interpreter": 6
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA20-0013",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "65-69",
+     "route": "OCCUPATIONAL",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": 121,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrolli-TT 2.8.2025.",
+     "due_date": "2025-08-02",
+     "referral_sent": null,
+     "report_date": "2025-04-04",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA20-161",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "100+",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 10,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-10-10",
+     "report_date": null,
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Kainuu"
+  },
+  {
+   "regionId": "HVA21",
+   "counts": {
+    "imaging": {
+     "open": 50,
+     "overdue": 4,
+     "due_passed": 32,
+     "done_by_due": 24,
+     "awaiting_person": 0,
+     "reports_with_recommendation": 132,
+     "share_done_by_due": 0.75
+    },
+    "referral": {
+     "open": 56,
+     "overdue": 7,
+     "overdue_at_sensitivity_days": 2,
+     "clock_passed": 301,
+     "diagnosed_by_threshold": 245,
+     "share_diagnosed_by_threshold": 0.814
+    },
+    "open_loops": 106,
+    "overdue": 11
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 63,
+     "overdue": 8
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 25,
+     "overdue": 1
+    },
+    {
+     "route": "PRIVATE",
+     "open": 18,
+     "overdue": 2
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 89,
+     "overdue": 9,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 6,
+     "overdue": 1,
+     "interpreter": 0
+    },
+    {
+     "language": "se",
+     "open": 1,
+     "overdue": 0,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 10,
+     "overdue": 1,
+     "interpreter": 10
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA21-0076",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "40-44",
+     "route": "OCCUPATIONAL",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 226,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Seuranta-TT kolmen kuukauden kuluttua.",
+     "due_date": "2025-04-19",
+     "referral_sent": null,
+     "report_date": "2025-01-19",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA21-285",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "90-94",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "other",
+     "interpreter": true,
+     "days_overdue": 32,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-09-18",
+     "report_date": null,
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Lapland"
+  },
+  {
+   "regionId": "HVA90",
+   "counts": {
+    "imaging": {
+     "open": 168,
+     "overdue": 17,
+     "due_passed": 145,
+     "done_by_due": 108,
+     "awaiting_person": 3,
+     "reports_with_recommendation": 507,
+     "share_done_by_due": 0.7448
+    },
+    "referral": {
+     "open": 182,
+     "overdue": 33,
+     "overdue_at_sensitivity_days": 16,
+     "clock_passed": 1275,
+     "diagnosed_by_threshold": 1028,
+     "share_diagnosed_by_threshold": 0.8063
+    },
+    "open_loops": 353,
+    "overdue": 50
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 221,
+     "overdue": 34
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 63,
+     "overdue": 7
+    },
+    {
+     "route": "PRIVATE",
+     "open": 69,
+     "overdue": 9
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 311,
+     "overdue": 42,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 16,
+     "overdue": 2,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 26,
+     "overdue": 6,
+     "interpreter": 26
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA90-0213",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "45-49",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 315,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Kontrolli-TT 20.1.2025.",
+     "due_date": "2025-01-20",
+     "referral_sent": null,
+     "report_date": "2024-12-06",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA90-578",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "95-99",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 220,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-03-14",
+     "report_date": null,
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA90-0565",
+     "loop_kind": "recommendation_needs_person",
+     "age_band": "45-49",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": null,
+     "missing_step": "Due date not set: the written recommendation is a range, vague, conditional or has no time",
+     "owner_role": "Referring unit; a person reads the recommendation and sets the date",
+     "status": "needs editing",
+     "recommendation_copied": "Kontrolli-TT 6–12 kk kuluttua.",
+     "due_date": null,
+     "referral_sent": null,
+     "report_date": "2025-11-30",
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "City of Helsinki"
+  },
+  {
+   "regionId": "HVA91",
+   "counts": {
+    "imaging": {
+     "open": 9,
+     "overdue": 1,
+     "due_passed": 3,
+     "done_by_due": 2,
+     "awaiting_person": 0,
+     "reports_with_recommendation": 21,
+     "share_done_by_due": 0.6667
+    },
+    "referral": {
+     "open": 10,
+     "overdue": 4,
+     "overdue_at_sensitivity_days": 1,
+     "clock_passed": 61,
+     "diagnosed_by_threshold": 53,
+     "share_diagnosed_by_threshold": 0.8689
+    },
+    "open_loops": 19,
+    "overdue": 5
+   },
+   "by_route": [
+    {
+     "route": "PUBLIC_PRIMARY",
+     "open": 14,
+     "overdue": 4
+    },
+    {
+     "route": "OCCUPATIONAL",
+     "open": 3,
+     "overdue": 0
+    },
+    {
+     "route": "PRIVATE",
+     "open": 2,
+     "overdue": 1
+    }
+   ],
+   "by_language": [
+    {
+     "language": "fi",
+     "open": 16,
+     "overdue": 5,
+     "interpreter": 0
+    },
+    {
+     "language": "sv",
+     "open": 1,
+     "overdue": 0,
+     "interpreter": 0
+    },
+    {
+     "language": "other",
+     "open": 2,
+     "overdue": 0,
+     "interpreter": 2
+    }
+   ],
+   "examples": [
+    {
+     "episode_code": "SYNTHETIC-SN-20261115-HVA91-0004",
+     "loop_kind": "imaging_follow_up",
+     "age_band": "70-74",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 62,
+     "missing_step": "Follow-up imaging not recorded by the due date the radiologist wrote",
+     "owner_role": "Referring unit; a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": "Seuranta-TT kuuden kuukauden kuluttua.",
+     "due_date": "2025-09-30",
+     "referral_sent": null,
+     "report_date": "2025-03-31",
+     "synthetic": true
+    },
+    {
+     "episode_code": "SYNTHETIC-20261114-2025-HVA91-47",
+     "loop_kind": "suspected_cancer_referral",
+     "age_band": "40-44",
+     "route": "PUBLIC_PRIMARY",
+     "contact_language": "fi",
+     "interpreter": false,
+     "days_overdue": 87,
+     "missing_step": "No DIAGNOSIS recorded by day 42 after the referral was sent",
+     "owner_role": "Pathway coordinator (roadmap 1.2.3 care-coordinating worker); a nurse calls",
+     "status": "nurse confirms",
+     "recommendation_copied": null,
+     "due_date": null,
+     "referral_sent": "2025-07-25",
+     "report_date": null,
+     "synthetic": true
+    }
+   ],
+   "synthetic": true,
+   "name": "Åland",
+   "note": "The 1 June 2026 amendment and national measures are not claimed for Åland (separate health legislation; UNVERIFIED)."
+  }
+ ],
+ "provenance": {
+  "event_log": "data/eventlog/sample",
+  "event_log_sha256": "03fb237665cd0ff3857455e5522705b394a66f403fe2740a2adb0a42f3b7d8f4",
+  "snapshot": "data/snapshot/public-v1.json",
+  "snapshot_sha256": "9a68651c35a2f2265fe18ccd7da8cd637ab94e80c86a866e91dba057425f5831",
+  "code": {
+   "safetynet/rule.py": "7c12c0e2ff3cae86cad337dbbb474289e59eaaa7b0521f9516910d3f9d2afc51",
+   "safetynet/reports.py": "2b766014d0b2ab20283b8571edb844c5d36cb21a320533c4f8e98980c6ac9907",
+   "safetynet/measure.py": "bd9ea80ddaef17433a9f253885e05b166bc56e2f46c81423162ee9b6894513e4",
+   "safetynet/extension.py": "90c31671d24fee245bb831378647016962823a5203e07524384231e3d0a7e6f9",
+   "safetynet/worklist.py": "da5bb7e7ad4b06ed65188c6a82a7fb1057d0a905baee2d663e9c07fc359fdb0e",
+   "safetynet/build.py": "ca95d78d3bd912cbe4ddb5794de9cbc3ff46eb52cd8fbb5adbc0ed548943f024"
+  },
+  "python": "3.12.13",
+  "pyarrow": "26.0.1",
+  "command": "scribe/.venv/bin/python -m safetynet.build"
+ }
+}
