@@ -97,8 +97,9 @@ export function validateBuyingNeed(need) {
 
 export function unsignedQuoteBody(q) {
   const lines = q.lines.map((line) => ({ sku: line.sku, quantity: line.quantityLitres,
-    unit: 'L', unit_price_cents: line.unitPriceCents, stock_version: line.stockVersion }));
-  return { version: 'kattely.procurement.quote.v1', quote_id: q.id, supplier_id: 'supplier-demo',
+    unit: 'L', unit_price_cents: line.unitPriceCents, stock_version: line.stockVersion,
+    supplier_id: line.supplierId ?? 'supplier-demo' }));
+  return { version: 'kattely.procurement.quote.v2', quote_id: q.id, supplier_id: 'supplier-demo',
     buyer_id: q.buyerId, audience: 'https://supplier-demo.invalid', currency: 'EUR',
     issued_at: Math.floor(q.createdAtMs / 1000), expires_at: Math.floor(q.expiresAtMs / 1000),
     lines, total_cents: lines.reduce((sum, line) => sum + line.quantity * line.unit_price_cents, 0) };
@@ -246,6 +247,9 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
         typeof verification.signedOfferDigest !== 'string' || typeof verification.signedMandateDigest !== 'string') {
       throw new TradeError('INVALID_TRUST_EVIDENCE', 'Only a cryptographically verified quote-bound receipt may extend the audit.', 409);
     }
+    q.verifiedHandshake = { quoteBodyDigest: verification.quoteBodyDigest,
+      signedOfferDigest: verification.signedOfferDigest,
+      signedMandateDigest: verification.signedMandateDigest };
     return record('TRUST_HANDSHAKE_VERIFIED', {
       quoteId, buyerId: q.buyerId, signedOfferDigest: verification.signedOfferDigest,
       signedMandateDigest: verification.signedMandateDigest, quoteBodyDigest: verification.quoteBodyDigest,
@@ -312,6 +316,8 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
       status: 'SIMULATED_COMMITTED',
       createdAt: new Date(clock()).toISOString(),
       commitment: 'SIMULATION_ONLY_NO_REAL_PURCHASE',
+      paymentEligible: Boolean(q.planId && q.verifiedHandshake),
+      verifiedQuoteBodyDigest: q.planId ? (q.verifiedHandshake?.quoteBodyDigest ?? null) : null,
       humanDecision: q.approval ? structuredClone(q.approval) : null,
     };
     orders.set(orderId, order);
