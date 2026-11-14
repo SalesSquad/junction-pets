@@ -50,6 +50,7 @@ def fixture():
       "known_classes":[12,15],
       "frozen_fit_frame_sha256":[frame_hash("train:0"),frame_hash("calibration:0")],
       "frozen_fit_capture_ids":["training-capture","calibration-capture"],
+      "frozen_fit_scene_ids":["training-scene-0","calibration-scene-1"],
       "unknown_classes_in_calibration":[3,22],
       "unknown_classes_in_test":[23,44],
       "scenes":[scene(i,"camera-1" if i<2 else "camera-2") for i in range(4)],
@@ -114,6 +115,11 @@ class FieldGate(unittest.TestCase):
         doc=fixture()
         for row in doc["scenes"]:
             row["detector_true_positives_iou50"]=2500
+            # Preserve a mathematically possible detector/source path. Accepted
+            # correctly localized classes must be a SUBSET of detected TPs.
+            row["known_correct_accepted"]=2400
+            row["accepted_correct"]=2400
+            row["accepted_proposals"]=2400
         self.assertIn("STATISTICALLY_UNQUALIFIED_detector_recall_iou50",
                       gate.qualify(doc)["reasons"])
 
@@ -164,6 +170,41 @@ class FieldGate(unittest.TestCase):
         reasons=gate.qualify(doc)["reasons"]
         self.assertIn("FRAME_COUNT_NOT_VERIFIABLE",reasons)
         self.assertIn("MISSING_OR_INVALID_FIT_PROVENANCE",reasons)
+
+    def test_numeric_and_string_class_ids_are_normalized_before_leakage_check(self):
+        doc=fixture()
+        doc["unknown_classes_in_calibration"]=["023","044"]
+        doc["unknown_classes_in_test"]=[23,44]
+        r=gate.qualify(doc)
+        self.assertFalse(r["passed"])
+        self.assertIn("UNKNOWN_CLASSES_NOT_EXCLUDED_FROM_CALIBRATION",r["reasons"])
+        doc=fixture()
+        doc["known_classes"]=[12,"015"]
+        doc["unknown_classes_in_test"]=[15,44]
+        self.assertIn("UNKNOWN_CLASSES_NOT_EXCLUDED_FROM_CALIBRATION",
+                      gate.qualify(doc)["reasons"])
+
+    def test_correctly_accepted_localizations_cannot_exceed_detector_true_positives(self):
+        doc=fixture()
+        row=doc["scenes"][0]
+        row["annotated_detectable_objects"]=100
+        row["detector_true_positives_iou50"]=100
+        # Previously 4,800 accepted correct were counted despite only
+        # 100 real detector true positives. A research gate must fail closed.
+        with self.assertRaisesRegex(ValueError,"Inconsistent real-world confusion"):
+            gate.qualify(doc)
+
+    def test_train_calibration_physical_scene_overlap_or_absent_scene_proof(self):
+        doc=fixture()
+        doc["frozen_fit_scene_ids"].append(doc["scenes"][0]["scene_id"])
+        r=gate.qualify(doc)
+        self.assertFalse(r["passed"])
+        self.assertIn("TRAIN_CALIBRATION_PHYSICAL_SCENE_LEAKAGE",r["reasons"])
+        doc=fixture()
+        del doc["frozen_fit_scene_ids"]
+        r=gate.qualify(doc)
+        self.assertFalse(r["passed"])
+        self.assertIn("MISSING_OR_INVALID_FIT_SCENE_PROVENANCE",r["reasons"])
 
     def test_background_false_positives_are_measured_not_silently_discarded(self):
         doc=fixture()

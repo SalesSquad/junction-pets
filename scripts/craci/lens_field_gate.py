@@ -23,6 +23,20 @@ MAX_UNKNOWN_FALSE_ACCEPT=.01
 MIN_DETECTION_RECALL=.90
 Z95=1.959963984540054
 
+def canonical_class_id(token)->str:
+    # A declared object class must have one representation across JSON int and
+    # string encodings. Class 23, "23", and "023" are the SAME object ID.
+    if isinstance(token,bool):
+        raise ValueError("Boolean is not a class ID")
+    if isinstance(token,int) and token>=0:
+        return "id:"+str(token)
+    if isinstance(token,str):
+        if re.fullmatch(r"[0-9]{1,20}",token):
+            return "id:"+str(int(token))
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.:-]{0,127}",token):
+            return "symbol:"+token
+    raise ValueError("Noncanonical or unsupported object class ID")
+
 
 def wilson_interval(successes:int,trials:int)->tuple[float,float]:
     if not isinstance(successes,int) or not isinstance(trials,int) or trials<=0 or successes<0 or successes>trials:
@@ -63,9 +77,18 @@ def qualify(data:dict)->dict:
     cal_unknown=data.get("unknown_classes_in_calibration")
     test_unknown=data.get("unknown_classes_in_test")
     known=data.get("known_classes")
-    if (not isinstance(cal_unknown,list) or not isinstance(test_unknown,list) or
-        not isinstance(known,list) or not cal_unknown or not test_unknown or not known or
-        set(cal_unknown)&set(test_unknown) or set(known)&(set(test_unknown)|set(cal_unknown))):
+    try:
+        if (not isinstance(cal_unknown,list) or not isinstance(test_unknown,list) or
+            not isinstance(known,list) or not cal_unknown or not test_unknown or not known):
+            raise ValueError("Missing object class lists")
+        cal_ids={canonical_class_id(x) for x in cal_unknown}
+        test_ids={canonical_class_id(x) for x in test_unknown}
+        known_ids={canonical_class_id(x) for x in known}
+        if (len(cal_ids)!=len(cal_unknown) or len(test_ids)!=len(test_unknown) or
+            len(known_ids)!=len(known) or cal_ids&test_ids or
+            known_ids&(cal_ids|test_ids)):
+            raise ValueError("Overlapping or duplicate object class IDs")
+    except (TypeError,ValueError):
         reasons.append("UNKNOWN_CLASSES_NOT_EXCLUDED_FROM_CALIBRATION")
     scenes=data.get("scenes")
     if not isinstance(scenes,list) or not 1<=len(scenes)<=64:
@@ -76,6 +99,15 @@ def qualify(data:dict)->dict:
     # scene label. Bind actual frame SHA-256 and immutable capture IDs.
     fit_frames=data.get("frozen_fit_frame_sha256")
     fit_captures=data.get("frozen_fit_capture_ids")
+    fit_scenes=data.get("frozen_fit_scene_ids")
+    valid_scene=lambda x: isinstance(x,str) and re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}",x) is not None
+    if (not isinstance(fit_scenes,list) or not 1<=len(fit_scenes)<=10000 or
+        not all(valid_scene(x) for x in fit_scenes) or
+        len(set(fit_scenes))!=len(fit_scenes)):
+        reasons.append("MISSING_OR_INVALID_FIT_SCENE_PROVENANCE")
+        fit_scene_set=set()
+    else:
+        fit_scene_set=set(fit_scenes)
     valid_hash=lambda x: isinstance(x,str) and re.fullmatch(r"[a-f0-9]{64}",x) is not None
     valid_capture=lambda x: isinstance(x,str) and re.fullmatch(r"[a-zA-Z0-9_.:-]{1,128}",x) is not None
     if (not isinstance(fit_frames,list) or not 1<=len(fit_frames)<=100000 or
@@ -102,13 +134,15 @@ def qualify(data:dict)->dict:
         device=record.get("device")
         capture=record.get("capture_id")
         hashes=record.get("frame_sha256")
-        if not isinstance(scene_id,str) or not scene_id or scene_id in ids:
+        if not valid_scene(scene_id) or scene_id in ids:
             raise ValueError("Duplicate/missing physical scene")
         if not isinstance(device,str) or not device:
             raise ValueError("Missing camera/device group")
         if not valid_capture(capture) or capture in captures:
             raise ValueError("Duplicate/missing physical video capture")
         ids.add(scene_id);devices.add(device);captures.add(capture)
+        if scene_id in fit_scene_set:
+            reasons.append("TRAIN_CALIBRATION_PHYSICAL_SCENE_LEAKAGE")
         if capture in fit_capture_set:
             reasons.append("TRAIN_CALIBRATION_CAPTURE_LEAKAGE")
         if (not isinstance(hashes,list) or not 1<=len(hashes)<=100000 or
@@ -140,7 +174,8 @@ def qualify(data:dict)->dict:
             n["unknown_falsely_accepted"]>n["unknown_objects"] or
             n["accepted_correct"]!=n["known_correct_accepted"] or
             n["accepted_proposals"]<n["accepted_correct"]+n["unknown_falsely_accepted"] or
-            n["detector_true_positives_iou50"]>n["annotated_detectable_objects"]):
+            n["detector_true_positives_iou50"]>n["annotated_detectable_objects"] or
+            n["known_correct_accepted"]>n["detector_true_positives_iou50"]):
             raise ValueError("Inconsistent real-world confusion or localization counts")
     if len(ids)<MIN_TEST_SCENES:reasons.append("NOT_ENOUGH_INDEPENDENT_SCENES")
     if len(devices)<MIN_DEVICES:reasons.append("NOT_ENOUGH_CAMERA_DOMAINS")
@@ -190,6 +225,7 @@ def qualify(data:dict)->dict:
        "verifiedCaptureGroups":len(captures),
        "trainCalibrationFrameHashesPresent":len(fit_frame_set),
        "trainCalibrationCaptureIdsPresent":len(fit_capture_set),
+       "trainCalibrationPhysicalSceneIdsPresent":len(fit_scene_set),
        "totals":dict(totals),
        "wilson95":intervals,
        "noProductionChange":True,
