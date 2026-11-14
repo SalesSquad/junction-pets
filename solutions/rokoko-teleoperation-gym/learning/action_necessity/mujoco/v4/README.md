@@ -17,7 +17,18 @@ Unbounded Gaussian sensor noise means no formal collision-free guarantee.
 
 ## Reserved independent qualification
 
-- Fresh development: seed offset `30`, `70` worlds → 129030–129099.
+- [Initial v4 CRACI #43632119623](https://github.com/SalesSquad/junction-pets/actions/runs/43632119623)
+  exposed **dev129030–129099** and failed before its JSON science receipt:
+  the legitimate first-option ABSTAIN at seed129089 had **zero**
+  `mj_step`, which frozen v2 physics-only evaluator rejected. That
+  failure and artifact14128851053 are retained; no performance claim.
+- The corrected v4 evaluator records that narrow first-option refusal
+  honestly: **zero physical steps, ABSTAIN=true, success=false, unsafe=false**,
+  matched latent-world fingerprint, and a separate zero-physics abstention
+  count. No invented physics steps or collision-free safety claim. Every
+  non-ABSTAIN episode still requires real MuJoCo integration.
+- **Next fresh development**: seed offset `100`, `70` worlds →
+  **129100–129169** (old 129030–129099 now blocked).
 - Earlier v3 calibration 229000–229099 is **exposed**; it is not a holdout for v4.
 - Future untouched calibration: offset `100`, `100` worlds → 229100–229199.
 - Sealed physics tests 329000+ and OOD 429000+ must remain untouched until
@@ -32,7 +43,7 @@ source checkout with exact `--expected-head`, and a fresh unique output:
 
 ```bash
 python solutions/rokoko-teleoperation-gym/learning/action_necessity/mujoco/v4/run.py \
-  --split dev --seed-offset 30 --episodes 70 --max-options 60 \
+  --split dev --seed-offset 100 --episodes 70 --max-options 60 \
   --require-git --expected-head FULL_NEW_V4_COMMIT \
   --output /tmp/unique-real-v4-dev.json
 ```
