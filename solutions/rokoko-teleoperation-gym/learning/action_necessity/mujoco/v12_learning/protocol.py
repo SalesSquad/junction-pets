@@ -93,6 +93,7 @@ def derive_cohort(all_512_initial_public_worlds,plan,stage):
 
 def paired_physical_goal_readout(trials,cohort,stage):
     """Preliminary original-physics result; independent qualifier still required."""
+    require(stage in ("pilot","followup"),"V12_UNKNOWN_PHYSICAL_COHORT_STAGE")
     arms=PILOT_ARMS if stage=="pilot" else FOLLOWUP_ARMS
     expected={w["seed"]:w["world_hash"] for w in cohort}
     require(len(expected)==(48 if stage=="pilot" else 160),
