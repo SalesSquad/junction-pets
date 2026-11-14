@@ -18,8 +18,23 @@ import random
 import time
 
 SEED=20261115
+INITIAL_CHECKPOINT_SHA256="df9b0155636392be4220248b2cc3b8fe96157edd26e580a423ddd033bf3bb2c6"
+INITIAL_MANIFEST_SHA256="2197e6c3d0721d6c452a7b4914fe35286ef501ddf76b1424de3a21b1d0591e43"
 WEIGHTS_URL="https://download.pytorch.org/models/fasterrcnn_mobilenet_v3_large_320_fpn-907ea3f9.pth"
-EXPECTED_SPLITS={"train":[5,9],"calibration":[10],"sealed":[12]}
+DATA_PLANS={
+    "chibi.lens.hb.domain-detector-data.v1":{
+      "plan":"initial",
+      "sceneSplits":{"train":[5,9],"calibration":[10],"sealed":[12]},
+      "sourceFrameCounts":{"train":80,"calibration":30,"sealed":30},
+      "framesPerScene":{"train":40,"calibration":30,"sealed":30},
+    },
+    "chibi.lens.hb.domain-detector-diverse-data.v2":{
+      "plan":"diverse",
+      "sceneSplits":{"train":list(range(1,11)),"calibration":[11],"sealed":[13]},
+      "sourceFrameCounts":{"train":160,"calibration":24,"sealed":24},
+      "framesPerScene":{"train":16,"calibration":24,"sealed":24},
+    },
+}
 ALLOWED_THRESHOLDS=(.05,.10,.20,.30,.40,.50)
 
 def file_sha256(path:Path)->str:
@@ -32,7 +47,17 @@ def read_manifest(data_root:Path):
     manifest=data_root/"manifest.json"
     raw=manifest.read_bytes()
     record=json.loads(raw)
-    if (record.get("schema")!="chibi.lens.hb.domain-detector-data.v1" or
+    selected_plan=DATA_PLANS.get(record.get("schema"))
+    if not selected_plan:
+        raise ValueError("Unregistered detector scene plan")
+    # Original v1 records predate explicit plan/framesPerScene fields.
+    # Preserve their exact pinned historical schema; require both fields for
+    # every new diverse experiment. No scene/rights/byte constraints change.
+    legacy_v1=(record.get("schema")=="chibi.lens.hb.domain-detector-data.v1"
+               and "plan" not in record and "framesPerScene" not in record)
+    plan_bound=(record.get("plan")==selected_plan["plan"] and
+                record.get("framesPerScene")==selected_plan["framesPerScene"])
+    if (not (legacy_v1 or plan_bound) or
         record.get("source")!="PUBLIC_BOP_HOMEBREWEDDB_CC0" or
         record.get("sourceUrl") !=
           "https://huggingface.co/datasets/bop-benchmark/hb/resolve/main/hb_val_primesense.zip" or
@@ -40,9 +65,8 @@ def read_manifest(data_root:Path):
           "8dd87de6eed1067063081bd4aed3d32a9f0bb6e00887bde78b941eaefc6fec0f" or
         record.get("sourceArchiveSizeBytes") != 2354714266 or
         record.get("officialLicense") != "CC0-1.0" or
-        record.get("sourceFrameCounts") !=
-          {"train":80,"calibration":30,"sealed":30} or
-        record.get("sceneSplits")!=EXPECTED_SPLITS or
+        record.get("sourceFrameCounts") !=selected_plan["sourceFrameCounts"] or
+        record.get("sceneSplits")!=selected_plan["sceneSplits"] or
         record.get("sealedSceneGTRead") is not False or
         record.get("gtOnlyTrainAndCalibration") is not True or
         record.get("knownInstanceClassesNotUsedForDetector") is not True or
@@ -52,19 +76,21 @@ def read_manifest(data_root:Path):
         record.get("privateOCRUsed") is not False):
         raise ValueError("Public archive/license/scene partition or consent boundary failed")
     rows=record["samples"]
-    if len(rows)!=140 or len({r["file"] for r in rows})!=140:
+    n_expected=sum(selected_plan["sourceFrameCounts"].values())
+    if len(rows)!=n_expected or len({r["file"] for r in rows})!=n_expected:
         raise ValueError("Source frame count or uniqueness violated")
     from collections import Counter
     actual=Counter((r["split"],r["scene_id"]) for r in rows)
-    expected={("train",5):40,("train",9):40,
-              ("calibration",10):30,("sealed",12):30}
+    expected={(split,scene):selected_plan["framesPerScene"][split]
+              for split,scenes in selected_plan["sceneSplits"].items()
+              for scene in scenes}
     if dict(actual)!=expected:
         raise ValueError("Missing or substituted physical video-scene rows")
-    if (len({r.get("source_png_sha256") for r in rows})!=140 or
+    if (len({r.get("source_png_sha256") for r in rows})!=n_expected or
         any(r.get("image_dimensions")!=[320,240] for r in rows)):
         raise ValueError("Source-frame digest or pixel geometry mismatch")
     for r in rows:
-        if r["split"] not in EXPECTED_SPLITS or r["scene_id"] not in EXPECTED_SPLITS[r["split"]]:
+        if r["split"] not in selected_plan["sceneSplits"] or r["scene_id"] not in selected_plan["sceneSplits"][r["split"]]:
             raise ValueError("Source scene leakage")
         if r["split"]=="sealed" and (
             "boxes_xyxy" in r or "object_class_ids_audit_only" in r):
@@ -197,13 +223,33 @@ def train(opts):
     opts.output.mkdir(parents=True,exist_ok=True)
     train_samples=[r for r in record["samples"] if r["split"]=="train"]
     calibration=[r for r in record["samples"] if r["split"]=="calibration"]
-    if len(train_samples)!=80 or len(calibration)!=30:
+    if (len(train_samples)!=record["sourceFrameCounts"]["train"] or
+        len(calibration)!=record["sourceFrameCounts"]["calibration"]):
         raise RuntimeError("Train/cal split count changed")
     if opts.max_steps<5 or opts.max_steps>400:
         raise RuntimeError("Invalid bounded training steps")
-    print("START_PRETRAINED_SOURCE",WEIGHTS_URL,"DEVICE",device,flush=True)
+    warm_sha=None
+    if record.get("plan")=="diverse":
+        if opts.warm_start is None or not opts.warm_start.is_file():
+            raise RuntimeError("Diverse-scene study requires source-pinned initial detector")
+        warm_sha=file_sha256(opts.warm_start)
+        if warm_sha!=INITIAL_CHECKPOINT_SHA256:
+            raise RuntimeError("Warm-start weights changed or unreviewed model")
+        previous=torch.load(opts.warm_start,map_location="cpu",weights_only=True)
+        if (previous.get("manifest_sha256")!=INITIAL_MANIFEST_SHA256 or
+            previous.get("trained_steps")!=80 or
+            previous.get("architecture")!="Torchvision_FasterRCNN_MobileNetV3_320"):
+            raise RuntimeError("Original detector checkpoint provenance mismatch")
+        print("START_PINNED_DOMAIN_WARM_START",warm_sha,"DEVICE",device,flush=True)
+        model=model_builder(weights=False)
+        model.load_state_dict(previous["state"],strict=True)
+    else:
+        if opts.warm_start is not None:
+            raise RuntimeError("Original experiment must not silently warm-start")
+        print("START_PRETRAINED_SOURCE",WEIGHTS_URL,"DEVICE",device,flush=True)
+        model=model_builder(weights=True)
     begin=time.monotonic()
-    model=model_builder(weights=True).to(device)
+    model=model.to(device)
     params=[p for p in model.parameters() if p.requires_grad]
     opt=torch.optim.SGD(params,lr=.002,momentum=.9,weight_decay=1e-4)
     model.train()
@@ -234,8 +280,8 @@ def train(opts):
             if count>=opts.max_steps:break
         if count>=opts.max_steps:break
     if count<5:raise RuntimeError("Not actually fitted")
-    # Freeze model BEFORE any novel sealed-scene evaluation. Only CAL scene10
-    # GT determines the detector score threshold.
+    # Freeze model BEFORE any novel sealed-scene evaluation. Only the
+    # pre-registered CAL scene GT determines the detector score threshold.
     results=predict_rows(model,calibration,root,device)
     metrics=[match_predictions(results,t) for t in ALLOWED_THRESHOLDS]
     # Pre-registered selection: F1 on cal, with preference for >=50% proposal
@@ -249,6 +295,8 @@ def train(opts):
     torch.save({"state":state,"threshold":best["threshold"],
                 "architecture":"Torchvision_FasterRCNN_MobileNetV3_320",
                 "trained_steps":count,"manifest_sha256":manifest_sha,
+                "dataset_plan":record.get("plan","initial"),
+                "initial_model_sha256":warm_sha,
                 "seed":SEED},checkpoint)
     report={
       "schema":"chibi.lens.hb.domain-objectness-finetune.v1",
@@ -256,8 +304,12 @@ def train(opts):
       "source":"PUBLIC_BOP_HB_CC0_RGB",
       "sourceArchivePointerSha256":record["sourceArchivePointerSHA256"],
       "sourceArchiveFullyRehashed":False,
-      "trainingScenes":[5,9],"calibrationScene":10,
-      "sealedScene":12,"sealedSceneGTEverRead":False,
+      "datasetPlan":record.get("plan","initial"),"datasetSchema":record["schema"],
+      "trainingScenes":record["sceneSplits"]["train"],
+      "calibrationScene":record["sceneSplits"]["calibration"][0],
+      "sealedScene":record["sceneSplits"]["sealed"][0],
+      "sealedSceneGTEverRead":False,
+      "initialSourceModelSHA256":warm_sha,
       "modelSource":"Torchvision BSD-3-Clause COCO pretrained 320 MobileNetV3",
       "pretrainedWeightsUrl":WEIGHTS_URL,
       "torchVersion":torch.__version__,"torchvisionVersion":torchvision_version,
@@ -296,6 +348,7 @@ def main():
     parser.add_argument("--epochs",type=int,default=2)
     parser.add_argument("--max-steps",type=int,default=64)
     parser.add_argument("--device",choices=("mps","cpu"),default="mps")
+    parser.add_argument("--warm-start",type=Path)
     opts=parser.parse_args()
     train(opts)
 

@@ -18,8 +18,18 @@ import sys
 URL="https://huggingface.co/datasets/bop-benchmark/hb/resolve/main/hb_val_primesense.zip"
 ARCHIVE_SHA="8dd87de6eed1067063081bd4aed3d32a9f0bb6e00887bde78b941eaefc6fec0f"
 ARCHIVE_BYTES=2354714266
-SPLITS={"train":(5,9),"calibration":(10,),"sealed":(12,)}
-FRAME_COUNT={"train":40,"calibration":30,"sealed":30}
+PLANS={
+  "initial":{
+    "schema":"chibi.lens.hb.domain-detector-data.v1",
+    "splits":{"train":(5,9),"calibration":(10,),"sealed":(12,)},
+    "frames":{"train":40,"calibration":30,"sealed":30},
+  },
+  "diverse":{
+    "schema":"chibi.lens.hb.domain-detector-diverse-data.v2",
+    "splits":{"train":tuple(range(1,11)),"calibration":(11,),"sealed":(13,)},
+    "frames":{"train":16,"calibration":24,"sealed":24},
+  },
+}
 IMAGE_WIDTH=320
 IMAGE_HEIGHT=240
 MIN_VIS=.20
@@ -42,8 +52,13 @@ def sample_ids(count:int,n:int)->list[int]:
 def digest(raw:bytes)->str:
     return hashlib.sha256(raw).hexdigest()
 
-def prepare(out:Path):
+def prepare(out:Path,plan_name:str="initial"):
     from PIL import Image
+    if plan_name not in PLANS:
+        raise ValueError("Unregistered physical-scene split")
+    plan=PLANS[plan_name]
+    splits=plan["splits"]
+    per_scene=plan["frames"]
     if not out.is_dir() or any(out.iterdir()):
         raise RuntimeError("Expected new, empty task-owned output")
     if not str(out.resolve()).startswith("/private/tmp/chibi-hb-domain-detector-"):
@@ -51,7 +66,7 @@ def prepare(out:Path):
     reader=load_archive()
     print("ARCHIVE_INDEX_VERIFIED",len(reader.members),flush=True)
     entries=[]; counts=Counter()
-    for split,scene_ids in SPLITS.items():
+    for split,scene_ids in splits.items():
         for scene in scene_ids:
             base=f"val_primesense/{scene:06d}/"
             # This is intentionally forbidden for sealed scene 12.
@@ -60,7 +75,7 @@ def prepare(out:Path):
                 info=json.loads(reader.read(base+"scene_gt_info.json",max_size=8_000_000))
                 if len(gt)!=340 or set(gt)!=set(info):
                     raise RuntimeError("Untrusted public annotations in training/calibration")
-            for frame_id in sample_ids(340,FRAME_COUNT[split]):
+            for frame_id in sample_ids(340,per_scene[split]):
                 frame=str(frame_id)
                 png=reader.read(base+f"rgb/{frame_id:06d}.png",max_size=8_000_000)
                 if png[:8]!=bytes.fromhex("89504e470d0a1a0a"):
@@ -115,18 +130,21 @@ def prepare(out:Path):
     # Force video+scene isolation: never random-split neighboring video frames.
     if len({r["source_png_sha256"] for r in entries})!=len(entries):
         raise RuntimeError("Duplicate source video frame across splits")
-    if len(entries)!=140:
+    expected_total=sum(len(scenes)*per_scene[split] for split,scenes in splits.items())
+    if len(entries)!=expected_total:
         raise RuntimeError(f"Unexpected public split size {len(entries)}")
     record={
-      "schema":"chibi.lens.hb.domain-detector-data.v1",
+      "schema":plan["schema"],
+      "plan":plan_name,
       "source":"PUBLIC_BOP_HOMEBREWEDDB_CC0",
       "sourceUrl":URL,"officialLicense":"CC0-1.0",
       "licenseReference":"https://bop.felk.cvut.cz/datasets/",
       "sourceArchivePointerSHA256":ARCHIVE_SHA,
       "sourceArchiveSizeBytes":ARCHIVE_BYTES,
       "sourceVerification":"Official HF linked etag plus per-member CRC32; FULL_ARCHIVE_NOT_REHASHED",
-      "sourceFrameCounts":{s:len(SPLITS[s])*FRAME_COUNT[s] for s in SPLITS},
-      "sceneSplits":{k:list(v) for k,v in SPLITS.items()},
+      "sourceFrameCounts":{s:len(splits[s])*per_scene[s] for s in splits},
+      "framesPerScene":per_scene,
+      "sceneSplits":{k:list(v) for k,v in splits.items()},
       "sealedSceneGTRead":False,
       "knownInstanceClassesNotUsedForDetector":True,
       "allVisibleObjectsSingleObjectnessClass":True,
@@ -150,8 +168,9 @@ def prepare(out:Path):
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--out",required=True,type=Path)
+    p.add_argument("--plan",choices=("initial","diverse"),default="initial")
     opts=p.parse_args()
-    prepare(opts.out)
+    prepare(opts.out,plan_name=opts.plan)
 
 if __name__=="__main__":
     main()
