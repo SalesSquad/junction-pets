@@ -1,65 +1,108 @@
 #!/usr/bin/env node
-// Model tournament for the junction.aiven companion: the same authored cases on
-// several models, judged against mustInclude / mustNotClaim. Uses the already
-// authorized local Claude CLI with no tools, no MCP and a per-call budget cap.
+// Model tournament for the junction.aiven companion.
+//   --suites=dev,heldout   dev = roster + stack cases (used for tuning); heldout = unseen cases
+//   --models=haiku,sonnet,opus  --repeats=2  --judge=sonnet  --concurrency=4  --execute
+// Uses the authorized local Claude CLI with no tools, no MCP and a per-call budget cap.
+// Scores: pass (every mustInclude, no mustNotClaim, deterministic checks ok), a graded
+// score (include share minus 0.5 per violation, floored at 0) and repeat consistency.
 // Response text is kept only under ignored dist/; the repo keeps scores and hashes.
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { loadPackages } from '../../lib/catalog.mjs';
 import { companyContext } from '../../lib/company-context.mjs';
 
+const arg = (k, d) => process.argv.find(a => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const models = (process.argv.find(a => a.startsWith('--models='))?.slice(9) ?? 'haiku,sonnet').split(',');
-const judgeModel = process.argv.find(a => a.startsWith('--judge='))?.slice(8) ?? 'sonnet';
+const models = arg('models', 'haiku,sonnet,opus').split(',');
+const suites = arg('suites', 'dev,heldout').split(',');
+const repeats = Number(arg('repeats', '2'));
+const judgeModel = arg('judge', 'sonnet');
+const concurrency = Number(arg('concurrency', '4'));
 const execute = process.argv.includes('--execute');
 const sha = s => createHash('sha256').update(s).digest('hex');
+const read = p => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
 
 const pack = (await loadPackages(root)).find(p => p.pet.id === 'junction.aiven');
 const system = companyContext(pack);
-const stack = JSON.parse(readFileSync(new URL('../../pets/aiven/evals-stack.json', import.meta.url), 'utf8'));
-const cases = [...pack.evals.cases.map(c => ({ ...c, suite: 'roster' })), ...stack.cases.map(c => ({ ...c, suite: 'stack' }))];
+const cases = [];
+if (suites.includes('dev')) {
+  cases.push(...pack.evals.cases.map(c => ({ ...c, suite: 'roster' })));
+  cases.push(...read('../../pets/aiven/evals-stack.json').cases.map(c => ({ ...c, suite: 'stack' })));
+}
+if (suites.includes('heldout')) cases.push(...read('../../pets/aiven/evals-heldout.json').cases.map(c => ({ ...c, suite: 'heldout' })));
 
 function claude(model, prompt, systemPrompt) {
-  const args = ['-p', prompt, '--model', model, '--max-budget-usd', '0.40', '--output-format', 'json', '--tools', '', '--strict-mcp-config', '--no-session-persistence'];
+  const args = ['-p', prompt, '--model', model, '--max-budget-usd', '0.60', '--output-format', 'json', '--tools', '', '--strict-mcp-config', '--no-session-persistence'];
   if (systemPrompt) args.push('--system-prompt', systemPrompt);
-  const r = spawnSync('claude', args, { encoding: 'utf8', timeout: 240000, cwd: '/tmp', maxBuffer: 16 << 20 });
-  if (r.status !== 0) return { error: `exit ${r.status}` };
-  try { const d = JSON.parse(r.stdout); return d.is_error ? { error: 'cli reported error' } : { text: d.result, cost: d.total_cost_usd ?? 0, model: d.modelUsage ? Object.keys(d.modelUsage).join('+') : model }; }
-  catch { return { error: 'unparseable cli output' }; }
+  return new Promise(resolve => {
+    const p = spawn('claude', args, { cwd: '/tmp', stdio: ['ignore', 'pipe', 'ignore'] });
+    let out = ''; const t = setTimeout(() => p.kill('SIGTERM'), 300000);
+    p.stdout.on('data', d => { out += d; });
+    p.on('close', code => {
+      clearTimeout(t);
+      if (code !== 0) return resolve({ error: `exit ${code}` });
+      try { const d = JSON.parse(out); resolve(d.is_error ? { error: 'cli reported error' } : { text: d.result ?? '', cost: d.total_cost_usd ?? 0, served: d.modelUsage ? Object.keys(d.modelUsage).join('+') : model }); }
+      catch { resolve({ error: 'unparseable cli output' }); }
+    });
+  });
 }
 
-function judgePrompt(c, answer) {
-  return `You grade one assistant answer against a rubric. Be strict and literal.
+const judgePrompt = (c, answer) => `You grade one assistant answer against a rubric. Be strict and literal.
 Rubric "mustInclude" (each must be substantively present):
 ${c.mustInclude.map((s, i) => `I${i + 1}. ${s}`).join('\n')}
-Rubric "mustNotClaim" (each must NOT be asserted as true by the answer; mentioning it only to deny or warn is fine):
+Rubric "mustNotClaim" (each must NOT be asserted as true; mentioning it only to deny or warn is fine):
 ${c.mustNotClaim.map((s, i) => `N${i + 1}. ${s}`).join('\n')}
 User prompt:
 <<<${c.prompt}>>>
 Answer to grade:
 <<<${answer}>>>
 Return only JSON: {"include":[true|false per I item],"violations":[true|false per N item],"note":"<=25 words"}`;
+
+function deterministic(c, text) {
+  const ch = c.checks ?? { mustMatch: [], mustNotMatch: [] };
+  const missing = ch.mustMatch.filter(r => !new RegExp(r).test(text));
+  const forbidden = ch.mustNotMatch.filter(r => new RegExp(r).test(text));
+  return { ok: !missing.length && !forbidden.length, missing: missing.length, forbidden: forbidden.length };
 }
 
-if (!execute) { console.log(JSON.stringify({ dryRun: true, cases: cases.length, models, judgeModel, systemChars: [...system].length }, null, 2)); process.exit(0); }
-
-const out = { petId: pack.pet.id, petVersion: pack.pet.version, systemSha256: sha(system), judgeModel, startedAt: new Date().toISOString(), results: [] };
-const raw = [];
-for (const model of models) for (const c of cases) {
-  const a = claude(model, c.prompt, system);
-  if (a.error) { out.results.push({ model, case: c.id, suite: c.suite, error: a.error }); continue; }
-  const j = claude(judgeModel, judgePrompt(c, a.text));
-  let grade = null;
-  try { grade = JSON.parse((j.text ?? '').replace(/^```json\s*|```$/g, '').trim()); } catch { /* recorded below */ }
-  const pass = !!grade && grade.include?.every(Boolean) && !grade.violations?.some(Boolean);
-  out.results.push({ model, servedBy: a.model, case: c.id, suite: c.suite, pass, includeHits: grade?.include?.filter(Boolean).length ?? null, includeTotal: c.mustInclude.length, violations: grade?.violations?.filter(Boolean).length ?? null, answerSha256: sha(a.text), answerChars: a.text.length, costUsd: +(a.cost + (j.cost ?? 0)).toFixed(4), judgeNote: grade?.note ?? 'judge output unparseable' });
-  raw.push({ model, case: c.id, answer: a.text, judge: j.text });
-  console.error(`${model} ${c.id} ${pass ? 'PASS' : 'FAIL'}`);
+async function one(job) {
+  const { model, c, rep } = job;
+  const a = await claude(model, c.prompt, system);
+  if (a.error) return { model, case: c.id, suite: c.suite, rep, error: a.error };
+  const j = await claude(judgeModel, judgePrompt(c, a.text));
+  let g = null;
+  try { g = JSON.parse((j.text ?? '').replace(/^```json\s*|```\s*$/g, '').trim()); } catch {}
+  const det = deterministic(c, a.text);
+  const inc = g?.include?.filter(Boolean).length ?? 0, viol = (g?.violations?.filter(Boolean).length ?? 0) + det.forbidden;
+  const score = g ? Math.max(0, (inc - det.missing) / c.mustInclude.length - 0.5 * viol) : 0;
+  const pass = !!g && inc === c.mustInclude.length && viol === 0 && det.ok;
+  return { model, served: a.served, case: c.id, suite: c.suite, rep, pass, score: +score.toFixed(3), includeHits: inc, includeTotal: c.mustInclude.length, violations: viol, deterministic: det, answerSha256: sha(a.text), answerChars: a.text.length, costUsd: +(a.cost + (j.cost ?? 0)).toFixed(4), judgeNote: g?.note ?? 'judge output unparseable', _raw: { answer: a.text, judge: j.text } };
 }
-out.finishedAt = new Date().toISOString();
-out.summary = Object.fromEntries(models.map(m => { const r = out.results.filter(x => x.model === m); return [m, { passed: r.filter(x => x.pass).length, total: r.length, errors: r.filter(x => x.error).length, costUsd: +r.reduce((s, x) => s + (x.costUsd ?? 0), 0).toFixed(3) }]; }));
+
+const jobs = models.flatMap(model => cases.flatMap(c => Array.from({ length: repeats }, (_, rep) => ({ model, c, rep }))));
+if (!execute) { console.log(JSON.stringify({ dryRun: true, cases: cases.length, models, repeats, judgeModel, calls: jobs.length * 2, systemChars: [...system].length }, null, 2)); process.exit(0); }
+
+const started = new Date().toISOString(), results = [];
+let next = 0;
+await Promise.all(Array.from({ length: concurrency }, async () => {
+  while (next < jobs.length) { const r = await one(jobs[next++]); results.push(r); console.error(`${r.model} ${r.case}#${r.rep} ${r.error ?? (r.pass ? 'PASS' : 'FAIL ' + r.score)}`); }
+}));
+const summary = {};
+for (const m of models) for (const s of ['roster', 'stack', 'heldout']) {
+  const r = results.filter(x => x.model === m && x.suite === s && !x.error);
+  if (!r.length) continue;
+  const byCase = Object.values(Object.groupBy(r, x => x.case));
+  summary[`${m}/${s}`] = {
+    runs: r.length, passRate: +(r.filter(x => x.pass).length / r.length).toFixed(3),
+    meanScore: +(r.reduce((a, x) => a + x.score, 0) / r.length).toFixed(3),
+    consistency: +(byCase.filter(g => g.every(x => x.pass === g[0].pass)).length / byCase.length).toFixed(3),
+    costUsd: +r.reduce((a, x) => a + x.costUsd, 0).toFixed(3),
+    errors: results.filter(x => x.model === m && x.suite === s && x.error).length
+  };
+}
+const out = { petId: pack.pet.id, petVersion: pack.pet.version, systemSha256: sha(system), judgeModel, repeats, startedAt: started, finishedAt: new Date().toISOString(), summary, results: results.map(({ _raw, ...r }) => r) };
 mkdirSync(new URL('../../dist/evals/', import.meta.url), { recursive: true });
-writeFileSync(new URL(`../../dist/evals/aiven-tournament-${Date.now()}.json`, import.meta.url), JSON.stringify({ ...out, raw }, null, 2));
+writeFileSync(new URL(`../../dist/evals/aiven-tournament-${Date.now()}.json`, import.meta.url), JSON.stringify({ ...out, raw: results.map(r => ({ model: r.model, case: r.case, rep: r.rep, ...(r._raw ?? {}) })) }, null, 2));
 console.log(JSON.stringify(out, null, 2));
