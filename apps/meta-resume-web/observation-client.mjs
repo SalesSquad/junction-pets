@@ -139,12 +139,13 @@ function node(tag, textContent, className) {
   return el;
 }
 
-export function createObservationPanel({ element, read, notify, returnToTask }) {
+export function createObservationPanel({ element, read, notify, returnToTask,
+  onStart = () => null, onResult = async () => {}, onClear = () => {} }) {
   const $ = (selector) => element.querySelector(selector);
   let config = null, bundle = null, result = null, status = 'Checking observation connection…';
   let busy = false, requestVersion = 0, abort = null, lastContext = '', displayedBundle = null;
 
-  function cancel() { requestVersion += 1; abort?.abort(); abort = null; busy = false; }
+  function cancel() { requestVersion += 1; abort?.abort(); abort = null; busy = false; onClear(); }
 
   function render() {
     const { state, policy } = read();
@@ -281,11 +282,14 @@ export function createObservationPanel({ element, read, notify, returnToTask }) 
     status = config.mode === 'synthetic' ? 'Reading the synthetic moment…' : 'Looking at this moment…'; render();
     const timer = setTimeout(() => abort?.abort(), 45_000);
     try {
+      const ticket = onStart(request);
       const raw = await jsonResponse(await fetch('/api/observe', { method: 'POST', credentials: 'same-origin', cache: 'no-store',
         headers: { 'Content-Type': 'application/json', 'X-Meta-CSRF': config.csrfToken }, body: JSON.stringify(request), signal: abort.signal }), 262_144);
       if (version !== requestVersion) return;
       const { state, policy } = read();
       result = validateObservationResponse(JSON.parse(raw), request, state, policy);
+      await onResult({ request, result, ticket });
+      if (version !== requestVersion) return;
       status = result.status === 'failed' ? 'The moment could not be interpreted. You can still check and pack the item.'
         : result.status === 'skipped' ? 'Your current context is unchanged.'
           : result.status === 'abstained' ? 'A closer look is needed.' : 'A suggestion for this moment. Your task is unchanged.';

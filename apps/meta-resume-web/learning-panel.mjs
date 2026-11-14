@@ -1,4 +1,5 @@
 import { createLearningSession, restoreLearningSession } from './learning-core.mjs';
+import { createLearningObservationBridge } from './learning-observation.mjs';
 import { FIXTURE } from './fixture.mjs';
 
 const SCOPE = Object.freeze({ tenantId: 'demo-tenant', ownerId: 'demo-owner', contextId: 'camera-packing' });
@@ -39,7 +40,7 @@ function field(labelText, id, choices) {
 }
 
 /** Synthetic UI only. Real personal memory belongs to the authenticated Chibi host. */
-export function createLearningPanel({ mount, taskView, resetTask, onChange = () => {} }) {
+export function createLearningPanel({ mount, taskView, resetTask, observationView, onChange = () => {} }) {
   if (!(mount instanceof HTMLElement) || typeof taskView !== 'function' || typeof resetTask !== 'function') {
     throw new TypeError('Learning panel needs a mount, current task and reset callback.');
   }
@@ -62,6 +63,10 @@ export function createLearningPanel({ mount, taskView, resetTask, onChange = () 
     storageAvailable = false;
     restoreMessage = 'The previous learning demo could not be loaded. This session starts with no learned preferences.';
   }
+  const observationBridge = typeof observationView === 'function'
+    ? createLearningObservationBridge({ read: () => ({ ...observationView(), learning: session.snapshot() }) })
+    : null;
+  let observationVersion = 0, observationExpiry = null;
 
   mount.classList.add('learning-panel');
   mount.setAttribute('aria-labelledby', 'learningTitle');
@@ -92,6 +97,9 @@ export function createLearningPanel({ mount, taskView, resetTask, onChange = () 
   adviceTitle.id = 'learningAdviceTitle';
   const adviceText = node('p', 'learning-advice-text');
   const adviceMeta = node('p', 'learning-meta');
+  const observationNote = node('section', 'learning-observation');
+  observationNote.id = 'learningObservation';
+  observationNote.setAttribute('aria-label', 'Current view and learned help');
   const reminderNote = node('div', 'learning-reminder');
   reminderNote.hidden = true;
   const reminderText = node('p');
@@ -106,7 +114,7 @@ export function createLearningPanel({ mount, taskView, resetTask, onChange = () 
   const distractingButton = button('Too much', 'distracting', 'link-button');
   feedbackRow.append(node('span', null, 'Was this the right amount of help?'), usefulButton, distractingButton);
   const checkpointNote = node('p', 'learning-fineprint');
-  adviceCard.append(adviceKicker, adviceTitle, adviceText, adviceMeta, reminderNote, adviceActions, feedbackRow, checkpointNote);
+  adviceCard.append(adviceKicker, adviceTitle, adviceText, observationNote, adviceMeta, reminderNote, adviceActions, feedbackRow, checkpointNote);
 
   const memoryCard = node('article', 'learning-memory');
   const memoryKicker = node('div', 'card-kicker');
@@ -179,6 +187,7 @@ export function createLearningPanel({ mount, taskView, resetTask, onChange = () 
   }
 
   async function dispatch(operation, payload = {}) {
+    clearObservation(false);
     const result = await session.dispatch({
       schema: 'lens.learning-command/v1', commandId: uid('command'),
       expectedRevision: session.snapshot().revision, operation, payload,
@@ -280,6 +289,56 @@ export function createLearningPanel({ mount, taskView, resetTask, onChange = () 
     ackButton.disabled = busy || !recommendation?.reminderId;
   }
 
+  function renderObservation() {
+    observationNote.replaceChildren();
+    const context = observationBridge?.context(recommendation);
+    observationNote.dataset.observationContext = context ? 'current' : 'none';
+    if (!context) {
+      observationNote.append(node('p', 'learning-fineprint', 'Analyze a moment above to bring your current view and help preference together. The image and visual details are not saved in learning memory.'));
+      return;
+    }
+    observationNote.append(node('p', 'eyebrow', context.evidenceMode === 'SYNTHETIC'
+      ? 'SYNTHETIC VIEW · YOUR HELP PREFERENCE' : 'IMPORTED VIEW · SYNTHETIC LEARNING'));
+    if (context.assistance.action === 'stay_silent') {
+      observationNote.append(node('p', 'learning-fineprint', 'A current view is ready. Lens is holding back until you ask.'));
+      return;
+    }
+    if (context.summary) observationNote.append(node('p', 'learning-observation-summary', context.summary));
+    if (context.assistance.action === 'explain') {
+      for (const item of context.observations) observationNote.append(node('p', 'learning-fineprint', item.text));
+    }
+    for (const uncertainty of context.uncertainties) observationNote.append(node('p', 'learning-fineprint', uncertainty));
+    if (context.nextQuestion) observationNote.append(node('p', 'learning-observation-question', context.nextQuestion));
+    observationNote.append(node('p', 'learning-fineprint', 'Current moment only. You still check and confirm the item.'));
+  }
+
+  function clearObservation(refresh = true) {
+    observationVersion += 1;
+    clearTimeout(observationExpiry);
+    observationExpiry = null;
+    observationBridge?.clear();
+    if (refresh) renderObservation();
+  }
+
+  function beginObservation(request) {
+    clearObservation(false);
+    return observationBridge?.begin(request) ?? null;
+  }
+
+  async function observe(packet) {
+    const version = observationVersion;
+    const accepted = observationBridge
+      ? await observationBridge.accept(packet)
+      : { ok: false, error: { code: 'LEARNING_UNAVAILABLE' } };
+    if (version !== observationVersion) return accepted;
+    if (accepted.ok) {
+      clearTimeout(observationExpiry);
+      observationExpiry = setTimeout(() => clearObservation(), Math.max(0, accepted.expiresAt - Date.now()) + 1);
+    }
+    update();
+    return accepted;
+  }
+
   function renderHandoff() {
     handoffOutput.replaceChildren();
     handoffOutput.hidden = !handoffProposal;
@@ -311,6 +370,7 @@ export function createLearningPanel({ mount, taskView, resetTask, onChange = () 
     for (const item of [askButton, checkpointButton, nextButton, recordButton, reminderButton, handoffButton]) item.disabled = busy || !enabled;
     renderMemory(state);
     renderAdvice(state);
+    renderObservation();
     renderHandoff();
     const correct = state.outcomes.filter((item) => item.correct && item.hints === 0);
     const independent = new Set(correct.map((item) => `${item.stepId}:${item.templateId}`)).size;
@@ -402,7 +462,12 @@ export function createLearningPanel({ mount, taskView, resetTask, onChange = () 
   else if (restored) announce('Your previous synthetic learning state was restored.');
   return {
     update,
+    beginObservation,
+    observe,
+    clearObservation,
+    dispose: () => clearObservation(false),
     invalidateTask() {
+      clearObservation(false);
       session.invalidateProposals();
       recommendation = null;
       recommendationKey = '';
