@@ -1,0 +1,334 @@
+{
+  "schemaVersion": 1,
+  "artifactKind": "implementation-plan",
+  "workId": "META-NVIDIA-REUSE-20261114",
+  "observedAtUtc": "2026-11-14T08:01:05Z",
+  "status": "planned-not-dispatched",
+  "dispatchEnabled": false,
+  "runtimeExecutionRecorded": false,
+  "planPath": "docs/META_NVIDIA_SAM31_NEXT_PLAN_20261114.md",
+  "continuationOf": "docs/meta-execution/execution.json",
+  "registry": "https://github.com/SalesSquad/junction-pets/issues/80",
+  "scope": "SAM 3.1 observations and existing NVIDIA Super VL for Chibi Continuity",
+  "sourcePins": {
+    "junction": {
+      "repository": "SalesSquad/junction-pets",
+      "ref": "main",
+      "commit": "12eae05966445c9c596f8465389763e2970227e9"
+    },
+    "agents": {
+      "repository": "SalesSquad/agents",
+      "ref": "main",
+      "commit": "4ecdc4c085f4bc50b5af9cf0240abe85a10d8f9b"
+    },
+    "valmetTruth": {
+      "repository": "SalesSquad/valmet-truth-engine",
+      "ref": "main",
+      "commit": "21f2cc44bb3d05aeebf481a7a5e5c3f878a1222e"
+    },
+    "valmetHack": {
+      "repository": "SalesSquad/valmethack",
+      "ref": "main",
+      "commit": "c86c02f78df8871215f42bfa885220bfcd106904"
+    },
+    "realityTwin": {
+      "repository": "SalesSquad/reality-twin",
+      "ref": "main",
+      "commit": "def12f935299a203f440b9273503a944ad32c5e2"
+    },
+    "dam": {
+      "repository": "SalesSquad/MacAssetDAM",
+      "ref": "main",
+      "commit": "864af2c22c55df1dcc5295b0b6ad11f1d28e7947"
+    },
+    "savi": {
+      "repository": "SalesSquad/savi",
+      "ref": "baseline/round2",
+      "commit": "cd74ce55dc057e44ebffb12173b7ae648ebd5cf1"
+    },
+    "samCode": {
+      "repository": "facebookresearch/sam3",
+      "commit": "eef6839bcfc3458dd52ea80535dc6bd62aea86b1"
+    },
+    "nvidiaSkills": {
+      "repository": "NVIDIA/skills",
+      "commit": "894f2d7dfee49085e84e21c1aad2513bc44a5b6d"
+    }
+  },
+  "goals": {
+    "firstEpisode": "Resume packing camera, microphone and the correct charger after interruption; changed or ambiguous charger causes grounded proposal/question, never automatic completion.",
+    "ninetyDay": {
+      "workflows": 3,
+      "pilotUsers": 30,
+      "realEpisodes": 300,
+      "resumeTimeImprovementPercent": 35,
+      "forgottenStepReductionPercent": 50,
+      "status": "unmeasured targets carried forward from existing Continuity plan"
+    }
+  },
+  "modelProfiles": {
+    "sam31": {
+      "repository": "facebook/sam3.1",
+      "revision": "daa63191845a41281374e725f4c9e51c7a824460",
+      "checkpoint": "sam3.1_multiplex.pt",
+      "builder": "build_sam3_multiplex_video_predictor",
+      "status": "official source verified; no project runtime executed",
+      "runtime": "official PyTorch first",
+      "weightsAccessVerified": false,
+      "minimumVramGiB": null
+    },
+    "hostedSuperVL": {
+      "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "endpoint": "https://integrate.api.nvidia.com/v1/chat/completions",
+      "status": "existing bounded source adapter; current key/quota and live call unverified"
+    },
+    "localSuperVL": {
+      "repository": "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4",
+      "revision": "3acb09951cff50cda7be0200ebbad2c15a3e63ba",
+      "servedModel": "nemotron-3.5-super-vl",
+      "runtime": "vLLM 0.32.0",
+      "tensorParallelSize": 2,
+      "gpu": "2 x RTX PRO 6000 Blackwell Server Edition",
+      "contextTokens": 4096,
+      "maxOutputTokens": 256,
+      "maxConcurrentSequences": 1,
+      "maxImages": 1,
+      "videoEnabled": false,
+      "status": "prior finite executions recorded in Agents PR106; current VM/cache/auth availability unverified"
+    }
+  },
+  "proposedContract": {
+    "status": "design only; integrator must bind to current schema and fixture before writers",
+    "frame": [
+      "sessionId",
+      "captureGeneration",
+      "frameHash",
+      "timestamp",
+      "dimensions"
+    ],
+    "track": [
+      "runId",
+      "modelRevision",
+      "trackGeneration",
+      "maskRefOrBbox",
+      "visibility",
+      "uncertainty"
+    ],
+    "identity": [
+      "candidateRefs",
+      "evidenceRefs",
+      "unknownOrAmbiguousOrCandidate"
+    ],
+    "taskObservation": [
+      "taskId",
+      "expectedRevision",
+      "evidenceRefs",
+      "observations",
+      "uncertainties",
+      "nextQuestion",
+      "nextStepProposal"
+    ],
+    "invariants": [
+      "track_id is not H1 Observation.subjectId",
+      "only current host may attest exact physical identity",
+      "only user-authorized command confirms task state",
+      "not visible does not mean missing",
+      "no future frames in causal replay",
+      "pose/depth remain absent when not actually available"
+    ]
+  },
+  "workPackages": [
+    {
+      "id": "I0",
+      "status": "planned",
+      "owner": "current Meta integrator",
+      "dependsOn": [],
+      "scope": "shared observation schema, one synthetic fixture and error contract",
+      "estimatedActiveMinutes": [
+        30,
+        45
+      ],
+      "acceptance": "All writers reference the same source-pinned contract; current resume-command contract preserved."
+    },
+    {
+      "id": "W1",
+      "status": "planned",
+      "owner": "current Agents/Verda source owner",
+      "repository": "SalesSquad/agents",
+      "dependsOn": [
+        "I0"
+      ],
+      "proposedOwnedPaths": [
+        "cloud-services/verda/experiments/meta-sam31/**"
+      ],
+      "scope": "bounded SAM PyTorch worker using existing controller and receipt pattern",
+      "estimatedActiveMinutes": [
+        60,
+        180
+      ],
+      "executionPrerequisites": [
+        "current source and dirty baseline",
+        "weights access and license",
+        "existing authorized GPU/budget/cache availability"
+      ],
+      "acceptance": "Real inference receipt ties frame, mask, track generation, code and weight revision; no physical identity claim."
+    },
+    {
+      "id": "W2",
+      "status": "planned",
+      "owner": "single designated Junction shared-service writer",
+      "repository": "SalesSquad/junction-pets",
+      "dependsOn": [
+        "I0"
+      ],
+      "proposedOwnedPaths": [
+        "services/nemotron-vl/task-observation.mjs",
+        "services/nemotron-vl/index.mjs",
+        "apps/meta-resume-web/**"
+      ],
+      "ownershipNote": "Existing company and shared-module owners must delegate exact paths; UI follows adapter with the same writer. No ownership acquired by this JSON.",
+      "scope": "runTaskObservation, explicit hosted/local provider profiles and grounded Resume observation UI",
+      "estimatedActiveMinutes": [
+        60,
+        180
+      ],
+      "acceptance": "One current frame/crop plus task revision produces a bounded schema-valid proposal; existing provider guards remain effective."
+    },
+    {
+      "id": "W3",
+      "status": "planned",
+      "owner": "existing private Chibi H2/I2 owner",
+      "repository": "SalesSquad/chibi",
+      "dependsOn": [
+        "I0"
+      ],
+      "proposedOwnedPaths": [],
+      "ownershipNote": "Bind to current private host/store paths and active claim; do not start a competing implementation.",
+      "scope": "existing admission, tenant-scoped durable task/receipt and atomic revision handling",
+      "estimatedActiveMinutes": [
+        120,
+        240
+      ],
+      "acceptance": "Stale/foreign/revoked evidence cannot become confirmed task state; host-backed episode persists."
+    },
+    {
+      "id": "P1",
+      "status": "planned",
+      "owner": "current integrator with capture/native owner",
+      "dependsOn": [
+        "W1",
+        "W2",
+        "W3"
+      ],
+      "scope": "one whole bounded owned episode",
+      "estimatedActiveMinutes": [
+        30,
+        60
+      ],
+      "acceptance": "A meaningful changed-object observation reaches the current user confirmation flow; report physical device and replay evidence separately."
+    },
+    {
+      "id": "P2",
+      "status": "planned",
+      "owner": "same GPU source owner",
+      "dependsOn": [
+        "P1"
+      ],
+      "scope": "one frozen baseline-versus-SAM batch",
+      "acceptance": "Report useful task outcome, identity errors, ID switches, prompts, latency, peak VRAM and actual reserved GPU time; keep or remove SAM based on measured benefit."
+    }
+  ],
+  "experiment": {
+    "status": "not run",
+    "totalClips": 12,
+    "developmentClips": 4,
+    "frozenComparisonClips": 8,
+    "proposedClipSeconds": [
+      6,
+      10
+    ],
+    "conditions": [
+      "clear",
+      "occlusion",
+      "reentry_or_lookalike",
+      "object_moved",
+      "lighting_change",
+      "camera_motion"
+    ],
+    "comparisons": [
+      "full-frame current SuperVL baseline",
+      "SAM-selected current crop with the same SuperVL profile"
+    ],
+    "metrics": [
+      "wrong_object_proposal",
+      "track_id_switch",
+      "meaningful_change_recall",
+      "useful_next_step",
+      "unnecessary_question",
+      "p50_latency",
+      "p95_latency",
+      "peak_vram",
+      "provider_calls",
+      "reserved_gpu_seconds"
+    ],
+    "generalizationClaim": false,
+    "proposedWarmSessionMaxMinutes": 30,
+    "budgetAuthority": "No new spending authority. Use only separately verified existing authorized capacity/budget; count all allocated GPUs and startup time.",
+    "actualCost": null
+  },
+  "nvidiaSkills": {
+    "routerRead": true,
+    "catalogListCommand": "npx skills add nvidia/skills --list",
+    "catalogListExitCode": 0,
+    "newSkillsInstalled": false,
+    "considered": [
+      {
+        "name": "nemotron-customize",
+        "decision": "optional later eval/model_eval with exact existing endpoint/config; no training now"
+      },
+      {
+        "name": "deepstream-import-vision-model",
+        "decision": "not applicable: object detection only, not SAM segmentation"
+      },
+      {
+        "name": "vss-build-vision-ai",
+        "decision": "defer complete stack until measured multistream/archive requirement"
+      }
+    ]
+  },
+  "toolsAndMcp": {
+    "github": "actual connector source reads and task-branch plan write",
+    "metaDocs": "previously verified at https://mcp.developer.meta.com/wearables; not re-run during this planning audit",
+    "verda": "existing native CLI stdio MCP documented with 18 tools; not activated during this audit",
+    "newSchedulerCreated": false
+  },
+  "deferred": [
+    "new embedding producer until first vertical slice",
+    "SAVI avatar and phone AR",
+    "SAM3D/Omniverse environment reconstruction",
+    "DeepStream/Triton/Dynamo/VSS rollout",
+    "TensorRT optimization",
+    "model fine-tuning"
+  ],
+  "researchExecution": {
+    "workers": 3,
+    "mode": "read-only source audit",
+    "actualGpuJobsStarted": 0,
+    "modelDownloads": 0,
+    "inferenceCalls": 0,
+    "newCapabilitiesInstalled": 0
+  },
+  "currentUnknowns": [
+    "current NVIDIA hosted key/quota",
+    "current Verda GPU/cache/auth availability",
+    "SAM checkpoint access",
+    "live camera to private host readiness",
+    "actual model/tool cost"
+  ],
+  "nextAction": {
+    "owner": "current Meta integrator",
+    "workPackage": "I0",
+    "action": "Bind the shared observation contract and one camera/microphone/charger fixture; then dispatch W1 and W2 only under existing ownership and execution authority."
+  }
+}
+
