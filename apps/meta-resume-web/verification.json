@@ -1,0 +1,56 @@
+{
+  "workId": "META-EXEC-20261114/U1",
+  "sourceBase": "98d5a524d61e431ca36acd62b268ede343fc7fe2",
+  "sourceSha256": {
+    "README.md": "8041db27070d655fb4d2ff802695d9f033e2bd3d10c64739bf83c00f4091c5e2",
+    "app.mjs": "31c1c024a0cfb71d50156b5aaa92cb3f95d7d7032955a14b6b8ff46898204710",
+    "fixture.mjs": "6a9db832f8e6410facde34dc61d02943be97dbacfa796c64af461e07e22f8aa3",
+    "index.html": "4b942a65209a5958e530fef011f244d457e56bcc6d9f970a3bc49b49b125a3e6",
+    "prototype.json": "0106ad64f01f1b6209b498bbd08c041d360cde9d15fc17e0b74a8f2afdab6dec",
+    "scenario.mjs": "39d1448ae404fdfd22c91121f972a08e491a8c94514d281c17b098fc5a904bd0",
+    "state.mjs": "9049fa9ab26bbe0af4639b9c6370b8bef7414ac05f0a82e149ca219170a852b7",
+    "styles.css": "a631f7e254e888672d35a392b0c653312ee27b2f176bd8e24e367a2dc2fe5052",
+    "verify.mjs": "a238506acffa8a5a30649a3544f85d71f5461a09b5103136794bdfd8ee5bd67e",
+    "webmcp.mjs": "556e5d2e9e927d06055256cf516caa5164e8672a5d368599ff4afc865f8da788"
+  },
+  "deterministicScenario": {
+    "command": "node apps/meta-resume-web/scenario.mjs",
+    "result": "pass",
+    "checkedAtUtc": "2026-11-14T06:28:04.867Z",
+    "executor": "ChatGPT hosted exec_command; Linux Node v24.22.1",
+    "finalRevision": 8,
+    "checks": [
+      "two confirmations survive interruption",
+      "old capture rejected",
+      "lookalike identity rejected",
+      "empty-evidence proposal does not complete step",
+      "identical retry replays",
+      "conflicting ID reuse refused",
+      "stale revision refused",
+      "assistant cannot confirm",
+      "journal replay restores state",
+      "explicit user confirmation completes",
+      "capture revocation preserves confirmations and fences late evidence",
+      "correction invalidates this and later confirmations",
+      "offline resume remains available"
+    ]
+  },
+  "browserAttempt": {
+    "result": "blocked-before-page-load",
+    "command": "node apps/meta-resume-web/verify.mjs evidence",
+    "executor": "same authorized Linux cloud workspace; existing Chromium and Playwright",
+    "error": "FATAL chrome/browser/process_singleton_posix.cc:297 socket() failed: Operation not permitted (1); Chromium SIGABRT",
+    "loopbackServerClosed": true,
+    "browserConnectorFallback": "Browser access requires the originating browser context",
+    "sandboxOrAccountChanges": false
+  },
+  "qualification": {
+    "localSyntheticState": true,
+    "renderedBrowser": false,
+    "rendered600x600": false,
+    "nativeWebMcp": false,
+    "physicalGlasses": false,
+    "chibiHost": false,
+    "productionDeployment": false
+  }
+}

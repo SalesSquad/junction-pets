@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "workId": "META-EXEC-20261114",
+  "observedAtUtc": "2026-11-14T06:31:29.564031+00:00",
+  "status": "first-source-slices-delivered-continuation-enabled",
+  "distribution": "Developer continuation record; not an activation, daemon or production attestation. Private native receipt must stay outside public exports.",
+  "sourcePins": {
+    "junctionMain": "98d5a524d61e431ca36acd62b268ede343fc7fe2",
+    "chibiMain": "a39f7d3957c16cc2db8a8af4fbd4bd8184dd4aea",
+    "datIosSdk": "0bd369298eef6a980ad0bdb6c8a5502f2c02a08c",
+    "metaWebToolkit": "fbf132997d036548ce090761a8bd4cf0afbda52a"
+  },
+  "goal": {
+    "description": "Continuous physical-task companion across observations, interruptions, meaningful changes, consenting human handoff and later reviewed procedure/XR practice.",
+    "ninetyDayTarget": {
+      "workflows": 3,
+      "pilotUsers": 30,
+      "realEpisodes": 300,
+      "resumeTimeImprovementPercent": 35,
+      "forgottenStepReductionPercent": 50
+    },
+    "metricsStatus": "unmeasured targets, not outcomes/recruitments"
+  },
+  "registry": "https://github.com/SalesSquad/junction-pets/issues/80#issuecomment-6872905280",
+  "planPr": "https://github.com/SalesSquad/junction-pets/pull/104",
+  "lanes": [
+    {
+      "id": "H1",
+      "status": "source-complete-ready-for-review",
+      "worker": "/root/meta_resume_domain",
+      "workerModel": "gpt-6.1-sol",
+      "repository": "SalesSquad/chibi",
+      "branch": "codex/meta-resume-domain-20261114",
+      "head": "a17785fd34ad9ab4a177fae2365b44c8d09ee15d",
+      "prUrl": "https://github.com/SalesSquad/chibi/pull/122",
+      "ownedPaths": [
+        "crates/chibi-domain/src/meta_resume.rs",
+        "crates/chibi-domain/tests/meta_resume.rs"
+      ],
+      "integratorPath": "crates/chibi-domain/src/lib.rs",
+      "evidence": "h1-verification.json",
+      "runtimeStatus": "In-memory domain only; host API and durable store not implemented"
+    },
+    {
+      "id": "U1",
+      "status": "source-complete-browser-blocked",
+      "worker": "/root/meta_mcp_bootstrap",
+      "repository": "SalesSquad/junction-pets",
+      "branch": "codex/meta-resume-web-20261114",
+      "ownedPaths": [
+        "apps/meta-resume-web/**"
+      ],
+      "head": "01065ebcffb74ebbb801f126ae8b46dba15b3a80",
+      "prUrl": "https://github.com/SalesSquad/junction-pets/pull/108",
+      "runtimeStatus": "Synthetic local UI/state only; browser qualification blocked by current executor socket permission and missing originating browser context",
+      "evidence": "https://github.com/SalesSquad/junction-pets/blob/01065ebcffb74ebbb801f126ae8b46dba15b3a80/apps/meta-resume-web/verification.json",
+      "scenarioResult": "One Node state scenario passed finalRevision8; rendered browser and native WebMCP unqualified"
+    },
+    {
+      "id": "A1",
+      "status": "blocked-resource",
+      "worker": "/root/meta_execution_source_owner",
+      "prUrl": "https://github.com/SalesSquad/junction-pets/pull/75",
+      "head": "4eaac725b2032253c9e2414a6997ff4bb064e442",
+      "evidence": "native-blocked-receipt.private.json",
+      "reason": "All three checked Macs below existing25GiB simulator preflight; no simulator/test started",
+      "nextAction": "Admit one cached test-without-building after stable disk/capacity check; preserve source/products"
+    },
+    {
+      "id": "M1",
+      "status": "completed-live-documentation-search",
+      "worker": "/root/meta_mcp_bootstrap",
+      "evidence": "mcp/meta_mcp_receipt_20261114.json",
+      "endpoint": "https://mcp.developer.meta.com/wearables",
+      "tools": [
+        "search_dat_docs",
+        "search_webapps_docs"
+      ],
+      "runtimeStatus": "Documentation only; not developer account or glasses/Chibi runtime"
+    },
+    {
+      "id": "I1",
+      "status": "plan-mcp-contract-source-delivered",
+      "owner": "root",
+      "ownedPaths": [
+        "docs/CHIBI_RESUME_IMPLEMENTATION_PLAN_20261114.md",
+        "docs/CHIBI_CONTINUITY_EXECUTION_20261114.md",
+        "docs/meta-execution/**"
+      ],
+      "sharedContract": [
+        "resume-command.schema.json",
+        "golden-path.fixture.json"
+      ]
+    }
+  ],
+  "continuation": {
+    "existingFactory": {
+      "id": "Automation_0d78166db9c48191a1fd4e1894ea016f",
+      "enabled": true,
+      "promptUpdatedAtUtc": "2026-11-14T06:22:46.772107+00:00",
+      "schedule": "existing hourly at minute28, unchanged",
+      "newSchedulerCreated": false
+    },
+    "soleJunctionIntegrator": "Existing Portfolio PR Recovery",
+    "nextQueued": [
+      {
+        "id": "U2",
+        "objective": "Run the already authored single browser journey once on an existing admitted browser executor; current cloud socket permissions and absent originating browser context prevented page load.",
+        "status": "queued-not-dispatched"
+      },
+      {
+        "id": "I2",
+        "objective": "Bind actual strict command/snapshot transport and use same schema; preserve native adapter stack and current host authority.",
+        "status": "queued-not-dispatched"
+      },
+      {
+        "id": "H2",
+        "objective": "Private tenant-scoped task store and atomic revision/receipt transaction plus current authenticated host admission.",
+        "status": "queued-not-dispatched"
+      },
+      {
+        "id": "P1",
+        "objective": "Real input episode with phone/DAT adapter and baseline measurement, not synthetic model reuse.",
+        "status": "queued-not-dispatched"
+      },
+      {
+        "id": "R1",
+        "objective": "Choose Familiar or consented Relay after first measured episodes.",
+        "status": "queued-not-dispatched"
+      }
+    ]
+  },
+  "access": {
+    "githubConnector": "verified reads, task-branch writes and PR metadata",
+    "currentCloud": "verified source/Node/Python execution and public Meta docs MCP",
+    "codexCloudTaskApi": "HTTP401 Could not parse your authentication token; no hosted job started",
+    "privateGitCli": "no credentials available in current cloud; connector used without credential transfer"
+  },
+  "claims": {
+    "production": false,
+    "deployed": false,
+    "newSpendingAuthorized": false,
+    "glassesQualified": false,
+    "privateHostConnected": false,
+    "permanentWorkers": false
+  },
+  "cost": "Actual model/tool cost unknown; no new paid provider or API inference campaign started.",
+  "activeWriterClaimsAtHandoff": [],
+  "handoff": "Initial bounded worker tasks finished. Resume future work through current issue80 claims and existing Product Factory; do not infer permanently running workers."
+}

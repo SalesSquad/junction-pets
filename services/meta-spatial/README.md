@@ -67,3 +67,13 @@ host-owned append-only sightings and user correction. Then prove calibration and
 marker registration separately. Source, scope and acceptance criteria live in
 [the architecture](../../docs/META_SPATIAL_ARCHITECTURE.md) and the
 [Discord source record](../../docs/evidence/meta-discord-20261113.json).
+
+
+## Continuity observation integration
+
+The [runnable SAM 3.1 → Nemotron → Resume guide](OBSERVATION.md) describes the
+new task observation contract, worker bundle importer, fixed model profiles,
+bounded loopback development server and visible advisory UI. Start with
+`node services/meta-spatial/observation-server.mjs` for an explicitly synthetic
+whole journey. The existing host/private identity boundary remains unchanged;
+model output never confirms an item or task.

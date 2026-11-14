@@ -27,6 +27,11 @@ test('demo delegates three declared capabilities across four known companions',(
     'junction.mariadb','junction.nvidia','junction.meta',
   ]);
   assert.deepEqual(trace.messages[2].request.parents,['step.mariadb','step.nvidia']);
+  for (const person of trace.participants) {
+    const pet=packages.find(p=>p.pet.id===person.id).pet;
+    assert.equal(person.artIndex,pet.artIndex,'avatar uses the original pet manifest index');
+    assert.ok(Number.isInteger(person.artIndex)&&person.artIndex>=0&&person.artIndex<36);
+  }
   for (const message of trace.messages) {
     const p=packages.find(p=>p.pet.id===message.request.to).pet;
     assert.ok(p.capabilities.find(c=>c.id===message.request.capabilityId));

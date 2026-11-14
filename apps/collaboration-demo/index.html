@@ -28,20 +28,29 @@
         </div>
         <aside class="overview" aria-label="Scenario overview">
           <span class="panel-label">SCENARIO <span>001 / SPATIAL ASSISTANT</span></span>
-          <div class="scene-graphic" aria-hidden="true"><span class="ring ring-one"></span><span class="ring ring-two"></span><span class="ring ring-three"></span><span class="center-star">✳</span><span class="orbit orbit-one">DB</span><span class="orbit orbit-two">GPU</span><span class="orbit orbit-three">UX</span></div>
+          <div class="scene-graphic" aria-hidden="true"><span class="ring ring-one"></span><span class="ring ring-two"></span><span class="ring ring-three"></span><span class="center-star">✳</span><span class="orbit orbit-one" id="orbitDatabase">DB</span><span class="orbit orbit-two" id="orbitGpu">GPU</span><span class="orbit orbit-three" id="orbitUx">UX</span></div>
           <div class="scenario-caption"><strong>A hands-free industrial companion</strong><span>Manifest-based planning · Private host kept separate</span></div>
           <div class="stats"><div><strong id="participantCount">—</strong><span>Specialist pets</span></div><div><strong id="messageCount">—</strong><span>Task handoffs</span></div><div><strong>0</strong><span>External actions</span></div></div>
         </aside>
       </section>
+      <section class="team-section" aria-labelledby="team-heading">
+        <div class="section-heading">
+          <div><span class="kicker">01 / CHALLENGE TEAMS</span><h2 id="team-heading">One product. Shared expertise.</h2></div>
+          <div class="team-picker"><label for="solutionPicker">Source-declared solution</label><select id="solutionPicker" disabled><option>Loading team declarations…</option></select></div>
+        </div>
+        <p class="team-intro">These are existing Junction solution-to-pet links, not new pets. A proposed peer route is not an executed request or permission. The Council replay below is a separate synthetic example.</p>
+        <div id="solutionTeam" class="team-stage" aria-live="polite">Loading source-declared teams…</div>
+        <p id="teamMeta" class="team-meta">No Chibi host receipt has been verified.</p>
+      </section>
       <section class="workflow" aria-labelledby="workflow-heading">
-        <div class="section-heading"><div><span class="kicker">01 / THE TEAM</span><h2 id="workflow-heading">Specialists, connected.</h2></div><p>Each pet only handles capabilities explicitly declared in its own package. The coordinator does not inherit other pets' private memory.</p></div>
+        <div class="section-heading"><div><span class="kicker">02 / THE SIMULATED TEAM</span><h2 id="workflow-heading">Specialists, connected.</h2></div><p>Each pet only handles capabilities explicitly declared in its own package. The coordinator does not inherit other pets' private memory.</p></div>
         <div id="petRail" class="pet-rail" aria-live="polite"></div>
       </section>
       <section class="trace-section" aria-labelledby="trace-heading">
-        <div class="section-heading"><div><span class="kicker">02 / THE HANDOFF</span><h2 id="trace-heading">See the work move.</h2></div><div class="trace-controls"><div class="progress-label" id="progressLabel" aria-live="polite">Ready to replay</div><button id="next" type="button" class="step-btn" disabled>Next handoff →</button></div></div>
+        <div class="section-heading"><div><span class="kicker">03 / THE HANDOFF</span><h2 id="trace-heading">See the work move.</h2></div><div class="trace-controls"><div class="progress-label" id="progressLabel" aria-live="polite">Ready to replay</div><button id="next" type="button" class="step-btn" disabled>Next handoff →</button></div></div>
         <div class="trace-layout"><div class="timeline" id="timeline" aria-label="Inter-agent message timeline"></div><aside class="detail" id="detail" aria-label="Selected delegation detail"><div class="detail-empty"><span>↗</span><h3>Pick a handoff</h3><p>Every task carries a recipient capability, bounded synthetic context, source provenance and a declared scope.</p></div></aside></div>
       </section>
-      <section class="review" aria-labelledby="review-title"><div class="review-mark" aria-hidden="true">✓</div><div><span class="kicker">03 / HUMAN-IN-THE-LOOP</span><h2 id="review-title">The last word stays yours.</h2><p>Specialists can propose. The host must authorize. A human reviews source quality, bystander privacy, and real test evidence before a plan becomes a live action.</p></div><div class="review-state"><span class="review-pill">AWAITING HUMAN REVIEW</span><span>No deployment · No privileged execution</span></div></section>
+      <section class="review" aria-labelledby="review-title"><div class="review-mark" aria-hidden="true">✓</div><div><span class="kicker">04 / HUMAN-IN-THE-LOOP</span><h2 id="review-title">The last word stays yours.</h2><p>Specialists can propose. The host must authorize. A human reviews source quality, bystander privacy, and real test evidence before a plan becomes a live action.</p></div><div class="review-state"><span class="review-pill">AWAITING HUMAN REVIEW</span><span>No deployment · No privileged execution</span></div></section>
       <footer><span>Chibi Council v0.1 · Independent Junction companion demonstration</span><span id="traceMeta">Synthetic fixture · Source commit not verified</span></footer>
     </main>
   </div>

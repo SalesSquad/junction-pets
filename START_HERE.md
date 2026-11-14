@@ -7,6 +7,10 @@ the 34 packages and discover source provenance. For live implementation and PR
 state, read GitHub's current main HEAD and PRs, then follow
 [the sync contract](docs/SPACE_SYNC_CONTRACT.md).
 
+## Develop a product or solution
+
+For the active 19-product / 19-technology backlog, begin at [Product Factory #80](https://github.com/SalesSquad/junction-pets/issues/80) and read current open PR ownership. Use [solution workspaces](docs/SOLUTION_WORKSPACES.md) for a complete application, service, data pipeline or challenge demo that reuses one or more company agents. Run `node scripts/solution-workspace.mjs list` and `node scripts/solution-workspace.mjs brief meta-find-verify`. New products get their own bounded developer scope under `solutions/<id>/`; existing apps/services/agent sources keep their current owners and paths.
+
 ## Before editing
 
 1. Resolve authenticated current `main`, open PRs and exact source SHAs. Inspect
