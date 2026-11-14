@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "runId": "rokoko.hybrid.43650587631.forensic",
+  "projectId": "rokoko",
+  "taskId": "rokoko.mujoco-prospective-train",
+  "kind": "synthetic-test",
+  "capturedAt": "2026-11-14T22:58:05.785Z",
+  "status": "failed",
+  "source": {
+    "repository": "SalesSquad/junction-pets",
+    "commit": "39f48031f7bff3970516a3c055efe47603e78be5"
+  },
+  "evidence": {
+    "level": "source-reported",
+    "ref": "https://github.com/SalesSquad/junction-pets/actions/runs/43650587631",
+    "receiptSha256": "1dec9ec86ef1cd24cd9dbdc0bcbf7832c3efc776bce53f33f5a58233f7881030"
+  },
+  "dataset": {
+    "sha256": "c8eaf92dbc68d8a919606fddbff39c93b40621cfbb3408bf09d18d630d6a71ed",
+    "sampleSetSha256": "57ae3dc1d8149f55f29e8d8758d66ff8a694c5ad597e059d6b4bee498bab533f",
+    "split": "train",
+    "sampleCount": 640,
+    "origin": "synthetic"
+  },
+  "evaluation": {
+    "kind": "train-only-hybrid-forensic",
+    "protocolSha256": "d66d2f1d1967a3aa03e8a9cb9532d57c697144dc58ac8dfd500392aec98ad585",
+    "independentHoldout": false
+  },
+  "artifact": {
+    "type": "report",
+    "sha256": "d4a00877172f815958e7ad38753c36b99e30980c47e7128f9ad46bb229e2902b"
+  },
+  "metrics": [
+    {
+      "id": "frozen-v5-safe-goals-total",
+      "value": 30,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 160
+    },
+    {
+      "id": "hybrid-safe-goals-total",
+      "value": 30,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 160
+    },
+    {
+      "id": "v8-safe-goals-total",
+      "value": 0,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 160
+    },
+    {
+      "id": "rescue-off-v5-safe-goals-total",
+      "value": 30,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 160
+    },
+    {
+      "id": "frozen-v5-safe-near-goals",
+      "value": 15,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 128
+    },
+    {
+      "id": "hybrid-safe-near-goals",
+      "value": 15,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 128
+    },
+    {
+      "id": "frozen-v5-safe-clear-goals",
+      "value": 15,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 32
+    },
+    {
+      "id": "hybrid-safe-clear-goals",
+      "value": 15,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 32
+    },
+    {
+      "id": "hybrid-novel-safe-goals-vs-v5",
+      "value": 0,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 160
+    },
+    {
+      "id": "hybrid-lost-v5-safe-goals",
+      "value": 0,
+      "unit": "count",
+      "direction": "lower",
+      "samples": 160
+    },
+    {
+      "id": "hybrid-unsafe-trials",
+      "value": 0,
+      "unit": "count",
+      "direction": "lower",
+      "samples": 160
+    },
+    {
+      "id": "frozen-v5-forward-reopens-near",
+      "value": 64,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 128
+    },
+    {
+      "id": "hybrid-forward-reopens-near",
+      "value": 107,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 128
+    },
+    {
+      "id": "forensic-public-mask-option-transitions",
+      "value": 24167,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 24167
+    },
+    {
+      "id": "real-mujoco-train-episodes",
+      "value": 640,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 640
+    },
+    {
+      "id": "hosted-replayed-goal-trials",
+      "value": 30,
+      "unit": "count",
+      "direction": "higher",
+      "samples": 640
+    }
+  ],
+  "limitations": [
+    "CRACI run #43650587631 overall FAILED. Stage7 real MuJoCo physics succeeded; stage8 packed evidence, then system-Python unittest lacked NumPy. One-line env fix landed in harness a7bef33240e1fa498e9c7548757267dcc1c9c3bb. Not a green run.",
+    "Failed-run ZIP artifact 14136116349 SHA256 286f83c729303a7fe159d68ca494b94f51f685370ffff3e8578cefe62eaf5e0c. Original training SHA 111a7ce3b1cdf96d258b014e57d8310d35f622ebe40d494593b65bf0205161a1; raw SHA c8eaf92dbc68d8a919606fddbff39c93b40621cfbb3408bf09d18d630d6a71ed.",
+    "Independent forensic audit restored all 640 TRAIN episodes and 24,167 18D-public/7-mask option events. It verified goal replays, contacts, masks and 160 exact frozen V5 placebo traces. No local fresh MuJoCo rerun.",
+    "Hybrid and frozen V5 both earned 30/160 safe goals (near15,clear15); novel0, lost0,unsafe0. Hybrid forward reopen 107 vs V5 64 on 128 near worlds is proxy gain, not more true goals. V8 zero goals.",
+    "Negative TRAIN-only science. NO model improvement, sealed holdout, dev/cal/test/OOD, robot certificate, provider attestation, verified bill, promotion or release. Do not rerun the same negative cohort as new science."
+  ],
+  "policySha256": null
+}
