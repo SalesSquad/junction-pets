@@ -26,12 +26,16 @@ hashed <- strsplit(system2("sha256sum", shQuote(input), stdout = TRUE),
 stopifnot(identical(hashed, receipt$dataset_sha256))
 
 df <- read.csv(input, stringsAsFactors = FALSE, check.names = FALSE)
+robust <- isTRUE(receipt$robust_training)
+expected_total <- if (robust) 35000L else 30000L
+expected_splits <- if (robust) c("train", "cal", "shifted", "normal_holdout") else
+  c("train", "cal", "shifted")
 features <- c("visual", "text", "shape", "quality", "recency")
 required <- c("split", "cohort", "row_id", "label", "hard_negative",
               "baseline_probability", features)
 stopifnot(all(required %in% names(df)), !anyNA(df[required]),
-          nrow(df) == 30000L, length(unique(df$cohort)) == 1L,
-          setequal(unique(df$split), c("train", "cal", "shifted")),
+          nrow(df) == expected_total, length(unique(df$cohort)) == 1L,
+          setequal(unique(df$split), expected_splits),
           all(df$label %in% 0:1), all(df$hard_negative %in% 0:1),
           !any(df$hard_negative == 1 & df$label == 1),
           all(vapply(df[features], is.numeric, logical(1))),
@@ -42,12 +46,14 @@ stopifnot(all(required %in% names(df)), !anyNA(df[required]),
 train <- df[df$split == "train", , drop = FALSE]
 cal <- df[df$split == "cal", , drop = FALSE]
 shifted <- df[df$split == "shifted", , drop = FALSE]
+normal_holdout <- df[df$split == "normal_holdout", , drop = FALSE]
 stopifnot(nrow(train) == 20000L, nrow(cal) == 5000L,
           nrow(shifted) == 5000L,
+          nrow(normal_holdout) == (if (robust) 5000L else 0L),
           all(c(0L, 1L) %in% train$label),
           all(c(0L, 1L) %in% cal$label),
           all(c(0L, 1L) %in% shifted$label))
-for (subset in list(train, cal, shifted)) {
+for (subset in c(list(train, cal, shifted), if (robust) list(normal_holdout) else list())) {
   stopifnot(!anyDuplicated(subset$row_id),
             identical(sort(subset$row_id), seq_len(nrow(subset)) - 1L))
 }
@@ -160,10 +166,16 @@ draws <- replicate(1200, mean(sample(delta, length(delta), replace = TRUE)))
 ci <- as.numeric(quantile(draws, c(0.025, 0.975), names = FALSE, type = 1))
 selected <- shifted_metrics[[winner]]
 baseline <- shifted_metrics[["baseline_calibrated"]]
+normal_metrics <- if (robust) setNames(lapply(model_names, function(name) {
+  summary_metrics(normal_holdout, score(name, normal_holdout), thresholds[[name]])
+}), model_names) else NULL
+normal_safety <- !robust ||
+  normal_metrics[[winner]]$fpr <=
+    normal_metrics[["baseline_calibrated"]]$fpr + 0.01
 quality <- if (winner != "baseline_calibrated" &&
                selected$fpr <= baseline$fpr &&
                selected$recall > baseline$recall &&
-               ci[[1]] > 0) {
+               ci[[1]] > 0 && normal_safety) {
   "EXPLORATORY_SYNTHETIC_HELDOUT_GAIN"
 } else "NO_RELIABLE_SHIFTED_GAIN"
 
@@ -173,14 +185,18 @@ report <- list(
   datasetSha256 = receipt$dataset_sha256,
   modelFamiliesTrained = names(models),
   candidateCount = length(models),
+  trainingProfile = if (robust) "mixed_train_shifted_calibration" else "source_train_source_calibration",
+  calibrationDomain = receipt$calibration_domain,
   trainingCases = nrow(train), calibrationCases = nrow(cal),
   independentShiftedCases = nrow(shifted),
+  independentNormalCases = nrow(normal_holdout),
   calibrationTargetFpr = target_fpr,
   frozenBaselineThreshold = receipt$baseline_threshold,
   calibratedBaselineMethod = "FPR-matched on calibration negatives",
   calibratedCandidate = winner,
   calibration = cal_metrics,
   shiftedHoldout = shifted_metrics,
+  normalHoldout = normal_metrics,
   selectedMinusCalibratedBaselineShiftedRecall = as.numeric(mean(delta)),
   pairedBootstrap95pct = ci,
   selectedMinusBaselineShiftedFalseCandidates = selected$fp - baseline$fp,

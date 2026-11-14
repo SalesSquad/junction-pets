@@ -68,3 +68,16 @@ test('Meta trained model tournament gets eight distinct immutable cohorts', () =
   assert.ok(matrix.matrix.include.every(row => row.source_sha === meta));
   assert.throws(() => resolvePlan({workload: 'meta-r-tournament', source_sha: candidate}, context), /pinned Meta/);
 });
+
+test('shift-calibrated Meta R robustness study has twelve independent CPU cohorts', () => {
+  const meta = '634f1e0e6cb2de46bcf0a783532d46c23f513d11';
+  const robust = resolvePlan({workload: 'meta-r-robust', source_sha: meta}, context);
+  assert.equal(robust.jobCount, 12);
+  assert.equal(robust.maxParallel, 8);
+  assert.deepEqual(robust.matrix.include.map(row => row.cohort),
+                   Array.from({length:12},(_,i)=>i));
+  assert.equal(new Set(robust.matrix.include.map(row=>row.cell)).size,12);
+  assert.ok(robust.matrix.include.every(row=>row.source_sha===meta));
+  assert.throws(()=>resolvePlan({workload:'meta-r-robust',source_sha:candidate},context),
+                /pinned Meta/);
+});

@@ -21,7 +21,8 @@ FEATURES = ("visual", "text", "shape", "quality", "recency")
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--source-root", type=Path, required=True)
-    p.add_argument("--cohort", type=int, choices=range(8), required=True)
+    p.add_argument("--cohort", type=int, choices=range(12), required=True)
+    p.add_argument("--profile", choices=("normal", "robust"), default="normal")
     p.add_argument("--out", type=Path, required=True)
     args = p.parse_args()
 
@@ -43,19 +44,41 @@ def main():
 
     # Every cohort has distinct train/cal/shifted worlds. Original baseline's
     # TRAIN/VALIDATION/TEST seeds are never reused, and never used as labels.
-    seeds = {
-        "train": 110_001 + args.cohort * 10_007,
-        "cal": 220_003 + args.cohort * 10_009,
-        "shifted": 330_007 + args.cohort * 10_037,
-    }
+    if args.profile == "normal":
+        if args.cohort > 7:
+            raise RuntimeError("Normal source cohort must be 0..7")
+        seeds = {
+            "train": 110_001 + args.cohort * 10_007,
+            "cal": 220_003 + args.cohort * 10_009,
+            "shifted": 330_007 + args.cohort * 10_037,
+        }
+        parts = (
+            ("train", "train", TRAIN, "train"),
+            ("cal", "validation", CAL, "cal"),
+            ("shifted", "shifted_test", SHIFTED, "shifted"),
+        )
+    else:
+        # New scientific hypothesis: mixed source/shift training, a *shifted*
+        # calibration set and independent source + shifted heldouts. None of
+        # these seeds overlaps the original cohort's earlier datasets.
+        seeds = {
+            "train_normal": 510_001 + args.cohort * 10_007,
+            "train_shifted": 610_003 + args.cohort * 10_009,
+            "cal": 710_007 + args.cohort * 10_037,
+            "shifted": 810_011 + args.cohort * 10_039,
+            "normal_holdout": 910_013 + args.cohort * 10_043,
+        }
+        parts = (
+            ("train", "train", 10_000, "train_normal"),
+            ("train", "shifted_test", 10_000, "train_shifted"),
+            ("cal", "shifted_test", 5_000, "cal"),
+            ("shifted", "shifted_test", 5_000, "shifted"),
+            ("normal_holdout", "train", 5_000, "normal_holdout"),
+        )
     forbidden = {module.TRAIN_SEED, module.VALIDATION_SEED, module.TEST_SEED}
-    if len(set(seeds.values())) != 3 or any(s in forbidden for s in seeds.values()):
+    if (len(set(seeds.values())) != len(seeds) or
+            any(s in forbidden for s in seeds.values())):
         raise RuntimeError("Leaking baseline or held-out seed")
-    parts = (
-        ("train", "train", TRAIN),
-        ("cal", "validation", CAL),
-        ("shifted", "shifted_test", SHIFTED),
-    )
     fieldnames = ["split", "cohort", "row_id", "label", "hard_negative",
                   *FEATURES, "baseline_probability"]
     counts = {}
@@ -65,19 +88,20 @@ def main():
     with args.out.open("x", encoding="utf8", newline="") as out:
         writer = csv.DictWriter(out, fieldnames=fieldnames)
         writer.writeheader()
-        for split, domain, count in parts:
-            examples = module.synthetic_examples(seeds[split], count, domain=domain)
+        for split, domain, count, seed_key in parts:
+            examples = module.synthetic_examples(seeds[seed_key], count, domain=domain)
             if len(examples) != count:
                 raise RuntimeError("Generator underfilled a declared domain")
-            counts[split] = count
-            positives[split] = 0
-            hard_negatives[split] = 0
+            start_row = counts.get(split, 0)
+            counts[split] = start_row + count
+            positives.setdefault(split, 0)
+            hard_negatives.setdefault(split, 0)
             for i, ex in enumerate(examples):
                 if len(ex.features) != len(FEATURES):
                     raise RuntimeError("Unexpected model feature count")
                 if ex.hard_negative and ex.same_object:
                     raise RuntimeError("Hard-negative source contradicts label")
-                row = dict(split=split, cohort=args.cohort, row_id=i,
+                row = dict(split=split, cohort=args.cohort, row_id=start_row + i,
                            label=int(ex.same_object), hard_negative=int(ex.hard_negative),
                            baseline_probability=format(
                                module._model_score(frozen, ex.features), ".14g"))
@@ -92,6 +116,9 @@ def main():
         "source_sha": META_SOURCE,
         "cohort": args.cohort,
         "source_kind": "synthetic-feature-scores-not-camera-images",
+        "profile": args.profile,
+        "robust_training": args.profile == "robust",
+        "calibration_domain": ("shifted_test" if args.profile == "robust" else "validation"),
         "seed_sets": seeds,
         "original_baseline_seeds_disjoint": True,
         "counts": counts,

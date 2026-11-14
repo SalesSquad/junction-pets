@@ -41,6 +41,7 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - chaos-lab
         - rokoko-r-tournament
         - meta-r-tournament
+        - meta-r-robust
       source_sha:
         description: Full product SHA; overrides historical baseline. Tieto uses sponsor_revision.
         type: string
@@ -3694,9 +3695,9 @@ jobs:
         include-hidden-files: false
 
   meta-r-tournament:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'meta-r-tournament' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && (inputs.workload == 'meta-r-tournament' || inputs.workload == 'meta-r-robust') }}
     needs: plan
-    name: "Chibi Lens R models / cohort ${{ matrix.cohort }} / CPU 4"
+    name: "Chibi Lens R ${{ inputs.workload }} / cohort ${{ matrix.cohort }} / CPU 4"
     runs-on: craci
     timeout-minutes: 20
     strategy:
@@ -3711,7 +3712,7 @@ jobs:
       CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
       CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
       CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
-      CRACI_WORKLOAD: meta-r-tournament
+      CRACI_WORKLOAD: ${{ inputs.workload }}
       CRACI_CELL: ${{ matrix.cell }}
       CRACI_NEXT_OWNER: Portfolio PR Recovery
       CRACI_ALLOWED_SOURCE_CHANGES: '[]'
@@ -3764,7 +3765,7 @@ jobs:
         Rscript -e 'invisible(parse(file=file.path(Sys.getenv("CRACI_HARNESS_ROOT"),"scripts/craci/meta-r-train.R")));cat("R_PARSE_OK\n")'
         test "$(git -C "$CRACI_SOURCE_ROOT" rev-parse HEAD)" = "$CRACI_SOURCE_SHA"
         test "$(git -C "$CRACI_HARNESS_ROOT" rev-parse HEAD)" = "$CRACI_HARNESS_SHA"
-    - name: Generate 30k independent score samples and train four R models
+    - name: Generate source-bound cohort and train four R models
       id: qualification
       shell: bash
       run: |
@@ -3773,9 +3774,10 @@ jobs:
           scratch="$RUNNER_TEMP/meta-r-work"
           test ! -e "$scratch"
           mkdir "$scratch"
+          if [ "$CRACI_WORKLOAD" = "meta-r-robust" ]; then profile="robust"; else profile="normal"; fi
           python3 "$CRACI_HARNESS_ROOT/scripts/craci/meta-r-generate.py" \
             --source-root "$CRACI_SOURCE_ROOT" \
-            --cohort "$CRACI_COHORT" --out "$scratch/dataset.csv"
+            --profile "$profile" --cohort "$CRACI_COHORT" --out "$scratch/dataset.csv"
           Rscript "$CRACI_HARNESS_ROOT/scripts/craci/meta-r-train.R" \
             "$scratch/dataset.csv" "$scratch/models" "$CRACI_SOURCE_SHA"
           test -s "$scratch/dataset-receipt.json"
