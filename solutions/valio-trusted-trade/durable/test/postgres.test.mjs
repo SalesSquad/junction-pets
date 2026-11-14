@@ -8,6 +8,10 @@ test('real PostgreSQL multi-process durability and crash-before-ACK',
     assert.equal(r.postCommitCrashObserved,true);
     assert.equal(r.crashReplayed,true);
     assert.equal(r.sealedBatchRefusal,true);
+    assert.equal(r.refundRaceSingleWinner,true);
+    assert.equal(r.outboxDeleteRefusal,true);
+    assert.equal(r.outboxRetargetRefusal,true);
+    assert.equal(r.outboxTruncateRefusal,true);
     assert.equal(r.verified.balanced,true);
     assert.equal(r.verified.matching,true);
     assert.equal(r.verified.nonnegative,true);
