@@ -17,8 +17,9 @@ retained = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(retained)
 
 
-def fixture(root, corrupt_manifest=False):
-    artifacts = root / "artifacts" / "rokoko-mujoco-v7-feasibility"
+def fixture(root, corrupt_manifest=False,
+            artifact_name="rokoko-mujoco-v7-feasibility"):
+    artifacts = root / "artifacts" / artifact_name
     artifacts.mkdir(parents=True)
     originals = {"training.json": b'{"trials":[1,2,3]}\n' * 41,
                  "full_transitions.jsonl.gz": bytes(range(256)) * 4}
@@ -34,6 +35,32 @@ def fixture(root, corrupt_manifest=False):
 
 
 class ExactRetentionContracts(unittest.TestCase):
+    def test_v8_prospective_uses_same_strict_caps_and_distinct_schema(self):
+        with tempfile.TemporaryDirectory(prefix="craci-v8-retention-") as directory:
+            root = Path(directory) / "evidence"
+            name = "rokoko-mujoco-v8-prospective"
+            artifacts, originals = fixture(root, artifact_name=name)
+            report = retained.package_evidence(root, Path(directory) / "staging",
+                                               chunk_bytes=128, artifact_name=name)
+            self.assertEqual(report["schema"], retained.V8_SCHEMA)
+            self.assertTrue(retained.verify_parts(artifacts, report))
+            self.assertTrue(all(source["parts"] and all(
+                part["archive_bytes"] < retained.MAX_FILE_BYTES
+                for part in source["parts"]) for source in report["sources"]))
+            restored = Path(directory) / "restored"
+            retained.restore_parts(artifacts, restored)
+            for filename, raw in originals.items():
+                self.assertEqual((restored / filename).read_bytes(), raw)
+
+    def test_unrecognized_v8_artifact_target_does_not_move_source_files(self):
+        with tempfile.TemporaryDirectory(prefix="craci-v8-retention-") as directory:
+            root = Path(directory) / "evidence"
+            artifacts, originals = fixture(root)
+            with self.assertRaisesRegex(AssertionError, "UNKNOWN_ARTIFACT"):
+                retained.package_evidence(root, Path(directory) / "staging",
+                                          artifact_name="../../other-product")
+            self.assertTrue(all((artifacts / name).exists() for name in originals))
+
     def test_all_raw_bytes_survive_collector_safe_valid_zips_and_restore(self):
         with tempfile.TemporaryDirectory(prefix="craci-v7-retention-") as directory:
             root = Path(directory) / "evidence"
