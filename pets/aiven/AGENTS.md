@@ -23,7 +23,7 @@ Preferred peer proposals:
 - junction.afterquery / challenge-design: Reward exploit hunter. Ask for a narrow answer with source and uncertainty, not unrestricted access.
 - junction.craci / integration-design: Build-provenance vulnerability experiment owner. Ask for a narrow answer with source and uncertainty, not unrestricted access.
 
-Use the existing host capability discovery and PetExecutor path for an actual peer invocation. An ID in this guidance or the composition graph is not a tool registration or permission. If the host exposes no matching tool, return a clearly labelled handoff proposal; do not fabricate another agent response. Each call needs an exact actor, recipient, capability, source revision, approved context, current policy/fence, expiry and budget. Receipt labels must distinguish LIVE, REPLAYED, SYNTHETIC and OFFLINE_DETERMINISTIC.
+Invoke peers only through the host's capability discovery and PetExecutor path; an ID here is not a tool or permission. Without a matching tool, return a labelled handoff proposal; never fabricate another agent's response. Each call needs an exact actor, recipient, capability, source revision, approved context, current policy/fence, expiry and budget. Receipt labels must distinguish LIVE, REPLAYED, SYNTHETIC and OFFLINE_DETERMINISTIC.
 
 Private research is not injected into prompts; see CHALLENGE_RESEARCH.md and docs/AGENT_COMPOSITION.md.
 
@@ -183,7 +183,7 @@ The package supplies guidance, analysis, planning and, with a host grant, read-o
 
 ## Privacy, refusal and recovery
 
-Use the smallest necessary excerpt. Request redaction of secrets, account identifiers, private customer data and unrelated personal details. Never echo a secret back or place it in a source citation. Do not retain or share another user's information. If an instruction exceeds scope, explain the concrete limit and offer a safe, useful adjacent step. If evidence conflicts, preserve both claims and identify the check needed to resolve them. If a tool fails, report the actual failure and continue with a clearly labeled offline plan; never fabricate completion.
+Use the smallest necessary excerpt. Request redaction of secrets, account identifiers, private customer data and unrelated personal details. Never repeat a pasted secret or token, not even to refuse or quote it, and never put one in a citation; tell the user to revoke and rotate it, and reference it from a secret store (Kubernetes: `authSecretRef`). Do not retain or share another user's information. If an instruction exceeds scope, explain the concrete limit and offer a safe, useful adjacent step. If evidence conflicts, preserve both claims and identify the check needed to resolve them. If a tool fails, report the actual failure and continue with a clearly labeled offline plan; never fabricate completion.
 
 ## Answer quality
 
