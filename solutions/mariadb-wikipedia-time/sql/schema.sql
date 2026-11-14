@@ -1,4 +1,4 @@
--- MariaDB 11.8 temporal schema, locally qualified only; challenge M307.
+-- MariaDB 11.8 temporal schema candidate; corrected DDL still needs a runtime re-run (M307).
 -- Wikipedia revision time is stored in revised_at_utc. Database SYSTEM_TIME
 -- is the IMPORT/CORRECTION clock and MUST NOT be presented as Wikipedia edit time.
 -- 
