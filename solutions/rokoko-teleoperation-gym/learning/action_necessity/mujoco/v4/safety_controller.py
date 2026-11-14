@@ -56,12 +56,16 @@ class SweptLaneController(RiskAwareController):
         """Observed object center separation over one actual option window."""
         obj = np.asarray(o[:2], dtype=float)
         obstacle = np.asarray(o[6:8], dtype=float)
+        # The real pusher target can advance .002 m * ten controls in one
+        # option. V3's .011 m forward estimate underbound that open-loop
+        # traversal and could deem a contact path clear too late. The extra
+        # few millimetres also cover modest object inertia/noisy servo lag.
         if action == 2:
-            dx, dy = .011, 0.
+            dx, dy = .024, 0.
         elif action == 1:
-            dx, dy = .007, 0.
+            dx, dy = .014, 0.
         elif action in (3, 4):
-            dx, dy = .008, -.007 if action == 3 else .007
+            dx, dy = .021, -.019 if action == 3 else .019
         else:
             return float("inf")
         gap_min = float("inf")
