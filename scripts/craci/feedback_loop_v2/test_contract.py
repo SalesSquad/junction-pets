@@ -282,6 +282,33 @@ class FeedbackContracts(unittest.TestCase):
                             clock="2026-11-14T21:01:00Z")
         self.assertFalse(out["job_dispatch_authorized"])
 
+    def test_real_science_stop_receipt_exits_nonzero(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output=Path(tmp)/"stop"
+            with patch.object(fb,"source_head",return_value="a"*40), \
+                 patch.object(fb,"read_pinned",return_value=(fixture(),{})):
+                result=fb.main(["--mode","compile","--require-git",
+                                "--expected-head","a"*40,
+                                "--repo-root",tmp,"--candidate","v10",
+                                "--output-dir",str(output)])
+            self.assertEqual(result,2)
+            self.assertEqual(json.loads((output/"feedback.json").read_text())["decision"],
+                             "STOP")
+            self.assertTrue((output/"manifest.json").is_file())
+
+    def test_valid_negative_learning_does_not_exit_as_failed_science(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output=Path(tmp)/"learn"
+            with patch.object(fb,"source_head",return_value="a"*40), \
+                 patch.object(fb,"read_pinned",return_value=(fixture(),{})):
+                result=fb.main(["--mode","compile","--require-git",
+                                "--expected-head","a"*40,
+                                "--repo-root",tmp,"--candidate","v11",
+                                "--output-dir",str(output)])
+            self.assertEqual(result,0)
+            self.assertEqual(json.loads((output/"feedback.json").read_text())["decision"],
+                             "TRAIN_MORE_FOR_UNSUPPORTED_ACTION")
+
     def test_utc_cutoff_requires_timezone(self):
         with self.assertRaisesRegex(fb.FeedbackStop,"UTC_CUTOFF_TIMEZONE"):
             fb.parse_utc("2026-11-14T21:00:00")
