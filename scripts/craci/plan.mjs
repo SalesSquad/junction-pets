@@ -33,6 +33,7 @@ const FRONTIER_PINS = Object.freeze({
   'rokoko-heldout': '0390b87a54ad5cbc98fd5d781f828be0cfa8fbe8',
   'arduino-proof-48': 'eb7ff4cb7fa6c867ced7d944385b4e0bd08d04c4',
   'valio-settlement-browser': 'd45f450a38ec6c8fb2f73b96d181454458ae3928',
+  'valio-http-race': 'd45f450a38ec6c8fb2f73b96d181454458ae3928',
   'bahn-offline-sweep': 'a4396d5ead2acc3d3db5e9a456af7f48058bb358',
   'rokoko-rl-cpu': '59479b42b177c1829a2e6678adfff1fb68aef09c',
   'rokoko-rl-full': '59479b42b177c1829a2e6678adfff1fb68aef09c',
@@ -45,7 +46,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race',
 ]);
 
 function choose(value, choices, label) {
