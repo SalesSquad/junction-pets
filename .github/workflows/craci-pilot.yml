@@ -31,6 +31,11 @@ on:
         type: choice
         default: base
         options: [base, '2283', '2234', '2129', '2297', heads, all]
+      tieto_toolchain:
+        description: Preserve pinned SDK or explicitly test Roslyn 4.12 compatibility
+        type: choice
+        default: pinned
+        options: [pinned, compatible]
       shard:
         description: Fixed scenario shard; use all only for new scenario coverage
         type: choice
@@ -257,7 +262,7 @@ jobs:
 
   tieto-sponsor:
     if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'tieto-sponsor' }}
-    name: Tieto MessagePack / ${{ matrix.revision }} / .NET 8
+    name: Tieto MessagePack / ${{ matrix.revision }} / ${{ inputs.tieto_toolchain }}
     runs-on: craci
     timeout-minutes: 30
     concurrency:
@@ -272,6 +277,7 @@ jobs:
       SPONSOR_SHA: ${{ fromJSON('{"base":"32258fdbee4bcd653c79f51b4376b5103c6f4d27","2283":"9df83c38409c8bfad0517aebffe48211eda4a5b4","2234":"9007cee1163c4a274fd60c3cc20c21ae63622786","2129":"083afd994c1c9a994cb2cd5aa0b6ad805a621457","2297":"a0aa5ab2de7f5a669d97e37184a89034c1de82b6"}')[matrix.revision] }}
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_NOLOGO: '1'
+      TIETO_TOOLCHAIN: ${{ inputs.tieto_toolchain || 'pinned' }}
     steps:
       - name: Configure public sponsor and SDK downloads
         uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
@@ -280,7 +286,10 @@ jobs:
           image: ubuntu-24.04
           network: |
             default: deny
-            presets: [github]
+            presets: [github, ubuntu]
+            sources:
+              - apt:
+                  urls: [https://packages.microsoft.com/ubuntu/24.04/prod]
             connections:
               - tls:
                   serverNamePatterns:
@@ -316,6 +325,25 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
           global-json-file: sponsor/global.json
+      - name: Install explicitly selected compatible compiler
+        if: ${{ inputs.tieto_toolchain == 'compatible' }}
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: '9.0.100'
+      - name: Restore the expected legacy timezone data
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y tzdata-legacy
+          test -f /usr/share/zoneinfo/Cuba
+      - name: Record the explicit compiler compatibility overlay
+        if: ${{ inputs.tieto_toolchain == 'compatible' }}
+        working-directory: sponsor
+        run: |
+          set -euo pipefail
+          python3 ../harness/scripts/craci/tieto-toolchain.py
+          git diff -- global.json
+          test "$(git diff --name-only)" = "global.json"
       - name: Build and test four actual sponsor suites
         working-directory: sponsor
         run: |

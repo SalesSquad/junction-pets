@@ -257,6 +257,12 @@ async function espooJourney(page) {
   let focusFailure;
   try {
     await page.waitForFunction(() => document.activeElement === document.querySelector('#evidence-M-01 summary'));
+    assert.equal(await page.evaluate(() => location.hash), '#evidence-M-01');
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => document.querySelector('#evidence-M-01')?.open === false);
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => document.querySelector('#evidence-M-01')?.open === true);
+    assert.equal(await page.evaluate(() => document.activeElement === document.querySelector('#evidence-M-01 summary')), true);
   } catch (error) {
     // Focus is independent of the meeting state machine. Keep its failure,
     // inspect the actual browser state and continue the remaining journey;
