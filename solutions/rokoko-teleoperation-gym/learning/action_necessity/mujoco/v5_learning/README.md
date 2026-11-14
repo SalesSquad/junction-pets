@@ -31,8 +31,10 @@ an infrastructure/source/timeout failure must not be called scientific RED.
 
 ## Separation and data provenance
 
-- Training-only seeds: **5,290,000…5,290,047** by default, in a new domain
-  disjoint from all legacy physics seed bands. Six policy candidates (three
+- Training-only seeds: **510,000…510,047** by default, in an independent
+  reservation **inside frozen `ContactEnv.reset`'s valid `[120000,520000)`
+  seed domain**, disjoint from all existing physics dev/cal/test/OOD bands.
+  Six policy candidates (three
   each for two generations) see the same 48 training seeds, using only actual
   observed `observation[18]`, `mask[7]`, seven-option action, reward, cost and
   subsequent observation. A candidate's training success, unsafe/abstain and
@@ -42,7 +44,8 @@ an infrastructure/source/timeout failure must not be called scientific RED.
   after training/model freeze. Run constant, the unchanged v4 controller and
   the learned v5 on the *same latent world hash* with the unchanged shield.
   Prior exposed v4 dev129030..169 and v3 cal229000..099 are excluded.
-- Additional train-only future cohort: **5,291,000…5,291,999**. Failure
+- Additional train-only future cohort: **511,000…511,999**, also inside the
+  frozen valid environment seed domain. Failure
   taxonomy produces a *proposal*, never an automatic new experiment.
 - **No** v3/v4 exposed calibration reuse, no physics test329000+ or
   OOD429000+, no privileged teacher supervision and no automatic model
