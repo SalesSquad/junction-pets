@@ -1,0 +1,96 @@
+{
+  "source_commit": "a9911f7e9d68114bd5d911eed322a65177fdf086",
+  "source_binding": "EXPORTED_FILE_HASHES_AND_COORDINATOR_PROVIDED_GIT_SHA",
+  "source_dirty": "NOT_AVAILABLE_EXPORTED_FILES",
+  "producing_sha256": {
+    "learning/env.py": "896f381c26a50fb0471f40188b9269c6b6b8afe4f34a847658ae67be2d2bc505",
+    "learning/test_env.py": "57dae9312448411cac7124b2f3ed9d9199b2e7db15f5786a6bfd0167e525c29e",
+    "learning/train.py": "ed31b924106e60c2bf210460638bf650abacf236d57b927bf1513659bc849815",
+    "sim/scene.xml": "f0c127fdd2f36d402efed57a90d308da8c047d3bdd699364f41a270988434d5a"
+  },
+  "completed_at": "2026-11-14T13:31:59.377407+00:00",
+  "input_sha256": "cd4add9017d183bfd7b378cb6fac05a8cd924eb8e0a5d99ba62d42aa1446a936",
+  "torch_version": "2.9.1+cu128",
+  "mujoco_version": "3.3.7",
+  "device": "cuda",
+  "cuda_device": "Tesla V100-SXM2-16GB",
+  "behavior_counts": {
+    "heuristic_demonstration": 30856,
+    "random_nonterminal": 14067,
+    "q_policy": 23563
+  },
+  "gradient_steps": 17106,
+  "train_transitions": 68486,
+  "train_episodes": 2000,
+  "physics_steps": 10411996,
+  "train_wall_seconds": 438.745999382998,
+  "wall_seconds": 639.3764547089959,
+  "initial_parameter_sha256": "53e9abdb71fad5e3a3ad59313c342602f4186020a790a485474fb36c52d4eb09",
+  "final_parameter_sha256": "aa03575a0eda605a8e97b857e6fea47a6dffb425624cfa8bb09900b9a0a3b98f",
+  "weights_sha256": "4fa7a958bc10406f36566377e299e0bca0d273ebc00449fc1ad731dd8a001a45",
+  "timed_out": false,
+  "summary": {
+    "train/dqn": {
+      "episodes": 2000,
+      "success": 116,
+      "unsafe": 0
+    },
+    "train/heuristic": {
+      "episodes": 0,
+      "success": 0,
+      "unsafe": 0
+    },
+    "train/abstain": {
+      "episodes": 0,
+      "success": 0,
+      "unsafe": 0
+    },
+    "cal/dqn": {
+      "episodes": 200,
+      "success": 101,
+      "unsafe": 0
+    },
+    "cal/heuristic": {
+      "episodes": 200,
+      "success": 0,
+      "unsafe": 0
+    },
+    "cal/abstain": {
+      "episodes": 200,
+      "success": 0,
+      "unsafe": 0
+    },
+    "test/dqn": {
+      "episodes": 300,
+      "success": 139,
+      "unsafe": 0
+    },
+    "test/heuristic": {
+      "episodes": 300,
+      "success": 0,
+      "unsafe": 0
+    },
+    "test/abstain": {
+      "episodes": 300,
+      "success": 0,
+      "unsafe": 0
+    },
+    "ood/dqn": {
+      "episodes": 150,
+      "success": 8,
+      "unsafe": 1
+    },
+    "ood/heuristic": {
+      "episodes": 150,
+      "success": 0,
+      "unsafe": 0
+    },
+    "ood/abstain": {
+      "episodes": 150,
+      "success": 0,
+      "unsafe": 0
+    }
+  },
+  "quality_claim": "PASSED_PAIRED_TEST_USEFULNESS",
+  "limits": "Synthetic research only. No hardware, safety certification, Isaac or live glove integration. One learner seed; heldout sample evidence only."
+}
