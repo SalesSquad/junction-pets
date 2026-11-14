@@ -158,3 +158,14 @@ test('fresh public HB scene8 OOD has exactly one pinned source, no old-scene rep
  assert.throws(()=>resolvePlan({workload:'lens-hb-scene8-ood',source_sha:candidate},context),
    /exact source\/harness SHA/);
 });
+
+test('HB source-defect repair admits only two changed Vision model selection paths', () => {
+  const repair = resolvePlan({workload:'lens-hb-vision', lane_slice:'selection-repair'}, context);
+  assert.equal(repair.jobCount,2);
+  assert.deepEqual(repair.matrix.include.map(x=>x.model), ['vision_prototype','vision_guard']);
+  assert.ok(repair.matrix.include.every(x=>x.source_sha===context.harnessSha));
+  assert.equal(repair.maxParallel,2);
+  assert.throws(()=>resolvePlan({
+    workload:'lens-hb-vision',lane_slice:'selection-repair',source_sha:candidate
+  },context),/exact harness source SHA/);
+});

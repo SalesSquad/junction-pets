@@ -141,9 +141,10 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     }
   } else if (workload === 'lens-hb-vision') {
     if (override && override !== harnessSha) throw new Error('HB real Vision study requires exact harness source SHA');
-    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining'], 'HB lane slice');
+    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining', 'selection-repair'], 'HB lane slice');
     for (const [index, model] of ['color', 'vision_prototype', 'vision_pca', 'vision_guard'].entries()) {
-      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
+      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0) ||
+          (slice === 'selection-repair' && !['vision_prototype', 'vision_guard'].includes(model))) continue;
       add(`hb-vision-${index}-${model}`, harnessSha, {model});
     }
   } else if (workload === 'lens-hb-scene8-ood') {
