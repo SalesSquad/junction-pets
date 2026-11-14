@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createWalWorkload,payment,refund} from '../plan.mjs';
+import {createWalWorkload,payment,refund,flightApplicationNames} from '../plan.mjs';
 
 test('10k is 5000 unique payment intents plus 5000 distinct refunds, never a repeated green tuple',()=>{
   const p=createWalWorkload({requests:10000,seed:20261114});
@@ -26,4 +26,13 @@ test('bounded request/seed validation refuses unsafe or ambiguous load',()=>{
   assert.throws(()=>createWalWorkload({requests:200,seed:-1}),RangeError);
   assert.equal(payment('wal_test','key_test_01234',1,[{supplierId:'farm-a',amountCents:1}]).kind,'pay');
   assert.equal(refund('wal_test','refund_key_01234').kind,'refund');
+});
+test('flight backend markers are source-bound to one schema and all eight distinct order IDs',()=>{
+  const schema='j26_1234567890abcdef1234';
+  const markers=flightApplicationNames(schema);
+  assert.equal(markers.length,8);assert.equal(new Set(markers).size,8);
+  assert.ok(markers.every((m,i)=>m===`j26wal_1234567890abcdef1234_wal_flight_${i}`));
+  assert.ok(markers.every(m=>m.length<=63));
+  for(const wrong of ['public','j26_untrusted','j26_1234567890abcdef1234;DROP'])
+    assert.throws(()=>flightApplicationNames(wrong));
 });
