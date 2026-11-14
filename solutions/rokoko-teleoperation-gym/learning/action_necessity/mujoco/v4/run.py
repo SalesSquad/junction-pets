@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import math
 from pathlib import Path
 import subprocess
 import sys
@@ -70,6 +71,47 @@ def post_step_unsafe_diagnostic(env, row):
             "source": "post-outcome inspection, not controller input or qualification filter"}
 
 
+def episode_with_explicit_safe_abort(env, seed, ood, name, make_policy):
+    """Score a real first-action ABSTAIN as a nonphysical, failed episode.
+
+    Frozen v2.episode deliberately requires >0 mj_step for a *physics* result.
+    However the unchanged environment implements healthy ABSTAIN by ending
+    immediately with zero steps, which is a valid explicit refusal. Never
+    invent physical steps, an achieved goal, or physical safety evidence.
+    This exception is accepted ONLY for the exact first-option safe refusal.
+    Any other missing-physics or policy error still fails closed.
+    """
+    try:
+        row = v3.v2.episode(env, seed, ood, name, make_policy)
+        row["zero_physics_abstain"] = False
+        return row
+    except AssertionError as exc:
+        expected = f"{name} failed real MuJoCo physics-step gate on world {seed}"
+        allowed = (name == "safe_v4" and str(exc) == expected
+                   and env.done is True and env.abstained is True
+                   and env.unsafe is False and env.steps == 1
+                   and env.physics_steps == 0 and env.last == 6)
+        if not allowed:
+            raise
+        # The post-ABSTAIN state is physically unchanged (zero integration).
+        # A matched latent world hash is still computed and cross-checked
+        # against the independent constant/v3 arms below.
+        xy = env.data.xpos[env.obj, :2]
+        error = math.hypot(float(xy[0]) - .16, float(xy[1]))
+        return dict(seed=seed, policy=name,
+                    world_hash=v3.v2.v1._world_signature(env),
+                    success=False, unsafe=False, abstained=True,
+                    zero_physics_abstain=True,
+                    physics_steps=0, option_steps=1,
+                    distinct_proposals=1, proposal_counts={"ABSTAIN": 1},
+                    shield_veto_proposals=0, no_contact_stall_options=0,
+                    dwell_ticks_final=0, peak_impulse=0., contacts=0,
+                    holds=0, acks=0, refusals=0, error=error,
+                    option_trace=[dict(option=1, proposed="ABSTAIN",
+                                       allowed=True, progress_m=0.,
+                                       contacts_added=0, refusals_added=0)])
+
+
 def main(argv=None):
     args = v3.v2.v1.parse_args(argv)
     if args.policy:
@@ -79,8 +121,8 @@ def main(argv=None):
     holdout = args.split in ("test", "ood")
     if holdout and not args.permit_holdout:
         raise PermissionError("physics test/OOD remain sealed without --permit-holdout")
-    if args.split == "dev" and args.seed_offset < 30:
-        raise ValueError("V4 uses FRESH dev seed offset >=30; v1-v3 dev batches exposed")
+    if args.split == "dev" and args.seed_offset < 100:
+        raise ValueError("V4 uses FRESH dev seed offset >=100; prior v4 30..99 batch exposed")
     if args.split == "cal" and args.seed_offset < 100:
         raise ValueError("V4 independent calibration offset >=100; v3 cal0..99 exposed")
     low, high = v3.v2.v1.SEED_BANDS[args.split]
@@ -105,7 +147,20 @@ def main(argv=None):
     for seed in range(low + args.seed_offset, low + args.seed_offset + args.episodes):
         rows = {}
         for name, factory in controllers.items():
-            row = v3.v2.episode(env, seed, args.split == "ood", name, factory)
+            row = episode_with_explicit_safe_abort(
+                env, seed, args.split == "ood", name, factory)
+            if row["zero_physics_abstain"]:
+                if not (name == "safe_v4" and row["physics_steps"] == 0
+                        and row["option_steps"] == 1 and row["abstained"]
+                        and not row["success"] and not row["unsafe"]
+                        and row["proposal_counts"] == {"ABSTAIN": 1}
+                        and row["option_trace"] == [
+                            dict(option=1, proposed="ABSTAIN", allowed=True,
+                                 progress_m=0., contacts_added=0,
+                                 refusals_added=0)]):
+                    raise AssertionError("INVALID_ZERO_PHYSICS_SAFE_ABSTAIN_RECEIPT")
+            elif row["physics_steps"] <= 0:
+                raise AssertionError("NONABSTAINED_WORLD_LACKS_REAL_MJ_STEPS")
             # Diagnostics are appended only after the policy/physics episode
             # finishes. They are never seen by an action policy or gate logic.
             row["diagnostic_deadman_release_tick"] = int(env.release)
@@ -118,6 +173,13 @@ def main(argv=None):
     summaries = {name: v3.v2.v1.summarize(worlds, name)
                  for name in controllers if name != "constant"}
     gate = v3.v2.qualification(summaries["safe_v4"])
+    abstentions = {
+        name: {
+            "explicit_abstained": sum(int(r[name]["abstained"]) for r in worlds),
+            "zero_physics_abstained": sum(
+                int(r[name]["zero_physics_abstain"]) for r in worlds),
+        } for name in controllers
+    }
     result = dict(schema="rokoko-mujoco-real-physics-swept-lane-v4",
                   actual_physics_engine=f"mujoco-{mujoco.__version__}",
                   numerical_backend="MuJoCo CPU mj_step, no trained model",
@@ -128,6 +190,7 @@ def main(argv=None):
                   episodes=args.episodes, max_options=args.max_options,
                   untouched_negative_runs=[43627944236, 43628857595,
                                            43630195101, 43630816368],
+                  abstention_accounting=abstentions,
                   world_pairing="same seed, independent motion/sensor RNG, unchanged shield",
                   safety="model-only collision and deadman, no hardware certification",
                   qualification=gate, summaries=summaries, paired_worlds=worlds)
