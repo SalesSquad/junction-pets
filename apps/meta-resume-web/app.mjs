@@ -2,6 +2,7 @@ import { FIXTURE, id } from './fixture.mjs';
 import { createSession, restoreSession } from './state.mjs';
 import { registerResumeTools } from './webmcp.mjs';
 import { createObservationPanel } from './observation-client.mjs';
+import { createLearningPanel } from './learning-panel.mjs';
 
 const $ = (selector) => document.querySelector(selector);
 const STORAGE_KEY = 'chibi-resume.synthetic.camera-bag-v1';
@@ -12,6 +13,7 @@ let restored = false;
 let pendingConfirmation = null;
 let toastTimer;
 let observationPanel = null;
+let learningPanel = null;
 
 try {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -203,6 +205,7 @@ function render() {
   document.documentElement.dataset.revision = String(state.revision);
   document.documentElement.dataset.taskStatus = state.status;
   observationPanel?.sync();
+  learningPanel?.update();
 }
 
 function requestConfirmation() {
@@ -239,6 +242,7 @@ function act(action, button) {
     session.revokeCapture(); persist(); render();
     toast('Observations revoked. Late results are fenced out; your confirmations remain.');
   } else if (action === 'reset') {
+    learningPanel?.invalidateTask();
     observationPanel?.clear('A fresh task is ready. Load a new observation when you want.');
     session = createSession(); candidateVisible = false; persist(); render();
     toast('A fresh local camera-bag demo is ready.');
@@ -271,6 +275,23 @@ observationPanel = createObservationPanel({
   read: () => ({ state: session.snapshot(), policy: session.getPolicy() }),
   notify: toast,
   returnToTask: () => { $('#primaryAction').scrollIntoView({ block: 'center' }); $('#primaryAction').focus(); },
+  onStart: (request) => learningPanel?.beginObservation(request) ?? null,
+  onResult: (packet) => learningPanel?.observe(packet),
+  onClear: () => learningPanel?.clearObservation(),
+});
+learningPanel = createLearningPanel({
+  mount: $('#learningPanel'),
+  observationView: () => ({ state: session.snapshot(), policy: session.getPolicy() }),
+  taskView: () => {
+    const state = session.snapshot();
+    return { taskId: state.taskId, revision: state.revision,
+      status: state.status, nextStepId: state.nextUnconfirmedStep };
+  },
+  resetTask: () => {
+    learningPanel?.invalidateTask();
+    observationPanel?.clear('A new practice episode is ready.');
+    session = createSession(); candidateVisible = false; persist(); render();
+  },
 });
 render();
 if (restored) toast('Your local demo progress is restored. No account or device was contacted.');
@@ -280,4 +301,5 @@ const cleanup = registerResumeTools(document, {
     $('#voiceStatus').textContent = ({ unavailable: 'Unavailable in this browser', registered: 'Native surface detected · unqualified', failed: 'Registration failed · controls still work' })[status];
   },
 });
-window.addEventListener('pagehide', () => { cleanup(); observationPanel.dispose(); }, { once: true });
+window.addEventListener('pagehide', () => { cleanup(); observationPanel.dispose(); learningPanel.dispose(); }, { once: true });
+

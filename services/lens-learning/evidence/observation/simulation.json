@@ -1,0 +1,57 @@
+{
+  "schema": "lens.learning-observation-simulation/v1",
+  "evidenceMode": "SYNTHETIC",
+  "source": {
+    "baseCommit": "ae5b4dcbeb380d1aafcb5ef8154efdadec38e130",
+    "files": {
+      "apps/meta-resume-web/learning-observation.mjs": "2db2c0cc226aa25344b4ed68dacd0ff5f064769e923e72d9a1c6f59c0d557370",
+      "apps/meta-resume-web/learning-core.mjs": "af20a9e4c3720f8263b8726aeeb3b6aa79fd8f3ffb0204ee9d6fd7e29e312be4",
+      "apps/meta-resume-web/observation-client.mjs": "2d14af278638e8671b0aad34afb1fbbcc532f3ffcee756c572d6908eaa014cc4",
+      "apps/meta-resume-web/state.mjs": "9049fa9ab26bbe0af4639b9c6370b8bef7414ac05f0a82e149ca219170a852b7",
+      "apps/meta-resume-web/fixture.mjs": "6a9db832f8e6410facde34dc61d02943be97dbacfa796c64af461e07e22f8aa3",
+      "services/lens-learning/observation-simulation.mjs": "d38c7afa2a25685ccf5c6fbad528a4eb92d0f705da23573e56ab25cb2feb90b5"
+    }
+  },
+  "checks": [
+    {
+      "name": "Approved preference and observation compose without task or memory mutation",
+      "passed": true
+    },
+    {
+      "name": "Both learning consent and capture permission are required",
+      "passed": true
+    },
+    {
+      "name": "Correction invalidates old context and confirmed quiet preference suppresses guidance",
+      "passed": true
+    },
+    {
+      "name": "A response started before forgetting cannot attach to a new learning episode",
+      "passed": true
+    },
+    {
+      "name": "Capture revocation during image hashing fences the eventual result",
+      "passed": true
+    },
+    {
+      "name": "Expiry, scope changes and actual task progress invalidate the composed view",
+      "passed": true
+    },
+    {
+      "name": "Mutated request, forged completion authority and mismatched image bytes are rejected",
+      "passed": true
+    },
+    {
+      "name": "Clear, forged tickets and old completions never resurrect or erase newer context",
+      "passed": true
+    }
+  ],
+  "passed": 8,
+  "providerCalls": 0,
+  "physicalDeviceVerified": false,
+  "privateHostVerified": false,
+  "limits": [
+    "One synthetic image/interpretation fixture; no SAM, NVIDIA or camera execution.",
+    "Browser composition only; not production identity, durable memory or measured learning."
+  ]
+}
