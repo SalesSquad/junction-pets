@@ -24,7 +24,7 @@ Begin at [`START_HERE.md`](START_HERE.md) and [`docs/AGENT_SOURCE_INDEX.json`](d
 
 ## Challenge evidence entrypoint
 
-Before company work, read that company's `pets/<company>/CHALLENGE_RESEARCH.md` and the [source routing index](ops/challenge-source-routing-20261113.json). They bind supplied recordings, fresh official main/technical briefs, Discord observations and Fable critique. Official brief clauses outrank rough ASR and earlier proposed helpers. Research or a planned proof is not an executed model workflow.
+Before company work, read [current shared sources](docs/challenge-research/CURRENT_SOURCES.md) and select the assigned agent's `partnerEvidenceKey` in [docs/AGENT_SOURCE_INDEX.json](docs/AGENT_SOURCE_INDEX.json). Read its latest sponsor clarification and owned briefs before older summaries. Then read that company's `pets/<company>/CHALLENGE_RESEARCH.md` and the [source routing index](ops/challenge-source-routing-20261113.json). They bind supplied recordings, fresh official main/technical briefs, Discord observations and Fable critique. Official brief clauses outrank rough ASR and earlier proposed helpers. Research or a planned proof is not an executed model workflow.
 
 ## Meta source discovery
 
@@ -88,3 +88,4 @@ next_action: <one executable step with an owner>
 ```
 
 Keep the task record and documentation in GitHub so a different future worker can resume **without the original chat or machine**. At handoff: inspect new PR/branch state, resolve conflicts, classify infra-vs-source failures, repair owned code and re-verify the final SHA; carry unresolved work with an explicit new owner. Never report a permanently running agent, provisioned Cloud environment, published plugin on Chibi or production recipient just because its manifest, README, draft PR or synthetic green test exists.
+
