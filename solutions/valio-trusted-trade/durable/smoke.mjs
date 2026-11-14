@@ -88,8 +88,8 @@ export async function runChaosLab({connectionString,requestCount=400,workerCount
     }));
     let cursor=0;
     async function batched(tasks,accept) {
-      for(let offset=0;offset<tasks.length;offset+=workerCount*2) {
-        const chunk=tasks.slice(offset,offset+workerCount*2);
+      for(let offset=0;offset<tasks.length;offset+=workerCount) {
+        const chunk=tasks.slice(offset,offset+workerCount);
         const outcomes=await Promise.all(chunk.map(task=>{
           const worker=workers[(cursor++)%workers.length];
           if(worker.child.exitCode!==null)throw new Error('Unexpected dead worker in batch.');
@@ -111,14 +111,14 @@ export async function runChaosLab({connectionString,requestCount=400,workerCount
       switch(i%5) {
         case 0: return pay(o.orderId,o.payKey,o.amount,o.supplier);
         case 1: return refund(o.orderId,o.refundKey);
-        case 2: return pay(o.orderId,o.payKey,o.amount+1,o.supplier); // conflict after canonicalization
+        case 2: return pay(o.orderId,o.payKey,o.amount,o.supplier==='farm-a'?'farm-b':'farm-a'); // valid money amount, frozen-beneficiary conflict at DB key
         case 3: return pay(o.orderId,`alt_payment_${i}_x`,o.amount,o.supplier);
         default:return refund(o.orderId,`alt_refund_${i}_x`);
       }
     });
     await batched(tasks,out=>{
       if(out.result?.idempotentReplay)allowedReplays++;
-      else if(['IDEMPOTENCY_CONFLICT','ORDER_ALREADY_SETTLED','ORDER_ALREADY_REFUNDED','AMOUNT_MISMATCH'].includes(out.error?.code))refusals++;
+      else if(['IDEMPOTENCY_CONFLICT','ORDER_ALREADY_SETTLED','ORDER_ALREADY_REFUNDED'].includes(out.error?.code))refusals++;
       else throw new Error(`Unexpected mixed response: ${JSON.stringify(out)}`);
     });
     const a=await auditLab(admin,schema);
