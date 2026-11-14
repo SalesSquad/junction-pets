@@ -42,18 +42,19 @@ const digestLike = (value) => JSON.stringify(value);
 
 /** No LLM claims: the demo deliberately accepts only the supported request shape. */
 export function parseBuyerRequest(raw) {
-  if (typeof raw !== 'string' || raw.length > 1000) {
+  if (typeof raw !== 'string' || raw.length > 1000 || !raw.trim()) {
     throw new TradeError('INVALID_REQUEST', 'Enter one short purchasing request.');
   }
-  const matched = raw.match(/(?:^|\W)(\d[\d,\s]*)(?:\s*)(?:litres?|liters?|l)\b/i);
+  // Full-sentence grammar, deliberately not an extraction/search regex: never
+  // turn a negative, decimal, second SKU, instruction or currency into quantity.
+  // One explicitly supported product and delivery fixture; no guesses.
+  const normalized = raw.trim().replace(/\s+/g, ' ');
+  const matched = normalized.match(/^(?:(?:(?:i|we)\s+need|need|order|buy|please\s+(?:order|buy))\s+)?(\d{1,3}(?:,\d{3})+|\d+)\s*(?:litres?|liters?|l)\s+(?:of\s+)?lactose[ -]+free\s+(?:dairy\s+)?milk(?:\s+by\s+monday)?[.!]?$/i);
   if (!matched) {
-    throw new TradeError('UNSUPPORTED_REQUEST', 'State a whole litre quantity, for example 1,000 L.');
+    throw new TradeError('UNSUPPORTED_REQUEST', 'Use one positive whole-litre lactose-free dairy milk request (for example: I need 1,000 L of lactose-free milk by Monday). No decimals, extra products or instructions.');
   }
-  const quantityLitres = Number(matched[1].replace(/[\s,]/g, ''));
+  const quantityLitres = Number(matched[1].replace(/,/g, ''));
   safeWhole(quantityLitres, 1, 10_000, 'Quantity');
-  if (!/lactose[\s-]*free/i.test(raw) || !/milk/i.test(raw)) {
-    throw new TradeError('UNSUPPORTED_REQUEST', 'This demo supports lactose-free dairy milk only; it will not guess another product.');
-  }
   return {
     quantityLitres,
     family: 'dairy-milk',

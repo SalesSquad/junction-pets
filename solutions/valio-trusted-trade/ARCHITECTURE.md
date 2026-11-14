@@ -18,6 +18,8 @@ IN-MEMORY SYNTHETIC FIXTURE CATALOG / AUDIT / ORDERS
 
 All fixture data and policy live server-side, not in the browser. Requests cannot override the URL-bound quote or order ID. There are no provider side effects. No external assets, network calls or dependencies are required.
 
+The intent boundary uses an **anchored, single-product whole-litre grammar**. Unsupported or mixed text results in `UNSUPPORTED_REQUEST`, including comma/point decimals, negative quantities, two products, unsupported delivery deadlines and instruction suffixes. The purchase layer must never extract a numeric fragment from an ambiguous natural-language message.
+
 ## Requested future sponsor/provider boundary
 
 ```text

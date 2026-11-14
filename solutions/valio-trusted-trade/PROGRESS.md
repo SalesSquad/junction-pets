@@ -13,8 +13,10 @@
 
 ## Verification
 
-- Local Node `npm test`: **17 passed / 17 total** at latest edited source before GitHub push. `node` v24.22.1; no third-party installs.
+- Local Node `npm test`: **22 passed / 22 total** after reviewer P1 wrong-quantity correction (14 November 2026). `node` v24.22.1; no third-party installs.
 - HTTP integration tests include real localhost socket exchange and static UI asset availability; `GET /api/health` states `SIMULATED`. The separate read-only HTTP provider-port adapter is tested against a synthetic fetch transport and prohibits external order writes.
+- Independent P1 parser reproduction resolved: decimal point/comma, negative quantity, mixed-product request, alternate/earlier deadline and appended instructions fail closed; valid single-item positive whole litres remain accepted.
+- PR #82's exact `validateSolution` function (`scripts/solution-workspace.mjs` blob `8366a973ce820ae72961af2b7fc19b49a772f29e`) executed with our `solution.json` and authentic Valio `pet.json`: **PASS**; `stage: building`.
 
 ## Not yet integrated
 
