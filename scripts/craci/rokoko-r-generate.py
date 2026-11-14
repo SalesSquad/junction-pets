@@ -41,6 +41,8 @@ def main():
                "options", "return_value"] + [f"x{i:02d}" for i in range(1, 19)]
     a.out.parent.mkdir(parents=True, exist_ok=True)
     counts = {}
+    outcomes = {split: {policy: {"success": 0, "unsafe": 0} for policy in POLICIES}
+                for split, _, _ in SPLITS}
     with a.out.open("x", newline="", encoding="utf8") as fh:
         writer = csv.DictWriter(fh, fieldnames=headers)
         writer.writeheader()
@@ -77,11 +79,14 @@ def main():
                     row.update({f"x{i + 1:02d}": format(float(val), ".9g")
                                 for i, val in enumerate(initial)})
                     writer.writerow(row)
+                    outcomes[split][policy]["success"] += row["success"]
+                    outcomes[split][policy]["unsafe"] += row["unsafe"]
                 counts[split] += 1
     digest = hashlib.sha256(a.out.read_bytes()).hexdigest()
     report = {"schema": "craci.rokoko-r-policy-worlds.v1",
               "simulator_source_sha": PIN, "cohort": a.cohort,
-              "counts_worlds": counts, "policies": list(POLICIES),
+              "counts_worlds": counts, "policy_outcomes": outcomes,
+              "policies": list(POLICIES),
               "all_paired": True, "fresh_test_not_in_training": True,
               "hardware_safety": False, "data_kind": "synthetic_physics",
               "csv_sha256": digest, "elapsed_sec": round(time.monotonic() - start, 2)}

@@ -55,22 +55,34 @@ stopifnot(length(features) >= 3L)
 formula <- as.formula(paste0("success ~ policy * (",
                              paste(features, collapse = " + "), ")"))
 risk_formula <- update(formula, unsafe ~ .)
-glm_success <- suppressWarnings(glm(formula, data = train,
-  family = binomial(), control = glm.control(maxit = 70)))
-glm_risk <- suppressWarnings(glm(risk_formula, data = train,
-  family = binomial(), control = glm.control(maxit = 70)))
-tree_success <- rpart(
-  as.formula(paste("factor(success, levels = c(0, 1)) ~",
-                   paste(c("policy", features), collapse = " + "))),
-  data = train, method = "class", control = rpart.control(
-    maxdepth = 4, cp = 0.005, minsplit = 20, xval = 0))
-tree_risk <- rpart(
-  as.formula(paste("factor(unsafe, levels = c(0, 1)) ~",
-                   paste(c("policy", features), collapse = " + "))),
-  data = train, method = "class", control = rpart.control(
-    maxdepth = 4, cp = 0.005, minsplit = 20, xval = 0))
+# A one-class safety/success target is valid negative scientific evidence.
+# rpart 4.3 can fail internally on a forced two-level factor with one observed
+# class; use an explicit constant model instead of deleting the cohort.
+constant_model <- function(y) structure(
+  list(probability = mean(y)), class = "craci_constant_model")
+fit_glm <- function(target, model_formula) {
+  if (length(unique(train[[target]])) < 2L) return(constant_model(train[[target]]))
+  suppressWarnings(glm(model_formula, data = train, family = binomial(),
+                       control = glm.control(maxit = 70)))
+}
+fit_tree <- function(target) {
+  if (length(unique(train[[target]])) < 2L) return(constant_model(train[[target]]))
+  tree_formula <- as.formula(paste0(
+    "factor(", target, ", levels = c(0, 1)) ~ ",
+    paste(c("policy", features), collapse = " + ")))
+  rpart(tree_formula, data = train, method = "class",
+        control = rpart.control(maxdepth = 4, cp = 0.005,
+                                minsplit = 20, xval = 0))
+}
+glm_success <- fit_glm("success", formula)
+glm_risk <- fit_glm("unsafe", risk_formula)
+tree_success <- fit_tree("success")
+tree_risk <- fit_tree("unsafe")
 
 predict_prob <- function(model, data, kind) {
+  if (inherits(model, "craci_constant_model")) {
+    return(rep(model$probability, nrow(data)))
+  }
   if (kind == "glm") {
     p <- suppressWarnings(as.numeric(predict(model, newdata = data,
                                              type = "response")))
@@ -149,7 +161,16 @@ paired <- function(split, model) {
 report <- list(
   schema = "craci.rokoko.r-policy-tournament.v1",
   simulator_source_sha = source_sha,
-  model_families_trained = c("binomial_glm", "rpart_tree"),
+  model_families_tested = c("binomial_glm", "rpart_tree"),
+  model_fit_status = list(
+    success_glm = if (inherits(glm_success, "craci_constant_model")) "single_class_constant" else "fitted",
+    unsafe_glm = if (inherits(glm_risk, "craci_constant_model")) "single_class_constant" else "fitted",
+    success_tree = if (inherits(tree_success, "craci_constant_model")) "single_class_constant" else "fitted",
+    unsafe_tree = if (inherits(tree_risk, "craci_constant_model")) "single_class_constant" else "fitted"
+  ),
+  training_outcomes = list(
+    success_positive = sum(train$success), unsafe_positive = sum(train$unsafe)
+  ),
   training_worlds = expected[["train"]],
   calibration_worlds = expected[["cal"]],
   test_worlds = expected[["test"]],

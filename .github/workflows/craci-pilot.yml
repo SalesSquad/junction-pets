@@ -3624,6 +3624,7 @@ jobs:
           -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- \
           install -qq -y --no-install-recommends r-base-core r-cran-rpart r-cran-jsonlite
         Rscript -e 'stopifnot(requireNamespace("rpart"),requireNamespace("jsonlite"))'
+        Rscript -e 'invisible(parse(file=file.path(Sys.getenv("CRACI_HARNESS_ROOT"), "scripts/craci/rokoko-r-train.R"))); cat("R_PARSE_OK\\n")'
         Rscript --version
     - name: Install pinned MuJoCo simulator in temporary venv
       shell: bash
@@ -3650,6 +3651,9 @@ jobs:
             "$CRACI_RECEIPT_DIR/artifacts/r-policy/models" "$CRACI_SOURCE_SHA"
           test -s "$CRACI_RECEIPT_DIR/artifacts/r-policy/models/training-report.json"
           test -s "$CRACI_RECEIPT_DIR/artifacts/r-policy/models/trained-models.rds"
+          python3 -m zipfile -c "$CRACI_RECEIPT_DIR/artifacts/r-policy/synthetic-worlds.zip" \
+            "$CRACI_RECEIPT_DIR/artifacts/r-policy/dataset.csv"
+          test -s "$CRACI_RECEIPT_DIR/artifacts/r-policy/synthetic-worlds.zip"
         '
     - id: receipt
       name: Finalize exact-source R training record even after failure
