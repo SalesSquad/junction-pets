@@ -88,7 +88,6 @@ class RescueSDKContract(unittest.TestCase):
         self.assertEqual(offers[0]["feeCents"], posts[0]["schedule"][0]["feeCents"])
 
     def test_manual_premium_audience_and_candidate_filter(self):
-        self.world._unused = None
         self.desk.roster[0]["rating"] = 4.3
         self.desk.roster[1]["completedGigs"] = 10
         self.desk.roster[2]["licence"] = "automatic_only"
@@ -105,6 +104,9 @@ class RescueSDKContract(unittest.TestCase):
     def test_day_offer_budget_and_dedup(self):
         self.desk.roster = self.desk.roster[:1]
         for i in range(OFFER_DAY_LIMIT + 2):
+            # The next offer is only considered after the previous 10-minute
+            # invitation expired. A driver must not receive two concurrently.
+            self.desk.now = 480 + 11 * i
             req = copy.deepcopy(self.req)
             req["id"] = f"R{i}"
             order = won_order(req)
@@ -156,6 +158,7 @@ class RescueSDKContract(unittest.TestCase):
         self.desk.outbox.clear()
         self.desk.handle({"kind": "gig_booked", "seq": 2, "at": 520,
                           "gigId": gid, "driverId": "D0", "feeCents": 12000})
+        self.desk.now = 555  # the official runner advances desk.now first
         self.desk.handle({"kind": "visit_failed", "seq": 3, "at": 555,
                           "gigId": gid, "orderId": "R1", "leg": 0,
                           "reason": "not_ready"})
