@@ -1,9 +1,11 @@
 """Non-physics guard tests for immutable V10 CRACI prospective wrapper."""
 from __future__ import annotations
 
+import gzip
 import importlib.util
 import json
 from pathlib import Path
+import tempfile
 import unittest
 
 
@@ -62,6 +64,49 @@ def fake_readout(training):
             "lost_baseline_safe_near_goal_seeds": [515000],
             "novel_v10_safe_near_goal_seeds": [],
             "v10_new_unsafe_vs_frozen_controls": []}
+
+
+class FakeClearMuJoCoContract:
+    """Synthetic deterministic contract fixture, never claimed to be MuJoCo."""
+
+    def reset(self, seed, ood):
+        self.seed = seed
+        self.done = False
+        self.dwell = self.contacts = self.steps = self.physics_steps = 0
+        return [0.] * 18
+
+    def mask(self, observation):
+        return [1, 0, 0, 0, 0, 0, 0]
+
+    def step(self, action):
+        self.done = True
+        self.dwell = 250
+        self.contacts = 1
+        self.steps = 1
+        self.physics_steps = 100
+        observed = [0.] * 18
+        observed[0] = .1
+        return observed, 1., True, {"cost": 0, "contacts": 1, "success": True,
+                                     "unsafe": False, "abstained": False, "error": .1}
+
+
+def clear_replay_fixture(base: Path):
+    first = [0.] * 18
+    after = first.copy()
+    after[0] = .1
+    event = {"observation": first, "mask": [1, 0, 0, 0, 0, 0, 0],
+             "action": 0, "next_observation": after, "reward": 1.,
+             "done": True, "cost": 0, "contacts_cumulative": 1,
+             "success_info": True, "dwell_ticks_cumulative": 250,
+             "dwell_ticks_current": 250}
+    row = {"seed": 515128, "strategy": "frozen_v5", "observed_corridor": False,
+           "success": True, "unsafe": False, "abstained": False,
+           "world_hash": "fake-stable-public-world-signature", "option_steps": 1,
+           "physics_steps": 100, "contacts": 1, "final_error": .1}
+    with gzip.open(base / "full_transitions.jsonl.gz", "wt", encoding="utf8") as f:
+        f.write(json.dumps({"seed": row["seed"], "strategy": row["strategy"],
+                            "transitions": [event]}) + "\n")
+    return {"trials": [row]}
 
 
 class V10ProspectiveQualificationTest(unittest.TestCase):
@@ -123,6 +168,24 @@ class V10ProspectiveQualificationTest(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "PRE_REGISTERED_FIVE_WAY"):
             qualifier.verify_independent_comparison(training, manifest, "a" * 40,
                                                     Path("unused"), None)
+
+    def test_clear_goal_replay_requires_exact_reproduced_frozen_proposal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            training = clear_replay_fixture(root)
+            near = lambda a, b: all(abs(float(x) - float(y)) <= 1e-5
+                                    for x, y in zip(a, b))
+            factory = lambda strategy: (lambda: (lambda observation, mask: 0))
+            good = qualifier.replay_clear_goal_successes(
+                root, training, FakeClearMuJoCoContract, factory,
+                lambda env: "fake-stable-public-world-signature", near)
+            self.assertEqual(good["replayed_safe_clear_goal_trajectories"], 1)
+            self.assertFalse(good["model_promotion_authorized"])
+            invalid = lambda strategy: (lambda: (lambda observation, mask: 1))
+            with self.assertRaisesRegex(AssertionError, "POLICY_ACTION_NOT_REPRODUCED"):
+                qualifier.replay_clear_goal_successes(
+                    root, training, FakeClearMuJoCoContract, invalid,
+                    lambda env: "fake-stable-public-world-signature", near)
 
 
 if __name__ == "__main__":
