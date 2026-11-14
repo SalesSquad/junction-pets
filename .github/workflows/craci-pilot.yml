@@ -1,13 +1,33 @@
 name: CRACI portable CI
+run-name: CRACI ${{ inputs.workload || 'portable' }} ${{ inputs.product || '' }} ${{ inputs.source_sha || github.sha }}
 
 on:
   pull_request:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      workload:
+        description: Fixed qualification workload
+        type: choice
+        default: portable
+        options: [portable, product-browser]
+      source_sha:
+        description: Full source commit; required for product browser jobs
+        type: string
+        default: ''
+      product:
+        description: Product for the browser workload
+        type: choice
+        default: stoa
+        options: [stoa, valio]
 
 permissions:
   contents: read
+
+env:
+  # Conservative owner-authorized Junction window, not provider credit expiry.
+  CRACI_WINDOW_END: '2026-11-15T17:00:00Z'
 
 concurrency:
   group: craci-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
@@ -15,6 +35,7 @@ concurrency:
 
 jobs:
   portable:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && (github.event_name != 'workflow_dispatch' || inputs.workload == 'portable') }}
     name: Validate, test and build on CRACI
     runs-on: craci
     timeout-minutes: 15
@@ -22,20 +43,33 @@ jobs:
       - name: Configure monitored CRACI networking
         uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534 # v1
         with:
+          size: '2'
           image: ubuntu-24.04
           network: |
             default: deny
             presets: [github, npm]
+      - name: Enforce the credit window and source format
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+          if [ -n "$SOURCE_SHA" ]; then [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; fi
       - name: Check out the selected commit
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
+          ref: ${{ inputs.source_sha || github.sha }}
           persist-credentials: false
       - name: Set up Node 22
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
       - name: Record source and executor
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
         run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           git rev-parse HEAD
           node --version
           npm --version
@@ -59,3 +93,83 @@ jobs:
           sha256sum package-lock.json
           cat "$RUNNER_TEMP/craci-build.sha256"
           sha256sum "$RUNNER_TEMP/craci-build.sha256"
+
+  product-browser:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && github.event_name == 'workflow_dispatch' && inputs.workload == 'product-browser' }}
+    name: ${{ inputs.product }} / ${{ matrix.browser }} on CRACI
+    runs-on: craci
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - name: Configure browser installation networking
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '4'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, npm, ubuntu]
+            connections:
+              - tls:
+                  serverNamePatterns:
+                    - cdn.playwright.dev
+                    - playwright.download.prss.microsoft.com
+                    - fwjydgxpttajiqpfmqtj.supabase.co
+                  ports: [443]
+      - name: Enforce the credit window and immutable input
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          PRODUCT: ${{ inputs.product }}
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          case "$PRODUCT" in stoa|valio) ;; *) exit 1;; esac
+      - name: Check out the pinned harness
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: harness
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Check out the pinned product
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+      - name: Set up Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install the locked harness and selected browser
+        working-directory: harness
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          git -C ../source rev-parse HEAD
+          npm ci --ignore-scripts
+          npx --no-install playwright install --with-deps "$BROWSER"
+      - name: Fetch and verify the Stoa sponsor sample
+        if: ${{ inputs.product == 'stoa' }}
+        run: |
+          set -euo pipefail
+          node source/solutions/stoa-blueprint-studio/scripts/fetch-sponsor-sample.mjs "$RUNNER_TEMP/stoa-sponsor.dxf"
+          printf 'STOA_SPONSOR_DXF=%s\n' "$RUNNER_TEMP/stoa-sponsor.dxf" >> "$GITHUB_ENV"
+      - name: Exercise desktop and narrow product journeys
+        working-directory: harness
+        env:
+          PRODUCT: ${{ inputs.product }}
+          BROWSER: ${{ matrix.browser }}
+          CRACI_SOURCE_SHA: ${{ inputs.source_sha }}
+          PRODUCT_SOURCE_ROOT: ${{ github.workspace }}/source
+        run: |
+          set -euo pipefail
+          export CRACI_BROWSER_OUTPUT="$RUNNER_TEMP/craci-browser-results"
+          node scripts/craci/product-browser.mjs "$PRODUCT" "$BROWSER"
+

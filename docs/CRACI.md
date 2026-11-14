@@ -1,5 +1,106 @@
 # CRACI CI for Junction
 
+## Active owner-authorized CRACI window — 14 November 2026
+
+Work ID: `CRACI-ACTIVATE-20261114`. Mikael explicitly requested substantial use
+of existing CRACI credits for the next two days. This is the scoped exception to
+the usual GitHub Actions opt-out for **SalesSquad/junction-pets only**.
+
+The authenticated existing `onemanraid` billing page showed **EUR 1,009.97
+starter credit remaining** on 14 November. The owner authorized at most
+**EUR 1,000 of existing credits**, with no top-up, cash charge or new provider.
+The page did not display credit expiry. The conservative operational cutoff is
+**2026-11-15 17:00 UTC / Sunday 19:00 Europe/Helsinki**, matching CRACI's announced
+Junction weekend window; this is not a claim about the credit's legal expiry.
+
+Repository Actions was read back enabled after checking that its only workflow
+was CRACI portable CI (ID `417767938`). Existing PR events now launch actual
+CRACI jobs. Three previously unqualified source heads completed successfully:
+
+| Source / purpose | Source SHA | Actual GitHub run | CRACI job / runner |
+| --- | --- | --- | --- |
+| PR76 Linux environment qualification | `10c5b2df57e1ad3bbdeedf69ec23906a1be4c34d` | [43548053684](https://github.com/SalesSquad/junction-pets/actions/runs/43548053684) | `132303867708` / `craci-3-4c175445` |
+| PR85 S-Pankki Node integration | `8baf32ebbe4c50e92f3230fa38c843b92b48a0b4` | [43548058431](https://github.com/SalesSquad/junction-pets/actions/runs/43548058431) | `132303882860` / `craci-0-a1618a21` |
+| PR87 Valio Node integration | `db003d1fd491381e7ce2409eefb1807a0c7ef0de` | [43548062533](https://github.com/SalesSquad/junction-pets/actions/runs/43548062533) | `132303896493` / `craci-2-305400a7` |
+
+These jobs passed install, audit, validation, Node tests, catalog build and
+digest recording. They do not prove browser behavior, actual banking data,
+Harbor isolation, live model use or deployment. Exact account-billed cost for
+these individual jobs remains unknown.
+
+### Fixed browser workload
+
+The existing workflow now has manual choices `portable` and `product-browser`.
+Browser dispatch requires a full `source_sha` and `product=stoa|valio`; there is
+no arbitrary command input. It checks out the harness and product separately
+and verifies the product commit before importing any product code.
+
+```sh
+gh workflow run craci-pilot.yml --repo SalesSquad/junction-pets \
+  --ref codex/junction-craci-burst-20261114 \
+  -f workload=product-browser -f product=stoa \
+  -f source_sha=bfb4e363879b9125b10ed8a8a14f77ea5ed8af70
+```
+
+Use the live reviewed harness branch/HEAD and current intended product SHA;
+the example is a dated initial source, not a permanent current-head assertion.
+The three browser jobs are Chromium, Firefox and WebKit, at most three parallel
+jobs per dispatch, each explicitly **4 vCPU, 20 minutes maximum**. Each checks
+1440×900 and 390×844 viewports. The narrow viewport is not a physical phone test.
+
+- **Stoa:** room count, area, evidence selection and polygon highlight,
+  unsupported-question refusal, local DXF import, and the official sponsor DXF
+  fetched through bounded range requests and independently checked against
+  `4070c5f19eb921bc08e2f5a23e957086f76abcca03fafbb8b62ca30c8a60b58d`.
+- **Valio:** quantities and cent-exact quote, human-approval gate, replay of the
+  actual browser-emitted order payload with one audit event, cancellation and
+  restored stock, price-change invalidation, and budget refusal. All suppliers,
+  orders and payments in this test are synthetic; no real purchase occurs.
+
+Browser runtime requests are restricted to the test's own loopback origin.
+Installation uses the locked Playwright version, npm/Ubuntu/GitHub presets,
+the two version-documented Playwright download hosts and the specific public
+Stoa sponsor hostname. Direct TLS download exceptions are not a claim that
+CRACI has package-aware SBOM visibility into browser binaries.
+JSON outcome records remain in GitHub logs. Screenshots/traces are temporary
+runner diagnostics; no persistent artifact upload is claimed.
+
+### Continuing use and stop
+
+The existing Junction Product Factory and sole Portfolio PR Recovery
+automations received this bounded CRACI exception without a schedule change.
+They must select missing evidence or an actual failure, check current source
+and existing runs, and avoid repeating a successful unchanged workload.
+Start at most three jobs per batch; do not create a 34-agent fanout or burn
+credits with idle/repeated work.
+
+The repository variable `CRACI_CREDIT_WINDOW_OPEN=true` admits these workflow
+jobs before runner allocation. Missing/false closes new jobs. Each job also
+checks the UTC cutoff before installing dependencies. This second check occurs
+after initial allocation and is not a provider hard spending cap.
+
+A one-time shutdown automation `Automation_563ad488d07081919594286152d28d46`
+is scheduled for **15 November 19:00 Europe/Helsinki**. It sets the flag false,
+disables only workflow417767938, checks the resulting state and cancels only
+this window's unfinished work. The two existing automations carry the same
+expiry instruction as a fallback. Scheduling is verified; future execution
+must still be observed. The shutdown uses existing authorized administration
+access and cannot be claimed successful if that access is unavailable.
+
+The CRACI billing page and delayed completed-job usage meter must be rechecked
+before expanding load. Do not treat a successful YAML write, dispatch request,
+green npm audit or old receipt as a new runner/SBOM/budget attestation.
+
+### Explicit unresolved lane
+
+The proposed AfterQuery Harbor reference/no-operation and adversarial workload
+was not activated. Automated tool safety checks blocked that authoring task,
+including its reduced benign follow-up. No blocked payload or Harbor runner
+job was installed. The existing AfterQuery owner retains the actual
+separate-container qualification gap; local regression remains distinct from
+that proof. Other independent CRACI workloads continue.
+
+
 This is the CRACI CI lane for `SalesSquad/junction-pets` and the CRACI side
 challenge. It automatically runs dependency security checks, the repository's
 validation, Node tests and catalog build on pull requests and pushes to `main`.
@@ -54,8 +155,9 @@ It does not deploy Chibi or execute companion/provider calls.
 The workflow is `contents: read`, CRACI-only and bounded to 15 minutes.
 `workflow_dispatch` remains available alongside the automatic triggers.
 Checkout credentials are not persisted. It requests no provider secrets, cache,
-artifact upload, deployment or GitHub-hosted fallback. It starts with CRACI's
-2-vCPU default; larger runners require an observed bottleneck and available credit.
+artifact upload, deployment or GitHub-hosted fallback. The portable lane explicitly requests
+2 vCPU; the browser lane requests 4 vCPU for browser/system installation and
+three-engine qualification. Available credit and observed capacity still bound admission.
 
 ## Network and dependency evidence
 
@@ -121,3 +223,4 @@ The original CRACI reference baseline was read on 13 November 2026. Runner and
 network guidance, GitHub event/concurrency rules and npm audit were checked for
 this automatic-CI change on 14 November. Account credit, App installation, runner
 pickup, SBOM completeness and vulnerability outcomes require live evidence.
+

@@ -1,5 +1,15 @@
 # AGENTS.md — Junction monorepo contributor contract
 
+> **Owner's CRACI exception (14 Nov 2026):** Use the existing CRACI connection
+> and `.github/workflows/craci-pilot.yml` for useful Junction portable/browser
+> qualification within the current credit window, ending conservatively at
+> **15 Nov 2026 17:00 UTC**. This fresh explicit request supersedes the default
+> Actions opt-out only for this repository. At most EUR1,000 of existing credit;
+> no cash top-up, new provider or GitHub-hosted fallback. Preserve the exception
+> during global Actions cleanup. Read [docs/CRACI.md](docs/CRACI.md) for actual
+> runs, fixed workloads, exact-source admission and scheduled shutdown. Do not
+> repeat unchanged passing suites merely to consume credit.
+
 > **Owner's lightweight development rule (14 Nov 2026):** Ordinary code,
 > docs and features proceed to task-owned PRs **without required tests,
 > repeat reviews, separate QA workers or per-commit CI receipts**. Full suites
@@ -88,4 +98,5 @@ next_action: <one executable step with an owner>
 ```
 
 Keep the task record and documentation in GitHub so a different future worker can resume **without the original chat or machine**. At handoff: inspect new PR/branch state, resolve conflicts, classify infra-vs-source failures, repair owned code and re-verify the final SHA; carry unresolved work with an explicit new owner. Never report a permanently running agent, provisioned Cloud environment, published plugin on Chibi or production recipient just because its manifest, README, draft PR or synthetic green test exists.
+
 
