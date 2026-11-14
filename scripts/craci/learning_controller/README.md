@@ -29,8 +29,9 @@ The source-reported successful execution was independently replay-qualified
 for **TRAIN data ingestion**, not for policy superiority or deployment.
 
 The sample input `v8-qualified-pins.json` freezes all **seven exact original
-file SHA-256 values**. The controller refuses a mismatched receipt, unpaired
-world hash, partial full transition count, unsupported action mask, replay or
+file SHA-256 values**. The controller refuses a mismatched receipt/run URL,
+unpaired world hash, unverified public-observation cohort selection, partial
+full transition count, unsupported action mask, replay or
 inconsistent independent readout.
 
 Verified original paired data from the 640 real MuJoCo 3.3.7 episodes:
@@ -88,9 +89,12 @@ node scripts/craci/learning_controller/cli.mjs \
 ```
 
 `--out` **must not exist**; output uses exclusive creation to preserve earlier
-negative decisions. Pass `--prior PREVIOUS.json` on a subsequent, genuinely
-new source-qualified result. The CLI rejects repeated source/byte identities,
-increments the future TRAIN scan by 512, and binds the previous cycle hash.
+negative decisions. Pass both `--prior PREVIOUS.json --prior-sha256
+REVIEWED_EXACT_FILE_SHA256` on a subsequent, genuinely new source-qualified
+result. The CLI rejects repeated source/byte identities, rejects modified
+previous reports, increments the future TRAIN scan by 512, and binds the
+previous cycle hash. **An independently reviewed prior SHA must be supplied**;
+this process cannot certify that the person supplying it is the reviewer.
 
 Run the small source/unit check:
 
@@ -112,9 +116,16 @@ owning CRACI archive; source data are not duplicated into this repository.
    must be retained, newly unsafe episodes must not increase, and at least one
    genuinely new paired safe goal must appear before *even proposing*
    additional independent scientific review.
-3. **No train leakage.** New seeds are disjoint from original source worlds;
-   the future scan is fixed before knowing its observations or outcomes. Use
-   only observed public state and original seven-action masks at inference.
+3. **No train leakage or fabricated cohorts.** New seeds are disjoint from
+   original source worlds; the future scan is fixed before knowing its
+   observations or outcomes. Re-derive every accepted cohort from the
+   source's complete ascending public-observation scan (original threshold
+   0.122, first 128 near and 32 clear), including the original world hashes.
+   The future 800-row summary may exceed CRACI's capture limit: a reviewed
+   lossless chunk packer and exact reassembly/complete-row check are required;
+   incomplete/truncated capture must stop, never silently omit bad worlds.
+   Use only observed public state and the original seven-action masks at
+   inference.
 4. **No self-attestation.** Source-reported CRACI plus independent source
    replay does not equal provider-certified billing or holdout certification.
    `dispatchAuthorized` and `modelPromotionAuthorized` always remain false.
