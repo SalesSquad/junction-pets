@@ -70,7 +70,10 @@ def prereview_artifacts(folder: Path, packer):
             check.get("dev_cal_test_ood_opened") is False and
             positive.get("claim_verified") is True,
             "HYBRID_INCOMPLETE_OR_UNREVIEWED_SOURCE_EVIDENCE")
-    for declaration in original_plan.get("part_files_for_independent_external_packager", []):
+    declared = original_plan.get("part_files_for_independent_external_packager", [])
+    require(sorted(p.get("name") for p in declared) == sorted(FILES),
+            "HYBRID_INCOMPLETE_OR_DUPLICATE_PARTS_PLAN")
+    for declaration in declared:
         name = declaration.get("name")
         require(name in FILES and declaration.get("sha256") ==
                 manifest["file_sha256"][name] and
@@ -92,7 +95,7 @@ def main():
     parser.add_argument("--private-staging", type=Path)
     parser.add_argument("--restore-output", type=Path)
     args = parser.parse_args()
-    harness_root = args.harness_root or Path(__file__).resolve().parent.parent.parent
+    harness_root = args.harness_root or Path(__file__).resolve().parent.parent
     packer = import_original_packer(harness_root.resolve(strict=True))
     evidence = args.evidence_root.resolve(strict=True)
     if args.mode == "pack":
