@@ -125,10 +125,24 @@ export async function runChaosLab({connectionString,requestCount=400,workerCount
     assert(a.balanced&&a.matching&&a.nonnegative,'Persistent ledger invariant failed.');
     assert(a.orders===102 && a.refunds===101,'Unexpected duplicate settlement or refund.');
     assert(a.batches===203 && a.outboxEvents===203,'Ledger/outbox must record each actual commit exactly once.');
+    // Negative control: a subsequent unbalanced INSERT into a committed batch
+    // must be forbidden by PostgreSQL, not merely overlooked by auditLab().
+    const sealed=(await admin.query(`SELECT batch_id FROM "${schema}".ledger_batches WHERE order_id=$1 AND kind=$2`,
+      ['crash_A','SIMULATED_PAYMENT'])).rows[0]?.batch_id;
+    assert(sealed,'Expected durable crash batch to exist.');
+    let sealedBatchRefusal=false;
+    try {
+      await admin.query(`INSERT INTO "${schema}".ledger_entries(batch_id,account_id,delta_cents) VALUES ($1,$2,$3)`,
+        [sealed,'demo:supplier:farm-c:wallet',1]);
+    } catch(e) { sealedBatchRefusal=e.code==='23514'&&String(e.message).includes('SEALED_LEDGER_BATCH'); }
+    assert(sealedBatchRefusal,'Post-commit ledger insertion was not denied.');
+    const afterTamper=await auditLab(admin,schema);
+    assert(afterTamper.batches===a.batches&&afterTamper.matching&&afterTamper.balanced,
+      'Negative control must leave original durable ledger intact.');
     const elapsedMs=Math.round(performance.now()-t0);
     return {runId:schema,workersStarted:workerCount,independentOsPids:workerCount,
       requests:requestCount+205, mixedRequests:requestCount,allowedReplays,refusals,
-      postCommitCrashObserved:true,crashReplayed:true,elapsedMs,
+      postCommitCrashObserved:true,crashReplayed:true,sealedBatchRefusal:true,elapsedMs,
       verified:{balanced:a.balanced,matching:a.matching,nonnegative:a.nonnegative,
         exactlyOneRaceWinner:true,committedOrders:a.orders,refunds:a.refunds,
         batches:a.batches,outboxEvents:a.outboxEvents},
