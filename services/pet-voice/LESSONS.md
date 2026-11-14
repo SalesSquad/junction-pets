@@ -66,6 +66,10 @@ _Updated 2026-11-14T21:55:11Z from 3 run(s), 74/74 turns ok._
   clarity compares the listener's transcript with that, and script fidelity is a separate
   TTS-model metric. Open limitation: a listener that transliterates (Devanagari ↔ Latin)
   scores near 0 although it understood — hi-IN 0.52 needs a script-aware check. (2026-11-14)
+- **Overwriting a file iCloud is syncing can fail.** Re-finalizing a resumed run raised
+  EDEADLK ("Resource deadlock avoided") on the iCloud copy and stopped before `learn`.
+  Copies now go through a temp file + `os.replace` with retries, and failures are reported in
+  the receipt instead of crashing. (2026-11-15)
 - **Measure intelligibility, don't guess it.** The listener only receives audio; comparing
   its transcript with what the speaker meant to say gives a free per-voice, per-language
   quality signal on every turn. (2026-11-14)

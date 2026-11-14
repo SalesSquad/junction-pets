@@ -710,14 +710,39 @@ def finalize(run_dir: Path, turns: list[dict], *, write_evidence: bool, icloud: 
     (run_dir / "evidence.json").write_text(json.dumps(evidence, ensure_ascii=False, indent=1))
     if icloud and ICLOUD_DIR.parent.is_dir():
         dest = ICLOUD_DIR / run_id
-        (dest / "turns").mkdir(parents=True, exist_ok=True)
-        for name in ["index.html", "transcript.md", "evidence.json", f"conversation.{ext}"]:
-            if (run_dir / name).exists():
-                shutil.copy2(run_dir / name, dest / name)
-        for t in ok:
-            shutil.copy2(run_dir / "turns" / f"{t['turn']:03d}.{ext}", dest / "turns" / f"{t['turn']:03d}.{ext}")
+        pairs = [(run_dir / n, dest / n) for n in ["index.html", "transcript.md", "evidence.json", f"conversation.{ext}"]
+                 if (run_dir / n).exists()]
+        pairs += [(run_dir / "turns" / f"{t['turn']:03d}.{ext}", dest / "turns" / f"{t['turn']:03d}.{ext}") for t in ok]
+        failed = sync_to_icloud(pairs)
         evidence["icloud"] = str(dest)
+        if failed:
+            evidence["icloudFailed"] = failed
+            print(f"icloud: {len(failed)} file(s) not copied (FileProvider busy); rerun to retry: {failed[:3]}", flush=True)
     return evidence
+
+
+def sync_to_icloud(pairs: list[tuple[Path, Path]], attempts: int = 4) -> list[str]:
+    """Copy into iCloud Drive without crashing the run. Overwriting a file that FileProvider is
+    syncing can raise EDEADLK ("Resource deadlock avoided", seen 14 Nov): write a temp file,
+    swap it in with os.replace, retry with backoff, and report what still failed."""
+    failed = []
+    for src, dst in pairs:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        for i in range(attempts):
+            tmp = dst.with_name(f".{dst.name}.tmp-{os.getpid()}")
+            try:
+                shutil.copy2(src, tmp)
+                os.replace(tmp, dst)
+                break
+            except OSError:
+                try:
+                    tmp.unlink(missing_ok=True)
+                except OSError:
+                    pass
+                time.sleep(2 * (i + 1))
+        else:
+            failed.append(dst.name)
+    return failed
 
 
 # ------------------------------------------------------------------- learn ---
