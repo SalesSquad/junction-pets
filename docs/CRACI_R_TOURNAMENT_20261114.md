@@ -39,3 +39,9 @@ R runs both `glm(..., family=binomial())` and `rpart` classification for outcome
 5. Preserve actual failed receipts, do not repeat unchanged successful cohorts or assume the old campaign's spending limit has been extended.
 
 Direct project owner: Portfolio PR Recovery for integration; task branch writer owns only `scripts/craci/rokoko-r-*`, `plan.mjs` additive workload, and this single CRACI workflow job.
+
+## Hosted pilot #1 and correction
+
+[CRACI run 43625113313](https://github.com/SalesSquad/junction-pets/actions/runs/43625113313), harness `b304793b8b2066bfc1f86cae0b0c49936ced22c7`, admitted four 8-vCPU cells with exact simulator SHA. All four **failed during R installation**, before simulation/training. The source is **not qualified**: the Ubuntu 24.04 image includes a Microsoft apt repository; under the approved `[github,pypi,ubuntu]` egress policy its InRelease fetch returned 403, making `apt-get update` fail. This was an environment dependency issue, NOT a trained model result or reason to open egress.
+
+Correction restricts apt package lists to the image's existing `/etc/apt/sources.list.d/ubuntu.sources`, retaining CRACI's default-deny network policy. A new source-harness SHA and new cloud run are required; first run remains failed evidence and must not be overwritten.

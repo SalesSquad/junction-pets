@@ -3611,12 +3611,18 @@ jobs:
         path: source
         ref: ${{ matrix.source_sha }}
         persist-credentials: false
-    - name: Install R base and rpart with monitored Ubuntu apt dependencies
+    - name: Install R from Ubuntu-only APT sources, preserve CRACI deny policy
       shell: bash
       run: |
         set -euo pipefail
-        sudo apt-get update -qq
-        sudo DEBIAN_FRONTEND=noninteractive apt-get install -qq -y --no-install-recommends r-base-core r-cran-rpart r-cran-jsonlite
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -s "$ubuntu_sources"
+        # The full Ubuntu CI image also lists Microsoft's apt repository.
+        # It is unnecessary for R and intentionally blocked by this policy.
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo DEBIAN_FRONTEND=noninteractive apt-get \
+          -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- \
+          install -qq -y --no-install-recommends r-base-core r-cran-rpart r-cran-jsonlite
         Rscript -e 'stopifnot(requireNamespace("rpart"),requireNamespace("jsonlite"))'
         Rscript --version
     - name: Install pinned MuJoCo simulator in temporary venv
