@@ -56,6 +56,13 @@ moving clock. It **never** calls `advance` for a final.
   `SPREAD_GUARD_POLICY=risk_budget` (default) for the bounded policy. Use the
   same official `--seed` for both attempts, and compare sponsor world scores;
   never infer genuine rank from the synthetic sensitivity harness.
+- `discovery_experiment.py` is a **separate opt-in, high-risk experiment**, not
+  the default/final system. It bids 132% of list with an economic floor at 135%
+  of reference fee and starts driver offers at 100% of reference. A first real
+  practice world gained much more revenue, but only 92% on-time; never use it
+  for `--board` or `--final` before at least five independent official practice
+  worlds clear the 90% gate. Its companion `test_discovery_experiment.py` checks
+  the sponsor SDK action shape, not real-world qualification.
 - Delegate correct post/withdraw/repost/rate-limit behavior to the official
   starter, adding optional manual-licence/plates constraints from dealer notes.
 
