@@ -258,3 +258,10 @@ These original reported capacity observations distinguish requested route, actua
 ## Verda service discovery follow-up
 
 Read [VERDA_SERVICE_MAP.md](VERDA_SERVICE_MAP.md) for the 13 November authenticated GPU catalog versus VM availability, complete service-to-workload map, current CLI credential-setup gaps and primary documentation. This is developer discovery and a proposed implementation sequence; it does not claim a GPU job, endpoint or live inference is running.
+
+
+## 14 November 2026 — current execution results
+
+The 13 November readiness and catalog sections above are historical. Current actual checks are recorded in [agents PR #106](https://github.com/SalesSquad/agents/pull/106), commit `57f55119410d065727dec2c37079195c33fea6f8`. NVMe, cross-host SFS, single-host two-GPU NCCL/DDP, native stdio MCP, one H100 serverless CUDA request, OCI registry push/pull and local Nemotron 3.5 Super VL NVFP4 probes passed within the specific bounds in that source. All owned serverless deployments were paused after the finite execution. Instant Cluster availability was empty in each of the three queried regions, so no cluster was started.
+
+The user explicitly authorized bounded Savi and Reality Twin model work for this task. Savi V2 improved but remains below its 0.85 mean-IoU gate (0.6967). Reality Twin V4 passed 512 synthetic closed-domain cases only as a required guarded composite; raw weights fail alone. Neither is activated in a product. See [Savi PR #52](https://github.com/SalesSquad/savi/pull/52) and [Reality Twin PR #27](https://github.com/SalesSquad/reality-twin/pull/27). Local Nemotron tests do not qualify the hosted NVIDIA API adapter. VM leases, project state and artifacts still require the owning job's final reconciliation; never infer shutdown from a stopped training process.
