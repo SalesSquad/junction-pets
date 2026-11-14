@@ -78,6 +78,23 @@ class ControllerTest(unittest.TestCase):
             ctl.cancel_own_active(self.journal)
             call.assert_called_once_with(["run","cancel","123","--repo",ctl.REPO])
 
+    def test_restart_stops_on_lost_dispatch_ack(self):
+        rows=[{"type":"dispatch-attempt","epoch":4}]
+        with self.assertRaisesRegex(RuntimeError,"UNRESOLVED_DISPATCH_INTENT"):
+            ctl.validate_intent_history(rows)
+
+    def test_restart_stops_on_duplicate_intent(self):
+        rows=[{"type":"dispatch-attempt","epoch":4},
+              {"type":"dispatch-attempt","epoch":4},
+              {"type":"dispatched","epoch":4,"runId":321}]
+        with self.assertRaisesRegex(RuntimeError,"DUPLICATE_DISPATCH_LEDGER"):
+            ctl.validate_intent_history(rows)
+
+    def test_restart_accepts_exact_one_to_one_intent_ack(self):
+        rows=[{"type":"dispatch-attempt","epoch":3},
+              {"type":"dispatched","epoch":3,"runId":123}]
+        self.assertIsNone(ctl.validate_intent_history(rows))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -59,6 +59,20 @@ def journal_rows(path):
         return [json.loads(line) for line in source if line.strip()]
 
 
+def validate_intent_history(rows):
+    """An uncertain remote dispatch is never silently skipped after restart."""
+    intents = [row["epoch"] for row in rows if row.get("type") == "dispatch-attempt"]
+    dispatched = [row["epoch"] for row in rows if row.get("type") == "dispatched"]
+    if len(intents) != len(set(intents)) or len(dispatched) != len(set(dispatched)):
+        raise RuntimeError("DUPLICATE_DISPATCH_LEDGER")
+    unconfirmed = set(intents) - set(dispatched)
+    unrecorded = set(dispatched) - set(intents)
+    if unconfirmed or unrecorded:
+        # A remote GH run might exist even though the client lost its ACK.
+        # Stopping is safer than dispatching a later epoch while this is unknown.
+        raise RuntimeError("UNRESOLVED_DISPATCH_INTENT")
+
+
 def recent_runs():
     return gh_json(["run", "list", "--repo", REPO, "--workflow", WORKFLOW,
                     "--limit", "100", "--json",
@@ -166,6 +180,7 @@ def main():
     except BlockingIOError as error:
         raise RuntimeError("CONTROLLER_ALREADY_RUNNING") from error
     history = journal_rows(journal)
+    validate_intent_history(history)
     attempted = {r["epoch"] for r in history if r.get("type") == "dispatch-attempt"}
     reservations = len(attempted) * RESERVE_EUR
     record(journal, type="start", sourceCommit=args.sha, hardStop=STOP.isoformat(),
