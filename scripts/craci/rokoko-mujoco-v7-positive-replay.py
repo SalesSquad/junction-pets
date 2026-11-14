@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import hashlib
+import importlib.util
 import json
 import math
 from pathlib import Path
@@ -32,7 +33,7 @@ def positive_candidate(row):
             (row["success"] or row["lateral_displacement"] >= .025))
 
 
-def replay_positive(evidence_dir: Path, env_factory):
+def replay_positive(evidence_dir: Path, env_factory, policy_factory):
     with (evidence_dir / "training.json").open(encoding="utf8") as f:
         training = json.load(f)
     selected = {
@@ -53,6 +54,7 @@ def replay_positive(evidence_dir: Path, env_factory):
             require(key not in visited, "DUPLICATE_POSITIVE_REPLAY_TRACE")
             row = selected[key]
             observation = env.reset(seed=doc["seed"], ood=False)
+            controller = policy_factory(doc["strategy"])()
             initial_observation = list(map(float, observation))
             require(near(initial_observation[0:18],
                          doc["transitions"][0]["observation"]),
@@ -68,6 +70,12 @@ def replay_positive(evidence_dir: Path, env_factory):
                 action = event["action"]
                 require(0 <= action < 7 and bool(actual_mask[action]),
                         "PINNED_MUJOCO_REPLAY_BYPASSED_SHIELD")
+                # Replay must verify that the claimed source-frozen *policy*
+                # actually generated this action, not just that some oracle
+                # could force a feasible sequence through the physics.
+                proposal = controller(observation.copy(), actual_mask.copy())
+                require(type(proposal) is int and proposal == action,
+                        "PINNED_POLICY_PROPOSAL_SEQUENCE_MISMATCH")
                 observation, reward, done, info = env.step(action)
                 peak_dwell = max(peak_dwell, int(env.dwell))
                 require(near(observation, event["next_observation"]),
@@ -126,13 +134,22 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--evidence-dir", type=Path, required=True)
     parser.add_argument("--physics-dir", type=Path, required=True)
+    parser.add_argument("--product-run", type=Path, required=True)
     a = parser.parse_args()
     sys.path.insert(0, str(a.physics_dir.resolve()))
     import mujoco
     require(mujoco.__version__ == "3.3.7", "PINNED_MUJOCO_VERSION_MISMATCH")
     from physics import MovingContactEnv
+    product_path = a.product_run.resolve()
+    require(product_path.is_file(), "FROZEN_PRODUCT_POLICY_SOURCE_MISSING")
+    spec = importlib.util.spec_from_file_location("v7_frozen_replay_product", product_path)
+    require(spec is not None and spec.loader is not None,
+            "FROZEN_PRODUCT_POLICY_IMPORT_UNAVAILABLE")
+    product = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(product)
     result = replay_positive(a.evidence_dir.resolve(),
-                             lambda: MovingContactEnv(max_options=60))
+                             lambda: MovingContactEnv(max_options=60),
+                             product.policy_factory)
     outfile = a.evidence_dir / "independent-positive-replay.json"
     with outfile.open("x", encoding="utf8") as stream:
         json.dump(result, stream, sort_keys=True, indent=2)
