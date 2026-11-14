@@ -50,6 +50,7 @@ function makeWorld(next, names, scenario, mode) {
     const name = `${names[(i - 1) % names.length]}#${i}`;
     nodes.push({
       name, locked: true, optional: next() < 0.42,
+      approvedIntegrity: `sha512-pin-${i}`,
       metadata: {registry: 'registry.npmjs.org', integrity: `sha512-pin-${i}`,
         scripts: false, egress: []},
     });
@@ -69,8 +70,11 @@ function makeWorld(next, names, scenario, mode) {
   if (scenario === 'integrity-drift') target.metadata.integrity = 'sha512-unpinned';
   if (scenario === 'unexpected-script') target.metadata.scripts = true;
   if (scenario === 'egress') target.metadata.egress = ['https://example.com/immune-probe'];
-  // The signed-update scenario has a newly reviewed *pin*; it is not a drift.
-  if (scenario === 'signed-update') target.metadata.integrity = `sha512-pin-${index}`;
+  // A genuine safe update changes bytes AND the independently approved pin.
+  if (scenario === 'signed-update') {
+    target.approvedIntegrity = `sha512-signed-update-${index}`;
+    target.metadata.integrity = target.approvedIntegrity;
+  }
   const changed = !['clean', 'signed-update'].includes(scenario);
   const allowRollback = changed && next() < (mode === 'shifted' ? 0.52 : 0.83);
   target.locked = allowRollback;
@@ -92,7 +96,7 @@ function anomalous(node) {
   if (!node.metadata.registry) return false;
   const expected = /^.+#(\d+)$/.exec(node.name)?.[1];
   if (node.metadata.registry !== 'registry.npmjs.org' ||
-      (expected && node.metadata.integrity !== `sha512-pin-${expected}`) ||
+      (expected && node.metadata.integrity !== node.approvedIntegrity) ||
       node.metadata.scripts || node.metadata.egress.length) return true;
   return false;
 }
@@ -108,7 +112,7 @@ function apply(world, actions) {
   for (const action of actions) {
     if (action.kind === 'rollback') {
       const node = nodes[action.node], suffix = /^.+#(\d+)$/.exec(node.name)?.[1];
-      node.metadata = {registry: 'registry.npmjs.org', integrity: `sha512-pin-${suffix}`,
+      node.metadata = {registry: 'registry.npmjs.org', integrity: node.approvedIntegrity || `sha512-pin-${suffix}`,
         scripts: false, egress: []};
     } else if (action.kind === 'deny-egress') {
       nodes[action.node].metadata.egress = [];
@@ -198,7 +202,7 @@ export async function tournament(config) {
     sourceLockfileSha256:sha(lockBytes),realLockfilePackages:names.length,
     corpusDigestSha256:uniqueWorlds.digest('hex'),metrics:{...overall,
       naiveFalsePositives: overall.naiveAlerts - overall.threats,
-      missUpper95IfZero: overall.threats ? Number((3/overall.threats).toFixed(7)) : null},
+      syntheticMissUpper95IfZero: overall.threats ? Number((3/overall.threats).toFixed(7)) : null},
     byScenario:results,
     durationMs:Math.round(performance.now()-started),
     limits:['Synthetic mutations are never installed or fetched',

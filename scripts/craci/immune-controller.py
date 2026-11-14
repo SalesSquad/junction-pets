@@ -8,8 +8,11 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timedelta, timezone
+import fcntl
 import json
+import os
 from pathlib import Path
+import stat
 import subprocess
 import sys
 import time
@@ -73,6 +76,38 @@ def connected_and_open(expected_sha):
         raise RuntimeError("HARNESS_SHA_CHANGED")
 
 
+def verify_owned_results(path, current):
+    """Do not spend another epoch on a broken or unproven previous epoch."""
+    history = read_history(path)
+    own = {row["runId"]: row["epoch"] for row in history if row.get("type") == "dispatched"}
+    already_verified = {row["runId"] for row in history if row.get("type") == "verified-success"}
+    by_id = {row["databaseId"]: row for row in current}
+    for run_id, epoch in sorted(own.items()):
+        if run_id in already_verified:
+            continue
+        run = by_id.get(run_id)
+        if run is None:
+            raise RuntimeError(f"OWN_RUN_UNVERIFIED_{run_id}")
+        if run["status"] != "completed":
+            continue
+        if run["conclusion"] != "success":
+            raise RuntimeError(f"OWN_RUN_FAILED_{run_id}")
+        details = github_json(["run", "view", str(run_id), "--repo", REPO,
+                               "--json", "jobs"])
+        cells = [cell for cell in details.get("jobs", [])
+                 if cell.get("name", "").startswith(f"Immune epoch {epoch} /")]
+        if len(cells) != 4 or any(cell.get("conclusion") != "success" for cell in cells):
+            raise RuntimeError(f"OWN_CELLS_UNVERIFIED_{run_id}")
+        artifact_data = github_json(["api", f"repos/{REPO}/actions/runs/{run_id}/artifacts"])
+        artifacts = [artifact for artifact in artifact_data.get("artifacts", [])
+                     if artifact.get("name", "").startswith("craci-immune-immune-")
+                     and not artifact.get("expired", True)]
+        if len(artifacts) != 4:
+            raise RuntimeError(f"OWN_RECEIPTS_UNVERIFIED_{run_id}")
+        log_event(path, {"type": "verified-success", "epoch": epoch, "runId": run_id,
+                         "jobs": len(cells), "receipts": len(artifacts)})
+
+
 def find_run(after, expected_sha, exclude):
     for attempt in range(6):
         for run in runs():
@@ -122,6 +157,17 @@ def main():
     journal = Path(args.journal).resolve()
     if journal.parent != Path("/private/tmp") or not journal.name.startswith("craci-immune-"):
         parser.error("journal must be isolated in /private/tmp")
+    # A restart after a crash may reuse the journal; two LIVE controllers may
+    # not share it. A per-task advisory lock is held for the process lifetime.
+    lock_file = journal.with_suffix(".lock")
+    lock_fd = os.open(lock_file, os.O_RDWR | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600)
+    locked = os.fstat(lock_fd)
+    if not stat.S_ISREG(locked.st_mode) or locked.st_nlink != 1:
+        raise RuntimeError("UNSAFE_CONTROLLER_LOCK")
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        raise RuntimeError("CONTROLLER_ALREADY_ACTIVE")
     start = utc_now()
     history = read_history(journal)
     used = {row["epoch"] for row in history if row.get("type") in ("dispatch-attempt", "dispatched")}
@@ -140,6 +186,7 @@ def main():
                 continue
             connected_and_open(args.sha)
             current = runs()
+            verify_owned_results(journal, current)
             active = [row for row in current if row["status"] in ("queued", "in_progress", "waiting", "pending")]
             if active:
                 log_event(journal, {"type": "skipped-capacity", "epoch": epoch, "activeRuns": len(active)})
@@ -176,6 +223,8 @@ def main():
             cancel_owned_active(journal)
         log_event(journal, {"type": "finish", "reservedEstimateEur": round(reservations, 4),
                             "actualProviderBillEur": None})
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        os.close(lock_fd)
 
 
 if __name__ == "__main__":
