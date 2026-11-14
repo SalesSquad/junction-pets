@@ -140,6 +140,16 @@ test('wrong source, wrong run and API 403 never produce provider verified status
   }
 });
 
+test('apparently valid CycloneDX cannot qualify a mismatched GitHub source',async()=>{
+  const bad={...mockData,job:{...mockData.job,commitSha:R}};
+  const x=await fetchCraciEvidence(query,{token:'test-token-private',fetchImpl:async url=>
+    url.includes('network-trace')?response(bad):
+      response({bomFormat:'CycloneDX',specVersion:'1.7',components:[{name:'npm'}]})});
+  assert.equal(x.network.reason,'PROVIDER_JOB_BINDING_MISMATCH');
+  assert.equal(x.sbom.status,'unknown');
+  assert.equal(x.sbom.reason,'JOB_BINDING_UNVERIFIED');
+});
+
 test('invalid query selectors never issue HTTP and fail closed',async()=>{
   let calls=0;
   await assert.rejects(fetchCraciEvidence({...query,jobId:'1&token=leak'},
