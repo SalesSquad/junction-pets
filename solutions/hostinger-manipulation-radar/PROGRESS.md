@@ -1,5 +1,49 @@
 # J26-HOSTINGER-M2-20261114 — delivery receipt
 
+## M3 OOD audit — 14 November 2026
+
+Task **J26-PF-HOSTINGER-M3-20261114**, sole code writer in `solutions/hostinger-manipulation-radar/**`, issue80 claim comment **6879753127** as supplied by coordinator. Verified clean branch `codex/j26-hostinger-ood-audit-20261114`, exact source base **`27fb74b999f41718237958e03404390350f75a65`**. Current M3 files remain uncommitted for coordinator review/integration; no commit/push/PR/merge or concurrent writer was created. This section supersedes current-state claims below without rewriting M2 historical evidence.
+
+Delivered independent `stress/ood.mjs` (no existing generator or fixture imports): **8 seeds × 64 = 512 OFFLINE_SYNTHETIC_OOD scenarios**, five predeclared cohorts. Ground truth is author-stipulated legitimate outreach vs concealed deceptive paid control, separate from detector events and outside public source. Time spacing/jitter, ages/unknowns, accounts, text, URL paths/queries, targets, credits and mixed groups vary. `stress/report.mjs` emits exact confusion counts, rates/nulls, Wilson 95% intervals, unchanged-policy vs naive comparator, source/corpus/label hashes, 40 case/label hash samples, and every error with signal evidence, counterevidence and reviewer action. No detector, threshold, weight, gate, M2 fixture or label was changed.
+
+Observed output of **`node stress/report.mjs`** (from product directory):
+
+| Method (512 cases) | TP | FP | TN | FN | Precision | FPR | Recall |
+| --- | ---: | ---: | ---: | ---: | --- | --- | --- |
+| Radar v1 | 45 | 70 | 250 | 147 | 45/115 | 70/320 | 45/192 |
+| Naive rule | 90 | 173 | 147 | 102 | 90/263 | 173/320 | 90/192 |
+
+Radar Wilson 95%: precision **30.7003–48.2633%**, FPR **17.6938–26.7234%**, recall **18.0029–29.9142%**. Total **217 uncorrected errors**: volunteers **50 FP / 128 benign**, community **20 FP / 96 benign**, wire **0 FP / 96 benign**, overt manipulation **51 FN / 96 harmful**, evasive manipulation **96 FN / 96 harmful**. Naive → Radar deltas: precision **+4.9099 percentage points**, FPR **−32.1875 points**, recall **−23.4375 points**. This exposes a serious recall tradeoff; no policy tuning followed. Authored correlated cases are not representative data; intervals do not establish realistic population error bounds.
+
+Reproducibility fingerprints (SHA-256, actual local uncommitted bytes):
+
+- Detector / policy: `f3050adf27f4a588e81cb0ba75e020a05d91fae54af1c7f8b6479eec48dc7455` (unchanged from M2).
+- OOD generator: `69920c1188e6eef87fe2cb9f2d0a37e08d744a4afcbb0b0442eedd2c59efc607`.
+- Audit reporter: `24aeb48bd9b87df7fbb0783a982690feb595b7c5700735666bde4e41123eb3b6`.
+- Combined `sourceSHA256`: `cdc368aae2e15a072c9e7f2bacbeabf5459908ef62e89ede78971f8b0a4fc553` (SHA-256 of ordered JSON map of the three source hashes above; includes policy/detector, excludes UI/docs).
+- Serialized cases: `328a8bc10fab9b7c4bfb1cbf2fb53b175b57dacb71d4b893d9feef95df78c7ce`.
+- Separate label map: `7c4e12be6d807e9fd9231156d1cbbb1bb770c792caa3802be95df8e1b03b34a0`.
+
+Existing `/api/benchmark` now serves a once-per-process cached OOD aggregate, with unchanged exact asset allowlist and CSP. No raw OOD cases, labels or full error rows enter browser responses. Browser ledger adds cohort/method confusion counts, denominators/intervals, error-family examples and counterevidence/reviewer actions. Example `ood-12011-0-01` is an explicitly legitimate volunteer case scoring 100; reviewer seeks a public shift notice and bulletin provenance, retaining uncertainty rather than banning or automatically dismissing. README gives exact local reproduction. Export explicitly states OOD evidence is authored synthetic, not independently confirmed field results, and analyst dispositions are not truth.
+
+Executed on this isolated Mac Mini, **Node v26.13.0**, 14 November 2026:
+
+```text
+node --test --test-skip-pattern='local HTTP smoke' solutions/hostinger-manipulation-radar/tests/*.test.mjs
+tests 20; pass 20; fail 0; cancelled 0; skipped 0; todo 0
+node --check solutions/hostinger-manipulation-radar/public/app.mjs
+node --check solutions/hostinger-manipulation-radar/server.mjs
+exit 0 (both)
+node solutions/hostinger-manipulation-radar/stress/report.mjs
+exit 0; 512 cases; 217 errors retained (metrics above)
+```
+
+After a final UI-only fingerprint abbreviation, `node --test solutions/hostinger-manipulation-radar/tests/journey.test.mjs` passed **1/1** again; `node --check` passed for all four changed runtime modules (`public/app.mjs`, `server.mjs`, `stress/ood.mjs`, `stress/report.mjs`). `git diff --check` passed. Exact changed files: `README.md`, `PROGRESS.md`, `public/app.mjs`, `server.mjs`, `stress/ood.mjs`, `stress/report.mjs`, `tests/ood.test.mjs`, `tests/journey.test.mjs`, all relative to this product directory.
+
+Six new OOD tests cover repeatable seeds, disjoint IDs/seeds, bounded varied observations, independent imports, label isolation/poisoning, frozen detector hash/gates, exact confusion denominators, Wilson known values/endpoints/nulls, all errors unsuppressed, sample/source hashes and socket-free allowlist/CSP/405/HEAD tests. Expanded DOM harness verifies new counts/CIs, exposed failures, actionable workflow and export disclaimer, preserving the existing journey assertions. Existing HTTP smoke is intentionally **excluded**, not executed/qualified, because task forbids ports; Node reports only the 20 selected tests. No tests weakened. Skill verification-plan helper was unavailable (`ENOENT` at its documented path); focused product checks above were selected directly. No installs, paid calls, credentials, private data, telemetry, deployment or persistent process.
+
+M2 CRACI's six real browser journeys remain source-bound historical qualification ([campaign record](../../docs/CRACI_PORTFOLIO_20261114.md)); they were not rerun and do not cover this M3 UI. M3 DOM contract is not visual/accessibility/native-download qualification. **Maturity remains 2/6, offline synthetic-only, no Hostinger endorsement or live provider claim.** The current source snapshot's M357/hostinger clarification still offers team booth coupon → KVM2 one month → 5000 AI credits / Instant scrape; own-account activation is unverified. Next external dependency: **licensed labelled external data plus separately authorized coupon activation / Hostinger deployment access**, coordinator/data and deployment owner. Next coordinator action: review the eight-file product-only diff, then own commit/integration. Lifecycle gate may report unsaved work; this task explicitly forbids rescue/push, so preservation is this intact owned worktree.
+
 Snapshot: **2026-11-14**, final checks approximately **02:39 UTC**, executor: isolated Mac Mini restricted local shell, Node **v26.13.0**. Base `b7a51ee7acc3b1923fa0506b31a0f2eafb56f402`; branch `codex/j26-hostinger-manipulation-radar-20261114`. Clean baseline verified before writing. Sole owned scope: `solutions/hostinger-manipulation-radar/**`. No commit, branch switch, push, PR, merge, deployment, provider login, install, paid resource or secret access performed. Files intentionally remain uncommitted for the coordinator.
 
 ## Delivered acceptance
