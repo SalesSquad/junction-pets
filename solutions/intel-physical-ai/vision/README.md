@@ -133,3 +133,17 @@ Next station dependency: independently reviewed numerical/provenance source,
 then separately authorized real camera/lighting/fixture integration with recorded
 object/session IDs, station-specific calibration and Intel target execution.
 Sponsor rubric conflict remains unresolved. No station maturity or 6/7 claim.
+
+## Current measured quality and product gate
+
+The first actual public-image run completed, including 200/200 OpenVINO CPU
+parity. It **failed the intended detection-quality objective**: AUROC 0.8164,
+23/100 defects detected by the binary rule, and 62/100 defects proposed good
+by the raw three-way rule. See `EXECUTED_M7.json` and `RESULTS.md`.
+
+`inspect` is diagnostic only: it preserves `diagnostic_proposal` but returns
+effective `proposal: hold`, `automatic_acceptance: false`, and
+`NOT_QUALIFIED_FOR_AUTONOMOUS_USE`. No field can authorize actuation.
+The host/device and model-policy qualification are distinct. A new, separate
+defect-labelled validation cohort is required; do not optimize on the exposed
+200-image test set or present numerical parity as model-quality approval.

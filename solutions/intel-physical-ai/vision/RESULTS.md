@@ -121,3 +121,45 @@ Retain precursor logs and `run-m7` intact; append actual results only after
 execution. Coordinator owns Git delivery. The scientific experiment remains
 unchanged; Intel target hardware, physical station, independence, STOP behavior
 and sponsor rubric compliance remain unverified.
+
+## Native real-image completion — supersedes environment blockers, not failed receipts
+
+The authorized MacBook Pro native CPU executed source commit `c90e93f`
+(pipeline SHA-256 `fbf186e29023125568f2c5637539ff29bb3c1a939d18cebb5465d4282f79e2c0`) with pinned offline weights. No
+GPU or provider-model calls were used. Anomalib PaDiM fitted 128 normal
+VisA candle images; 64 disjoint normals set the predeclared quantiles; all
+200 official test images were scored once. No parameters or thresholds were
+changed after seeing the heldout. Physical object/session identities are unknown.
+
+**Measured quality is insufficient, not a release pass:** image AUROC 0.8164;
+binary TP=23, FN=77, TN=94, FP=6. Three-way raw rule: anomalies 62 good /
+38 hold / 0 defect; normals 91 good / 9 hold / 0 defect. R independently
+read the generated CSV: 83/200 binary label disagreements and 47/200 holds.
+This is file-level public-data evidence, not independent physical trials.
+
+**Actual OpenVINO:** converted and reread XML/BIN; CPU scores/maps and
+proposals matched PyTorch for all 200 heldout images within predeclared
+atol=rtol=0.001. Max absolute score difference 0.0004272461 and map difference
+0.0004653931. This is Apple ARM CPU execution, not Intel NPU/iGPU qualification.
+Per-forward mean 0.02231 s excludes preprocessing; not robot throughput.
+
+**Product disposition:** the separate `inspect` command now returns the raw
+`diagnostic_proposal`, but its effective proposal is always `hold`, with
+`automatic_acceptance:false`, `actuation:false` and
+`NOT_QUALIFIED_FOR_AUTONOMOUS_USE`. A real saved-model OpenVINO inspection
+on an existing dataset image returned diagnostic good but effective hold;
+this is functional replay, not another independent evaluation sample.
+No training rerun for this output-only safety change.
+
+**Integrity:** artifact ledger verified; the actual 392-image manifest with
+swapped official truth labels is rejected by the corrected boundary. Source
+worker performed three new focused structural regressions; prior source
+plumbing checks and sandbox failures remain recorded above. No full suite
+was repeated. Raw data/model/maps/logs remain in the task-local vision lab,
+not Git. `EXECUTED_M7.json` binds hashes, exact results and source.
+
+**Next dependency:** defect-labelled calibration/validation from an authorized
+Intel/SO-101 station, before qualifying the policy; do not tune on this
+now-exposed heldout. Station ownership, real VLA/grasp/reinspection, physical
+E-stop and Intel target inference remain unverified. No merge, production
+deployment or submission. Portfolio PR Recovery remains sole integrator.
