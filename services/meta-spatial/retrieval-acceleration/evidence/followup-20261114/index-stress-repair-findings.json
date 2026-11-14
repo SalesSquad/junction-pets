@@ -1,0 +1,234 @@
+{
+  "action_authorized": false,
+  "change": "Float64 norm validation uses fixed 1024-row chunks; copied float32 values, projection, rankings, bindings and error priority are preserved.",
+  "comparisons": [
+    {
+      "amortization_after_fix": {
+        "basis": "median warm/fresh search; one observed preparation; resident input; no catalog changes",
+        "fresh_index_single_query_median_seconds": 0.6179628725003568,
+        "preparation_equivalent_warm_queries": 90.27652383548707,
+        "rows": [
+          {
+            "estimated_speed_ratio": 0.5215135544366678,
+            "fresh_each_query_seconds": 0.6179628725003568,
+            "prepare_once_then_reuse_seconds": 1.1849411530020006,
+            "queries_per_catalog_version": 1
+          },
+          {
+            "estimated_speed_ratio": 1.0317238318802309,
+            "fresh_each_query_seconds": 1.2359257450007135,
+            "prepare_once_then_reuse_seconds": 1.197923036001157,
+            "queries_per_catalog_version": 2
+          },
+          {
+            "estimated_speed_ratio": 3.874939204138135,
+            "fresh_each_query_seconds": 4.943702980002854,
+            "prepare_once_then_reuse_seconds": 1.2758143339960952,
+            "queries_per_catalog_version": 8
+          },
+          {
+            "estimated_speed_ratio": 12.457519828381791,
+            "fresh_each_query_seconds": 19.774811920011416,
+            "prepare_once_then_reuse_seconds": 1.587379525975848,
+            "queries_per_catalog_version": 32
+          }
+        ],
+        "strict_reuse_break_even_queries": 2,
+        "warm_single_query_median_seconds": 0.012981882999156369
+      },
+      "baseline_receipt": {
+        "file": "index-stress-50000-identity.json",
+        "sha256": "20dd152de0da0d08bd7eb8c6c25ef88ce9916c4fa8bd728daa72896dca5732b8"
+      },
+      "fixed_receipt": {
+        "file": "index-stress-after-fix-50000-identity.json",
+        "sha256": "b57f828190827d46a92226f30c7485b535e19bc894692f043c9bf2a0578dce11"
+      },
+      "memory": {
+        "after_preparation": {
+          "after_peak_rss_bytes": 495554560,
+          "before_peak_rss_bytes": 955473920,
+          "reduction_percent": 48.135208127920436
+        },
+        "final": {
+          "after_peak_rss_bytes": 533950464,
+          "before_peak_rss_bytes": 993763328,
+          "reduction_percent": 46.269856317338366
+        }
+      },
+      "mode": "identity",
+      "parity": {
+        "all_bindings_identical": true,
+        "all_query_results_identical": true,
+        "baseline_query_results_sha256_by_batch": {
+          "1": "9dda96df3f44b2905713a8e4a7ed000d27b9e7c303c1381b7b422833eb200baa",
+          "128": "034d6170f6ddb1664b288d6ee64e25e0ead963dbd175a5363c5410bdabcccc44",
+          "16": "034d6170f6ddb1664b288d6ee64e25e0ead963dbd175a5363c5410bdabcccc44"
+        },
+        "batch_shapes": 3,
+        "candidate_positions_compared": 49152,
+        "cpu_seconds": 2.9433366549999995,
+        "fixed_query_results_sha256_by_batch": {
+          "1": "9dda96df3f44b2905713a8e4a7ed000d27b9e7c303c1381b7b422833eb200baa",
+          "128": "034d6170f6ddb1664b288d6ee64e25e0ead963dbd175a5363c5410bdabcccc44",
+          "16": "034d6170f6ddb1664b288d6ee64e25e0ead963dbd175a5363c5410bdabcccc44"
+        },
+        "fixed_source_sha256": "19c221551253ce46775c8b88a945f9339a8e2ae5eb38fcbf720a4d900fb957b2",
+        "memory_scope": "This comparison occurs after fixed-only RSS is frozen; final process RSS includes baseline allocations",
+        "query_rows_per_batch": 128,
+        "reference_source_sha256": "c104e41c7e0a1ad9cd97d883ec0ee1ef4f24c4db56496e6e2b7edb3cca54dcaf",
+        "wall_seconds": 2.9421612240003014
+      },
+      "timing": {
+        "fresh_index_single_query_median_seconds": {
+          "after": 0.6179628725003568,
+          "before": 0.5484611065003264
+        },
+        "preparation_wall_seconds": {
+          "after": 1.1719592700028443,
+          "before": 1.3329429510013142
+        },
+        "warm_single_query_median_seconds": {
+          "after": 0.012981882999156369,
+          "before": 0.013118335999024566
+        }
+      }
+    },
+    {
+      "amortization_after_fix": {
+        "basis": "median warm/fresh search; one observed preparation; resident input; no catalog changes",
+        "fresh_index_single_query_median_seconds": 0.9405312439994304,
+        "preparation_equivalent_warm_queries": 118.14342120141677,
+        "rows": [
+          {
+            "estimated_speed_ratio": 0.6014252804316615,
+            "fresh_each_query_seconds": 0.9405312439994304,
+            "prepare_once_then_reuse_seconds": 1.563837228997727,
+            "queries_per_catalog_version": 1
+          },
+          {
+            "estimated_speed_ratio": 1.1928387720459663,
+            "fresh_each_query_seconds": 1.8810624879988609,
+            "prepare_once_then_reuse_seconds": 1.5769628989946796,
+            "queries_per_catalog_version": 2
+          },
+          {
+            "estimated_speed_ratio": 4.544406030861313,
+            "fresh_each_query_seconds": 7.5242499519954436,
+            "prepare_once_then_reuse_seconds": 1.6557169189763954,
+            "queries_per_catalog_version": 8
+          },
+          {
+            "estimated_speed_ratio": 15.271982467808266,
+            "fresh_each_query_seconds": 30.096999807981774,
+            "prepare_once_then_reuse_seconds": 1.9707329989032587,
+            "queries_per_catalog_version": 32
+          }
+        ],
+        "strict_reuse_break_even_queries": 2,
+        "warm_single_query_median_seconds": 0.013125669996952638
+      },
+      "baseline_receipt": {
+        "file": "index-stress-50000-residual.json",
+        "sha256": "e4febef77567265c38827a798512d0ac36671aef3ce1ce9d862cb0751e9f1d99"
+      },
+      "fixed_receipt": {
+        "file": "index-stress-after-fix-50000-residual.json",
+        "sha256": "28e9aba584e47d059745d6eac52846b53b27198f9315f43d680973c187112bc6"
+      },
+      "memory": {
+        "after_preparation": {
+          "after_peak_rss_bytes": 700801024,
+          "before_peak_rss_bytes": 955580416,
+          "reduction_percent": 26.66226596255401
+        },
+        "final": {
+          "after_peak_rss_bytes": 732459008,
+          "before_peak_rss_bytes": 1001046016,
+          "reduction_percent": 26.83063552594969
+        }
+      },
+      "mode": "residual",
+      "parity": {
+        "all_bindings_identical": true,
+        "all_query_results_identical": true,
+        "baseline_query_results_sha256_by_batch": {
+          "1": "d56a0ae5772ad1fcc3a3781e2b28559872790eb6871f584dedbe10bb9b6ea37d",
+          "128": "b520be828401123d704ef63cd579236ccb4c195d0e4652bfabdec07c934be60c",
+          "16": "572fc6ba878cbb118f544681dd363758987d763085f8203032e8839ed7f5c624"
+        },
+        "batch_shapes": 3,
+        "candidate_positions_compared": 49152,
+        "cpu_seconds": 3.3688700030000014,
+        "fixed_query_results_sha256_by_batch": {
+          "1": "d56a0ae5772ad1fcc3a3781e2b28559872790eb6871f584dedbe10bb9b6ea37d",
+          "128": "b520be828401123d704ef63cd579236ccb4c195d0e4652bfabdec07c934be60c",
+          "16": "572fc6ba878cbb118f544681dd363758987d763085f8203032e8839ed7f5c624"
+        },
+        "fixed_source_sha256": "19c221551253ce46775c8b88a945f9339a8e2ae5eb38fcbf720a4d900fb957b2",
+        "memory_scope": "This comparison occurs after fixed-only RSS is frozen; final process RSS includes baseline allocations",
+        "query_rows_per_batch": 128,
+        "reference_source_sha256": "c104e41c7e0a1ad9cd97d883ec0ee1ef4f24c4db56496e6e2b7edb3cca54dcaf",
+        "wall_seconds": 3.3692283499985933
+      },
+      "timing": {
+        "fresh_index_single_query_median_seconds": {
+          "after": 0.9405312439994304,
+          "before": 1.1155044690021896
+        },
+        "preparation_wall_seconds": {
+          "after": 1.5507115590007743,
+          "before": 1.1666483039989544
+        },
+        "warm_single_query_median_seconds": {
+          "after": 0.013125669996952638,
+          "before": 0.014022794999618782
+        }
+      }
+    }
+  ],
+  "completed_baseline_cases": 7,
+  "completed_fixed_cases": 2,
+  "declared_baseline_commit": "4210b617b087a63a52b0ea1d09ae33b2df9d6d46",
+  "gpu_calls": 0,
+  "identical_candidate_positions_compared": 98304,
+  "kind": "meta.retrieval-acceleration.synthetic-memory-repair-findings",
+  "limits": [
+    "Fixed memory is captured before old-source parity work; final_process_memory includes old-source allocations and is not a fixed-only metric.",
+    "Warm and fresh timings have small sample counts. Initial residual preparation was slower (1.167 to 1.551 seconds), so no universal preparation speedup is claimed.",
+    "Residual fixed-workload peak remains about 732 MB: immutable caller/index copies and unchanged full-gallery projection still need material memory.",
+    "Near-tie batch sensitivity remains unchanged and documented. No ranking precision or acceptance policy was changed.",
+    "Catalog or adapter churn can remove reuse benefit; host instance replacement and concurrent rebuild limits remain integration responsibilities.",
+    "No broad test rerun, model quality evaluation, provider call, GPU call or spending occurred."
+  ],
+  "model_quality_evaluated": false,
+  "observed_experiment_cpu_seconds": 42.069433212999996,
+  "physical_identity_verified": false,
+  "planned_baseline_cases": 7,
+  "planned_fixed_cases": 2,
+  "preserved_baseline_probe": {
+    "file": "index-stress-probe-baseline.txt",
+    "sha256": "fc4b90be70f5b06cd1deca28a466c0f232f9f89992c8529af91d6c1a62706a99"
+  },
+  "provider_calls": 0,
+  "qualification": false,
+  "schema_version": 1,
+  "source_sha256": {
+    "candidate_index.py": "19c221551253ce46775c8b88a945f9339a8e2ae5eb38fcbf720a4d900fb957b2",
+    "contract.py": "45c7a2b1295e5fd4818125481d68fbeffbbe95b7e1ba2c9a0e3adf04e74708d9",
+    "stress_probe.py": "167ecead0b2e247e4a2dc9b82260c578a56eca2b3e04be3f6dc5624cfb05a137",
+    "test_candidate_index.py": "3e9553044ee3923c10309f1cebb94341cd5a9cdf41631d50864fe6c882fcc1ea",
+    "test_index_memory.py": "a902301a2a2514897314c357d4c96c988c84c88157a7b3add457e8fd5ccc85e5"
+  },
+  "synthetic_only": true,
+  "targeted_test_evidence": {
+    "command": "OPENBLAS_NUM_THREADS=1 python -B -m unittest -v test_candidate_index test_index_memory",
+    "failed": 0,
+    "new_tests": 5,
+    "observed_unittest_seconds": 0.173,
+    "original_tests": 9,
+    "passed": 14,
+    "source_stable_during_run": true,
+    "status": "local advisory execution"
+  }
+}

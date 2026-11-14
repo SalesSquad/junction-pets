@@ -1,0 +1,75 @@
+{
+  "action_authorized": false,
+  "completed_cases": 7,
+  "cpu_hard_limit_total_seconds": 85,
+  "created_at_utc": "2026-11-14T22:02:27.037132+00:00",
+  "declared_source_commit": "4210b617b087a63a52b0ea1d09ae33b2df9d6d46",
+  "gpu_calls": 0,
+  "kind": "meta.retrieval-acceleration.synthetic-stress-summary",
+  "measurement_limits": [
+    "Fresh index over resident inputs; no disk I/O or cold hardware-cache control",
+    "Peak RSS is per isolated process and includes caller inputs and preparation temporaries",
+    "Amortization values are estimates for an unchanged catalog and adapter",
+    "Near-tie float64 reference is diagnostic only, not product ranking policy",
+    "Two-thread example cannot establish safety of arbitrary host-level cache replacement"
+  ],
+  "model_quality_evaluated": false,
+  "observed_child_cpu_seconds": 18.843499,
+  "observed_parent_cpu_seconds": 0.061064703,
+  "physical_identity_verified": false,
+  "planned_cases": 7,
+  "probe_sha256": "fc4b90be70f5b06cd1deca28a466c0f232f9f89992c8529af91d6c1a62706a99",
+  "provider_calls": 0,
+  "qualification": false,
+  "receipts": [
+    {
+      "case": "50000-identity",
+      "file": "index-stress-50000-identity.json",
+      "sha256": "20dd152de0da0d08bd7eb8c6c25ef88ce9916c4fa8bd728daa72896dca5732b8",
+      "status": "COMPLETE"
+    },
+    {
+      "case": "50000-residual",
+      "file": "index-stress-50000-residual.json",
+      "sha256": "e4febef77567265c38827a798512d0ac36671aef3ce1ce9d862cb0751e9f1d99",
+      "status": "COMPLETE"
+    },
+    {
+      "case": "128-identity",
+      "file": "index-stress-128-identity.json",
+      "sha256": "d86e5d02b567d9ca7c92b7b16690099181169d378f0ad94dec3a5eea2dd4ca18",
+      "status": "COMPLETE"
+    },
+    {
+      "case": "128-residual",
+      "file": "index-stress-128-residual.json",
+      "sha256": "cd46a80d1476de1b4baf8aaf5171184f3e9b3bd02662944c228a5221c296d60f",
+      "status": "COMPLETE"
+    },
+    {
+      "case": "4096-identity",
+      "file": "index-stress-4096-identity.json",
+      "sha256": "6bb72d2669e32a235408a3fe1e84bf75ccbfe5e9358d907916a54845471ea456",
+      "status": "COMPLETE"
+    },
+    {
+      "case": "4096-residual",
+      "file": "index-stress-4096-residual.json",
+      "sha256": "ecdcba718cc8e9c67d7738cf5c0ebf31744c458e06154bc061fdeca3bfc3b802",
+      "status": "COMPLETE"
+    },
+    {
+      "case": "diagnostics",
+      "file": "index-stress-diagnostics.json",
+      "sha256": "cc73085e5ab0ce8bf8d7e43c221eecd3d45c178e8d7fbf4095be50f77d3fbe6a",
+      "status": "COMPLETE"
+    }
+  ],
+  "schema_version": 1,
+  "seed": 20261114,
+  "source_sha256": {
+    "candidate_index.py": "c104e41c7e0a1ad9cd97d883ec0ee1ef4f24c4db56496e6e2b7edb3cca54dcaf",
+    "contract.py": "45c7a2b1295e5fd4818125481d68fbeffbbe95b7e1ba2c9a0e3adf04e74708d9"
+  },
+  "synthetic_only": true
+}
