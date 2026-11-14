@@ -14,7 +14,7 @@ This is a **self-contained, disposable PostgreSQL experiment**, not the applicat
 
 ## Portable local/CRACI execution
 
-Prerequisites: Node 22+, PostgreSQL 14+ with an **ephemeral, isolated test database and schema-create privilege**, and package `pg` at the fixed version specified in this directory. Use a preconfigured job-local PostgreSQL service/container on authorized CRACI runners (or a developer-owned disposable database). An example Ubuntu service setup is PostgreSQL 16 official package/service; **do not provision production credentials or connect a sponsor database**. Docker is optional and not assumed installed.
+Prerequisites: Node 22+, PostgreSQL 14+ with an **ephemeral, isolated test database and schema-create privilege**, and the checked-in package lock pinning `pg@8.13.1` and its resolved transitive packages. Use a preconfigured job-local PostgreSQL service/container on authorized CRACI runners (or a developer-owned disposable database). An example Ubuntu service setup is PostgreSQL 16 official package/service; **do not provision production credentials or connect a sponsor database**. Docker is optional and not assumed installed.
 
 If an authorized Ubuntu runner already has Docker, one bounded local example is below (password generated per-run, no volume, localhost-only port; the image download requires existing approved registry access):
 
@@ -29,9 +29,11 @@ export VALIO_TEST_DATABASE_URL="postgres://valio_lab:$VALIO_LAB_PASSWORD@127.0.0
 
 Do not print `VALIO_LAB_PASSWORD` or the connection URL in CI logs. A CRACI job with a pre-existing PostgreSQL service does not need Docker; pass its **test-only** connection URL through an ephemeral job environment, not a committed file.
 
+For Ubuntu's existing local PostgreSQL service with **Unix peer authentication**, the officially supported `pg-connection-string` socket form is `VALIO_TEST_DATABASE_URL='socket:/var/run/postgresql?db=postgres'`. Before using it, start the service and verify that PostgreSQL has a role matching the runner's OS account with `CREATE` privilege on a **disposable** test database. This socket form was parsed locally with the pinned `pg` dependency; no PostgreSQL server was present here to connect to. Never grant a production user elevated privileges for this test.
+
 ```sh
 cd solutions/valio-trusted-trade/durable
-npm install --ignore-scripts --no-audit --no-fund
+npm ci --ignore-scripts --no-audit --no-fund
 node --test test/contract.test.mjs
 export VALIO_TEST_DATABASE_URL='postgres://<ephemeral-test-user>:<password>@127.0.0.1:5432/<ephemeral-db>'
 node smoke.mjs --workers 8 --requests 1000
