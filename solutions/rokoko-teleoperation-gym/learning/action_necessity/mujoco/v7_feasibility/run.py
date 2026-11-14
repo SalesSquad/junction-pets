@@ -275,6 +275,31 @@ def verify_contact_trace(transitions,contacts):
         raise ValueError("CONTACT_TERMINAL_TOTAL_MISMATCH")
 
 
+def verify_terminal_success(transitions,result):
+    """No source-valid 'win' without contact, dwell, physics and public goal."""
+    if not transitions:
+        raise ValueError("SUCCESS_EVIDENCE_EMPTY")
+    last=transitions[-1]
+    if bool(result["success"])!=bool(last["success_info"]):
+        raise ValueError("SUCCESS_INFO_MISMATCH")
+    if bool(result["abstained"]) and int(last["action"])!=6:
+        raise ValueError("ABSTAIN_LAST_ACTION_INVALID")
+    dwell=[int(t["dwell_ticks_cumulative"]) for t in transitions]
+    if any(b<a for a,b in zip(dwell,dwell[1:])):
+        raise ValueError("DWELL_RUNNING_PEAK_NONMONOTONE")
+    if int(result["dwell_ticks_final"])!=int(last["dwell_ticks_current"]):
+        raise ValueError("DWELL_TERMINAL_RAW_COUNTER_MISMATCH")
+    if bool(result["success"]):
+        final=np.asarray(last["next_observation"],dtype=float)
+        goal_distance=float(np.linalg.norm(final[:2]-final[16:18]))
+        if (int(result["dwell_ticks_final"])<250 or
+            int(last["contacts_cumulative"])<1 or
+            int(result["physics_steps"])<=0 or
+            bool(result["unsafe"]) or bool(result["abstained"]) or
+            int(last["action"])==6 or goal_distance>=.025):
+            raise ValueError("NONPHYSICAL_OR_UNSAFE_SUCCESS_CLAIM")
+
+
 def real_rollout(env,seed,strategy,deadline):
     """No shortcut/synthetic physics. Complete raw transitions are returned."""
     from env import ACTIONS
@@ -290,6 +315,7 @@ def real_rollout(env,seed,strategy,deadline):
     side_proposals=0
     side_contact_option_steps=[]
     previous_contacts=0
+    peak_dwell=0
     side_forward_reopen_trace=[]
     for option in range(MAX_OPTIONS):
         if time.monotonic()>=deadline:
@@ -302,6 +328,7 @@ def real_rollout(env,seed,strategy,deadline):
         m=np.asarray(allowed,dtype=bool).astype(int).tolist()
         saw_forward_masked|=not(m[1] or m[2])
         observed,reward,done,last=env.step(action)
+        peak_dwell=max(peak_dwell,int(env.dwell))
         if action in (3,4) and int(last["contacts"])>previous_contacts:
             side_contact_option_steps.append(option+1)
         previous_contacts=int(last["contacts"])
@@ -316,6 +343,9 @@ def real_rollout(env,seed,strategy,deadline):
                                     reward=float(reward),cost=int(last["cost"]),
                                     done=bool(done),
                                     contacts_cumulative=int(last["contacts"]),
+                                    dwell_ticks_current=int(env.dwell),
+                                    dwell_ticks_cumulative=peak_dwell,
+                                    success_info=bool(last["success"]),
                                     next_observation=np.asarray(observed,dtype=float).tolist()))
         if done:
             break
@@ -349,6 +379,7 @@ def real_rollout(env,seed,strategy,deadline):
                 full_transition_sha256=digest(all_transitions),
                 sparse_trace=True,
                 sparse_transition_indices=sparse_indices(len(all_transitions)))
+    verify_terminal_success(all_transitions,result)
     result["transitions"]=[all_transitions[i] for i in result["sparse_transition_indices"]]
     return result,all_transitions
 
