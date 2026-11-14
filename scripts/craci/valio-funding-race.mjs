@@ -117,9 +117,15 @@ for(let i=0;i<fixtures;i++){
     assert.equal(service.demoWallet().buyerBalanceCents,250000);
     assert.equal(service.paymentJournalVerify().valid,true);
     const paidLoser=await call('/api/orders/'+orders[loser].id+'/settlement',{
-      buyerId,idempotencyKey:'j26-funding-second-after-refund-'+i},token);
+      buyerId,idempotencyKey:'j26-funding-payment-'+i+'-'+loser},token);
     assert.equal(paidLoser.status,201);
     assert.equal(paidLoser.idempotentReplay,false);
+    // The previously declined key must remain unconsumed until funds are restored.
+    const retried=await call('/api/orders/'+orders[loser].id+'/settlement',{
+      buyerId,idempotencyKey:'j26-funding-payment-'+i+'-'+loser},token);
+    assert.equal(retried.status,201);
+    assert.equal(retried.idempotentReplay,true);
+    assert.equal(retried.transfer.id,paidLoser.transfer.id);
     report.second_settlements_after_refund++;
     assert.equal((await call('/api/orders/'+orders[loser].id+'/cancel',{buyerId},token)).status,200);
     assert.equal((await call('/api/orders/'+orders[loser].id+'/cancel',{buyerId},token)).status,200);
