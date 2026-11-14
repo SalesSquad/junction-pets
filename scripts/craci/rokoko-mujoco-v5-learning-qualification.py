@@ -39,6 +39,12 @@ def load_json(path: Path):
         return json.load(handle)
 
 
+def canonical_sha256(value) -> str:
+    """Exact payload bytes used by the product trainer, not a producer claim."""
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"),
+                                     ensure_ascii=False, allow_nan=False).encode("utf8")).hexdigest()
+
+
 def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> dict:
     """Contract assertions independent of the producer's claimed verdict."""
     require(SOURCE_SHA.fullmatch(source) is not None, "INVALID_EXACT_SOURCE_SHA")
@@ -50,7 +56,23 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
             "UNHASHED_WEIGHTS")
     require(training.get("actual_transition_count", 0) > 0,
             "NO_REAL_LEARNING_TRANSITIONS")
+    require(isinstance(training.get("rollouts"), list) and training["rollouts"],
+            "NO_ACTUAL_TRAINING_ROLLOUTS")
+    require(all(isinstance(row, dict) and isinstance(row.get("transitions"), list)
+                for row in training["rollouts"]), "INVALID_TRAINING_EPISODE_SCHEMA")
+    require(sum(len(row["transitions"]) for row in training["rollouts"]) ==
+            training["actual_transition_count"], "TRAINING_TRANSITION_COUNT_MISMATCH")
+    require(training["dataset_sha256"] == canonical_sha256(training["rollouts"]),
+            "FORGED_TRAINING_DATASET_DIGEST")
+    require(isinstance(model.get("weights"), dict) and model["weights"],
+            "NO_LEARNED_MODEL_WEIGHTS")
+    require(training["weights_sha256"] == canonical_sha256(model["weights"]),
+            "FORGED_CANDIDATE_WEIGHTS_DIGEST")
+    require(training.get("selected", {}).get("weights") == model["weights"],
+            "SELECTED_MODEL_IS_NOT_FROZEN_WEIGHTS")
     require(dev.get("split") == "dev", "NOT_DEVELOPMENT_ONLY")
+    require(dev.get("actual_physics_engine") == "mujoco-3.3.7",
+            "ACTUAL_REAL_PHYSICS_VERSION_REQUIRED")
     require(dev.get("first_seed") == DEV_FIRST and dev.get("episodes") == DEV_COUNT,
             "EXPOSED_OR_WRONG_DEV_SEED_COHORT")
     require(training.get("train_first_seed") == TRAIN_FIRST and
