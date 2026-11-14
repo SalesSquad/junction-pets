@@ -11,7 +11,7 @@ import {createLabSchema,seedAccounts,auditLab} from '../index.mjs';
 import {payment,refund,createWalWorkload,flightApplicationNames} from './plan.mjs';
 import {createOwnedCluster,startOwnedCluster,sigkillOwnedPostmaster,
   recoverySignals,closeOwnedCluster} from './cluster.mjs';
-import {captureOwnedPgFailure} from './forensics.mjs';
+import {captureOwnedPgFailure,redactPgLine} from './forensics.mjs';
 
 const workerPath=fileURLToPath(new URL('../worker.mjs',import.meta.url));
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -274,7 +274,7 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     if(c)try{forensic=await captureOwnedPgFailure(c.logFile);}catch{}
     console.error(JSON.stringify({event:'WAL_CHAOS_FAILURE_FORENSIC',
       workId:facts.workId,stage:failureStage,sourceSha:facts.sourceSha,
-      errorCode:error.code||'UNCLASSIFIED',errorMessage:String(error.message).slice(0,700),
+      errorCode:error.code||'UNCLASSIFIED',errorMessage:redactPgLine(error.message),
       testOwnedPgdata:c?.root||null,forensic}));
     throw error;
   } finally {
