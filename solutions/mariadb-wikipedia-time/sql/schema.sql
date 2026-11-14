@@ -1,10 +1,20 @@
--- Proposed MariaDB schema, NOT executed. Official main challenge M307.
+-- MariaDB 11.8 temporal schema, locally qualified only; challenge M307.
 -- Wikipedia revision time is stored in revised_at_utc. Database SYSTEM_TIME
 -- is the IMPORT/CORRECTION clock and MUST NOT be presented as Wikipedia edit time.
+-- 
+-- IMPORTANT: Dataset, source revision and page IDs are exact identifiers.
+-- MariaDB's default utf8mb4_uca1400_ai_ci merges case/accent variants, including
+-- distinct Wikipedia pages and dataset names. That produced five real SQL
+-- verification failures at d0be3abf (CRACI 43564983185). A binary NO PAD
+-- collation preserves distinct case, accents and trailing spaces in both
+-- primary/index keys and the prepared as-of query (not just SELECT filters).
+-- CREATE IF NOT EXISTS does NOT migrate existing collations. For an existing
+-- table, first audit collisions and plan an explicit transactional migration;
+-- never silently alter or drop a populated historical table.
 CREATE TABLE IF NOT EXISTS wiki_revision_events (
-  dataset_id VARCHAR(100) NOT NULL,
-  source_revision_id VARCHAR(32) NOT NULL,
-  page_id VARCHAR(128) NOT NULL,
+  dataset_id VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_nopad_bin NOT NULL,
+  source_revision_id VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_nopad_bin NOT NULL,
+  page_id VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_nopad_bin NOT NULL,
   article_title VARCHAR(255) NOT NULL,
   revised_at_utc DATETIME(6) NOT NULL,
   content_body MEDIUMTEXT NOT NULL,
