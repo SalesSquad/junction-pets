@@ -32,12 +32,13 @@ const SPONSOR_PINS = Object.freeze({
 const FRONTIER_PINS = Object.freeze({
   'rokoko-heldout': '0390b87a54ad5cbc98fd5d781f828be0cfa8fbe8',
   'arduino-proof-48': 'eb7ff4cb7fa6c867ced7d944385b4e0bd08d04c4',
+  'valio-settlement-browser': 'd45f450a38ec6c8fb2f73b96d181454458ae3928',
 });
 export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser',
 ]);
 
 function choose(value, choices, label) {
@@ -81,6 +82,8 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override) throw new Error('Tieto uses sponsor_revision pins; source_sha is unsupported for this workload');
     const revisions = revision === 'all' ? ['base', '2283', '2234', '2129', '2297'] : revision === 'heads' ? ['2283', '2234', '2129', '2297'] : [revision];
     for (const rev of revisions) add(`tieto-${rev}-${toolchain}`, SPONSOR_PINS[rev], {revision: rev, source_repository: 'te-industry-tech-office/junction26-messagepack-csharp'});
+  } else if (workload === 'valio-settlement-browser') {
+    for (const engine of selectedEngines) add(`valio-settlement-${engine}`, override || FRONTIER_PINS[workload], {browser: engine, product: 'valio'});
   } else if (Object.hasOwn(FRONTIER_PINS, workload)) {
     add(workload, override || FRONTIER_PINS[workload]);
   } else {
