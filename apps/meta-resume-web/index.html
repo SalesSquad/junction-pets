@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="description" content="Chibi Resume: a local synthetic camera-bag task. Only a visible user confirmation completes a step. Observations and assistant proposals do not prove identity or completion. No live glasses, microphone or Chibi host is connected.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Chibi Resume — user confirmation required · local demo</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.mjs"></script>
@@ -56,6 +56,18 @@
             <div class="surface-footnote"><span class="connection-dot" aria-hidden="true"></span><span id="surfaceConnection">Glasses disconnected · local controls available</span></div>
           </article>
           <p class="display-caption"><span aria-hidden="true">↳</span> A small surface for the next useful action. Full context stays beside it.</p>
+          <section class="observation-card" id="observationCard" aria-labelledby="observationTitle" aria-busy="false">
+            <div class="card-kicker"><span class="eyebrow">A FRESH LOOK</span><span class="observation-badge" id="observationBadge">ADVISORY</span></div>
+            <h2 id="observationTitle">What changed?</h2>
+            <p class="observation-intro">Bring one moment into context. Chibi can suggest what to check; you decide what is done.</p>
+            <div class="observation-inputs"><button type="button" class="secondary-button" id="observationSample" disabled>Use synthetic sample</button><button type="button" class="link-button" id="observationImport">Import observation ↗</button><input type="file" id="observationFile" accept="application/json,.json" hidden aria-label="Choose an observation JSON file"></div>
+            <div class="observation-preview" id="observationPreview" hidden><div class="observation-image-wrap"><img id="observationImage" alt="" decoding="async"><svg id="observationBoxes" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"></svg></div><p id="observationCaption"></p></div>
+            <p id="observationStatus" class="observation-status" role="status" aria-live="polite">Checking observation connection…</p>
+            <div class="observation-actions"><button type="button" class="primary-button" id="observationAnalyze" disabled>Analyze this moment</button><button type="button" class="link-button" id="observationClear" disabled>Clear</button></div>
+            <p class="observation-disclosure" id="observationDisclosure">No image is sent until you choose Analyze.</p>
+            <div class="observation-output" id="observationOutput" aria-live="polite" aria-atomic="true"></div>
+            <details class="observation-evidence"><summary>Observation details</summary><dl id="observationDetails"></dl><p>Tracks and interpretations are suggestions. They do not prove an item's identity or change your packing history.</p></details>
+          </section>
         </section>
 
         <aside class="context-column" aria-label="Task context and controls">
@@ -74,7 +86,7 @@
             <div id="historyPanel" class="history-panel" hidden><h3>Append-only demo history</h3><ol id="eventHistory"></ol></div>
           </section>
 
-          <section class="connection-card" aria-labelledby="connection-title"><div class="connection-title"><span class="connection-icon" aria-hidden="true">⌁</span><div><h2 id="connection-title">You are in control.</h2><p>No glasses or Chibi host connected.</p></div></div><div class="connection-detail"><span id="captureStatus">Synthetic observations enabled</span><button type="button" class="link-button danger-link" id="revokeButton" data-action="revoke">Revoke</button></div><div class="connection-detail"><span>Voice tools</span><span id="voiceStatus">Unavailable in this browser</span></div><p class="storage-note" id="storageNote">Progress stays in this browser. No uploads.</p></section>
+          <section class="connection-card" aria-labelledby="connection-title"><div class="connection-title"><span class="connection-icon" aria-hidden="true">⌁</span><div><h2 id="connection-title">You are in control.</h2><p>No glasses or Chibi host connected.</p></div></div><div class="connection-detail"><span id="captureStatus">Synthetic observations enabled</span><button type="button" class="link-button danger-link" id="revokeButton" data-action="revoke">Revoke</button></div><div class="connection-detail"><span>Voice tools</span><span id="voiceStatus">Unavailable in this browser</span></div><p class="storage-note" id="storageNote">Task progress stays in this browser. Observation analysis is optional.</p></section>
         </aside>
       </div>
 

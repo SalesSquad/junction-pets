@@ -1,4 +1,5 @@
 :root {
+
   color-scheme:dark;
   --bg:#101310;
   --panel:#191e19;
@@ -1283,4 +1284,54 @@ body.compact {
 .compact .segments {
   margin-top: 16px;
   margin-bottom: 18px;
+}
+
+
+/* One current observation, kept separate from confirmed task state. */
+.observation-card {
+  margin-top: 28px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: linear-gradient(145deg, #1c231d, #171d18);
+}
+.observation-card h2 { margin: 14px 0 8px; font-size: 27px; letter-spacing: -.8px; }
+.observation-intro { margin: 0; max-width: 48ch; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.observation-badge { color: var(--amber); font: 8px var(--mono); letter-spacing: .6px; text-align: right; }
+.observation-inputs, .observation-actions { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 20px; }
+.observation-inputs .secondary-button { padding: 11px 15px; font-size: 11px; min-height: 42px; }
+.observation-actions .primary-button { width: auto; min-height: 44px; padding: 13px 20px; font-size: 12px; }
+.observation-preview { margin-top: 21px; }
+.observation-image-wrap { position: relative; max-width: 480px; margin: auto; border-radius: 12px; overflow: hidden; background: #0e130e; }
+.observation-image-wrap img { display: block; width: 100%; height: auto; }
+.observation-image-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.observation-image-wrap rect { fill: #d1ed990a; stroke: var(--accent); stroke-width: .005; }
+.observation-preview > p { margin: 9px 0 0; color: var(--muted); font: 9px var(--mono); line-height: 1.6; }
+.observation-status { margin: 18px 0 0; font-size: 12px; line-height: 1.6; color: var(--text); min-height: 20px; }
+.observation-disclosure { margin: 12px 0 0; color: var(--muted); font-size: 10px; line-height: 1.65; }
+.observation-output:not(:empty) { margin-top: 23px; padding-top: 20px; border-top: 1px solid var(--border); }
+.observation-summary { margin: 0; color: var(--text); font-size: 15px; line-height: 1.6; }
+.observation-facts { margin: 13px 0; padding-left: 19px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.observation-facts li + li { margin-top: 5px; }
+.observation-uncertainty { margin: 10px 0; padding-left: 12px; border-left: 2px solid var(--amber); color: var(--amber); font-size: 12px; line-height: 1.65; }
+.observation-question { margin: 17px 0 0; color: var(--accent); font-size: 17px; font-weight: 600; line-height: 1.55; }
+.observation-next { margin: 12px 0; color: var(--muted); font-size: 12px; }
+.observation-return { margin-top: 16px; padding: 12px 16px; font-size: 11px; }
+.observation-advisory { margin: 12px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+.observation-evidence { margin-top: 21px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--muted); }
+.observation-evidence summary { cursor: pointer; font-size: 10px; line-height: 1.7; width: fit-content; }
+.observation-evidence summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
+.observation-evidence dl { display: grid; grid-template-columns: 105px minmax(0, 1fr); gap: 8px 10px; margin: 14px 0; font: 9px var(--mono); line-height: 1.65; }
+.observation-evidence dt { color: var(--text); }
+.observation-evidence dd { margin: 0; overflow-wrap: anywhere; }
+.observation-evidence > p { margin: 12px 0 0; font-size: 10px; line-height: 1.6; max-width: 66ch; }
+.observation-card[aria-busy="true"] .observation-status { color: var(--accent); }
+.compact .observation-card { display: none; }
+@media (max-width: 760px) {
+  .observation-card { padding: 23px 20px; margin-top: 20px; border-radius: 18px; }
+}
+@media (max-width: 420px) {
+  .observation-inputs, .observation-actions { gap: 12px; }
+  .observation-evidence dl { grid-template-columns: 1fr; gap: 4px; }
+  .observation-evidence dd + dt { margin-top: 8px; }
 }

@@ -1,6 +1,7 @@
 import { FIXTURE, id } from './fixture.mjs';
 import { createSession, restoreSession } from './state.mjs';
 import { registerResumeTools } from './webmcp.mjs';
+import { createObservationPanel } from './observation-client.mjs';
 
 const $ = (selector) => document.querySelector(selector);
 const STORAGE_KEY = 'chibi-resume.synthetic.camera-bag-v1';
@@ -10,6 +11,7 @@ let storageAvailable = true;
 let restored = false;
 let pendingConfirmation = null;
 let toastTimer;
+let observationPanel = null;
 
 try {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -193,13 +195,14 @@ function render() {
   $('#revokeButton').disabled = !policy.captureEnabled;
   $('#revokeButton').textContent = policy.captureEnabled ? 'Revoke' : 'Revoked';
   $('#surfaceConnection').textContent = policy.captureEnabled ? 'Glasses disconnected · local controls available' : 'Observations stopped · confirmations preserved';
-  $('#storageNote').textContent = storageAvailable ? 'Progress stays in this browser. No uploads.' : 'Storage unavailable or save invalid. Current progress is in memory only.';
+  $('#storageNote').textContent = storageAvailable ? 'Task progress stays in this browser. Observation analysis is optional.' : 'Storage unavailable or save invalid. Current progress is in memory only.';
   $('#chapter1').className = count >= 2 ? 'done' : 'active';
   $('#chapter2').className = wasInterrupted ? 'done' : count >= 2 ? 'active' : '';
   $('#chapter3').className = candidateVisible ? 'done' : interrupted ? 'active' : '';
   $('#chapter4').className = completed ? 'done' : hasProposal ? 'active' : '';
   document.documentElement.dataset.revision = String(state.revision);
   document.documentElement.dataset.taskStatus = state.status;
+  observationPanel?.sync();
 }
 
 function requestConfirmation() {
@@ -236,6 +239,7 @@ function act(action, button) {
     session.revokeCapture(); persist(); render();
     toast('Observations revoked. Late results are fenced out; your confirmations remain.');
   } else if (action === 'reset') {
+    observationPanel?.clear('A fresh task is ready. Load a new observation when you want.');
     session = createSession(); candidateVisible = false; persist(); render();
     toast('A fresh local camera-bag demo is ready.');
     $('#primaryAction').focus();
@@ -262,6 +266,12 @@ $('#historyToggle').addEventListener('click', () => {
   $('#historyPanel').hidden = expanded;
 });
 
+observationPanel = createObservationPanel({
+  element: $('#observationCard'),
+  read: () => ({ state: session.snapshot(), policy: session.getPolicy() }),
+  notify: toast,
+  returnToTask: () => { $('#primaryAction').scrollIntoView({ block: 'center' }); $('#primaryAction').focus(); },
+});
 render();
 if (restored) toast('Your local demo progress is restored. No account or device was contacted.');
 const cleanup = registerResumeTools(document, {
@@ -270,4 +280,4 @@ const cleanup = registerResumeTools(document, {
     $('#voiceStatus').textContent = ({ unavailable: 'Unavailable in this browser', registered: 'Native surface detected · unqualified', failed: 'Registration failed · controls still work' })[status];
   },
 });
-window.addEventListener('pagehide', cleanup, { once: true });
+window.addEventListener('pagehide', () => { cleanup(); observationPanel.dispose(); }, { once: true });

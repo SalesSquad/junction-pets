@@ -44,3 +44,14 @@ For development and the next evidence workflow, read the [source-pinned knowledg
 ## Drawing observations and fixed Stoa composition
 
 The drawing entrypoint `runDrawingObservation` reuses this exact-model bounded transport but has a separate question/source/page/region input and no benchmark requirement. It returns region-cited model interpretations or abstention after same-model review. `validateDrawingObservationResult` supports structural rechecking at the composing boundary. The fixed [Stoa→NVIDIA developer recipe](../stoa-nvidia/README.md) binds both identities and the parent request; its CLI defaults to zero-network planning. Source classifications and coordinates remain caller declarations, model review is not independent truth, and production uses existing host policy/executor/artifact seams. No live provider or sponsor-drawing qualification is implied.
+
+
+## Meta task observation
+
+The same bounded provider caller now has an explicit local NVFP4 profile, while
+all existing entry points retain their hosted default. The new
+`runTaskObservation` performs one grounded task interpretation without benchmark
+rows or drawing-specific fields. See [the runnable Meta observation guide](../meta-spatial/OBSERVATION.md)
+for the developer server, fixed profiles, strict image/track contract, evidence
+limits and focused checks. It returns an advisory artifact, never a task
+confirmation, identity attestation or production host grant.
