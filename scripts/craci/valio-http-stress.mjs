@@ -92,6 +92,7 @@ async function fixture(i) {
     const cancelPath='/api/orders/'+order.id+'/cancel';
     const paymentPath='/api/orders/'+order.id+'/payment';
     const before=await call(settlePath,{buyerId,idempotencyKey:'j26-stress-noauth-'+i},token);
+    assert.equal(before.status,403);
     assert.equal(before.error?.code,'PAYMENT_APPROVAL_REQUIRED');
     outcomes.unapproved_payment_denials++;
     const proposal=(await call(paymentPath,undefined,token)).proposal;
@@ -100,6 +101,7 @@ async function fixture(i) {
       buyerId,decision:'approve',proposalDigest:proposal.digest},token);
     assert.equal(approval.status,200);
     const illegal=await call(settlePath,{buyerId,idempotencyKey:'j26-stress-injected-'+i,amountCents:1},token);
+    assert.equal(illegal.status,400);
     assert.equal(illegal.error?.code,'PAYMENT_TERMS_FORBIDDEN');
     outcomes.tampered_term_denials++;
     const kind=i%3;
