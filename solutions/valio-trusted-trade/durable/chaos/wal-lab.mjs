@@ -8,9 +8,10 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import pg from 'pg';
 import {createLabSchema,seedAccounts,auditLab} from '../index.mjs';
-import {payment,refund,createWalWorkload} from './plan.mjs';
+import {payment,refund,createWalWorkload,flightApplicationNames} from './plan.mjs';
 import {createOwnedCluster,startOwnedCluster,sigkillOwnedPostmaster,
   recoverySignals,closeOwnedCluster} from './cluster.mjs';
+import {captureOwnedPgFailure} from './forensics.mjs';
 
 const workerPath=fileURLToPath(new URL('../worker.mjs',import.meta.url));
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -64,9 +65,17 @@ async function installPauseTrigger(pool,schema){
   // This intentionally pauses ONLY the eight new test orders at a rollback-safe
   // point in the current transaction. The trigger itself is durable DDL.
   const q=`"${schema}"`;
+  const marker=`j26wal_${schema.slice(4)}_`;
+  // Set a backend-local marker from NEW.order_id *inside* this exact trigger.
+  // Parameterized INSERT SQL exposes $1..$4 in pg_stat_activity.query, so this
+  // is the only honest link from a waiting PID to its exact flight fixture.
+  flightApplicationNames(schema);
   await pool.query(`CREATE FUNCTION ${q}.wal_pause() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
-  IF NEW.order_id LIKE 'wal_flight_%' THEN PERFORM pg_sleep(5); END IF;
+  IF NEW.order_id LIKE 'wal_flight_%' THEN
+    PERFORM set_config('application_name','${marker}' || NEW.order_id,true);
+    PERFORM pg_sleep(8);
+  END IF;
   RETURN NEW;
 END $$`);
   await pool.query(`CREATE TRIGGER wal_fault_pause BEFORE INSERT ON ${q}.ledger_batches
@@ -79,14 +88,22 @@ async function removePauseTrigger(pool,schema){
   await pool.query(`DROP FUNCTION ${q}.wal_pause()`);
 }
 
-async function waitForInFlightDbWork(pool,maxMs=3500){
+async function waitForInFlightDbWork(pool,schema,maxMs=6000){
+  const expected=new Set(flightApplicationNames(schema));
   const limit=Date.now()+maxMs;
+  let best=0,correctSql=0;
   while(Date.now()<limit){
-    const {rows:[r]}=await pool.query("SELECT count(*)::int AS n FROM pg_stat_activity WHERE wait_event='PgSleep'");
-    if(r.n>0)return r.n;
+    const {rows}=await pool.query("SELECT pid,application_name,query,state,wait_event FROM pg_stat_activity WHERE state='active' AND wait_event='PgSleep'");
+    const matches=rows.filter(r=>expected.has(r.application_name));
+    const sqlMatches=matches.filter(r=>/INSERT\s+INTO\s+ledger_batches\s*\(\s*batch_id\s*,\s*order_id\s*,\s*kind\s*,\s*intent_digest\s*\)/i.test(r.query||''));
+    best=Math.max(best,matches.length);correctSql=Math.max(correctSql,sqlMatches.length);
+    const pids=new Set(sqlMatches.map(r=>r.pid));
+    const markers=new Set(sqlMatches.map(r=>r.application_name));
+    if(pids.size===8&&markers.size===8&&[...expected].every(m=>markers.has(m)))
+      return {count:8,pids:[...pids].sort((a,b)=>a-b),matchedFlightIds:markers.size,queryMatched:true};
     await wait(60);
   }
-  throw new Error('NO_IN_FLIGHT_EVIDENCE: no database backend observed waiting in deterministic pg_sleep fault.');
+  throw new Error(`NO_8_FLIGHTS: expected eight distinct, schema-bound PgSleep backend PIDs on exact INSERT; observed markers ${best}/8 and matching SQL ${correctSql}/8. Refused SIGKILL.`);
 }
 
 async function assertWalSeals(pool,schema,orderId){
@@ -115,12 +132,13 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
   const plan=createWalWorkload({requests,seed});
   const startedAt=new Date().toISOString(),deadline=Date.now()+maxMinutes*60_000;
   const t0=performance.now();
-  let c=null,pool=null,workers=[],cleanup=null;
+  let c=null,pool=null,workers=[],cleanup=null,failure=null,failureStage='INITDB';
   const facts={workId:'J26-VALIO-WAL-CHAOS-20261114',startedAt,
     simulatedOnly:true,sourceSha:process.env.CRACI_SOURCE_SHA||null,
     workload:{requests:plan.requests,orders:plan.orders,seed,planDigest:plan.planDigest}};
   try {
     c=await createOwnedCluster();
+    failureStage='INITIAL_CLUSTER_START';
     const firstPid=await startOwnedCluster(c);
     pool=new pg.Pool({connectionString:c.dsn,max:4,connectionTimeoutMillis:8000});
     const schema=`j26_${randomBytes(10).toString('hex')}`;
@@ -128,6 +146,7 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     await seedAccounts(pool,{schema,buyerFundsCents:2_000_000,
       suppliers:['farm-a','farm-b','farm-c']});
     workers=await Promise.all(Array.from({length:workerCount},()=>spawnOwnedWorker(c.dsn,schema)));
+    failureStage='ACKNOWLEDGED_ANCHORS';
     assert(new Set(workers.map(w=>w.pid)).size===workerCount,'Initial workers are not distinct OS PIDs.');
 
     // Two acknowledged COMMITs must remain replayable after forced server death.
@@ -143,6 +162,7 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     // The server stays alive; the response is genuinely ambiguous to caller.
     const ambiguous=payment('wal_ambiguous','wal_ambiguous_pay_0001',1000,
       [{supplierId:'farm-c',amountCents:1000}],seed);
+    failureStage='WORKER_COMMIT_PRE_ACK_CRASH';
     let workerCrash=false;
     try{await workers[2].call({...ambiguous,crashAfterCommit:true});}
     catch(e){workerCrash=e.exitCode===42;}
@@ -151,6 +171,7 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
 
     // Eight genuinely in-flight SQL transactions will be terminated by a
     // SIGKILL of only our own verified postmaster and its verified children.
+    failureStage='INSTALL_FLIGHT_TRIGGER';
     await installPauseTrigger(pool,schema);
     const flights=Array.from({length:8},(_,i)=>payment(`wal_flight_${i}`,
       `wal_flight_pay_${i}_0001`,500,[{supplierId:'farm-a',amountCents:500}],seed));
@@ -158,7 +179,9 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     // Attach rejection handlers before the deliberate SIGKILL so Node never
     // mistakes expected abruptly closed IPC requests for unhandled promises.
     const interruptedOutcomes=Promise.allSettled(pending);
-    const observedPgSleep=await waitForInFlightDbWork(pool);
+    failureStage='VERIFY_EIGHT_SOURCE_BOUND_FLIGHTS';
+    const observedPgSleep=await waitForInFlightDbWork(pool,schema);
+    failureStage='SIGKILL_OWNED_POSTMASTER';
     const crash=await sigkillOwnedPostmaster(c);
     for(const w of workers)w.kill();
     await interruptedOutcomes;
@@ -166,12 +189,14 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     await pool.end();pool=null;
 
     // The exact same PGDATA/WAL is restarted after an abnormal SIGKILL.
+    failureStage='RESTART_SAME_PGDATA_WAL';
     const restartPid=await startOwnedCluster(c);
     assert(firstPid!==restartPid,'Postmaster PID did not change across SIGKILL/restart.');
     const signals=await recoverySignals(c);
     assert(signals.interrupted&&signals.redo&&signals.accepting,
       'WAL crash-recovery log evidence missing; not qualified.');
     pool=new pg.Pool({connectionString:c.dsn,max:4,connectionTimeoutMillis:8000});
+    failureStage='WAL_RECOVERY_INVARIANTS';
     const version=(await pool.query('SHOW server_version')).rows[0]?.server_version;
     const settings=(await pool.query("SELECT current_setting('fsync') AS fsync,current_setting('synchronous_commit') AS sync_commit,current_setting('full_page_writes') AS full_page_writes")).rows[0];
     assert(settings.fsync==='on'&&settings.sync_commit==='on'&&settings.full_page_writes==='on',
@@ -181,6 +206,7 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     assert(before.balanced&&before.matching&&before.nonnegative,'WAL recovery corrupted account/ledger invariants.');
     assert(before.orders>=3&&before.orders<=11,'Unexpected pre-replay WAL recovery settlement count.');
     assert(before.outboxEvents===before.batches,'Recovery lost/duplicated an outbox event.');
+    failureStage='REPLAY_ACKNOWLEDGED_AND_AMBIGUOUS';
     workers=await Promise.all(Array.from({length:workerCount},()=>spawnOwnedWorker(c.dsn,schema)));
     assert(new Set(workers.map(w=>w.pid)).size===workerCount,'Recovery workers are not independent OS processes.');
     const replay=await Promise.all([...anchors,ambiguous].map((t,i)=>workers[i].call(t)));
@@ -192,6 +218,7 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     const afterFlights=await auditLab(pool,schema);
     assert(afterFlights.orders===11&&afterFlights.batches===11&&afterFlights.outboxEvents===11,
       'Replayed flights created duplicate ledger/outbox rows or lost committed orders.');
+    failureStage='RECOVERED_LEDGER_TAMPER_NEGATIVES';
     const tamperRefusals=await assertWalSeals(pool,schema,'wal_ambiguous');
     const afterTamper=await auditLab(pool,schema);
     assert(afterTamper.batches===afterFlights.batches&&afterTamper.outboxEvents===afterFlights.outboxEvents&&
@@ -200,11 +227,14 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     // 10k are DISTINCT state-changing transactions (5k orders + 5k refunds),
     // not 10k repetitions of an unchanged passing tuple.
     const counts={processed:0};
+    failureStage='UNIQUE_PAYMENT_PHASE';
     await pump(plan.pays,workers,{deadline,expect:'SIMULATED_SETTLED',counts});
     const midpoint=await auditLab(pool,schema);
     assert(midpoint.orders===plan.orders+11&&midpoint.balanced&&midpoint.matching&&midpoint.nonnegative,
       'Payment-phase ledger invariant/unique-order check failed.');
+    failureStage='UNIQUE_REFUND_PHASE';
     await pump(plan.refunds,workers,{deadline,expect:'SIMULATED_REFUNDED',counts});
+    failureStage='FINAL_DOUBLE_ENTRY_AND_OUTBOX_AUDIT';
     const final=await auditLab(pool,schema);
     const expected=11+plan.requests;
     assert(counts.processed===plan.requests,'Not all unique benchmark writes executed.');
@@ -219,7 +249,11 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
         synchronousCommit:settings.sync_commit==='on',fullPageWrites:settings.full_page_writes==='on',
         firstPostmasterPid:firstPid,restartedPostmasterPid:restartPid,
         originalWorkerPids:workerCount,postCrashWorkerPids:workerCount,
-        workerPreAckCrash:true,pgWaitEventObserved:'PgSleep',observedSleepingBackends:observedPgSleep,
+        workerPreAckCrash:true,pgWaitEventObserved:'PgSleep',
+        observedSleepingBackends:observedPgSleep.count,
+        observedBackendPids:observedPgSleep.pids,
+        matchedFlightIds:observedPgSleep.matchedFlightIds,
+        insertQueryMatched:observedPgSleep.queryMatched,
         ...crash,walRecoverySignals:signals},
       recovery:{priorConfirmedCommits:2,ambiguousCommittedNoAck:1,
         recoveredOrdersBeforeReplay:before.orders,replayedFlightIntents:flights.length,
@@ -234,13 +268,23 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     const log=await readFile(c.logFile);
     report.cluster.pgLogSha256=digest(log);
     return report;
+  } catch(error) {
+    failure=error;
+    let forensic=null;
+    if(c)try{forensic=await captureOwnedPgFailure(c.logFile);}catch{}
+    console.error(JSON.stringify({event:'WAL_CHAOS_FAILURE_FORENSIC',
+      workId:facts.workId,stage:failureStage,sourceSha:facts.sourceSha,
+      errorCode:error.code||'UNCLASSIFIED',errorMessage:String(error.message).slice(0,700),
+      testOwnedPgdata:c?.root||null,forensic}));
+    throw error;
   } finally {
     for(const w of workers){w.kill();w.stop();}
     if(pool)try{await pool.end();}catch{}
-    cleanup=await closeOwnedCluster(c,{keepData});
+    cleanup=await closeOwnedCluster(c,{keepData:keepData||Boolean(failure)});
     // Cleanup concerns only this run-created disposable cluster. The JSON receipt
     // is emitted by the CLI after cleanup; never print the socket URL/password.
-    if(cleanup?.retained)console.error(JSON.stringify({event:'OWNED_TEST_DATA_RETAINED',reason:cleanup.reason}));
+    if(cleanup?.retained)console.error(JSON.stringify({event:'OWNED_TEST_DATA_RETAINED',
+      path:cleanup.retained,reason:cleanup.reason}));
   }
 }
 
