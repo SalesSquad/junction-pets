@@ -47,7 +47,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab', 'rokoko-r-tournament', 'meta-r-tournament', 'meta-r-robust', 'lens-real-bop-train',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab', 'rokoko-r-tournament', 'meta-r-tournament', 'meta-r-robust', 'lens-real-bop-train', 'lens-r8-meta',
 ]);
 
 function choose(value, choices, label) {
@@ -121,6 +121,15 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override && override !== harnessSha) throw new Error('Real BOP features must match pinned harness SHA');
     for (const profile of ['all', 'color', 'spatial', 'gradient']) {
       add(`lens-real-bop-${profile}`, harnessSha, {profile});
+    }
+  } else if (workload === 'lens-r8-meta') {
+    if (override && override !== harnessSha) throw new Error('Lens R8 requires the pinned immutable harness');
+    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining'], 'R8 lane slice');
+    const arms = ['color-logit','color-balanced','fusion-logit','fusion-balanced',
+      'texture-tree','quality-logit','centroid-shrink','consensus-ensemble'];
+    for (const [index, arm] of arms.entries()) {
+      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
+      add(`lens-r8-${index}-${arm}`, harnessSha, {arm, iteration: index + 1});
     }
   } else if (workload === 'rokoko-rl-ablations') {
     for (const learnerSeed of [17,43]) add(`rokoko-ablation-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});

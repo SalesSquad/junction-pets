@@ -43,6 +43,15 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - meta-r-tournament
         - meta-r-robust
         - lens-real-bop-train
+        - lens-r8-meta
+      lane_slice:
+        description: R8 only; pilot first, then seven unique remaining arms
+        type: choice
+        default: all
+        options:
+        - all
+        - pilot
+        - remaining
       source_sha:
         description: Full product SHA; overrides historical baseline. Tieto uses sponsor_revision.
         type: string
@@ -3946,6 +3955,139 @@ jobs:
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
       with:
         name: craci-lens-real-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+
+  lens-r8-meta:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'lens-r8-meta' }}
+    needs: plan
+    name: "Lens R8 / ${{ matrix.arm }} / CPU 4"
+    runs-on: craci
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    permissions:
+      contents: read
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: lens-r8-meta
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_ARM: ${{ matrix.arm }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+      CRACI_DATA_SHA: c0c11251849877e7b2f373f6c7acf54739dc69d0fb2649c20050ca977bf5513d
+    steps:
+    - name: Setup licensed public CPU-only CRACI sandbox
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, ubuntu]
+    - name: Reject expired credit and unpinned source before work
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1260
+        test "$CRACI_SOURCE_SHA" = "$CRACI_HARNESS_SHA"
+        case "$CRACI_ARM" in
+          color-logit|color-balanced|fusion-logit|fusion-balanced|texture-tree|quality-logit|centroid-shrink|consensus-ensemble) ;;
+          *) echo "R8 arm is unregistered" >&2; exit 2;;
+        esac
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+    - name: Checkout immutable owned R8 training harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Checkout independently pinned public-only feature fixture
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Pin Node runtime for shared source-bound receipt producer
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install R nnet and rpart from allowed Ubuntu sources only
+      shell: bash
+      run: |
+        set -euo pipefail
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -s "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo DEBIAN_FRONTEND=noninteractive apt-get \
+          -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- \
+          install -qq -y --no-install-recommends r-base-core r-cran-nnet r-cran-rpart r-cran-jsonlite
+        Rscript -e 'stopifnot(requireNamespace("nnet"),requireNamespace("rpart"),requireNamespace("jsonlite"))'
+        Rscript -e 'invisible(parse(file=file.path(Sys.getenv("CRACI_HARNESS_ROOT"),"scripts/craci/lens-r8-model.R")));cat("R8_SYNTAX_OK\n")'
+        test "$(git -C "$CRACI_SOURCE_ROOT" rev-parse HEAD)" = "$CRACI_SOURCE_SHA"
+        test "$(git -C "$CRACI_HARNESS_ROOT" rev-parse HEAD)" = "$CRACI_HARNESS_SHA"
+    - name: Fit 3 R variants; select on calibration and audit scene metadata
+      id: qualification
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash -euo pipefail -c '
+          scratch="$RUNNER_TEMP/lens-r8-$CRACI_ARM"
+          test ! -e "$scratch"
+          mkdir "$scratch"
+          src="$CRACI_SOURCE_ROOT/fixtures/lens-ycbv-contrast-r8-20261114"
+          python3 "$CRACI_HARNESS_ROOT/scripts/craci/lens-r8-admission.py" \
+            --fixture "$src" \
+            --register "$CRACI_SOURCE_ROOT/docs/CHIBI_LENS_DATA_SOURCE_REGISTER_20261114.json" \
+            --out "$scratch/cloud-admission.json"
+          Rscript "$CRACI_HARNESS_ROOT/scripts/craci/lens-r8-model.R" \
+            "$src/contrast-features.csv" "$src/admission.json" \
+            "$CRACI_ARM" "$scratch/models" "$CRACI_DATA_SHA"
+          test -s "$scratch/models/training-report.json"
+          test -s "$scratch/models/trained-models.rds"
+          dest="$CRACI_RECEIPT_DIR/artifacts/lens-r8"
+          mkdir -p "$dest"
+          cp "$scratch/cloud-admission.json" "$dest/cloud-admission.json"
+          cp "$scratch/models/training-report.json" "$dest/training-report.json"
+          cp "$src/scene-metadata.json" "$dest/scene-metadata.json"
+          ( cd "$scratch/models" && python3 -m zipfile -c "$dest/trained-models.zip" \
+             training-report.json trained-models.rds )
+          python3 -m zipfile -t "$dest/trained-models.zip"
+        '
+    - id: receipt
+      name: Finalize source-reported success or preserve failed partial evidence
+      if: ${{ always() }}
+      shell: bash
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          mkdir -p "$CRACI_RECEIPT_DIR/upload"
+          printf '%s\n' '{"schemaVersion":1,"status":"incomplete","reason":"Pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+          printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+    - name: Preserve exact result, metadata, R model and receipt (7 days)
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-lens-r8-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
         path: ${{ runner.temp }}/craci-evidence/upload/
         if-no-files-found: error
         retention-days: 7

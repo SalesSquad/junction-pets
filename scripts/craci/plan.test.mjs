@@ -92,3 +92,21 @@ test('real MIT-licensed image feature trials use only pinned harness and four no
   assert.throws(() => resolvePlan({workload: 'lens-real-bop-train',source_sha:candidate},context),
                 /pinned harness SHA/);
 });
+
+test('eight fresh real-image R/metadata lanes are unique and fail closed', () => {
+  const all = resolvePlan({workload:'lens-r8-meta', lane_slice:'all'}, context);
+  const pilot = resolvePlan({workload:'lens-r8-meta', lane_slice:'pilot'}, context);
+  const remainder = resolvePlan({workload:'lens-r8-meta', lane_slice:'remaining'}, context);
+  assert.equal(all.jobCount,8);
+  assert.equal(all.maxParallel,8);
+  assert.equal(pilot.jobCount,1);
+  assert.equal(remainder.jobCount,7);
+  assert.deepEqual([...pilot.matrix.include,...remainder.matrix.include].map(r=>r.cell),
+                   all.matrix.include.map(r=>r.cell));
+  assert.equal(new Set(all.matrix.include.map(r=>r.arm)).size,8);
+  assert.ok(all.matrix.include.every(r=>r.source_sha === context.harnessSha));
+  assert.throws(()=>resolvePlan({workload:'lens-r8-meta', source_sha:candidate},context),
+    /pinned immutable harness/);
+  assert.throws(()=>resolvePlan({workload:'lens-r8-meta', lane_slice:'unsupported'},context),
+    /Unsupported R8 lane slice/);
+});
