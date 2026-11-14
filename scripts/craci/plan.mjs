@@ -48,7 +48,7 @@ export const WORKLOADS = Object.freeze([
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
   'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab',
-  'rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-shared-tournament', 'valio-wal-chaos',
+  'rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-shared-tournament', 'valio-wal-chaos',
 ]);
 
 function choose(value, choices, label) {
