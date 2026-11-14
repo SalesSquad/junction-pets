@@ -4,7 +4,11 @@ const ui = {page:byId('page'), target:byId('target'), baseline:byId('baseline'),
   events:byId('events'), state:byId('snapshot-state'), diffState:byId('diff-state'),
   count:byId('count'), reverts:byId('reverts'), source:byId('source')};
 let catalog;
+const sourceSelect = byId('evidence-source');
+const apiPath = path => path + '?source=' + sourceSelect.value;
+const trustedMode = mode => ['SYNTHETIC_REPLAY_NO_MARIADB','REAL_LOCAL_SNAPSHOT_NO_MARIADB'].includes(mode);
 let requestSerial = 0;
+let catalogSerial = 0;
 const el = (tag, text, className) => {
   const node = document.createElement(tag);
   if (text !== undefined) node.textContent = String(text);
@@ -57,6 +61,7 @@ function draw(result) {
     add(ui.snapshot,'p',s.title+' · Revision '+s.revision_id,'metadata');
     add(ui.snapshot,'p',s.text,'lead');
     add(ui.snapshot,'p','Edited '+s.revised_at+' · body SHA-256 '+s.sha256,'metadata');
+    if(s.source_url){const citation=el('a','Open cited Wikipedia revision');citation.href=s.source_url;citation.target='_blank';citation.rel='noopener noreferrer';ui.snapshot.append(citation);}
     add(ui.snapshot,'p','Source: '+(s.source_url || 'Synthetic fixture — no Wikipedia URL')+' · '+s.source_integrity,'metadata');
   }else{
     add(ui.snapshot,'p',s.status==='NO_EVIDENCE'?'No revision exists at that time.':'Multiple revisions share the latest timestamp; selection refused.','lead');
@@ -88,12 +93,12 @@ async function run() {
   ui.state.textContent='LOADING'; ui.diffState.textContent='LOADING';
   try {
     const req={page_id:ui.page.value, as_of:ui.target.value, compare_at:ui.baseline.value};
-    ui.status.textContent='Inspecting the synthetic historical boundary…';
-    const response=await fetch('/api/compare',{method:'POST',headers:{'Content-Type':'application/json'},
+    ui.status.textContent='Inspecting the local historical boundary…';
+    const response=await fetch(apiPath('/api/compare'),{method:'POST',headers:{'Content-Type':'application/json'},
       cache:'no-store',body:JSON.stringify(req)});
     const result=await response.json();
     if(serial !== requestSerial) return;
-    if(!response.ok || result.mode!=='SYNTHETIC_REPLAY_NO_MARIADB' || result.verified_live_source!==false)
+    if(!response.ok || !trustedMode(result.mode) || result.verified_live_source!==false)
       throw new Error(result.reason || 'Untrusted response');
     draw(result); syncSelection();
   }catch(err){
@@ -107,13 +112,22 @@ byId('query').addEventListener('submit',event=>{event.preventDefault();void run(
 ui.page.addEventListener('change',()=>{renderHistory();void run();});
 ui.target.addEventListener('change',()=>{syncSelection();void run();});
 ui.baseline.addEventListener('change',()=>{void run();});
+async function loadCatalog() {
+const serial=++catalogSerial;
 try {
-  const response=await fetch('/api/catalog',{cache:'no-store'});
-  catalog=await response.json();
-  if(!response.ok||catalog.mode!=='SYNTHETIC_REPLAY_NO_MARIADB'||catalog.live!==false||
+  const response=await fetch(apiPath('/api/catalog'),{cache:'no-store'});
+  const next=await response.json();
+  if(serial!==catalogSerial)return;
+  catalog=next;
+  if(!response.ok||!trustedMode(catalog.mode)||catalog.live!==false||
       !Array.isArray(catalog.pages)||!catalog.pages.length) throw new Error('Untrusted catalog');
   fill(ui.page,catalog.pages.map(p=>[p.page_id,p.title+' · '+p.page_id]));
   ui.source.textContent='Dataset '+catalog.dataset_id+' · '+catalog.dataset_license+
     ' · '+catalog.provenance+'. Timeline titles and dates cover the entire local fixture.';
+  byId('source-label').textContent=catalog.provenance;
+  if(catalog.retrieved_at) ui.source.textContent+=' Retrieved '+catalog.retrieved_at+' · Snapshot '+catalog.snapshot_sha256+' · '+catalog.window+' · '+catalog.attribution+' Local metadata is not authenticated sponsor evidence.';
   renderHistory();await run();
-}catch(err){warn('Fixture unavailable: '+err.message);}
+}catch(err){if(serial!==catalogSerial)return;clear(ui.snapshot);clear(ui.difference);clear(ui.events);clear(ui.page);clear(ui.target);clear(ui.baseline);ui.source.textContent='No admitted source selected.';ui.reverts.textContent='No current finding.';warn('Snapshot unavailable: '+err.message);}
+}
+sourceSelect.addEventListener('change',()=>{++requestSerial;void loadCatalog();});
+await loadCatalog();

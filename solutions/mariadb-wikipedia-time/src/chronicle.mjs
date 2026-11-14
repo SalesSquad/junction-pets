@@ -1,4 +1,5 @@
 import {createHash} from 'node:crypto';
+import {admitSnapshot} from './wikipedia.mjs';
 
 // OFFLINE_DETERMINISTIC: no MariaDB or Wikipedia provider connected.
 export const sha256 = s => createHash('sha256').update(s,'utf8').digest('hex');
@@ -13,6 +14,7 @@ export function utc(value) {
 }
 const str=(v,max=200000)=>typeof v==='string'&&v.trim().length>0&&v.length<=max;
 export function loadDataset(input) {
+  if (input?.provenance === 'WIKIPEDIA_API_SNAPSHOT') return admitSnapshot(input);
   if (!input || !str(input.dataset_id,100) || !str(input.dataset_license,250) ||
       !['SYNTHETIC','LICENSED_REPLAY'].includes(input.provenance) ||
       !Array.isArray(input.revisions) || input.revisions.length>5000)
@@ -35,7 +37,7 @@ export function loadDataset(input) {
     }else if(r.source_url!==null)throw new Error('SYNTHETIC_SOURCE_MUST_BE_NULL');
     return Object.freeze({...r,ms,hash:sha256(r.body)});
   });
-  return Object.freeze({...input,revisions:Object.freeze(revisions)});
+  return Object.freeze({...input,source_integrity:'LOCAL_HASH_ONLY_UNVERIFIED',retrieved_at:null,snapshot_sha256:null,attribution:null,revisions:Object.freeze(revisions)});
 }
 export function at(dataset,page,instant) {
   if(!str(page,128))throw new Error('INVALID_PAGE');
@@ -50,7 +52,8 @@ export function at(dataset,page,instant) {
   const r=candidates[0];
   return{status:'FOUND',page_id:page,as_of:instant,revision_id:r.revision_id,
     revised_at:r.revised_at,title:r.title,text:r.body,sha256:r.hash,source_url:r.source_url,
-    provenance:dataset.provenance,source_integrity:'LOCAL_HASH_ONLY_UNVERIFIED',dataset_id:dataset.dataset_id,license:dataset.dataset_license};
+    provenance:dataset.provenance,source_integrity:dataset.source_integrity || 'LOCAL_HASH_ONLY_UNVERIFIED',dataset_id:dataset.dataset_id,license:dataset.dataset_license,
+    retrieved_at:dataset.retrieved_at || null,snapshot_sha256:dataset.snapshot_sha256 || null,attribution:dataset.attribution || null};
 }
 const terms=s=>new Set(s.toLowerCase().match(/[\p{L}\p{N}]+/gu)||[]);
 export function compare(a,b) {

@@ -17,11 +17,12 @@
         <p>Follow the paper trail of an article—not a model's recollection of it.</p></div>
       <div class="edition"><span>01 / PROVENANCE</span><strong>Evidence before interpretation.</strong></div>
     </div>
-    <p class="disclosure"><strong>SYNTHETIC REPLAY</strong> · Fictional text · No Wikipedia/MariaDB connection · Not a vandalism detector</p>
+    <p class="disclosure"><strong id="source-label">SYNTHETIC REPLAY</strong> · Local read-only evidence · No live database · Not a vandalism detector</p>
   </header>
   <main id="workbench">
     <section class="controls" aria-labelledby="query-title">
       <div><span class="eyebrow">01 · Investigate</span><h2 id="query-title">Choose a point in time.</h2></div>
+      <label>Evidence source <select id="evidence-source"><option value="synthetic">Synthetic demonstration</option><option value="real">Admitted local Wikipedia snapshot</option></select></label>
       <form id="query">
         <label>Article <select id="page" name="page" required></select></label>
         <label>As of (UTC) <select id="target" name="target" required></select></label>
