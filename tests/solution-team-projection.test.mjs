@@ -27,7 +27,9 @@ test('Valio team binds three existing pets, declared skills and original avatar 
 });
 
 test('unknown member, unknown capability and duplicate plan fail before visualization',()=>{
-  assert.throws(()=>projectSolutionTeams(packages,[{...valio,agentIds:[...valio.agentIds,'junction.fake']}]),/Unknown pet/);
-  assert.throws(()=>projectSolutionTeams(packages,[{...valio,capabilityUses:[{...valio.capabilityUses[0],capabilityId:'purchase-live-stock'}]}]),/Unknown, duplicate or non-planned/);
+  assert.throws(()=>projectSolutionTeams(packages,[{...valio,agentIds:[...valio.agentIds,'junction.fake']}]),/Unknown agent/);
+  assert.throws(()=>projectSolutionTeams(packages,[{...valio,capabilityUses:[{...valio.capabilityUses[0],capabilityId:'purchase-live-stock'}]}]),/Unknown or unselected agent capability/);
+  assert.throws(()=>projectSolutionTeams(packages,[{...valio,capabilityUses:[{...valio.capabilityUses[0],status:'executed'}]}]),/Capability uses are planned references/);
+  assert.throws(()=>projectSolutionTeams(packages,[{...valio,ownedPaths:['apps/collaboration-demo/']}]),/Scaffold ownership/);
   assert.throws(()=>projectSolutionTeams(packages,[valio,valio]),/Duplicate solution/);
 });
