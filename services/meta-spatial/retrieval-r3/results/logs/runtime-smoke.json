@@ -1,0 +1,15 @@
+{
+  "step": "runtime-smoke",
+  "command": [
+    "/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/venv/bin/python",
+    "-c",
+    "import json,sys,numpy as np; from pathlib import Path; from runtime import VisualRetrievalAdapter; r=Path(sys.argv[1]); d=json.loads((r/\"fresh-data/dataset.json\").read_text()); idx=[i for i,x in enumerate(d[\"records\"]) if x[\"split\"]==\"test\"]; z=np.load(r/\"evaluation/features.npz\",allow_pickle=False); adapter=VisualRetrievalAdapter.from_artifacts(r/\"training\",r/\"evaluation\"); out=adapter.propose(z[\"query\"][idx[:3]],z[\"gallery\"][idx],[d[\"records\"][i][\"product_id\"] for i in idx]); (r/\"runtime-smoke.json\").write_text(json.dumps(out,indent=2)+\"\\n\"); print(json.dumps(out))",
+    "/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/experiment"
+  ],
+  "source_commit": "745f2e6597b8d4e398551c37071b9ec662f2aea8",
+  "started_epoch": 1794682876.220435,
+  "ended_epoch": 1794682876.720099,
+  "exit_code": 0,
+  "error": null,
+  "log_sha256": "3682d47c36985c730e1ec5842da1db4e750cd1bae9bfa2d0a78c7ed1b4d461bf"
+}

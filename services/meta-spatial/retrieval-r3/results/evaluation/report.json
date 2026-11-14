@@ -1,0 +1,481 @@
+{
+  "ablation_selection": {
+    "checkpoint": "checkpoints/cosine_preservation_ablation-seed-17.safetensors",
+    "checkpoint_sha256": "f5ffb78c54459d5fb2c4f237f1ee65394b14ec6b4b09cd7c3c489ae63341a796",
+    "dev": {
+      "family_recall_at_1": 0.7867950481430537,
+      "gallery_products": 727,
+      "mrr": 0.7317594785775584,
+      "ndcg_at_10": 0.7735874529343139,
+      "queries": 727,
+      "recall_at_1": 0.6231086657496562,
+      "recall_at_10": 0.9133425034387895,
+      "recall_at_5": 0.8624484181568088
+    },
+    "epoch": 3,
+    "kind": "adapter",
+    "preservation": 0.05,
+    "recipe": "cosine_preservation_ablation",
+    "seed": 17
+  },
+  "counts": {
+    "cal": 1225,
+    "test": 1175
+  },
+  "dataset_sha256": "c67c6007da76ae3e106da34754eca15d42315271e55d9174657335390e4d3f9f",
+  "family_counts": {
+    "cal": 702,
+    "test": 689
+  },
+  "feature_sha256": "59701519b8ef62c7ff7de65ec5e48fae2f621eb12fd6adca8bf2af24cc73bc9d",
+  "kind": "meta.visual_adapter.r3.fresh_evaluation",
+  "limitations": [
+    "Foundation pretraining overlap unknown",
+    "Heuristic family independence assumption",
+    "Fresh confirmation applies only to this fixed catalog protocol",
+    "No threshold/model tuning after fresh test scores",
+    "No new spending beyond remaining prior USD50 authorization"
+  ],
+  "paired_primary_vs_frozen": {
+    "families": 689,
+    "interval95": [
+      0.034996839581517,
+      0.07105451133910079
+    ],
+    "method": "paired_family_cluster_percentile_bootstrap_query_weighted",
+    "not_a_field_or_pretraining_independence_guarantee": true,
+    "recall_at_1_difference": 0.05276595744680851,
+    "resamples": 2000,
+    "seed": 14683,
+    "superiority_supported_by_interval": true
+  },
+  "partitions": {
+    "cal": {
+      "cosine_preservation_ablation": {
+        "policy": {
+          "absent_families_with_any_error": 1,
+          "absent_queries_accepted": 1,
+          "accepted": 31,
+          "accepted_precision": 1.0,
+          "action_authorized": false,
+          "bound": "exact_one_sided_Clopper_Pearson_95",
+          "combined_families_with_any_error": 1,
+          "combined_family_error_rate": 0.0014245014245014246,
+          "combined_family_error_upper95": 0.006739648767772056,
+          "conditional_accepted_error_certified": false,
+          "correct_accepted": 31,
+          "coverage": 0.025306122448979593,
+          "denominator": "all_eligible_families",
+          "families": 702,
+          "independence_assumption": "connected_source_families; other correlations unknown",
+          "physical_identity_verified": false,
+          "present_families_with_any_error": 0,
+          "queries": 1225,
+          "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+          "wrong_present_accepted": 0
+        },
+        "retrieval": {
+          "family_recall_at_1": 0.7673469387755102,
+          "gallery_products": 1225,
+          "mrr": 0.6848349460838855,
+          "ndcg_at_10": 0.7343667974792945,
+          "queries": 1225,
+          "recall_at_1": 0.5542857142857143,
+          "recall_at_10": 0.8987755102040816,
+          "recall_at_5": 0.846530612244898
+        }
+      },
+      "frozen_hybrid_text_weight_0.25": {
+        "policy": {
+          "absent_families_with_any_error": 1,
+          "absent_queries_accepted": 1,
+          "accepted": 19,
+          "accepted_precision": 1.0,
+          "action_authorized": false,
+          "bound": "exact_one_sided_Clopper_Pearson_95",
+          "combined_families_with_any_error": 1,
+          "combined_family_error_rate": 0.0014245014245014246,
+          "combined_family_error_upper95": 0.006739648767772056,
+          "conditional_accepted_error_certified": false,
+          "correct_accepted": 19,
+          "coverage": 0.015510204081632653,
+          "denominator": "all_eligible_families",
+          "families": 702,
+          "independence_assumption": "connected_source_families; other correlations unknown",
+          "physical_identity_verified": false,
+          "present_families_with_any_error": 0,
+          "queries": 1225,
+          "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+          "wrong_present_accepted": 0
+        },
+        "retrieval": {
+          "family_recall_at_1": 0.7248979591836735,
+          "gallery_products": 1225,
+          "mrr": 0.6430367029240973,
+          "ndcg_at_10": 0.6871787083428803,
+          "queries": 1225,
+          "recall_at_1": 0.5224489795918368,
+          "recall_at_10": 0.8367346938775511,
+          "recall_at_5": 0.7836734693877551
+        }
+      },
+      "frozen_image_image": {
+        "policy": {
+          "absent_families_with_any_error": 1,
+          "absent_queries_accepted": 1,
+          "accepted": 17,
+          "accepted_precision": 1.0,
+          "action_authorized": false,
+          "bound": "exact_one_sided_Clopper_Pearson_95",
+          "combined_families_with_any_error": 1,
+          "combined_family_error_rate": 0.0014245014245014246,
+          "combined_family_error_upper95": 0.006739648767772056,
+          "conditional_accepted_error_certified": false,
+          "correct_accepted": 17,
+          "coverage": 0.013877551020408163,
+          "denominator": "all_eligible_families",
+          "families": 702,
+          "independence_assumption": "connected_source_families; other correlations unknown",
+          "physical_identity_verified": false,
+          "present_families_with_any_error": 0,
+          "queries": 1225,
+          "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+          "wrong_present_accepted": 0
+        },
+        "retrieval": {
+          "family_recall_at_1": 0.72,
+          "gallery_products": 1225,
+          "mrr": 0.6423840245027259,
+          "ndcg_at_10": 0.6853021653212225,
+          "queries": 1225,
+          "recall_at_1": 0.5208163265306123,
+          "recall_at_10": 0.8318367346938775,
+          "recall_at_5": 0.7820408163265307
+        }
+      },
+      "primary_visual": {
+        "policy": {
+          "absent_families_with_any_error": 1,
+          "absent_queries_accepted": 1,
+          "accepted": 30,
+          "accepted_precision": 1.0,
+          "action_authorized": false,
+          "bound": "exact_one_sided_Clopper_Pearson_95",
+          "combined_families_with_any_error": 1,
+          "combined_family_error_rate": 0.0014245014245014246,
+          "combined_family_error_upper95": 0.006739648767772056,
+          "conditional_accepted_error_certified": false,
+          "correct_accepted": 30,
+          "coverage": 0.024489795918367346,
+          "denominator": "all_eligible_families",
+          "families": 702,
+          "independence_assumption": "connected_source_families; other correlations unknown",
+          "physical_identity_verified": false,
+          "present_families_with_any_error": 0,
+          "queries": 1225,
+          "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+          "wrong_present_accepted": 0
+        },
+        "retrieval": {
+          "family_recall_at_1": 0.7689795918367347,
+          "gallery_products": 1225,
+          "mrr": 0.6845999221134181,
+          "ndcg_at_10": 0.7341584954779716,
+          "queries": 1225,
+          "recall_at_1": 0.5551020408163265,
+          "recall_at_10": 0.8987755102040816,
+          "recall_at_5": 0.8424489795918367
+        }
+      }
+    },
+    "test": {
+      "cosine_preservation_ablation": {
+        "policy": {
+          "absent_families_with_any_error": 0,
+          "absent_queries_accepted": 0,
+          "accepted": 18,
+          "accepted_precision": 0.9444444444444444,
+          "action_authorized": false,
+          "bound": "exact_one_sided_Clopper_Pearson_95",
+          "combined_families_with_any_error": 1,
+          "combined_family_error_rate": 0.001451378809869376,
+          "combined_family_error_upper95": 0.006866466579042824,
+          "conditional_accepted_error_certified": false,
+          "correct_accepted": 17,
+          "coverage": 0.015319148936170212,
+          "denominator": "all_eligible_families",
+          "families": 689,
+          "independence_assumption": "connected_source_families; other correlations unknown",
+          "physical_identity_verified": false,
+          "present_families_with_any_error": 1,
+          "queries": 1175,
+          "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+          "wrong_present_accepted": 1
+        },
+        "retrieval": {
+          "family_recall_at_1": 0.8187234042553192,
+          "gallery_products": 1175,
+          "mrr": 0.7014529105027817,
+          "ndcg_at_10": 0.7477904642196656,
+          "queries": 1175,
+          "recall_at_1": 0.585531914893617,
+          "recall_at_10": 0.9038297872340425,
+          "recall_at_5": 0.8408510638297872
+        }
+      },
+      "frozen_hybrid_text_weight_0.25": {
+        "policy": {
+          "absent_families_with_any_error": 0,
+          "absent_queries_accepted": 0,
+          "accepted": 12,
+          "accepted_precision": 0.9166666666666666,
+          "action_authorized": false,
+          "bound": "exact_one_sided_Clopper_Pearson_95",
+          "combined_families_with_any_error": 1,
+          "combined_family_error_rate": 0.001451378809869376,
+          "combined_family_error_upper95": 0.006866466579042824,
+          "conditional_accepted_error_certified": false,
+          "correct_accepted": 11,
+          "coverage": 0.010212765957446808,
+          "denominator": "all_eligible_families",
+          "families": 689,
+          "independence_assumption": "connected_source_families; other correlations unknown",
+          "physical_identity_verified": false,
+          "present_families_with_any_error": 1,
+          "queries": 1175,
+          "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+          "wrong_present_accepted": 1
+        },
+        "retrieval": {
+          "family_recall_at_1": 0.7565957446808511,
+          "gallery_products": 1175,
+          "mrr": 0.6483868983849486,
+          "ndcg_at_10": 0.696069586333835,
+          "queries": 1175,
+          "recall_at_1": 0.5285106382978724,
+          "recall_at_10": 0.8561702127659574,
+          "recall_at_5": 0.8017021276595745
+        }
+      },
+      "frozen_image_image": {
+        "policy": {
+          "absent_families_with_any_error": 0,
+          "absent_queries_accepted": 0,
+          "accepted": 9,
+          "accepted_precision": 0.8888888888888888,
+          "action_authorized": false,
+          "bound": "exact_one_sided_Clopper_Pearson_95",
+          "combined_families_with_any_error": 1,
+          "combined_family_error_rate": 0.001451378809869376,
+          "combined_family_error_upper95": 0.006866466579042824,
+          "conditional_accepted_error_certified": false,
+          "correct_accepted": 8,
+          "coverage": 0.007659574468085106,
+          "denominator": "all_eligible_families",
+          "families": 689,
+          "independence_assumption": "connected_source_families; other correlations unknown",
+          "physical_identity_verified": false,
+          "present_families_with_any_error": 1,
+          "queries": 1175,
+          "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+          "wrong_present_accepted": 1
+        },
+        "retrieval": {
+          "family_recall_at_1": 0.7582978723404256,
+          "gallery_products": 1175,
+          "mrr": 0.6509697225786459,
+          "ndcg_at_10": 0.6988032855972812,
+          "queries": 1175,
+          "recall_at_1": 0.5319148936170213,
+          "recall_at_10": 0.8587234042553191,
+          "recall_at_5": 0.8008510638297872
+        }
+      },
+      "primary_visual": {
+        "policy": {
+          "absent_families_with_any_error": 0,
+          "absent_queries_accepted": 0,
+          "accepted": 17,
+          "accepted_precision": 0.9411764705882353,
+          "action_authorized": false,
+          "bound": "exact_one_sided_Clopper_Pearson_95",
+          "combined_families_with_any_error": 1,
+          "combined_family_error_rate": 0.001451378809869376,
+          "combined_family_error_upper95": 0.006866466579042824,
+          "conditional_accepted_error_certified": false,
+          "correct_accepted": 16,
+          "coverage": 0.01446808510638298,
+          "denominator": "all_eligible_families",
+          "families": 689,
+          "independence_assumption": "connected_source_families; other correlations unknown",
+          "physical_identity_verified": false,
+          "present_families_with_any_error": 1,
+          "queries": 1175,
+          "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+          "wrong_present_accepted": 1
+        },
+        "retrieval": {
+          "family_recall_at_1": 0.8136170212765957,
+          "gallery_products": 1175,
+          "mrr": 0.7008460194609353,
+          "ndcg_at_10": 0.7473585235321153,
+          "queries": 1175,
+          "recall_at_1": 0.5846808510638298,
+          "recall_at_10": 0.9038297872340425,
+          "recall_at_5": 0.84
+        }
+      }
+    }
+  },
+  "physical_identity_verified": false,
+  "policies": {
+    "cosine_preservation_ablation": {
+      "calibration": {
+        "absent_families_with_any_error": 1,
+        "absent_queries_accepted": 1,
+        "accepted": 31,
+        "accepted_precision": 1.0,
+        "action_authorized": false,
+        "bound": "exact_one_sided_Clopper_Pearson_95",
+        "combined_families_with_any_error": 1,
+        "combined_family_error_rate": 0.0014245014245014246,
+        "combined_family_error_upper95": 0.006739648767772056,
+        "conditional_accepted_error_certified": false,
+        "correct_accepted": 31,
+        "coverage": 0.025306122448979593,
+        "denominator": "all_eligible_families",
+        "families": 702,
+        "independence_assumption": "connected_source_families; other correlations unknown",
+        "physical_identity_verified": false,
+        "present_families_with_any_error": 0,
+        "queries": 1225,
+        "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+        "wrong_present_accepted": 0
+      },
+      "confidence_is_probability": false,
+      "risk_target": 0.01,
+      "status": "calibration_selected_not_test_certified",
+      "threshold": 1.273078441619873
+    },
+    "frozen_hybrid_text_weight_0.25": {
+      "calibration": {
+        "absent_families_with_any_error": 1,
+        "absent_queries_accepted": 1,
+        "accepted": 19,
+        "accepted_precision": 1.0,
+        "action_authorized": false,
+        "bound": "exact_one_sided_Clopper_Pearson_95",
+        "combined_families_with_any_error": 1,
+        "combined_family_error_rate": 0.0014245014245014246,
+        "combined_family_error_upper95": 0.006739648767772056,
+        "conditional_accepted_error_certified": false,
+        "correct_accepted": 19,
+        "coverage": 0.015510204081632653,
+        "denominator": "all_eligible_families",
+        "families": 702,
+        "independence_assumption": "connected_source_families; other correlations unknown",
+        "physical_identity_verified": false,
+        "present_families_with_any_error": 0,
+        "queries": 1225,
+        "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+        "wrong_present_accepted": 0
+      },
+      "confidence_is_probability": false,
+      "risk_target": 0.01,
+      "status": "calibration_selected_not_test_certified",
+      "threshold": 0.8833929896354675
+    },
+    "frozen_image_image": {
+      "calibration": {
+        "absent_families_with_any_error": 1,
+        "absent_queries_accepted": 1,
+        "accepted": 17,
+        "accepted_precision": 1.0,
+        "action_authorized": false,
+        "bound": "exact_one_sided_Clopper_Pearson_95",
+        "combined_families_with_any_error": 1,
+        "combined_family_error_rate": 0.0014245014245014246,
+        "combined_family_error_upper95": 0.006739648767772056,
+        "conditional_accepted_error_certified": false,
+        "correct_accepted": 17,
+        "coverage": 0.013877551020408163,
+        "denominator": "all_eligible_families",
+        "families": 702,
+        "independence_assumption": "connected_source_families; other correlations unknown",
+        "physical_identity_verified": false,
+        "present_families_with_any_error": 0,
+        "queries": 1225,
+        "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+        "wrong_present_accepted": 0
+      },
+      "confidence_is_probability": false,
+      "risk_target": 0.01,
+      "status": "calibration_selected_not_test_certified",
+      "threshold": 1.1674542427062988
+    },
+    "primary_visual": {
+      "calibration": {
+        "absent_families_with_any_error": 1,
+        "absent_queries_accepted": 1,
+        "accepted": 30,
+        "accepted_precision": 1.0,
+        "action_authorized": false,
+        "bound": "exact_one_sided_Clopper_Pearson_95",
+        "combined_families_with_any_error": 1,
+        "combined_family_error_rate": 0.0014245014245014246,
+        "combined_family_error_upper95": 0.006739648767772056,
+        "conditional_accepted_error_certified": false,
+        "correct_accepted": 30,
+        "coverage": 0.024489795918367346,
+        "denominator": "all_eligible_families",
+        "families": 702,
+        "independence_assumption": "connected_source_families; other correlations unknown",
+        "physical_identity_verified": false,
+        "present_families_with_any_error": 0,
+        "queries": 1225,
+        "risk_event": "any_present_wrong_OR_any_absent_accept_within_family",
+        "wrong_present_accepted": 0
+      },
+      "confidence_is_probability": false,
+      "risk_target": 0.01,
+      "status": "calibration_selected_not_test_certified",
+      "threshold": 1.2787461280822754
+    }
+  },
+  "product_gate": {
+    "checks": {
+      "combined_family_upper95_at_most_1_percent": true,
+      "coverage_at_least_20_percent": false,
+      "recall_at_least_fixed_hybrid": true,
+      "zero_wrong_present_accepted": false
+    },
+    "status": "FAIL"
+  },
+  "production_activation": false,
+  "protocol_sha256": "0900b0d4d96e6787fa9f63a9d0e04af087d65dc33202810a4fd29f1ebefb1756",
+  "schema_version": 1,
+  "scores_sha256": "4f4aa74d502cc2e82e1d986c825cc9ef5b665533ab60a40fbe993d81d652c7b1",
+  "seconds": 129.6839247910102,
+  "selection": {
+    "checkpoint": "checkpoints/primary-seed-17.safetensors",
+    "checkpoint_sha256": "cbab10328684c0e3554054410b20010ae4606bde5fb7db45ddc040de636e5b15",
+    "dev": {
+      "family_recall_at_1": 0.7867950481430537,
+      "gallery_products": 727,
+      "mrr": 0.7315829490396932,
+      "ndcg_at_10": 0.7730635711233571,
+      "queries": 727,
+      "recall_at_1": 0.624484181568088,
+      "recall_at_10": 0.9119669876203577,
+      "recall_at_5": 0.8638239339752407
+    },
+    "epoch": 3,
+    "kind": "adapter",
+    "preservation": 0.0,
+    "recipe": "primary",
+    "seed": 17
+  },
+  "selection_sha256": "4802c58ea12c9f48892d54eb376d1ac5c2d88eabe812ec9930673f976785f6d7",
+  "source_commit": "745f2e6597b8d4e398551c37071b9ec662f2aea8",
+  "verified_unique_images": 4141
+}

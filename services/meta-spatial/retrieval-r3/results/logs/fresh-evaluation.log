@@ -1,0 +1,44 @@
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/visual_adapter.py:39: RuntimeWarning: divide by zero encountered in matmul
+  return normalize_rows(x + (x @ a) @ b)
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/visual_adapter.py:39: RuntimeWarning: overflow encountered in matmul
+  return normalize_rows(x + (x @ a) @ b)
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/visual_adapter.py:39: RuntimeWarning: invalid value encountered in matmul
+  return normalize_rows(x + (x @ a) @ b)
+Fetching 8 files:   0%|          | 0/8 [00:00<?, ?it/s]Fetching 8 files: 100%|██████████| 8/8 [00:00<00:00, 2259.25it/s]
+`torch_dtype` is deprecated! Use `dtype` instead!
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+{"stage": "pixel_encoder", "view": 0, "done": 128, "total": 2400}
+{"stage": "pixel_encoder", "view": 0, "done": 1408, "total": 2400}
+{"stage": "pixel_encoder", "view": 1, "done": 128, "total": 2400}
+{"stage": "pixel_encoder", "view": 1, "done": 1408, "total": 2400}
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:202: RuntimeWarning: divide by zero encountered in matmul
+  frozen = q @ g.T
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:202: RuntimeWarning: overflow encountered in matmul
+  frozen = q @ g.T
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:202: RuntimeWarning: invalid value encountered in matmul
+  frozen = q @ g.T
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:204: RuntimeWarning: divide by zero encountered in matmul
+  "frozen_hybrid_text_weight_0.25": 0.75*frozen + 0.25*(q@t.T),
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:204: RuntimeWarning: overflow encountered in matmul
+  "frozen_hybrid_text_weight_0.25": 0.75*frozen + 0.25*(q@t.T),
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:204: RuntimeWarning: invalid value encountered in matmul
+  "frozen_hybrid_text_weight_0.25": 0.75*frozen + 0.25*(q@t.T),
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/visual_adapter.py:39: RuntimeWarning: divide by zero encountered in matmul
+  return normalize_rows(x + (x @ a) @ b)
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/visual_adapter.py:39: RuntimeWarning: overflow encountered in matmul
+  return normalize_rows(x + (x @ a) @ b)
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/visual_adapter.py:39: RuntimeWarning: invalid value encountered in matmul
+  return normalize_rows(x + (x @ a) @ b)
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:205: RuntimeWarning: divide by zero encountered in matmul
+  "primary_visual": frozen if primary_weights is None else project_features(q, primary_weights) @ project_features(g, primary_weights).T,
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:205: RuntimeWarning: overflow encountered in matmul
+  "primary_visual": frozen if primary_weights is None else project_features(q, primary_weights) @ project_features(g, primary_weights).T,
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:205: RuntimeWarning: invalid value encountered in matmul
+  "primary_visual": frozen if primary_weights is None else project_features(q, primary_weights) @ project_features(g, primary_weights).T,
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:206: RuntimeWarning: divide by zero encountered in matmul
+  "cosine_preservation_ablation": frozen if ablation_weights is None else project_features(q, ablation_weights) @ project_features(g, ablation_weights).T}
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:206: RuntimeWarning: overflow encountered in matmul
+  "cosine_preservation_ablation": frozen if ablation_weights is None else project_features(q, ablation_weights) @ project_features(g, ablation_weights).T}
+/Users/mikaelervamaa/Developer/meta-lens-adapter-r3-control-20261114/source-745f2e6597b8/services/meta-spatial/retrieval-r3/evaluation.py:206: RuntimeWarning: invalid value encountered in matmul
+  "cosine_preservation_ablation": frozen if ablation_weights is None else project_features(q, ablation_weights) @ project_features(g, ablation_weights).T}
+{"stage": "FRESH_EVALUATION_COMPLETE", "product_gate": {"status": "FAIL", "checks": {"recall_at_least_fixed_hybrid": true, "coverage_at_least_20_percent": false, "zero_wrong_present_accepted": false, "combined_family_upper95_at_most_1_percent": true}}, "paired": {"recall_at_1_difference": 0.05276595744680851, "interval95": [0.034996839581517, 0.07105451133910079], "superiority_supported_by_interval": true, "method": "paired_family_cluster_percentile_bootstrap_query_weighted", "resamples": 2000, "seed": 14683, "families": 689, "not_a_field_or_pretraining_independence_guarantee": true}, "primary_recall": 0.5846808510638298}

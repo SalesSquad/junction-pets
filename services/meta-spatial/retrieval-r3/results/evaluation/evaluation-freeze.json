@@ -1,0 +1,61 @@
+{
+  "ablation_candidate": {
+    "checkpoint": "checkpoints/cosine_preservation_ablation-seed-17.safetensors",
+    "checkpoint_sha256": "f5ffb78c54459d5fb2c4f237f1ee65394b14ec6b4b09cd7c3c489ae63341a796",
+    "dev": {
+      "family_recall_at_1": 0.7867950481430537,
+      "gallery_products": 727,
+      "mrr": 0.7317594785775584,
+      "ndcg_at_10": 0.7735874529343139,
+      "queries": 727,
+      "recall_at_1": 0.6231086657496562,
+      "recall_at_10": 0.9133425034387895,
+      "recall_at_5": 0.8624484181568088
+    },
+    "epoch": 3,
+    "kind": "adapter",
+    "preservation": 0.05,
+    "recipe": "cosine_preservation_ablation",
+    "seed": 17
+  },
+  "confirmation_candidate": {
+    "checkpoint": "checkpoints/primary-seed-17.safetensors",
+    "checkpoint_sha256": "cbab10328684c0e3554054410b20010ae4606bde5fb7db45ddc040de636e5b15",
+    "dev": {
+      "family_recall_at_1": 0.7867950481430537,
+      "gallery_products": 727,
+      "mrr": 0.7315829490396932,
+      "ndcg_at_10": 0.7730635711233571,
+      "queries": 727,
+      "recall_at_1": 0.624484181568088,
+      "recall_at_10": 0.9119669876203577,
+      "recall_at_5": 0.8638239339752407
+    },
+    "epoch": 3,
+    "kind": "adapter",
+    "preservation": 0.0,
+    "recipe": "primary",
+    "seed": 17
+  },
+  "dataset_sha256": "c67c6007da76ae3e106da34754eca15d42315271e55d9174657335390e4d3f9f",
+  "fresh_scores_observed": false,
+  "protocol_sha256": "0900b0d4d96e6787fa9f63a9d0e04af087d65dc33202810a4fd29f1ebefb1756",
+  "schema_version": 1,
+  "selection_sha256": "4802c58ea12c9f48892d54eb376d1ac5c2d88eabe812ec9930673f976785f6d7",
+  "source_commit": "745f2e6597b8d4e398551c37071b9ec662f2aea8",
+  "source_hashes": {
+    "cloud_lease.py": "eee107ed72863c516f1d7a46d00836427177d1c16b7a27e18f8271841b5f3e2c",
+    "evaluation.py": "3bc293ded8d212150a559ea31e8e1e59b2b023567a751ed0e29e6dc2dea5f259",
+    "prepare_holdout.py": "baa43173353705893dec58a7f6ab73c1dfb3c0d1ef8fc965e54ee85fe9c91cb0",
+    "restore_prior_cache.py": "2fe52c716d0e736bc4d1b5c677537551611976428c6f4080f680091f8a95eb1f",
+    "run_campaign.py": "5956827c4bd4361e4a2fe133158887b0c2c73ee509f1e765eb7499bf426a0862",
+    "runtime.py": "e2bb3096ef062758fc956a81b780f4954bbc7224465cc787bec16a77c406328d",
+    "test_evaluation.py": "acbe01a6515384116322de1408d1e159577a7d828b91e28ac63354472e683fbf",
+    "test_holdout.py": "228fe1be72eaf937df329c413231e06869a8d2e7c5ddb3d61bed220444051b3a",
+    "test_runtime.py": "b3bbeb1095b629a305f7605769831b6faf6433c847b2d1e61baf9b83fa4c5e4d",
+    "test_visual_adapter.py": "fcfd362e125763134083c0e43204d2fe6d032992e2d15ede0d81bec1a197a666",
+    "train_visual.py": "0bb23a98c3d747b87252f72c1b3765a08ecb367e833f0a815c8bb084a1d05b50",
+    "visual_adapter.py": "933de9d32de9782e4b399ef7f5d0a87c94e8389dd65f7ed1eae96a541f0250b1"
+  },
+  "utc": "2026-11-14T18:59:05Z"
+}
