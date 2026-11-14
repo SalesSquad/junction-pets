@@ -251,3 +251,42 @@ receipt tree and a single registry writer; this is not a sandbox against a
 malicious local owner. Hashes bind supplied bytes, not execution truth or trusted
 wall-clock time. Private receipt content is parsed only for identity and never
 written or printed by the importer.
+
+
+### Automatic owner-side reconciliation (no additional GPU work)
+
+A scheduled macOS one-shot importer reconciles trusted local experiment
+envelopes without creating a second development agent or GPU process.
+The local owner-only state lives under
+~/Library/Application Support/JunctionExperimentRegistry, with three folders:
+source (a clean dedicated GitHub main clone), inbox, and receipts.
+
+Launch the one-shot runner using this documented command in your existing
+authorized automation or a macOS LaunchAgent:
+
+    python3 "$HOME/Library/Application Support/JunctionExperimentRegistry/source/services/experiment-registry/auto_sync.py"       --owner-root "$HOME/Library/Application Support/JunctionExperimentRegistry"       --verda-db "$HOME/Library/Application Support/JunctionVerda/jobs.sqlite3"
+
+The runner locks one writer, verifies GitHub main, reads the existing Verda
+coordinator SQLite database read-only, ingests SHA-verified receipts, commits
+only new sanitized immutable metadata and opens a task-owned PR. The
+existing portfolio PR integrator owns merge; no direct main push.
+Private receipts and failed envelopes are retained, so missed/offline
+runs can catch up after the owner Mac resumes. If a PR is still open,
+the runner stops rather than creating a duplicate.
+
+The first automatic producer is verda_collect.py: it emits one bounded
+lease-state record for a new coordinator job or transition, with all records
+classified non-promotable. Stopped VM state is NOT proof of executed GPU
+training. Previous November 13 jobs are already in the history and are not
+replayed as new. Manual verda vm actions outside that coordinator and SAVI,
+Reality Twin, Meta, Apple/Xcode Cloud provider jobs require their producer
+to emit a redacted run+receipt envelope using the inbox contract above,
+or an explicitly integrated adapter; provider subscriptions are NOT implied.
+No GPU starts, provider credentials, independent model acceptance, or
+release are performed by this source-only tool.
+
+Further useful checks: stale pending PRs, invalid envelopes, missing
+provider receipts, measured costs versus quality improvement, and
+failure -> quarantined-case -> next-training-plan feedback. Comparison
+across differing loss definitions remains prohibited without rescoring
+on the same frozen cohort.

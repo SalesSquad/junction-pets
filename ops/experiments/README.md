@@ -20,3 +20,12 @@ This code is not auto-scheduled and never copies private receipt/media bytes int
 Git. Originals remain private and retained; only immutable sanitized run metadata
 is written here. Model runs require preregistered policy and remain
 `not-compared` with exit 2; importing evidence never approves a model or release.
+
+
+Scheduled owner-side synchronization is implemented by
+services/experiment-registry/auto_sync.py and the read-only Verda
+coordinator adapter services/experiment-registry/verda_collect.py.
+Only source-pinned sanitized run envelopes enter Git; no private
+model weights or raw receipts. This is conditional on the Mac being
+online and on real producer receipts. Apple/Meta and manual GPU
+experiments remain unconnected until their own producers emit events.
