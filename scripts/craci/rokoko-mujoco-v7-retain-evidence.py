@@ -137,8 +137,11 @@ def package_evidence(evidence_root: Path, staging_root: Path,
                 archive = artifacts / archive_name
                 entry = f"{filename}.part{index:03d}"
                 require(not archive.exists(), "EVIDENCE_PACK_ARCHIVE_EXISTS")
-                with zipfile.ZipFile(archive, "x", compression=zipfile.ZIP_STORED,
-                                     allowZip64=False) as output:
+                # JSON is highly compressible; fixed DEFLATE keeps the total
+                # source-bound evidence beneath the existing 63 MiB cap.
+                # The already-gzipped transition stream is still byte-exact.
+                with zipfile.ZipFile(archive, "x", compression=zipfile.ZIP_DEFLATED,
+                                     compresslevel=6, allowZip64=False) as output:
                     output.writestr(entry, segment)
                 actual_bytes = archive.stat().st_size
                 require(actual_bytes < MAX_FILE_BYTES, "EVIDENCE_PACK_PART_TOO_LARGE")
