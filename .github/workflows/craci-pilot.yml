@@ -29,6 +29,7 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - meta-r-robust
         - meta-r-hardshift-2x
         - lens-real-bop-train
+        - lens-six-ml
       source_sha:
         description: Full product SHA; overrides historical baseline. Tieto uses sponsor_revision.
         type: string
@@ -2134,6 +2135,118 @@ jobs:
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
       with:
         name: craci-lens-real-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+
+  lens-six-ml:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'lens-six-ml' }}
+    needs: plan
+    name: "Lens six corrective ML / round ${{ matrix.round }} / CPU 2"
+    runs-on: craci
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    permissions:
+      contents: read
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: lens-six-ml
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+      CRACI_ROUND: ${{ matrix.round }}
+    steps:
+    - name: Configure bounded CRACI CPU and default-deny public source checkout
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Recheck exact source, window and six fixed round IDs
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1140
+        test "$CRACI_SOURCE_SHA" = "$CRACI_HARNESS_SHA"
+        case "$CRACI_ROUND" in 1|2|3|4|5|6);; *) exit 2;; esac
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+    - name: Checkout pinned source-only training harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Checkout exact public BOP numerical data and training code
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Use pinned Node for source-bound receipts
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Train fixed ML correction and calibrate on separate scenes
+      id: qualification
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git -C "$CRACI_SOURCE_ROOT" rev-parse HEAD)" = "$CRACI_SOURCE_SHA"
+        test "$(git -C "$CRACI_HARNESS_ROOT" rev-parse HEAD)" = "$CRACI_HARNESS_SHA"
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash -euo pipefail -c '
+          destination="$CRACI_RECEIPT_DIR/artifacts/lens-six"
+          mkdir -p "$destination"
+          python3 "$CRACI_SOURCE_ROOT/scripts/craci/lens-data-gate.py" \
+            --register "$CRACI_SOURCE_ROOT/docs/CHIBI_LENS_DATA_SOURCE_REGISTER_20261114.json" \
+            --source-id bop-ycbv-test-public-mit \
+            --fixture-dir "$CRACI_SOURCE_ROOT/fixtures/lens-public-ycbv-20261114" \
+            --out "$destination/public-admission.json"
+          python3 "$CRACI_SOURCE_ROOT/scripts/craci/lens-six-ml.py" \
+            --source-root "$CRACI_SOURCE_ROOT" \
+            --expected-head "$CRACI_SOURCE_SHA" --round "$CRACI_ROUND" \
+            --out "$RUNNER_TEMP/lens-six-model-$CRACI_ROUND"
+          cp "$RUNNER_TEMP/lens-six-model-$CRACI_ROUND/report.json" "$destination/report.json"
+          cp "$RUNNER_TEMP/lens-six-model-$CRACI_ROUND/weights.json" "$destination/weights.json"
+          test -s "$destination/public-admission.json"
+          test -s "$destination/report.json"
+          test -s "$destination/weights.json"
+        '
+    - id: receipt
+      name: Preserve provenance, science-negative and training failure receipts
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          mkdir -p "$CRACI_RECEIPT_DIR/upload"
+          printf '%s\n' '{"schemaVersion":1,"status":"incomplete","reason":"Pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+          printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+    - name: Save each distinct model, result and evidence receipt
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-lens-six-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
         path: ${{ runner.temp }}/craci-evidence/upload/
         if-no-files-found: error
         retention-days: 7

@@ -33,7 +33,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train',
+  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml',
 ]);
 
 function choose(value, choices, label) {
@@ -87,6 +87,12 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
       const prefix = hard ? 'meta-r-hardshift-2x' : workload === 'meta-r-robust' ? 'meta-r-robust' : 'meta-r';
       add(`${prefix}-${cohort}`, meta, {cohort});
     }
+  } else if (workload === 'lens-six-ml') {
+    // Exactly six pretrained hypotheses on public numeric BOP features.
+    if (override && override !== harnessSha) throw new Error('Lens ML source must equal exact harness SHA');
+    for (let round=1; round<=6; round++) {
+      add(`lens-six-${round}`, harnessSha, {round});
+    }
   } else if (workload === 'lens-real-bop-train') {
     // Admitted public BOP YCB-Video features are stored at the pinned harness source.
     if (override && override !== harnessSha) throw new Error('Real RGB numeric features must use exact source/harness SHA');
@@ -107,7 +113,7 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     }
   }
   return {schemaVersion: 1, workload, harnessSha, selectedAt: when.toISOString(), windowEnd: WINDOW_END,
-    sourceOverride: override || null, maxParallel: workload === 'meta-r-hardshift-2x' ? Math.min(6, include.length) : Math.min(8, include.length),
+    sourceOverride: override || null, maxParallel: ['meta-r-hardshift-2x','lens-six-ml'].includes(workload) ? Math.min(6, include.length) : Math.min(8, include.length),
     jobCount: workload === 'cache-proof' ? 2 : include.length, matrix: {include}};
 }
 

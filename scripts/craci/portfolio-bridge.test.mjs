@@ -36,3 +36,14 @@ test('closed window and wrong repository fail closed before scheduling model wor
   assert.throws(()=>resolvePlan({workload:name},{...base,repository:'other/repo'}),/Junction-only/);
  }
 });
+
+test('six distinct preregistered corrective ML rounds have exact source, no repetitions',()=>{
+ const p=resolvePlan({workload:'lens-six-ml'},base);
+ assert.equal(p.jobCount,6);
+ assert.equal(p.maxParallel,6);
+ assert.deepEqual(p.matrix.include.map(x=>x.round),[1,2,3,4,5,6]);
+ assert.equal(new Set(p.matrix.include.map(x=>x.cell)).size,6);
+ assert.ok(p.matrix.include.every(x=>x.source_sha===base.harnessSha));
+ assert.throws(()=>resolvePlan({workload:'lens-six-ml',source_sha:frozen},base),
+   /Lens ML source must equal exact harness SHA/);
+});
