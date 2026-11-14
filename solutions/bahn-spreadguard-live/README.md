@@ -79,15 +79,31 @@ moving clock. It **never** calls `advance` for a final.
   inventing win/late labels. In the deterministic shortage fixture it quoted
   55.8% vs Discovery's 64.0% of synthetic requests, trading quote volume for
   stronger up-front delivery-risk controls. These numbers **cannot** predict
-  the official game score. **Do not use on `--board` or `--final`**
-  without its own separate official qualification.
+  the official game score. One additional official **unranked** same-seed
+  comparison on 2026-11-14 found **inferior results** versus Discovery:
+
+  | Holdout A, same official seed | Discovery | Uber-inspired experiment |
+  | --- | ---: | ---: |
+  | Orders won (after cancellations) | 301 | 284 |
+  | On time | 92.0% | 91.2% |
+  | Undelivered | 0.3% | 0.7% |
+  | Margin | +€5,418.07 | +€4,603.94 |
+
+  Exact sponsor-world IDs: Discovery `wb66a14d35da664f11487`, Uber
+  `wf6ccbe870ec315616e9e`. Both had 1,039 requests; Uber sent 457
+  competitive quotes vs 470, and had 16 failed visits vs Discovery's 12.
+  This **disproves that the current opt-in version is better on this seed**.
+  It is **NOT qualified for `--board` or `--final`** and must not replace the
+  five-world-qualified Discovery strategy without additional evidence.
 - Delegate correct post/withdraw/repost/rate-limit behavior to the official
   starter, adding optional manual-licence/plates constraints from dealer notes.
 
 The default `dispatch.py` has one real official practice qualification. The
 `discovery_experiment.py` has five independently seeded qualifying official
-**unranked** practice results. The Uber-inspired variant has zero official
-practice results; never conflate their evidence.
+**unranked** practice results. The Uber-inspired variant has **one** official
+unranked practice result that passed the 90% on-time gate but **underperformed
+Discovery in the same seeded world**. Never conflate their evidence or treat
+either unranked result as a leaderboard/final qualification.
 The `One Man Raid` team was registered on 2026-11-14; its token stays exclusively
 in the owner's Mac Keychain and must never enter this repository. Official
 practice is being qualified independently of this draft PR. Algorithm parameters
