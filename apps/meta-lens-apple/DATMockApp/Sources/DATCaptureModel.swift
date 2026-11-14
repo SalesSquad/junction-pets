@@ -86,14 +86,25 @@ final class DATCaptureModel: ObservableObject {
                 mock.powerOn()
                 mock.unfold()
                 mock.don()
-                let selector = SpecificDeviceSelector(device: mock.deviceIdentifier)
-                self.selector = selector
-                for await device in selector.activeDeviceStream() {
-                    guard self.epoch.accepts(generation), !Task.isCancelled else { return }
-                    if device == mock.deviceIdentifier { break }
+                let wearables = Wearables.shared
+                // Selecting an ID is not proof that the SDK has discovered the mock.
+                // Subscribe before checking the snapshot to avoid missing discovery.
+                let discovery = wearables.devicesStream()
+                self.status = "Waiting for Meta test glasses"
+                if !wearables.devices.contains(mock.deviceIdentifier) {
+                    for await devices in discovery {
+                        guard self.epoch.accepts(generation), !Task.isCancelled else { return }
+                        if devices.contains(mock.deviceIdentifier) { break }
+                    }
                 }
                 guard self.epoch.accepts(generation), !Task.isCancelled else { return }
-                let session = try Wearables.shared.createSession(deviceSelector: selector)
+                guard wearables.devices.contains(mock.deviceIdentifier) else {
+                    throw DeviceSessionError.noEligibleDevice
+                }
+                let selector = SpecificDeviceSelector(device: mock.deviceIdentifier)
+                self.selector = selector
+                self.status = "Creating Meta test session"
+                let session = try wearables.createSession(deviceSelector: selector)
                 self.session = session
                 self.listeners.append(session.statePublisher.listen { [weak self] state in
                     Task { @MainActor in
@@ -113,10 +124,11 @@ final class DATCaptureModel: ObservableObject {
                         self.stop(reason: "Meta session failed — manual path available")
                     }
                 })
+                self.status = "Starting Meta test session"
                 try session.start()
             } catch {
                 guard self.epoch.accepts(generation) else { return }
-                self.lastError = error.localizedDescription
+                self.lastError = "\(self.status): \(error.localizedDescription)"
                 self.stop(reason: "Could not start Meta test session")
             }
         }
