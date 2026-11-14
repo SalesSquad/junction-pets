@@ -18,7 +18,7 @@ test_real_search_npz_identity_and_residual_are_schema_valid (test_cli.CliTests.t
 test_real_search_top128_and_gallery_limit (test_cli.CliTests.test_real_search_top128_and_gallery_limit) ... ok
 test_synthetic_safetensors_selection_and_checkpoint_binding (test_cli.CliTests.test_synthetic_safetensors_selection_and_checkpoint_binding) ... ok
 test_accepts_finite_json_and_rejects_non_utf8 (test_contract.StrictJSONTest.test_accepts_finite_json_and_rejects_non_utf8) ... ok
-test_excessive_nesting_is_a_contract_error (test_contract.StrictJSONTest.test_excessive_nesting_is_a_contract_error) ... FAIL
+test_excessive_nesting_is_a_contract_error (test_contract.StrictJSONTest.test_excessive_nesting_is_a_contract_error) ... ok
 test_rejects_duplicate_keys_and_nonfinite_literals (test_contract.StrictJSONTest.test_rejects_duplicate_keys_and_nonfinite_literals) ... ok
 test_bad_token_counts_are_rejected (test_reconcile.ReconciliationTests.test_bad_token_counts_are_rejected) ... ok
 test_case_bytes_must_match_plan (test_reconcile.ReconciliationTests.test_case_bytes_must_match_plan) ... ok
@@ -67,16 +67,7 @@ test_unknown_directory_and_nested_file_rejected (test_reconcile.ReconciliationTe
 test_unsafe_image_path_and_out_of_slice_artifacts_rejected (test_reconcile.ReconciliationTests.test_unsafe_image_path_and_out_of_slice_artifacts_rejected) ... ok
 test_wrong_input_types_raise_contract_error (test_reconcile.ReconciliationTests.test_wrong_input_types_raise_contract_error) ... ok
 
-======================================================================
-FAIL: test_excessive_nesting_is_a_contract_error (test_contract.StrictJSONTest.test_excessive_nesting_is_a_contract_error)
 ----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/workspace/scratch/a14f1ee6c1e3/meta-lens-acceleration/services/meta-spatial/retrieval-acceleration/test_contract.py", line 17, in test_excessive_nesting_is_a_contract_error
-    with self.assertRaises(ContractError):
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: ContractError not raised
+Ran 68 tests in 1.866s
 
-----------------------------------------------------------------------
-Ran 68 tests in 1.839s
-
-FAILED (failures=1)
+OK

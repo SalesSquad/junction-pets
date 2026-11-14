@@ -14,8 +14,10 @@ class StrictJSONTest(unittest.TestCase):
             strict_json_loads('{"x":1}'.encode("utf-16"))
 
     def test_excessive_nesting_is_a_contract_error(self):
-        with self.assertRaises(ContractError):
-            strict_json_loads("[" * 2000 + "0" + "]" * 2000)
+        self.assertIsInstance(strict_json_loads("[" * 64 + "0" + "]" * 64), list)
+        for count in (65, 2000):
+            with self.subTest(depth=count), self.assertRaises(ContractError):
+                strict_json_loads("[" * count + "0" + "]" * count)
 
 
 if __name__ == "__main__":

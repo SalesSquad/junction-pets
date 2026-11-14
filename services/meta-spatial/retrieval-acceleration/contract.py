@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = 1
+MAX_JSON_CONTAINER_DEPTH = 64
 
 class ContractError(ValueError):
     """A caller-visible, stable error code and explanation."""
@@ -42,8 +43,19 @@ def strict_json_loads(raw: bytes | str):
     try:
         if isinstance(raw, bytes):
             raw = raw.decode("utf-8")
-        return json.loads(raw, object_pairs_hook=_unique_object,
-                          parse_constant=invalid_constant, parse_float=finite_float)
+        parsed = json.loads(raw, object_pairs_hook=_unique_object,
+                            parse_constant=invalid_constant, parse_float=finite_float)
+        # Libraries can raise the process recursion limit. Enforce our own
+        # container-depth contract independently of the JSON parser's limit.
+        pending = [(parsed, 0)]
+        while pending:
+            value, depth = pending.pop()
+            if isinstance(value, (dict, list)):
+                if depth >= MAX_JSON_CONTAINER_DEPTH:
+                    raise ContractError("json_depth", "JSON exceeds 64 nested containers")
+                children = value.values() if isinstance(value, dict) else value
+                pending.extend((child, depth + 1) for child in children)
+        return parsed
     except ContractError:
         raise
     except (ValueError, UnicodeDecodeError, RecursionError) as exc:

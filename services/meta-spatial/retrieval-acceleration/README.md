@@ -135,12 +135,30 @@ accepted-coverage or 93% product claim. Historical R3 results remain unchanged.
 
 ## Focused verification
 
+Delivered result: **68/68 checks pass, zero skips**, with source hashes unchanged
+during execution and independent review of the final evidence. The final fixed
+synthetic benchmark gives the following median times for 32 streamed queries:
+
+| Timed path | Seconds | Relative speed |
+| --- | ---: | ---: |
+| Original R3 runtime | 0.900682 | 1.00× |
+| Prepared index, including preparation | 0.069478 | 12.96× |
+| Queries after preparation | 0.014743 | 61.09× |
+
+All 96 query comparisons retained identical top-five IDs/order and zero measured
+score difference. Gallery projection count falls from 32 to one per run.
+This comparison uses one observed OpenBLAS thread on a CPU.
+
 ```sh
 OPENBLAS_NUM_THREADS=1 python -m unittest discover \
   -s services/meta-spatial/retrieval-acceleration -p 'test_*.py' -v
 
 python services/meta-spatial/retrieval-acceleration/benchmark.py \
   --output /path/to/new-synthetic-benchmark.json
+
+# Also preserve a source-bound test receipt and raw log in a new directory.
+OPENBLAS_NUM_THREADS=1 python services/meta-spatial/retrieval-acceleration/verify.py \
+  --output-dir /path/to/new-focused-verification
 ```
 
 The benchmark compares the exact pinned R3 runtime with the prepared index on
@@ -150,6 +168,14 @@ preparation in the main speedup, retains every repeat, alternates execution
 order, checks candidate order and score tolerance, and records source hashes.
 Its result describes this CPU workload, not NVIDIA inference or end-to-end
 glasses latency. Do not rerun a successful benchmark merely to find a larger number.
+
+The first combined verification found an interpreter-dependent JSON depth check.
+The final implementation enforces 64 nested containers explicitly. Its failed
+receipt/log and the first benchmark remain unchanged in `evidence/attempt-01/`
+and in milestone commit `0a51c02e8a5b6b746e5c8912f041ea41cbf8fe89`.
+The benchmark was repeated once to bind the changed shared-contract source;
+the first measured preparation-inclusive ratio was 11.98×. Both runs retain
+all three repeats; the final result was not selected from a parameter search.
 
 See `evidence/verification.json`, `evidence/benchmark.json`, and
 `evidence/review.md` for the delivered checks, measured result and independent
