@@ -1,0 +1,3066 @@
+{
+  "schema": "motionbridge.counterfactual.v1",
+  "source_kind": "SYNTHETIC_MUJOCO",
+  "input_source_kind": "UNVERIFIED_REPLAY",
+  "actuation_authorized": false,
+  "model_decisions": "OFFLINE_STUB",
+  "source_base_sha": "84dceb0347771590035a7f973a264cb2a4540c7f",
+  "source_head_at_execution": "84dceb0347771590035a7f973a264cb2a4540c7f",
+  "mujoco_version": "3.3.7",
+  "source_hashes": {
+    "sim/experiment.py": "bed51a4d4f92c41d62ddb7234106e4713269d0673192ee2b8baded139931afe0",
+    "sim/scene.xml": "6bc66d2361c1b53dcac9897d2c7c7fb03a4cb2be50fb7f41df8b5d4341ff43b5",
+    "src/engine.mjs": "3790913bd71749ca7c1542d1fbefac5b9f9ed988a2ef355c88357f4fe579f84b",
+    "src/retarget.mjs": "efd164f68089889668804f923177d6d05620807056d9680078c90e285e5160f5",
+    "fixtures/synthetic-retarget.csv": "7e86589006a4fd2f31d053883d0ffd058c7b412716b7eae8cc7234f3be358333",
+    "fixtures/retarget-map.json": "2c0639e7e8aed8c8d097d88409b285063d14fece9ee6430316a69d2fc330aaa6"
+  },
+  "demo_provenance": {
+    "input_csv_sha256": "7e86589006a4fd2f31d053883d0ffd058c7b412716b7eae8cc7234f3be358333",
+    "config_sha256": "2c0639e7e8aed8c8d097d88409b285063d14fece9ee6430316a69d2fc330aaa6",
+    "source_frame": {
+      "frame_id": "invented-mm-frame",
+      "position_units": "mm",
+      "time_units": "us",
+      "bounds": {
+        "x": [
+          0,
+          500
+        ],
+        "y": [
+          -500,
+          0
+        ],
+        "z": [
+          0,
+          500
+        ]
+      }
+    },
+    "target_frame": {
+      "frame_id": "tabletop-v1",
+      "units": "m",
+      "bounds": {
+        "x": [
+          -0.5,
+          0.5
+        ],
+        "y": [
+          0,
+          0.6
+        ],
+        "z": [
+          0,
+          0.6
+        ]
+      },
+      "accepted": true,
+      "assumption_id": "synthetic-only-calibration"
+    },
+    "position_scale_to_m": 0.001,
+    "time_divisor_to_ms": 1000,
+    "rotation": {
+      "x": "-y",
+      "y": "+x",
+      "z": "+z"
+    },
+    "rotation_determinant": 1,
+    "translation_m": {
+      "x": 0.1,
+      "y": 0,
+      "z": 0
+    },
+    "columns": [
+      {
+        "signal": "time",
+        "index": 0,
+        "header": "time"
+      },
+      {
+        "signal": "x",
+        "index": 1,
+        "header": "pose"
+      },
+      {
+        "signal": "y",
+        "index": 2,
+        "header": "pose"
+      },
+      {
+        "signal": "z",
+        "index": 3,
+        "header": "pose"
+      },
+      {
+        "signal": "grip",
+        "index": 4,
+        "header": "grip"
+      },
+      {
+        "signal": "quality",
+        "index": 5,
+        "header": "quality"
+      },
+      {
+        "signal": "deadman",
+        "index": 6,
+        "header": "deadman"
+      },
+      {
+        "signal": "reset_ack",
+        "index": 7,
+        "header": "ack"
+      }
+    ],
+    "source_label": "UNVERIFIED_REPLAY",
+    "calibration_status": "OPERATOR_DECLARED_ASSUMPTION",
+    "source_provenance_verified": false,
+    "sdk_integration_verified": false,
+    "simulator_calibration_verified": false,
+    "actuation_authorized": false,
+    "training_authorized": false
+  },
+  "demo_progress": [
+    0.0,
+    0.49999999999999983,
+    1.0
+  ],
+  "training": "NONE: train split is calibration/development evaluation; no fitted or RL policy",
+  "train_seeds": [
+    104,
+    105,
+    106,
+    107,
+    108,
+    109
+  ],
+  "holdout_seeds": [
+    10104,
+    10105,
+    10106,
+    10107,
+    10108,
+    10109,
+    10110,
+    10111,
+    10112,
+    10113,
+    10114,
+    10115,
+    10116,
+    10117,
+    10118,
+    10119,
+    10120,
+    10121,
+    10122,
+    10123,
+    10124,
+    10125,
+    10126,
+    10127,
+    10128,
+    10129,
+    10130,
+    10131,
+    10132,
+    10133
+  ],
+  "fragility_step_impulse_ns": 0.006,
+  "train_summary": {
+    "open_loop": {
+      "trials": 6,
+      "successes": 0,
+      "false_successes": 0,
+      "broken": 0,
+      "contact_trials": 6,
+      "mean_error_m": 0.11490980503766879,
+      "human_requests": 0,
+      "unsafe_deadman_commands": 0
+    },
+    "object_centered": {
+      "trials": 6,
+      "successes": 0,
+      "false_successes": 0,
+      "broken": 0,
+      "contact_trials": 6,
+      "mean_error_m": 0.040133117253044505,
+      "human_requests": 0,
+      "unsafe_deadman_commands": 0
+    }
+  },
+  "holdout_summary": {
+    "open_loop": {
+      "trials": 30,
+      "successes": 0,
+      "false_successes": 0,
+      "broken": 0,
+      "contact_trials": 26,
+      "mean_error_m": 0.13864939305152585,
+      "human_requests": 0,
+      "unsafe_deadman_commands": 0
+    },
+    "object_centered": {
+      "trials": 30,
+      "successes": 0,
+      "false_successes": 0,
+      "broken": 1,
+      "contact_trials": 30,
+      "mean_error_m": 0.07387324841840187,
+      "human_requests": 18,
+      "unsafe_deadman_commands": 0
+    }
+  },
+  "negative_deadman": {
+    "seed": 104,
+    "policy": "object_centered",
+    "scenario": {
+      "x": 0.011039062324678932,
+      "y": 0.0074372737404514565,
+      "friction": 0.3695715884210052,
+      "mass": 0.06593356853255664,
+      "obstacle_y": 0.15,
+      "stale_start": 87,
+      "stale_length": 0,
+      "deadman_step": -1
+    },
+    "success": false,
+    "error_m": 0.14914648501986272,
+    "sensor_claim": false,
+    "false_success": false,
+    "broken": false,
+    "max_step_impulse_ns": 0.0,
+    "pusher_object_contact_steps": 0,
+    "obstacle_contact_steps": 0,
+    "held_ticks": 200,
+    "unsafe_deadman_commands": 0,
+    "human_requests": 0,
+    "human_takeovers": 0,
+    "remaining_human_budget": 2,
+    "decisions": {
+      "CONTINUE": 0,
+      "REPLAN": 0,
+      "REOBSERVE": 0,
+      "REQUEST_HUMAN": 0,
+      "HALT": 200
+    },
+    "final_object_xyz": [
+      0.011039062324749962,
+      0.0074372737404514565,
+      0.019996618947980823
+    ]
+  },
+  "train": [
+    {
+      "seed": 104,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.011039062324678932,
+        "y": 0.0074372737404514565,
+        "friction": 0.3695715884210052,
+        "mass": 0.06593356853255664,
+        "obstacle_y": 0.15,
+        "stale_start": 87,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.11553290317306862,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.002486913983574008,
+      "pusher_object_contact_steps": 284,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 42,
+        "REPLAN": 158,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.048823849686446354,
+        0.03142793847925398,
+        0.019996618947980823
+      ]
+    },
+    {
+      "seed": 104,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.011039062324678932,
+        "y": 0.0074372737404514565,
+        "friction": 0.3695715884210052,
+        "mass": 0.06593356853255664,
+        "obstacle_y": 0.15,
+        "stale_start": 87,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.03450143327637385,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.002973705394881814,
+      "pusher_object_contact_steps": 1322,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 127,
+        "REPLAN": 73,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.1274373877434221,
+        -0.011402858464079903,
+        0.01996642932014244
+      ]
+    },
+    {
+      "seed": 105,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.00907438437783582,
+        "y": -0.0030176270632859235,
+        "friction": 0.38721709797179926,
+        "mass": 0.1166111243526554,
+        "obstacle_y": 0.15,
+        "stale_start": 84,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10694231734620793,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003623979018225131,
+      "pusher_object_contact_steps": 368,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 50,
+        "REPLAN": 150,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.05763054923138917,
+        -0.030937918299556097,
+        0.019996618947980823
+      ]
+    },
+    {
+      "seed": 105,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.00907438437783582,
+        "y": -0.0030176270632859235,
+        "friction": 0.38721709797179926,
+        "mass": 0.1166111243526554,
+        "obstacle_y": 0.15,
+        "stale_start": 84,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.037355893066410004,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003935862036272945,
+      "pusher_object_contact_steps": 1433,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 144,
+        "REPLAN": 56,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.12339181627767123,
+        0.007436641133017118,
+        0.02000972530227396
+      ]
+    },
+    {
+      "seed": 106,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.005056409593499827,
+        "y": 0.008022151213770647,
+        "friction": 0.15502910291119562,
+        "mass": 0.115944426185501,
+        "obstacle_y": 0.15,
+        "stale_start": 105,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.12355510261361288,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0034442783151949815,
+      "pusher_object_contact_steps": 299,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 37,
+        "REPLAN": 163,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.04038330470755034,
+        0.030946883351537335,
+        0.019996618947980847
+      ]
+    },
+    {
+      "seed": 106,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.005056409593499827,
+        "y": 0.008022151213770647,
+        "friction": 0.15502910291119562,
+        "mass": 0.115944426185501,
+        "obstacle_y": 0.15,
+        "stale_start": 105,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.05536224477126865,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.004001171774190399,
+      "pusher_object_contact_steps": 1458,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 122,
+        "REPLAN": 78,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.10616308446094183,
+        -0.012905993621344309,
+        0.01999590147523448
+      ]
+    },
+    {
+      "seed": 107,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.006084432967935404,
+        "y": 0.0016257986078155942,
+        "friction": 0.4416843020776954,
+        "mass": 0.09604547947473505,
+        "obstacle_y": 0.15,
+        "stale_start": 106,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10659093729045047,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003454157380598755,
+      "pusher_object_contact_steps": 461,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 48,
+        "REPLAN": 152,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.05803329173698265,
+        0.031055085227084066,
+        0.019995752893942488
+      ]
+    },
+    {
+      "seed": 107,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.006084432967935404,
+        "y": 0.0016257986078155942,
+        "friction": 0.4416843020776954,
+        "mass": 0.09604547947473505,
+        "obstacle_y": 0.15,
+        "stale_start": 106,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.030660901324154156,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0038260839604032557,
+      "pusher_object_contact_steps": 1516,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 140,
+        "REPLAN": 60,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.12975636862763068,
+        -0.005041193452125818,
+        0.019996682035501517
+      ]
+    },
+    {
+      "seed": 108,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.008867514482383914,
+        "y": 0.006312687260650313,
+        "friction": 0.41413219271997637,
+        "mass": 0.07695645742847945,
+        "obstacle_y": 0.15,
+        "stale_start": 80,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.13294424610463274,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0029638631636128487,
+      "pusher_object_contact_steps": 306,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 29,
+        "REPLAN": 171,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.030791766519488634,
+        0.03129544652461158,
+        0.01999633988152522
+      ]
+    },
+    {
+      "seed": 108,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.008867514482383914,
+        "y": 0.006312687260650313,
+        "friction": 0.41413219271997637,
+        "mass": 0.07695645742847945,
+        "obstacle_y": 0.15,
+        "stale_start": 80,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.05266516016843334,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0030296782442926387,
+      "pusher_object_contact_steps": 1452,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 108,
+        "REPLAN": 92,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.10878589605901505,
+        -0.012277404167360742,
+        0.019977063849080004
+      ]
+    },
+    {
+      "seed": 109,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.005290007073459171,
+        "y": -0.0008144205138022036,
+        "friction": 0.31416922299064076,
+        "mass": 0.057105041116000066,
+        "obstacle_y": 0.15,
+        "stale_start": 109,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10389332369804019,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.002366164041529086,
+      "pusher_object_contact_steps": 421,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 51,
+        "REPLAN": 149,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.06100247734924119,
+        -0.03151687195833775,
+        0.019996618947980823
+      ]
+    },
+    {
+      "seed": 109,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.005290007073459171,
+        "y": -0.0008144205138022036,
+        "friction": 0.31416922299064076,
+        "mass": 0.057105041116000066,
+        "obstacle_y": 0.15,
+        "stale_start": 109,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.030253070911627003,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0026802536313177403,
+      "pusher_object_contact_steps": 1376,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 126,
+        "REPLAN": 74,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.13140180518365258,
+        0.009868715865307449,
+        0.019958361109263995
+      ]
+    }
+  ],
+  "holdout": [
+    {
+      "seed": 10104,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.0030728064975301464,
+        "y": -0.004309644469028054,
+        "friction": 0.35257872451631544,
+        "mass": 0.10892180982299388,
+        "obstacle_y": 0.065,
+        "stale_start": 108,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.11819571565960481,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003492940823362476,
+      "pusher_object_contact_steps": 332,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 41,
+        "REPLAN": 139,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.04593998442215895,
+        -0.030992580509999597,
+        0.019996618947980847
+      ]
+    },
+    {
+      "seed": 10104,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.0030728064975301464,
+        "y": -0.004309644469028054,
+        "friction": 0.35257872451631544,
+        "mass": 0.10892180982299388,
+        "obstacle_y": 0.065,
+        "stale_start": 108,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.05816177568383974,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003742003967669514,
+      "pusher_object_contact_steps": 1481,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 108,
+        "REPLAN": 72,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.10224747153035418,
+        0.00688749635644483,
+        0.019998516850308554
+      ]
+    },
+    {
+      "seed": 10105,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.01020785196361545,
+        "y": 0.001841016306301041,
+        "friction": 0.5036203994603268,
+        "mass": 0.07426977595242945,
+        "obstacle_y": 0.0,
+        "stale_start": 101,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10779683725893315,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003172949868121306,
+      "pusher_object_contact_steps": 1578,
+      "obstacle_contact_steps": 24,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 47,
+        "REPLAN": 145,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.056912075103337845,
+        0.03151250328883851,
+        0.01999420794937477
+      ]
+    },
+    {
+      "seed": 10105,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.01020785196361545,
+        "y": 0.001841016306301041,
+        "friction": 0.5036203994603268,
+        "mass": 0.07426977595242945,
+        "obstacle_y": 0.0,
+        "stale_start": 101,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10952783642295114,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0037775637415401004,
+      "pusher_object_contact_steps": 1739,
+      "obstacle_contact_steps": 682,
+      "held_ticks": 112,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 2,
+      "human_takeovers": 0,
+      "remaining_human_budget": 0,
+      "decisions": {
+        "CONTINUE": 70,
+        "REPLAN": 18,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 2,
+        "HALT": 102
+      },
+      "final_object_xyz": [
+        0.05200736351439238,
+        0.01827395459062292,
+        0.019994209396249633
+      ]
+    },
+    {
+      "seed": 10106,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.008319715560450566,
+        "y": 0.03467866928723612,
+        "friction": 0.40856851144310957,
+        "mass": 0.09162138363815404,
+        "obstacle_y": 0.0,
+        "stale_start": 86,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.17185498756185005,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0,
+      "pusher_object_contact_steps": 0,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 180,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        -0.008319715560436805,
+        0.03467866928729073,
+        0.019996451480507816
+      ]
+    },
+    {
+      "seed": 10106,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.008319715560450566,
+        "y": 0.03467866928723612,
+        "friction": 0.40856851144310957,
+        "mass": 0.09162138363815404,
+        "obstacle_y": 0.0,
+        "stale_start": 86,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.11323826233045171,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0026054219355174345,
+      "pusher_object_contact_steps": 1521,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 89,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 2,
+      "human_takeovers": 0,
+      "remaining_human_budget": 0,
+      "decisions": {
+        "CONTINUE": 17,
+        "REPLAN": 95,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 2,
+        "HALT": 66
+      },
+      "final_object_xyz": [
+        0.046882191942222345,
+        0.00522164301958421,
+        0.019996451615297284
+      ]
+    },
+    {
+      "seed": 10107,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.011496193768667173,
+        "y": -0.00911582158939242,
+        "friction": 0.3776885650073519,
+        "mass": 0.08551012842511091,
+        "obstacle_y": 0.15,
+        "stale_start": 88,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.14198260719261208,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.002759455749722126,
+      "pusher_object_contact_steps": 274,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 23,
+        "REPLAN": 169,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.021497811485402342,
+        -0.031244271825063074,
+        0.01999661894798113
+      ]
+    },
+    {
+      "seed": 10107,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.011496193768667173,
+        "y": -0.00911582158939242,
+        "friction": 0.3776885650073519,
+        "mass": 0.08551012842511091,
+        "obstacle_y": 0.15,
+        "stale_start": 88,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.06064623393858276,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003365433162834399,
+      "pusher_object_contact_steps": 1477,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 95,
+        "REPLAN": 97,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.10054426080364363,
+        0.011957456566852341,
+        0.01999917405375085
+      ]
+    },
+    {
+      "seed": 10108,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.0027772407308340307,
+        "y": -0.009397480891758056,
+        "friction": 0.30643480811068424,
+        "mass": 0.08399805286612515,
+        "obstacle_y": -0.065,
+        "stale_start": 94,
+        "stale_length": 0,
+        "deadman_step": 140
+      },
+      "success": false,
+      "error_m": 0.12887817152600187,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0027148521180310127,
+      "pusher_object_contact_steps": 268,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 60,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 33,
+        "REPLAN": 107,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 60
+      },
+      "final_object_xyz": [
+        0.034968182180712175,
+        -0.03125104204166599,
+        0.019996618947980823
+      ]
+    },
+    {
+      "seed": 10108,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.0027772407308340307,
+        "y": -0.009397480891758056,
+        "friction": 0.30643480811068424,
+        "mass": 0.08399805286612515,
+        "obstacle_y": -0.065,
+        "stale_start": 94,
+        "stale_length": 0,
+        "deadman_step": 140
+      },
+      "success": false,
+      "error_m": 0.07364727443744946,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0033439592747656123,
+      "pusher_object_contact_steps": 1514,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 60,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 51,
+        "REPLAN": 89,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 60
+      },
+      "final_object_xyz": [
+        0.08655932836394954,
+        -0.005512602081667961,
+        0.019996619078160548
+      ]
+    },
+    {
+      "seed": 10109,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.0027824890235519217,
+        "y": 0.03347531673881414,
+        "friction": 0.4613342483792421,
+        "mass": 0.05821319968575039,
+        "obstacle_y": 0.0,
+        "stale_start": 98,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.16074185076825898,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0,
+      "pusher_object_contact_steps": 0,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 180,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.0027824890235110815,
+        0.03347531673879765,
+        0.019995297819651852
+      ]
+    },
+    {
+      "seed": 10109,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.0027824890235519217,
+        "y": 0.03347531673881414,
+        "friction": 0.4613342483792421,
+        "mass": 0.05821319968575039,
+        "obstacle_y": 0.0,
+        "stale_start": 98,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10961036214231865,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.002891195467121487,
+      "pusher_object_contact_steps": 1567,
+      "obstacle_contact_steps": 1220,
+      "held_ticks": 123,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 2,
+      "human_takeovers": 0,
+      "remaining_human_budget": 0,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 77,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 2,
+        "HALT": 101
+      },
+      "final_object_xyz": [
+        0.05202747038428361,
+        0.0188776147156755,
+        0.01999533079159342
+      ]
+    },
+    {
+      "seed": 10110,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.002437227851497954,
+        "y": -0.005431858360842631,
+        "friction": 0.45673052398953484,
+        "mass": 0.11566703967332437,
+        "obstacle_y": 0.15,
+        "stale_start": 88,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.12200196742888139,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0038959510256612304,
+      "pusher_object_contact_steps": 364,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 37,
+        "REPLAN": 155,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.041964161804190714,
+        -0.0308548368644296,
+        0.019995407254162073
+      ]
+    },
+    {
+      "seed": 10110,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.002437227851497954,
+        "y": -0.005431858360842631,
+        "friction": 0.45673052398953484,
+        "mass": 0.11566703967332437,
+        "obstacle_y": 0.15,
+        "stale_start": 88,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.061160159390583564,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.004251925618506928,
+      "pusher_object_contact_steps": 1557,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 101,
+        "REPLAN": 91,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.09887586209056866,
+        0.0020987761935006947,
+        0.01997051368608084
+      ]
+    },
+    {
+      "seed": 10111,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.011045475164733753,
+        "y": -0.018805730117295374,
+        "friction": 0.5969113815002793,
+        "mass": 0.1147590483831216,
+        "obstacle_y": 0.0,
+        "stale_start": 68,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.12967434718785864,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0033981160304055605,
+      "pusher_object_contact_steps": 442,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 180,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.03403708224555121,
+        -0.030802267276667676,
+        0.01999119731173915
+      ]
+    },
+    {
+      "seed": 10111,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.011045475164733753,
+        "y": -0.018805730117295374,
+        "friction": 0.5969113815002793,
+        "mass": 0.1147590483831216,
+        "obstacle_y": 0.0,
+        "stale_start": 68,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10957980697959752,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.004688665780023512,
+      "pusher_object_contact_steps": 1661,
+      "obstacle_contact_steps": 817,
+      "held_ticks": 106,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 2,
+      "human_takeovers": 0,
+      "remaining_human_budget": 0,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 95,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 2,
+        "HALT": 83
+      },
+      "final_object_xyz": [
+        0.052032181939848696,
+        -0.018726568319260034,
+        0.01999119878909123
+      ]
+    },
+    {
+      "seed": 10112,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.00955108159367915,
+        "y": -0.01218681114269584,
+        "friction": 0.18364863881540666,
+        "mass": 0.11898015465201611,
+        "obstacle_y": -0.065,
+        "stale_start": 52,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.1459445835832652,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003027546525059064,
+      "pusher_object_contact_steps": 247,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 20,
+        "REPLAN": 180,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.0173574643232152,
+        -0.030869539889506897,
+        0.019996618947980955
+      ]
+    },
+    {
+      "seed": 10112,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.00955108159367915,
+        "y": -0.01218681114269584,
+        "friction": 0.18364863881540666,
+        "mass": 0.11898015465201611,
+        "obstacle_y": -0.065,
+        "stale_start": 52,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.07089089134128475,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0032351690206346706,
+      "pusher_object_contact_steps": 1539,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 97,
+        "REPLAN": 103,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.090223932697958,
+        0.012522735604601218,
+        0.019995740483514633
+      ]
+    },
+    {
+      "seed": 10113,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.003913062035091449,
+        "y": 0.020259702557513137,
+        "friction": 0.6903743837115167,
+        "mass": 0.07123767758763626,
+        "obstacle_y": -0.065,
+        "stale_start": 107,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.13441114184422379,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0026771497561398497,
+      "pusher_object_contact_steps": 275,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 192,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.029183803438090357,
+        0.030878435338337094,
+        0.019987181716674747
+      ]
+    },
+    {
+      "seed": 10113,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.003913062035091449,
+        "y": 0.020259702557513137,
+        "friction": 0.6903743837115167,
+        "mass": 0.07123767758763626,
+        "obstacle_y": -0.065,
+        "stale_start": 107,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.0387347541742687,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003960108018689102,
+      "pusher_object_contact_steps": 1635,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 38,
+        "REPLAN": 154,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.1212688217133679,
+        -0.0005263168913733808,
+        0.019992133633019698
+      ]
+    },
+    {
+      "seed": 10114,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.01111343684655848,
+        "y": -0.02102393462219665,
+        "friction": 0.46227682376595447,
+        "mass": 0.1065972945049834,
+        "obstacle_y": -0.065,
+        "stale_start": 48,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.1591469286030272,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0026240353245393627,
+      "pusher_object_contact_steps": 229,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 192,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.003919274372871985,
+        -0.031089418963470814,
+        0.019995275197680594
+      ]
+    },
+    {
+      "seed": 10114,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.01111343684655848,
+        "y": -0.02102393462219665,
+        "friction": 0.46227682376595447,
+        "mass": 0.1065972945049834,
+        "obstacle_y": -0.065,
+        "stale_start": 48,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.07468358813964648,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0028021682363140415,
+      "pusher_object_contact_steps": 1534,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 72,
+        "REPLAN": 120,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.08608603910018796,
+        0.010694144262791722,
+        0.019983537426183046
+      ]
+    },
+    {
+      "seed": 10115,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.002061786913818713,
+        "y": 0.025528628504119355,
+        "friction": 0.49667521678857895,
+        "mass": 0.059971690180434425,
+        "obstacle_y": -0.065,
+        "stale_start": 94,
+        "stale_length": 20,
+        "deadman_step": 140
+      },
+      "success": false,
+      "error_m": 0.1519469655079599,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.001566258700557475,
+      "pusher_object_contact_steps": 115,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 81,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 120,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 60
+      },
+      "final_object_xyz": [
+        0.011332659797975823,
+        0.03139908094726282,
+        0.01999439771181077
+      ]
+    },
+    {
+      "seed": 10115,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.002061786913818713,
+        "y": 0.025528628504119355,
+        "friction": 0.49667521678857895,
+        "mass": 0.059971690180434425,
+        "obstacle_y": -0.065,
+        "stale_start": 94,
+        "stale_length": 20,
+        "deadman_step": 140
+      },
+      "success": false,
+      "error_m": 0.07698779467338789,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0026182162553121404,
+      "pusher_object_contact_steps": 1519,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 81,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 30,
+        "REPLAN": 90,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 60
+      },
+      "final_object_xyz": [
+        0.08301339135739352,
+        -0.00042733872031706894,
+        0.019994398515097118
+      ]
+    },
+    {
+      "seed": 10116,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.008057181184032036,
+        "y": -0.02138386807117487,
+        "friction": 0.41898588773534373,
+        "mass": 0.09437689266188148,
+        "obstacle_y": 0.065,
+        "stale_start": 61,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.14181521203307618,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.002226811599211264,
+      "pusher_object_contact_steps": 325,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 180,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.021669316316136826,
+        -0.031243820437669736,
+        0.019996240656255
+      ]
+    },
+    {
+      "seed": 10116,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.008057181184032036,
+        "y": -0.02138386807117487,
+        "friction": 0.41898588773534373,
+        "mass": 0.09437689266188148,
+        "obstacle_y": 0.065,
+        "stale_start": 61,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.06133378000234885,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003763168741738103,
+      "pusher_object_contact_steps": 1412,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 66,
+        "REPLAN": 114,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.09954081055862526,
+        0.010320803334454561,
+        0.01998234303694748
+      ]
+    },
+    {
+      "seed": 10117,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.0018621130164041665,
+        "y": -0.012664363896023684,
+        "friction": 0.33006271135509524,
+        "mass": 0.06239666054314531,
+        "obstacle_y": 0.065,
+        "stale_start": 103,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.13975536426443166,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0022289334716794453,
+      "pusher_object_contact_steps": 214,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 180,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.023833115524542047,
+        -0.0314665125638554,
+        0.019996618947980823
+      ]
+    },
+    {
+      "seed": 10117,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.0018621130164041665,
+        "y": -0.012664363896023684,
+        "friction": 0.33006271135509524,
+        "mass": 0.06239666054314531,
+        "obstacle_y": 0.065,
+        "stale_start": 103,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.05784060510239233,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0027083170514223404,
+      "pusher_object_contact_steps": 1393,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 50,
+        "REPLAN": 130,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.10264635265978421,
+        0.007489641872950358,
+        0.01998216550735039
+      ]
+    },
+    {
+      "seed": 10118,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.003911838921433958,
+        "y": 0.0033106176255031997,
+        "friction": 0.5121494744381461,
+        "mass": 0.08645553652598553,
+        "obstacle_y": -0.065,
+        "stale_start": 68,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10677980955897673,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0035641626119719684,
+      "pusher_object_contact_steps": 656,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 47,
+        "REPLAN": 133,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.05782218267505435,
+        0.031010020576603493,
+        0.019993968634035093
+      ]
+    },
+    {
+      "seed": 10118,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.003911838921433958,
+        "y": 0.0033106176255031997,
+        "friction": 0.5121494744381461,
+        "mass": 0.08645553652598553,
+        "obstacle_y": -0.065,
+        "stale_start": 68,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.04827307015814917,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0041213611331146725,
+      "pusher_object_contact_steps": 1581,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 95,
+        "REPLAN": 85,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.11173409485478591,
+        0.0008316868441835268,
+        0.01997409873515997
+      ]
+    },
+    {
+      "seed": 10119,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.008389150582481152,
+        "y": 0.025755805878776544,
+        "friction": 0.7517341764621257,
+        "mass": 0.10131340292476175,
+        "obstacle_y": 0.15,
+        "stale_start": 108,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.13687442090121685,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.002853919491033427,
+      "pusher_object_contact_steps": 235,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 180,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.026480007750723032,
+        0.03011675226176432,
+        0.019983893020991482
+      ]
+    },
+    {
+      "seed": 10119,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.008389150582481152,
+        "y": 0.025755805878776544,
+        "friction": 0.7517341764621257,
+        "mass": 0.10131340292476175,
+        "obstacle_y": 0.15,
+        "stale_start": 108,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.07061972114503622,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.004540429384765166,
+      "pusher_object_contact_steps": 1673,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 21,
+        "REPLAN": 159,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.0897216617875877,
+        0.006935430246528539,
+        0.019992188404140188
+      ]
+    },
+    {
+      "seed": 10120,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.009844186744952868,
+        "y": -0.007322907027804908,
+        "friction": 0.41275157160844944,
+        "mass": 0.0986685792150233,
+        "obstacle_y": 0.065,
+        "stale_start": 103,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.11922312170073257,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003122671523293439,
+      "pusher_object_contact_steps": 284,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 40,
+        "REPLAN": 152,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.0448886369468533,
+        -0.031040728794832485,
+        0.019996367786907977
+      ]
+    },
+    {
+      "seed": 10120,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.009844186744952868,
+        "y": -0.007322907027804908,
+        "friction": 0.41275157160844944,
+        "mass": 0.0986685792150233,
+        "obstacle_y": 0.065,
+        "stale_start": 103,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.045132427948514624,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0039092602180547924,
+      "pusher_object_contact_steps": 1422,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 119,
+        "REPLAN": 73,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.1156518647850355,
+        0.008377288074495802,
+        0.019992799660295702
+      ]
+    },
+    {
+      "seed": 10121,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.0026625785732537818,
+        "y": 0.029652692365951208,
+        "friction": 0.3104523332259588,
+        "mass": 0.05348417812563966,
+        "obstacle_y": 0.065,
+        "stale_start": 73,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.15854077452296939,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0009249196174594946,
+      "pusher_object_contact_steps": 38,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 200,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.00463171433189132,
+        0.03155745545661117,
+        0.019996618947980823
+      ]
+    },
+    {
+      "seed": 10121,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.0026625785732537818,
+        "y": 0.029652692365951208,
+        "friction": 0.3104523332259588,
+        "mass": 0.05348417812563966,
+        "obstacle_y": 0.065,
+        "stale_start": 73,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.03576300894882688,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0023488703604561635,
+      "pusher_object_contact_steps": 1256,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 72,
+        "REPLAN": 128,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.12453990178897194,
+        -0.004644808277864163,
+        0.019989518554528254
+      ]
+    },
+    {
+      "seed": 10122,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.00713104262410064,
+        "y": -0.03155570431690987,
+        "friction": 0.4588785850618764,
+        "mass": 0.08706205275987239,
+        "obstacle_y": -0.065,
+        "stale_start": 99,
+        "stale_length": 8,
+        "deadman_step": 140
+      },
+      "success": false,
+      "error_m": 0.15600755896351567,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.001345529989375203,
+      "pusher_object_contact_steps": 7,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 69,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 132,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 60
+      },
+      "final_object_xyz": [
+        0.007256189028965402,
+        -0.03174408076791129,
+        0.019995356410396497
+      ]
+    },
+    {
+      "seed": 10122,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.00713104262410064,
+        "y": -0.03155570431690987,
+        "friction": 0.4588785850618764,
+        "mass": 0.08706205275987239,
+        "obstacle_y": -0.065,
+        "stale_start": 99,
+        "stale_length": 8,
+        "deadman_step": 140
+      },
+      "success": false,
+      "error_m": 0.0890224099578887,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0032582923098807438,
+      "pusher_object_contact_steps": 1471,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 69,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 42,
+        "REPLAN": 90,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 60
+      },
+      "final_object_xyz": [
+        0.07105025540128003,
+        0.0035961660880564285,
+        0.019995356814420058
+      ]
+    },
+    {
+      "seed": 10123,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.0030126784447523387,
+        "y": 0.006863724640231196,
+        "friction": 0.7145517701315113,
+        "mass": 0.08758185051226193,
+        "obstacle_y": 0.0,
+        "stale_start": 77,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.1099866523189173,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0038728054553689986,
+      "pusher_object_contact_steps": 1625,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 36,
+        "REPLAN": 156,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.05446472905406762,
+        0.030973702954135773,
+        0.019985953474594923
+      ]
+    },
+    {
+      "seed": 10123,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.0030126784447523387,
+        "y": 0.006863724640231196,
+        "friction": 0.7145517701315113,
+        "mass": 0.08758185051226193,
+        "obstacle_y": 0.0,
+        "stale_start": 77,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10994028381977575,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.004433169936968496,
+      "pusher_object_contact_steps": 1800,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 115,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 2,
+      "human_takeovers": 0,
+      "remaining_human_budget": 0,
+      "decisions": {
+        "CONTINUE": 86,
+        "REPLAN": 0,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 2,
+        "HALT": 104
+      },
+      "final_object_xyz": [
+        0.050585809439119944,
+        0.010742481569929314,
+        0.019985955932184545
+      ]
+    },
+    {
+      "seed": 10124,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.00960492070448051,
+        "y": 0.04396997357975384,
+        "friction": 0.6625421303991326,
+        "mass": 0.07603166700657152,
+        "obstacle_y": 0.0,
+        "stale_start": 49,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.1752118366543282,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0,
+      "pusher_object_contact_steps": 0,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 180,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        -0.00960492070449554,
+        0.04396997357975982,
+        0.019988495015637806
+      ]
+    },
+    {
+      "seed": 10124,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.00960492070448051,
+        "y": 0.04396997357975384,
+        "friction": 0.6625421303991326,
+        "mass": 0.07603166700657152,
+        "obstacle_y": 0.0,
+        "stale_start": 49,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10887333189466807,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.004280523290960441,
+      "pusher_object_contact_steps": 1586,
+      "obstacle_contact_steps": 628,
+      "held_ticks": 83,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 2,
+      "human_takeovers": 0,
+      "remaining_human_budget": 0,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 118,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 2,
+        "HALT": 60
+      },
+      "final_object_xyz": [
+        0.054852447413203456,
+        0.028238175983115513,
+        0.019988507005506365
+      ]
+    },
+    {
+      "seed": 10125,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.004362107602632526,
+        "y": 0.0059329228301002596,
+        "friction": 0.633335168336396,
+        "mass": 0.08689458031470575,
+        "obstacle_y": -0.065,
+        "stale_start": 47,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10892073850230649,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0039931997619590265,
+      "pusher_object_contact_steps": 497,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 39,
+        "REPLAN": 161,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.05551866882146785,
+        0.030779517719576436,
+        0.01998976318561212
+      ]
+    },
+    {
+      "seed": 10125,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.004362107602632526,
+        "y": 0.0059329228301002596,
+        "friction": 0.633335168336396,
+        "mass": 0.08689458031470575,
+        "obstacle_y": -0.065,
+        "stale_start": 47,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.03315754732003565,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.004400081408027783,
+      "pusher_object_contact_steps": 1701,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 110,
+        "REPLAN": 90,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.12687736043199221,
+        0.0015210826171672604,
+        0.01998708269492297
+      ]
+    },
+    {
+      "seed": 10126,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.004663397435005823,
+        "y": -0.040590424975026726,
+        "friction": 0.4004459906235488,
+        "mass": 0.0969075658486766,
+        "obstacle_y": 0.15,
+        "stale_start": 68,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.16959250294300776,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0,
+      "pusher_object_contact_steps": 0,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 200,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        -0.004663397434945157,
+        -0.040590424975052795,
+        0.019996610361586484
+      ]
+    },
+    {
+      "seed": 10126,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.004663397435005823,
+        "y": -0.040590424975026726,
+        "friction": 0.4004459906235488,
+        "mass": 0.0969075658486766,
+        "obstacle_y": 0.15,
+        "stale_start": 68,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.074144881856139,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0026331009675963947,
+      "pusher_object_contact_steps": 1321,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 69,
+        "REPLAN": 131,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.08806625856224064,
+        0.017972210443526173,
+        0.01999348845003503
+      ]
+    },
+    {
+      "seed": 10127,
+      "policy": "open_loop",
+      "scenario": {
+        "x": -0.0065576436873738915,
+        "y": -0.025372300467927898,
+        "friction": 0.1665492464403853,
+        "mass": 0.10657852187589321,
+        "obstacle_y": 0.15,
+        "stale_start": 61,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.1627565131185806,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.002088585221081078,
+      "pusher_object_contact_steps": 97,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 180,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.00022629867588750137,
+        -0.03101688133439585,
+        0.019996618947980823
+      ]
+    },
+    {
+      "seed": 10127,
+      "policy": "object_centered",
+      "scenario": {
+        "x": -0.0065576436873738915,
+        "y": -0.025372300467927898,
+        "friction": 0.1665492464403853,
+        "mass": 0.10657852187589321,
+        "obstacle_y": 0.15,
+        "stale_start": 61,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.07499267014957087,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.002643588145689226,
+      "pusher_object_contact_steps": 1457,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 72,
+        "REPLAN": 108,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.08644629935340352,
+        0.014620317963478416,
+        0.019974119725779733
+      ]
+    },
+    {
+      "seed": 10128,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.0011605383051969832,
+        "y": -0.02817864793691006,
+        "friction": 0.4128856680499481,
+        "mass": 0.05312613406306556,
+        "obstacle_y": 0.0,
+        "stale_start": 88,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.1581396768215566,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0010938572495157953,
+      "pusher_object_contact_steps": 62,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 200,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.005041422702961256,
+        -0.031559415509543845,
+        0.01999636508269079
+      ]
+    },
+    {
+      "seed": 10128,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.0011605383051969832,
+        "y": -0.02817864793691006,
+        "friction": 0.4128856680499481,
+        "mass": 0.05312613406306556,
+        "obstacle_y": 0.0,
+        "stale_start": 88,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10949235099640969,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": true,
+      "max_step_impulse_ns": 0.006609418342841002,
+      "pusher_object_contact_steps": 1563,
+      "obstacle_contact_steps": 1165,
+      "held_ticks": 117,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 2,
+      "human_takeovers": 0,
+      "remaining_human_budget": 0,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 83,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 2,
+        "HALT": 115
+      },
+      "final_object_xyz": [
+        0.05357862215335772,
+        -0.025750053668743573,
+        0.019996904350435905
+      ]
+    },
+    {
+      "seed": 10129,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.003944261776053122,
+        "y": -0.006442640314860318,
+        "friction": 0.39480185073354146,
+        "mass": 0.06925429111906307,
+        "obstacle_y": 0.15,
+        "stale_start": 56,
+        "stale_length": 20,
+        "deadman_step": 140
+      },
+      "success": false,
+      "error_m": 0.12160526984378114,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.002681721398275707,
+      "pusher_object_contact_steps": 481,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 81,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 38,
+        "REPLAN": 82,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 60
+      },
+      "final_object_xyz": [
+        0.04252646855825561,
+        -0.031429461725971726,
+        0.019996618947980823
+      ]
+    },
+    {
+      "seed": 10129,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.003944261776053122,
+        "y": -0.006442640314860318,
+        "friction": 0.39480185073354146,
+        "mass": 0.06925429111906307,
+        "obstacle_y": 0.15,
+        "stale_start": 56,
+        "stale_length": 20,
+        "deadman_step": 140
+      },
+      "success": false,
+      "error_m": 0.07418703925034731,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0029870450028473094,
+      "pusher_object_contact_steps": 1539,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 81,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 47,
+        "REPLAN": 73,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 60
+      },
+      "final_object_xyz": [
+        0.0866959364048908,
+        -0.011411882104927221,
+        0.019996619147588282
+      ]
+    },
+    {
+      "seed": 10130,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.009092897065322882,
+        "y": 0.02498886575306039,
+        "friction": 0.3239582080829012,
+        "mass": 0.08499612763159325,
+        "obstacle_y": 0.0,
+        "stale_start": 57,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.1466188434458953,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0018198371160876498,
+      "pusher_object_contact_steps": 157,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 192,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.016777145588275626,
+        0.031373543433440114,
+        0.019996618947980823
+      ]
+    },
+    {
+      "seed": 10130,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.009092897065322882,
+        "y": 0.02498886575306039,
+        "friction": 0.3239582080829012,
+        "mass": 0.08499612763159325,
+        "obstacle_y": 0.0,
+        "stale_start": 57,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.1090287608464747,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003345469412639631,
+      "pusher_object_contact_steps": 1582,
+      "obstacle_contact_steps": 1170,
+      "held_ticks": 129,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 2,
+      "human_takeovers": 0,
+      "remaining_human_budget": 0,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 72,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 2,
+        "HALT": 118
+      },
+      "final_object_xyz": [
+        0.05200667219596622,
+        0.014990391640256657,
+        0.019996713340609
+      ]
+    },
+    {
+      "seed": 10131,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.007326082439454748,
+        "y": 0.024114489179433388,
+        "friction": 0.41440617834051263,
+        "mass": 0.11106288374154154,
+        "obstacle_y": -0.065,
+        "stale_start": 106,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.14687722812764056,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0022378007472443097,
+      "pusher_object_contact_steps": 121,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 180,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.016416364668185104,
+        0.03092991767462961,
+        0.019996334326936156
+      ]
+    },
+    {
+      "seed": 10131,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.007326082439454748,
+        "y": 0.024114489179433388,
+        "friction": 0.41440617834051263,
+        "mass": 0.11106288374154154,
+        "obstacle_y": -0.065,
+        "stale_start": 106,
+        "stale_length": 20,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.07020052900368266,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003293847108609855,
+      "pusher_object_contact_steps": 1429,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 21,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 79,
+        "REPLAN": 101,
+        "REOBSERVE": 20,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.0910587409384915,
+        -0.013236958540800217,
+        0.019996290035432247
+      ]
+    },
+    {
+      "seed": 10132,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.010398580984254897,
+        "y": 0.01455324349212285,
+        "friction": 0.6181276040291034,
+        "mass": 0.11390934271893652,
+        "obstacle_y": 0.065,
+        "stale_start": 79,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.11894287745428693,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.003683351701685158,
+      "pusher_object_contact_steps": 350,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 0,
+        "REPLAN": 200,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.04498601195166654,
+        0.030318157106317124,
+        0.019990381201195142
+      ]
+    },
+    {
+      "seed": 10132,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.010398580984254897,
+        "y": 0.01455324349212285,
+        "friction": 0.6181276040291034,
+        "mass": 0.11390934271893652,
+        "obstacle_y": 0.065,
+        "stale_start": 79,
+        "stale_length": 0,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.05345209666321958,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.004793833772163903,
+      "pusher_object_contact_steps": 1623,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 0,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 124,
+        "REPLAN": 76,
+        "REOBSERVE": 0,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.10760914305701767,
+        -0.010598336967379851,
+        0.019985902326710055
+      ]
+    },
+    {
+      "seed": 10133,
+      "policy": "open_loop",
+      "scenario": {
+        "x": 0.01017271753375093,
+        "y": 0.00572054620228743,
+        "friction": 0.45940556364662155,
+        "mass": 0.06013867144283368,
+        "obstacle_y": 0.065,
+        "stale_start": 73,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.10925728624807923,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.0025372542773859463,
+      "pusher_object_contact_steps": 401,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 9,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 0,
+      "human_takeovers": 0,
+      "remaining_human_budget": 2,
+      "decisions": {
+        "CONTINUE": 45,
+        "REPLAN": 147,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 0,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.055361318534438014,
+        0.031430891483433594,
+        0.019995343878967446
+      ]
+    },
+    {
+      "seed": 10133,
+      "policy": "object_centered",
+      "scenario": {
+        "x": 0.01017271753375093,
+        "y": 0.00572054620228743,
+        "friction": 0.45940556364662155,
+        "mass": 0.06013867144283368,
+        "obstacle_y": 0.065,
+        "stale_start": 73,
+        "stale_length": 8,
+        "deadman_step": -1
+      },
+      "success": false,
+      "error_m": 0.033874197834213755,
+      "sensor_claim": false,
+      "false_success": false,
+      "broken": false,
+      "max_step_impulse_ns": 0.00301348306546873,
+      "pusher_object_contact_steps": 1368,
+      "obstacle_contact_steps": 0,
+      "held_ticks": 11,
+      "unsafe_deadman_commands": 0,
+      "human_requests": 2,
+      "human_takeovers": 0,
+      "remaining_human_budget": 0,
+      "decisions": {
+        "CONTINUE": 116,
+        "REPLAN": 74,
+        "REOBSERVE": 8,
+        "REQUEST_HUMAN": 2,
+        "HALT": 0
+      },
+      "final_object_xyz": [
+        0.12765095107969693,
+        -0.0100498911866393,
+        0.019960970981373352
+      ]
+    }
+  ],
+  "costs": "unknown; no paid provider/model calls"
+}
