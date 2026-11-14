@@ -64,3 +64,24 @@ test('eight fresh real-image R/metadata lanes are unique and fail closed', () =>
   assert.throws(()=>resolvePlan({workload:'lens-r8-meta', lane_slice:'unsupported'},context),
     /Unsupported R8 lane slice/);
 });
+
+test('R3 distinct risk, drift, and hard-negative pilots preserve source and green R8 cohorts', () => {
+  const all = resolvePlan({workload:'lens-r3-methods',lane_slice:'all'},context);
+  const pilot = resolvePlan({workload:'lens-r3-methods',lane_slice:'pilot'},context);
+  const remaining = resolvePlan({workload:'lens-r3-methods',lane_slice:'remaining'},context);
+  assert.equal(all.jobCount,3);
+  assert.equal(all.maxParallel,3);
+  assert.deepEqual(all.matrix.include.map(x=>x.method),
+                   ['risk-upper','metadata-shield','hard-negative']);
+  assert.deepEqual([...pilot.matrix.include,...remaining.matrix.include].map(x=>x.cell),
+                   all.matrix.include.map(x=>x.cell));
+  assert.equal(new Set(all.matrix.include.map(x=>x.cell)).size,3);
+  assert.ok(all.matrix.include.every(x=>x.source_sha===context.harnessSha));
+  assert.throws(()=>resolvePlan({workload:'lens-r3-methods',source_sha:candidate},context),
+                /pinned immutable harness/);
+  assert.throws(()=>resolvePlan({workload:'lens-r3-methods',lane_slice:'invalid'},context),
+                /Unsupported R3 lane slice/);
+  assert.throws(()=>resolvePlan({workload:'lens-r3-methods'}, {...context, now:'2026-11-15T16:29:00Z'}),
+                /31-minute admission cutoff/);
+  assert.equal(resolvePlan({workload:'lens-r3-methods'}, {...context, now:'2026-11-15T16:28:59Z'}).jobCount,3);
+});
