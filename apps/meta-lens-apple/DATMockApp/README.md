@@ -28,6 +28,15 @@ This reads actual pixels; it does not prove a charger's identity or wattage.
 Import requires HEVC in an MP4 container, as supported by Meta's mock camera;
 an incompatible codec may fail to deliver frames and produces a bounded timeout.
 
+To avoid downloading the SDK's full binary history, an existing clean shallow
+checkout can be supplied. The generator refuses any HEAD except the pinned
+official release commit (it does not accept a substitute SDK):
+
+```sh
+git clone --depth 1 --branch 1.0.1 https://github.com/facebook/meta-wearables-dat-ios /YOUR/CACHE/meta-dat-1.0.1
+python3 scripts/generate_project.py --sdk-path /YOUR/CACHE/meta-dat-1.0.1
+```
+
 For the integration test (replace destination with an **owned** simulator):
 
 ```sh

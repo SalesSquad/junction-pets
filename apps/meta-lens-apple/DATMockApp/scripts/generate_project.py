@@ -2,6 +2,8 @@
 """Generate the small debug-only iOS harness; stdlib only, no global Xcode changes."""
 import hashlib
 import json
+import argparse
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,9 +38,20 @@ def source_files(folder, suffix):
     return refs, builds
 
 
-remote = add("meta-sdk", "XCRemoteSwiftPackageReference",
-             repositoryURL="https://github.com/facebook/meta-wearables-dat-ios",
-             requirement={"kind": "exactVersion", "version": "1.0.1"})
+parser = argparse.ArgumentParser()
+parser.add_argument("--sdk-path", type=Path, help="Optional shallow official SDK checkout at exact 1.0.1 commit")
+args = parser.parse_args()
+if args.sdk_path:
+    sdk = args.sdk_path.resolve()
+    assert subprocess.check_output(["git", "-C", str(sdk), "rev-parse", "HEAD"], text=True).strip() == \
+        "0bd369298eef6a980ad0bdb6c8a5502f2c02a08c", "Unexpected Meta SDK commit"
+    assert not subprocess.check_output(["git", "-C", str(sdk), "status", "--porcelain"], text=True).strip(), \
+        "SDK checkout must be clean"
+    remote = add("meta-sdk", "XCLocalSwiftPackageReference", relativePath=str(sdk))
+else:
+    remote = add("meta-sdk", "XCRemoteSwiftPackageReference",
+                 repositoryURL="https://github.com/facebook/meta-wearables-dat-ios",
+                 requirement={"kind": "exactVersion", "version": "1.0.1"})
 local = add("lens-core", "XCLocalSwiftPackageReference", relativePath="../..")
 deps = [add("product-" + name, "XCSwiftPackageProductDependency", package=package, productName=name)
         for name, package in [("MWDATCore", remote), ("MWDATCamera", remote),
@@ -118,3 +131,10 @@ scheme.write_text(f'''<?xml version="1.0" encoding="UTF-8"?>
 </Scheme>
 ''')
 print(OUTPUT)
+resolved = OUTPUT / "project.xcworkspace" / "xcshareddata" / "swiftpm" / "Package.resolved"
+resolved.parent.mkdir(parents=True, exist_ok=True)
+resolved.write_text(json.dumps({"pins": [] if args.sdk_path else [{
+    "identity": "meta-wearables-dat-ios", "kind": "remoteSourceControl",
+    "location": "https://github.com/facebook/meta-wearables-dat-ios",
+    "state": {"revision": "0bd369298eef6a980ad0bdb6c8a5502f2c02a08c", "version": "1.0.1"}
+}], "version": 2}, indent=2) + "\n")

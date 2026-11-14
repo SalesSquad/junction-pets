@@ -35,6 +35,7 @@ final class DATCaptureModel: ObservableObject {
     private var busy = false
     private var hasStreamed = false
     private var importedVideo: URL?
+    private var mockEnabled = false
 
     private static let configurationError: String? = {
         do {
@@ -76,6 +77,7 @@ final class DATCaptureModel: ObservableObject {
             guard let self else { return }
             do {
                 MockDeviceKit.shared.enable()
+                self.mockEnabled = true
                 let mock = try MockDeviceKit.shared.pairGlasses(model: .rayBanMeta)
                 self.mock = mock
                 mock.services.camera.setCameraFeed(fileURL: video)
@@ -267,7 +269,8 @@ final class DATCaptureModel: ObservableObject {
         selector = nil
         mock = nil
         status = reason
-        guard !cleaning else { return }
+        guard !cleaning, mockEnabled else { return }
+        mockEnabled = false
         cleaning = true
         let oldListeners = listeners
         listeners = []
@@ -284,7 +287,7 @@ final class DATCaptureModel: ObservableObject {
     }
 
     func importAndStart(_ url: URL, consent: Bool, bystanderClearance: Bool) throws {
-        guard !running, !cleaning, consent, bystanderClearance else { throw CaptureFailure.notReady }
+        guard configured, !running, !cleaning, consent, bystanderClearance else { throw CaptureFailure.notReady }
         let access = url.startAccessingSecurityScopedResource()
         defer { if access { url.stopAccessingSecurityScopedResource() } }
         let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? Int.max
