@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 
 from tournament import (ARENA_SHA256, SPLITS, TD_SOURCE, TD_WEIGHTS,
-                        V2_SOURCE, V2_WEIGHTS, frozen_td_digest,
+                        V2_SOURCE, V2_WEIGHTS, RUN_SHA256, frozen_td_digest,
                         paired_metric, compare_one_split, sample_definition,
                         verify_shared_simulator)
 
@@ -62,6 +62,9 @@ class SplitContracts(unittest.TestCase):
     def test_frozen_hashes_explicit(self):
         for digest in (V2_SOURCE, TD_SOURCE, V2_WEIGHTS, TD_WEIGHTS, ARENA_SHA256):
             self.assertRegex(digest, r"^[0-9a-f]{40}$|^[0-9a-f]{64}$")
+        # True GitHub source bytes and independent CRACI preflight 43629572697.
+        self.assertEqual(RUN_SHA256,
+                         "0ad2765fef407da181c83b0140de80a6f1d82fa0fa132cf1de73013c9cf9ffe0")
 
     def test_mismatched_simulator_reports_role_file_and_digest_before_scoring(self):
         with tempfile.TemporaryDirectory() as temp:
