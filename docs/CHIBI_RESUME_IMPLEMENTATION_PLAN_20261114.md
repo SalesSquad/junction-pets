@@ -394,7 +394,41 @@ Kestävä etu voi muodostua korjatuista menettelyistä, alakohtaisista vaikeista
 
 Jos ensimmäinen kohta estyy, host ja puhelinpolku voivat edetä. Jos host puuttuu, adapteri ja synteettinen sopimus voidaan toimittaa mutta todellinen yksityinen jatkuvuus pysyy avoimena. Jos käyttäjähyöty puuttuu, teknisesti onnistunut lasidemo ei yksin oikeuta laajentamista.
 
-## 19. Toimitus, rajat ja lähteet
+## 19. GitHub- ja developer-lähteet kytkettyinä työpaketteihin
+
+**Täsmennys 14.11.2026:** alkuperäinen suunnitelma hyödynsi Meta-tutkimusmuistiota ja virallisia developer-sivuja, mutta uudelleenkäytettävät esimerkit eivät näkyneet riittävän selvästi työpaketeissa. Tämä taulukko tekee kytkennän eksplisiittiseksi. Aiempi syvempi tutkimus ja sen versiot ovat [Meta/ARKit-tutkimusmuistiossa][S16].
+
+| Lähde | Mitä on tarkastettu? | Konkreettinen käyttö / työpaketti |
+| --- | --- | --- |
+| Metan iOS DAT 1.0.1, SDK-pinni 0bd369298eef6a980ad0bdb6c8a5502f2c02a08c | Package.swift, julkaistut Swift-rajapinnat ja nyt erikseen Display-mock-rajapinta. SDK koostuu binäärisistä XCFramework-moduuleista. [S21][S24] | A1/A2: käytetään todellista SDK:ta ja sen lifecyclea; rajapinnan saatavuus erotetaan onnistuneesta laiteajosta. |
+| iOS-esimerkit, main bbae597cd1c748cd29b9375a1624a8d75b1c9e14 | CameraAccess/CameraViewModel.swift: session, camera/stream, luvat, listenerit ja taustalle siirtyminen. [S18] | A2: yhteyden ja kameran elinkaaren vertailutoteutus. Oma CaptureEpoch ja hostin tehtäväversio säilyvät. |
+| BirdSpotter samassa iOS-repossa | README ja sovellusrakenne: SwiftUI, useita laitekyvykkyyksiä, puhelimen capture-vaihtoehto ja paikallinen katalogi. Lintutunnistus on tarkoituksella simuloitu. [S19] | A2/R1: sovelluksen ja vaihtoehtoisten syötteiden rakenne; tästä ei saada valmista tunnistusmallia tai tarkkuustulosta. |
+| meta/meta-wearables-dat-android | Aiemman tutkimuksen versionoitu viite f4371bc9f90249d51eb07d7f8a61e8d829294f16. Tässä täsmennyksessä ei tehty uutta Android-koodiauditointia. [S16] | Myöhempi Android-adapteri saman tehtäväsopimuksen päälle. |
+| meta/meta-wearables-webapp, pinni fbf132997d036548ce090761a8bd4cf0afbda52a | Työkalupaketti ja uudelleen luettu WebMCP-skillin todellinen sopimus. [S20] | S1: Display-kortti, oma WebMCP-adapteri sekä fyysisistä laseista erillinen web-simulaattoripolku. |
+| Metan developer FAQ, DAT-, Web Apps - ja Connectors-ohjeet | Kehitysreitit, saatavuus ja ominaisuusrajat; ristiriidat ratkaistaan ominaisuuskohtaisesti versionoidulla lähteellä ja tarvittaessa ajolla. [S12][S14][S15][S23] | I0/A1/S1: oikean reitin ja käytettävissä olevan kyvykkyyden valinta. |
+| Omat taimi-lens, reality-twin ja chibi | Aiemmassa tutkimuksessa nimetyt capture-, OCR-, rekisteröinti- ja host-lähteet. Niiden vanhat SHA:t eivät ole tämän täsmennyksen uusi main-auditointi. [S16] | A2/H1 ja myöhempi spatiaalinen vaihe: nykyinen lähde ja omistajuus varmistetaan ennen poimintaa. |
+| Project Aria Tools, AprilTag, OpenCV PnP, Hierarchical Localization, ORB-SLAM3, COLMAP ja Gaussian Splatting | Tutkimusmuistion vaihtoehto- ja lähdekartta. Kaikkia ei ole auditoitu, integroitu tai valittu riippuvuuksiksi. [S16] | Myöhempi rekisteröinti, paikannus ja harjoittelutila vasta nimetyn tarpeen mukaan. |
+
+### Kehittäjäagenttien lähteet
+
+A1/A2:n alussa otetaan toteutuksen lähteeksi Metan oma **mwdat-ios**-plugin tai vastaavat versionoidut ohjetiedostot sekä dokumentaatio-MCP **https://mcp.developer.meta.com/wearables**. README dokumentoi tuen Codexille ja Claude Codelle sekä anonyymin search_dat_docs-haun. Aiempi tutkimus tallentaa myös toteutuneet dokumentaatiohaut kalibroinnista, äänestä, Displaysta ja WebMCP:stä. Tässä lähdetarkistuksessa pluginia ei asennettu eikä käyttäjän laite- tai tiliasetuksia muutettu. [S16][S17]
+
+### Ristiriita Display-mockista ratkaistiin versionoidusta rajapinnasta
+
+Yleinen FAQ ilmoittaa edelleen, ettei MockDeviceKit tue Display-laseja. Pinniin sidottu 1.0.1-rajapinta kuitenkin sisältää **GlassesModel.metaRayBanDisplay**, **MockGlassesServices.display** sekä **MockDisplayKit.createPreviewView()**- ja **sendClick(identifier:)**-toiminnot. Changelog kuvaa saman ominaisuuden. Siksi Display-mockia ei merkitä suunnitelmassa mahdottomaksi FAQ-lauseen perusteella. [S21][S22][S23]
+
+S1 voi kehittää natiivin Display-kortin mock-esikatselua. Natiivi Display-mock, Display Web App Simulator ja fyysinen Display-laite ovat kolme erillistä polkua. Tässä luettiin rajapinta; mockin ajonaikaista toimintaa, oikeaa laitetta tai maailmaan kohdistettua AR:ää ei tällä perusteella kelpuuteta.
+
+### WebMCP tarvitsee sovittimen
+
+Tarkastetun Metan WebMCP-skillin mukaan pinta on **document.modelContext**, avustajan kutsulla on **10 sekunnin määräaika**, ja parametriskeeman tukea on rajattu. Argumentit tarkistetaan itse execute-käsittelijässä; peruutus välitetään eteenpäin. Toiminnon on päivitettävä samaa tehtävänäkymää kuin painikkeiden. S1 tekee yhteisen Chibi-sopimuksen päälle sovittimen, ja käyttöliittymä toimii myös ilman avustajapintaa. [S20]
+
+### Kaksi A2:n käytännön tarkistusta
+
+- **Telemetria:** SDK:n README kertoo analyticsin ja crash reportingin olevan oletuksena päällä ja tarjoaa niille erilliset MWDAT.Analytics.OptOut- ja MWDAT.CrashReporting.OptOut-asetukset. Valinta ja sovelluksen todellinen asetus kirjataan; tämän lähdetarkistuksen perusteella ei väitetä nykyisen sovelluksen asetuksia muutetuiksi. [S17]
+- **Julkaisu ja versiot:** FAQ kuvaa DAT 1.0:n vakaaksi, README käyttää edelleen preview-sanastoa ja changelog nimeää kokeellisia ominaisuuksia. Valitaan tuettu ominaisuus kerrallaan. Esimerkin oman lisenssin ja SDK:n ehtojen tarkistus kuuluu sen konkreettiseen käyttöönottoon. [S17][S22][S23]
+
+## 20. Toimitus, rajat ja lähteet
 
 Tämä työ toimittaa suunnitelman sekä dokumentaation oman task-haaran ja luonnos-PR:n. Se ei käynnistä toteutustöitä, malliajoja, palvelimia tai automaatioita. Toteutuksen merge, julkaisu, tuotantomuutos ja uusi kulutus kulkevat nykyisen omistajan valtuuksien kautta.
 
@@ -433,3 +467,13 @@ Kannettavat kokeet ohjataan olemassa olevaan, toteutushetkellä varmennettuun pi
 [S13]: https://github.com/SalesSquad/junction-pets/blob/98d5a524d61e431ca36acd62b268ede343fc7fe2/AGENTS.md
 [S14]: https://developers.meta.com/wearables/web-apps/
 [S15]: https://dev.meta.ai/products/connectors
+
+[S16]: https://github.com/SalesSquad/junction-pets/blob/98d5a524d61e431ca36acd62b268ede343fc7fe2/docs/research/META_GLASSES_ARKIT_20261113.md
+[S17]: https://github.com/meta/meta-wearables-dat-ios/blob/bbae597cd1c748cd29b9375a1624a8d75b1c9e14/README.md
+[S18]: https://github.com/meta/meta-wearables-dat-ios/blob/bbae597cd1c748cd29b9375a1624a8d75b1c9e14/samples/CameraAccess/CameraAccess/ViewModels/CameraViewModel.swift
+[S19]: https://github.com/meta/meta-wearables-dat-ios/blob/bbae597cd1c748cd29b9375a1624a8d75b1c9e14/samples/BirdSpotter/README.md
+[S20]: https://github.com/meta/meta-wearables-webapp/blob/fbf132997d036548ce090761a8bd4cf0afbda52a/plugins/meta-wearables-webapp/skills/ai-glasses-webapp-webmcp/SKILL.md
+[S21]: https://github.com/meta/meta-wearables-dat-ios/blob/0bd369298eef6a980ad0bdb6c8a5502f2c02a08c/MWDATMockDevice.xcframework/ios-arm64/MWDATMockDevice.framework/Modules/MWDATMockDevice.swiftmodule/arm64-apple-ios.swiftinterface
+[S22]: https://github.com/meta/meta-wearables-dat-ios/blob/bbae597cd1c748cd29b9375a1624a8d75b1c9e14/CHANGELOG.md
+[S23]: https://developers.meta.com/wearables/faq/
+[S24]: https://github.com/meta/meta-wearables-dat-ios/blob/0bd369298eef6a980ad0bdb6c8a5502f2c02a08c/Package.swift
