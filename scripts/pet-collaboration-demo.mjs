@@ -9,17 +9,18 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const out=resolve(root,'dist/collaboration-demo');
 const packages=await loadPackages(root);
 const trace=runDemo(packages);
-// Read the canonical solution.json files; incomplete workspaces are not published teams.
-const solutions=[];
+// Read canonical solution.json files with their filesystem directory identities.
+const solutionEntries=[];
 for(const entry of await readdir(resolve(root,'solutions'),{withFileTypes:true})){
   if(!entry.isDirectory())continue;
   try{
-    solutions.push(JSON.parse(await readFile(resolve(root,'solutions',entry.name,'solution.json'),'utf8')));
+    const manifest=JSON.parse(await readFile(resolve(root,'solutions',entry.name,'solution.json'),'utf8'));
+    solutionEntries.push({directory:entry.name,manifest});
   }catch(error){
     if(error?.code!=='ENOENT')throw error;
   }
 }
-const projection=projectSolutionTeams(packages,solutions);
+const projection=projectSolutionTeams(packages,solutionEntries);
 await mkdir(out,{recursive:true});
 await writeFile(join(out,'trace.json'),JSON.stringify(trace,null,2)+'\n');
 await writeFile(join(out,'solution-teams.json'),JSON.stringify(projection,null,2)+'\n');
