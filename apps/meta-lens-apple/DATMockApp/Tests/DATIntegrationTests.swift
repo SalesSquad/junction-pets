@@ -12,11 +12,25 @@ final class DATIntegrationTests: XCTestCase {
         try await super.tearDown()
     }
 
+    private func failureDiagnostics() -> String {
+        guard let model = activeModel else { return "model=nil" }
+        return "configured=\(model.configured), running=\(model.running), cleaning=\(model.cleaning), "
+            + "status=\(model.status.debugDescription), lastError=\(model.lastError.debugDescription), "
+            + "frameCount=\(model.frameCount), recognizedText=\(String(model.recognizedText.prefix(200)).debugDescription), "
+            + "frameDigestLength=\(model.frameDigest.count)"
+    }
+
     private func eventually(_ predicate: @escaping @MainActor () -> Bool, seconds: Double = 25) async throws {
         let deadline = Date().addingTimeInterval(seconds)
-        while !predicate(), Date() < deadline { try await Task.sleep(for: .milliseconds(100)) }
+        var statusHistory: [String] = []
+        while !predicate(), Date() < deadline {
+            if let status = activeModel?.status, statusHistory.last != status, statusHistory.count < 32 {
+                statusHistory.append(status)
+            }
+            try await Task.sleep(for: .milliseconds(100))
+        }
         guard predicate() else {
-            XCTFail("Condition not met within \(seconds)s")
+            XCTFail("Condition not met within \(seconds)s; \(failureDiagnostics()); statusHistory=\(statusHistory)")
             throw NSError(domain: "DATIntegrationTest", code: 1)
         }
     }
