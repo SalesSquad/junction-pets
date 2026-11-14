@@ -60,10 +60,12 @@ Answer to grade:
 <<<${answer}>>>
 Return only JSON: {"include":[true|false per I item],"violations":[true|false per N item],"note":"<=25 words"}`;
 
+// Checks are written as regex strings; a leading "(?i)" means case-insensitive.
+const rx = r => r.startsWith('(?i)') ? new RegExp(r.slice(4), 'i') : new RegExp(r);
 function deterministic(c, text) {
   const ch = c.checks ?? { mustMatch: [], mustNotMatch: [] };
-  const missing = ch.mustMatch.filter(r => !new RegExp(r).test(text));
-  const forbidden = ch.mustNotMatch.filter(r => new RegExp(r).test(text));
+  const missing = ch.mustMatch.filter(r => !rx(r).test(text));
+  const forbidden = ch.mustNotMatch.filter(r => rx(r).test(text));
   return { ok: !missing.length && !forbidden.length, missing: missing.length, forbidden: forbidden.length };
 }
 
@@ -81,6 +83,7 @@ async function one(job) {
   return { model, served: a.served, case: c.id, suite: c.suite, rep, pass, score: +score.toFixed(3), includeHits: inc, includeTotal: c.mustInclude.length, violations: viol, deterministic: det, answerSha256: sha(a.text), answerChars: a.text.length, costUsd: +(a.cost + (j.cost ?? 0)).toFixed(4), judgeNote: g?.note ?? 'judge output unparseable', _raw: { answer: a.text, judge: j.text } };
 }
 
+for (const c of cases) for (const r of [...(c.checks?.mustMatch ?? []), ...(c.checks?.mustNotMatch ?? [])]) rx(r); // fail fast on a bad pattern
 const jobs = models.flatMap(model => cases.flatMap(c => Array.from({ length: repeats }, (_, rep) => ({ model, c, rep }))));
 if (!execute) { console.log(JSON.stringify({ dryRun: true, cases: cases.length, models, repeats, judgeModel, calls: jobs.length * 2, systemChars: [...system].length }, null, 2)); process.exit(0); }
 
