@@ -33,7 +33,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta', 'lens-r3-methods',
+  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision', 'lens-hb-scene8-ood',
 ]);
 
 function choose(value, choices, label) {
@@ -117,6 +117,20 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
       if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
       add(`lens-r3-${index}-${method}`, harnessSha, {method, iteration: index + 1});
     }
+  } else if (workload === 'lens-hb-vision') {
+    if (override && override !== harnessSha) throw new Error('HB real Vision study requires exact harness source SHA');
+    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining', 'selection-repair'], 'HB lane slice');
+    for (const [index, model] of ['color', 'vision_prototype', 'vision_pca', 'vision_guard'].entries()) {
+      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0) ||
+          (slice === 'selection-repair' && !['vision_prototype', 'vision_guard'].includes(model))) continue;
+      add(`hb-vision-${index}-${model}`, harnessSha, {model});
+    }
+  } else if (workload === 'lens-hb-scene8-ood') {
+    // A single new public physical-scene contrast. No previously exposed
+    // test11, no upload of original image crops, no automatic model promotion.
+    if (override && override !== harnessSha)
+      throw new Error('HB scene8 OOD requires exact source/harness SHA');
+    add('hb-scene8-ood-public', harnessSha, {scene: 8});
   } else {
     if (workload === 'sbank-sponsor' && !override) throw new Error('sbank-sponsor requires source_sha');
     const source = override || BASELINES[workload] || harnessSha;
