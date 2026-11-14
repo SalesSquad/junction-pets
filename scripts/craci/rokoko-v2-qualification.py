@@ -31,7 +31,7 @@ def main() -> int:
     runner = source / "solutions/rokoko-teleoperation-gym/learning/action_necessity/v2_run.py"
     summary = {"schema": "junction.rokoko.v2.craci.qualification.v1",
                "source_sha": FROZEN_SOURCE, "model_sha256_expected": FROZEN_MODEL,
-               "world_lockbox_used_once": True, "results": [], "all_criteria_passed": False}
+               "preregistered_seed_windows": True, "global_once_registry_enforced": False, "results": [], "all_criteria_passed": False}
     for split, underlying, first, count in SPLITS:
         destination = output / (split + ".json")
         try:
