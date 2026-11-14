@@ -142,3 +142,21 @@ test('six HB feedback folds keep train-only source pins and distinct groups',()=
  assert.throws(()=>resolvePlan({workload:'lens-hb-six-feedback'}, {...context,creditOpen:'false'}),/closed/);
  assert.throws(()=>resolvePlan({workload:'lens-hb-six-feedback'}, {...context,now:'2026-11-15T17:00:00Z'}),/deadline/);
 });
+
+test('new six-fold unknown risk ML has exact source, pilot and nonrepeating remainder',()=>{
+ const all=resolvePlan({workload:'lens-six-unknown-ml'},context);
+ assert.equal(all.jobCount,6); assert.equal(all.maxParallel,4);
+ assert.deepEqual(all.matrix.include.map(x=>x.fold),[0,1,2,3,4,5]);
+ const pilot=resolvePlan({workload:'lens-six-unknown-ml',learning_fold:'0'},context);
+ const rest=resolvePlan({workload:'lens-six-unknown-ml',learning_fold:'remaining'},context);
+ assert.deepEqual(pilot.matrix.include.map(x=>x.fold),[0]);
+ assert.deepEqual(rest.matrix.include.map(x=>x.fold),[1,2,3,4,5]);
+ assert.equal(new Set([...pilot.matrix.include,...rest.matrix.include].map(x=>x.cell)).size,6);
+ assert.ok(all.matrix.include.every(x=>x.source_sha===context.harnessSha));
+ assert.throws(()=>resolvePlan({workload:'lens-six-unknown-ml',source_sha:candidate},context),
+                /exact source\/harness SHA/);
+ assert.throws(()=>resolvePlan({workload:'lens-six-unknown-ml',learning_fold:'7'},context),
+                /Unsupported HB unknown-ML fold/);
+ assert.throws(()=>resolvePlan({workload:'lens-six-unknown-ml'},{...context,creditOpen:'false'}),/closed/);
+ assert.throws(()=>resolvePlan({workload:'lens-six-unknown-ml'},{...context,now:'2026-11-15T17:00:00Z'}),/deadline/);
+});

@@ -33,7 +33,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision', 'lens-hb-scene8-ood', 'lens-hb-six-feedback',
+  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision', 'lens-hb-scene8-ood', 'lens-hb-six-feedback', 'lens-six-unknown-ml',
 ]);
 
 function choose(value, choices, label) {
@@ -136,6 +136,16 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
       if (selected !== 'all' && selected !== String(fold)) continue;
       add(`hb-dev-fold-${fold}`, harnessSha, {fold});
     }
+  } else if (workload === 'lens-six-unknown-ml') {
+    if (override && override !== harnessSha)
+      throw new Error('HB six unknown-ML requires exact source/harness SHA');
+    const selected = choose(input.learning_fold || 'all',
+      ['all','remaining','0','1','2','3','4','5'], 'HB unknown-ML fold');
+    for (let fold=0; fold<6; fold++) {
+      if ((selected === 'remaining' && fold === 0) ||
+          (!['all','remaining'].includes(selected) && selected !== String(fold))) continue;
+      add('hb-unknown-fold-' + fold, harnessSha, {fold});
+    }
   } else if (workload === 'lens-hb-scene8-ood') {
     // A single new public physical-scene contrast. No previously exposed
     // test11, no upload of original image crops, no automatic model promotion.
@@ -156,7 +166,7 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     }
   }
   return {schemaVersion: 1, workload, harnessSha, selectedAt: when.toISOString(), windowEnd: WINDOW_END,
-    sourceOverride: override || null, maxParallel: workload === 'lens-hb-six-feedback' ? Math.min(4,include.length) : ['meta-r-hardshift-2x','lens-six-ml'].includes(workload) ? Math.min(6, include.length) : Math.min(8, include.length),
+    sourceOverride: override || null, maxParallel: ['lens-hb-six-feedback','lens-six-unknown-ml'].includes(workload) ? Math.min(4,include.length) : ['meta-r-hardshift-2x','lens-six-ml'].includes(workload) ? Math.min(6, include.length) : Math.min(8, include.length),
     jobCount: workload === 'cache-proof' ? 2 : include.length, matrix: {include}};
 }
 
