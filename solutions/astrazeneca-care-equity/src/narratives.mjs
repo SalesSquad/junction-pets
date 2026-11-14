@@ -97,7 +97,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const at = (p) => new URL(p, import.meta.url);
   const app = JSON.parse(readFileSync(at('../web/data/app.json'), 'utf8'));
   const apiKey = process.env.TYPESAFE_API_KEY || '';
-  const rawDir = at('../data/narratives/raw/');
+  const arg = (name, fallback) => { const i = process.argv.indexOf(name); return i > 0 ? process.argv[i + 1] : fallback; };
+  const rawDir = at(`../${arg('--raw', 'data/narratives/raw')}/`);
+  const outFile = at(`../${arg('--out', 'data/narratives/fi-v1.json')}`);
+  const withClaimCheck = !process.argv.includes('--no-claim-check');
   const counties = {}; const totals = { generated: 0, kept: 0, rejected: {}, input_tokens: 0, output_tokens: 0 }; let model = null;
   const files = existsSync(rawDir) ? readdirSync(rawDir).filter((f) => f.endsWith('.json')).sort() : [];
   for (const f of files) {
@@ -112,7 +115,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   // The English brief goes through the same service, one Choice per sentence.
   const claimCheck = {}; const claimTotals = { SUPPORTED: 0, NOT_SUPPORTED: 0, UNCLEAR: 0 }; let claimModel = null;
-  if (apiKey) {
+  if (apiKey && withClaimCheck) {
     for (const region of app.analysis.regions) {
       const brief = buildBrief(app, region.regionId);
       const out = await verifyClaims(brief.claims, { apiKey, app });
@@ -126,9 +129,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     schemaVersion: 'care-equity-narratives-v1', generatedAt: new Date().toISOString(), snapshotSha256: app.provenance.snapshotSha256,
     verifier: apiKey ? { service: 'TypeSafe System One', model: model ?? claimModel, keepAt: KEEP_AT, overclaimAt: OVERCLAIM_AT } : null,
     status: apiKey ? 'CHECKED' : 'NOT_CONFIGURED', totals, counties,
-    claimCheck: apiKey ? { model: claimModel, autoAccept: 0.8, totals: claimTotals, counties: claimCheck } : null,
+    claimCheck: apiKey && withClaimCheck ? { model: claimModel, autoAccept: 0.8, totals: claimTotals, counties: claimCheck } : null,
   };
   mkdirSync(at('../data/narratives/'), { recursive: true });
-  writeFileSync(at('../data/narratives/fi-v1.json'), `${JSON.stringify(out, null, 1)}\n`);
+  writeFileSync(outFile, `${JSON.stringify(out, null, 1)}\n`);
   console.log(JSON.stringify({ status: out.status, counties: Object.keys(counties).length, totals, claimTotals, model: out.verifier?.model ?? null }));
 }

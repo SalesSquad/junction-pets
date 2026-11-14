@@ -18,8 +18,8 @@ def summarize(pred,y,mask):
     return dict(mae=float(np.mean(abs(q[:,2]-v))),pinball=float(pinball(q,v).mean()),cov90=float(np.mean((v>=q[:,0])&(v<=q[:,4]))),cov50=float(np.mean((v>=q[:,1])&(v<=q[:,3]))),n=int(len(v)))
 def main():
     a=args(); p,x,years,targets,cats=load(a.panel); bundle=torch.load(Path(a.artifacts)/'backtest.pt',weights_only=False,map_location='cpu')
-    w,y,m=windows(x,years,targets,[t for t in years if t<=2020]); y[np.array([t+2>2021 for _,t in m]),:,1]=np.nan
-    vw,vy,vm=windows(x,years,targets,[2021]); tw,ty,tm=windows(x,years,targets,[2022,2023]); ridge=fit_ridge(w,y,targets)
+    w,y,m=windows(x,years,targets,[t for t in years if t<=2020],window=a.window); y[np.array([t+2>2021 for _,t in m]),:,1]=np.nan
+    vw,vy,vm=windows(x,years,targets,[2021],window=a.window); tw,ty,tm=windows(x,years,targets,[2022,2023],window=a.window); ridge=fit_ridge(w,y,targets)
     vp={'transformer':predict(bundle,vw,vm,cats,targets,a.device)}; tp={'transformer':predict(bundle,tw,tm,cats,targets,a.device)}; offsets={}
     for method in METHODS[1:]:
         v=baseline(vw,targets,method,ridge); t=baseline(tw,targets,method,ridge); off=np.zeros((len(targets),2,5))

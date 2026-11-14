@@ -1,0 +1,1429 @@
+{
+ "schemaVersion": "care-equity-narratives-v1",
+ "generatedAt": "2026-11-14T15:08:35.600Z",
+ "snapshotSha256": "9a68651c35a2f2265fe18ccd7da8cd637ab94e80c86a866e91dba057425f5831",
+ "verifier": {
+  "service": "TypeSafe System One",
+  "model": "jev-1.14.0",
+  "keepAt": 0.8,
+  "overclaimAt": 0.5
+ },
+ "status": "CHECKED",
+ "totals": {
+  "generated": 139,
+  "kept": 91,
+  "rejected": {
+   "NOT_FAITHFUL": 38,
+   "NUMBER_NOT_IN_SOURCE": 10
+  },
+  "input_tokens": 87876,
+  "output_tokens": 8415
+ },
+ "counties": {
+  "HVA01": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Itä-Uudenmaan hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 0,9 % kansallista tasoa korkeampi (suhdeluku 1,009, 95 % väli 0,962–1,058), mikä vastaa noin 2,2 kuolemantapausta vuodessa enemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA01-mortality"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.13
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensihoitoon kuluvaa aikaa ei julkaista alueittain millekään syöpätyypille, joten tavoitetta hoitoon pääsy vakiintuneiden tavoiteaikojen puitteissa ei voi tarkistaa avoimista tiedoista.",
+     "claimIds": [
+      "HVA01-blind-spot"
+     ],
+     "pSupports": 0.99,
+     "pOverclaim": 0.11
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Mitattujen hoitopolun vaiheiden perusteella mikään vaihe ei näytä selvästi huonommalta kuin koko maassa, ja jos tulokset eroavat, syytä ei voi paikantaa julkisista tiedoista.",
+     "claimIds": [
+      "HVA01-locate"
+     ],
+     "pSupports": 0.79,
+     "pOverclaim": 0.14,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Paksusuolisyövän seulontaan kutsutuista osallistui 73,3 % tavoitteen ollessa 80 %; mallin oletuksin arvioituna muistutukset ja monikieliset uudelleenkutsut lisäisivät osallistumista 1,5–4,5 prosenttiyksikköä ja kuroisivat umpeen noin 45 % erosta, eli kyse on mallin arviosta eikä varmasta tuloksesta.",
+     "claimIds": [
+      "HVA01-detect-screen_colorectal"
+     ],
+     "pSupports": 0.26,
+     "pOverclaim": 0.08,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Kohdunkaulasyövän seulontaan kutsutuista naisista osallistui 75,0 % tavoitteen ollessa 80 %; mallin oletuksin arvioituna HPV-itsenäytteenottosarjat lisäisivät osallistumista 1,5–4,5 prosenttiyksikköä ja kuroisivat umpeen noin 60 % erosta, eli kyse on mallin arviosta eikä varmasta tuloksesta.",
+     "claimIds": [
+      "HVA01-detect-screen_cervix"
+     ],
+     "pSupports": 0.3,
+     "pOverclaim": 0.08,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Ensimmäisenä askeleena kaikille hyvinvointialueille ehdotetaan, että kansalliseen syöpärekisteriin lisätään ensimmäisen yhteydenoton, lähetteen, diagnoosin ja ensihoidon päivämäärät sekä hoitoon tulon reitti ja että alueittaiset mediaanit julkaistaan neljännesvuosittain.",
+     "claimIds": [
+      "HVA01-enable"
+     ],
+     "pSupports": 0.62,
+     "pOverclaim": 0.09,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA02": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Keski-Uudenmaan hyvinvointialueen syöpäkuolleisuus vuosina 2021–2025 oli ikävakioituna 1,1 % kansallista tasoa alhaisempi (suhdeluku 0,989, 95 % luottamusväli 0,952–1,027), noin 4,6 kuolemantapausta vuodessa vähemmän kuin ikärakenne ennustaa.",
+     "claimIds": [
+      "HVA02-mortality"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.12
+    },
+    {
+     "fi": "Mammografiaseulonnassa kutsutuista naisista osallistui kolmen vuoden keskiarvona vuoteen 2024 asti 80,63 %, kun koko maassa vastaava luku oli 81,6 % ja tavoite 80 %.",
+     "claimIds": [
+      "HVA02-flag-screen_breast"
+     ],
+     "pSupports": 0.93,
+     "pOverclaim": 0.08
+    },
+    {
+     "fi": "Kohdunkaulasyövän seulonnassa osallistui 74,6 % kutsutuista (tavoite 80 %) ja paksusuolisyövän seulonnassa 75,4 % (tavoite 80 %). Mallin arvion mukaan oletuksin HPV-itsenäytteet lisäisivät osallistumista 1,5–4,5 prosenttiyksikköä ja muistutus- ja monikielinen uudelleenkutsu 1,5–4,5 prosenttiyksikköä, mikä sulkisi noin 56 % ja noin 65 % tavoitteeseen puuttuvasta osuudesta.",
+     "claimIds": [
+      "HVA02-detect-screen_cervix",
+      "HVA02-detect-screen_colorectal"
+     ],
+     "pSupports": 0.93,
+     "pOverclaim": 0.22
+    },
+    {
+     "fi": "Ensimmäinen askel kaikille hyvinvointialueille on lisätä ensimmäisen yhteydenoton, lähetteen, diagnoosin ja ensimmäisen hoidon päivämäärät sekä hakureitti kansalliseen syöpähoidon laatuhoitorekisteriin ja julkaista maakuntakohtaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA02-enable"
+     ],
+     "pSupports": 0.85,
+     "pOverclaim": 0.12
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Julkisen datan mitattavissa olevista vaiheista varhaisin, jossa alue jää selvästi valtakunnallisesta tasosta, on varhainen toteaminen eli seulontaan osallistuminen; hoitoon pääsyn aikoja ei kuitenkaan julkaista maakunnittain, joten tavoitteen mukaisten enimmäisaikojen toteutumaa ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA02-locate",
+      "HVA02-blind-spot"
+     ],
+     "pSupports": 0.7,
+     "pOverclaim": 0.17,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Mallin arvion mukaan standardoidut, aikataulutetut syöpäpolut nopealla lähetereitillä lykkäisivät noin 7,5 kuolemantapausta vuodessa (vaihteluväli 1,1–14,9) arviolta 311,327 euron vuosikustannuksella; toimenpide pysyi portfoliossa 60 %:ssa herkkyysajoista. Kyse on oletuksin tehdystä arviosta.",
+     "claimIds": [
+      "HVA02-action-timed-pathways"
+     ],
+     "pSupports": null,
+     "pOverclaim": null,
+     "reason": "NUMBER_NOT_IN_SOURCE",
+     "unmatchedNumbers": [
+      311.327
+     ]
+    }
+   ]
+  },
+  "HVA03": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Vuosina 2021–2025 Länsi-Uudenmaan hyvinvointialueen syöpäkuolleisuus oli ikävakioituna 3,7 % alle valtakunnallisen tason (suhdeluku 0,963, 95 %:n vaihteluväli 0,937–0,99), mikä on noin 35,1 kuolemantapausta vuodessa vähemmän kuin ikärakenne ennustaa.",
+     "claimIds": [
+      "HVA03-mortality"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.2
+    },
+    {
+     "fi": "Rintasyöpäseulontaan kutsutuista naisista osallistui 76,27 % (kolmen vuoden keskiarvo vuoteen 2024 asti), kun valtakunnallinen taso on 81,6 % ja tavoite 80 %; julkisin tiedoin mitattavista vaiheista selvästi heikoin on varhainen toteaminen eli seulontaan osallistuminen.",
+     "claimIds": [
+      "HVA03-flag-screen_breast",
+      "HVA03-locate"
+     ],
+     "pSupports": 0.9,
+     "pOverclaim": 0.16
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensimmäiseen hoitoon kuluvaa aikaa ei julkaista alueittain millekään syöpätyypille, joten hoitoon pääsyn tavoiteaikoja ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA03-blind-spot"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.09
+    },
+    {
+     "fi": "Kohdunkaulasyövän seulonnan osallistuminen on 72,8 %, kun tavoite on 80 %; mallin arvion mukaan HPV-itsenäytteenotto seulonnasta jääneille voisi oletuksin lisätä osallistumista 1,5–4,5 prosenttiyksikköä ja sulkea noin 42 % kuilusta.",
+     "claimIds": [
+      "HVA03-detect-screen_cervix"
+     ],
+     "pSupports": 0.9,
+     "pOverclaim": 0.24
+    },
+    {
+     "fi": "Paksusuolisyöpäseulonnan osallistuminen on 73,4 %, kun tavoite on 80 %; mallin arvion mukaan muistutukset ja monikielinen uudelleenkutsu voisivat oletuksin lisätä osallistumista 1,5–4,5 prosenttiyksikköä ja sulkea noin 45 % kuilusta.",
+     "claimIds": [
+      "HVA03-detect-screen_colorectal"
+     ],
+     "pSupports": 0.95,
+     "pOverclaim": 0.23
+    },
+    {
+     "fi": "Ensimmäinen askel jokaiselle hyvinvointialueelle on lisätä ensimmäisen yhteydenoton, lähetteen, diagnoosin ja ensimmäisen hoidon päivämäärät sekä hoitoon tulon reitti valtakunnalliseen syöpähoidon laaturekisteriin ja julkaista alueittaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA03-enable"
+     ],
+     "pSupports": 0.94,
+     "pOverclaim": 0.14
+    }
+   ],
+   "rejected": []
+  },
+  "HVA04": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Vantaan ja Keravan hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 2,0 % valtakunnallista tasoa alhaisempi (suhdeluku 0,98, 95 % väli 0,945–1,016), noin 9,9 kuolemantapausta vuodessa vähemmän kuin ikärakenne ennustaa.",
+     "claimIds": [
+      "HVA04-mortality"
+     ],
+     "pSupports": 0.94,
+     "pOverclaim": 0.13
+    },
+    {
+     "fi": "Rintasyöpäseulontaan kutsutuista naisista osallistui kolmen vuoden keskiarvona vuoteen 2024 asti 76,57 %, kun valtakunnallinen taso oli 81,6 % ja tavoite 80 %.",
+     "claimIds": [
+      "HVA04-flag-screen_breast"
+     ],
+     "pSupports": 0.84,
+     "pOverclaim": 0.07
+    },
+    {
+     "fi": "Perusterveydenhuollon lääkärin elektiiviseen vastaanottoon pääsyä odotettiin kolmen vuoden keskiarvona vuoteen 2025 asti yli 7 päivää 71,27 % tapauksista, valtakunnallisesti 54,7 %, ja yli 3 kuukautta 5,5 % tapauksista, valtakunnallisesti 1,7 %.",
+     "claimIds": [
+      "HVA04-flag-gp_wait_over_7d",
+      "HVA04-flag-gp_wait_over_3m"
+     ],
+     "pSupports": 0.9,
+     "pOverclaim": 0.09
+    },
+    {
+     "fi": "Mallin arvio oletuksin: HPV-itsenäytteenottosetit kohdunkaulaseulonnan kutsuttujen ei-osallistujille voisivat nostaa osallistumista 1,5–4,5 prosenttiyksikköä, mikä sulkisi noin 30 % kuilusta 80 %:n tavoitteeseen, kun nykyinen taso on 70,1 %.",
+     "claimIds": [
+      "HVA04-detect-screen_cervix"
+     ],
+     "pSupports": 0.96,
+     "pOverclaim": 0.32
+    },
+    {
+     "fi": "Ensimmäinen askel jokaiselle hyvinvointialueelle on lisätä kansalliseen syöpien laaturekisteriin ensimmäisen yhteydenoton, lähetteen, diagnoosin ja ensimmäisen hoidon päivämäärät sekä tulotapa ja julkaista aluekohtaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA04-enable"
+     ],
+     "pSupports": 0.9,
+     "pOverclaim": 0.12
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Kohdunkaulasyöpäseulontaan kutsutuista naisista osallistui kolmen vuoden keskiarvona vuoteen 2024 asti 70,13 %, kun valtakunnallinen taso oli 73,4 % ja tavoite 80 %.",
+     "claimIds": [
+      "HVA04-flag-screen_cervix"
+     ],
+     "pSupports": 0.75,
+     "pOverclaim": 0.07,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA05": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Varsinais-Suomen hyvinvointialueen ikävakioitu syöpäkuolleisuus vuosina 2021–2025 oli 1,6 % korkeampi kuin valtakunnallinen taso (suhde 1,016, 95 %:n väli 0,992–1,041), mikä vastaa noin 19,3 kuolemaa vuodessa enemmän kuin ikärakenne ennustaa.",
+     "claimIds": [
+      "HVA05-mortality"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.15
+    },
+    {
+     "fi": "Julkisesta datasta mitattavista vaiheista varhaisin, jossa alue on selvästi valtakunnallista tasoa heikompi, on lähete erikoissairaanhoitoon; hoitoon pääsyn tavoiteaikojen toteutumista ei kuitenkaan voi tarkistaa avoimesta datasta, koska lähetteestä diagnoosiin ja diagnoosista hoidon alkuun kuluvaa aikaa ei julkaista alueittain millekään syövälle.",
+     "claimIds": [
+      "HVA05-locate",
+      "HVA05-blind-spot"
+     ],
+     "pSupports": 0.81,
+     "pOverclaim": 0.17
+    },
+    {
+     "fi": "Mallin arvion mukaan oletuksin paksusuolisyövän seulonnan osallistumisaste (75,0 % kutsutuista, tavoite 80 %) voisi parantua muistutuksilla ja monikielisellä uudelleenkutsulla 1,5–4,5 prosenttiyksikköä, mikä kuroisi umpeen noin 60 % tavoitteen ja nykytason välisestä erosta.",
+     "claimIds": [
+      "HVA05-detect-screen_colorectal"
+     ],
+     "pSupports": 0.86,
+     "pOverclaim": 0.21
+    },
+    {
+     "fi": "Ensimmäinen askel jokaiselle hyvinvointialueelle on lisätä ensikontaktin, lähetteen, diagnoosin ja ensimmäisen hoidon päivämäärät sekä hoitoon tulon reitti kansalliseen syöpähoidon laatuvalvontarekisteriin ja julkaista alueittaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA05-enable"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.14
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Yli kuuden kuukauden odotusaika erikoissairaanhoidon hoitoon pääsyyn oli alueella 54,83 henkilöä per 10 000 asukasta (kolmen vuoden keskiarvo vuoteen 2025 asti), kun koko maassa vastaava luku oli 36.",
+     "claimIds": [
+      "HVA05-flag-specialist_wait_over_6m"
+     ],
+     "pSupports": null,
+     "pOverclaim": null,
+     "reason": "NUMBER_NOT_IN_SOURCE",
+     "unmatchedNumbers": [
+      10000
+     ]
+    },
+    {
+     "fi": "Mallin arvion mukaan oletuksin kohdunkaulasyövän seulonnan osallistumisaste (76,3 %, tavoite 80 %) voisi nousta HPV-itsenäytteen avulla seulonnassa käymättömille 1,5–3,67 prosenttiyksikköä, mikä kuroisi umpeen noin 82 % erosta.",
+     "claimIds": [
+      "HVA05-detect-screen_cervix"
+     ],
+     "pSupports": 0.75,
+     "pOverclaim": 0.24,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA06": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Satakunnan hyvinvointialueella syöpäkuolleisuus ikävakioituna oli vuosina 2021–2025 9,7 % valtakunnallista tasoa korkeampi (suhdeluku 1,097, 95 % luottamusväli 1,063–1,132), mikä vastaa noin 58,7 kuolemantapausta vuodessa enemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA06-mortality"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.15
+    },
+    {
+     "fi": "Julkisin tiedoin mitattavista vaiheista varhaisin, jossa Satakunnan hyvinvointialue on selvästi valtakunnan tasoa huonompi, on lähetteen ohjautuminen erikoissairaanhoitoon.",
+     "claimIds": [
+      "HVA06-locate"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.17
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensihoitoon kulunutta aikaa ei julkaista alueittain millekään syövälle, joten tavoitetta potilaiden hoitoon pääsystä vahvistettuihin enimmäisaikoihin ei voida tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA06-blind-spot"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.11
+    },
+    {
+     "fi": "Suositeltu toimenpide on standardoidut, aikataulutetut syöpäpolut ja nopea lähetteen käsittely; mallin arvion mukaan se lykkäisi noin 11,7 kuolemantapausta vuodessa (vaihteluväli 1,7–23,5) arviolta 315 168 euron vuosikustannuksella; kyse on mallin arviosta annetuin oletuksin.",
+     "claimIds": [
+      "HVA06-action-timed-pathways"
+     ],
+     "pSupports": 0.8,
+     "pOverclaim": 0.19
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Erikoissairaanhoitoon tehtyjä lähetteitä, joita käsiteltiin yli 21 päivää ennen kuin ne otettiin vastaan, oli kolmen vuoden keskiarvona vuoteen 2025 asti 3 % kaikista vastaanotetuista lähetteistä, kun koko maassa vastaava luku oli 1 %.",
+     "claimIds": [
+      "HVA06-flag-referral_handled_over_21d"
+     ],
+     "pSupports": 0.77,
+     "pOverclaim": 0.12,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Mallin arvion mukaan HPV-itsenäytteenottosetit kohdunkaulan syöpäseulaan osallistumattomille voisivat nostaa osallistumista 1,5–4,5 prosenttiyksiköllä, mikä sulkisi noin 38 % 72,1 %:n ja 80 %:n tavoitteen välisestä erosta.",
+     "claimIds": [
+      "HVA06-detect-screen_cervix"
+     ],
+     "pSupports": 0.76,
+     "pOverclaim": 0.29,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA07": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Kanta-Hämeen hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 0,6 % alle valtakunnallisen tason (suhdeluku 0,994, 95 %:n väli 0,957–1,031), eli noin 3 kuolemantapausta vuodessa vähemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA07-mortality"
+     ],
+     "pSupports": 0.96,
+     "pOverclaim": 0.15
+    },
+    {
+     "fi": "Julkisista tiedoista ei voi tarkistaa, pääsevätkö potilaat hoitoon vakiintuneissa enimmäisajoissa, koska lähetteestä diagnoosiin ja diagnoosista ensihoitoon kuluvaa aikaa ei julkaista alueittain millekään syöpätyypille.",
+     "claimIds": [
+      "HVA07-blind-spot"
+     ],
+     "pSupports": 0.85,
+     "pOverclaim": 0.12
+    },
+    {
+     "fi": "Ensimmäinen askel jokaiselle hyvinvointialueelle on lisätä ensikontaktin, lähetteen, diagnoosin ja ensihoidon päivämäärät sekä hoitoon tulon reitti kansalliseen syöpähoidon laaturekisteriin ja julkaista alueittaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA07-enable"
+     ],
+     "pSupports": 0.87,
+     "pOverclaim": 0.14
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Kohdunkaulan syöpäseulonnan (sivelynäytteen) kutsutuista naisista osallistui hyvinvointialueella 70,63 % (kolmen vuoden keskiarvo vuoteen 2024), kun koko maassa vastaava luku oli 73,4 % ja tavoite 80 %.",
+     "claimIds": [
+      "HVA07-flag-screen_cervix"
+     ],
+     "pSupports": 0.76,
+     "pOverclaim": 0.07,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Yli 6 kuukautta erikoissairaanhoidon hoitoon pääsyä odottaneita oli hyvinvointialueella 56 per 10 000 asukasta (kolmen vuoden keskiarvo vuoteen 2025), kun koko maassa vastaava luku oli 36.",
+     "claimIds": [
+      "HVA07-flag-specialist_wait_over_6m"
+     ],
+     "pSupports": null,
+     "pOverclaim": null,
+     "reason": "NUMBER_NOT_IN_SOURCE",
+     "unmatchedNumbers": [
+      10000
+     ]
+    }
+   ]
+  },
+  "HVA08": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Pirkanmaan hyvinvointialueen syövän standardoitu kuolleisuus vuosina 2021–2025 oli 2,2 % valtakunnallista tasoa korkeampi (suhdeluku 1,022, 95 % luottamusväli 0,998–1,047), mikä vastaa noin 27,2 ylimääräistä kuolemantapausta vuodessa suhteessa ikärakenteeseen.",
+     "claimIds": [
+      "HVA08-mortality"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.15
+    },
+    {
+     "fi": "Seulontaan kutsutuista naisista kohdunkaulasyöpäseulontaan (papa-koe) osallistui Pirkanmaalla kolmen vuoden keskiarvona vuoteen 2024 asti 71,43 %, kun valtakunnallinen taso oli 73,4 % ja tavoite 80 %.",
+     "claimIds": [
+      "HVA08-flag-screen_cervix"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.06
+    },
+    {
+     "fi": "Erikoissairaanhoidon lähetteistä käsiteltiin Pirkanmaalla 3 päivän kuluessa 70,97 % (kolmen vuoden keskiarvo vuoteen 2025 asti), kun valtakunnallinen taso oli 76,8 %; yli 21 päivää käsiteltyjen lähetteiden osuus oli 2 %, kun valtakunnallinen osuus oli 1 %.",
+     "claimIds": [
+      "HVA08-flag-referral_handled_3d",
+      "HVA08-flag-referral_handled_over_21d"
+     ],
+     "pSupports": 0.89,
+     "pOverclaim": 0.08
+    },
+    {
+     "fi": "Julkisen tiedon perusteella varhainen toteamisvaihe, eli seulontaan osallistuminen, on varhaisin vaihe, jossa Pirkanmaa on selvästi valtakunnallista tasoa heikompi.",
+     "claimIds": [
+      "HVA08-locate"
+     ],
+     "pSupports": 0.93,
+     "pOverclaim": 0.22
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensihoitoon kuluvaa aikaa ei julkaista alueittain millekään syöpätyypille, joten hoitoon pääsyn tavoiteaikojen toteutumaa ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA08-blind-spot"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.11
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Mallin arvion mukaan standardoidut ja aikataulutetut syöpäpolut sekä nopeutettu lähetteen käsittely voisivat oletuksin siirtää noin 21,9 kuolemantapausta vuodessa (vaihteluväli 3,3–44) arviolta 823 365 euron vuosikustannuksella; toimenpide pysyi portfoliossa 81 %:ssa herkkyysajoista.",
+     "claimIds": [
+      "HVA08-action-timed-pathways"
+     ],
+     "pSupports": 0.53,
+     "pOverclaim": 0.2,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA09": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Päijät-Hämeen hyvinvointialueella syöpäkuolleisuus vuosina 2021–2025 oli ikävakioituna 0,1 % kansallista tasoa alempi (suhdeluku 0,999, 95 % väli 0,966–1,033), mikä vastaa noin 0,3 kuolemantapausta vähemmän vuodessa kuin ikärakenteen perusteella odottaisi.",
+     "claimIds": [
+      "HVA09-mortality"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.13
+    },
+    {
+     "fi": "Seulontaan osallistuminen on kohdunkaulasyöpäseulonnassa 70,23 %, kun valtakunnallinen taso on 73,4 % ja tavoite 80 %.",
+     "claimIds": [
+      "HVA09-flag-screen_cervix"
+     ],
+     "pSupports": 0.86,
+     "pOverclaim": 0.07
+    },
+    {
+     "fi": "Varhaisen toteamisen vaiheessa, eli seulontaan osallistumisessa, alue jää selvästi valtakunnallisesta tasosta, ja tämä on varhaisin julkisin tiedoin mitattava vaihe, jossa alue on selvästi valtakunnallista tasoa heikompi.",
+     "claimIds": [
+      "HVA09-locate"
+     ],
+     "pSupports": 0.87,
+     "pOverclaim": 0.17
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensihoitoon kuluvaa aikaa ei julkaista alueittain millekään syöpätyypille, joten tavoite potilaiden hoitoon pääsystä vakiintuneissa enimmäisajoissa ei ole avoimen datan perusteella tarkistettavissa.",
+     "claimIds": [
+      "HVA09-blind-spot"
+     ],
+     "pSupports": 0.99,
+     "pOverclaim": 0.1
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Kohdunkaulasyövän seulonnan osalta HPV-itsenäytteenottosetit voisivat mallin arvion mukaan nostaa osallistumista 1,5–4,5 prosenttiyksikköä, mikä kuroisi umpeen noin 31 % tavoitteeseen puuttuvasta osuudesta; kyse on mallin arviosta sen oletuksin.",
+     "claimIds": [
+      "HVA09-detect-screen_cervix"
+     ],
+     "pSupports": 0.68,
+     "pOverclaim": 0.17,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Paksusuolen syöpäseulonnan osallistumisen (76,9 %, tavoite 80 %) osalta muistutukset ja monikielinen uudelleenkutsu voisivat mallin arvion mukaan nostaa osallistumista 1,5–3,07 prosenttiyksikköä, mikä kuroisi umpeen noin 98 % kuilusta; kyse on mallin arviosta oletuksin.",
+     "claimIds": [
+      "HVA09-detect-screen_colorectal"
+     ],
+     "pSupports": 0.73,
+     "pOverclaim": 0.16,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Jokainen alue voi aloittaa lisäämällä kansalliseen syöpien laaturekisteriin ensikontaktin, lähetteen, diagnoosin ja ensihoidon päivämäärät sekä hoitoon tulotavan ja julkaisemalla maakohtaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA09-enable"
+     ],
+     "pSupports": 0.16,
+     "pOverclaim": 0.2,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA10": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Kymenlaakson hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 9,6 % kansallista tasoa korkeampi (suhdeluku 1,096, 95 % luottamusväli 1,058–1,135), mikä on noin 45,7 kuolemantapausta vuodessa enemmän kuin ikärakenne ennustaa.",
+     "claimIds": [
+      "HVA10-mortality"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.17
+    },
+    {
+     "fi": "Mallin arvio oletuksin: muistutukset ja monikieliset uudelleenkutsut voisivat lisätä kolorektaalisyövän seulontaan osallistumista 1,5–4,5 prosenttiyksikköä, mikä kuroisi umpeen noin 34 % kuilusta 80 %:n tavoitteeseen.",
+     "claimIds": [
+      "HVA10-detect-screen_colorectal"
+     ],
+     "pSupports": 0.92,
+     "pOverclaim": 0.37
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Kolorektaalisyövän seulontaan kutsutuista osallistui kolmen vuoden keskiarvona vuoteen 2024 asti 71,1 %, kun koko maassa vastaava luku oli 73,5 % ja tavoite 80 %.",
+     "claimIds": [
+      "HVA10-flag-screen_colorectal"
+     ],
+     "pSupports": 0.78,
+     "pOverclaim": 0.07,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Erikoissairaanhoidon lähetteistä 1,67 % oli käsitelty yli 21 päivää, kun koko maassa vastaava osuus oli 1 % (kolmen vuoden keskiarvo vuoteen 2025 asti).",
+     "claimIds": [
+      "HVA10-flag-referral_handled_over_21d"
+     ],
+     "pSupports": 0.71,
+     "pOverclaim": 0.12,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Julkisen tiedon perusteella varhaisin vaihe, jossa alue jää selvästi kansallisesta tasosta, on varhainen toteaminen seulonnan osallistumisen kautta; lähetteestä diagnoosiin ja diagnoosista hoitoon kuluvia aikoja ei julkaista alueittain, joten hoidon tavoiteaikojen toteutumista ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA10-locate",
+      "HVA10-blind-spot"
+     ],
+     "pSupports": 0.79,
+     "pOverclaim": 0.17,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Ensimmäisenä askeleena ehdotetaan, että kansalliseen syöpärekisteriin lisätään ensimmäisen yhteydenoton, lähetteen, diagnoosin ja ensimmäisen hoidon päivämäärät sekä hoitoon tulon reitti, ja että alueelliset mediaanit julkaistaan neljännesvuosittain.",
+     "claimIds": [
+      "HVA10-enable"
+     ],
+     "pSupports": 0.19,
+     "pOverclaim": 0.12,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA11": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Etelä-Karjalan hyvinvointialueella syöpäkuolleisuus vuosina 2021–2025 oli ikävakioituna 4,0 % alle valtakunnallisen tason (suhdeluku 0,96, 95 %:n väli 0,92–1), noin 14,7 kuolemaa vuodessa vähemmän kuin ikärakenne ennustaa.",
+     "claimIds": [
+      "HVA11-mortality"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.15
+    },
+    {
+     "fi": "Yksikään mitattu hoitopolun vaihe ei näytä selvästi huonompaa kuin koko maassa, ja jos tulokset eroavat, syytä ei voida paikantaa julkisesta datasta.",
+     "claimIds": [
+      "HVA11-locate"
+     ],
+     "pSupports": 0.9,
+     "pOverclaim": 0.11
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensihoitoon kuluvaa aikaa ei julkaista alueittain millekään syöpätyypille, joten tavoitteen 3 mittaria potilaiden pääsystä hoitoon vahvistettuihin tavoiteaikoihin ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA11-blind-spot"
+     ],
+     "pSupports": 0.99,
+     "pOverclaim": 0.11
+    },
+    {
+     "fi": "Mallin arvion mukaan oletuksin kohdunkaulasyöpäseulonnan (papa-kokeen) kutsutuista osallistui 74,1 %, kun tavoite on 80 %; HPV-itsenäytteiden arvioidaan nostavan osallistumista 1,5–4,5 prosenttiyksikköä ja sulkevan noin 51 % erosta.",
+     "claimIds": [
+      "HVA11-detect-screen_cervix"
+     ],
+     "pSupports": 0.87,
+     "pOverclaim": 0.21
+    },
+    {
+     "fi": "Jokaiselle alueelle ensimmäinen askel on lisätä kansalliseen syöpälaaturekisteriin ensikontaktin, lähetteen, diagnoosin ja ensihoidon päivämäärät sekä hoitoon tulon tapa, ja julkaista aluekohtaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA11-enable"
+     ],
+     "pSupports": 0.84,
+     "pOverclaim": 0.11
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Mallin arvion mukaan oletuksin paksusuolisyöpäseulontaan kutsutuista osallistui 75,7 %, kun tavoite on 80 %; muistutusten ja monikielisen uusintakutsun arvioidaan nostavan osallistumista 1,5–4,27 prosenttiyksikköä ja sulkevan noin 70 % erosta.",
+     "claimIds": [
+      "HVA11-detect-screen_colorectal"
+     ],
+     "pSupports": 0.77,
+     "pOverclaim": 0.22,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA12": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Etelä-Savon hyvinvointialueella syöpäkuolleisuus vuosina 2021–2025 oli ikävakioituna 0,5 % alle valtakunnallisen tason (suhdeluku 0,995, 95 %:n väli 0,957–1,034), eli noin 2,2 kuolemantapausta vuodessa vähemmän kuin ikärakenne ennustaa.",
+     "claimIds": [
+      "HVA12-mortality"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.17
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensimmäiseen hoitoon kuluvia aikoja ei julkaista maakunnittain millekään syövälle, joten tavoitetta potilaat pääsevät hoitoon vahvistetuissa enimmäisajoissa ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA12-blind-spot"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.13
+    },
+    {
+     "fi": "Mallin arvio oletuksin: paksusuolisyöpäseulonnassa kutsutuista osallistui 78,7 % tavoitteen ollessa 80 %, ja muistutusten ja monikielisten uudelleenkutsujen arvioidaan lisäävän osallistumista 1,33 prosenttiyksikköä, mikä kuroisi umpeen noin 100 % kuilusta.",
+     "claimIds": [
+      "HVA12-detect-screen_colorectal"
+     ],
+     "pSupports": 0.9,
+     "pOverclaim": 0.36
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Mitatuissa hoitopolun vaiheissa ei näy selvää eroa valtakunnalliseen tasoon verrattuna, eikä syytä eroihin voi paikantaa julkisesta datasta.",
+     "claimIds": [
+      "HVA12-locate"
+     ],
+     "pSupports": 0.4,
+     "pOverclaim": 0.2,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Mallin arvio oletuksin: standardoidut ja aikataulutetut syöpäpolut sekä nopea lähetekäytäntö lykkäisivät arviolta 7,2 kuolemantapausta vuodessa (vaihteluväli 1,1–14,5) oletetulla 192,216 euron vuosikustannuksella, ja toimenpide pysyi portfoliossa 94 %:ssa herkkyysajoista.",
+     "claimIds": [
+      "HVA12-action-timed-pathways"
+     ],
+     "pSupports": null,
+     "pOverclaim": null,
+     "reason": "NUMBER_NOT_IN_SOURCE",
+     "unmatchedNumbers": [
+      192.216
+     ]
+    },
+    {
+     "fi": "Ensimmäinen askel jokaiselle hyvinvointialueelle on lisätä syöpärekisteriin ensimmäisen yhteydenoton, lähetteen, diagnoosin ja ensimmäisen hoidon päivämäärät sekä hoitoon tulon reitti ja julkaista maakunnittaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA12-enable"
+     ],
+     "pSupports": 0.6,
+     "pOverclaim": 0.12,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA13": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Pohjois-Savon hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 7,0 % valtakunnallista tasoa alhaisempi (suhdeluku 0,93, 95 % luottamusväli 0,9–0,961), eli noin 46,4 kuolemaa vuodessa vähemmän kuin alueen ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA13-mortality"
+     ],
+     "pSupports": 0.96,
+     "pOverclaim": 0.17
+    },
+    {
+     "fi": "Kohdunkaulasyövän seulontaan kutsutuista naisista 67,83 % osallistui (kolmen vuoden keskiarvo vuoteen 2024), kun valtakunnallinen luku oli 73,4 % ja tavoite 80 %; erikoissairaanhoidon lähetteistä 69,57 % käsiteltiin 3 päivässä (kolmen vuoden keskiarvo vuoteen 2025), kun valtakunnallinen luku oli 76,8 %.",
+     "claimIds": [
+      "HVA13-flag-screen_cervix",
+      "HVA13-flag-referral_handled_3d"
+     ],
+     "pSupports": 0.94,
+     "pOverclaim": 0.08
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensimmäiseen hoitoon kuluvaa aikaa ei julkaista alueittain millekään syövälle, joten tavoitetta hoitoon pääsystä määritellyissä ajoissa ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA13-blind-spot"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.11
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Julkisesta datasta mitattavista vaiheista varhaisin, jossa alue selvästi jää valtakunnallisesta tasosta, on varhainen toteaminen eli seulontaan osallistuminen.",
+     "claimIds": [
+      "HVA13-locate"
+     ],
+     "pSupports": 0.78,
+     "pOverclaim": 0.19,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Mallin arvion mukaan oletuksin standardoidut ja aikataulutetut syöpäpolut nopealla lähetteellä voisivat lykätä noin 10,6 kuolemaa vuodessa (vaihteluväli 1,6–21,3), ja arvioitu vuosikustannus on 372 768 euroa; kyse on mallin arviosta, ei varmasta vaikutuksesta.",
+     "claimIds": [
+      "HVA13-action-timed-pathways"
+     ],
+     "pSupports": 0.32,
+     "pOverclaim": 0.09,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Ensimmäinen askel jokaisella alueella on lisätä ensimmäisen yhteydenoton, lähetteen, diagnoosin ja ensimmäisen hoidon päivämäärät sekä hakureitti syöpärekisteriin ja julkaista alueen mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA13-enable"
+     ],
+     "pSupports": 0.75,
+     "pOverclaim": 0.13,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA14": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Pohjois-Karjalan hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 1,0 % kansallista tasoa alhaisempi (suhdeluku 0,99, 95 %:n väli 0,954–1,028), eli noin 4,3 kuolemaa vuodessa vähemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA14-mortality"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.13
+    },
+    {
+     "fi": "Kohdunkaulasyövän seulontaan kutsutuista osallistui kolmen vuoden keskiarvona vuoteen 2024 asti 66,43 %, kun koko maassa vastaava luku oli 73,4 % ja tavoite 80 %.",
+     "claimIds": [
+      "HVA14-flag-screen_cervix"
+     ],
+     "pSupports": 0.84,
+     "pOverclaim": 0.07
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Erikoissairaanhoitoon pääsyn odotusajoissa alue poikkeaa selvästi: yli 6 kuukautta odottaneita oli kolmen vuoden keskiarvona vuoteen 2025 asti 79,3 per 10 000 asukasta, kun koko maassa luku oli 36.",
+     "claimIds": [
+      "HVA14-flag-specialist_wait_over_6m"
+     ],
+     "pSupports": null,
+     "pOverclaim": null,
+     "reason": "NUMBER_NOT_IN_SOURCE",
+     "unmatchedNumbers": [
+      10000
+     ]
+    },
+    {
+     "fi": "Mallin arvio oletuksin: standardoidut ja aikataulutetut syöpäpolut sekä nopeutettu lähetteen käsittely lykkäisivät arvion mukaan noin 7,8 kuolemaa vuodessa (vaihteluväli 1,2–15,6), ja oletettu vuotuinen kustannus on 242,127 euroa.",
+     "claimIds": [
+      "HVA14-action-timed-pathways"
+     ],
+     "pSupports": null,
+     "pOverclaim": null,
+     "reason": "NUMBER_NOT_IN_SOURCE",
+     "unmatchedNumbers": [
+      242.127
+     ]
+    },
+    {
+     "fi": "Ensimmäinen askel jokaiselle alueelle on lisätä syöpärekisteriin ensikontaktin, lähetteen, diagnoosin ja ensihoidon päivämäärät sekä hoitoon tulon reitti ja julkaista alueittaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA14-enable"
+     ],
+     "pSupports": 0.75,
+     "pOverclaim": 0.11,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA15": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Keski-Suomen hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 5,7 % valtakunnallista tasoa alhaisempi (suhdeluku 0,943, 95 %:n väli 0,913–0,974), mikä vastaa noin 38,4 kuolemantapausta vuodessa vähemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA15-mortality"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.16
+    },
+    {
+     "fi": "Kohdunkaulan syöpäseulontaan kutsutuista naisista osallistui Keski-Suomessa 70 % (kolmen vuoden keskiarvo vuoteen 2024 asti), kun koko maassa osuus oli 73,4 % ja tavoite 80 %.",
+     "claimIds": [
+      "HVA15-flag-screen_cervix"
+     ],
+     "pSupports": 0.96,
+     "pOverclaim": 0.06
+    },
+    {
+     "fi": "Mallin arvio oletuksin: HPV-omanäytteenottosettien arvioidaan lisäävän kohdunkaulan seulontaan osallistumista 1,5–4,5 prosenttiyksikköä, mikä sulkisi noin 30 % kuilusta nykyisen 70,0 %:n ja 80 %:n tavoitteen välillä.",
+     "claimIds": [
+      "HVA15-detect-screen_cervix"
+     ],
+     "pSupports": 0.89,
+     "pOverclaim": 0.3
+    },
+    {
+     "fi": "Ensimmäinen toimenpide jokaiselle hyvinvointialueelle on lisätä syöpärekisteriin ensikontaktin, lähetteen, diagnoosin ja ensihoidon päivämäärät sekä hoitoon tulon reitti ja julkaista alueittaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA15-enable"
+     ],
+     "pSupports": 0.81,
+     "pOverclaim": 0.11
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Erikoissairaanhoidon odotus on Keski-Suomessa yli kuukauden: vuoden aikana yli 6 kuukautta odottaneita oli 58,6 per 10 000 asukasta (kolmen vuoden keskiarvo vuoteen 2025 asti), kun koko maassa vastaava luku oli 36.",
+     "claimIds": [
+      "HVA15-flag-specialist_wait_over_6m"
+     ],
+     "pSupports": null,
+     "pOverclaim": null,
+     "reason": "NUMBER_NOT_IN_SOURCE",
+     "unmatchedNumbers": [
+      10000
+     ]
+    },
+    {
+     "fi": "Julkisen datan perusteella varhaisin vaihe, jossa alue jää selvästi valtakunnan tasosta, on varhainen toteaminen eli seulontaan osallistuminen, mutta hoitoon pääsyn tavoiteaikoja ei voi tarkistaa avoimesta datasta, koska lähetteen, diagnoosin ja ensihoidon välisiä aikoja ei julkaista maakunnittain.",
+     "claimIds": [
+      "HVA15-locate",
+      "HVA15-blind-spot"
+     ],
+     "pSupports": 0.61,
+     "pOverclaim": 0.2,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA16": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Etelä-Pohjanmaan hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 4,8 % valtakunnallista tasoa korkeampi (suhdeluku 1,048, 95 %:n väli 1,012–1,085), mikä on noin 24,6 kuolemantapausta vuodessa enemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA16-mortality"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.16
+    },
+    {
+     "fi": "Erikoissairaanhoidon lähetteistä käsiteltiin kolmen päivän kuluessa 70,8 % (kolmen vuoden keskiarvo vuoteen 2025 asti), kun koko maassa vastaava luku oli 76,8 %; julkisin tiedoin mitattavista vaiheista varhaisin, jossa alue jää selvästi valtakunnallisesta tasosta, on lähetteen eteneminen erikoissairaanhoitoon.",
+     "claimIds": [
+      "HVA16-flag-referral_handled_3d",
+      "HVA16-locate"
+     ],
+     "pSupports": 0.88,
+     "pOverclaim": 0.18
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensihoitoon kulunutta aikaa ei julkaista hyvinvointialueittain millekään syöpälajille, joten tavoitetta potilaiden hoitoon pääsystä vakiintuneissa enimmäisajoissa ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA16-blind-spot"
+     ],
+     "pSupports": 0.92,
+     "pOverclaim": 0.11
+    },
+    {
+     "fi": "Mallin arvion mukaan standardoidut, aikataulutetut syöpäpolut ja nopeutettu lähetekäytäntö lykkäisivät oletuksin noin 9,4 kuolemantapausta vuodessa (vaihteluväli 1,4–18,9) arviolta 284 211 euron vuosikustannuksella; toimenpide pysyi portfoliossa 94 %:ssa herkkyysajoista.",
+     "claimIds": [
+      "HVA16-action-timed-pathways"
+     ],
+     "pSupports": 0.81,
+     "pOverclaim": 0.17
+    },
+    {
+     "fi": "Paksusuolisyövän seulontaan kutsutuista osallistui 75,6 %, kun tavoite on 80 %; mallin arvion mukaan muistutukset ja monikielinen uudelleenkutsu lisäisivät osallistumista oletuksin 1,5–4,37 prosenttiyksikköä ja sulkisivat noin 69 % tavoitteen ja nykytason välisestä erosta.",
+     "claimIds": [
+      "HVA16-detect-screen_colorectal"
+     ],
+     "pSupports": 0.9,
+     "pOverclaim": 0.22
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Ensimmäisenä askeleena kaikille hyvinvointialueille syöpärekisteriin lisättäisiin ensimmäisen yhteydenoton, lähetteen, diagnoosin ja ensimmäisen hoidon päivämäärät sekä hoitoon pääsyn reitti, ja alueittaiset mediaanit julkaistaisiin neljännesvuosittain.",
+     "claimIds": [
+      "HVA16-enable"
+     ],
+     "pSupports": 0.77,
+     "pOverclaim": 0.15,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA17": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Pohjanmaan hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 2,6 % alhaisempi kuin koko maassa (suhdeluku 0,974, 95 % luottamusväli 0,937–1,012), mikä vastaa noin 11,1 kuolemantapausta vuodessa vähemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA17-mortality"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.13
+    },
+    {
+     "fi": "Erikoissairaanhoidon lähetteistä 2 % käsiteltiin yli 21 päivässä (kolmen vuoden keskiarvo vuoteen 2025 asti), kun koko maassa vastaava osuus oli 1.",
+     "claimIds": [
+      "HVA17-flag-referral_handled_over_21d"
+     ],
+     "pSupports": 0.83,
+     "pOverclaim": 0.1
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensihoitoon kuluvia aikoja ei julkaista maakunnittain millekään syövälle, joten hoitoon pääsyn tavoitetta hoidetaan vakiintuneissa enimmäisajoissa ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA17-blind-spot"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.11
+    },
+    {
+     "fi": "Ensimmäinen askel on lisätä ensikontaktin, lähetteen, diagnoosin ja ensihoidon päivämäärät sekä hoitoon tulon tapa kansalliseen syöpähoidon laaturekisteriin ja julkaista maakunnittaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA17-enable"
+     ],
+     "pSupports": 0.86,
+     "pOverclaim": 0.11
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Ensimmäisen yhteydenoton ja perusterveydenhuollon saatavuudessa alue jää selvästi valtakunnallisesta tasosta: yli 3 kuukautta odottaneita oli 3,27 % lääkärin vastaanotolle tehdyistä käynneistä (kolmen vuoden keskiarvo vuoteen 2025 asti), kun koko maassa vastaava luku oli 1,7.",
+     "claimIds": [
+      "HVA17-flag-gp_wait_over_3m",
+      "HVA17-locate"
+     ],
+     "pSupports": 0.75,
+     "pOverclaim": 0.23,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Mallin arvio oletuksin: suositeltu standardoitu ja aikataulutettu syöpäpolku nopealla lähetteellä voisi lykätä noin 7,2 kuolemantapausta vuodessa (vaihteluväli 1,1–14,5) arviolta 269,333 euron vuosikustannuksella, ja toimenpide pysyi portfoliossa 69 prosentissa herkkyysajoista.",
+     "claimIds": [
+      "HVA17-action-timed-pathways"
+     ],
+     "pSupports": null,
+     "pOverclaim": null,
+     "reason": "NUMBER_NOT_IN_SOURCE",
+     "unmatchedNumbers": [
+      269.333
+     ]
+    }
+   ]
+  },
+  "HVA18": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Keski-Pohjanmaan hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 2,3 % kansallista tasoa alhaisempi (suhdeluku 0,977, 95 % luottamusväli 0,925–1,031), noin 3,8 kuolemantapausta vuodessa vähemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA18-mortality"
+     ],
+     "pSupports": 0.95,
+     "pOverclaim": 0.12
+    },
+    {
+     "fi": "Erikoissairaanhoidon lähetteistä 71,83 % käsiteltiin 3 päivän kuluessa vastaanottamisesta (kolmen vuoden keskiarvo vuoteen 2025 asti), kun koko maassa vastaava luku oli 76,8 %.",
+     "claimIds": [
+      "HVA18-flag-referral_handled_3d"
+     ],
+     "pSupports": 0.8,
+     "pOverclaim": 0.07
+    },
+    {
+     "fi": "Yli 21 päivää käsiteltyjen lähetteiden osuus oli 2,33 % (kolmen vuoden keskiarvo vuoteen 2025 asti), kun koko maassa luku oli 1 %.",
+     "claimIds": [
+      "HVA18-flag-referral_handled_over_21d"
+     ],
+     "pSupports": 0.91,
+     "pOverclaim": 0.09
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Julkisen datan mitattavista vaiheista varhaisin selvästi maan tasoa heikompi vaihe on lähetteen eteneminen erikoissairaanhoitoon, mutta hoitoon pääsyn tavoiteaikojen toteutumaa ei voi tarkistaa avoimesta datasta, koska aikoja lähetteestä diagnoosiin ja diagnoosista hoitoon ei julkaista alueittain.",
+     "claimIds": [
+      "HVA18-locate",
+      "HVA18-blind-spot"
+     ],
+     "pSupports": 0.64,
+     "pOverclaim": 0.19,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Mallin arvio oletuksin: suositeltu standardoitu ajoitettu syöpäpolku nopealla lähetteellä voisi lykätä noin 2,8 kuolemantapausta vuodessa (vaihteluväli 0,4–5,6) arviolta 101 247 euron vuosikustannuksella; kyse on arviosta, ei varmasta vaikutuksesta.",
+     "claimIds": [
+      "HVA18-action-timed-pathways"
+     ],
+     "pSupports": 0.21,
+     "pOverclaim": 0.1,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Ensimmäisenä askeleena ehdotetaan, että ensikontakti-, lähete-, diagnoosi- ja ensimmäisen hoidon päivämäärät sekä hoitoon tulon reitti lisätään kansalliseen syöpähoidon laaturekisteriin ja alueiden mediaanit julkaistaisiin neljännesvuosittain.",
+     "claimIds": [
+      "HVA18-enable"
+     ],
+     "pSupports": 0.64,
+     "pOverclaim": 0.11,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA19": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Pohjois-Pohjanmaan hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 4,0 % alle valtakunnallisen tason (suhdeluku 0,96, 95 % luottamusväli 0,933–0,988), mikä vastaa noin 35,5 kuolemantapausta vuodessa vähemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA19-mortality"
+     ],
+     "pSupports": 0.96,
+     "pOverclaim": 0.19
+    },
+    {
+     "fi": "Pohjois-Pohjanmaalla odotusaika yli 3 kuukautta lääkärin arvioinnista ei-kiireelliseen avohoidon vastaanottoon oli 8,23 % valmistuneista käynneistä (kolmen vuoden keskiarvo vuoteen 2025 asti), kun koko maassa vastaava luku oli 1,7 %.",
+     "claimIds": [
+      "HVA19-flag-gp_wait_over_3m"
+     ],
+     "pSupports": 0.95,
+     "pOverclaim": 0.07
+    },
+    {
+     "fi": "Julkisilla tiedoilla mitattavista vaiheista varhaisin, jossa alue on selvästi valtakunnallista tasoa heikompi, on ensikontakti ja perusterveydenhuollon pääsy hoitoon.",
+     "claimIds": [
+      "HVA19-locate"
+     ],
+     "pSupports": 0.87,
+     "pOverclaim": 0.15
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensimmäiseen hoitoon kuluvaa aikaa ei julkaista alueittain millekään syöpätyypille, joten tavoitetta potilaiden pääsystä hoitoon vahvistetuissa enimmäisajoissa ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA19-blind-spot"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.11
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Yli 6 kuukautta erikoissairaanhoidon hoitoon pääsyä odottaneita potilaita oli Pohjois-Pohjanmaalla 81,07 per 10 000 asukasta (kolmen vuoden keskiarvo vuoteen 2025 asti), kun maassa vastaava luku oli 36.",
+     "claimIds": [
+      "HVA19-flag-specialist_wait_over_6m"
+     ],
+     "pSupports": null,
+     "pOverclaim": null,
+     "reason": "NUMBER_NOT_IN_SOURCE",
+     "unmatchedNumbers": [
+      10000
+     ]
+    },
+    {
+     "fi": "Mallin arvion mukaan kohdunkaulasyövän seulonnassa HPV-itsenäytteenottosetit voisivat nostaa seulontaan osallistumista 1,5–4,5 prosenttiyksikköä nykyisestä 73,6 prosentista, mikä sulkisi noin 47 % 80 prosentin tavoitteen ja kuulijoiden kuvan vuoksi kyse on oletuksiin perustuvasta arviosta.",
+     "claimIds": [
+      "HVA19-detect-screen_cervix"
+     ],
+     "pSupports": 0.07,
+     "pOverclaim": 0.27,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Mallin arvion mukaan paksusuolisyövän seulonnan muistutukset ja monikielinen uudelleenkutsu voisivat nostaa osallistumista 1,5–3,13 prosenttiyksikköä nykyisestä 76,9 prosentista, mikä sulkisi noin 96 % 80 prosentin tavoitteen; kyse on oletuksiin perustuvasta arviosta.",
+     "claimIds": [
+      "HVA19-detect-screen_colorectal"
+     ],
+     "pSupports": 0.12,
+     "pOverclaim": 0.18,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Jokaisen hyvinvointialueen ensimmäinen askel on lisätä ensikontakti-, lähete-, diagnoosi- ja ensihoidon päivämäärät sekä hoitoon tulon reitti kansalliseen syöpähoidon laaturekisteriin ja julkaista alueittaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA19-enable"
+     ],
+     "pSupports": 0.64,
+     "pOverclaim": 0.13,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA20": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Kainuun hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 1,8 % alle valtakunnallisen tason (suhdeluku 0,982, 95 % luottamusväli 0,933–1,033), eli noin 3,7 kuolemantapausta vuodessa vähemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA20-mortality"
+     ],
+     "pSupports": 0.95,
+     "pOverclaim": 0.15
+    },
+    {
+     "fi": "Julkisesta datasta mitattavista vaiheista varhaisin, jossa Kainuun hyvinvointialue on selvästi valtakunnallista tasoa huonompi, on lähete erikoissairaanhoitoon.",
+     "claimIds": [
+      "HVA20-locate"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.17
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensihoitoon kuluvaa aikaa ei julkaista maakunnittain millekään syövälle, joten tavoitetta potilaat pääsevät hoitoon vahvistetuissa enimmäisajoissa ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA20-blind-spot"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.13
+    },
+    {
+     "fi": "Mallin arvion mukaan standardoidut ja aikataulutetut syöpäpolut nopealla lähetteellä lykkäisivät oletusten mukaan noin 3,5 kuolemantapausta vuodessa (vaihteluväli 0,5–7,1), ja arvioitu kustannus olisi oletuksena 103 790 euroa vuodessa; toimenpide pysyi portfoliossa 92 %:ssa herkkyysajoista.",
+     "claimIds": [
+      "HVA20-action-timed-pathways"
+     ],
+     "pSupports": 0.84,
+     "pOverclaim": 0.16
+    },
+    {
+     "fi": "Kohdunkaulasyöpäseulaan kutsutuista osallistui 76,6 % tavoitteen ollessa 80 %; mallin arvion mukaan HPV-itsenäytteet seulonnasta jääneille lisäisivät osallistumista 1,5–3,4 prosenttiyksikköä, mikä sulkisi noin 88 % kuilusta.",
+     "claimIds": [
+      "HVA20-detect-screen_cervix"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.29
+    },
+    {
+     "fi": "Ensimmäinen askel jokaiselle hyvinvointialueelle on lisätä ensikontaktin, lähetteen, diagnoosin ja ensihoidon päivämäärät sekä hoitoon tulon reitti kansalliseen syöpähoidon laatuhoitoon rekisteriin ja julkaista maakuntakohtaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA20-enable"
+     ],
+     "pSupports": 0.83,
+     "pOverclaim": 0.13
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Kainuun hyvinvointialueella potilaita, jotka odottivat vuoden aikana yli 6 kuukautta erikoissairaanhoitoon pääsyä, oli kolmen vuoden keskiarvona vuoteen 2025 asti 45,53 per 10 000 asukasta, kun valtakunnallinen luku oli 36.",
+     "claimIds": [
+      "HVA20-flag-specialist_wait_over_6m"
+     ],
+     "pSupports": null,
+     "pOverclaim": null,
+     "reason": "NUMBER_NOT_IN_SOURCE",
+     "unmatchedNumbers": [
+      10000
+     ]
+    }
+   ]
+  },
+  "HVA21": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Lapin hyvinvointialueella syöpäkuolleisuus oli vuosina 2021–2025 ikävakioituna 5,6 % valtakunnallista tasoa korkeampi (suhdeluku 1,056, 95 % varmuusväli 1,019–1,094), mikä vastaa noin 26,5 kuolemaa vuodessa enemmän kuin ikärakenne ennustaisi.",
+     "claimIds": [
+      "HVA21-mortality"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.15
+    },
+    {
+     "fi": "Mitattavista hoitopolun vaiheista ei löydy selvää kohtaa, jossa Lapin hyvinvointialue olisi selvästi maan keskiarvoa heikompi; jos tulokset eroavat, syytä ei voi paikantaa julkisesta datasta.",
+     "claimIds": [
+      "HVA21-locate"
+     ],
+     "pSupports": 0.99,
+     "pOverclaim": 0.13
+    },
+    {
+     "fi": "Lähetteestä diagnoosiin ja diagnoosista ensihoitoon kuluvia aikoja ei julkaista maakunnittain millekään syövälle, joten tavoitteen, jonka mukaan potilaat pääsevät hoitoon vakiintuneissa enimmäisajoissa, toteutumista ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA21-blind-spot"
+     ],
+     "pSupports": 0.99,
+     "pOverclaim": 0.1
+    },
+    {
+     "fi": "Mallin arvio oletuksin: standardoidut ja aikataulutetut syöpäpolut nopealla lähetteellä lykkäisivät arviolta 8,8 kuolemaa vuodessa (vaihteluväli 1,3–17,6) Lapin hyvinvointialueella, ja toimenpiteen arvioitu vuosikustannus on 264 323 euroa; toimenpide pysyi portfoliossa 95 %:ssa herkkyysajoista.",
+     "claimIds": [
+      "HVA21-action-timed-pathways"
+     ],
+     "pSupports": 0.94,
+     "pOverclaim": 0.16
+    },
+    {
+     "fi": "Ensimmäinen askel jokaiselle hyvinvointialueelle on lisätä ensikontaktin, lähetteen, diagnoosin ja ensihoidon päivämäärät sekä hoitoon tulon reitti kansalliseen syöpärekisteriin ja julkaista maakunnittaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA21-enable"
+     ],
+     "pSupports": 0.89,
+     "pOverclaim": 0.12
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Mallin arvio oletuksin: HPV-itsenäytteet seulonnan ulkopuolelle jääneille naisille lisäisivät kohdunkaulasyöpäseulontaan osallistumista arviolta 1,5–4,5 prosenttiyksikköä, ja tämä sulkisi noin 57 % kuilusta nykyisen 74,7 %:n osallistumisen ja 80 %:n tavoitteen välillä.",
+     "claimIds": [
+      "HVA21-detect-screen_cervix"
+     ],
+     "pSupports": 0.79,
+     "pOverclaim": 0.37,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA90": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Helsingin kaupungin ikävakioitu syöpäkuolleisuus oli vuosina 2021–2025 1,0 % valtakunnallista tasoa korkeampi (suhdeluku 1,01, 95 %:n väli 0,986–1,034), eli noin 12,8 kuolemaa vuodessa enemmän kuin ikärakenne ennustaa.",
+     "claimIds": [
+      "HVA90-mortality"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.16
+    },
+    {
+     "fi": "Seulontoihin osallistuminen jää Helsingissä alle valtakunnallisen tason ja 80 %:n tavoitteen: rintasyöpäseulonta 73,37 % (valtakunnallisesti 81,6 %), kohdunkaulasyöpäseulonta 70,97 % (73,4 %) ja paksusuolisyöpäseulonta 70,83 % (73,5 %), kolmen vuoden keskiarvo vuoteen 2024 asti.",
+     "claimIds": [
+      "HVA90-flag-screen_breast",
+      "HVA90-flag-screen_cervix",
+      "HVA90-flag-screen_colorectal"
+     ],
+     "pSupports": 0.88,
+     "pOverclaim": 0.12
+    },
+    {
+     "fi": "Perusterveydenhuollon lääkärin elektiiviseen vastaanottoon yli 7 päivää kestävä odotus on Helsingissä 69,67 % (valtakunnallisesti 54,7 %), ja yli 3 kuukautta kestävä odotus 3,63 % (valtakunnallisesti 1,7 %), kolmen vuoden keskiarvo vuoteen 2025 asti.",
+     "claimIds": [
+      "HVA90-flag-gp_wait_over_7d",
+      "HVA90-flag-gp_wait_over_3m"
+     ],
+     "pSupports": 0.9,
+     "pOverclaim": 0.08
+    },
+    {
+     "fi": "Julkisesti mitattavista vaiheista varhaisin, jossa Helsinki on selvästi valtakunnallista tasoa heikompi, on varhainen toteaminen eli seulontaan osallistuminen; hoitoon pääsyn aikoja diagnoosiin ja hoidon alkuun ei kuitenkaan julkaista alueittain, joten tavoiteaikojen toteutumista ei voi tarkistaa avoimesta datasta.",
+     "claimIds": [
+      "HVA90-locate",
+      "HVA90-blind-spot"
+     ],
+     "pSupports": 0.85,
+     "pOverclaim": 0.16
+    },
+    {
+     "fi": "Ensimmäinen toimenpide kaikille hyvinvointialueille on lisätä ensikontaktin, lähetteen, diagnoosin ja ensihoidon päivämäärät sekä hoitoon tulon reitti kansalliseen syöpähoitojen laaturekisteriin ja julkaista alueen mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA90-enable"
+     ],
+     "pSupports": 0.91,
+     "pOverclaim": 0.12
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Mallin arvion mukaan (oletuksin, ei varmaa tulosta) paksusuolisyöpäseulonnan muistutus ja monikielinen uudelleenkutsu lisäisivät osallistumista 1,5–4,5 prosenttiyksikköä ja kuroisivat umpeen noin 33 % 70,8 %:n ja 80 %:n tavoitteen välisestä kuilusta.",
+     "claimIds": [
+      "HVA90-detect-screen_colorectal"
+     ],
+     "pSupports": 0.69,
+     "pOverclaim": 0.13,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  },
+  "HVA91": {
+   "generator": "claude-haiku-5-5 via haiku MCP",
+   "kept": [
+    {
+     "fi": "Ahvenanmaan syöpäkuolleisuus vuosina 2021–2025 oli ikävakioituna 2,4 % valtakunnallista tasoa korkeampi (suhdeluku 1,024, 95 %:n väli 0,958–1,093), mikä vastaa noin 1,9 kuolemantapausta vuodessa enemmän kuin ikärakenne ennustaa.",
+     "claimIds": [
+      "HVA91-mortality"
+     ],
+     "pSupports": 0.97,
+     "pOverclaim": 0.18
+    },
+    {
+     "fi": "Hoitoon pääsyn tavoiteaikoja ei voida tarkistaa avoimesta datasta, koska lähetteestä diagnoosiin ja diagnoosista ensimmäiseen hoitoon kuluvaa aikaa ei julkaista maakunnittain millekään syöpätyypille.",
+     "claimIds": [
+      "HVA91-blind-spot"
+     ],
+     "pSupports": 0.98,
+     "pOverclaim": 0.13
+    },
+    {
+     "fi": "Mallin arvio oletuksin: standardoidut, aikataulutetut syöpäpolut nopealla lähetteellä lykkäisivät noin 1,4 kuolemantapausta vuodessa (vaihteluväli 0,2–2,8), ja oletetut kustannukset ovat 46 254 euroa vuodessa; toimenpide pysyi portfoliossa 94 %:ssa herkkyysajoista.",
+     "claimIds": [
+      "HVA91-action-timed-pathways"
+     ],
+     "pSupports": 0.89,
+     "pOverclaim": 0.17
+    }
+   ],
+   "rejected": [
+    {
+     "fi": "Julkisen datan perusteella mikään mitattu hoitopolun vaihe ei näytä selvästi valtakunnallista tasoa heikommalta, eikä eroille voida paikantaa syytä.",
+     "claimIds": [
+      "HVA91-locate"
+     ],
+     "pSupports": 0.39,
+     "pOverclaim": 0.14,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    },
+    {
+     "fi": "Ensimmäinen askel jokaiselle maakunnalle on lisätä kansalliseen syöpärekisteriin ensimmäisen yhteydenoton, lähetteen, diagnoosin ja ensimmäisen hoidon päivämäärät sekä tulotie ja julkaista maakunnittaiset mediaanit neljännesvuosittain.",
+     "claimIds": [
+      "HVA91-enable"
+     ],
+     "pSupports": 0.55,
+     "pOverclaim": 0.11,
+     "reason": "NOT_FAITHFUL",
+     "unmatchedNumbers": []
+    }
+   ]
+  }
+ },
+ "claimCheck": null
+}

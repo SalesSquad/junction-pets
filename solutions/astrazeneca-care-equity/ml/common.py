@@ -9,8 +9,15 @@ METHODS=['transformer','persistence','drift','ridge']
 def save(path,obj):
     Path(path).parent.mkdir(parents=True,exist_ok=True)
     Path(path).write_text(json.dumps(obj,allow_nan=False,indent=2))
-def args():
-    p=argparse.ArgumentParser(); p.add_argument('--device',choices=['cpu','cuda'],default='cpu'); p.add_argument('--epochs',type=int,default=100); p.add_argument('--seeds',type=int,default=5); p.add_argument('--smoke',action='store_true'); p.add_argument('--panel',default=str(ROOT/'data/panel.json')); p.add_argument('--out',default=str(ROOT.parent/'data/ml/forecast-v1.json')); p.add_argument('--artifacts',default=str(ROOT/'artifacts')); a=p.parse_args()
+def args(configure=None):
+    p=argparse.ArgumentParser(); p.add_argument('--device',choices=['cpu','cuda'],default='cpu'); p.add_argument('--epochs',type=int,default=100); p.add_argument('--seeds',type=int,default=5); p.add_argument('--smoke',action='store_true'); p.add_argument('--panel',default=str(ROOT/'data/panel.json')); p.add_argument('--out',default=str(ROOT.parent/'data/ml/forecast-v1.json')); p.add_argument('--artifacts',default=str(ROOT/'artifacts')); p.add_argument('--d-model',type=int,default=128); p.add_argument('--layers',type=int,default=3); p.add_argument('--heads',type=int,default=4); p.add_argument('--window',type=int,default=8); p.add_argument('--lr',type=float,default=.0005); p.add_argument('--dropout',type=float,default=.1); p.add_argument('--mask-rate',type=float,default=.15); p.add_argument('--tag',default='')
+    if configure: configure(p)
+    a=p.parse_args()
+    if min(a.d_model,a.layers,a.heads,a.window,a.seeds,a.epochs)<1 or a.window<3 or a.d_model%a.heads: p.error('positive dimensions required; window >=3 and d-model divisible by heads')
+    if not 0<=a.dropout<1 or not 0<=a.mask_rate<=1 or a.lr<=0: p.error('invalid learning rate/dropout/mask rate')
+    if a.tag:
+        if Path(a.tag).is_absolute() or '..' in Path(a.tag).parts: p.error('tag must be a relative artifact subdirectory')
+        a.artifacts=str(Path(a.artifacts)/a.tag)
     if a.smoke: a.seeds=1; a.epochs=2
     return a
 def seed(s):
@@ -23,17 +30,17 @@ def load(path):
                 if int(y) in years: x[u,np.where(years==int(y))[0][0],j]=v
     cats=np.array([{'KUNTA':0,'HYVINVOINTIALUE':1,'MAA':2}[u['category']] for u in p['units']])
     return p,x,years,targets,cats
-def windows(x,years,targets,origins):
+def windows(x,years,targets,origins,window=8,include_empty=False):
     xx=[]; yy=[]; meta=[]
     for u in range(len(x)):
         for t in origins:
             where=np.where(years==t)[0]
             if not len(where): continue
-            k=where[0]; w=np.full((8,x.shape[2]),np.nan); start=max(0,k-7); w[-(k-start+1):]=x[u,start:k+1]
+            k=where[0]; w=np.full((window,x.shape[2]),np.nan); start=max(0,k-window+1); w[-(k-start+1):]=x[u,start:k+1]
             last=np.array([last_value(w[:,j]) for j in targets]); y=np.full((len(targets),2),np.nan)
             for h in range(2):
                 if k+h+1<len(years): y[:,h]=x[u,k+h+1,targets]
-            if not np.isfinite(w).any(): continue
+            if not include_empty and not np.isfinite(w).any(): continue
             xx.append(w); yy.append(y); meta.append((u,int(t)))
     return np.array(xx),np.array(yy),meta
 def last_value(v):
