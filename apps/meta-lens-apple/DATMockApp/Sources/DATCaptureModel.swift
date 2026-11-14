@@ -21,6 +21,7 @@ final class DATCaptureModel: ObservableObject {
     @Published private(set) var cleaning = false
     @Published private(set) var configured = false
     @Published private(set) var lastError: String?
+    private(set) var sdkDiagnostics = ""
     private var epoch = CaptureEpoch()
     private var mock: (any MockGlasses)?
     private var selector: SpecificDeviceSelector?
@@ -65,6 +66,7 @@ final class DATCaptureModel: ObservableObject {
         frameDigest = ""
         lastTimestamp = nil
         lastError = nil
+        sdkDiagnostics = ""
         frameCount = 0
         lastFrameAt = .distantPast
         hasStreamed = false
@@ -140,13 +142,31 @@ final class DATCaptureModel: ObservableObject {
                     }
                 })
                 self.status = "Starting Meta test session"
+                self.recordSDKDiagnostics(stage: "before-session-start")
                 try session.start()
             } catch {
                 guard self.epoch.accepts(generation) else { return }
+                self.recordSDKDiagnostics(stage: "startup-catch")
                 self.lastError = "\(self.status): \(error.localizedDescription)"
                 self.stop(reason: "Could not start Meta test session")
             }
         }
+    }
+
+    private func recordSDKDiagnostics(stage: String) {
+        let wearables = Wearables.shared
+        let exactID = mock?.deviceIdentifier
+        let device = mock.flatMap { wearables.deviceForIdentifier($0.deviceIdentifier) }
+        let deviceState = device.map {
+            "link=\($0.linkState), compatibility=\($0.compatibility()), "
+                + "don=\($0.donState), hinge=\($0.hingeState)"
+        } ?? "device=missing"
+        let snapshot = "\(stage): \(deviceState), registration=\(wearables.registrationState), "
+            + "selectorExact=\(exactID != nil && selector?.activeDevice == exactID), "
+            + "sessionExact=\(exactID != nil && session?.deviceId == exactID), "
+            + "bundle=\(Bundle.main.bundleIdentifier ?? "nil"); "
+        // Keep only bounded public state; never record a device identifier or credential.
+        sdkDiagnostics = String((sdkDiagnostics + snapshot).suffix(1_200))
     }
 
     private func startCamera(generation: UInt64) async {

@@ -17,7 +17,7 @@ final class DATIntegrationTests: XCTestCase {
         return "configured=\(model.configured), running=\(model.running), cleaning=\(model.cleaning), "
             + "status=\(model.status.debugDescription), lastError=\(model.lastError.debugDescription), "
             + "frameCount=\(model.frameCount), recognizedText=\(String(model.recognizedText.prefix(200)).debugDescription), "
-            + "frameDigestLength=\(model.frameDigest.count)"
+            + "frameDigestLength=\(model.frameDigest.count), sdkDiagnostics=\(model.sdkDiagnostics.debugDescription)"
     }
 
     private func eventually(_ predicate: @escaping @MainActor () -> Bool, seconds: Double = 25) async throws {
