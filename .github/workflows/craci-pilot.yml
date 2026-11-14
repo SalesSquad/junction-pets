@@ -871,6 +871,12 @@ jobs:
           network: |
             default: deny
             presets: [github, dockerhub]
+            # Docker Hub's documented CDN; the initial trace denied this exact host.
+            # Direct TLS permits the image download but is outside package detection.
+            connections:
+              - tls:
+                  serverNamePatterns: [production.cloudfront.docker.com]
+                  ports: [443]
       - name: Enforce credit window
         run: |
           set -euo pipefail
