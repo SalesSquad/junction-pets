@@ -23,3 +23,28 @@ The three methods share a deterministic baseline fitted on TRAIN, and append the
 The existing repo-authorized manual CRACI pilot workflow gains `workload=lens-r3-methods` with precisely three distinct CPU-4 cells (no dynamic self-repetition), `lane_slice=pilot` then `lane_slice=remaining`, source pin = harness commit, 20-minute hard timeout per cell, maximum three simultaneous jobs, `default:deny` network and only GitHub/Ubuntu package repositories. Source registration, SHA-256 and private-data exclusions are checked before training. R nnet/jsonlite dependencies use only pinned Ubuntu apt source, receipts from existing `run-receipt.mjs`, model and metadata in allowlisted JSON+ZIP artifacts. All source-reported evidence remains separate from provider-attested billing; **actual CRACI charges are unknown**. Worst-case reserved 3 × 4-vCPU × 20 min plus 2-vCPU × 5 min planner = 250 vCPU-min for one R3 wave, using only existing Junction-approved promotional credit, not cash/top-ups. Global window stops **2026-11-15 17:00 UTC** with its separate shutdown controller. This task does not revive expired three-hour Immune/Chaos campaigns.
 
 Avoid repeating any of the 8 already-green R8 cohorts, and only requalify a failed R3 method after a material source fix. No test/validator downgrades, no public corpus augmentation without new provenance approval, and no automatic trained-model promotion. The next scientifically decisive milestone is new independently labelled, licensed real object scenes or on-device validation that has never been used for tuning.
+## Completed CRACI hosted training and immutable evidence
+
+Both **source-bound** CRACI workflows successfully completed at original experiment
+harness SHA `08645c6d83e4fc47093a16220de36098f3f1e1b6`:
+
+- [Pilot #43636400308](https://github.com/SalesSquad/junction-pets/actions/runs/43636400308): `risk-upper`, 1/1 CPU4 job and original R model archive.
+- [Remaining #43636605103](https://github.com/SalesSquad/junction-pets/actions/runs/43636605103): `metadata-shield` and `hard-negative`, 2/2 CPU4 jobs and model archives.
+
+The standalone `scripts/craci/lens-r3-audit.py` downloaded all three source-reported artifacts and independently checked the exact source/harness SHA, license/admission gate, no private media/OCR transfer, real nnet-trained RDS/model reports, common dataset and three unique method names. The archive's report bytes match the root report; calibration totals, accepted-correct/wrong counts and test metadata slices are consistent. Actual provider billing is **UNKNOWN** without authenticated provider invoices. These are GitHub-hosted source-reported receipts, not CRACI provider-signed attestations.
+
+| New method | Calibration wrong /225 | Heldout accepted correct /225 | Heldout accepted wrong /225 | Abstained /225 | Baseline accepted correct/wrong | Model eligible for promotion? |
+|---|---:|---:|---:|---:|---|---|
+| Exact class-conditional upper risk bound | 0 | 78 | 49 (21.8%) | 98 | 149/62 | NO |
+| Pixel-metadata Mahalanobis shift shield | 1 | 151 | 72 (32.0%) | 2 | 149/62 | NO |
+| Train-scene OOF hard-negative weighting | 11 | 149 | 62 (27.6%) | 14 | 149/62 | NO |
+
+The exact risk bound reduced false accepted claims by 13 but also reduced correct accepted suggestions by 71. Its per-class upper-bound calibration admitted 75 `1` samples and 61 `12` samples with 0 wrong, but **no** `3` samples; the independent physical scene test still shifted drastically, and an exact binomial bound on one calibration distribution does not imply distribution-shift safety.
+
+The metadata shield rejected only **two** test examples as OOD and blocked **one** prior baseline mistake. Adding quality features actually increased wrong accepted suggestions by 10 while correct suggestions increased by 2. Thus this particular feature/threshold hypothesis **failed** and must not be advertised as drift immunity.
+
+The OOF hard-negative teacher found 200 confident training-scene errors and 49 ambiguous training examples. Three weighted multinomial candidates were fitted, but calibration selected the unchanged baseline (variant index 0). No evidence that the reweighting helps, and no additional training on the fixed test should be initiated without new independent data.
+
+**No method achieves the <=5% heldout wrong-accepted objective; no model has been deployed, promoted or integrated into Chibi.** The public BOP test-scenes are repeated from R8 and must remain explicitly labelled posthoc. Do not turn these results into official BOP leaderboard scores or claims about real Meta wearable recognition. The work's next legitimate evidence source is a new independently licensed and labelled set of physical capture scenes with hard unknown objects and controlled camera/lighting changes.
+
+Permanent summary in this task branch: `docs/CHIBI_LENS_R3_RESULTS_20261114.json`, matched against original GitHub artifacts by the audit script, not by a later docs-only commit.
