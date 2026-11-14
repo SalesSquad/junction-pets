@@ -3641,19 +3641,26 @@ jobs:
         set -euo pipefail
         node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash -euo pipefail -c '
           mkdir -p "$CRACI_RECEIPT_DIR/artifacts/r-policy"
+          scratch="$RUNNER_TEMP/rokoko-r-work"
+          test ! -e "$scratch"
+          mkdir "$scratch"
           "$RUNNER_TEMP/r-rokoko-venv/bin/python" \
             "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-r-generate.py" \
             --source-root "$CRACI_SOURCE_ROOT" \
             --cohort "$CRACI_COHORT" --max-seconds 1050 \
-            --out "$CRACI_RECEIPT_DIR/artifacts/r-policy/dataset.csv"
+            --out "$scratch/dataset.csv"
           Rscript "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-r-train.R" \
-            "$CRACI_RECEIPT_DIR/artifacts/r-policy/dataset.csv" \
-            "$CRACI_RECEIPT_DIR/artifacts/r-policy/models" "$CRACI_SOURCE_SHA"
-          test -s "$CRACI_RECEIPT_DIR/artifacts/r-policy/models/training-report.json"
-          test -s "$CRACI_RECEIPT_DIR/artifacts/r-policy/models/trained-models.rds"
-          python3 -m zipfile -c "$CRACI_RECEIPT_DIR/artifacts/r-policy/synthetic-worlds.zip" \
-            "$CRACI_RECEIPT_DIR/artifacts/r-policy/dataset.csv"
-          test -s "$CRACI_RECEIPT_DIR/artifacts/r-policy/synthetic-worlds.zip"
+            "$scratch/dataset.csv" "$scratch/models" "$CRACI_SOURCE_SHA"
+          test -s "$scratch/dataset-receipt.json"
+          test -s "$scratch/models/training-report.json"
+          test -s "$scratch/models/trained-models.rds"
+          cp "$scratch/dataset-receipt.json" "$CRACI_RECEIPT_DIR/artifacts/r-policy/dataset-receipt.json"
+          cp "$scratch/models/training-report.json" "$CRACI_RECEIPT_DIR/artifacts/r-policy/training-report.json"
+          ( cd "$scratch" && python3 -m zipfile -c \
+            "$CRACI_RECEIPT_DIR/artifacts/r-policy/training-evidence.zip" \
+            dataset.csv dataset-receipt.json models/training-report.json models/trained-models.rds )
+          test -s "$CRACI_RECEIPT_DIR/artifacts/r-policy/training-evidence.zip"
+          python3 -m zipfile -t "$CRACI_RECEIPT_DIR/artifacts/r-policy/training-evidence.zip"
         '
     - id: receipt
       name: Finalize exact-source R training record even after failure
