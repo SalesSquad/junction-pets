@@ -32,3 +32,11 @@ test('the bridge refuses executed actions, unknown operations, low-risk deletes 
   assert.throws(() => toPendingActions({ ...base, executed_actions: ['x'] }, ctx), /invalid companion response/);
   assert.equal(canonical({ b: 1, a: [2, { d: 1, c: 2 }] }), '{"a":[2,{"c":2,"d":1}],"b":1}');
 });
+
+test('v2 responses validate with governance and refuse a LIVE handoff label', () => {
+  const v2 = { ...base, risks_and_side_effects: ['rebalance'], governance: { owner_role: 'platform owner', approvals_needed: ['DPO'], data_classification: 'special_category' }, peer_handoffs: [] };
+  assert.deepEqual(validateResponse(v2), []);
+  const live = { ...v2, peer_handoffs: [{ actor: 'a', recipient: 'b', capability: 'c', approved_context: 'd', expiry: 'e', budget: 'f', receipt_label: 'LIVE' }] };
+  assert.ok(validateResponse(live).some(e => /LIVE/.test(e)));
+  assert.ok(validateResponse({ ...v2, extra: 1 }).some(e => /unknown field/.test(e)));
+});

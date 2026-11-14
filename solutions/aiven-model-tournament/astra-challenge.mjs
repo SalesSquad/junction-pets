@@ -12,7 +12,8 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { loadPackages } from '../../lib/catalog.mjs';
 import { companyContext } from '../../lib/company-context.mjs';
-import { validateResponse, toPendingActions, RESPONSE_SCHEMA } from '../aiven-decision-bridge/bridge.mjs';
+import { validateResponse, toPendingActions, RESPONSE_SCHEMA, RESPONSE_SCHEMA_V2 } from '../aiven-decision-bridge/bridge.mjs';
+import { systemFor } from '../../pets/aiven/modules/router.mjs';
 
 const arg = (k, d) => process.argv.find(a => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -51,11 +52,12 @@ For each case write strict, checkable mustInclude (2-4) and mustNotClaim (1-3) i
 }
 
 const set = JSON.parse(readFileSync(arg('cases'), 'utf8'));
+const arms = arg('arms', 'full').split(','); // full = AGENTS.md + response.v1; modular = routed modules + response.v2
 const models = arg('models', 'haiku,sonnet').split(','), repeats = Number(arg('repeats', '2')), judge = arg('judge', 'opus'), concurrency = Number(arg('concurrency', '6'));
 const system = companyContext(aiven);
 const ctx = { adoptionId: '00000000-0000-4000-8000-000000000001', agentVersionId: '00000000-0000-4000-8000-000000000002', authorityRevision: '1', conversationId: 'astra', chibi: 'junction.aiven' };
-const jobs = models.flatMap(model => set.cases.flatMap(c => Array.from({ length: repeats }, (_, rep) => ({ model, c, rep }))));
-if (!process.argv.includes('--execute')) { console.log(JSON.stringify({ dryRun: true, cases: set.cases.length, models, repeats, judge, answers: jobs.length })); process.exit(0); }
+const jobs = models.flatMap(model => arms.flatMap(arm => set.cases.flatMap(c => Array.from({ length: repeats }, (_, rep) => ({ model, arm, c, rep })))));
+if (!process.argv.includes('--execute')) { console.log(JSON.stringify({ dryRun: true, cases: set.cases.length, models, arms, repeats, judge, answers: jobs.length })); process.exit(0); }
 
 const judgePrompt = (c, resp) => `Grade the assistant's typed response against the rubric. Strict and literal.
 mustInclude (each substantively present in answer, facts, assumptions, proposals or next_check):
@@ -70,9 +72,10 @@ Return only JSON {"include":[bool per I],"violations":[bool per N],"note":"<=25 
 const results = []; let next = 0; const started = new Date().toISOString();
 await Promise.all(Array.from({ length: concurrency }, async () => {
   while (next < jobs.length) {
-    const { model, c, rep } = jobs[next++];
-    const a = await claude(model, c.prompt, system, RESPONSE_SCHEMA);
-    if (a.error || !a.data) { results.push({ model, case: c.id, rep, error: a.error ?? 'no structured output' }); continue; }
+    const { model, arm, c, rep } = jobs[next++];
+    const routed = arm === 'modular' ? systemFor(c.prompt) : null;
+    const a = await claude(model, c.prompt, routed ? routed.system : system, routed ? RESPONSE_SCHEMA_V2 : RESPONSE_SCHEMA);
+    if (a.error || !a.data) { results.push({ model, arm, case: c.id, rep, error: a.error ?? 'no structured output' }); continue; }
     const typedErrors = validateResponse(a.data);
     let pending = 0; try { pending = toPendingActions(a.data, ctx).length; } catch {}
     const raw = JSON.stringify(a.data);
@@ -84,16 +87,16 @@ await Promise.all(Array.from({ length: concurrency }, async () => {
     };
     let g = null, jr = null;
     for (let i = 0; i < 2 && !g; i++) { jr = await claude(judge, judgePrompt(c, a.data)); try { g = JSON.parse((jr.text ?? '').replace(/^```json\s*|```\s*$/g, '').trim()); } catch {} }
-    if (!g) { results.push({ model, case: c.id, rep, error: 'judge unparseable' }); continue; }
+    if (!g) { results.push({ model, arm, case: c.id, rep, error: 'judge unparseable' }); continue; }
     const inc = g.include.filter(Boolean).length, viol = g.violations.filter(Boolean).length;
     const detOk = Object.values(det).every(Boolean);
     const score = Math.max(0, inc / c.mustInclude.length - 0.5 * viol) * (detOk ? 1 : 0.5);
-    results.push({ model, case: c.id, rep, pass: detOk && inc === c.mustInclude.length && viol === 0, score: +score.toFixed(3), det, typedErrors, proposals: pending, includeHits: inc, includeTotal: c.mustInclude.length, violations: viol, note: g.note, costUsd: +(a.cost + (jr.cost ?? 0)).toFixed(4), responseSha256: sha(raw), _raw: a.data });
-    console.error(`${model} ${c.id}#${rep} ${results.at(-1).pass ? 'PASS' : 'FAIL ' + results.at(-1).score}`);
+    results.push({ model, arm, modules: routed?.modules ?? null, case: c.id, rep, pass: detOk && inc === c.mustInclude.length && viol === 0, score: +score.toFixed(3), det, typedErrors, proposals: pending, includeHits: inc, includeTotal: c.mustInclude.length, violations: viol, note: g.note, costUsd: +(a.cost + (jr.cost ?? 0)).toFixed(4), responseSha256: sha(raw), _raw: a.data });
+    console.error(`${model}/${arm} ${c.id}#${rep} ${results.at(-1).pass ? 'PASS' : 'FAIL ' + results.at(-1).score}`);
   }
 }));
-const summary = Object.fromEntries(models.map(m => { const r = results.filter(x => x.model === m && !x.error); return [m, { runs: r.length, passRate: +(r.filter(x => x.pass).length / (r.length || 1)).toFixed(3), meanScore: +(r.reduce((s, x) => s + x.score, 0) / (r.length || 1)).toFixed(3), schemaValid: r.filter(x => x.det.schemaValid).length, proposalOk: r.filter(x => x.det.proposalOk).length, noSecretEcho: r.filter(x => x.det.noSecretEcho).length, costUsd: +r.reduce((s, x) => s + x.costUsd, 0).toFixed(3), errors: results.filter(x => x.model === m && x.error).length }]; }));
+const summary = Object.fromEntries(models.flatMap(m => arms.map(arm => [m, arm])).map(([m, arm]) => { const r = results.filter(x => x.model === m && x.arm === arm && !x.error); return [`${m}/${arm}`, { runs: r.length, passRate: +(r.filter(x => x.pass).length / (r.length || 1)).toFixed(3), meanScore: +(r.reduce((s, x) => s + x.score, 0) / (r.length || 1)).toFixed(3), schemaValid: r.filter(x => x.det.schemaValid).length, proposalOk: r.filter(x => x.det.proposalOk).length, noSecretEcho: r.filter(x => x.det.noSecretEcho).length, costUsd: +r.reduce((s, x) => s + x.costUsd, 0).toFixed(3), errors: results.filter(x => x.model === m && x.arm === arm && x.error).length }]; }));
 const out = { casesFile: arg('cases'), casesSha256: sha(readFileSync(arg('cases'))), aivenContextSha256: sha(system), judge, startedAt: started, finishedAt: new Date().toISOString(), summary, results: results.map(({ _raw, ...r }) => r) };
 mkdirSync(new URL('../../dist/evals/', import.meta.url), { recursive: true });
-writeFileSync(new URL(`../../dist/evals/astra-challenge-${Date.now()}.json`, import.meta.url), JSON.stringify({ ...out, raw: results.map(r => ({ model: r.model, case: r.case, rep: r.rep, response: r._raw })) }, null, 2));
+writeFileSync(new URL(`../../dist/evals/astra-challenge-${Date.now()}.json`, import.meta.url), JSON.stringify({ ...out, raw: results.map(r => ({ model: r.model, arm: r.arm, case: r.case, rep: r.rep, response: r._raw })) }, null, 2));
 console.log(JSON.stringify(out, null, 2));

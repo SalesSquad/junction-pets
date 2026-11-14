@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
 export const RESPONSE_SCHEMA = JSON.parse(readFileSync(new URL('../../pets/aiven/schemas/response.v1.json', import.meta.url), 'utf8'));
+export const RESPONSE_SCHEMA_V2 = JSON.parse(readFileSync(new URL('../../pets/aiven/schemas/response.v2.json', import.meta.url), 'utf8'));
 const OPS = new Set(RESPONSE_SCHEMA.properties.action_proposals.items.properties.operation.enum);
 const HIGH_RISK = new Set(['service_delete', 'consumer_group_reset_offsets', 'service_power', 'credential_rotate']);
 
@@ -14,12 +15,13 @@ export const canonical = v => Array.isArray(v) ? `[${v.map(canonical).join(',')}
   : v && typeof v === 'object' ? `{${Object.keys(v).sort().map(k => `${JSON.stringify(k)}:${canonical(v[k])}`).join(',')}}` : JSON.stringify(v);
 const sha = s => createHash('sha256').update(s).digest('hex');
 
-export function validateResponse(r) {
+export function validateResponse(r, schema = 'governance' in (r ?? {}) ? RESPONSE_SCHEMA_V2 : RESPONSE_SCHEMA) {
   const errors = [];
-  const req = RESPONSE_SCHEMA.required;
+  const req = schema.required;
   if (!r || typeof r !== 'object') return ['not an object'];
   for (const k of req) if (!(k in r)) errors.push(`missing ${k}`);
-  for (const k of Object.keys(r)) if (!(k in RESPONSE_SCHEMA.properties)) errors.push(`unknown field ${k}`);
+  for (const k of Object.keys(r)) if (!(k in schema.properties)) errors.push(`unknown field ${k}`);
+  for (const h of r.peer_handoffs ?? []) if (h.receipt_label === 'LIVE') errors.push('a handoff proposal cannot be LIVE');
   if (Array.isArray(r.executed_actions) && r.executed_actions.length) errors.push('executed_actions must be empty');
   for (const [i, p] of (r.action_proposals ?? []).entries()) {
     if (!OPS.has(p.operation)) errors.push(`proposal ${i}: unknown operation`);

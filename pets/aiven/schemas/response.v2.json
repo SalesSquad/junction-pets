@@ -1,0 +1,214 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://salessquad.github.io/junction-pets/aiven/response.v2.json",
+  "title": "Aiven companion typed response v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "answer",
+    "facts",
+    "assumptions",
+    "action_proposals",
+    "executed_actions",
+    "next_check",
+    "risks_and_side_effects",
+    "governance",
+    "peer_handoffs"
+  ],
+  "properties": {
+    "answer": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The user-facing answer, in the user's language."
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim",
+          "source_url"
+        ],
+        "properties": {
+          "claim": {
+            "type": "string"
+          },
+          "source_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Official Aiven documentation URL (https://aiven.io/...) supporting the claim, or null. Do not cite other sites here."
+          }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "action_proposals": {
+      "type": "array",
+      "description": "Changes the user asked for. Never executed by the companion; each becomes a Chibi pending action that a human approves or declines.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operation",
+          "target",
+          "parameters",
+          "reason",
+          "risk",
+          "reversible",
+          "owner_role",
+          "rollback"
+        ],
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "service_update_plan",
+              "service_create",
+              "service_delete",
+              "service_power",
+              "topic_create",
+              "topic_update",
+              "consumer_group_reset_offsets",
+              "integration_create",
+              "credential_rotate",
+              "other"
+            ]
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "risk": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "description": "high for service_delete, consumer_group_reset_offsets, service_power, credential_rotate and anything touching personal data; otherwise medium or low."
+          },
+          "reversible": {
+            "type": "boolean"
+          },
+          "owner_role": {
+            "type": "string",
+            "minLength": 2,
+            "description": "Accountable human role that approves and owns the change, e.g. \"platform owner\" or \"data protection officer\"."
+          },
+          "rollback": {
+            "type": "string",
+            "minLength": 5,
+            "description": "How to undo or contain the change if it goes wrong."
+          }
+        }
+      }
+    },
+    "executed_actions": {
+      "type": "array",
+      "maxItems": 0,
+      "description": "Always empty: the companion executes nothing."
+    },
+    "next_check": {
+      "type": "string",
+      "minLength": 1
+    },
+    "risks_and_side_effects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Concrete consequences of the proposals and recommendations (irreversibility, ordering, rebalancing, data loss or replay, cost, residency)."
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_role",
+        "approvals_needed",
+        "data_classification"
+      ],
+      "properties": {
+        "owner_role": {
+          "type": "string",
+          "minLength": 2
+        },
+        "approvals_needed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "data_classification": {
+          "type": "string",
+          "enum": [
+            "none",
+            "internal",
+            "personal",
+            "special_category"
+          ]
+        }
+      }
+    },
+    "peer_handoffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "actor",
+          "recipient",
+          "capability",
+          "approved_context",
+          "expiry",
+          "budget",
+          "receipt_label"
+        ],
+        "properties": {
+          "actor": {
+            "type": "string"
+          },
+          "recipient": {
+            "type": "string"
+          },
+          "capability": {
+            "type": "string"
+          },
+          "approved_context": {
+            "type": "string"
+          },
+          "expiry": {
+            "type": "string"
+          },
+          "budget": {
+            "type": "string"
+          },
+          "receipt_label": {
+            "type": "string",
+            "enum": [
+              "PROPOSED_NOT_SENT",
+              "LIVE",
+              "REPLAYED",
+              "SYNTHETIC",
+              "OFFLINE_DETERMINISTIC"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
