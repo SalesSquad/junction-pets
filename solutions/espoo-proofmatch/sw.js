@@ -1,7 +1,7 @@
 // Only app-shell assets; no candidate input, proposals or third-party resources.
-const CACHE = 'proofmatch-espoo-private-shell-v2';
+const CACHE = 'proofmatch-espoo-private-shell-v2-safari-qa-20261114';
 const ASSETS = ['./', './index.html', './styles.css', './app.mjs', './matcher.mjs', './data.mjs', './benchmark.mjs', './skill-graph.mjs', './event-meetings.mjs', './demo-validation.mjs'];
-self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS))));
+self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => ['proofmatch-espoo-shell-v1', 'proofmatch-espoo-private-shell-v2'].includes(key) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);

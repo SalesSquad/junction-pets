@@ -112,3 +112,55 @@ Coordinator follows through with task-branch PR, confirming the final source
 SHA and scope. Next acceptance: actual browser/keyboard flow and a source-rights
 review before any public contest submission; competition eligibility remains
 uncleared. No deployment or production connection is authorized by this record.
+
+
+## Safari real-browser / accessibility continuation — 2026-11-14
+
+**QA-owned delta after W2 HEAD `e542b7de1af6d93edba22dcff3d95400132fb808`.**
+This section is additional evidence; it does not rewrite the earlier author
+sandbox result. Source at this checkpoint remains private and local to the
+ProofMatch task branch until the coordinator's final verified push.
+
+- **Browser:** actual Safari 27.0 on the authorized Mac Mini, isolated
+  task-created Safari window on `http://127.0.0.1:4197/`; the user’s pre-existing
+  Safari tabs were not navigated. The standalone `safaridriver` HTTP server
+  responded to `/status` but creating a WebDriver session timed out, so no
+  successful WebDriver session is claimed. Existing authorized Safari Apple
+  Events JavaScript drove real WebKit DOM interactions instead.
+- **Reproducible QA:** `python3 solutions/espoo-proofmatch/safari-e2e.py
+  --window-id <task-window-id> --url http://127.0.0.1:4197/`.
+  Nine browser-flow checkpoints **PASS**: five selectable fictional people
+  without a person score, Ari’s related TypeScript→JavaScript evidence, Ren
+  without a portfolio, role change, employer proposal, intended candidate
+  acceptance, employer cancellation, candidate decline, and reset/no navigation.
+  Repeated with Safari Responsive Design Mode at **390 × 844 CSS pixels**;
+  `document.documentElement.scrollWidth === innerWidth === 390`.
+- **Accessibility:** Safari accessibility tree exposed named role selector,
+  candidate controls, evidence disclosures, shared-time selector and actionable
+  buttons. The macOS authorized UI driver sent real Space to focused Ari card:
+  `aria-pressed` switched false→true, detail became Ari. Real Tab reached
+  “Inspect the transfer rule”, and Safari reported `:focus-visible=true`.
+  Sampled computed text/background contrast ratios at 390 CSS px were at least
+  **5.76:1** across body, muted, primary/selected cards, badge, notes and
+  buttons. Sampled candidate/proposal/reset controls were >=46 CSS px tall.
+  These are sampled outcomes, **not complete WCAG conformance**, VoiceOver
+  speech, or physical iPhone qualification.
+- **Defect fixed:** mobile CSS hides the desktop `<br>` inside the hero
+  heading; previously Safari rendered “Less polish.More possibility.”. An
+  explicit source-space now yields “Less polish. More possibility.” in Safari;
+  `safari-e2e.py` asserts this text.
+- **Offline regression reproduced and repaired:** old service-worker v2
+  cache returned the stale mobile heading after offline reload. Bumped the
+  owned cache version, added `skipWaiting()` after successful cache
+  population, and restricted cleanup to known previous ProofMatch caches.
+  **Verified** in Safari: new version installed, old v2 cache removed,
+  `navigator.serviceWorker.controller=true`; local Node server was stopped
+  and loopback HTTP confirmed unavailable, then Safari offline reload
+  **PASS**. All nine user-flow checkpoints again **PASS offline**, with the
+  corrected heading and all five fictional candidates. No candidate or meeting
+  data was written to the cache.
+- **Still not verified:** actual VoiceOver spoken navigation, physical iOS
+  Safari, end-user studies, service-worker update behavior across multiple
+  simultaneous clients, any real identity/consent/booking, public deployment,
+  or contest eligibility of pre-existing private Workbase-derived code.
+  No external accounts, city API, or production data were used.

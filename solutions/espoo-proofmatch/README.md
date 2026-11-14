@@ -93,3 +93,25 @@ forms are heuristics, not validated evidence of aptitude. No protected-attribute
 inference, automated hiring/rejection, model, external provider or real event
 participant path exists. See `ARCHITECTURE.md` for boundaries and missing
 production controls.
+
+
+## Safari browser QA (macOS, private demo only)
+
+Start the local Node server, then open a **new, task-owned Safari window** to its
+loopback URL. Obtain that window's ID from your authorized local automation; do
+not target another user's window or enable new browser permissions to make a
+test pass. On a Mac where Safari Apple Events JavaScript is already authorized:
+
+```sh
+python3 solutions/espoo-proofmatch/safari-e2e.py \
+  --window-id <TASK_CREATED_SAFARI_WINDOW_ID> \
+  --url http://127.0.0.1:4173/
+```
+
+This dependency-free script checks nine real Safari DOM interaction checkpoints,
+including the explicit employer/candidate actions, the mobile heading text and
+horizontal overflow. It does **not** test authenticated consent, physical
+iPhone Safari, screen-reader speech or hardware device behavior. Safari 27.0
+was additionally inspected with macOS accessibility snapshots and real
+keyboard Tab/Space events. See `PROGRESS.md` for the exact source-bound
+2026-11-14 desktop, 390 × 844 responsive, and offline-cache readbacks.
