@@ -39,6 +39,7 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - valio-funding-race
         - immune-tournament
         - chaos-lab
+        - rokoko-r-tournament
       source_sha:
         description: Full product SHA; overrides historical baseline. Tieto uses sponsor_revision.
         type: string
@@ -3550,6 +3551,123 @@ jobs:
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
       with:
         name: craci-chaos-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+
+  rokoko-r-tournament:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-r-tournament' }}
+    needs: plan
+    name: "Rokoko R ML / cohort ${{ matrix.cohort }} / CPU 8"
+    runs-on: craci
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    permissions:
+      contents: read
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-r-tournament
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+      CRACI_COHORT: ${{ matrix.cohort }}
+    steps:
+    - name: Configure dedicated CRACI 8-vCPU 24-GB sandbox
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '8'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Enforce separate authorized global credit deadline and evidence path
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860
+        [[ "$CRACI_SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+        test "$CRACI_SOURCE_SHA" = '59479b42b177c1829a2e6678adfff1fb68aef09c'
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+    - name: Checkout immutable R tournament harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Checkout immutable Rokoko MuJoCo simulator
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Install R base and rpart with monitored Ubuntu apt dependencies
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update -qq
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -qq -y --no-install-recommends r-base-core r-cran-rpart r-cran-jsonlite
+        Rscript -e 'stopifnot(requireNamespace("rpart"),requireNamespace("jsonlite"))'
+        Rscript --version
+    - name: Install pinned MuJoCo simulator in temporary venv
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/r-rokoko-venv"
+        "$RUNNER_TEMP/r-rokoko-venv/bin/python" -m pip install --disable-pip-version-check --no-input 'numpy==2.1.3' 'mujoco==3.3.6'
+        test "$(git -C "$CRACI_SOURCE_ROOT" rev-parse HEAD)" = "$CRACI_SOURCE_SHA"
+        test "$(git -C "$CRACI_HARNESS_ROOT" rev-parse HEAD)" = "$CRACI_HARNESS_SHA"
+    - name: Simulate paired worlds and train independent R decision models
+      id: qualification
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash -euo pipefail -c '
+          mkdir -p "$CRACI_RECEIPT_DIR/artifacts/r-policy"
+          "$RUNNER_TEMP/r-rokoko-venv/bin/python" \
+            "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-r-generate.py" \
+            --source-root "$CRACI_SOURCE_ROOT" \
+            --cohort "$CRACI_COHORT" --max-seconds 1050 \
+            --out "$CRACI_RECEIPT_DIR/artifacts/r-policy/dataset.csv"
+          Rscript "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-r-train.R" \
+            "$CRACI_RECEIPT_DIR/artifacts/r-policy/dataset.csv" \
+            "$CRACI_RECEIPT_DIR/artifacts/r-policy/models" "$CRACI_SOURCE_SHA"
+          test -s "$CRACI_RECEIPT_DIR/artifacts/r-policy/models/training-report.json"
+          test -s "$CRACI_RECEIPT_DIR/artifacts/r-policy/models/trained-models.rds"
+        '
+    - id: receipt
+      name: Finalize exact-source R training record even after failure
+      if: ${{ always() }}
+      shell: bash
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          mkdir -p "$CRACI_RECEIPT_DIR/upload"
+          printf '%s\n' '{"schemaVersion":1,"result":"incomplete","reason":"Pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+          printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+    - name: Upload independent model weights and source-bound metrics
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-r-policy-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
         path: ${{ runner.temp }}/craci-evidence/upload/
         if-no-files-found: error
         retention-days: 7

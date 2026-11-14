@@ -45,3 +45,16 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
   }
   assert.throws(() => resolvePlan({workload: 'meta-browser', browser: 'firefox'}, context), /Chromium/);
 });
+
+test('R training cohort maps to the exact physics source, never an implicit branch', () => {
+  const expected = '59479b42b177c1829a2e6678adfff1fb68aef09c';
+  const plan = resolvePlan({workload: 'rokoko-r-tournament', source_sha: expected}, context);
+  assert.equal(plan.jobCount, 4);
+  assert.equal(plan.maxParallel, 4);
+  assert.deepEqual(plan.matrix.include.map(row => row.cohort), [0, 1, 2, 3]);
+  assert.ok(plan.matrix.include.every(row => row.source_sha === expected));
+  assert.throws(
+    () => resolvePlan({workload: 'rokoko-r-tournament', source_sha: candidate}, context),
+    /pinned simulator SHA/
+  );
+});
