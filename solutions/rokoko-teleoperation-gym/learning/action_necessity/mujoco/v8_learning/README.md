@@ -36,15 +36,30 @@ python3 scripts/craci/rokoko-mujoco-v7-retain-evidence.py \
   --restore-output /approved/private/restored-v7
 ```
 
-Place byte-identical copies of the 3 small independent qualification files in
-the **private** restored folder. `run.py` refuses to train if any expected
-original SHA, exact source, physics version, all 1,280 trial identities,
-sample-pairing, independent replay, train-only flag, or full raw trace digest
-is missing or contradictory. The verifier does not authorize deployment.
+Place byte-identical copies of the 3 small independent qualification files,
+the original CRACI `receipt.json`, and the **outer downloaded GitHub artifact**
+as `artifact.zip` in the **private** restored folder. `run.py` requires all
+seven files (including the 11 MB outer artifact). It checks **independently
+pinned** corrected-run SHA-256 hashes, rather than trusting the input manifest:
+
+| Immutable input | Exact SHA-256 |
+| --- | --- |
+| `training.json` | `06ffeb5f4d5a639eba15f0bd2c260b6d0c046ea13665a8f5e884848bb1a236d8` |
+| `full_transitions.jsonl.gz` | `3888fd350c66f3a1ca6a2bebb7731097c86181b5644d921b0bb580855bae4d64` |
+| `receipt.json` | `546249d8ccc2929a58429c0c767e58b92eb9deaabb2d3f39c36761b4e27ae9a6` |
+| `artifact.zip` | `612a7770ded0466e00ec45e1b0073cb03a0cf4758d0e17d354f32e0639749e3c` |
+
+It also pins manifest and independent qualification/replay SHA bytes and the
+CRACI `craci.43640728389.1.ebec06d6f3461523` success receipt. It aborts if
+the original V7 source and fixed harness HEAD, physics version, any of 1,280
+trial identities, sample pairing, independent replay, train-only flag, or
+full raw trace digest is missing or contradictory. The verifier does not
+authorize deployment.
 
 ## Training recipe
 
-Pin a clean Git checkout of this V8 task branch and run:
+Pin an entirely clean Git checkout of this V8 task branch (including no
+untracked files) and run:
 
 ```sh
 python3 solutions/rokoko-teleoperation-gym/learning/action_necessity/mujoco/v8_learning/run.py \
