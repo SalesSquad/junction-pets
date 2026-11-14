@@ -1,0 +1,55 @@
+{
+  "additional_observation": {
+    "kind": "label_closeup",
+    "reason": "No brand, model, or regulatory text is visible on the query or candidates, so a label closeup is the most useful next observation to distinguish them."
+  },
+  "identifiability": "insufficient",
+  "observations": [
+    {
+      "candidate": "c01",
+      "contradicting_visible_traits": [
+        "Query is a front-facing wall charger with a single USB-A port and foldable prongs; c01 is an angled side/prong view of a different charger body.",
+        "Query has one USB-A port; c01 shows a different port orientation and no matching front face.",
+        "Query has a small circular LED above the port; c01 shows a small dot on the side but not in the same front-face position."
+      ],
+      "matching_visible_traits": [
+        "Both are black rectangular USB chargers with a single USB-A port.",
+        "Both have a small circular indicator dot on the body."
+      ]
+    },
+    {
+      "candidate": "c02",
+      "contradicting_visible_traits": [
+        "Query has one USB-A port; c02 is a multi-port USB hub with six ports.",
+        "Query is a wall plug form factor; c02 is a desktop hub with a cable and no prongs.",
+        "Query has foldable side wings; c02 has a solid rectangular body with no wings."
+      ],
+      "matching_visible_traits": [
+        "Both are black USB power devices with USB-A ports.",
+        "Both have a small circular LED indicator on the body."
+      ]
+    },
+    {
+      "candidate": "c03",
+      "contradicting_visible_traits": [
+        "Query is a USB charger; c03 shows two black pencil sharpeners labeled CUTTING.",
+        "Query has a USB-A port; c03 has no ports and is not an electronic charger.",
+        "Query is a single device; c03 is a pair of identical sharpeners."
+      ],
+      "matching_visible_traits": [
+        "Both are black plastic objects photographed on a white background."
+      ]
+    }
+  ],
+  "proposed_candidate": null,
+  "ranking": [
+    "c01",
+    "c02",
+    "c03"
+  ],
+  "schema_version": 1,
+  "lane": "detail",
+  "qualification": false,
+  "action_authorized": false,
+  "physical_identity_verified": false
+}

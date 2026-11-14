@@ -1,0 +1,250 @@
+{
+  "schema_version": 1,
+  "work_id": "META-LENS-R5-NEMOTRON4-20261114",
+  "source_commit": "c1c766547765bec0b13a437ce3bb38507c525423",
+  "source_sha256": {
+    ".gitignore": "4c206e794c6a46d48fb1d94e2208b0d2363e64fe4fcc7faf9b1473438fb7c22e",
+    "nim_models.py": "fac771e7d697d5e2d43ed7aacb8028aab2fef3ed6b91b1069cd47f87982ec0ba",
+    "prepare_cases.py": "562e08dd10d278221c296b016137c1b39b46aba79a26d42d72be47d4eba993af",
+    "protocol.py": "9bdc44c26acdd7cfccd75dfceb887670d335830418c7d3497ba927f0c1710369",
+    "provider.py": "aeb4d4bed72a54910bdbf65bd1e39d96f1ea1b044e210306bc17980fc465667a",
+    "run_specialists.py": "cfe289b1dc873f88b861bee42a6c5885189598920dd151463c096340c36ba931",
+    "test_nim_models.py": "6b5f3f7acad229612d01068949c662b5662cc24b4e854e140d0535b8cb4ef55b",
+    "test_protocol.py": "fbb1a9325cc139586aae291ea1987ef44be971717efecbb56b7c2600df6c8b54"
+  },
+  "cases_sha256": "40eab6b31ed50034b92b7d93f0c27d79efecfdb832f29c4d05cc86fe1c57e4eb",
+  "provider": "verda_nemotron",
+  "model": "nemotron-3.5-super-vl",
+  "lanes": [
+    {
+      "lane": "ocr",
+      "attempted_cases": 1,
+      "valid_observations": 0,
+      "records": [
+        {
+          "case_id": "q0001",
+          "lane": "ocr",
+          "split": "dev",
+          "qualification": false,
+          "schema_version": 1,
+          "provider": "verda_nemotron",
+          "url": "https://containers.datacrunch.io/nemotron-3-5-super-vl-b300/v1/chat/completions",
+          "requested_model": "nemotron-3.5-super-vl",
+          "request_sha256": "23202b7b4e77b29df0c93cd4ed62b3221791374e55869b62837f629aca1cbe4c",
+          "request_bytes": 14278,
+          "started_utc": "2026-11-14T21:17:56.766076+00:00",
+          "attempts": 1,
+          "retry_performed": false,
+          "provider_completion_known": true,
+          "verified_cost_usd": null,
+          "usage": {
+            "prompt_tokens": 492,
+            "total_tokens": 2540,
+            "completion_tokens": 2048,
+            "prompt_tokens_details": null,
+            "completion_tokens_details": {
+              "reasoning_tokens": 2048
+            }
+          },
+          "http_status": 200,
+          "status": "preparation_or_schema_error",
+          "returned_model": "nemotron-3.5-super-vl",
+          "finish_reason": "length",
+          "elapsed_seconds": 4.336651000005077,
+          "ended_utc": "2026-11-14T21:18:01.103696+00:00",
+          "response_sha256": "6625919df01b3cd9f42988220c3ebd44eff22690d8342deeddeb201b052e62c8",
+          "response_bytes": 6198,
+          "error_type": "ValueError",
+          "error": "incomplete_provider_completion"
+        }
+      ]
+    },
+    {
+      "lane": "visual",
+      "attempted_cases": 1,
+      "valid_observations": 0,
+      "records": [
+        {
+          "case_id": "q0001",
+          "lane": "visual",
+          "split": "dev",
+          "qualification": false,
+          "schema_version": 1,
+          "provider": "verda_nemotron",
+          "url": "https://containers.datacrunch.io/nemotron-3-5-super-vl-b300/v1/chat/completions",
+          "requested_model": "nemotron-3.5-super-vl",
+          "request_sha256": "629e6058cf23394b2563248682ed612ef71a55f9b16275c730dc373509d8829b",
+          "request_bytes": 45645,
+          "started_utc": "2026-11-14T21:17:56.770740+00:00",
+          "attempts": 1,
+          "retry_performed": false,
+          "provider_completion_known": true,
+          "verified_cost_usd": null,
+          "usage": {
+            "prompt_tokens": 1422,
+            "total_tokens": 3470,
+            "completion_tokens": 2048,
+            "prompt_tokens_details": null,
+            "completion_tokens_details": {
+              "reasoning_tokens": 2048
+            }
+          },
+          "http_status": 200,
+          "status": "preparation_or_schema_error",
+          "returned_model": "nemotron-3.5-super-vl",
+          "finish_reason": "length",
+          "elapsed_seconds": 5.709342999994988,
+          "ended_utc": "2026-11-14T21:18:02.480081+00:00",
+          "response_sha256": "37acfe0f4efb93db5c98ccbd3fa1767c88043535955096e5fe5f73d46ab838d5",
+          "response_bytes": 8584,
+          "error_type": "ValueError",
+          "error": "incomplete_provider_completion"
+        }
+      ]
+    },
+    {
+      "lane": "detail",
+      "attempted_cases": 1,
+      "valid_observations": 0,
+      "records": [
+        {
+          "case_id": "q0001",
+          "lane": "detail",
+          "split": "dev",
+          "qualification": false,
+          "schema_version": 1,
+          "provider": "verda_nemotron",
+          "url": "https://containers.datacrunch.io/nemotron-3-5-super-vl-b300/v1/chat/completions",
+          "requested_model": "nemotron-3.5-super-vl",
+          "request_sha256": "0c391c7b4f73d8452080cf7e7b99ee544189f68b5bfbe187f14ca0a8584a3227",
+          "request_bytes": 45609,
+          "started_utc": "2026-11-14T21:17:56.775081+00:00",
+          "attempts": 1,
+          "retry_performed": false,
+          "provider_completion_known": true,
+          "verified_cost_usd": null,
+          "usage": {
+            "prompt_tokens": 1417,
+            "total_tokens": 3465,
+            "completion_tokens": 2048,
+            "prompt_tokens_details": null,
+            "completion_tokens_details": {
+              "reasoning_tokens": 2048
+            }
+          },
+          "http_status": 200,
+          "status": "preparation_or_schema_error",
+          "returned_model": "nemotron-3.5-super-vl",
+          "finish_reason": "length",
+          "elapsed_seconds": 4.986751292002737,
+          "ended_utc": "2026-11-14T21:18:01.761804+00:00",
+          "response_sha256": "f3077bc076a121190398152afa0538b0a2206e8a93e512969028c6b3fa5c7a90",
+          "response_bytes": 8274,
+          "error_type": "ValueError",
+          "error": "incomplete_provider_completion"
+        }
+      ]
+    },
+    {
+      "lane": "critic",
+      "attempted_cases": 1,
+      "valid_observations": 0,
+      "records": [
+        {
+          "case_id": "q0001",
+          "lane": "critic",
+          "split": "dev",
+          "qualification": false,
+          "schema_version": 1,
+          "provider": "verda_nemotron",
+          "url": "https://containers.datacrunch.io/nemotron-3-5-super-vl-b300/v1/chat/completions",
+          "requested_model": "nemotron-3.5-super-vl",
+          "request_sha256": "862d61f8550e93df62a909700a0f4bc754f83feed145af85f6c9041df65bb3dc",
+          "request_bytes": 45570,
+          "started_utc": "2026-11-14T21:17:56.773291+00:00",
+          "attempts": 1,
+          "retry_performed": false,
+          "provider_completion_known": true,
+          "verified_cost_usd": null,
+          "usage": {
+            "prompt_tokens": 1405,
+            "total_tokens": 3453,
+            "completion_tokens": 2048,
+            "prompt_tokens_details": null,
+            "completion_tokens_details": {
+              "reasoning_tokens": 2048
+            }
+          },
+          "http_status": 200,
+          "status": "preparation_or_schema_error",
+          "returned_model": "nemotron-3.5-super-vl",
+          "finish_reason": "length",
+          "elapsed_seconds": 4.711257834002026,
+          "ended_utc": "2026-11-14T21:18:01.484519+00:00",
+          "response_sha256": "b644762901f87721434a414a8f705f81e5cd7676920ce88196e2dbf2a06a958e",
+          "response_bytes": 8423,
+          "error_type": "ValueError",
+          "error": "incomplete_provider_completion"
+        }
+      ]
+    }
+  ],
+  "max_concurrent_calls": 4,
+  "maximum_inference_calls": 4,
+  "start_index": 0,
+  "case_count": 1,
+  "max_output_tokens_per_call": 2048,
+  "max_attempts_per_job": 1,
+  "deadline_seconds": 240,
+  "started_utc": "2026-11-14T21:17:56.660925+00:00",
+  "new_gpu_instances": 0,
+  "same_backbone_specialists_are_independent_models": false,
+  "verified_cost_usd": null,
+  "qualification": false,
+  "action_authorized": false,
+  "ended_utc": "2026-11-14T21:18:02.764484+00:00",
+  "elapsed_seconds": 6.108530707992031,
+  "attempted_cases": 4,
+  "http200_calls": 4,
+  "valid_observations": 0,
+  "reported_usage": [
+    {
+      "prompt_tokens": 492,
+      "total_tokens": 2540,
+      "completion_tokens": 2048,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 2048
+      }
+    },
+    {
+      "prompt_tokens": 1422,
+      "total_tokens": 3470,
+      "completion_tokens": 2048,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 2048
+      }
+    },
+    {
+      "prompt_tokens": 1417,
+      "total_tokens": 3465,
+      "completion_tokens": 2048,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 2048
+      }
+    },
+    {
+      "prompt_tokens": 1405,
+      "total_tokens": 3453,
+      "completion_tokens": 2048,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 2048
+      }
+    }
+  ],
+  "all_expected_cases_completed": true,
+  "status": "PARTIAL_OR_FAILED"
+}
