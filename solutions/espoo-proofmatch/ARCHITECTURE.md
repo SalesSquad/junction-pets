@@ -1,64 +1,96 @@
-# ProofMatch boundaries
+# Private ProofMatch v2 boundaries
 
-`data.mjs` → `matcher.mjs` → `app.mjs` → semantic static HTML/CSS.
-`benchmark.mjs` reuses the same pure matcher, with independently declared fixture
-labels. `matcher.test.mjs` is the sole focused Node test file. `serve.mjs` serves
-only the seven shell files plus the root page on 127.0.0.1. No npm dependency,
-root workspace integration, database, backend action API or external request.
+`data.mjs` → `skill-graph.mjs` → `app.mjs` → semantic static HTML/CSS.
+`event-meetings.mjs` owns the separate simulated event lifecycle.
+`demo-validation.mjs` provides bounded identifiers/lists, strict fictional event
+UTC windows and immutable output snapshots. No dependencies, database, action
+API, providers or outbound communications exist.
 
-## Determinism and audit
+This source adapts pre-existing PRIVATE Workbase IP at
+`4c5ce6e2edb41b83360dd7d0227da9ded06a566b`; exact lineage and uncleared contest
+scope are in `WORKBASE_REUSE.md`. Private IP is no longer absent from this slice.
+No auth, credentials, real data, core DB or global discoverability is imported.
 
-The scoring observation date is injected, never read from the wall clock. Every
-skill result exposes status, eligible evidence IDs, quality, age, role weight and
-score contribution. The UI links IDs to local fixture cards and their issuer,
-reference, source type, observed date and explicit `externalVerification:false`.
-These are synthetic descriptions of self-provided material. No third party has
-checked them; an artifact-shaped claim can be fabricated. Outcome presence is a
-simple heuristic, not semantic validation. No legal or hiring inference follows.
-There is no model, embedding similarity, AI-authorship detector or rejection
-threshold. Generic bio padding is used only by the labelled naive baseline.
+## Skill and interest evidence
 
-Per-skill maximum support avoids duplicate-card inflation. Stable ASCII-ID tie
-breaks and final one-decimal rounding make repeated results reproducible.
-Validation rejects missing/duplicate IDs, unsupported source types, purported
-external verification, invalid dates, nonfinite/nonpositive weights and malformed
-UTC windows. Functions do not mutate their input. Unknown skills stay visible;
-unknown capability is distinct from a known negative outcome. No personal or
-protected characteristics are input to the scoring path.
+The bounded symmetric graph normalizes canonical skill IDs, keeps the strongest
+duplicate edge and performs direct-edge lookup only. Exact matches precede the
+strongest related skill at threshold 0.5; related credit is 0.6 × relation.
+Ties use lexical canonical IDs, independent of input order. The one seeded
+TypeScript↔JavaScript edge at 0.85 is authored transfer context, not an external
+taxonomy or verified proficiency. Invalid/nonfinite weights, self-edges,
+oversized inputs and duplicate normalized role requirements fail validation.
 
-## Scheduling and draft state
+Workbase required-count coverage is separate from weighted preferred coverage
+(default preferred weight 0.6). Absent requirement groups yield `null`, not a
+claim of perfection. No aggregate v2 person score is computed or shown. Existing
+v1 positive role weights remain only for legacy benchmark compatibility.
 
-Intersections use explicit UTC half-open windows and canonical complete 20-minute
-slots. Overlapping input windows deduplicate. A draft holds its candidate and
-employer across roles within this tab, so overlapping pairs are unavailable;
-touching boundaries are allowed. Duplicate role/candidate pairs are rejected
-even at another slot. Both demo consent values must be boolean `true` at draft
-creation. Validation is repeated at the function boundary, not just in the UI.
+Only eligible self-provided cards at/before the injected observation date supply
+skill labels. An exact skill label on a statement stays a statement, not proof
+of proficiency; related labels stay explicitly related. No bio, protected
+characteristic, current clock, model or inferred preference enters this path.
+Structured `{code,args}` reasons and cautions have a separate English renderer;
+the UI exposes sources, uncertainty and direct transfer paths. Nothing claims
+external verification. Missing evidence is unknown ability, never rejection.
 
-The ledger is caller-supplied memory. It is neither trusted consent nor durable
-transactional storage. Two tabs do not coordinate; refresh loses drafts. There
-is no authenticated party, actual mutual confirmation, message recipient,
-email/calendar service or external booking. Availability is a fixed fictional
-event snapshot, not checked against current time or calendars. A live system
-would need participant identity, revocable consent, actual schedule freshness,
-atomic duplicate/conflict controls and independent provenance evaluation. These
-are future boundaries, not part of this demo or claims of authorization.
+Two-sided context consists of role needs and the candidate's explicit synthetic
+event-role IDs in `interests`. Absent/null/empty interest is unknown; another
+listed role is explained as other interests. Neither removes or sorts people.
+All candidates remain selectable in fixture order, including no-portfolio Ren.
+This is event-local context, not permission to share profiles with employers.
 
-## Privacy, offline and accessible presentation
+## Separate simulated event proposals
 
-No real people, PII import fields, analytics, cookies, localStorage, credentials,
-private repository material or external assets. UI dynamic strings are escaped
-before rendering; source references are text, never arbitrary executable URLs.
-The one external challenge link navigates only on user action. The local server
-has a strict file allowlist, read-only methods, MIME headers and restrictive CSP.
-The optional service worker caches only named shell assets at this origin and
-uses network-first with offline fallback; no drafts are written to storage.
-First load requires the local server. A stale cache is possible offline; clear
-site data for a fresh version. Cache versions must be changed for future releases.
+The event is fixed to fictional 15 November 2026. Strict round-tripped UTC
+strings, whole-minute availability and a fixed UTC-aligned 15-minute grid
+produce canonical half-open slots. Only complete shared slots may be proposed;
+overlapping availability windows deduplicate. Inputs are bounded: 24 windows per
+party, 256 records, 64-character IDs; times must be on the fictional event day.
 
-Native select/buttons/checkboxes/details, labelled fields, semantic landmarks,
-skip link, selected-state buttons, live announcements, focus restoration and
-visible focus support keyboard use. Consent resets on selection/role changes.
-Layout collapses for narrow screens; system fonts and reduced-motion rules avoid
-network and animation requirements. Automated/source checks do not establish
-screen-reader, device or production accessibility qualification.
+| Action | Intended simulated actor | Allowed source state | Result / time hold |
+| --- | --- | --- | --- |
+| Propose | Role's employer | No active role/candidate pair | pending / held |
+| Accept | Proposal's candidate | pending | accepted / held |
+| Decline | Proposal's candidate | pending | declined / released |
+| Cancel | Proposal's employer or candidate | pending or accepted | cancelled / released |
+
+Employer and candidate IDs must be distinct. A role cannot change employers in
+one ledger. Pending and accepted records prevent duplicate active pairs and
+conflicting times across roles/employers for either participant; adjacent slots
+are allowed. Decline/cancel preserve history and permit a fresh unique proposal.
+Terminal states cannot transition. Every public command validates ledger shape,
+known states, IDs, event, slot and consistency. Immutable cloned outputs prevent
+later caller mutation from altering a previous snapshot.
+
+These are local command checks, **not authentication or trusted consent**. One
+operator can select either party; a caller could fabricate a ledger or identity.
+Records have no signed authority, persistent audit log, transactional storage,
+clock freshness or cross-tab coordination. Reload/reset clears the simulation.
+No Workbase job application or external booking is made. A real system requires
+verified actors, event-scoped sharing, revocable consent, fresh calendars and
+atomic conflict/duplicate controls. Those capabilities are not implemented.
+
+## Serving, offline and presentation
+
+`serve.mjs` exposes only named product shell files, GET/HEAD and 127.0.0.1, with
+MIME/nosniff, no-referrer and restrictive CSP headers. Modules are served as JS.
+The v2 service worker caches all named transitive app modules and removes the
+known v1 cache when activated; it never deletes unrelated caches or persists
+meeting records. Fetch is network-first with same-origin named-asset offline
+fallback. A first visit requires the server; browser offline lifecycle is not
+qualified by source or syntax checks. Two shell versions may coexist until an
+old tab closes and the new worker activates. Clear site data for a fresh shell.
+
+UI strings are escaped before HTML insertion. Fixture references are text, not
+executable URLs. Native selects, buttons, fieldsets, details, labelled controls,
+selected-state candidate buttons, skip link, live announcements and explicit
+focus restoration support keyboard use. Party actions have visible actor labels,
+text statuses and 44px targets. Layout collapses to one column on narrow screens;
+reduced-motion rules avoid nonessential animation. Browser, screen-reader,
+physical-device and accessibility qualification remain unverified in this run.
+
+`matcher.mjs` and its 18 old tests remain unchanged, including their legacy draft
+policy. `benchmark.mjs` uses it for only 2 illustrative fixed cases and is not a
+v2 quality measurement. `skill-graph.test.mjs` and `event-meetings.test.mjs` cover
+new pure boundaries. No full monorepo suite or provider/runtime test is implied.
