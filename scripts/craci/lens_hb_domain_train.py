@@ -43,6 +43,15 @@ def read_manifest(data_root:Path):
     rows=record["samples"]
     if len(rows)!=140 or len({r["file"] for r in rows})!=140:
         raise ValueError("Source frame count or uniqueness violated")
+    from collections import Counter
+    actual=Counter((r["split"],r["scene_id"]) for r in rows)
+    expected={("train",5):40,("train",9):40,
+              ("calibration",10):30,("sealed",12):30}
+    if dict(actual)!=expected:
+        raise ValueError("Missing or substituted physical video-scene rows")
+    if (len({r.get("source_png_sha256") for r in rows})!=140 or
+        any(r.get("image_dimensions")!=[320,240] for r in rows)):
+        raise ValueError("Source-frame digest or pixel geometry mismatch")
     for r in rows:
         if r["split"] not in EXPECTED_SPLITS or r["scene_id"] not in EXPECTED_SPLITS[r["split"]]:
             raise ValueError("Source scene leakage")
