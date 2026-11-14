@@ -480,7 +480,10 @@ def main(argv=None):
                                 raw_evidence=raw_paths,ledger=ledger,
                                 credit_cutoff=args.credit_cutoff_utc,clock=args.at_utc)
         record["executed_head"]=exact
-        valid=True
+        # A scientifically honest STOP is not an execution PASS even when
+        # its original source evidence was fully verified (e.g. V10 lost 11
+        # true V5 goal250 wins). Persist the receipt but exit nonzero.
+        valid=record["decision"]!="STOP"
     except (FeedbackStop,FileNotFoundError,KeyError,TypeError,ValueError,
             json.JSONDecodeError,UnicodeDecodeError,gzip.BadGzipFile) as exc:
         record=dict(schema=SCHEMA,decision="STOP",reasons=[str(exc)],
