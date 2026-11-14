@@ -181,6 +181,14 @@ def verify_readout(training, readout):
     summaries = readout.get("strategies", {})
     require(set(summaries) == set(EXPECTED_STRATEGIES),
             "V10_INDEPENDENT_PAIRED_READOUT_WRONG_ARMS")
+    actual_near = sorted({r["seed"] for r in training["trials"]
+                          if r["observed_corridor"]})
+    actual_clear = sorted({r["seed"] for r in training["trials"]
+                           if not r["observed_corridor"]})
+    require(len(actual_near) == 128 and len(actual_clear) == 32 and
+            readout.get("near_seeds") == actual_near and
+            readout.get("clear_seeds") == actual_clear,
+            "V10_INDEPENDENT_PAIRED_COHORT_LISTS_NOT_RAW_OBSERVATIONS")
     for name in EXPECTED_STRATEGIES:
         rows = [r for r in training["trials"] if r["strategy"] == name]
         safe = [r for r in rows if not r["unsafe"] and not r["abstained"]]
@@ -191,11 +199,18 @@ def verify_readout(training, readout):
                 summaries[name]["abstained"] == sum(r["abstained"] for r in rows) and
                 summaries[name]["safe_goals_all"] == sum(r["success"] for r in safe) and
                 summaries[name]["safe_goals_near"] == sum(r["success"] for r in near) and
-                summaries[name]["safe_goals_clear"] == sum(r["success"] for r in clear),
+                summaries[name]["safe_goals_clear"] == sum(r["success"] for r in clear) and
+                summaries[name]["safe_near_lateral25_after_contact"] == sum(
+                    r["stage_funnel"]["signed_lateral25_after_contact"] for r in near) and
+                summaries[name]["safe_near_forward_reopen_after_lateral"] == sum(
+                    r["stage_funnel"]["forward_reopen_after_lateral25"] for r in near) and
+                summaries[name]["safe_near_dwell_after_reopen"] == sum(
+                    r["stage_funnel"]["full_contact_lateral_reopen_goal_dwell"]
+                    for r in near),
                 "V10_INDEPENDENT_PAIRED_SCIENCE_COUNTS_NOT_RAW")
     rows = {(r["seed"], r["strategy"]): r for r in training["trials"]}
     losses, new_goals, new_unsafe = [], [], []
-    for seed in sorted(readout["near_seeds"]):
+    for seed in actual_near:
         candidate = rows[seed, "v10_loss_informed"]
         safe_goal = candidate["success"] and not candidate["unsafe"]
         old = any(rows[seed, name]["success"] and not rows[seed, name]["unsafe"]
@@ -241,7 +256,11 @@ def main():
     subprocess.run([str(python), "-B", "-m", "unittest", "discover", "-q",
                     "-s", str(product), "-p", "test_contract.py"],
                    cwd=source_root, check=True)
-    output = receipt_root / "artifacts" / "rokoko-mujoco-v10-prospective"
+    # CRITICAL: 800 full sparse trial summaries are ~22 MiB, above the 20 MiB
+    # individual CRACI collector gate. Neither originals nor temporary files
+    # ever enter CRACI_RECEIPT_DIR. The whole original is independently read
+    # from private runner temp before being losslessly ZIP-published.
+    output = Path(os.environ["RUNNER_TEMP"]) / "v10-prospective-private-originals"
     require(not output.exists(), "V10_CRACI_NON_OVERWRITING_OUTPUT_REQUIRED")
     result = subprocess.run([
         str(python), "-B", str(product / "run.py"),
@@ -315,10 +334,22 @@ def main():
     with (output / "independent-qualification.json").open("x", encoding="utf8") as file:
         json.dump(check, file, indent=2, sort_keys=True)
         file.write("\n")
+    collector_output = receipt_root / "artifacts" / "rokoko-mujoco-v10-prospective"
+    require(not collector_output.exists(), "V10_CRACI_COLLECTOR_PREEXISTING_OUTPUT")
+    packer = import_verified(harness_root /
+                             "scripts/craci/rokoko-mujoco-v10-retain-evidence.py",
+                             "v10_private_after_full_original_qualification_packer")
+    packed = packer.publish_private_source(output, collector_output)
+    require(packed["source_count"] == 2 and packed["archives"] >= 2 and
+            packed["exact_source_sha"] == head and
+            packed["original_sha256"] == manifest["file_sha256"],
+            "V10_CRACI_PACKED_COLLECTOR_EVIDENCE_NOT_EXACT_OR_COMPLETE")
     print(json.dumps({"source_head": head, "producer_exit": result.returncode,
                       "trials": check["trials"],
                       "option_transitions": check["actual_real_option_transitions"],
                       "policy_replayed_positive": replay["fully_replayed_positive_train_trials"],
+                      "losslessly_packed_originals": packed["source_count"],
+                      "collector_published_bytes": packed["collector_bytes"],
                       "unsafe_v10_near": readout["strategies"]["v10_loss_informed"]["unsafe"],
                       "safe_v10_near_goals": readout["strategies"]["v10_loss_informed"]["safe_goals_near"],
                       "promotion_authorized": False}, sort_keys=True))
