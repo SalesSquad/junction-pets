@@ -1,0 +1,133 @@
+import {createServer} from 'node:http';
+import {readFile} from 'node:fs/promises';
+import {resolve} from 'node:path';
+import {fileURLToPath, pathToFileURL} from 'node:url';
+import {loadDataset, inspect, reverts, utc} from '../src/chronicle.mjs';
+
+// Read-only loopback studio. This is NOT an authenticated MariaDB/Wikipedia host.
+export const MAX_REQUEST_BYTES = 2048;
+export const LABEL = 'SYNTHETIC_REPLAY_NO_MARIADB';
+const fixturePath = fileURLToPath(new URL('../fixtures/synthetic.json', import.meta.url));
+const assets = new Map([
+  ['/', ['index.html', 'text/html; charset=utf-8']],
+  ['/index.html', ['index.html', 'text/html; charset=utf-8']],
+  ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
+  ['/style.css', ['style.css', 'text/css; charset=utf-8']]
+]);
+const assetRoot = new URL('./', import.meta.url);
+const headers = Object.freeze({
+  'Cache-Control': 'no-store',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'Cross-Origin-Resource-Policy': 'same-origin',
+  'Content-Security-Policy': "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+});
+export async function loadFixture() {
+  return loadDataset(JSON.parse(await readFile(fixturePath, 'utf8')));
+}
+export function makeCatalog(dataset) {
+  const pages = new Map();
+  for (const revision of dataset.revisions) {
+    if (!pages.has(revision.page_id)) pages.set(revision.page_id, []);
+    pages.get(revision.page_id).push({
+      revision_id: revision.revision_id, revised_at: revision.revised_at,
+      title: revision.title, sha256: revision.hash
+    });
+  }
+  return {
+    status: 'OK', mode: LABEL, live: false,
+    dataset_id: dataset.dataset_id, dataset_license: dataset.dataset_license,
+    provenance: dataset.provenance,
+    pages: [...pages].map(([page_id, rows]) => {
+      rows.sort((a, b) => a.revised_at.localeCompare(b.revised_at) ||
+        a.revision_id.localeCompare(b.revision_id));
+      return {page_id, title: rows.at(-1).title, revisions: rows};
+    }).sort((a, b) => a.page_id.localeCompare(b.page_id))
+  };
+}
+export function evaluate(dataset, request) {
+  if (!request || Array.isArray(request) || typeof request !== 'object' ||
+      Object.keys(request).length !== 3 ||
+      !['page_id','as_of','compare_at'].every(k => Object.hasOwn(request, k)) ||
+      typeof request.page_id !== 'string' || request.page_id.length > 128 ||
+      typeof request.as_of !== 'string' || typeof request.compare_at !== 'string')
+    throw new Error('INVALID_QUERY_SHAPE');
+  const now = utc(request.as_of), earlier = utc(request.compare_at);
+  if (earlier > now) throw new Error('COMPARISON_AFTER_TARGET');
+  if (!dataset.revisions.some(r => r.page_id === request.page_id))
+    throw new Error('UNKNOWN_PAGE');
+  const snapshot = inspect(dataset, request.page_id, request.as_of, request.compare_at);
+  // The shared kernel currently returns ALL revert candidates. The as-of
+  // studio must never call a future revert a historical observation.
+  const known = dataset.revisions.filter(r => r.ms <= now);
+  return {
+    ...snapshot,
+    mode: LABEL,
+    verified_live_source: false,
+    suspected_reverts: reverts({...dataset, revisions: known}, request.page_id),
+    as_of_boundary: request.as_of,
+    note: 'Full fixture timeline is browsable; as-of findings exclude future revisions.'
+  };
+}
+function json(res, status, body) {
+  res.writeHead(status, {...headers, 'Content-Type': 'application/json; charset=utf-8'});
+  res.end(JSON.stringify(body));
+}
+async function readJson(req) {
+  const parts = [];
+  let bytes = 0;
+  for await (const part of req) {
+    bytes += part.length;
+    if (bytes > MAX_REQUEST_BYTES) throw new Error('REQUEST_TOO_LARGE');
+    parts.push(part);
+  }
+  try { return JSON.parse(Buffer.concat(parts).toString('utf8')); }
+  catch { throw new Error('INVALID_JSON'); }
+}
+export function createStudioServer(dataset) {
+  const catalog = makeCatalog(dataset);
+  return createServer(async (req, res) => {
+    try {
+      const serverPort = req.socket.localPort;
+      const allowedHost = ['127.0.0.1:' + serverPort, 'localhost:' + serverPort];
+      if (!allowedHost.includes(req.headers.host))
+        return json(res, 403, {status:'REFUSED', reason:'LOOPBACK_HOST_ONLY'});
+      if (req.headers.origin &&
+          !allowedHost.some(h => req.headers.origin === 'http://' + h))
+        return json(res, 403, {status:'REFUSED', reason:'ORIGIN_REFUSED'});
+      const pathname = new URL(req.url, 'http://127.0.0.1').pathname;
+      if (req.method === 'GET' && pathname === '/api/catalog')
+        return json(res, 200, catalog);
+      if (req.method === 'POST' && pathname === '/api/compare') {
+        if ((req.headers['content-type'] || '').split(';')[0].trim() !== 'application/json')
+          return json(res, 415, {status:'REFUSED', reason:'JSON_REQUIRED'});
+        try { return json(res, 200, evaluate(dataset, await readJson(req))); }
+        catch (err) {
+          const reason = err.message || 'INVALID_REQUEST';
+          return json(res, reason === 'REQUEST_TOO_LARGE' ? 413 : 422,
+            {status:'REFUSED', reason});
+        }
+      }
+      if (req.method === 'GET' && assets.has(pathname)) {
+        const [name, mime] = assets.get(pathname);
+        const bytes = await readFile(new URL(name, assetRoot));
+        res.writeHead(200, {...headers, 'Content-Type': mime});
+        return res.end(bytes);
+      }
+      return json(res, 404, {status:'NOT_FOUND'});
+    } catch {
+      return json(res, 500, {status:'REFUSED', reason:'LOCAL_SERVER_ERROR'});
+    }
+  });
+}
+if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+  try {
+    const server = createStudioServer(await loadFixture());
+    server.listen(4177, '127.0.0.1', () => {
+      process.stdout.write('Chronicle Studio: http://127.0.0.1:4177 (synthetic, loopback only)\n');
+    });
+  } catch (err) {
+    process.stderr.write('STUDIO_START_REFUSED: ' + err.message + '\n');
+    process.exitCode = 1;
+  }
+}
