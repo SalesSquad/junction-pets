@@ -3,6 +3,12 @@ import {createHash} from 'node:crypto';
 
 const sha=x=>createHash('sha256').update(x).digest('hex');
 const suppliers=['farm-a','farm-b','farm-c'];
+export function flightApplicationNames(schema){
+  if(typeof schema!=='string'||!/^j26_[a-f0-9]{20}$/.test(schema))
+    throw new Error('Expected exact run-owned j26_20-hex schema for WAL flight correlation.');
+  const marker=`j26wal_${schema.slice(4)}_`;
+  return Array.from({length:8},(_,i)=>`${marker}wal_flight_${i}`);
+}
 export function payment(orderId,idempotencyKey,amountCents,allocations,seed=20261114) {
   return {kind:'pay',terms:{orderId,idempotencyKey,totalCents:amountCents,
     buyerAccount:'demo:buyer:wallet',allocations,
