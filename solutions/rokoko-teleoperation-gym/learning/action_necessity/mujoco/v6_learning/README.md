@@ -74,8 +74,10 @@ python3 solutions/rokoko-teleoperation-gym/learning/action_necessity/mujoco/v6_l
 - `manifest.json`: source and full evidence SHA-256s, no provider billing claim.
 
 Qualification strictly requires **positive v6-vs-constant success gain,
-paired 95% lower CI > 0, zero unsafe regression vs constant and v5, no loss
-of even one v5-success world, and at least v5's total successful worlds**.
+paired 95% lower CI > 0, zero *new unsafe worlds* relative to either constant
+or v5 (even if aggregate counts tie), no loss of even one previously
+successful **constant or v5 world**, at least five genuinely new success worlds
+which both baselines failed, and at least v5's total successful worlds**.
 Observed center-corridor new wins are reported separately; a no-contact
 physical primitive could still make this hypothesis SCIENCE RED. No baseline
 relaxation or post-hoc tuning on the opened dev cohort is allowed. A science
