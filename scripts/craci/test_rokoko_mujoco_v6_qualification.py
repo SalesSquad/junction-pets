@@ -76,6 +76,19 @@ class QualificationContracts(unittest.TestCase):
         self.assertEqual(result["failure_mining"]["candidate_new_wins_v5_misses"], 4)
         self.assertFalse(result["science_gate_passed"])
 
+    def test_baseline_overlap_cannot_fake_five_genuinely_new_world_wins(self):
+        t, m, d = fixture()
+        # The candidate still wins five worlds v5 lost, but one was also won
+        # by constant, so the genuinely novel improvement is only four.
+        d["paired_worlds"][12]["constant"]["success"] = False
+        d["paired_worlds"][23]["constant"]["success"] = True
+        d["summaries"]["learned_v6"]["paired_bootstrap95_pp"] = (
+            validator.paired_ci_from_worlds(d["paired_worlds"]))
+        result = validator.verify_dev_receipt(t, m, d, SOURCE)
+        self.assertEqual(result["failure_mining"]["candidate_new_wins_v5_misses"], 5)
+        self.assertEqual(result["failure_mining"]["candidate_new_wins_both_baselines_miss"], 4)
+        self.assertFalse(result["science_gate_passed"])
+
     def test_losing_frozen_v5_win_is_not_accepted_even_with_net_gain(self):
         t, m, d = fixture()
         d["paired_worlds"][18]["learned_v6"]["success"] = False
