@@ -65,7 +65,12 @@ class V8StrictProspectiveQualification(unittest.TestCase):
                             Path("weights.json"), Path("training-receipt.json"))
 
     def test_fresh_predeclared_paired_cohort_and_reused_true_physics_contract(self):
-        trials = [{}] * qualification.EXPECTED_TRIALS
+        trials = [{
+            "strategy": name, "observed_corridor": index < 128,
+            "success": False, "unsafe": False,
+            "away_lateral_displacement": 0.0,
+            "forward_reopened_after_side": 0,
+        } for index in range(160) for name in qualification.STRATEGIES]
         training = {
             "schema": "junction.rokoko.mujoco-v8.prospective-train.v1.training",
             "train_first_seed": qualification.NEW_TRAIN_FIRST,
@@ -84,6 +89,10 @@ class V8StrictProspectiveQualification(unittest.TestCase):
         self.assertEqual(previous.TRAIN_FIRST, 513_000)
         self.assertEqual(previous.MIN_STRATEGIES, 4)
         self.assertFalse(result["independentHoldout"])
+        self.assertFalse(result["model_improvement_independently_verified"])
+        self.assertEqual(result["candidate_v8_safe_goal_difference_vs_best_frozen_baseline"], 0)
+        self.assertEqual(result["next_experiment_advisory"]["new_train_seed_start"],
+                         514_000)
         self.assertEqual(result["schema"],
                          "junction.rokoko.mujoco-v8-prospective.craci.train.v1")
         training["strategies"] = ["v8_hierarchical"]
