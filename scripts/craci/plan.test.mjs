@@ -58,3 +58,13 @@ test('R training cohort maps to the exact physics source, never an implicit bran
     /pinned simulator SHA/
   );
 });
+
+test('Meta trained model tournament gets eight distinct immutable cohorts', () => {
+  const meta = '634f1e0e6cb2de46bcf0a783532d46c23f513d11';
+  const matrix = resolvePlan({workload: 'meta-r-tournament', source_sha: meta}, context);
+  assert.equal(matrix.jobCount, 8);
+  assert.equal(matrix.maxParallel, 8);
+  assert.deepEqual(matrix.matrix.include.map(row => row.cohort), [0,1,2,3,4,5,6,7]);
+  assert.ok(matrix.matrix.include.every(row => row.source_sha === meta));
+  assert.throws(() => resolvePlan({workload: 'meta-r-tournament', source_sha: candidate}, context), /pinned Meta/);
+});

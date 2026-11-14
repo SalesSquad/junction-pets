@@ -47,7 +47,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab', 'rokoko-r-tournament',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab', 'rokoko-r-tournament', 'meta-r-tournament',
 ]);
 
 function choose(value, choices, label) {
@@ -109,6 +109,12 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override && override !== simulator) throw new Error('R tournament requires pinned simulator SHA');
     for (let cohort = 0; cohort < 4; cohort++) {
       add(`rokoko-r-${cohort}`, simulator, {cohort});
+    }
+  } else if (workload === 'meta-r-tournament') {
+    const meta = '634f1e0e6cb2de46bcf0a783532d46c23f513d11';
+    if (override && override !== meta) throw new Error('Meta R tournament requires pinned Meta candidate model SHA');
+    for (let cohort = 0; cohort < 8; cohort++) {
+      add(`meta-r-${cohort}`, meta, {cohort});
     }
   } else if (workload === 'rokoko-rl-ablations') {
     for (const learnerSeed of [17,43]) add(`rokoko-ablation-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});
