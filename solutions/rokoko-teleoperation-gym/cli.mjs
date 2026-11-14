@@ -4,6 +4,8 @@ import {createHash} from "node:crypto";
 import {evaluateEpisode,compareEpisodes} from "./src/engine.mjs";
 import {previewMappedCsv} from "./src/csv.mjs";
 
+import {retargetCsv} from "./src/retarget.mjs";
+
 const args=process.argv.slice(2);
 const value=flag=>{
   const i=args.indexOf(flag);
@@ -12,10 +14,24 @@ const value=flag=>{
 };
 async function main() {
   if(args.includes("--help")) {
-    process.stdout.write("MotionBridge Studio (offline only)\n  node cli.mjs --episode fixtures/episodes.json\n  node cli.mjs --csv fixtures/duplicate-columns.csv --map fixtures/mapping.json\n");
+    process.stdout.write("MotionBridge Studio (offline only)\n  node cli.mjs --episode fixtures/episodes.json\n  node cli.mjs --csv fixtures/duplicate-columns.csv --map fixtures/mapping.json\n  node cli.mjs --retarget-csv fixtures/synthetic-retarget.csv --retarget-map fixtures/retarget-map.json\n");
     return;
   }
+  const modes=["--episode","--csv","--retarget-csv"].filter(f=>args.includes(f));
+  const allowed=modes[0]==="--episode"?["--episode"]:modes[0]==="--csv"?["--csv","--map"]:["--retarget-csv","--retarget-map"];
+  if(modes.length!==1 || args.length!==allowed.length*2 || !allowed.every(f=>args.filter(a=>a===f).length===1) || args.some((a,i)=>i%2===0 && !allowed.includes(a))) throw new Error("choose one mode with its exact flags");
   let result, input;
+  if(args.includes("--retarget-csv")) {
+    const readExactUtf8=async flag=>{
+      const bytes=await readFile(value(flag));
+      const text=bytes.toString("utf8");
+      if(!Buffer.from(text,"utf8").equals(bytes)) throw new Error("invalid UTF-8 input: "+flag);
+      return text;
+    };
+    const replay=retargetCsv(await readExactUtf8("--retarget-csv"),await readExactUtf8("--retarget-map"));
+    process.stdout.write(JSON.stringify({product:"MotionBridge Studio",evidence:"OFFLINE_DETERMINISTIC",...replay},null,2)+"\n");
+    return;
+  }
   if(args.includes("--episode") && !args.includes("--csv")) {
     input=JSON.parse(await readFile(value("--episode"),"utf8"));
     const episodes=Array.isArray(input.episodes)?input.episodes:[input];
