@@ -47,7 +47,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament',
 ]);
 
 function choose(value, choices, label) {
@@ -72,6 +72,8 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
   const shard = choose(input.shard || 'all', ['all', '0', '1', '2', '3'], 'shard');
   const toolchain = choose(input.tieto_toolchain || 'pinned', ['pinned', 'compatible'], 'Tieto toolchain');
   const revision = choose(input.sponsor_revision || 'base', ['base', '2283', '2234', '2129', '2297', 'heads', 'all'], 'sponsor revision');
+  const epoch = String(input.epoch || '1');
+  if (!/^(?:[1-9]|1[0-2])$/.test(epoch)) throw new Error('Immune epoch must be 1 through 12');
   const product = input.product || 'stoa';
   choose(product, ['stoa', 'valio', ...Object.keys(PRODUCT_PINS), 'all'], 'product');
   const include = [];
@@ -91,6 +93,11 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override) throw new Error('Tieto uses sponsor_revision pins; source_sha is unsupported for this workload');
     const revisions = revision === 'all' ? ['base', '2283', '2234', '2129', '2297'] : revision === 'heads' ? ['2283', '2234', '2129', '2297'] : [revision];
     for (const rev of revisions) add(`tieto-${rev}-${toolchain}`, SPONSOR_PINS[rev], {revision: rev, source_repository: 'te-industry-tech-office/junction26-messagepack-csharp'});
+  } else if (workload === 'immune-tournament') {
+    if (override && override !== harnessSha) throw new Error('Immune source must match pinned harness SHA');
+    for (let index = 0; index < 4; index++) {
+      add(`immune-${epoch}-${index}`, harnessSha, {epoch: Number(epoch), seed: Number(epoch) * 1009 + index * 17});
+    }
   } else if (workload === 'rokoko-rl-ablations') {
     for (const learnerSeed of [17,43]) add(`rokoko-ablation-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});
   } else if (workload === 'rokoko-rl-seed-sweep') {

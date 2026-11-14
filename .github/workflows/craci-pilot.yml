@@ -37,6 +37,7 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - rokoko-rl-ablations
         - valio-http-race
         - valio-funding-race
+        - immune-tournament
       source_sha:
         description: Full product SHA; overrides historical baseline. Tieto uses sponsor_revision.
         type: string
@@ -93,6 +94,11 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - '1'
         - '2'
         - '3'
+      epoch:
+        description: CRACI Immune distinct adversarial cohort 1-12
+        type: choice
+        default: '1'
+        options: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
 permissions:
   contents: read
 env:
@@ -3312,3 +3318,114 @@ jobs:
         include-hidden-files: false
     needs:
     - plan
+
+  # Three-hour, explicit owner-authorized counterfactual supply-chain campaign.
+  # All payloads are synthetic and benign; actual CRACI trace/SBOM is separate.
+  immune-tournament:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'immune-tournament' }}
+    needs: plan
+    name: "Immune epoch ${{ matrix.epoch }} / cohort ${{ matrix.seed }}"
+    runs-on: craci
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: immune-tournament
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+      CRACI_IMMUNE_STOP: '2026-11-14T18:00:00Z'
+    steps:
+    - name: CRACI package-aware locked network (4 vCPU)
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm]
+    - name: Enforce three-hour cutoff, leave room for completion
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(( $(date -ud "$CRACI_IMMUNE_STOP" +%s) - $(date -u +%s) ))" -gt 960
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 960
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+        test "$CRACI_SOURCE_SHA" = "$CRACI_HARNESS_SHA"
+    - name: Check out pinned harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out exact product source
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Install pinned Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Observe real CRACI package downloads and SBOM
+      working-directory: source
+      run: npm ci --ignore-scripts --no-audit
+    - name: Probe denied outbound to neutral example.com, never exfiltrate
+      id: egress
+      shell: bash
+      run: |
+        set -euo pipefail
+        set +e
+        curl --fail --silent --head --max-time 8 https://example.com -o /dev/null
+        rc=$?
+        set -e
+        printf '{"probe":"example.com","exitCode":%s,"claim":"transport failed; CRACI network trace required for policy attribution"}\n' "$rc" > "$CRACI_RECEIPT_DIR/artifacts/egress-probe.json"
+        if [ "$rc" -eq 0 ]; then
+          echo 'Unexpected egress success under deny-by-default policy'
+          exit 1
+        fi
+    - name: Seeded adversarial provenance graph and bounded counterfactual repair
+      id: qualification
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- node "$CRACI_HARNESS_ROOT/scripts/craci/immune-tournament.mjs" --epoch "${{ matrix.epoch }}" --seed "${{ matrix.seed }}" --cases 250000 --lockfile "$CRACI_SOURCE_ROOT/package-lock.json" --output "$CRACI_RECEIPT_DIR/artifacts/immune-${{ matrix.seed }}.json"
+    - id: receipt
+      name: Finalize bounded source-verified receipt even after failed assertions
+      if: ${{ always() }}
+      shell: bash
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          mkdir -p "$CRACI_RECEIPT_DIR/upload"
+          printf '%s\n' '{"schemaVersion":1,"result":"incomplete","evidence":"infrastructure-only","reason":"Pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+          printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+    - name: Save fixed receipts and bounded metrics
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-immune-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
