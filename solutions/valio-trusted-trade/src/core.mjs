@@ -64,6 +64,28 @@ export function parseBuyerRequest(raw) {
   };
 }
 
+/** Typed needs never infer substitutions, prices or authority from prose. */
+export function validateBuyingNeed(need) {
+  const keys = ['family', 'quantityLitres', 'lactoseFree', 'deliverBy'];
+  if (!need || typeof need !== 'object' || Array.isArray(need) ||
+      Object.keys(need).some((key) => !keys.includes(key)) ||
+      !['dairy-milk', 'oat-drink'].includes(need.family) ||
+      typeof need.lactoseFree !== 'boolean' || need.deliverBy !== '2026-11-16') {
+    throw new TradeError('INVALID_NEED', 'Specify dairy-milk or oat-drink, lactoseFree boolean, whole litres and fixture date 2026-11-16 only.');
+  }
+  safeWhole(need.quantityLitres, 1, 10_000, 'Quantity');
+  return { ...need };
+}
+
+export function unsignedQuoteBody(q) {
+  const lines = q.lines.map((line) => ({ sku: line.sku, quantity: line.quantityLitres,
+    unit: 'L', unit_price_cents: line.unitPriceCents, stock_version: line.stockVersion }));
+  return { version: 'kattely.procurement.quote.v1', quote_id: q.id, supplier_id: 'supplier-demo',
+    buyer_id: q.buyerId, audience: 'https://supplier-demo.invalid', currency: 'EUR',
+    issued_at: Math.floor(q.createdAtMs / 1000), expires_at: Math.floor(q.expiresAtMs / 1000),
+    lines, total_cents: lines.reduce((sum, line) => sum + line.quantity * line.unit_price_cents, 0) };
+}
+
 export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = FIXTURE_POLICY, clock = () => Date.now() } = {}) {
   const catalog = new Map(initialCatalog.map((item) => [item.sku, { ...item }]));
   const quotes = new Map();
@@ -89,11 +111,12 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     return o;
   };
 
-  const requestQuote = ({ buyerId, requestText, budgetCents = policy.perOrderBudgetCents } = {}) => {
+  const requestQuote = ({ buyerId, requestText, need, budgetCents = policy.perOrderBudgetCents } = {}) => {
     if (buyerId !== policy.buyerId) throw new TradeError('BUYER_NOT_FOUND', 'Only the fictional demo buyer is available.', 403);
     safeWhole(budgetCents, 1, policy.perOrderBudgetCents, 'Maximum budget');
-    const requested = parseBuyerRequest(requestText);
-    const suitable = catalogList().filter((x) => x.family === requested.family && x.lactoseFree && x.deliverBy <= requested.deliverBy);
+    if (need !== undefined && requestText !== undefined) throw new TradeError('INVALID_NEED', 'Use typed need OR legacy text, never both.');
+    const requested = need !== undefined ? validateBuyingNeed(need) : parseBuyerRequest(requestText);
+    const suitable = catalogList().filter((x) => x.family === requested.family && (!requested.lactoseFree || x.lactoseFree) && x.deliverBy <= requested.deliverBy);
     suitable.sort((a, b) => a.priceCents - b.priceCents || a.sku.localeCompare(b.sku));
     let remaining = requested.quantityLitres;
     const lines = [];
@@ -130,6 +153,7 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
       expiresAtMs: clock() + policy.quoteLifetimeMs,
       orderId: null,
       provider: 'INVENTED_LOCAL_CATALOG',
+      explanation: 'Lowest unit price first among exact-family, dietary and delivery matches; split only when cheaper SKU stock is exhausted. No substitution. Prices are synthetic net cents; stock is checked, not reserved.',
     };
     quotes.set(quote.id, quote);
     record('QUOTE_CREATED', { quoteId, lines: lines.map((x) => ({ sku: x.sku, quantityLitres: x.quantityLitres, stockVersion: x.stockVersion })), totalCents, approvalRequired });
@@ -161,7 +185,8 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     return structuredClone(q);
   };
 
-  const commitOrder = ({ quoteId, buyerId, idempotencyKey } = {}) => {
+  const commitOrder = ({ quoteId, buyerId, idempotencyKey, ...extra } = {}) => {
+    if (Object.keys(extra).length) throw new TradeError('ORDER_TERMS_FORBIDDEN', 'Order accepts only quoteId, buyerId and idempotencyKey; terms are server-owned.');
     if (typeof idempotencyKey !== 'string' || !/^[A-Za-z0-9_-]{10,80}$/.test(idempotencyKey)) {
       throw new TradeError('INVALID_IDEMPOTENCY_KEY', 'Supply a stable unique 10–80 character idempotency key.');
     }
@@ -169,6 +194,7 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     const prior = idempotency.get(idempotencyKey);
     if (prior) {
       if (prior.fingerprint !== fingerprint) throw new TradeError('IDEMPOTENCY_CONFLICT', 'Idempotency key was already used for a different order.', 409);
+      record('ORDER_REPLAYED', { orderId: prior.orderId, quoteId });
       return { ...structuredClone(getOrder(prior.orderId)), idempotentReplay: true };
     }
     const q = getQuote(quoteId);
@@ -239,5 +265,6 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     cancelOrder,
     simulatePriceChange,
     audit: () => structuredClone(audit),
+    recordRefusal: (code, path) => record('HTTP_REFUSED', { reason: code, path }),
   });
 }

@@ -5,7 +5,7 @@
 ## Current runtime
 
 ```text
-Browser (mobile-responsive, demo identity only)
+Independent buyer Node process + Browser (synthetic demo identities only)
     ↕ Same-origin JSON HTTP (localhost)
 src/server.mjs       route contract, payload limits, origin-bound CSS/JS
     ↕
@@ -18,7 +18,7 @@ IN-MEMORY SYNTHETIC FIXTURE CATALOG / AUDIT / ORDERS
 
 All fixture data and policy live server-side, not in the browser. Requests cannot override the URL-bound quote or order ID. There are no provider side effects. No external assets, network calls or dependencies are required.
 
-The intent boundary uses an **anchored, single-product whole-litre grammar**. Unsupported or mixed text results in `UNSUPPORTED_REQUEST`, including comma/point decimals, negative quantities, two products, unsupported delivery deadlines and instruction suffixes. The purchase layer must never extract a numeric fragment from an ambiguous natural-language message.
+Typed needs validate exact dairy-milk/oat-drink family, whole litres, dietary boolean and the fixed demo date, rejecting unknown fields. The preserved legacy intent boundary uses an **anchored, single-product whole-litre grammar**. Unsupported or mixed text results in `UNSUPPORTED_REQUEST`, including comma/point decimals, negative quantities, two products, unsupported delivery deadlines and instruction suffixes. The purchase layer must never extract a numeric fragment from an ambiguous natural-language message.
 
 ## Requested future sponsor/provider boundary
 
@@ -31,7 +31,11 @@ Supplier API (signed catalog, quote/availability, reservation, order, status)
     → immutable supplier receipt and reconciliation
 ```
 
-`openapi.yaml` defines a proposed supplier exchange wire contract, **not a claim about Valio Aimo's API**. `src/supplier-port.mjs` is an isolated, read-only HTTP JSON adapter with no order capability; it is not connected to the synthetic core. Provider-specific mapping and SDK/CLI packaging should be implemented only after a verified sponsor spec, authorized sandbox and no-spend account exist.
+`src/contract.mjs` is the implemented synthetic HTTP interface, served at `/openapi.json` and exported to `openapi.yaml`. `/.well-known/trusted-trade` advertises its endpoints. `buyer-agent.mjs` runs in a separate process and uses only real localhost HTTP, checks catalog/quote facts and never imports core functions. All writes require an ephemeral server-issued synthetic session capability; quotes/orders bind to that session. This prevents token forgery and cross-session commitment, but the open demo session issuer is **not real buyer authentication**. Approval labels are explicitly unauthenticated and share that session; real approver separation is absent.
+
+`GET /api/quotes/:id/body` exports an **UNSIGNED synthetic** Kättely-compatible body. No signature or cross-repository trust is implemented. Reads are public synthetic data. HTTP refusals and idempotent replays append audit events. Monotonic client processing measurements exclude human input in the cumulative HTTP field; no manual baseline is measured.
+
+`src/supplier-port.mjs` remains an isolated optional read-only external adapter with no order capability; it is not connected to the purchasing simulator. The implemented local supplier supports the whole simulated order flow independently of that future-provider adapter. Sponsor-specific mapping requires verified schema and separately authorized sandbox access.
 
 ## State transitions
 

@@ -1,72 +1,83 @@
-# Trusted Trade · an auditable buying agent
+# Trusted Trade · external buyer agent ↔ synthetic wholesaler
 
-> **Independent Junction 2026 proof of concept, not a Valio Aimo product.** The entire buyer, product catalog, stock, prices, approvals, orders and audit events are invented local fixtures. **No supplier is contacted. No financial commitment occurs.** The browser and API use a *working local control plane*, not a sponsor connection.
+**Independent Junction 2026 prototype. Not a Valio Aimo product or endorsement.** Every supplier, buyer, catalog fact, price, stock count, approval and order is **SYNTHETIC / NONCOMMERCIAL**. Localhost HTTP is real; supplier commerce is simulated. Zero dependencies, credentials, payments or external provider writes.
 
-![status](https://img.shields.io/badge/provider-INVENTED%20FIXTURE-orange) ![execution](https://img.shields.io/badge/fulfillment-SIMULATED-orange)
+## Run the independent agent
 
-## Quick start
-
-Requires Node.js 22+; zero package dependencies and zero credentials.
+Node 22+. Terminal 1:
 
 ```sh
 cd solutions/valio-trusted-trade
-npm test
 npm start
 ```
 
-Open **http://127.0.0.1:4177** on the same computer. For a phone, use a tunnel or an explicitly configured HTTPS demo proxy; the Node server intentionally binds to localhost only. The responsive UI works in a narrow mobile browser, but no iOS app or native integration is claimed.
+Terminal 2, same directory:
 
-## Why this product
+```sh
+npm run demo:agent -- success
+# Read the fixed-price basket; type approve or reject at the SYNTHETIC human prompt.
+```
 
-The sponsor asks how independent purchasing assistants can *discover catalog items and prices, check availability, and place a compliant order* through a structured open interface. A new marketplace or natural-language chatbot alone would miss the fundamental opportunity: **safe agent interoperability with supplier commerce and buyer authority**.
+Open `http://127.0.0.1:4177` for the existing browser workspace and activity timeline. The CLI is a **separate Node process**, imports no server/core functions, and makes actual HTTP requests. No LLM interpretation is used.
 
-Trusted Trade composes a constrained buyer request, explicit product facts, immutable quote evidence, server-enforced spending policy and a one-time order receipt. Start with the preset *1,000 litres of lactose-free milk by Monday* scenario; it uses two source-versioned SKUs (€1,773.00 total), breaches the €750 fictional auto-commit threshold, and requires an explicit unauthenticated demo decision. Select €1,500 to see the budget refusal; simulate a price change to see the stale-quote refusal; commit twice with the same key to prove one deduction; cancel to restore simulated stock.
+**Restart the server between the following independent demonstrations** to reset in-memory stock and prices:
 
-### Demo routes
+```sh
+npm run demo:agent -- refusal
+npm run demo:agent -- replay --decision=approve
+npm run demo:agent -- stale --decision=approve
+npm run demo:agent -- success --oat --decision=approve
+npm run demo:agent -- success --decision=reject
+```
 
-| Method | Endpoint | Guarantee in this prototype |
-|---|---|---|
-| GET | `/api/health` | Clearly states `SIMULATED` |
-| GET | `/api/catalog?q=milk` | Typed products, stock counts, price cents and version |
-| GET | `/api/policy` | Synthetic buyer scope and spending ceiling; `approverAuthentication: NOT_IMPLEMENTED` |
-| POST | `/api/quotes` | Rejects unavailable stock, unsuitable substitutions or budget overflow |
-| GET | `/api/quotes/:id` | Original fixed-price basket and expiry |
-| POST | `/api/quotes/:id/approval` | Fictional human approve/reject decision receipt |
-| POST | `/api/orders` | Atomic in-memory stock recheck, quote validity and idempotency |
-| GET | `/api/orders/:id` | Provider-neutral order receipt, explicitly simulated |
-| POST | `/api/orders/:id/cancel` | Idempotent cancellation and synthetic restock |
-| GET | `/api/audit` | Event trail across quotes, decisions, commits and cancels |
-| POST | `/api/demo/reprice` | Demo-only catalog source mutation to test stale quotes |
+`--decision=approve|reject` is explicitly a **scripted synthetic human decision**, never authenticated human approval. Without it, the agent pauses for terminal input when policy requires approval. `SUPPLIER_URL=http://127.0.0.1:PORT` selects another local demo instance; external origins and redirects are refused.
 
-See [supplier OpenAPI proposal](./openapi.yaml) and `src/supplier-port.mjs` for the **future external provider** boundary. The standalone HTTP port implements read-only JSON catalog interoperability and enforces HTTPS for non-local sources, but is intentionally **not wired to the purchasing simulator** and forbids all external order writes. The current API is a local buyer-controlled simulation. It does not accept Valio credentials or attempt undocumented sponsor endpoints.
+```text
+Independent buyer-agent.mjs (Node process A)       Browser workspace
+          │ real localhost HTTP                       │
+          ├─ /.well-known/trusted-trade + /openapi.json ┤
+          ├─ current catalog + server-owned policy     ┤
+          ├─ ephemeral SYNTHETIC buyer capability      ┤
+          ├─ typed need → fixed quote                  ┤
+          ├─ explicit SYNTHETIC human approve/reject   ┤
+          └─ order → receipt / refusal / same-key replay
+                              │
+                    server.mjs (Node process B)
+                    core.mjs → invented in-memory stock / audit
+```
 
-## Explicit limits and next integrations
+## Ninety-second judging walkthrough
 
-- **No live supplier API.** Sponsor endpoint details, scope, procurement sandbox and order authorization have not been confirmed. Inventing these would risk fake procurement claims.
-- **No real login or legally binding approval.** Browser reviewer button is clearly unauthenticated; real OAuth 2.1, roles, scoped delegation and buyer proofs are release prerequisites.
-- **No durable order store.** In-memory state resets on restart; production requires transactional stock reservation, persisted idempotency, immutable signed receipts, cancel/reconcile jobs, human escalation and provenance.
-- **No tax, freight, real delivery calendar or substitutions.** The demo explicitly quotes item net amounts only and one fixture delivery date (Monday 16 November 2026). Real freight/tax must be source-backed.
-- **No autonomous intent guessing.** The anchored full-sentence grammar supports **one positive whole-litre lactose-free dairy milk request**, optionally specifying *by Monday* (the fixed 16 Nov 2026 demonstration delivery date). Decimals, negatives, multiple products, alternative deadlines and appended instructions fail closed; this prevents the parser from turning a customer request for 1.5 L into a different purchase quantity. A real date/calendar policy is still required before provider orders.
-- **No live demo publishing or external writes.** `npm start` is local only. A deployed public service would need authentication and removal or isolation of the demo reprice mutation.
+1. Run `success`. Discovery reads the implemented OpenAPI and current synthetic catalog. The exact dairy need returns 780 L at 174 cents plus 220 L at 189 cents: **177,300 cents**, with no oat substitution. Lowest price wins within exact family, dietary, date and stock constraints. Stock is checked, **not reserved**.
+2. The agent first attempts commitment without approval and observes server refusal. The €750 synthetic auto-commit threshold requires an explicit decision. Type `approve`; one simulated receipt is issued. Quote terms, source versions and IDs remain fixed; approval/order state transitions are separate.
+3. Restart and run `replay`: one commitment, same-key replay returns the same receipt without reducing stock twice; a new key for the used quote and a reused key for another quote are refused.
+4. Restart and run `stale`: after synthetic approval, a source-price change invalidates the old terms. `refusal` independently demonstrates the budget boundary. `--oat` proves typed second-family buying without freeform interpretation.
+5. In the browser, choose typed milk/oat or the preserved safe legacy sentence, set whole litres, quote, approve/reject, commit, verify replay, simulate stale price, cancel, and export the **UNSIGNED** body. Activity explains provenance, selection, refusals, IDs and measured local processing time. Manual baseline is **UNMEASURED**.
 
-Existing Valio recipe arithmetic in merged PR #49 is complementary exploratory work, not the procurement provider; no recipe logic has been copied or altered. The challenge companion's `pets/valio-aimo/CHALLENGE_RESEARCH.md` and official brief are source references, not edited by this feature.
+The CLI's final JSON records actual monotonic per-request durations, cumulative HTTP processing and elapsed time including human input. These are local measurements, not a claimed speed-up versus manual buying. A rejection also emits its measured request list.
 
-## Judging walkthrough (90 seconds)
+## Implemented open interface
 
-1. Open the product and start the 1,000-L preset purchase. Show two fixed-price availability lines, per-SKU source version and quote ID.
-2. Point at the €750 auto-commit threshold. Attempt a direct POST order without approval: it returns `APPROVAL_REQUIRED`. Approve as fictional buyer.
-3. Commit and inspect a synthetic order receipt; retry the same idempotency key and observe the same order ID. Show cancellation and audit events.
-4. Create a fresh quote, hit **Simulate stale price** and show placement refused. Select €1,500 to demonstrate budget refusal. Stress all products and approvals are fictional and no external order is sent.
-5. Explain the open provider interface and the remaining sponsor mock credential / real approval / reconciliation work.
+Discover `GET /.well-known/trusted-trade`; follow `openapi` to `/openapi.json` and `endpoints` to the actual routes. [openapi.yaml](openapi.yaml) is the generated snapshot of [src/contract.mjs](src/contract.mjs), a proposed synthetic interchange contract, **not a sponsor API specification**. Regenerate with `npm run contract:export`.
 
-## Evaluating the solution against sponsor priorities
+- Public synthetic reads: catalog, policy, original quote, order receipt and audit.
+- `POST /api/demo/session` with `{"buyerId":"helsinki-hotel-demo"}` issues an ephemeral demo capability. Send `Authorization: Bearer <token>` for writes. This endpoint is deliberately unauthenticated; it does **not** verify a real buyer. A session owns its quotes and orders; another session cannot approve or commit them.
+- `POST /api/quotes`: `buyerId`, optional smaller `budgetCents`, and **either** legacy `requestText` **or** typed `need`: `{"family":"oat-drink","quantityLitres":1000,"lactoseFree":true,"deliverBy":"2026-11-16"}`. Extra need/quote fields, decimals, unknown families/dates, and mixed text/typed requests fail closed.
+- `POST /api/quotes/:id/approval`: `buyerId`, `decision: approve|reject`, optional synthetic `approver` label. URL ID is authoritative. Decision is single-use and expiry/source versions are checked.
+- `POST /api/orders`: **only** `buyerId`, `quoteId`, `idempotencyKey`. Client quantities, price or authority are rejected, including on replay. The server rechecks approval, expiry, stock, price and versions; one quote produces at most one simulated order. Key conflicts refuse.
+- `POST /api/orders/:id/cancel`: owning session + buyer; restocks once. `POST /api/demo/reprice`: capability + `sku`, `priceCents`; deliberately synthetic source mutation.
+- `GET /api/quotes/:id/body`: `{mode:"SYNTHETIC",signature:"UNSIGNED",body:{...}}`. Body uses stable `kattely.procurement.quote.v1` fields, Unix-second issue/expiry, supplier `supplier-demo`, audience `https://supplier-demo.invalid`, EUR and quantity × cents recomputed per line. **No signer, signature, delegation proof or cryptographic verification.** Separate Kättely work may consume this body later; there is no repository dependency.
 
-| Sponsor focus | Demonstration evidence | Honest gap |
-|---|---|---|
-| End-to-end trade loop (30%) | Request → split fixed-price basket → approval → simulated commit → receipt | Sponsor-backed quote/order not yet connected |
-| Professional buyer need (20%) | Realistic kitchen volume, delivery constraint, budget ceiling, multi-SKU stock | Placeholder buyer and delivery calendar |
-| Agent autonomy and controls (20%) | Structured selection; explicit per-order approval; authority enforced by server | Delegated signed scoped approvals needed |
-| Exceptions (15%) | Stock exhaustion, budget, stale price, expired offer, double submit, rejected order, cancellation | Production refunds and substitutions needed |
-| Open interoperability (15%) | HTTP JSON contract, OpenAPI supplier boundary, source version fields | Source schema negotiation and live sandbox qualification |
+[src/supplier-port.mjs](src/supplier-port.mjs) remains an optional read-only future-provider adapter with external order writes disabled. The runnable supplier is the local synthetic HTTP service above; no live-provider wiring is implied.
 
-This is an operational vertical slice suitable for sponsor feedback, **not a finished commercial procurement system**.
+## Verification and boundaries
+
+```sh
+npm test
+```
+
+The original 22 tests retain their assertions (HTTP helpers now obtain the required synthetic capability). Seven additional focused tests cover forged/mismatched capabilities, altered order terms, replay conflicts, rejected/unapproved orders, competing stock, stale prices, injected-clock expiry, typed needs and cent-exact interoperability. One launches separate buyer Node processes against actual localhost HTTP servers for six scenarios; no sleeps or printed fake results. No monorepo suite or Actions changes.
+
+Not commercially qualified: real buyer authentication/approver separation, durable transactional stock and idempotency, signed evidence, revocation, taxes/freight and real delivery calendars. Capabilities and all state reset on restart; reads are intentionally public synthetic data. Any local user can request a demo identity; this is **not production access control**. No browser/device usability claim follows from Node tests. Mobile/keyboard behavior needs browser review.
+
+Source: [official challenge brief #327](https://hackjunction.app/participate/45/challenges/327), mirrored in the repository's `docs/challenge-research/official-briefs.md`; external-agent lookup → fixed-price inquiry/order → buyer permissions and approvals. **Sponsor integration remains unverified and disconnected.** Next priorities: sponsor-confirmed sandbox schema, authenticated scoped authority and durable reconciliation, under separate authorization. No deployment, commercial order or spending is authorized here.

@@ -5,14 +5,21 @@ const elements = Object.fromEntries([
   'quote-status', 'quote-id', 'items', 'quote-total', 'policy-title',
   'policy-explanation', 'policy-panel', 'approve', 'reject', 'order',
   'reprice', 'cancel', 'decision-status', 'alert', 'audit-events',
-  'refresh-audit',
+  'refresh-audit', 'family', 'quantity', 'need-mode', 'activity', 'replay', 'export-body', 'interop-body', 'quote-title',
 ].map((id) => [id, document.getElementById(id)]));
 const money = (cents) => new Intl.NumberFormat('en-FI', { style: 'currency', currency: 'EUR' }).format(cents / 100);
 const state = { quote: null, order: null, idempotencyKey: null, busy: false, stale: false };
+let sessionToken;
+const sessionReady = fetch('/api/demo/session', { method: 'POST', body: JSON.stringify({ buyerId: DEMO_BUYER }) }).then(async (response) => {
+  const body = await response.json();
+  if (!response.ok) throw new Error('Demo session unavailable.');
+  sessionToken = body.token;
+});
 const api = async (path, payload) => {
+  await sessionReady;
   const response = await fetch(path, {
     method: payload === undefined ? 'GET' : 'POST',
-    headers: payload === undefined ? undefined : { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
     body: payload === undefined ? undefined : JSON.stringify(payload),
   });
   const body = await response.json();
@@ -29,7 +36,10 @@ const showAlert = (message = '') => {
   elements.alert.textContent = message;
   elements.alert.hidden = !message;
 };
-const say = (message) => { elements['decision-status'].textContent = message; };
+const activity = (message) => {
+  elements.activity.prepend(addNode('li', message));
+};
+const say = (message) => { elements['decision-status'].textContent = message; activity(message); };
 const step = (stage) => {
   const names = ['request', 'quote', 'approve', 'commit'];
   names.forEach((name, index) => {
@@ -57,6 +67,9 @@ const render = () => {
   }
   elements['quote-status'].textContent = state.stale ? 'PRICE CHANGED' : q.status.replaceAll('_', ' ');
   elements['quote-id'].textContent = q.id;
+  elements['quote-title'].textContent = q.requested.family === 'oat-drink' ? 'Oat drink' : 'Dairy milk';
+  elements.replay.disabled = state.busy || !o;
+  elements['export-body'].disabled = state.busy;
   elements['quote-total'].textContent = money(q.totalCents);
   elements.items.replaceChildren();
   for (const line of q.lines) {
@@ -115,6 +128,7 @@ const refreshAudit = async () => {
 };
 const act = async (label, action) => {
   if (state.busy) return;
+  const started = performance.now();
   state.busy = true;
   showAlert();
   render();
@@ -122,8 +136,10 @@ const act = async (label, action) => {
     await action();
   } catch (error) {
     showAlert(`${error.code ?? label}: ${error.message}`);
+    activity(`Refused: ${error.code ?? label}. ${error.message}`);
     say(`${label} blocked. Policy and earlier decisions remain unchanged.`);
   } finally {
+    activity(`${label}: ${(performance.now() - started).toFixed(1)} ms local processing including HTTP. Manual baseline unmeasured.`);
     state.busy = false;
     render();
     try { await refreshAudit(); } catch { /* Audit is optional if the demo server stops. */ }
@@ -137,10 +153,12 @@ elements.find.addEventListener('click', () => act('Quote', async () => {
   state.idempotencyKey = null;
   const { quote } = await api('/api/quotes', {
     buyerId: DEMO_BUYER,
-    requestText: elements['request-text'].value,
+    ...(elements['need-mode'].value === 'typed' ? { need: { family: elements.family.value, quantityLitres: Number(elements.quantity.value), lactoseFree: true, deliverBy: '2026-11-16' } } : { requestText: elements['request-text'].value }),
     budgetCents: Number(elements.budget.value),
   });
   state.quote = quote;
+  activity(`${quote.id} · INVENTED_LOCAL_CATALOG · ${quote.explanation}`);
+  elements['interop-body'].textContent = '';
   state.idempotencyKey = crypto.randomUUID();
   say(quote.approvalRequired ? 'Quote is ready. This amount requires an explicit fictional buyer decision.' : 'Under the policy threshold: simulated placement is available.');
 }));
@@ -162,6 +180,13 @@ elements.order.addEventListener('click', () => act('Commit', async () => {
 elements.reprice.addEventListener('click', () => act('Stale-price simulation', async () => {
   const source = state.quote.lines[0];
   await api('/api/demo/reprice', { sku: source.sku, priceCents: source.unitPriceCents + 35 });
+  try {
+    if (state.quote.status === 'AWAITING_HUMAN_APPROVAL') {
+      await api(`/api/quotes/${state.quote.id}/approval`, { buyerId: DEMO_BUYER, decision: 'approve', approver: 'Synthetic stale probe (never accepted)' });
+    } else {
+      await api('/api/orders', { quoteId: state.quote.id, buyerId: DEMO_BUYER, idempotencyKey: state.idempotencyKey });
+    }
+  } catch (error) { activity(`Server refused old terms: ${error.code}. Requote and reapprove.`); }
   state.stale = true;
   say('Price changed at the fictional source. The original quote cannot be used; request a fresh one.');
 }));
@@ -173,3 +198,19 @@ elements.cancel.addEventListener('click', () => act('Cancel', async () => {
 elements['refresh-audit'].addEventListener('click', () => act('Audit refresh', async () => refreshAudit()));
 render();
 refreshAudit().catch(() => showAlert('The local demo backend is offline. Run npm start in the solution directory.'));
+
+elements.replay.addEventListener('click', () => act('Replay verification', async () => {
+  const { order } = await api('/api/orders', { quoteId: state.quote.id, buyerId: DEMO_BUYER, idempotencyKey: state.idempotencyKey });
+  say(`Server replay: ${order.id}, same receipt ${order.id === state.order.id}; idempotentReplay=${order.idempotentReplay}. No second stock deduction.`);
+}));
+elements['export-body'].addEventListener('click', () => act('Unsigned quote export', async () => {
+  const payload = await api(`/api/quotes/${encodeURIComponent(state.quote.id)}/body`);
+  elements['interop-body'].textContent = JSON.stringify(payload, null, 2);
+  say('UNSIGNED synthetic Kättely-compatible quote BODY shown below. No cryptographic proof or delegation.');
+}));
+elements['need-mode'].addEventListener('change', () => {
+  const typed = elements['need-mode'].value === 'typed';
+  elements['request-text'].disabled = typed;
+  elements.family.disabled = !typed;
+  elements.quantity.disabled = !typed;
+});

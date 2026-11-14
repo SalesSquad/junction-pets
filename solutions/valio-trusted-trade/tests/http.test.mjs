@@ -6,11 +6,13 @@ import { createTradeService } from '../src/core.mjs';
 
 let server;
 let base;
+let token;
 before(async () => {
   server = createTradeHttpServer(createTradeService());
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   base = `http://127.0.0.1:${server.address().port}`;
+  token = (await (await fetch(`${base}/api/demo/session`, { method: 'POST', body: JSON.stringify({ buyerId: 'helsinki-hotel-demo' }) })).json()).token;
 });
 after(async () => { if (server) await new Promise((resolve) => server.close(resolve)); });
 const get = async (path) => {
@@ -18,7 +20,7 @@ const get = async (path) => {
   return { status: response.status, body: response.headers.get('content-type')?.startsWith('application/json') ? await response.json() : await response.text() };
 };
 const post = async (path, body) => {
-  const response = await fetch(`${base}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const response = await fetch(`${base}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
   return { status: response.status, body: await response.json() };
 };
 
