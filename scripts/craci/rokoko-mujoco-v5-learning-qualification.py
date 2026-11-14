@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
+import random
 import re
 import subprocess
 import sys
@@ -45,11 +47,32 @@ def canonical_sha256(value) -> str:
                                      ensure_ascii=False, allow_nan=False).encode("utf8")).hexdigest()
 
 
+def paired_ci_from_worlds(worlds: list[dict]) -> list[float]:
+    """Reproduce unchanged frozen MuJoCo bootstrap from raw paired successes."""
+    differences = [int(w["learned_v5"]["success"]) - int(w["constant"]["success"])
+                   for w in worlds]
+    require(differences, "EMPTY_PAIRED_SCIENCE_COHORT")
+    rng = random.Random(20261114)
+    n, draws = len(differences), 2000
+    means = sorted(sum(differences[rng.randrange(n)] for _ in range(n)) / n
+                   for _ in range(draws))
+    return [round(100 * means[int(.025 * (draws - 1))], 3),
+            round(100 * means[int(.975 * (draws - 1))], 3)]
+
+
+def finite_vector(x, length: int) -> bool:
+    return (isinstance(x, list) and len(x) == length and
+            all(type(v) in (int, float) and math.isfinite(v) for v in x))
+
+
 def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> dict:
     """Contract assertions independent of the producer's claimed verdict."""
     require(SOURCE_SHA.fullmatch(source) is not None, "INVALID_EXACT_SOURCE_SHA")
     require(training.get("executed_head") == source, "TRAIN_SOURCE_MISMATCH")
     require(dev.get("executed_head") == source, "DEV_SOURCE_MISMATCH")
+    require(model.get("executed_head") == source, "MODEL_SOURCE_MISMATCH")
+    require(training.get("actual_physics_engine") == "mujoco-3.3.7",
+            "ACTUAL_TRAINING_PHYSICS_VERSION_REQUIRED")
     require(HASH.fullmatch(training.get("dataset_sha256", "")) is not None,
             "UNHASHED_DATASET")
     require(HASH.fullmatch(training.get("weights_sha256", "")) is not None,
@@ -60,6 +83,39 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
             "NO_ACTUAL_TRAINING_ROLLOUTS")
     require(all(isinstance(row, dict) and isinstance(row.get("transitions"), list)
                 for row in training["rollouts"]), "INVALID_TRAINING_EPISODE_SCHEMA")
+    by_candidate = {}
+    for row in training["rollouts"]:
+        generation, candidate = row.get("generation"), row.get("candidate")
+        require(type(generation) is int and generation in (0, 1) and
+                type(candidate) is int and candidate in (0, 1, 2),
+                "UNEXPECTED_TRAINING_GENERATION_OR_CANDIDATE")
+        require(type(row.get("seed")) is int and
+                TRAIN_FIRST <= row["seed"] < TRAIN_FIRST + TRAIN_COUNT,
+                "TRAINING_ROLLOUT_CONTAINS_EXPOSED_OR_HELDOUT_SEED")
+        require(HASH.fullmatch(row.get("world_hash", "")) is not None,
+                "UNHASHED_TRAINING_WORLD_IDENTITY")
+        by_candidate.setdefault((generation, candidate), []).append(row["seed"])
+        require(row["transitions"], "EMPTY_TRAINING_TRANSITION_SEQUENCE")
+        for event in row["transitions"]:
+            require(isinstance(event, dict) and
+                    finite_vector(event.get("observation"), 18) and
+                    finite_vector(event.get("next_observation"), 18),
+                    "TRAINING_TRANSITION_WITHOUT_OBSERVED_STATE")
+            mask = event.get("mask")
+            action = event.get("action")
+            require(isinstance(mask, list) and len(mask) == 7 and
+                    all(type(v) is int and v in (0, 1) for v in mask) and
+                    type(action) is int and 0 <= action < 7 and mask[action] == 1,
+                    "TRAINING_TRANSITION_BYPASSED_SHARED_SHIELD")
+            require(type(event.get("reward")) in (int, float) and
+                    math.isfinite(event["reward"]) and
+                    type(event.get("cost")) is int and event["cost"] in (0, 1) and
+                    type(event.get("done")) is bool,
+                    "INVALID_TRAINING_REWARD_OR_SAFETY_COST")
+    require(set(by_candidate) == {(g, c) for g in (0, 1) for c in (0, 1, 2)} and
+            all(sorted(seeds) == list(range(TRAIN_FIRST, TRAIN_FIRST + TRAIN_COUNT))
+                for seeds in by_candidate.values()),
+            "INCOMPLETE_OR_DUPLICATED_SIX_CANDIDATE_TRAINING_COHORT")
     require(sum(len(row["transitions"]) for row in training["rollouts"]) ==
             training["actual_transition_count"], "TRAINING_TRANSITION_COUNT_MISMATCH")
     require(training["dataset_sha256"] == canonical_sha256(training["rollouts"]),
@@ -84,6 +140,8 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
             dev.get("weights_sha256"), "CANDIDATE_WEIGHT_BINDING_MISMATCH")
     require(dev.get("dataset_sha256") == training["dataset_sha256"],
             "TRAIN_DATASET_BINDING_MISMATCH")
+    require(model.get("dataset_sha256") == training["dataset_sha256"],
+            "MODEL_TRAIN_DATASET_BINDING_MISMATCH")
     worlds = dev.get("paired_worlds")
     require(isinstance(worlds, list) and len(worlds) == DEV_COUNT,
             "MISSING_RAW_PAIRED_DEVELOPMENT_WORLDS")
@@ -97,7 +155,8 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
             require(isinstance(row, dict) and row.get("seed") == DEV_FIRST + offset,
                     "DEVELOPMENT_WORLD_ORDER_OR_SEED_MISMATCH")
             wh = row.get("world_hash")
-            require(isinstance(wh, str) and len(wh) >= 16, "UNHASHED_WORLD_IDENTITY")
+            require(isinstance(wh, str) and HASH.fullmatch(wh) is not None,
+                    "UNHASHED_WORLD_IDENTITY")
             hashes.add(wh)
             for field in ("success", "unsafe", "abstained", "zero_physics_abstain"):
                 require(type(row.get(field)) is bool, "UNQUALIFIED_EPISODE_BOOLEAN")
@@ -126,6 +185,8 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
     require(isinstance(ci, list) and len(ci) == 2 and
             all(type(x) in (int, float) and -100 <= x <= 100 for x in ci) and
             ci[0] <= ci[1], "INVALID_PAIRED_CONFIDENCE_INTERVAL")
+    require(ci == paired_ci_from_worlds(worlds),
+            "PRODUCER_CONFIDENCE_INTERVAL_NOT_REPRODUCED_FROM_RAW_PAIRED_WORLDS")
     # v4 has an explicit safety advantage over risky v3 on earlier dev. A new
     # candidate cannot waive that requirement to gain aggregate task success.
     scientific_ok = (
@@ -219,6 +280,17 @@ def main() -> int:
     training = load_json(evidence / "training.json")
     model = load_json(evidence / "model.json")
     dev = load_json(evidence / "dev.json")
+    manifest = load_json(evidence / "manifest.json")
+    require(manifest.get("executed_head") == requested,
+            "LEARNING_MANIFEST_SOURCE_MISMATCH")
+    file_hashes = manifest.get("file_sha256", {})
+    require(isinstance(file_hashes, dict) and
+            set(file_hashes) == {"training.json", "model.json", "dev.json"},
+            "INCOMPLETE_LEARNING_EVIDENCE_MANIFEST")
+    for name, recorded_hash in file_hashes.items():
+        require(HASH.fullmatch(recorded_hash) is not None and
+                hashlib.sha256((evidence / name).read_bytes()).hexdigest() == recorded_hash,
+                "LEARNING_ARTIFACT_BYTES_HASH_MISMATCH")
     result = verify_dev_receipt(training, model, dev, requested)
     result["trainer_exit_code"] = process.returncode
     result["science_gate_passed"] &= process.returncode == 0
