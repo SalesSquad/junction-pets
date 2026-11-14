@@ -13,10 +13,10 @@ async function main(argv=process.argv.slice(2)) {
     flags[key]=argv[i+1];
   }
   const required=['--pins','--training','--transitions','--manifest','--qualification',
-    '--replay','--readout','--receipt','--candidate-commit','--candidate-weights','--out'];
+    '--replay','--readout','--receipt','--candidate-commit','--candidate-weights','--candidate-strategy','--out'];
   if(required.some(k=>!flags[k]) || Object.keys(flags).some(k=>![...required,'--prior','--prior-sha256'].includes(k)) ||
      Boolean(flags['--prior'])!==Boolean(flags['--prior-sha256']))
-    throw new Error('USAGE: cli.mjs --pins PINS.json --training TRAINING.json --transitions FULL.jsonl.gz --manifest MANIFEST.json --qualification QUALIFICATION.json --replay POSITIVE_REPLAY.json --readout PAIRED_READOUT.json --receipt RECEIPT.json --candidate-commit SHA40 --candidate-weights SHA256 --out NEW.json [--prior PREVIOUS.json --prior-sha256 REVIEWED_SHA256]');
+    throw new Error('USAGE: cli.mjs --pins PINS.json --training TRAINING.json --transitions FULL.jsonl.gz --manifest MANIFEST.json --qualification QUALIFICATION.json --replay POSITIVE_REPLAY.json --readout PAIRED_READOUT.json --receipt RECEIPT.json --candidate-commit SHA40 --candidate-weights SHA256 --candidate-strategy NEW_ID --out NEW.json [--prior PREVIOUS.json --prior-sha256 REVIEWED_SHA256]');
   const pins=JSON.parse(await readFile(flags['--pins'],'utf8'));
   const paths={training:flags['--training'],transitions:flags['--transitions'],
     manifest:flags['--manifest'],qualification:flags['--qualification'],
@@ -38,7 +38,8 @@ async function main(argv=process.argv.slice(2)) {
   }
   const cycle=await compileCycle(paths,pins,{
     candidateCommit:flags['--candidate-commit'],
-    candidateWeightsSha:flags['--candidate-weights'],nextSeedStart});
+    candidateWeightsSha:flags['--candidate-weights'],
+    candidateStrategyId:flags['--candidate-strategy'],nextSeedStart});
   if(priorBytes)cycle.priorCycleSha256=sha(priorBytes);
   const output=JSON.stringify(cycle,null,2)+'\n';
   await writeFile(flags['--out'],output,{flag:'wx',mode:0o600});
