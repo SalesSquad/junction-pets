@@ -79,6 +79,9 @@ These are transition-level counts, not independent worlds; legal does **not**
 imply right-sided action succeeds or is safe. Three examples cannot support
 credible right-side action-conditioned dynamics. An honest learned controller
 must mark option 4 **UNTRAINED**, even where the public shield allows it.
+The machine-readable exact per-action executed/legal and distinct-world counts
+are in `action-support-v10-v11.json`; all three right-side executions came from
+only one V10 frozen-V6 world, and V11 provided none.
 
 The next version is an *action-conditioned, uncertainty-aware, phase-aware
 contact-to-dwell controller*: infer moving-obstacle trend only from past and
