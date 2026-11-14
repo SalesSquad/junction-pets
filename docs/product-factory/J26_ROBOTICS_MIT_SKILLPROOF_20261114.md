@@ -3,7 +3,7 @@
 **Työ-ID:** `J26-ROBOTICS-MIT-RADAR-20261114`  
 **Tarkasteltu repo:** `SalesSquad/junction-pets`, autentikoitu `main=51ac807d03fe5c37d1fdf8518ef32830ff50ac2b` (lähdehetken checkpoint, tarkista ennen tuotekirjoitusta).  
 **Junction-lähderajaus:** `START_HERE.md`, `AGENTS.md`, `docs/AGENT_SOURCE_INDEX.json`, `docs/challenge-research/CURRENT_SOURCES.md`, `current-source-catalog.json` luettu nykyisestä mainista; 2026-11-14 snapshot, 38 briefiä, 35 partner-avainta. Relevantit `rokoko/M326`, `aalto/M320`, `ignite-next-and-intel/M330`, `arduino/M356,T45`. Lue aina myöhempi `latestClarification` ennen aikaisempaa ohjetta.  
-**Tila:** tutkimus ja itsenäinen tuotekonsepti, **EI malli-, paino-, SDK-, koulutus-, laite-, sponsoripalvelu- tai GPU-integraation suoritus**. Ei kolmannen osapuolen koodin kopiointia eikä uusia riippuvuuksia. Lähdereferenssit ja lupaehdot tallennettu koneellisesti tiedostoon `robotics_mit_sources_20261114.json`.
+**Tila:** tutkimus ja itsenäinen tuotekonsepti, **EI malli-, paino-, SDK-, koulutus-, laite-, sponsoripalvelu- tai GPU-integraation suoritus**. Ei kolmannen osapuolen koodin kopiointia eikä uusia riippuvuuksia. Lähdereferenssit ja lupaehdot tallennettu koneellisesti tiedostoon `J26_ROBOTICS_MIT_LEDGER_20261114.json`.
 
 ## Päätelmä: markkinoille ei tarvita taas yhtä VLA-politiikkaa
 
