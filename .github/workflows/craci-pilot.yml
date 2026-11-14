@@ -38,6 +38,7 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - valio-http-race
         - valio-funding-race
         - immune-tournament
+        - chaos-lab
       source_sha:
         description: Full product SHA; overrides historical baseline. Tieto uses sponsor_revision.
         type: string
@@ -3423,6 +3424,129 @@ jobs:
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
       with:
         name: craci-immune-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+
+  chaos-lab:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'chaos-lab' }}
+    needs: plan
+    name: "Chaos Lab / ${{ matrix.profile }} / seed ${{ matrix.seed }}"
+    runs-on: craci
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: chaos-lab
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+      CRACI_CHAOS_STOP: '2026-11-14T18:00:00Z'
+      CHAOS_PROFILE: ${{ matrix.profile }}
+      CHAOS_SEED: ${{ matrix.seed }}
+    steps:
+    - name: Configure monitored CRACI sandbox and default-deny networking
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm]
+    - name: Enforce bounded three-hour authorization before checkout
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(( $(date -ud "$CRACI_CHAOS_STOP" +%s) - $(date -u +%s) ))" -gt 960
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 960
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+        test "$CRACI_SOURCE_SHA" = "$CRACI_HARNESS_SHA"
+    - name: Check out exact immutable harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out exact immutable source
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Pin Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Observe real CRACI-monitored npm resolution once per distinct wave
+      if: ${{ matrix.profile == 'network' }}
+      working-directory: source
+      run: npm ci --ignore-scripts --no-audit --no-fund
+    - name: Expect neutral external egress to be denied
+      if: ${{ matrix.profile == 'network' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        set +e
+        curl --silent --show-error --head --max-time 8 https://example.com -o /dev/null
+        rc=$?
+        set -e
+        printf '{"probe":"https://example.com","exitCode":%s,"claim":"Transport failed; CRACI provider trace needed to attribute policy enforcement"}\n' "$rc" > "$CRACI_RECEIPT_DIR/artifacts/egress-probe.json"
+        if [ "$rc" -eq 0 ]; then
+          echo 'Unexpected egress success under deny-by-default policy'
+          exit 1
+        fi
+    - name: Four profiles of fault-injection hooks and real isolated probes
+      id: qualification
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash -euo pipefail -c '
+          node "$CRACI_HARNESS_ROOT/scripts/craci/chaos-lab.mjs" \
+            --seed "$CHAOS_SEED" --cases 25000 --profile "$CHAOS_PROFILE" \
+            --output "$CRACI_RECEIPT_DIR/artifacts/chaos-$CHAOS_PROFILE.json"
+          if [ "$CHAOS_PROFILE" = "network" ]; then
+            node "$CRACI_HARNESS_ROOT/scripts/craci/chaos-probes.mjs" \
+              --output "$CRACI_RECEIPT_DIR/artifacts/probes-$CHAOS_PROFILE.json"
+          fi
+          if [ "$CHAOS_PROFILE" = "evidence" ]; then
+            node --test "$CRACI_HARNESS_ROOT/scripts/craci/chaos-tests.test.mjs"
+          fi
+        '
+    - id: receipt
+      name: Finalize source-bound receipt, including on assertion failure
+      if: ${{ always() }}
+      shell: bash
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          mkdir -p "$CRACI_RECEIPT_DIR/upload"
+          printf '%s\n' '{"schemaVersion":1,"result":"incomplete","evidence":"infrastructure-only","reason":"Pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+          printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+    - name: Upload compact immutable chaos evidence
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-chaos-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
         path: ${{ runner.temp }}/craci-evidence/upload/
         if-no-files-found: error
         retention-days: 7

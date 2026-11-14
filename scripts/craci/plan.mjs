@@ -47,7 +47,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab',
 ]);
 
 function choose(value, choices, label) {
@@ -97,6 +97,12 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override && override !== harnessSha) throw new Error('Immune source must match pinned harness SHA');
     for (let index = 0; index < 4; index++) {
       add(`immune-${epoch}-${index}`, harnessSha, {epoch: Number(epoch), seed: Number(epoch) * 1009 + index * 17});
+    }
+  } else if (workload === 'chaos-lab') {
+    if (override && override !== harnessSha) throw new Error('Chaos source must match pinned harness SHA');
+    for (const [index, profile] of ['provenance', 'network', 'control', 'evidence'].entries()) {
+      add(`chaos-${epoch}-${profile}`, harnessSha, {epoch: Number(epoch), profile,
+        seed: Number(epoch) * 10007 + index * 73});
     }
   } else if (workload === 'rokoko-rl-ablations') {
     for (const learnerSeed of [17,43]) add(`rokoko-ablation-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});
