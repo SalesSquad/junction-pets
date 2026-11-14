@@ -84,6 +84,23 @@ class ExactRetentionContracts(unittest.TestCase):
                                               chunk_bytes=128)
             self.assertTrue(all((artifacts / name).exists() for name in originals))
 
+    def test_original_training_above_20mib_becomes_legal_small_archives(self):
+        with tempfile.TemporaryDirectory(prefix="craci-v7-large-retention-") as directory:
+            root = Path(directory) / "evidence"
+            artifacts, _ = fixture(root)
+            training = artifacts / "training.json"
+            training.write_bytes(b"V7 synthetic contract fixture." * (21 * 1024 * 1024 // 30 + 1))
+            self.assertGreater(training.stat().st_size, retained.MAX_FILE_BYTES)
+            manifest = json.loads((artifacts / "manifest.json").read_text(encoding="utf8"))
+            manifest["file_sha256"]["training.json"] = retained.sha_file(training)
+            (artifacts / "manifest.json").write_text(
+                json.dumps(manifest) + "\n", encoding="utf8")
+            report = retained.package_evidence(root, Path(directory) / "staging")
+            self.assertTrue(retained.verify_parts(artifacts, report))
+            self.assertGreater(len(report["sources"][0]["parts"]), 3)
+            self.assertTrue(all(part["archive_bytes"] < retained.MAX_FILE_BYTES
+                                for item in report["sources"] for part in item["parts"]))
+
 
 if __name__ == "__main__":
     unittest.main()
