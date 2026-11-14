@@ -20,7 +20,8 @@ MANIFEST_SCHEMA = "junction.rokoko.mujoco-v10.prospective-train.v1.manifest"
 QUALIFIED_SCHEMA = "junction.rokoko.mujoco-v10-prospective.craci.train.v1"
 SOURCE_FILES = ("training.json", "full_transitions.jsonl.gz")
 PROOF_FILES = ("manifest.json", "paired-readout.json",
-               "independent-qualification.json", "independent-positive-replay.json")
+               "independent-qualification.json", "independent-positive-replay.json",
+               "independent-clear-goal-replay.json")
 CHUNK_BYTES = 6 * 1024 * 1024
 MAX_FILE_BYTES = 20 * 1024 * 1024
 MAX_COLLECTOR_BYTES = 63 * 1024 * 1024
@@ -62,6 +63,8 @@ def source_proof(private: Path):
         encoding="utf8"))
     replay = json.loads((private / "independent-positive-replay.json").read_text(
         encoding="utf8"))
+    clear_replay = json.loads((private / "independent-clear-goal-replay.json").read_text(
+        encoding="utf8"))
     readout = json.loads((private / "paired-readout.json").read_text(encoding="utf8"))
     require(manifest.get("schema") == MANIFEST_SCHEMA and
             set(manifest.get("file_sha256", {})) == set(SOURCE_FILES) and
@@ -82,6 +85,15 @@ def source_proof(private: Path):
             replay == qualified.get("independent_true_physics_positive_replay") and
             replay.get("claim_verified") is True and
             replay.get("model_promotion_authorized") is False and
+            clear_replay == qualified.get("independent_true_physics_clear_goal_replay") and
+            clear_replay.get("claim_verified") is True and
+            clear_replay.get("model_promotion_authorized") is False and
+            clear_replay.get("dev_cal_test_ood_opened") is False and
+            clear_replay.get("replayed_safe_clear_goal_trajectories") ==
+            clear_replay.get("claimed_safe_clear_goal_trajectories") ==
+            sum(readout.get("strategies", {}).get(name, {}).get("safe_goals_clear", -1)
+                for name in ("frozen_v5", "frozen_v6", "repeat_left", "frozen_v8",
+                             "v10_loss_informed")) and
             readout.get("model_promotion_authorized") is False and
             readout.get("executed_head") == manifest.get("executed_head") and
             qualified.get("exact_source_sha") == manifest.get("executed_head"),
@@ -104,6 +116,11 @@ def verify_archive_parts(published: Path, report):
     require(sha_file(manifest_path) == report.get("original_manifest_sha256"),
             "V10_PUBLISHED_MANIFEST_REBINDING_INVALID")
     manifest = json.loads(manifest_path.read_text(encoding="utf8"))
+    proof_hashes = report.get("proof_sha256", {})
+    require(set(proof_hashes) == set(PROOF_FILES) and
+            all(sha_file(published / name) == proof_hashes[name]
+                for name in PROOF_FILES),
+            "V10_PUBLISHED_INDEPENDENT_PROOF_BYTES_CHANGED")
     require(manifest.get("schema") == MANIFEST_SCHEMA and
             manifest.get("executed_head") == report.get("exact_source_sha") and
             set(manifest.get("file_sha256", {})) == set(SOURCE_FILES) and
@@ -178,6 +195,8 @@ def publish_private_source(private: Path, collector: Path):
                 "V10_SMALL_INDEPENDENT_PROOF_PUBLISH_CHANGED")
     report = {"schema": SCHEMA,
               "original_manifest_sha256": sha_file(private / "manifest.json"),
+              "proof_sha256": {name: sha_file(private / name)
+                               for name in PROOF_FILES},
               "exact_source_sha": manifest["executed_head"],
               "sources": []}
     for name in SOURCE_FILES:
