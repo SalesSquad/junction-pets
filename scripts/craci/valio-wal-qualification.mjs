@@ -37,6 +37,9 @@ try {
     replay_anchor:r.priorConfirmedCommits===2&&r.ambiguousCommittedNoAck===1&&r.replayedFlightIntents===8,
     replay_integrity:r.ordersAfterFlightResolution===11&&r.allFourTamperRefusals===true,
     real_workers:c.originalWorkerPids===8&&c.postCrashWorkerPids===8,
+    eight_actual_inflight_backends:c.observedSleepingBackends===8&&c.matchedFlightIds===8&&
+      c.insertQueryMatched===true&&Array.isArray(c.observedBackendPids)&&
+      c.observedBackendPids.length===8&&new Set(c.observedBackendPids).size===8,
     state_changing_10k:v.uniqueStateChangingRequests===10000&&v.committedOrders===5011&&v.refundedOrders===5000,
     exact_outbox:v.ledgerBatches===10011&&v.outboxEvents===10011,
     balanced:v.balanced===true&&v.balancesMatchLedger===true&&v.noNegativeBalances===true,
