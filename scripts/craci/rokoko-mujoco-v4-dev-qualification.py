@@ -8,7 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-SOURCE = "95d12c840e21b7e77bca46fc440b6333fc992a38"
+SOURCE = "3845af08a6df0dfb8b844f355b722425e254b312"
 
 
 def main() -> int:
