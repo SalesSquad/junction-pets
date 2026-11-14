@@ -1,10 +1,13 @@
-import {answerQuestion, BASKETS, budgetCapacity, centsToEuros, currentMonth, latestDate, readTransactions, selectEvidenceRows, spendingSummary} from '../src/coach.mjs';
+import {answerQuestion, BASKETS, budgetCapacity, centsToEuros, latestDate, planSpendingWindow, readTransactions, selectEvidenceRows, spendingSummary} from '../src/coach.mjs';
 import {syntheticRows} from '../src/demo-data.mjs';
 
 const $ = (id) => document.getElementById(id);
 let transactions = readTransactions(syntheticRows);
 let assumptions = {regularBills: '350.00', irregularBuffer: '150.00', emergencyBuffer: '120.00'};
 let lastQuestion = 'Where did my money go this month?';
+let scenario = {days: 14, dailyFlex: '15.00', oneTime: '75.00'};
+let lastAnswerSources = [];
+let lastRunwaySources = [];
 
 function textElement(tag, className, value) {
   const el = document.createElement(tag);
@@ -58,8 +61,8 @@ function renderTransactions(highlight = []) {
   const tbody = $('transaction-rows');
   const highlights = new Set(highlight);
   tbody.replaceChildren();
-  const visibleRows = selectEvidenceRows(transactions, highlight);
-  $('row-count').textContent = `${visibleRows.length} / ${transactions.length} ROWS (CITED ROWS ALWAYS INCLUDED)`;
+  const visibleRows = selectEvidenceRows(transactions, highlight, 150, 40);
+  $('row-count').textContent = `${visibleRows.length} / ${transactions.length} ROWS (LINKED CITATIONS INCLUDED)`;
   for (const x of visibleRows) {
     const tr = document.createElement('tr');
     tr.id = `source-row-${x.row}`;
@@ -73,6 +76,43 @@ function renderTransactions(highlight = []) {
     const amount = textElement('td', `right ${x.changeCents < 0 ? 'money-negative' : 'money-positive'}`, centsToEuros(x.changeCents));
     tr.append(amount); tbody.append(tr);
   }
+}
+
+function renderRunway() {
+  const x = planSpendingWindow(transactions, assumptions, scenario);
+  lastRunwaySources = x.sources.slice(0, 3);
+  const result = $('runway-result');
+  result.replaceChildren();
+  const remaining = textElement('div', `runway-metric${x.gapCents ? ' warm' : ''}`, '');
+  remaining.append(textElement('div', 'eyebrow', `AFTER ${x.days} HYPOTHETICAL DAYS`));
+  remaining.append(textElement('strong', '', centsToEuros(x.remainingCents)));
+  remaining.append(textElement('p', '', x.gapCents
+    ? `Your chosen spending would exceed the illustrative room by ${centsToEuros(x.gapCents)}. This is not affordable within this exercise.`
+    : `Starting illustrative room ${centsToEuros(x.startingRoomCents)} − daily ${centsToEuros(x.dailyFlexCents)} × ${x.days} − one-time ${centsToEuros(x.oneTimeCents)} = ${centsToEuros(x.remainingCents)}.`));
+  const ceiling = textElement('div', 'runway-metric', '');
+  ceiling.append(textElement('div', 'eyebrow', 'ALTERNATIVE DAILY LIMIT IN THIS EXERCISE'));
+  ceiling.append(textElement('strong', '', centsToEuros(x.maxDailyFlexCents)));
+  ceiling.append(textElement('p', '', `Per day for ${x.days} days, after the chosen one-time purchase and all reserves. Rounded DOWN to the cent; not a recommendation.`));
+  result.append(remaining, ceiling);
+  const chart = $('runway-chart');
+  chart.replaceChildren();
+  for (const step of x.steps) {
+    const bar = document.createElement('div');
+    bar.className = `runway-column${step.gapCents ? ' empty' : ''}`;
+    bar.style.height = `${Math.max(4, Math.min(100, Math.round(100 * step.remainingCents / Math.max(1, x.startingRoomCents))))}%`;
+    bar.setAttribute('aria-hidden', 'true');
+    chart.append(bar);
+  }
+  chart.setAttribute('aria-label', `${x.days}-day what-if timeline: starting illustrative room ${centsToEuros(x.startingRoomCents)}, planned outlay ${centsToEuros(x.plannedOutlayCents)}, final ${centsToEuros(x.remainingCents)}, shortfall ${centsToEuros(x.gapCents)}.`);
+  const note = $('runway-note');
+  note.replaceChildren();
+  note.append(document.createTextNode(`${x.caveat} ${x.reserveShortfallCents ? `Your reserves already exceed observed balances by ${centsToEuros(x.reserveShortfallCents)}. ` : ''}Sources: `));
+  for (const row of lastRunwaySources) {
+    const link = textElement('a', '', `CSV #${row}`);
+    link.href = `#source-row-${row}`;
+    note.append(link, document.createTextNode(' '));
+  }
+  if (x.sources.length > lastRunwaySources.length) note.append(document.createTextNode(`+${x.sources.length - lastRunwaySources.length} more account balances. `));
 }
 
 function renderAnswer(question) {
@@ -102,12 +142,14 @@ function renderAnswer(question) {
     if (answer.sources.length > 30) sourceList.append(textElement('span', 'source-pill', `+${answer.sources.length - 30} additional rows`));
     area.append(sourceList);
   }
-  renderTransactions(answer.sources);
+  lastAnswerSources = answer.sources.slice(0, 30);
+  renderTransactions([...lastAnswerSources, ...lastRunwaySources]);
 }
 
 function renderAll() {
   renderOverview();
   renderBaskets();
+  renderRunway();
   renderAnswer(lastQuestion);
 }
 
@@ -133,6 +175,19 @@ $('reserves-form').addEventListener('submit', event => {
     renderAll();
   } catch (error) {
     $('reserve-error').textContent = `I cannot calculate that reserve: ${error.message}`;
+  }
+});
+$('runway-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const proposed = {days: Number($('runway-days').value), dailyFlex: $('runway-daily').value, oneTime: $('runway-onetime').value};
+  try {
+    planSpendingWindow(transactions, assumptions, proposed);
+    scenario = proposed;
+    $('runway-error').textContent = '';
+    renderRunway();
+    renderTransactions([...lastAnswerSources, ...lastRunwaySources]);
+  } catch (error) {
+    $('runway-error').textContent = `This what-if scenario needs a correction: ${error.message}`;
   }
 });
 $('dataset-upload').addEventListener('change', async event => {

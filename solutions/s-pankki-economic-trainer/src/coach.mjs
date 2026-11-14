@@ -188,6 +188,37 @@ export function budgetCapacity(rows, assumptions = {}) {
   };
 }
 
+// Deliberately a user-entered what-if exercise, NOT a forecast, loan decision,
+// advice, or claim that balances and reserves will remain constant tomorrow.
+export function planSpendingWindow(rows, assumptions = {}, scenario = {}) {
+  const {days = 14, dailyFlex = '15.00', oneTime = '0.00'} = scenario;
+  if (![7, 14, 30].includes(days)) throw new Error('Choose a planning window of 7, 14 or 30 days');
+  const dailyFlexCents = eurosToCents(dailyFlex);
+  const oneTimeCents = eurosToCents(oneTime);
+  if (dailyFlexCents < 0 || oneTimeCents < 0) throw new Error('What-if outgoings cannot be negative');
+  const capacity = budgetCapacity(rows, assumptions);
+  const plannedOutlayCents = dailyFlexCents * days + oneTimeCents;
+  if (!Number.isSafeInteger(plannedOutlayCents)) throw new Error('Scenario exceeds safe integer cents');
+  const netAfterPlanCents = capacity.availableCents - plannedOutlayCents;
+  if (!Number.isSafeInteger(netAfterPlanCents)) throw new Error('Scenario exceeds safe integer cents');
+  const remainingCents = Math.max(0, netAfterPlanCents);
+  const gapCents = Math.max(0, -netAfterPlanCents);
+  const maxDailyFlexCents = Math.floor(Math.max(0, capacity.availableCents - oneTimeCents) / days);
+  const steps = Array.from({length: days}, (_, index) => {
+    const day = index + 1;
+    const afterDayCents = capacity.availableCents - oneTimeCents - dailyFlexCents * day;
+    return {day, remainingCents: Math.max(0, afterDayCents), gapCents: Math.max(0, -afterDayCents)};
+  });
+  return {
+    illustrationOnly: true, days, dailyFlexCents, oneTimeCents, plannedOutlayCents,
+    startingRoomCents: capacity.availableCents, remainingCents, gapCents,
+    netAfterPlanCents, maxDailyFlexCents, steps,
+    reserveShortfallCents: capacity.shortfallCents,
+    sources: capacity.accountBalanceSources, asOf: capacity.asOf,
+    caveat: 'Hypothetical exercise only: historical snapshot, fixed reserves and assumed choices; no future deposits, bills, holds or actual account changes are modelled.',
+  };
+}
+
 function formatMonth(month) { return new Date(`${month}-01T00:00:00Z`).toLocaleDateString('en-GB', {month: 'long', year: 'numeric', timeZone: 'UTC'}); }
 
 export function answerQuestion(question, rows, assumptions = {}) {
@@ -200,11 +231,20 @@ export function answerQuestion(question, rows, assumptions = {}) {
   const baseMonth = currentMonth(rows);
   const month = /last month|viime ku|edellis/.test(q) ? monthBefore(baseMonth) : baseMonth;
   const summary = spendingSummary(rows, month);
-  const focus = /taxi|taks/.test(q) ? 'Taxis' : /coffee|kahvi/.test(q) ? 'Coffee' : /restaurant|ravintol|dining/.test(q) ? 'Dining' : /grocer|ruokakaup|ruokamen|päivittäistavar/.test(q) ? 'Groceries' : null;
+  const focus = /taxi|taks/.test(q) ? 'Taxis' : /coffee|kahvi/.test(q) ? 'Coffee' : /restaurant|ravintol|dining/.test(q) ? 'Dining' : /grocer|ruokakaup|ruokamen|päivittäistavar/.test(q) ? 'Groceries' : /rent|vuokr|housing/.test(q) ? 'Housing' : /electric|sähkö|utilit/.test(q) ? 'Utilities' : /repair|korjau/.test(q) ? 'Repairs' : /health|dent|tervey/.test(q) ? 'Healthcare' : null;
   if (focus) {
     const relevant = summary.rows.filter(x => x.group === focus);
     const value = relevant.reduce((sum, x) => sum + x.amountCents, 0);
     return {type: 'category', title: `${focus} · ${formatMonth(month)}`, message: `${centsToEuros(value)} net spending, using ${relevant.length} matching source rows.`, sources: relevant.map(x => x.row), result: {month, focus, spentCents: value}};
+  }
+  const basket = /irregular|unexpected|epäsäännöllis/.test(q) ? 'mandatory-irregular'
+    : /discretionary|everyday choices|flex spending|harkinnanvarais/.test(q) ? 'everyday'
+      : /mandatory regular|recurring essential|pakolliset säännöllis/.test(q) ? 'mandatory-regular' : null;
+  if (basket) {
+    const relevant = summary.rows.filter(x => x.basket === basket);
+    const label = BASKETS.find(x => x.id === basket).label;
+    const spentCents = relevant.reduce((sum, x) => sum + x.amountCents, 0);
+    return {type: 'basket', title: `${label} · ${formatMonth(month)}`, message: `${centsToEuros(spentCents)} of observed net outgoings in this basket.`, sources: relevant.map(x => x.row), result: {month, basket, spentCents}};
   }
   if (/spend|spent|money|käyt|kulut|menot|kolme|basket|three|where|mihin|summary|yhteenveto|kuukaus/.test(q)) {
     return {type: 'summary', title: `Your spending · ${formatMonth(month)}`, message: `${centsToEuros(summary.spentCents)} net spending; ${centsToEuros(summary.totals.unclassified)} is not yet classified.`, sources: summary.sources, result: summary};

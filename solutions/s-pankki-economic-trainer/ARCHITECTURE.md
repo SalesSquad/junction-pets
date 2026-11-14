@@ -4,8 +4,8 @@
 Local sponsor CSV (synthetic only)
   └─ src/import-sponsor.mjs — streaming 1-customer subset → gitignored JSON
        └─ Browser session, in-memory only
-            ├─ web/app.mjs — questions, reserve inputs, source-row explorer
-            ├─ src/coach.mjs — schema, integer cents, classification, refusals
+            ├─ web/app.mjs — questions, reserves, what-if runway, source explorer
+            ├─ src/coach.mjs — schema, exact cents, three baskets, 7/14/30 what-if math
             └─ web/styles.css — responsive iPhone-first visual system
 ```
 
@@ -14,6 +14,12 @@ Local sponsor CSV (synthetic only)
 Latest account balance selection compares validated `tx_timestamp` values (UTC fallback if timezone absent). A later CSV row does not imply a later transaction. Conflicting balances at the same latest timestamp cause a deliberate refusal; the UI budgeting formula is visibly clamped with `max(0, ...)` and labels any reserve shortfall. These choices prevent a plausible but false budget answer when input order or reserve size is adversarial.
 
 The core is portable ES Modules and can be composed with a consented model intent adapter later. Trust invariant: the model may propose an intent but cannot supply the answer amount, rewrite a source row, classify an unknown merchant without a reviewed mapping, or authorize any financial action. Sponsor data stays outside version control.
+
+## M2 educational planner contract
+
+`planSpendingWindow` consumes an existing **source-cited, timestamp-checked** reserve-adjusted illustration and exactly three user inputs (`days` among 7/14/30, `dailyFlex` in euro cents, `oneTime` in euro cents). `remaining = max(0, illustrative_start - days × daily_flex - one_time)`; if the raw result is negative, report the exact gap and show 0 remaining. For an alternative daily spending envelope, `floor(max(0, illustrative_start - one_time)/days)` performs exact-cent conservative rounding. Intermediate multiplication/total must stay within JS safe integer cents. This is a deterministic *what-if*, not a future model or advice. Source references point only to historical latest account balances.
+
+The benchmark `tests/synthetic-acceptance.test.mjs` pins 30 independent exact-cent Q&As against authored fictional rows, with explicit expected source CSV line IDs. It is not sponsor production qualification: `SPONSOR_SOURCE.md` records the official Git LFS pointer SHA and unavailability of actual object bytes.
 
 ## Ownership
 

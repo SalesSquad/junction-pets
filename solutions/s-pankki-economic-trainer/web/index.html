@@ -16,6 +16,7 @@
       <div class="side-section"><div class="eyebrow">YOUR SPACE</div>
         <a class="side-link active" href="#conversation"><span aria-hidden="true">◉</span> Money conversation</a>
         <a class="side-link" href="#baskets"><span aria-hidden="true">▥</span> Three money baskets</a>
+        <a class="side-link" href="#runway"><span aria-hidden="true">◷</span> What-if money runway</a>
         <a class="side-link" href="#evidence"><span aria-hidden="true">⌗</span> Evidence explorer</a>
       </div>
       <div class="side-note">
@@ -63,7 +64,22 @@
         <form id="reserves-form" class="reserve-panel"><div class="reserve-input"><label for="regular">Upcoming regular bills (€)</label><input id="regular" inputmode="decimal" value="350.00" pattern="[0-9]+([.,][0-9]{1,2})?" required /></div><div class="reserve-input"><label for="irregular">Irregular expense buffer (€)</label><input id="irregular" inputmode="decimal" value="150.00" pattern="[0-9]+([.,][0-9]{1,2})?" required /></div><div class="reserve-input"><label for="emergency">Emergency buffer (€)</label><input id="emergency" inputmode="decimal" value="120.00" pattern="[0-9]+([.,][0-9]{1,2})?" required /></div><button class="apply-button" type="submit">Update plan <span aria-hidden="true">↗</span></button><p id="reserve-error" role="alert"></p></form>
       </section>
 
-      <section id="evidence" class="section-gap evidence-section" aria-labelledby="evidence-title"><div class="section-title"><div><div class="eyebrow eyebrow-purple">04 / FOLLOW THE PROOF</div><h2 id="evidence-title">Every answer has a trail.</h2><p>No mysterious numbers. No invisible assumptions. Inspect the source row behind each claim.</p></div><span id="row-count" class="month-label">—</span></div>
+      <section id="runway" class="section-gap" aria-labelledby="runway-title"><div class="section-title"><div><div class="eyebrow eyebrow-purple">04 / PRACTISE A CHOICE</div><h2 id="runway-title">What if I spend this much?</h2><p>Try a small daily choice and one extra purchase across a few days. This is arithmetic on yesterday's snapshot, never a prediction or permission to spend.</p></div><span class="month-label">YOUR WHAT-IF LAB</span></div>
+        <div class="runway-panel">
+          <form id="runway-form" class="runway-form">
+            <div class="reserve-input"><label for="runway-days">How far to imagine</label><select id="runway-days"><option value="7">7 days</option><option value="14" selected>14 days</option><option value="30">30 days</option></select></div>
+            <div class="reserve-input"><label for="runway-daily">Daily flex spending (€)</label><input id="runway-daily" inputmode="decimal" value="15.00" pattern="[0-9]+([.,][0-9]{1,2})?" required /></div>
+            <div class="reserve-input"><label for="runway-onetime">One extra purchase (€)</label><input id="runway-onetime" inputmode="decimal" value="75.00" pattern="[0-9]+([.,][0-9]{1,2})?" required /></div>
+            <button class="apply-button" type="submit">Run my scenario <span aria-hidden="true">↗</span></button>
+            <p id="runway-error" role="alert"></p>
+          </form>
+          <div id="runway-result" class="runway-result" aria-live="polite" aria-atomic="true"></div>
+          <div class="runway-graph-wrap"><div class="runway-graph-head"><strong>Day-by-day illustrative room</strong><span>AFTER YOUR EXTRA PURCHASE</span></div><div id="runway-chart" class="runway-chart" role="img" aria-label="Day-by-day illustrated remaining room for the what-if scenario"></div></div>
+          <p id="runway-note" class="runway-note"></p>
+        </div>
+      </section>
+
+      <section id="evidence" class="section-gap evidence-section" aria-labelledby="evidence-title"><div class="section-title"><div><div class="eyebrow eyebrow-purple">05 / FOLLOW THE PROOF</div><h2 id="evidence-title">Every answer has a trail.</h2><p>No mysterious numbers. No invisible assumptions. Inspect the source row behind each claim.</p></div><span id="row-count" class="month-label">—</span></div>
         <div class="table-scroller"><table><thead><tr><th>CSV ROW</th><th>DATE</th><th>CATEGORY</th><th>BASKET</th><th class="right">NET CHANGE</th></tr></thead><tbody id="transaction-rows"></tbody></table></div>
         <div class="import-box"><div><strong>Have the sponsor's synthetic CSV?</strong><p>Export one customer locally and open the JSON here. Data stays in this browser tab; no uploads or account connections.</p></div><label class="import-button" id="import-button" for="dataset-upload" role="button" tabindex="0">Open local export <span aria-hidden="true">↗</span></label><input id="dataset-upload" type="file" accept=".json,application/json" /><p id="upload-error" role="alert"></p></div>
       </section>

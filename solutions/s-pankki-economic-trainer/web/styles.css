@@ -11,3 +11,27 @@ main{padding:0 min(5vw,70px) 55px;max-width:1440px;width:100%;margin:0 auto}.top
 @media(max-width:810px){.shell{display:block}.sidebar{height:auto;position:static;border-right:0;border-bottom:1px solid var(--edge);padding:16px 22px}.wordmark{padding:0;font-size:25px}.brand-mark{height:34px;width:34px;border-radius:11px;font-size:27px}.side-section,.side-note,.sidebar-footer{display:none}main{padding:0 20px 32px}.topline{height:56px}.welcome{padding:47px 0 32px}.welcome h1{font-size:clamp(42px,8vw,58px)}.halo-card{display:none}.basket-grid{gap:9px}.basket-card{padding:16px}.section-gap{margin-top:54px}}
 @media(max-width:590px){main{padding:0 16px 32px}.topline-right{display:none}.welcome h1{font-size:43px;letter-spacing:-2.7px}.lede{font-size:13px}.overview{grid-template-columns:1fr 1fr;gap:9px}.overview-box{padding:17px}.overview-primary{grid-column:1/-1}.overview-box .big-number{font-size:26px;white-space:normal}.overview-primary .big-number{font-size:36px}.overview-period{grid-column:auto}.overview-period .big-date{font-size:19px;margin-top:16px}.overview-box .eyebrow{letter-spacing:.9px;font-size:9px}.overview-box p{font-size:10px;line-height:1.45}.section-title h2{font-size:30px}.new-pill{display:none}.chat-panel{padding:16px}.assistant-intro{gap:11px}.assistant-avatar{width:42px;height:42px;font-size:27px}.assistant-intro p{font-size:11px}.prompts{flex-direction:column;align-items:flex-start}.prompt{width:100%;display:flex;justify-content:space-between}.answer{padding:17px}.answer .answer-text{font-size:15px}.basket-grid{grid-template-columns:1fr}.basket-card{padding:17px;display:grid;grid-template-columns:1fr auto;column-gap:15px;align-items:center}.basket-card .basket-emoji{grid-row:1/3;margin:0}.basket-card h3{grid-column:1}.basket-card p{grid-column:1;min-height:0}.basket-card strong{grid-column:2;grid-row:2;margin:0;font-size:22px}.basket-bar,.basket-foot{grid-column:1/-1;margin-top:10px}.reserve-panel{grid-template-columns:1fr}.apply-button{grid-column:1}.import-box{grid-template-columns:1fr}.import-button{text-align:center}footer{padding-top:44px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+
+/* M2: accessible and deliberately illustrative spending-runway laboratory. */
+.runway-panel{background:#fff;border:1px solid var(--edge);border-radius:20px;padding:24px;box-shadow:0 10px 30px rgba(44,35,79,.025)}
+.runway-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:13px;align-items:end}
+.runway-form .reserve-input input,.runway-form select{border:1px solid #e3e0eb;border-radius:10px;padding:11px 12px;width:100%;min-width:0;color:#3b3260;background:#fbfafc;font-weight:680;min-height:44px}
+.runway-form #runway-error{grid-column:1/-1;color:#a33737;font-size:12px;margin:0}
+.runway-form #runway-error:empty{display:none}
+.runway-result{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:22px}
+.runway-metric{background:#f3efff;border:1px solid #e7dfff;border-radius:15px;padding:20px;min-width:0}
+.runway-metric.warm{background:#fff4eb;border-color:#f0dccc}
+.runway-metric .eyebrow{color:#785ec4}
+.runway-metric strong{font-size:clamp(23px,3vw,35px);font-weight:780;letter-spacing:-1.4px;color:#483270;display:block;margin-top:10px}
+.runway-metric.warm strong{color:#a85d35}
+.runway-metric p{font-size:11px;color:#706885;line-height:1.5;margin:7px 0 0}
+.runway-graph-wrap{margin-top:22px;border-top:1px solid #f0edf7;padding-top:19px}
+.runway-graph-head{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#403956;font-size:12px}
+.runway-graph-head span{color:#a19aaa;font-size:9px;letter-spacing:.5px;font-weight:800}
+.runway-chart{display:flex;gap:4px;align-items:flex-end;height:105px;margin-top:17px;border-bottom:1px solid #e9e3ef;padding:0 1px}
+.runway-column{background:linear-gradient(180deg,#8c75e6,#c9c0f2);border-radius:5px 5px 0 0;flex:1;min-width:3px;transition:height .2s ease}
+.runway-column.empty{background:linear-gradient(180deg,#f1ae80,#f4d4b5)}
+.runway-note{font-size:11px;color:#7a748c;line-height:1.65;margin:17px 0 0}
+.runway-note a{font-weight:750;text-decoration:underline;text-underline-offset:3px;color:#6550bc}
+@media(max-width:1160px){.runway-form{grid-template-columns:repeat(3,minmax(0,1fr))}.runway-form .apply-button{grid-column:1/-1}}
+@media(max-width:590px){.runway-panel{padding:16px}.runway-form{grid-template-columns:1fr}.runway-form .apply-button{grid-column:1}.runway-result{grid-template-columns:1fr}.runway-metric{padding:18px}.runway-graph-head span{font-size:8px}.runway-chart{gap:3px}}
