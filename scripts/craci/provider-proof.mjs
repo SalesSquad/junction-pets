@@ -62,11 +62,23 @@ function evaluateNetwork(raw, q) {
   const protocols = Object.create(null);let denied=0;
   for (const observed of observations) {
     if (!observed || typeof observed !== 'object' ||
-      !['http','dns','tcp','ssh'].includes(observed.protocol))
+      !['http','dns','tcp','ssh_git'].includes(observed.protocol))
       return {status:'unknown',reason:'UNKNOWN_OBSERVATION_SHAPE'};
     protocols[observed.protocol]=(protocols[observed.protocol]||0)+1;
-    if (observed.http?.policyDenied === true || observed.tcp?.policyDenied === true ||
-        observed.dns?.policyDenied === true || observed.ssh?.policyDenied === true) denied++;
+    // CRACI v1preview1: HTTP has policyDenied, TCP and SSH Git have allowed;
+    // DNS exposes only query/response metadata, not a policy-denial boolean.
+    if (observed.protocol === 'http') {
+      if (typeof observed.http?.policyDenied !== 'boolean') return {status:'unknown',reason:'UNKNOWN_OBSERVATION_SHAPE'};
+      if (observed.http.policyDenied) denied++;
+    } else if (observed.protocol === 'tcp') {
+      if (typeof observed.tcp?.allowed !== 'boolean') return {status:'unknown',reason:'UNKNOWN_OBSERVATION_SHAPE'};
+      if (!observed.tcp.allowed) denied++;
+    } else if (observed.protocol === 'ssh_git') {
+      if (typeof observed.sshGit?.allowed !== 'boolean') return {status:'unknown',reason:'UNKNOWN_OBSERVATION_SHAPE'};
+      if (!observed.sshGit.allowed) denied++;
+    } else if (!observed.dns || typeof observed.dns !== 'object') {
+      return {status:'unknown',reason:'UNKNOWN_OBSERVATION_SHAPE'};
+    }
   }
   return {status:'provider_api_observed',runId:q.runId,jobId:q.jobId,
     harnessSha:job.commitSha,jobStatus:String(job.status).slice(0,40),
