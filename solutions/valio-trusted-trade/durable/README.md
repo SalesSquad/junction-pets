@@ -53,6 +53,8 @@ The harness creates eight distinct Node **OS processes** on one shared PostgreSQ
 
 Proof is the **actual CLI JSON receipt plus PostgreSQL query** for an observed run, not a passing JavaScript format-only test. The simple local unit tests cover canonical intent validation only. If the executor lacks PostgreSQL or `VALIO_TEST_DATABASE_URL`, the integration test reports **BLOCKED/skipped**, and durable multi-process qualification remains unverified. PostgreSQL superusers can change schemas/triggers; this is test infrastructure, not an immutable external financial audit service.
 
+**Retained real failure evidence (14 Nov 2026):** [CRACI run #43626421407](https://github.com/SalesSquad/junction-pets/actions/runs/43626421407) started an actual ephemeral PostgreSQL service and eight workers on PR #156 source `987c85c3373e5eb1982522f1bc283b539ffe4b01`, but failed the post-commit append negative control. The trigger's unqualified PL/pgSQL table lookup depended on the invoking session's `search_path`. The source repair now binds trigger-side queries to `TG_TABLE_SCHEMA` using PostgreSQL identifier quoting and bound parameters. This old failed run is **not** counted as a passed durable ledger test; a new source-pinned CRACI rerun is required.
+
 ## Exact SQL audit before cleaning retained test schema
 
 For a `--keep-schema` run, use its `runId` (validate it matches `j26_[a-z0-9_]+`) to inspect the exact schema: `SET search_path` to that schema, then count `ledger_batches`, `ledger_entries`, `ledger_commands`, `ledger_outbox`, and `demo_settlements`. Compare balances with opening balances plus summed ledger deltas. Do not drop another session's schemas. `auditLab()` performs those checks automatically before the harness returns.
