@@ -33,7 +33,7 @@ def positive_candidate(row):
             (row["success"] or row["lateral_displacement"] >= .025))
 
 
-def replay_positive(evidence_dir: Path, env_factory, policy_factory):
+def replay_positive(evidence_dir: Path, env_factory, policy_factory, signature_func):
     with (evidence_dir / "training.json").open(encoding="utf8") as f:
         training = json.load(f)
     selected = {
@@ -44,6 +44,14 @@ def replay_positive(evidence_dir: Path, env_factory, policy_factory):
     verified_success = set()
     verified_displacement = set()
     env = env_factory()
+    # Independently recompute the entire *pre-outcome* seed selection scan.
+    # The producer cannot choose easy worlds and forge a first-128 near label.
+    for row in training["selection_scan"]:
+        reset = env.reset(seed=row["seed"], ood=False)
+        require(abs(float(reset[7]) -
+                    float(row["initial_observed_obstacle_y"])) < 1e-5 and
+                signature_func(env) == row["world_hash"],
+                "SOURCE_MUJOCO_REPLAY_PREOUTCOME_WORLD_SELECTION_MISMATCH")
     with gzip.open(evidence_dir / "full_transitions.jsonl.gz", "rt",
                    encoding="utf8") as source:
         for line in source:
@@ -124,6 +132,7 @@ def replay_positive(evidence_dir: Path, env_factory, policy_factory):
         "verified_near_corridor_success_worlds": len(verified_success),
         "verified_obstacle_away_displacement_worlds": len(verified_displacement),
         "positive_trial_keys_sha256": key_sha,
+        "selection_scan_replayed": len(training["selection_scan"]),
         "claim_verified": True,
         "model_promotion_authorized": False,
         "no_dev_cal_test_ood": True,
@@ -149,7 +158,8 @@ def main():
     spec.loader.exec_module(product)
     result = replay_positive(a.evidence_dir.resolve(),
                              lambda: MovingContactEnv(max_options=60),
-                             product.policy_factory)
+                             product.policy_factory,
+                             product.v6.v5.v4.v3.v2.v1._world_signature)
     outfile = a.evidence_dir / "independent-positive-replay.json"
     with outfile.open("x", encoding="utf8") as stream:
         json.dump(result, stream, sort_keys=True, indent=2)
