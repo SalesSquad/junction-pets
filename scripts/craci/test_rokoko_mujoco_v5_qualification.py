@@ -1,7 +1,6 @@
 """Synthetic contract tests only; never a substitute for real CRACI physics."""
 from __future__ import annotations
 
-import copy
 import importlib.util
 from pathlib import Path
 import unittest
@@ -12,15 +11,19 @@ spec = importlib.util.spec_from_file_location("craci_v5_learning_qual", MODULE)
 validator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(validator)
 SOURCE = "a" * 40
-DIGEST = "b" * 64
-WEIGHTS = "c" * 64
 
 
 def fixture():
-    training = dict(executed_head=SOURCE, dataset_sha256=DIGEST,
-                    weights_sha256=WEIGHTS, actual_transition_count=313,
-                    train_first_seed=5290000, train_episodes=48)
-    model = dict(weights_sha256=WEIGHTS)
+    rollouts = [{"seed": 5290000, "transitions": [{"action": 2, "reward": 0.5,
+                                                     "cost": 0}]}]
+    weights = {"clearance": 0.066, "lane_distance": 0.031}
+    digest = validator.canonical_sha256(rollouts)
+    wsha = validator.canonical_sha256(weights)
+    training = dict(executed_head=SOURCE, dataset_sha256=digest,
+                    weights_sha256=wsha, actual_transition_count=1,
+                    train_first_seed=5290000, train_episodes=48,
+                    rollouts=rollouts, selected={"weights": weights})
+    model = dict(weights_sha256=wsha, weights=weights)
     paired = []
     for i in range(80):
         row = {}
@@ -34,7 +37,8 @@ def fixture():
                              option_steps=1)
         paired.append(row)
     dev = dict(executed_head=SOURCE, split="dev", first_seed=129170,
-               episodes=80, weights_sha256=WEIGHTS, dataset_sha256=DIGEST,
+               episodes=80, actual_physics_engine="mujoco-3.3.7",
+               weights_sha256=wsha, dataset_sha256=digest,
                paired_worlds=paired, summaries={"learned_v5": {
                    "candidate_success": 24, "constant_success": 13,
                    "candidate_unsafe": 0, "constant_unsafe": 0,
@@ -67,6 +71,18 @@ class QualificationContracts(unittest.TestCase):
         t, m, d = fixture()
         m["weights_sha256"] = "f" * 64
         with self.assertRaisesRegex(AssertionError, "CANDIDATE_WEIGHT_BINDING"):
+            validator.verify_dev_receipt(t, m, d, SOURCE)
+
+    def test_forged_training_digest_fails(self):
+        t, m, d = fixture()
+        t["rollouts"][0]["transitions"][0]["reward"] = 5.0
+        with self.assertRaisesRegex(AssertionError, "FORGED_TRAINING_DATASET"):
+            validator.verify_dev_receipt(t, m, d, SOURCE)
+
+    def test_forged_model_parameters_fail(self):
+        t, m, d = fixture()
+        m["weights"]["clearance"] = 0.05
+        with self.assertRaisesRegex(AssertionError, "FORGED_CANDIDATE_WEIGHTS"):
             validator.verify_dev_receipt(t, m, d, SOURCE)
 
     def test_mismatched_world_fails(self):
