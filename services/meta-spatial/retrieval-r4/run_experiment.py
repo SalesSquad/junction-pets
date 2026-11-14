@@ -98,6 +98,7 @@ def main():
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--source-commit", required=True)
     parser.add_argument("--rscript", required=True)
+    parser.add_argument("--candidate-policy", choices=("rrf", "adapted_topk"), default="rrf")
     args = parser.parse_args()
     sources = source_binding(args.source_commit)
     args.output.mkdir(parents=True, exist_ok=False)
@@ -106,12 +107,13 @@ def main():
                "source_commit": args.source_commit, "source_sha256": sources,
                "started_at_unix": started, "python": sys.version,
                "new_cloud_instances": 0, "new_pixel_inference": False,
+               "candidate_policy": args.candidate_policy,
                "qualification": False, "stages": []}
     env = dict(os.environ, OPENBLAS_NUM_THREADS="2", OMP_NUM_THREADS="2", VECLIB_MAXIMUM_THREADS="2")
     candidates = args.output / "candidates"
     training = args.output / "training"
     export = [sys.executable, str(ROOT / "prepare_candidates.py"), "--source-commit", args.source_commit,
-              "--output", str(candidates)]
+              "--output", str(candidates), "--candidate-policy", args.candidate_policy]
     for name in ("prior-data", "prior-features", "fresh-data", "fresh-features", "training"):
         export.extend(["--" + name, str(getattr(args, name.replace("-", "_")))])
     fit = [args.rscript, str(ROOT / "train_reranker.R"), "--input", str(candidates / "candidates.csv"),

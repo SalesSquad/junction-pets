@@ -213,14 +213,14 @@ def load_inputs(prior_data, prior_features, fresh_data, fresh_features, training
     return partitions, weights, visual, admission, binding
 
 
-def export_partition(split, records, arrays, weights, visual_module, writer, *, limit):
+def export_partition(split, records, arrays, weights, visual_module, writer, *, limit, policy="rrf"):
     query, gallery, text = (arrays[k] for k in ("query", "gallery", "text"))
     frozen = query @ gallery.T
     image_text = query @ text.T
     # Explicit identity uses exact frozen scores, not an extra normalization.
     adapted = frozen if weights is None else visual_module.project_features(query, weights) @ visual_module.project_features(gallery, weights).T
     ids = [r["product_id"] for r in records]
-    candidates, ranks = select_candidates(frozen, adapted, image_text, ids, limit=limit)
+    candidates, ranks = select_candidates(frozen, adapted, image_text, ids, limit=limit, policy=policy)
     feats = candidate_features(frozen, adapted, image_text, candidates, ranks=ranks)
     diagnostics, hit_count = [], 0
     for qi, record in enumerate(records):
@@ -239,7 +239,7 @@ def export_partition(split, records, arrays, weights, visual_module, writer, *, 
         diagnostics.append({"query_id": record["product_id"], "candidate_count": len(candidates[qi]),
                             "truth_in_candidates": found, "baseline_truth_rank": int(ranks["adapted"][qi, qi])})
     report = {"queries": len(records), "families": len({r["family_id"] for r in records}),
-              "rows": int(candidates.size), "candidate_limit": int(candidates.shape[1]),
+              "rows": int(candidates.size), "candidate_limit": int(candidates.shape[1]), "candidate_policy": policy,
               "queries_with_truth_candidate": hit_count, "queries_missing_truth_candidate": len(records) - hit_count,
               "candidate_recall": hit_count / len(records),
               "baseline_complete_gallery_recall": {str(k): float(np.mean(np.diag(ranks["adapted"]) <= k)) for k in (1, 5, 10, 20, 50, 100)},
@@ -257,6 +257,8 @@ def main():
     parser.add_argument("--output", type=Path, required=True, help="New or empty output directory; historical output is never overwritten")
     parser.add_argument("--source-commit", required=True)
     parser.add_argument("--max-candidates", type=int, default=100)
+    parser.add_argument("--candidate-policy", choices=("rrf", "adapted_topk"), default="rrf",
+                        help="Explicit predeclared pool: original RRF (default) or stable adapted-score top-k")
     args = parser.parse_args()
     if re.fullmatch(r"[0-9a-f]{40}", args.source_commit) is None or not 1 <= args.max_candidates <= 100:
         parser.error("exact source commit and candidate bound 1..100 required")
@@ -277,7 +279,7 @@ def main():
         for split in ("train", "dev", "cal", "test"):
             stats[split], query_diagnostics[split] = export_partition(
                 split, partitions[split]["records"], partitions[split]["arrays"], weights, visual_module, writer,
-                limit=args.max_candidates)
+                limit=args.max_candidates, policy=args.candidate_policy)
             handle.flush()
             print(json.dumps({"stage": "candidate_partition", "split": split, **stats[split]}), flush=True)
     diagnostic_path = args.output / "query_diagnostics.json"
@@ -289,9 +291,11 @@ def main():
                 "input_sha256": sha256(csv_path), "input_file": "candidates.csv", "columns": list(CSV_COLUMNS),
                 "feature_names": list(FEATURE_NAMES), "admission": admission, "counts": {s: x["queries"] for s, x in stats.items()},
                 "partitions": stats, "binding": binding, "query_diagnostics_sha256": sha256(diagnostic_path),
-                "selection": {"method": "top_limit_of_RRF_union_of_each_retriever_top_limit", "rrf_constant": 60,
+                "selection": {"candidate_policy": args.candidate_policy,
+                              "method": "top_limit_of_RRF_union_of_each_retriever_top_limit" if args.candidate_policy == "rrf" else "stable_adapted_rank_top_limit",
+                              "rrf_constant": 60 if args.candidate_policy == "rrf" else None,
                               "max_candidates": args.max_candidates,
-                              "tie_break": ["adapted_rank", "visual_rank", "text_rank", "candidate_id"],
+                              "tie_break": ["adapted_rank", "visual_rank", "text_rank", "candidate_id"] if args.candidate_policy == "rrf" else ["source_bound_gallery_order"],
                               "per_method_ranks": {"adapted": "baseline_rank", "visual": "visual_rank", "text": "text_rank"},
                               "oracle_positive_injected": False},
                 "transduction": {"enabled": True, "features": ["f_reverse_rank", "f_density"],

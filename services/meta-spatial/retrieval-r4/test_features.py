@@ -83,6 +83,21 @@ class FeatureNumerics(unittest.TestCase):
         with self.assertRaises(ValueError):
             select_candidates(good, good, good, ["a", "a"])
 
+    def test_explicit_adapted_topk_preserves_original_order_and_default_rrf(self):
+        visual = np.asarray([[.9, .8, .1], [.1, .8, .9]], dtype=np.float32)
+        adapted = np.asarray([[.6, .3, .7], [.7, .7, .2]], dtype=np.float32)
+        ids = ["z", "a", "b"]
+        before = adapted.copy()
+        selected, ranks = select_candidates(visual, adapted, visual, ids, limit=2, policy="adapted_topk")
+        np.testing.assert_array_equal(selected, [[2, 0], [0, 1]])
+        np.testing.assert_array_equal(np.take_along_axis(ranks["adapted"], selected, axis=1), [[1, 2], [1, 2]])
+        np.testing.assert_array_equal(adapted, before)
+        default, _ = select_candidates(visual, adapted, visual, ids, limit=2)
+        explicit, _ = select_candidates(visual, adapted, visual, ids, limit=2, policy="rrf")
+        np.testing.assert_array_equal(default, explicit)
+        with self.assertRaisesRegex(ValueError, "unknown_candidate_policy"):
+            select_candidates(visual, adapted, visual, ids, policy="oracle")
+
     def test_multiview_pools_only_registered_views_and_rejects_query_leak(self):
         q = np.asarray([[1., 0.], [0., 1.]], dtype=np.float32)
         g = np.asarray([[1., 0.], [0., 1.], [-1., 0.]], dtype=np.float32)

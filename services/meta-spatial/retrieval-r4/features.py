@@ -57,19 +57,23 @@ def stable_ranks(scores, *, axis=1):
     return ranks
 
 
-def select_candidates(visual, adapted, text, candidate_ids: Sequence[str], *, limit=100):
-    """Top-limit RRF of each retriever's top-limit union; never inject a positive."""
+def select_candidates(visual, adapted, text, candidate_ids: Sequence[str], *, limit=100, policy="rrf"):
+    """Explicit RRF or original adapted top-k policy; never inject a positive."""
     visual, adapted, text = (score_matrix(x) for x in (visual, adapted, text))
     if visual.shape != adapted.shape or visual.shape != text.shape:
         raise ValueError("retriever_score_shapes_must_match")
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 100:
         raise ValueError("candidate_limit_must_be_one_to_100")
+    if policy not in ("rrf", "adapted_topk"):
+        raise ValueError("unknown_candidate_policy")
     ids = list(candidate_ids)
     if len(ids) != visual.shape[1] or any(not isinstance(v, str) or not v for v in ids) or len(set(ids)) != len(ids):
         raise ValueError("unique_candidate_ids_must_match_gallery")
     ranks = {name: stable_ranks(matrix) for name, matrix in
              (("visual", visual), ("adapted", adapted), ("text", text))}
     count = min(limit, len(ids))
+    if policy == "adapted_topk":
+        return np.argsort(ranks["adapted"], axis=1, kind="stable")[:, :count].astype(np.int32), ranks
     selected = np.empty((len(visual), count), dtype=np.int32)
     string_ids = np.asarray(ids)
     for qi in range(len(visual)):

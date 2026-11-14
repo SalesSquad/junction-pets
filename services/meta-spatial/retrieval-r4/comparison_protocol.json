@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "work_id": "META-LENS-R4-COVERAGE93-20261114",
+  "status": "research_comparison_no_qualification",
+  "first_run_source_commit": "0faa839b99b8fbee06d88bab7fee5c9c7a0aa0ad",
+  "first_run_candidate_policy": "rrf",
+  "second_run_candidate_policy": "adapted_topk",
+  "reason": "RRF retained the positive for 711 of 727 development queries; the unchanged adapted top100 retained 719. Test data are historical diagnostics and were already inspected.",
+  "candidate_limit": 100,
+  "feature_names": ["f_visual", "f_adapted", "f_text", "f_reverse_rank", "f_density", "f_gap"],
+  "training": "Same admitted train/dev/cal/test partitions, same six features and same R trainer. Fit each candidate policy on training only.",
+  "regularization_grid": [0.01, 0.1, 1],
+  "within_run_selection": "Development exact Recall@1, then MRR, then fixed regularization grid order.",
+  "between_run_selection": "Development exact Recall@1, then MRR, then first-run order on an exact tie. Report candidate recall independently.",
+  "acceptance": "Freeze each research threshold using calibration only; never lower the risk target to obtain coverage.",
+  "historical_test": "Report every completed run. No fresh validation or deployment qualification can be inferred.",
+  "new_cloud_compute": false,
+  "action_authorized": false,
+  "qualification": false
+}
