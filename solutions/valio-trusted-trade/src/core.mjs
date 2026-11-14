@@ -5,6 +5,7 @@
  */
 import { planProcurementPortfolio, PlannerFault } from './procurement-planner.mjs';
 import { digest } from './trust-envelope.mjs';
+import { createSyntheticSettlement } from './settlement.mjs';
 
 export const FIXTURE_CATALOG = Object.freeze([
   { sku: 'DEMO-LF-1', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 780, priceCents: 174, deliverBy: '2026-11-16', certification: 'Finnish origin · fictional', version: 1, supplierId: 'fictional-north-dairy', reliabilityBps: 9640, emissionsGramsPerL: 1150 },
@@ -130,6 +131,7 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     if (!o) throw new TradeError('ORDER_NOT_FOUND', 'This order does not exist.', 404);
     return o;
   };
+  const settlement = createSyntheticSettlement({ getOrder, TradeError, record, clock });
 
   const requestQuote = ({ buyerId, requestText, need, budgetCents = policy.perOrderBudgetCents } = {}) => {
     if (buyerId !== policy.buyerId) throw new TradeError('BUYER_NOT_FOUND', 'Only the fictional demo buyer is available.', 403);
@@ -144,7 +146,7 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
       if (remaining <= 0) break;
       const quantity = Math.min(remaining, item.unitsAvailable);
       if (quantity) {
-        lines.push({ sku: item.sku, name: item.name, quantityLitres: quantity, unitPriceCents: item.priceCents, totalCents: quantity * item.priceCents, stockVersion: item.version, certification: item.certification, deliverBy: item.deliverBy });
+        lines.push({ sku: item.sku, name: item.name, supplierId: item.supplierId, quantityLitres: quantity, unitPriceCents: item.priceCents, totalCents: quantity * item.priceCents, stockVersion: item.version, certification: item.certification, deliverBy: item.deliverBy });
         remaining -= quantity;
       }
     }
@@ -325,6 +327,9 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     if (o.buyerId !== buyerId) throw new TradeError('BUYER_MISMATCH', 'Only this demo buyer may cancel the order.', 403);
     if (o.status === 'SIMULATED_CANCELLED') return structuredClone(o);
     if (o.status !== 'SIMULATED_COMMITTED') throw new TradeError('CANNOT_CANCEL', 'Order is not cancelable.', 409);
+    // In this deliberately in-memory fixture, cancellation reverses all posted
+    // supplier transfers before stock is restored. Nothing reaches a bank.
+    settlement.refundForCancellation(o);
     for (const line of o.lines) {
       const item = catalog.get(line.sku);
       item.unitsAvailable += line.quantityLitres;
@@ -370,6 +375,12 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     order: (id) => structuredClone(getOrder(id)),
     commitOrder,
     cancelOrder,
+    payment: settlement.payment,
+    demoWallet: settlement.wallet,
+    approvePayment: settlement.approve,
+    settlePayment: settlement.settle,
+    paymentJournal: settlement.journal,
+    paymentJournalVerify: settlement.verify,
     simulatePriceChange,
     simulateStockShock,
     audit: () => structuredClone(audit),
