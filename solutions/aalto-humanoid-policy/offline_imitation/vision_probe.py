@@ -112,7 +112,8 @@ def save_progress(out: Path, indexes: list[int], embeddings: list[np.ndarray]):
     tmp = out / "embeddings.partial.npz.tmp"
     with tmp.open("wb") as f:
         np.savez_compressed(f, rows=np.asarray(indexes, dtype=np.int64),
-                            embeddings=np.asarray(embeddings, dtype=np.float32))
+                            embeddings=np.asarray(embeddings, dtype=np.float32).reshape(
+                                -1, EMBED_DIM * len(CAMERAS)))
     tmp.replace(out / "embeddings.partial.npz")
 
 
@@ -189,6 +190,12 @@ def run(root: Path, out: Path, *, resume: bool, stride: int,
         frames = [sample[key] for key in CAMERAS]
         if any(x.shape != (3, 480, 640) for x in frames):
             raise ValueError("unexpected camera frame shape")
+        for img in frames:
+            if img.dtype != torch.uint8 and (
+                not img.is_floating_point() or not torch.isfinite(img).all()
+                or img.min() < 0 or img.max() > 1.0
+            ):
+                raise ValueError("unsupported video tensor range/dtype")
         # LeRobot yields float images in [0,1]; avoid the common 1/255 double rescale.
         inputs = processor(images=frames, return_tensors="pt",
                            do_rescale=frames[0].dtype == torch.uint8)["pixel_values"].to("cuda")
