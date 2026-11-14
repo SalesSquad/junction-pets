@@ -1,5 +1,7 @@
 const $=id=>document.getElementById(id);
 const names=new Map();
+const companions=new Map();
+let atlasReady=false;
 const cssInitials={
   'junction.openai-codex':'CX','junction.mariadb':'DB','junction.nvidia':'NV','junction.meta':'M',
 };
@@ -37,13 +39,35 @@ function notice(message){
   window.chibiToastTimeout=setTimeout(()=>$('toast').classList.remove('show'),2500);
 }
 
+function paintAvatar(logo){
+  const index=Number(logo.dataset.artIndex);
+  logo.classList.add('has-art');
+  logo.style.backgroundPosition=`${index%6*20}% ${Math.floor(index/6)*20}%`;
+}
+function petAvatar(id){
+  const person=companions.get(id);
+  const initials=cssInitials[id]??person?.company?.slice(0,2).toUpperCase()??'?';
+  const logo=element('span','pet-logo',initials);
+  logo.setAttribute('aria-hidden','true'); // The adjacent text already names the companion.
+  logo.style.setProperty('--pet-surface','#1a4c4b');
+  logo.style.setProperty('--pet-accent','#b2f0d3');
+  if(Number.isInteger(person?.artIndex)&&person.artIndex>=0&&person.artIndex<36){
+    logo.dataset.artIndex=String(person.artIndex);
+    if(atlasReady)paintAvatar(logo);
+  }
+  return logo;
+}
+function renderOrbitAvatars(){
+  for(const [slot,id] of [['orbitDatabase','junction.mariadb'],['orbitGpu','junction.nvidia'],['orbitUx','junction.meta']]){
+    const node=$(slot);node.replaceChildren(petAvatar(id));
+    node.title=human(id);
+  }
+}
 function renderPeople(){
   const rail=$('petRail');rail.replaceChildren();
   for(const person of trace.participants){
     const card=element('article','pet-card');
-    const logo=element('span','pet-logo',cssInitials[person.id]??person.company.slice(0,2).toUpperCase());
-    logo.style.setProperty('--pet-surface','#1a4c4b');
-    logo.style.setProperty('--pet-accent','#b2f0d3');
+    const logo=petAvatar(person.id);
     const label=element('span','cap-count','SPECIALIST');
     const title=element('h3','',person.company);
     const description=element('p','',person.id==='junction.openai-codex'?'Coordinates the review and evidence.':person.id==='junction.mariadb'?'Analyses database questions.':person.id==='junction.nvidia'?'Designs reproducible GPU checks.':'Reviews consent and UX.');
@@ -66,9 +90,11 @@ function renderTimeline(){
     button.setAttribute('aria-label',`View handoff ${i+1}: ${human(message.request.from)} to ${human(message.request.to)}`);
     button.addEventListener('click',()=>selectMessage(message.id));
     const line=element('span','index',String(i+1).padStart(2,'0'));
+    const avatars=element('span','handoff-icons');avatars.setAttribute('aria-hidden','true');
+    append(avatars,petAvatar(message.request.from),element('span','handoff-arrow','→'),petAvatar(message.request.to));
     const middle=element('span','transfer');
     append(middle,element('strong','',human(message.request.from)+' → '+human(message.request.to)),element('small','',message.capability.title));
-    append(button,line,middle,element('span','badge','SIMULATED'),element('span','arrow','↗'));
+    append(button,line,avatars,middle,element('span','badge','SIMULATED'),element('span','arrow','↗'));
     timeline.append(button);
   });
   $('progressLabel').textContent=shown===trace.messages.length?'All handoffs revealed':`${shown} of ${trace.messages.length} handoffs`;
@@ -142,8 +168,15 @@ async function setup(){
     if(parsed.messages.some(m=>m.policy?.externalEffects!==false||m.response?.kind!=='synthetic-example'||m.policy?.hostAuthorization!==false))throw new Error('Untrusted provider execution claim');
     await verifyTraceDigest(parsed);
     trace=parsed;
-    for(const person of trace.participants)names.set(person.id,person.company);
-    renderPeople();reset();
+    for(const person of trace.participants){names.set(person.id,person.company);companions.set(person.id,person);}
+    renderPeople();renderOrbitAvatars();reset();
+    // Show initials until the *local* canonical atlas has actually loaded.
+    const atlas=new Image();
+    atlas.addEventListener('load',()=>{
+      atlasReady=true;
+      for(const avatar of document.querySelectorAll('.pet-logo[data-art-index]'))paintAvatar(avatar);
+    });
+    atlas.src='./company-mascots.png';
     notice('Deterministic fixture loaded · source commit not verified.');
   }catch(error){failure(error instanceof Error?error.message:'Unknown load error');}
 }

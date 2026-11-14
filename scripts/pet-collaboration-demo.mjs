@@ -12,6 +12,8 @@ await writeFile(join(out,'trace.json'),JSON.stringify(trace,null,2)+'\n');
 for (const name of ['index.html','style.css','app.js']) {
   await copyFile(resolve(root,'apps/collaboration-demo',name),join(out,name));
 }
+// Reuse the canonical 34-companion atlas; generated dist remains derivative.
+await copyFile(resolve(root,'apps/catalog/public/assets/company-mascots.png'),join(out,'company-mascots.png'));
 console.log(JSON.stringify({
   status:'synthetic-trace-generated',
   mode:trace.executionMode,
