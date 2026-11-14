@@ -4,6 +4,7 @@ Work: JUNCTION-VIDEO-RESUME-20261113. This is developer research and proposed wo
 
 ## Sources
 
+- [Cloudinary platform, MCP/plugins/CLI, AI/3D, credits and implementation research — 14 November](PLATFORM_RESEARCH.md)
 - [Shared research and media index](../../docs/challenge-research/README.md)
 - [Full official main briefs](../../docs/challenge-research/official-briefs.md)
 - [Full official technical briefs](../../docs/challenge-research/official-tech-briefs.md)
@@ -22,7 +23,7 @@ Work: JUNCTION-VIDEO-RESUME-20261113. This is developer research and proposed wo
 
 **Adversarial case:** Wrong crop/transform or unsupported media is surfaced and original source remains available for verification
 
-**Dependency:** Read four eligible tools; verified Cloudinary access and media rights; mandatory hackathon-survey submission prepared, not submitted
+**Dependency:** Choose and document one eligible tool: React AI Starter Kit, Next.js AI Starter Kit, AI Skills Pack or AI Power Start. The four routes are now described in [PLATFORM_RESEARCH.md](PLATFORM_RESEARCH.md). Actual Cloudinary access and media rights remain to be verified for the execution; prepare the mandatory [hackathon survey](https://cld.media/hackathon-survey), without treating this research as a submitted entry.
 
 ## Return contract
 
