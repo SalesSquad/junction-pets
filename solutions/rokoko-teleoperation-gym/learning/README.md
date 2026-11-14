@@ -101,3 +101,15 @@ verified source commit SHA via --source-commit. The coordinator must compare all
 producing_sha256 entries against exact committed producer bytes before treating
 a GPU training result as source-bound. A real Git checkout additionally rejects
 a mismatched SHA or dirty producer files. No private Git credentials are copied.
+
+## Source-bound first development negative (not a sealed evaluation)
+
+The initial 200-episode CUDA development run at source f2b5627 had
+199/200 abstaining terminations, zero successes and only 531 option
+transitions. It performed 117 real GPU optimizer updates, but this
+degenerate collection does not demonstrate useful RL. The next **training**
+revision therefore samples nonterminal masked actions whenever possible and
+collects explicitly labelled heuristic demonstration trajectories to provide
+a more informative off-policy replay buffer. This adaptation is based only on
+training data. Any subsequent heldout results must use new source-bound
+seed groups and must be reported even if training still fails.

@@ -1,7 +1,7 @@
 """Focused real-physics smoke and fail-closed checks; no training claim."""
 import unittest
 import numpy as np
-from env import ContactEnv, OBS_SIZE, heuristic
+from env import ContactEnv, OBS_SIZE, heuristic, sample_nonterminal_exploration
 
 
 class PhysicsChecks(unittest.TestCase):
@@ -22,6 +22,13 @@ class PhysicsChecks(unittest.TestCase):
         np.testing.assert_array_equal(ContactEnv().reset(120001), snapshots[0])
         with self.assertRaises(ValueError):
             ContactEnv().reset(800000)
+
+    def test_exploration_does_not_accidentally_abstain(self):
+        mask = np.array([True, True, False, False, False, False, True])
+        for _ in range(60):
+            self.assertIn(sample_nonterminal_exploration(mask), (0, 1))
+        self.assertEqual(sample_nonterminal_exploration(
+            np.array([False, False, False, False, False, False, True])), 6)
 
     def test_hold_refuses_model_override_and_requires_ack(self):
         env = ContactEnv(max_options=3)

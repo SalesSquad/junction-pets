@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch import nn
-from env import ContactEnv, OBS_SIZE, SCENE, heuristic
+from env import ContactEnv, OBS_SIZE, SCENE, heuristic, sample_nonterminal_exploration
 
 
 class Q(nn.Module):
@@ -63,6 +63,8 @@ def main():
     optimizer = torch.optim.Adam(online.parameters(), lr=3e-4)
     initial_hash = weights_hash(online)
     replay = []
+    behavior_counts = {'heuristic_demonstration': 0,
+                       'random_nonterminal': 0, 'q_policy': 0}
     cursor = updates = transitions = 0
     env = ContactEnv(args.max_options)
     rows = []
@@ -118,12 +120,18 @@ def main():
                 action = 6
             elif method == 'heuristic':
                 action = heuristic(obs, mask)
-            elif random.random() < epsilon:
-                action = int(random.choice(np.flatnonzero(mask)))
+            elif training and random.random() < max(.20, .70-.50*len(rows)/max(args.train_episodes,1)):
+                action = heuristic(obs, mask)
+                behavior_counts['heuristic_demonstration'] += 1
+            elif training and random.random() < epsilon:
+                action = sample_nonterminal_exploration(mask)
+                behavior_counts['random_nonterminal'] += 1
             else:
                 with torch.no_grad():
                     q = online(torch.as_tensor(obs, device=device))
                     action = int(q.masked_fill(~torch.as_tensor(mask,device=device), -torch.inf).argmax())
+                if training:
+                    behavior_counts['q_policy'] += 1
             nxt, reward, done, info = env.step(action)
             total += reward
             if training:
@@ -196,6 +204,7 @@ def main():
                    input_sha256=hashlib.sha256((args.out/'frozen-config.json').read_bytes()).hexdigest(),
                    torch_version=torch.__version__, mujoco_version=__import__('mujoco').__version__,
                    device=str(device),cuda_device=torch.cuda.get_device_name(0) if device.type=='cuda' else None,
+                   behavior_counts=behavior_counts,
                    gradient_steps=updates,train_transitions=transitions,train_episodes=summary['train/dqn']['episodes'],
                    physics_steps=sum(r.get('physics_steps',0) for r in rows),train_wall_seconds=train_wall,
                    wall_seconds=time.monotonic()-start,initial_parameter_sha256=initial_hash,

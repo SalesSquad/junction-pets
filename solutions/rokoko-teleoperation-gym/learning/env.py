@@ -1,5 +1,6 @@
 """Synthetic option gym on the original MuJoCo XML. HOLD is a servo, not E-stop."""
 from pathlib import Path
+import random
 import numpy as np
 import mujoco as mj
 
@@ -174,6 +175,14 @@ class ContactEnv:
                     contacts=self.contacts, physics_steps=self.physics_steps, holds=self.holds,
                     acks=self.acks, refusals=self.refusals, requested=int(requested))
         return self.observation(), reward, bool(self.done), info
+
+
+def sample_nonterminal_exploration(mask):
+    # A random exploratory option must not accidentally end almost every
+    # episode through ABSTAIN when useful safe options remain available.
+    # ABSTAIN is still mandatory when the independent shield leaves no option.
+    available = np.flatnonzero(np.asarray(mask[:6], dtype=bool))
+    return int(random.choice(available.tolist())) if available.size else 6
 
 
 def heuristic(obs, mask):
