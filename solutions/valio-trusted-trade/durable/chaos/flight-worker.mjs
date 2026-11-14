@@ -1,7 +1,7 @@
 /** Dedicated bounded WAL worker, with intentional DB-disconnect EventEmitter guards. */
 import pg from 'pg';
 import {settleDemoPayment,refundDemoPayment} from '../index.mjs';
-import {guardPgPool} from './pg-faults.mjs';
+import {guardPgPool,wirePgError} from './pg-faults.mjs';
 
 const schema=process.env.VALIO_LAB_SCHEMA;
 const connectionString=process.env.VALIO_TEST_DATABASE_URL;
@@ -37,7 +37,7 @@ process.on('message',async ({taskId,control,kind,terms,crashAfterCommit=false})=
     if(crashAfterCommit)process.exit(42); // Server COMMIT complete, NO caller ACK.
     process.send?.({taskId,result,pid:process.pid});
   }catch(error){
-    process.send?.({taskId,error:{code:error.code||'UNEXPECTED',message:String(error.message).slice(0,200)},pid:process.pid});
+    process.send?.({taskId,error:wirePgError(error),pid:process.pid});
   }
 });
 process.on('disconnect',async()=>{await pool.end();});
