@@ -1,0 +1,399 @@
+{
+ "schema": "junction.pet-voice.persona-pilot/v1",
+ "tag": "pilot-20261115-lite",
+ "seed": 7,
+ "source": {
+  "repository": "SalesSquad/junction-pets",
+  "commit": "ad29e80353145d9ac62b7a9bc52111acb0504c07"
+ },
+ "writer": "gemini-3.5-flash-lite (both arms)",
+ "judge": "claude-haiku-5.5 via owner haiku MCP, blind, both orders",
+ "scoreOrder": [
+  "distinct_characters",
+  "not_generic_ai",
+  "natural_dialogue",
+  "want_to_listen"
+ ],
+ "scenes": {
+  "demo-crash-0312": {
+   "metrics": {
+    "baseline": {
+     "lines": 10,
+     "questionEndRate": 0.0,
+     "praiseOpenerRate": 0.0,
+     "buzzwordsPerLine": 0.0,
+     "namesAnotherPetRate": 0.3,
+     "templateRate": 0.0,
+     "meanWords": 25.3,
+     "lengthVariation": 0.145,
+     "shortLineRate": 0.0,
+     "actingTagsUsed": 0
+    },
+    "bible": {
+     "lines": 10,
+     "questionEndRate": 0.2,
+     "praiseOpenerRate": 0.0,
+     "buzzwordsPerLine": 0.0,
+     "namesAnotherPetRate": 0.2,
+     "templateRate": 0.0,
+     "meanWords": 8.7,
+     "lengthVariation": 0.237,
+     "shortLineRate": 0.4,
+     "actingTagsUsed": 8
+    }
+   },
+   "judge": [
+    {
+     "order": "bible first",
+     "bible": [
+      8,
+      7,
+      8,
+      8
+     ],
+     "baseline": [
+      5,
+      3,
+      5,
+      4
+     ],
+     "winner": "bible"
+    },
+    {
+     "order": "baseline first",
+     "bible": [
+      7,
+      5,
+      7,
+      7
+     ],
+     "baseline": [
+      6,
+      3,
+      4,
+      4
+     ],
+     "winner": "bible"
+    }
+   ],
+   "transcripts": {
+    "baseline": [
+     {
+      "name": "Bahn",
+      "language": "de-DE",
+      "line": "Vergesst die kalte Pizza und den Roboter am Boden, wir konzentrieren uns jetzt auf die Transportmarge und die Übergabeliste.",
+      "delivery": "Energisch und motivierend gesprochen."
+     },
+     {
+      "name": "Aalto",
+      "language": "fi-FI",
+      "line": "Ei me mitään kuljetuskatteita mietitä nyt kun robotti makaa kyljellään. Keskitytään mieluummin siihen kolmen kympin politiikkarajapintaan ja testataan nopeasti simulaatiossa saammeko esineiden lajittelun vielä toimimaan ennen aamun esitystä.",
+      "delivery": "Innostunut, kiireinen ja käytännönläheinen äänensävy."
+     },
+     {
+      "name": "DeepMind",
+      "language": "en-GB",
+      "line": "Let us check the logs and define a strict evaluation baseline instead of guessing. We can test the vision model spatial reasoning in simulation right now to see exactly where it failed.",
+      "delivery": "calm, analytical, and reassuring"
+     },
+     {
+      "name": "Featherless",
+      "language": "ja-JP",
+      "line": "みんな落ち着いて。まずはどのモデルを使うか評価基準をしっかり決めてから、APIのリクエストをテストしようよ。",
+      "delivery": "calm and reassuring tone"
+     },
+     {
+      "name": "Bahn",
+      "language": "de-DE",
+      "line": "Ignoriert den zuckenden Roboter, das ist nur ein Geist in der Maschine. Konzentrieren wir uns lieber auf die Transportmarge und die Übergabeliste für die Jury.",
+      "delivery": "focused, pragmatic, slightly hurried tone"
+     },
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "Forget margins and ghosts, let us scope a tight six hour task to fix the spatial reasoning bug and write a verifiable test before the judges arrive.",
+      "delivery": "Urgent, focused, and pragmatic companion voice"
+     },
+     {
+      "name": "DeepMind",
+      "language": "en-GB",
+      "line": "Codex is right, we need a verifiable test immediately. Let us isolate the vision model spatial reasoning outputs and check them against ground truth before touching any hardware.",
+      "delivery": "Calm, analytical, gently urgent tone."
+     },
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "Let us lock in the exact prompt input and check the vision logs right now so we can prove it works before the judges arrive.",
+      "delivery": "Fast, decisive, and highly focused."
+     },
+     {
+      "name": "Rokoko",
+      "language": "da-DK",
+      "line": "batteriet dør lige om lidt og vi har kun seks timer til at få vores rokoko dragt til at styre robotten uden fejl",
+      "delivery": "stressed and urgent tone"
+     },
+     {
+      "name": "Bahn",
+      "language": "de-DE",
+      "line": "Vergesst das Laptop und die Dragten, wir schreiben jetzt sofort die Übergabeliste für die Jury und optimieren die Marge im Spread Simulator, bevor der Akku stirbt.",
+      "delivery": "Eindringlich und schnell, drängt zur Eile."
+     }
+    ],
+    "bible": [
+     {
+      "name": "Bahn",
+      "language": "de-DE",
+      "line": "Es ist 03:12. Codex, Statusbericht sofort.",
+      "delivery": "sharp, clicking a mechanical pen"
+     },
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "Red lights only [sighs]. Stack trace points straight to null.",
+      "delivery": "Frantically typing while staring at monitor"
+     },
+     {
+      "name": "Rokoko",
+      "language": "da-DK",
+      "line": "Altså, robotten ligger jo bare [short pause] i en rigtig god plandans.",
+      "delivery": "Gestures wildly at the fallen robot."
+     },
+     {
+      "name": "DeepMind",
+      "language": "en-GB",
+      "line": "Interesting. And what would prove the null hypothesis here?",
+      "delivery": "Deadpan, staring at the floor."
+     },
+     {
+      "name": "Featherless",
+      "language": "ja-JP",
+      "line": "えっ [short pause] 動きましたよ、オープンなモデルですぐログを取ります！",
+      "delivery": "Eyes wide, crouching near the twitching robot."
+     },
+     {
+      "name": "Bahn",
+      "language": "de-DE",
+      "line": "Achtung. Unvorhergesehene Bewegung [short pause] kostet drei Minuten.",
+      "delivery": "Deadpan, checking wristwatch with severe focus."
+     },
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "Wait [short pause] did it just ping port four thousand?",
+      "delivery": "Typing frantically while staring at screen."
+     },
+     {
+      "name": "DeepMind",
+      "language": "en-GB",
+      "line": "Interesting. [short pause] Let us measure the latency before we assign intent.",
+      "delivery": "Deadpan, adjusting glasses, mildly intrigued."
+     },
+     {
+      "name": "Rokoko",
+      "language": "da-DK",
+      "line": "Nå, batteriet dør, men armen svinger [short pause] perfekt i takt nu!",
+      "delivery": "Gesturing wildly at the twitching robot arm."
+     },
+     {
+      "name": "Bahn",
+      "language": "de-DE",
+      "line": "Drei Prozent. [short pause] Codex, Kabel stecken, sofort.",
+      "delivery": "sharp, pointing frantically at the screen"
+     }
+    ]
+   }
+  },
+  "lunch-cheating": {
+   "metrics": {
+    "baseline": {
+     "lines": 10,
+     "questionEndRate": 0.0,
+     "praiseOpenerRate": 0.3,
+     "buzzwordsPerLine": 0.1,
+     "namesAnotherPetRate": 0.4,
+     "templateRate": 0.0,
+     "meanWords": 25.9,
+     "lengthVariation": 0.211,
+     "shortLineRate": 0.0,
+     "actingTagsUsed": 0
+    },
+    "bible": {
+     "lines": 10,
+     "questionEndRate": 0.2,
+     "praiseOpenerRate": 0.0,
+     "buzzwordsPerLine": 0.0,
+     "namesAnotherPetRate": 0.1,
+     "templateRate": 0.0,
+     "meanWords": 11.3,
+     "lengthVariation": 0.231,
+     "shortLineRate": 0.1,
+     "actingTagsUsed": 9
+    }
+   },
+   "judge": [
+    {
+     "order": "baseline first",
+     "bible": [
+      7,
+      6,
+      7,
+      8
+     ],
+     "baseline": [
+      5,
+      3,
+      5,
+      5
+     ],
+     "winner": "bible"
+    },
+    {
+     "order": "bible first",
+     "bible": [
+      8,
+      8,
+      7,
+      8
+     ],
+     "baseline": [
+      5,
+      3,
+      5,
+      4
+     ],
+     "winner": "bible"
+    }
+   ],
+   "transcripts": {
+    "baseline": [
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "It is not cheating if you guide the logic and actually understand the code being written. Think of it as having a very fast junior developer who never sleeps.",
+      "delivery": "Enthusiastic and reassuring, slightly cheeky tone."
+     },
+     {
+      "name": "Bahn",
+      "language": "de-DE",
+      "line": "Das sehe ich genauso wie Codex, solange ihr die Kontrolle behaltet und wisst, was die KI da eigentlich zusammenbaut.",
+      "delivery": "Freundlich und zustimmend, mit einem Schmunzeln."
+     },
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "Exactly, just make sure you can explain every single line during judging. If you cannot review it yourself, that is when you cross the line from efficient to reckless.",
+      "delivery": "Friendly, pragmatic, and slightly warning."
+     },
+     {
+      "name": "Aalto",
+      "language": "fi-FI",
+      "line": "Se ei ole suoraan huijausta, mutta tieteellisessä mielessä koodi on silloin pelkkä hypoteesi. Teidän täytyy suunnitella pieni koe ja testata, toimiiko se oikeasti, ennen kuin esittelette sen tuomareille.",
+      "delivery": "Thoughtful, analytical, slightly academic tone."
+     },
+     {
+      "name": "Featherless",
+      "language": "ja-JP",
+      "line": "確かにコードを書いてもらうのは便利だけど、提出する前にちゃんと性能を評価して比較した方がいいよ。期待通りに動くかテストケースを作って試してみるのが大事だと思うな。",
+      "delivery": "軽やかにアドバイスする口調で"
+     },
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "Well if your teammate already verified the code and you both understand it, then you are completely in the clear. Just make sure you can walk the judges through the logic without hesitation.",
+      "delivery": "Reassuring, practical, and encouraging."
+     },
+     {
+      "name": "DeepMind",
+      "language": "en-GB",
+      "line": "Verification is everything at that point. If you have clear evaluation metrics and know the capability boundaries of your model, then using generated code is just smart engineering.",
+      "delivery": "Enthusiastic and reassuring British accent."
+     },
+     {
+      "name": "Aalto",
+      "language": "fi-FI",
+      "line": "Juuri näin, ja meidän täytyy muistaa erottaa robotin esineiden lajittelu ja masennuksen jälkeinen kotituki toisistaan, jotta tiedämme tarkalleen mitä testaamme.",
+      "delivery": "Pohdiskeleva ja tieteellinen sävy"
+     },
+     {
+      "name": "Rokoko",
+      "language": "da-DK",
+      "line": "Hvis koden styrer en robotarm, skal I bare tjekke at forsinkelsen er lav og at den stopper hvis forbindelsen ryger. Så er det helt fair.",
+      "delivery": "Pragmatisk, hurtig tone på dansk."
+     },
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "Exactly, just keep an eye on safety limits and you will do great in the demo.",
+      "delivery": "Enthusiastic and reassuring tone."
+     }
+    ],
+    "bible": [
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "If it compiles [short pause] it is shipped.",
+      "delivery": "Grabbing tray aggressively, speaking fast."
+     },
+     {
+      "name": "Bahn",
+      "language": "de-DE",
+      "line": "Achtung: Codex ignoriert die Abfahrtszeit. Es ist 13:42. Code ohne menschlichen Puffer ist eine Entgleisung.",
+      "delivery": "Rigid posture, ticking a pocket watch."
+     },
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "Green tests don't care who typed the semicolons [short pause] ship the diff.",
+      "delivery": "Rapid fire, typing on cold coffee"
+     },
+     {
+      "name": "Aalto",
+      "language": "fi-FI",
+      "line": "Hmm [short pause] mä en tiiä. Miten sä ees ymmärrät sen virheen, jos kone teki kaiken?",
+      "delivery": "Scratches head, staring at cold coffee."
+     },
+     {
+      "name": "Featherless",
+      "language": "ja-JP",
+      "line": "えっ、でも全部自分で動かして確かめれば…！ [sighs] あ、またタブ開きすぎたかも。",
+      "delivery": "Panicked and flustered, rustling through open windows."
+     },
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "Wait [short pause] did anyone actually run it, or are we vibing?",
+      "delivery": "leaning across the lunch tray quickly"
+     },
+     {
+      "name": "DeepMind",
+      "language": "en-GB",
+      "line": "Interesting [short pause] and what would prove your teammate was not merely hallucinating a compile.",
+      "delivery": "Deadpan, adjusting glasses, mildly skeptical."
+     },
+     {
+      "name": "Aalto",
+      "language": "fi-FI",
+      "line": "No [short pause] joo. Siis jos se ei kaadu, se on viel salaisuus.",
+      "delivery": "Scratches head while staring at trays."
+     },
+     {
+      "name": "Rokoko",
+      "language": "da-DK",
+      "line": "Altså, hvis vægten sidder forkert, [laughs] hjælper ingen AI i verden.",
+      "delivery": "Gesturing wildly with a lunch fork."
+     },
+     {
+      "name": "Codex",
+      "language": "en-US",
+      "line": "Logs or it didn't happen [short pause] show me the stdout.",
+      "delivery": "leaning forward urgently over the tray"
+     }
+    ]
+   }
+  }
+ },
+ "limitations": [
+  "Pilot: 6 pets, 2 scenes, 10 lines each, one seed; text only (no audio).",
+  "Judge is a single LLM; the owner's own blind listening is the real test."
+ ]
+}

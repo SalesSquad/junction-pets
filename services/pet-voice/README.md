@@ -55,6 +55,21 @@ accuracy came from the Live voice paraphrasing two lines, which led to the scrip
 check now in `speak()`. An independent read-only verifier confirmed run 1's receipt, hashes,
 durations and iCloud copies.
 
+## Persona lab (personality, not just a voice)
+
+`persona_lab.py` A/B-tests the same scene (`scenes.json`) with the current company-copy persona
+versus a character bible (`characters.json`, pilot: 6 pets) plus craft rules against AI slop.
+It is text-only, so it works while the TTS quota is out.
+
+```sh
+python3 persona_lab.py audit evidence/relay-all34-20261114.json   # slop signals of an old run
+python3 persona_lab.py ab --tag my-test                          # both arms, all scenes
+```
+
+Outputs per scene: both transcripts, slop metrics (template rate, question endings, praise
+openers, buzzwords, length variation, acting tags) and a blind X/Y packet for a judge or a
+human. Pilot result: `persona-evidence/pilot-20261115.json` (bible arm won 4/4 blind).
+
 ## Boundaries
 
 Synthetic companion dialogue; not a Chibi-authorized transport (no grants, no private
