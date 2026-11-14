@@ -45,8 +45,8 @@ def main():
     trained.load_state_dict(torch.load(weights, map_location="cpu", weights_only=True))
     assert weights_hash(trained) == receipt["final_parameter_sha256"]
     for model in (virgin, trained):
-        model.eval()
-        assert not any(p.requires_grad is False for p in model.parameters())
+        model.eval().requires_grad_(False)
+        assert all(not p.requires_grad for p in model.parameters())
     env = ContactEnv(60)
     methods = ("trained_q", "untrained_q", "push_medium", "heuristic", "masked_random", "abstain")
     worlds = (("fresh_test", 321000, args.test), ("fresh_ood", 421000, args.ood))
@@ -64,7 +64,7 @@ def main():
                 obs = env.reset(world_seed, ood=split=="fresh_ood")
                 done = False
                 reward_sum = 0.0
-                rng = random.Random(world_seed*1009 + args.learner_seed*9176)
+                rng = random.Random(world_seed*1009 + 20261114)
                 last = {}
                 while not done:
                     if time.monotonic() >= deadline:
