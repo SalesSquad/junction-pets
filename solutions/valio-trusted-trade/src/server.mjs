@@ -7,6 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { createTradeService, TradeError, unsignedQuoteBody } from './core.mjs';
 import { createDemoTrustRegistry, TrustFault } from './trust-envelope.mjs';
 import { recognizeImage, ScanFault } from './scanning.mjs';
+import { createFixtureCatalogSearch, RetrievalFault } from './catalog-retrieval.mjs';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const publicDir = resolve(currentDir, '../public');
@@ -48,7 +49,9 @@ const readImage = async (request) => {
   return Buffer.concat(chunks);
 };
 
-export function createTradeHttpServer(service = createTradeService()) {
+export function createTradeHttpServer(service = createTradeService(), {
+  catalogSearch = createFixtureCatalogSearch(() => service.catalog()),
+} = {}) {
   const sessions = new Map();
   const quoteOwners = new Map();
   const planOwners = new Map();
@@ -118,6 +121,17 @@ export function createTradeHttpServer(service = createTradeService()) {
       }
       if (request.method === 'GET' && url.pathname === '/api/scan/resolve') {
         return send(200, { product: service.resolveProductScan(url.searchParams.get('gtin')) });
+      }
+      if (request.method === 'GET' && url.pathname === '/api/products/search') {
+        const searchToken = request.headers.authorization?.replace(/^Bearer /, '');
+        if (!sessions.has(searchToken)) throw new TradeError('BUYER_CAPABILITY_REQUIRED', 'Product discovery requires a demo buyer session.', 403);
+        try {
+          return send(200, await catalogSearch.search({ query: url.searchParams.get('q'),
+            buyerId: sessions.get(searchToken), limit: 5 }));
+        } catch (error) {
+          if (error instanceof RetrievalFault) throw new TradeError(error.code, error.message, error.status);
+          throw error;
+        }
       }
       if (request.method === 'GET' && url.pathname === '/api/policy') return send(200, service.policy());
       if (request.method === 'GET' && ['/api/demo/wallet', '/api/demo/ledger/verify', '/api/demo/ledger'].includes(url.pathname)) {

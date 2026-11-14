@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Trusted Trade — implemented SYNTHETIC localhost API",
-    "version": "0.5.0",
-    "description": "All parties, stock, prices, approvals, emission factors, orders, scan GTINs and EUR wallet balances invented. No banking, brokerage or commercial effects. Scanner observations are not physical receipt attestation. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification."
+    "version": "0.6.0",
+    "description": "All parties, stock, prices, approvals, emission factors, orders, scan GTINs and EUR wallet balances invented. Default product discovery is lexical, NOT pgvector. Optional pgvector adapter requires a real separate database and embedding provider. No banking, brokerage or commercial effects. Scanner observations are not physical receipt attestation. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification."
   },
   "servers": [
     {
@@ -149,6 +149,145 @@
           },
           "409": {
             "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/products/search": {
+      "get": {
+        "summary": "Read-only buyer-scoped product candidate discovery (fixture lexical by default; optional PostgreSQL/pgvector provider)",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 160
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Advisory candidates with source digests; never commercial truth",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "query",
+                    "mode",
+                    "candidates",
+                    "reason",
+                    "requiresTradeCoreValidation"
+                  ],
+                  "properties": {
+                    "query": {
+                      "type": "string"
+                    },
+                    "mode": {
+                      "enum": [
+                        "FIXTURE_LEXICAL_NO_EMBEDDINGS",
+                        "PGVECTOR_HYBRID_RRF"
+                      ]
+                    },
+                    "candidates": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "sku",
+                          "name",
+                          "provenance",
+                          "requiresTradeCoreValidation"
+                        ],
+                        "properties": {
+                          "sku": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "family": {
+                            "type": "string"
+                          },
+                          "lexicalScore": {
+                            "type": "number"
+                          },
+                          "rrfScore": {
+                            "type": "number"
+                          },
+                          "provenance": {
+                            "type": "object",
+                            "required": [
+                              "sourceKind",
+                              "sourceRef",
+                              "sourceVersion",
+                              "sourceSha256"
+                            ],
+                            "properties": {
+                              "sourceKind": {
+                                "type": "string"
+                              },
+                              "sourceRef": {
+                                "type": "string"
+                              },
+                              "sourceVersion": {
+                                "type": [
+                                  "string",
+                                  "integer"
+                                ]
+                              },
+                              "sourceSha256": {
+                                "type": "string"
+                              },
+                              "observedAt": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "format": "date-time"
+                              }
+                            }
+                          },
+                          "requiresTradeCoreValidation": {
+                            "const": true
+                          }
+                        }
+                      }
+                    },
+                    "reason": {
+                      "enum": [
+                        "RANKED_ADVISORY_CANDIDATES",
+                        "NO_SUPPORTED_MATCH",
+                        "EXACT_GTIN_ROUTE_REQUIRED",
+                        "UNVERIFIED_DIETARY_CONSTRAINT",
+                        "LOW_CONFIDENCE_ABSTAINED"
+                      ]
+                    },
+                    "requiresTradeCoreValidation": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query"
+          },
+          "403": {
+            "description": "Demo session required"
+          },
+          "503": {
+            "description": "Configured search backend unavailable"
           }
         }
       }

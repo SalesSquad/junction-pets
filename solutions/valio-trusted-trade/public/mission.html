@@ -64,6 +64,8 @@
               <div class="scan-manual"><label for="scan-code">GTIN / EAN (manual fallback)</label><div class="scan-manual-controls"><input id="scan-code" inputmode="numeric" maxlength="14" placeholder="13-digit product barcode" /><button type="button" id="scan-code-button" class="outline-button">Check exact code ↗</button></div></div>
               <div class="scan-result" id="scan-result" role="status" aria-live="polite">No scan yet. Example invented fixture GTIN: <code>2000000000015</code>.</div>
               <button type="button" id="scan-confirm-button" class="primary-button" hidden>Apply recognized quantities to request ✓</button>
+              <div class="product-search"><label for="product-query">Aimo product discovery · advisory candidates</label><div class="scan-manual-controls"><input id="product-query" maxlength="160" placeholder="Try: laktoositon maito · kaurajuoma" /><button type="button" id="search-products-button" class="outline-button">Find products ↗</button></div></div>
+              <div id="product-search-result" class="scan-result" role="status" aria-live="polite">Search uses a read-only lexical demo index. Aiven pgvector needs a configured PostgreSQL service and real embeddings.</div>
               <small id="scan-privacy" class="scan-privacy">Browser barcode recognition runs on-device when supported. Optional OCR runs on this demo server; uploaded images are processed transiently and not saved. Neither OCR nor scanning verifies allergens, delivery or spending authority. Meta glasses are not connected.</small>
             </section>
 

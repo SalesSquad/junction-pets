@@ -49,3 +49,8 @@
 .scan button:focus-visible,.scan select:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
 @media(max-width:1050px){.scan-controls{grid-template-columns:1fr 1fr}.scan-controls>.outline-button{grid-column:1/-1}}
 @media(max-width:620px){.scan{padding:16px}.scan-controls{grid-template-columns:1fr}.scan-controls>.outline-button{grid-column:auto}.scan-manual-controls{flex-direction:column}.scan-manual-controls>.outline-button{width:100%}.scan .section-kicker{letter-spacing:.055em}.scan h2{font-size:22px}}
+.product-search{display:grid;gap:7px;margin-top:5px;padding-top:15px;border-top:1px solid var(--stroke)}
+.product-search>label{font-size:10px;font-weight:750;letter-spacing:.055em;color:var(--lime)}
+.product-search input{flex:1;min-width:0;height:44px;color:var(--ink);background:#071e18;border:1px solid #466356;border-radius:9px;padding:9px 10px;font-size:12px}
+.search-candidate{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--stroke-soft);padding:7px 0}
+.search-candidate b{font-size:12px;color:var(--ink)}.search-candidate span,.scan-result small{font-size:10px;color:var(--muted)}

@@ -391,6 +391,27 @@ $('scan-code-button').addEventListener('click', () => act('Exact GTIN lookup', a
     `${observation.receiptId} · ${product.sku} · ${observation.observedCount}/${observation.orderedCount} · NOT physical proof`);
 }));
 
+$('search-products-button').addEventListener('click', () => act('Product discovery', async () => {
+  const { query, mode, candidates, reason } = await api(`/api/products/search?q=${encodeURIComponent($('product-query').value)}`);
+  const panel = $('product-search-result');
+  panel.replaceChildren();
+  panel.append(node('strong', `${candidates.length} search candidates · ${mode === 'PGVECTOR_HYBRID_RRF' ? 'pgvector + full-text RRF' : 'fictional lexical index'}`));
+  if (reason === 'EXACT_GTIN_ROUTE_REQUIRED') panel.append(node('span', 'Barcode identity requires the exact GTIN field above, not a fuzzy search.'));
+  if (reason === 'NO_SUPPORTED_MATCH') panel.append(node('span', 'No candidates in the current data scope. No products were invented.'));
+  if (reason === 'UNVERIFIED_DIETARY_CONSTRAINT') panel.append(node('span',
+    'Safety abstention: the available catalog cannot verify this diet or allergen requirement. No product is suggested.'));
+  if (reason === 'LOW_CONFIDENCE_ABSTAINED') panel.append(node('span',
+    'No sufficiently relevant, source-backed match. Semantic-only nearest neighbours are withheld without calibrated confidence.'));
+  for (const candidate of candidates) {
+    const row = node('div', undefined, 'search-candidate');
+    row.append(node('b', `${candidate.name} · ${candidate.sku}`));
+    row.append(node('span', `Source ${candidate.provenance.sourceKind} · revision ${candidate.provenance.sourceVersion} · SHA-256 ${candidate.provenance.sourceSha256.slice(0, 12)}…`));
+    panel.append(row);
+  }
+  panel.append(node('small', 'Search only proposes candidates. The signed trade core independently revalidates exact product, eligibility, stock and fixed price.'));
+  timeline('Read-only product discovery', `${query.slice(0, 80)} · ${candidates.length} provisional candidates · ${mode}`);
+}));
+
 $('mission-form').addEventListener('submit', (event) => {
   event.preventDefault();
   act('Portfolio planning', async () => {

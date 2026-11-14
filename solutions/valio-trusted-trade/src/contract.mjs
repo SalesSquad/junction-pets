@@ -1,10 +1,11 @@
 // Implemented localhost contract. No sponsor API or authentication claim.
-export const endpoints = Object.freeze({ session: '/api/demo/session', catalog: '/api/catalog', scanResolve: '/api/scan/resolve', scanOcr: '/api/scan/ocr', policy: '/api/policy', quotes: '/api/quotes', orders: '/api/orders', audit: '/api/audit', auditVerify: '/api/audit/verify', reprice: '/api/demo/reprice', plans: '/api/plans', shock: '/api/demo/shock', jwks: '/.well-known/trusted-trade/jwks.json', buyerKey: '/api/trust/buyer-key', wallet: '/api/demo/wallet', ledger: '/api/demo/ledger', ledgerVerify: '/api/demo/ledger/verify' });
+export const endpoints = Object.freeze({ session: '/api/demo/session', catalog: '/api/catalog', productsSearch: '/api/products/search', scanResolve: '/api/scan/resolve', scanOcr: '/api/scan/ocr', policy: '/api/policy', quotes: '/api/quotes', orders: '/api/orders', audit: '/api/audit', auditVerify: '/api/audit/verify', reprice: '/api/demo/reprice', plans: '/api/plans', shock: '/api/demo/shock', jwks: '/.well-known/trusted-trade/jwks.json', buyerKey: '/api/trust/buyer-key', wallet: '/api/demo/wallet', ledger: '/api/demo/ledger', ledgerVerify: '/api/demo/ledger/verify' });
 export const metadata = Object.freeze({ mode: 'SYNTHETIC_NONCOMMERCIAL', supplier_id: 'supplier-demo', openapi: '/openapi.json', endpoints,
   approval: 'UNAUTHENTICATED_SYNTHETIC_HUMAN_DECISION', session: 'EPHEMERAL_DEMO_CAPABILITY_NOT_REAL_IDENTITY',
   quoteBody: 'UNSIGNED_kattely.procurement.quote.v2', tradeProof: 'Ed25519_SIGNED_LOCAL_DEMO_KEYS_NOT_REAL_KATTELY_OR_AP2',
   portfolio: 'DETERMINISTIC_MULTI_PRODUCT_OPTIONS_WITH_SYNTHETIC_METRICS', recovery: 'STOCK_SHOCK_REPLANS_WITH_FRESH_APPROVAL',
   settlement: 'DOUBLE_ENTRY_SYNTHETIC_WALLET_REQUIRES_SEPARATE_DEMO_PAYMENT_APPROVAL_NO_PSP',
+  retrieval: 'FIXTURE_LEXICAL_READ_ONLY; OPTIONAL_SCOPED_PGVECTOR_SQL_ADAPTER_REQUIRES_EXTERNAL_DB_AND_REAL_EMBEDDINGS',
   families: ['dairy-milk', 'oat-drink'], fixtureDeliveryDate: '2026-11-16',
   scanning: 'EXACT_SYNTHETIC_GTIN_AND_OPTIONAL_TRANSIENT_SERVER_OCR_UNTRUSTED; NO_META_DEVICE_OR_PHYSICAL_DELIVERY_ATTESTATION' });
 const json = (schema) => ({ 'application/json': { schema } });
@@ -18,12 +19,16 @@ const operation = (summary, schema, status = '200', secured = false) => ({ summa
   responses: { [status]: { description: 'Synthetic result only' }, '400': { description: 'Invalid terms' }, '403': { description: 'Buyer capability or approval refused' }, '409': { description: 'Budget, stock, expiry, state or replay conflict' } } });
 const parameter = (name) => ({ name, in: 'path', required: true, schema: str });
 export const openapi = {
-  openapi: '3.1.0', info: { title: 'Trusted Trade — implemented SYNTHETIC localhost API', version: '0.5.0', description: 'All parties, stock, prices, approvals, emission factors, orders, scan GTINs and EUR wallet balances invented. No banking, brokerage or commercial effects. Scanner observations are not physical receipt attestation. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification.' },
+  openapi: '3.1.0', info: { title: 'Trusted Trade — implemented SYNTHETIC localhost API', version: '0.6.0', description: 'All parties, stock, prices, approvals, emission factors, orders, scan GTINs and EUR wallet balances invented. Default product discovery is lexical, NOT pgvector. Optional pgvector adapter requires a real separate database and embedding provider. No banking, brokerage or commercial effects. Scanner observations are not physical receipt attestation. Independent Ed25519 proof-of-possession demo keys are self-attested, not verified identities, Kättely or AP2 certification.' },
   servers: [{ url: '/' }], paths: {
     '/.well-known/trusted-trade': { get: operation('Discover synthetic capabilities') },
     [endpoints.jwks]: { get: operation('Publish ephemeral self-attested demo verification keys, NOT a trusted identity registry') },
     [endpoints.session]: { post: operation('Issue an ephemeral demo buyer capability (not login)', object({ buyerId: str }), '201') },
     [endpoints.catalog]: { get: operation('Read current synthetic product prices, stock and versions') },
+    [endpoints.productsSearch]: { get: { summary: 'Read-only buyer-scoped product candidate discovery (fixture lexical by default; optional PostgreSQL/pgvector provider)',
+      security: [{ demoCapability: [] }],
+      parameters: [{ name: 'q', in: 'query', required: true, schema: { type: 'string', minLength: 2, maxLength: 160 } }],
+      responses: { '200': { description: 'Advisory candidates with source digests; never commercial truth' }, '400': { description: 'Invalid query' }, '403': { description: 'Demo session required' }, '503': { description: 'Configured search backend unavailable' } } } },
     [endpoints.scanResolve]: { get: { summary: 'Resolve a checksum-valid barcode by exact synthetic GTIN; never semantic identity',
       parameters: [{ name: 'gtin', in: 'query', required: true, schema: str }],
       responses: { '200': { description: 'Exact synthetic product identity, never authority' }, '400': { description: 'Invalid barcode or checksum' }, '404': { description: 'Unknown barcode' } } } },
@@ -114,6 +119,17 @@ const successSchema = (path, method, schema) => {
 };
 successSchema(endpoints.session, 'post', object({ token: str, buyerId: str, mode: { const: 'SYNTHETIC_NOT_AUTHENTICATED' } }));
 successSchema(endpoints.catalog, 'get', object({ mode: { const: 'INVENTED_FIXTURE' }, products: { type: 'array', items: ref('Product') } }));
+successSchema(endpoints.productsSearch, 'get', object({
+  query: str, mode: { enum: ['FIXTURE_LEXICAL_NO_EMBEDDINGS', 'PGVECTOR_HYBRID_RRF'] },
+  candidates: { type: 'array', items: { type: 'object', required: ['sku', 'name', 'provenance', 'requiresTradeCoreValidation'], properties: {
+    sku: str, name: str, family: str, lexicalScore: { type: 'number' }, rrfScore: { type: 'number' },
+    provenance: { type: 'object', required: ['sourceKind', 'sourceRef', 'sourceVersion', 'sourceSha256'], properties: {
+      sourceKind: str, sourceRef: str, sourceVersion: { type: ['string', 'integer'] }, sourceSha256: str, observedAt: { type: ['string', 'null'], format: 'date-time' },
+    } }, requiresTradeCoreValidation: { const: true },
+  } } },
+  reason: { enum: ['RANKED_ADVISORY_CANDIDATES', 'NO_SUPPORTED_MATCH', 'EXACT_GTIN_ROUTE_REQUIRED', 'UNVERIFIED_DIETARY_CONSTRAINT', 'LOW_CONFIDENCE_ABSTAINED'] },
+  requiresTradeCoreValidation: { const: true },
+}));
 successSchema(endpoints.scanResolve, 'get', object({ product: object({
   gtin: str, sku: str, name: str, family: str, unitsAvailable: { type: 'integer', minimum: 0 },
   priceCents: int, stockVersion: int, mode: { const: 'INVENTED_FIXTURE_EXACT_GTIN' },

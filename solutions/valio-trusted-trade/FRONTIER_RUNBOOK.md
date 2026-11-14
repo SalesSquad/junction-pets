@@ -58,6 +58,8 @@ npm run demo:frontier -- happy --decision=approve --payment-decision=approve --r
 
 `BarcodeDetector` is browser-dependent; an OCR fallback needs the local `tesseract` executable on the running server. On unsupported browsers, the manual GTIN field remains available. Images are transient on the application server; no third-party vision API or Meta device is connected. This Valio data domain does **not** import BIM, Valmet spatial assets or Taimi household data.
 
+The **Aimo product discovery** field additionally demonstrates a read-only candidate-search port. Today it uses Finnish/English lexical fixture search. An optional scoped PostgreSQL/pgvector adapter, SQL migration, provenance contract and tests are described in [RETRIEVAL_PGVECTOR.md](RETRIEVAL_PGVECTOR.md). **No live Aiven connection or real embeddings are implied.**
+
 ## 110-second judge story — trade and fictional EUR included
 
 | Seconds | Live action | Visible evidence |
