@@ -23,6 +23,20 @@ import numpy as np
 
 
 V7_SOURCE_SHA = "127ceb9be4374ba46908cd398ced6b740275a434"
+V7_HARNESS_SHA = "5cbe5ac9d1fe11a5230f38f465a0603599df48d5"
+V7_CRACI_RUN_ID = "craci.43640728389.1.ebec06d6f3461523"
+V7_DATASET_SHA256 = "d1ad3e8de866e38a15e86d76f16205d7ff1830289de151af78014edb03c36320"
+# Hashes measured from the corrected, independently replayed GitHub CRACI
+# run, NEVER from an input's self-reported manifest. No CLI flag overrides them.
+V7_PINNED_FILES = {
+    "training.json": "06ffeb5f4d5a639eba15f0bd2c260b6d0c046ea13665a8f5e884848bb1a236d8",
+    "full_transitions.jsonl.gz": "3888fd350c66f3a1ca6a2bebb7731097c86181b5644d921b0bb580855bae4d64",
+    "manifest.json": "5b7ffc619770326b34fe73b1c8123e22b5f6644585a5fb58e7be2b6851f718e0",
+    "independent-qualification.json": "2c371bc969d502bd1a64d6a5744012440deea961c22cfee7a173dbd72de5bc49",
+    "independent-positive-replay.json": "89b854b61f820c3a87c6b7e8c4e1732c0627ee5663e4e7cee17954b44da22f17",
+    "receipt.json": "546249d8ccc2929a58429c0c767e58b92eb9deaabb2d3f39c36761b4e27ae9a6",
+    "artifact.zip": "612a7770ded0466e00ec45e1b0073cb03a0cf4758d0e17d354f32e0639749e3c",
+}
 V7_TRAIN_SCHEMA = "junction.rokoko.mujoco-v7.action-feasibility.v1.training"
 V7_QUAL_SCHEMA = "junction.rokoko.mujoco-v7-feasibility.craci.train.v1"
 SCHEMA = "junction.rokoko.mujoco-v8.hierarchical-imitation.v1"
@@ -41,8 +55,7 @@ LEARNING_RATE = .055
 L2 = .003
 EPOCHS = 55
 FEATURE_COUNT = 41
-EVIDENCE_DIR_FILES = ("training.json", "full_transitions.jsonl.gz", "manifest.json",
-                      "independent-qualification.json", "independent-positive-replay.json")
+EVIDENCE_DIR_FILES = tuple(V7_PINNED_FILES)
 
 
 def require(ok, code):
@@ -86,9 +99,9 @@ def source_identity(expected_head):
     head = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"],
                                    text=True, timeout=10).strip()
     require(head == expected_head, "V8_SOURCE_HEAD_MISMATCH")
-    dirty = subprocess.check_output(["git", "-C", str(root), "status", "--porcelain=v1",
-                                     "--untracked-files=no"], text=True, timeout=10).strip()
-    require(not dirty, "V8_TRACKED_SOURCE_DIRTY")
+    dirty = subprocess.check_output(["git", "-C", str(root), "status", "--porcelain=v1"],
+                                    text=True, timeout=10).strip()
+    require(not dirty, "V8_SOURCE_DIRTY_INCLUDING_UNTRACKED")
     base = subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor",
                            V7_SOURCE_SHA, "HEAD"], capture_output=True, timeout=10)
     require(base.returncode == 0, "V8_NOT_DESCENDED_FROM_REVIEWED_V7")
@@ -98,10 +111,45 @@ def source_identity(expected_head):
 
 
 def verified_v7_evidence(root):
-    """Validate immutable source, independent physics proof, and all raw SHA claims."""
+    """Production: accept ONLY the known, retained and independently replayed V7 run."""
+    return _v7_evidence_contract(root, V7_PINNED_FILES, V7_DATASET_SHA256)
+
+
+def _v7_evidence_contract(root, trusted_sha256, expected_dataset_sha256):
+    """Pure contract seam for synthetic unit tests; production cannot replace pins.
+
+    Caller-provided expectations are intentionally inaccessible from main()/CLI.
+    Unit fixtures use this helper and explicitly prove the production gate rejects
+    their perfectly self-consistent synthetic hashes and forged qualification.
+    """
     require(root.is_dir() and all((root / name).is_file()
                                   for name in EVIDENCE_DIR_FILES),
             "V7_FULL_RESTORED_EVIDENCE_REQUIRED")
+    require(set(trusted_sha256) == set(EVIDENCE_DIR_FILES) and
+            all(file_sha256(root / name) == trusted_sha256[name]
+                for name in EVIDENCE_DIR_FILES),
+            "V7_PINNED_CRACI_ARTIFACT_SHA_MISMATCH")
+    receipt = read_json(root / "receipt.json")
+    binding = receipt.get("binding", {})
+    command = receipt.get("command", {})
+    require(receipt.get("runId") == V7_CRACI_RUN_ID and
+            binding.get("runId") == V7_CRACI_RUN_ID and
+            binding.get("sourceSha") == V7_SOURCE_SHA and
+            binding.get("harnessSha") == V7_HARNESS_SHA and
+            binding.get("repository") == "SalesSquad/junction-pets" and
+            binding.get("workload") == "rokoko-mujoco-v7-feasibility" and
+            receipt.get("status") == "succeeded" and
+            receipt.get("jobStatus") == "success" and
+            receipt.get("sourceVerified") is True and
+            receipt.get("harnessVerified") is True and
+            receipt.get("issues") == [] and
+            command.get("exitCode") == 0 and
+            command.get("wrapperExitCode") == 0 and
+            command.get("state") == "completed" and
+            command.get("binding") == binding and
+            receipt.get("manifest", {}).get("sha256") ==
+            "1bfddb3fbb91888ba6e8b3196572938387c7a629bfe948b128e9a3e5f12bc3e0",
+            "V7_PINNED_CRACI_RECEIPT_INVALID")
     manifest = read_json(root / "manifest.json")
     expected = manifest.get("file_sha256", {})
     require(set(expected) == {"training.json", "full_transitions.jsonl.gz"} and
@@ -139,7 +187,7 @@ def verified_v7_evidence(root):
             training.get("actual_transition_count") ==
             qualification.get("actual_real_option_transitions") and
             digest(trials) == training.get("dataset_sha256") ==
-            qualification.get("dataset_sha256"),
+            qualification.get("dataset_sha256") == expected_dataset_sha256,
             "V7_COMPLETE_PAIRED_TRAIN_DATASET_REQUIRED")
     keymap = {}
     worlds = {}
@@ -172,7 +220,12 @@ class PublicMemory:
 
     def features(self, observation, mask):
         obs = np.asarray(observation, dtype=np.float64)
-        legal = np.asarray(mask, dtype=bool)
+        raw_mask = np.asarray(mask)
+        require(raw_mask.shape == (ACTION_COUNT,) and
+                raw_mask.dtype.kind in ("b", "i", "u") and
+                np.all(np.isin(raw_mask, (0, 1))),
+                "V8_PUBLIC_18D_7MASK_ABI")
+        legal = raw_mask.astype(bool)
         require(obs.shape == (OBSERVATION_COUNT,) and
                 legal.shape == (ACTION_COUNT,) and np.all(np.isfinite(obs)) and
                 np.any(legal), "V8_PUBLIC_18D_7MASK_ABI")
@@ -361,6 +414,10 @@ def learn(examples, protected_success_seeds=()):
     heads, diagnostics = [], []
     for stage in range(STAGE_COUNT):
         weights, info = fit_stage(examples, stage, diagnostic)
+        require(not info["trained"] or
+                (info["fit_cross_entropy"] is not None and
+                 info["fit_cross_entropy"] < info["initial_fit_cross_entropy"]),
+                "V8_STAGE_GRADIENT_FAILED_TO_IMPROVE_FIT")
         heads.append(weights)
         diagnostics.append(info)
     stacked = np.stack(heads)
