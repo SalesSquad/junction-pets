@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -89,10 +90,31 @@ def fixture(folder):
               "fully_replayed_positive_train_trials": 3}
     (folder / "independent-positive-replay.json").write_text(json.dumps(replay),
                                                                 encoding="utf8")
-    return training, qual
+    # Trust-boundary adversary: fabricate a plausible successful source-bound
+    # receipt and archive, then rehash every file. The production gate MUST
+    # still reject this complete self-consistent fake V7 run.
+    (folder / "artifact.zip").write_bytes(b"synthetic-unit-contract-not-real-CRACI")
+    binding = {"runId": v8.V7_CRACI_RUN_ID, "sourceSha": v8.V7_SOURCE_SHA,
+               "harnessSha": v8.V7_HARNESS_SHA, "repository": "SalesSquad/junction-pets",
+               "workload": "rokoko-mujoco-v7-feasibility"}
+    receipt = {"runId": v8.V7_CRACI_RUN_ID, "binding": binding,
+               "status": "succeeded", "jobStatus": "success",
+               "sourceVerified": True, "harnessVerified": True, "issues": [],
+               "command": {"binding": binding, "exitCode": 0,
+                           "wrapperExitCode": 0, "state": "completed"},
+               "manifest": {"sha256": "1bfddb3fbb91888ba6e8b3196572938387c7a629bfe948b128e9a3e5f12bc3e0"}}
+    (folder / "receipt.json").write_bytes(v8.canonical_bytes(receipt))
+    return training, {name: v8.file_sha256(folder / name)
+                      for name in v8.EVIDENCE_DIR_FILES}
 
 
 class V8LearningContracts(unittest.TestCase):
+    def test_exact_checkout_refuses_untracked_source(self):
+        with patch.object(v8.subprocess, "check_output",
+                          side_effect=[v8.V7_SOURCE_SHA + "\n", "?? untracked-script.py\n"]):
+            with self.assertRaisesRegex(ValueError, "SOURCE_DIRTY_INCLUDING_UNTRACKED"):
+                v8.source_identity(v8.V7_SOURCE_SHA)
+
     def test_public_observation_features_and_original_shield(self):
         o = synthetic_observation(512001)
         m = [0, 0, 0, 1, 0, 0, 1]
@@ -111,12 +133,17 @@ class V8LearningContracts(unittest.TestCase):
             policy([0.] * 19, [True] * 7)
         with self.assertRaisesRegex(ValueError, "PUBLIC_18D_7MASK"):
             policy([0.] * 18, [False] * 7)
+        with self.assertRaisesRegex(ValueError, "PUBLIC_18D_7MASK"):
+            policy([0.] * 18, [0, 0, 0, 2, 0, 0, 1])
+        with self.assertRaisesRegex(ValueError, "PUBLIC_18D_7MASK"):
+            policy([0.] * 18, [0, 0, 0, "yes", 0, 0, 1])
 
     def test_full_1280_synthetic_boundary_and_gradient_updates(self):
         with tempfile.TemporaryDirectory(prefix="v8-contract-") as directory:
             root = Path(directory) / "evidence"
-            fixture(root)
-            training, _, _, _, rows = v8.verified_v7_evidence(root)
+            training, fixture_hashes = fixture(root)
+            training, _, _, _, rows = v8._v7_evidence_contract(
+                root, fixture_hashes, training["dataset_sha256"])
             self.assertEqual(len(rows), 1280)
             examples, witnesses, n = v8.training_examples(root, rows)
             self.assertEqual(n, 2560)
@@ -135,22 +162,37 @@ class V8LearningContracts(unittest.TestCase):
     def test_training_sha_mismatch_aborts_before_learning(self):
         with tempfile.TemporaryDirectory(prefix="v8-contract-") as directory:
             root = Path(directory) / "evidence"
-            fixture(root)
+            synthetic, trusted = fixture(root)
             training = root / "training.json"
             with training.open("ab") as out:
                 out.write(b"changed")
-            with self.assertRaisesRegex(ValueError, "RAW_EVIDENCE_SHA_MISMATCH"):
-                v8.verified_v7_evidence(root)
+            with self.assertRaisesRegex(ValueError, "PINNED_CRACI_ARTIFACT_SHA_MISMATCH"):
+                v8._v7_evidence_contract(root, trusted, synthetic["dataset_sha256"])
 
     def test_nonqualified_independent_replay_aborts(self):
         with tempfile.TemporaryDirectory(prefix="v8-contract-") as directory:
             root = Path(directory) / "evidence"
-            fixture(root)
+            training, _ = fixture(root)
             replay = root / "independent-positive-replay.json"
             payload = json.loads(replay.read_text(encoding="utf8"))
             payload["claim_verified"] = False
             replay.write_text(json.dumps(payload), encoding="utf8")
+            # The contract-only seam tests semantic replay rejection using a
+            # newly calculated synthetic hash. The production gate would fail
+            # earlier against the independently pinned real file digest.
+            trusted = {name: v8.file_sha256(root / name)
+                       for name in v8.EVIDENCE_DIR_FILES}
             with self.assertRaisesRegex(ValueError, "INDEPENDENT_POSITIVE_PHYSICS"):
+                v8._v7_evidence_contract(root, trusted, training["dataset_sha256"])
+
+    def test_self_consistent_forgery_cannot_pass_production_gate(self):
+        with tempfile.TemporaryDirectory(prefix="v8-forged-") as directory:
+            root = Path(directory) / "evidence"
+            training, trusted = fixture(root)
+            self.assertEqual(
+                len(v8._v7_evidence_contract(root, trusted,
+                                             training["dataset_sha256"])[4]), 1280)
+            with self.assertRaisesRegex(ValueError, "PINNED_CRACI_ARTIFACT_SHA_MISMATCH"):
                 v8.verified_v7_evidence(root)
 
     def test_unsafe_and_abstained_policies_not_training_teachers(self):
