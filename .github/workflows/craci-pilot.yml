@@ -4794,7 +4794,7 @@ jobs:
       run: |
         set -euo pipefail
         python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v10-hybrid-retain-evidence.py" --mode pack --harness-root "$CRACI_HARNESS_ROOT" --evidence-root "$RUNNER_TEMP/craci-evidence" --private-staging "$RUNNER_TEMP/craci-hybrid-private-original"
-        python3 -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v10_hybrid_prospective_qualification.py'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v10_hybrid_prospective_qualification.py'
     - id: receipt
       name: Finalize exact source-bound V10 hybrid TRAIN-only CRACI receipt
       if: ${{ always() }}
