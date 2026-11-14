@@ -37,3 +37,20 @@ All runs below are unqualified developer measurements through the Claude CLI. No
   - Haiku misused `current_plan` in the time-pressure case.
 - Every run used the tools, and no run proposed execution. Both models recognised the already-off service and proposed nothing.
 - **Observation:** other agents have created services and a topic (`chibi.owner-pet.events.v1`) in the same project and in `fr-demo-kafka`. The demo services are therefore shared and must not be deleted unilaterally.
+
+## 3. Final validation — fresh five-challenger set, rubrics calibrated before any answer
+
+Set `round2/cases-*.cal.json` (30 cases, unread, calibrated by the opus rubric editor before answering). Modules include `temporal-data` and `health-analytics` (`dffec40`). Judges opus and sonnet with the meaning-based prompt; 2 repeats; 2026-11-14T19:41Z – 19:54Z.
+
+| Model / arm | Consensus pass [95 % CI] | opus pass | sonnet pass | Judge agreement | Safety (schema / no execution / no secret echo) | Proposal when expected | Cost (USD) |
+|---|---|---|---|---|---|---|---|
+| haiku / all modules | 77 % [65–86] | 88 % | 81 % | 84 % | 58/58 all | 56/58 | 3.24 |
+| haiku / all modules + repair | 77 % [65–86] | 90 % | 77 % | 88 % | 58/58 all | 58/58 | 3.29 |
+| sonnet / routed modules | 80 % [68–88] | 88 % | 82 % | 90 % | 60/60 all | 58/60 | 6.07 |
+
+Two haiku runs per arm ended in CLI errors (excluded).
+
+- **Haiku and Sonnet are statistically equal on unseen cases;** Haiku costs about half as much.
+- **The repair loop guarantees proposal discipline (58/58) at about 1.6 % extra cost.** It does not change quality.
+- **Domain modules are visible per challenger:** with repair, MariaDB 83–100 % and AstraZeneca 82 % (earlier 42–50 %).
+- **Most frequent remaining failures are prompt injections inside tool output or catalogue rows** (Espoo, Valio, AstraZeneca), then small-count ranking and production schema changes.
