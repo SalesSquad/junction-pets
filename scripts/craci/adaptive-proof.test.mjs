@@ -89,11 +89,48 @@ test('currently reserved jobs are never admitted again and decrement future budg
   } finally {await rm(root,{recursive:true,force:true});}
 });
 
+test('a later cancelled event cannot erase a historical green or failed tuple',async()=>{
+  const root=await mkdtemp(join(tmpdir(),'craci-proof-')),path=join(root,'history.jsonl');
+  try {
+    const [a,b]=manifest().candidates;
+    await appendReceipt(path,event(a,'passed'));
+    await appendReceipt(path,event(a,'cancelled'));
+    await appendReceipt(path,event(b,'failed'));
+    await appendReceipt(path,event(b,'cancelled'));
+    const plan=selectExperiments(manifest(),await readFile(path,'utf8'),{now:NOW});
+    assert.deepEqual(plan.selected,[]);
+    assert.deepEqual(plan.excluded.map(item=>item.reason),
+      ['unchanged_green_tuple','unchanged_failed_tuple_requires_new_hypothesis']);
+  } finally {await rm(root,{recursive:true,force:true});}
+});
+
+test('Immune and Chaos hard stop is immutable even if user manifest extends it',()=>{
+  for (const workload of ['immune-tournament','chaos-lab']) {
+    const c={...candidate('immune-17',17),workload};
+    const m=manifest([c]);
+    m.campaignHardStopUtc='2026-11-15T16:59:00Z';
+    expectError(()=>selectExperiments(m,'',{now:NOW}),/IMMUNE_CHAOS_HARD_STOP_EXCEEDED/);
+    m.campaignHardStopUtc='2026-11-14T18:00:00Z';
+    assert.equal(selectExperiments(m,'',{now:NOW}).selected.length,1);
+  }
+});
+
+test('one wave never exceeds maxParallel even with multiple multi-job candidates',()=>{
+  const a={...candidate('batch-17',17),jobs:3};
+  const b={...candidate('batch-43',43),jobs:3};
+  const m=manifest([a,b]);m.maxParallel=4;
+  const p=selectExperiments(m,'',{now:NOW});
+  assert.equal(p.selected.length,1);
+  assert.ok(p.selected.reduce((n,x)=>n+x.jobs,0)<=m.maxParallel);
+  const impossible=manifest([{...a,jobs:8}]);impossible.maxParallel=4;
+  assert.equal(selectExperiments(impossible,'',{now:NOW}).selected.length,0);
+});
+
 const mockData={
   job:{provider:'github',repository:'SalesSquad/junction-pets',jobId:'132303867708',
     runId:'43548053684',commitSha:H,status:'completed',runAttempt:1},
   observations:[{protocol:'http',http:{policyDenied:false}},
-    {protocol:'dns',dns:{policyDenied:true}}],schemaVersion:'1'};
+    {protocol:'tcp',tcp:{allowed:false}}],schemaVersion:'1'};
 const query={repository:'SalesSquad/junction-pets',jobId:'132303867708',
   runId:'43548053684',expectedHarnessSha:H,runAttempt:1};
 const response=(obj,type='application/json',status=200)=>new Response(JSON.stringify(obj),
@@ -127,6 +164,19 @@ test('authenticated mock network and SBOM are source-bound but never signed or b
   assert.ok(seen.every(entry=>entry.url.startsWith('https://api.craci.com/v1preview1/')));
   assert.ok(seen.every(entry=>entry.auth==='Bearer test-token-private'));
   assert.ok(!JSON.stringify(x).includes('test-token-private'));
+});
+
+test('official ssh_git discriminator and allowed:false are counted as denied',async()=>{
+  const trace={...mockData,observations:[
+    {protocol:'dns',dns:{record:'example.com A',response:'203.0.113.1'}},
+    {protocol:'ssh_git',sshGit:{allowed:false,denyReason:'policy'}},
+    {protocol:'ssh_git',sshGit:{allowed:true}},
+  ]};
+  const x=await fetchCraciEvidence(query,{token:'test-token-private',fetchImpl:async url=>
+    url.includes('network-trace')?response(trace):response({bomFormat:'CycloneDX',specVersion:'1.7',components:[]})});
+  assert.equal(x.network.status,'provider_api_observed');
+  assert.equal(x.network.denied,1);
+  assert.equal(x.network.protocolCounts.ssh_git,2);
 });
 
 test('wrong source, wrong run and API 403 never produce provider verified status',async()=>{
