@@ -28,7 +28,7 @@ sys.path.insert(0, str(HERE))
 import run as v8  # noqa: E402; production provenance is checked before simulation
 
 
-SCHEMA = "junction.rokoko.mujoco-v8.prospective-paired-train.v1"
+SCHEMA = "junction.rokoko.mujoco-v8.prospective-train.v1"
 TRAINER_HEAD = "4b91c64bc1a79bf630b1da6d12bea28e87c2990a"
 # The real offline source-verified fit was frozen on this historical HEAD.
 # Prospective runner code is a later reviewed descendant and MUST NOT mutate
@@ -42,7 +42,8 @@ TRAIN_LAST_SCAN_SEED = TRAIN_FIRST_SEED + SELECTION_MAX_SEEDS - 1
 NEAR_TARGET = 128
 CLEAR_TARGET = 32
 NEAR_OBSERVED_Y_THRESHOLD = .122
-STRATEGIES = ("frozen_v5", "frozen_v6", "repeat_left", "frozen_v8")
+STRATEGIES = ("frozen_v5", "frozen_v6", "repeat_left", "v8_hierarchical")
+FROZEN_V7_RUN_FILE_SHA256 = "88b403e5246d2e496cf48a1e405708e6f86e1107d89185ebb615cf6af069f144"
 MAX_OPTIONS = 60
 MIN_SAFE_LATERAL = .025
 MIN_SUCCESS_DWELL_TICKS = 250
@@ -176,13 +177,22 @@ def signed_away(first, last):
     return (float(b[1]) - float(a[1])) * sign
 
 
-def stage_funnel(transitions):
+def direct_side_reopened_forward(mask_before, mask_after, action):
+    """A *side option* actually reopens a previously masked forward option."""
+    return bool(action in (3, 4) and
+                not(mask_before[1] or mask_before[2]) and
+                (mask_after[1] or mask_after[2]))
+
+
+def stage_funnel(transitions, forward_reopen_option_steps=()):
     """Chronological public-observation stage milestones, no latent state.
 
     The forward-reopen event must follow BOTH first contact and signed >=25 mm
     public lateral progress, and arise after a side option when forwards were
     previously masked. Report raw unsequenced progress independently too.
     """
+    v8.require(bool(transitions), "V8_STAGE_FUNNEL_EMPTY_REAL_TRACE")
+    reopen_options = set(forward_reopen_option_steps)
     contact = lateral = reopen = None
     any_lateral = False
     any_reopen = False
@@ -194,7 +204,7 @@ def stage_funnel(transitions):
         any_lateral |= is_lateral
         if contact is not None and lateral is None and is_lateral and i >= contact:
             lateral = i
-        did_reopen = bool(transition.get("forward_reopened_after_side"))
+        did_reopen = (i + 1) in reopen_options
         any_reopen |= did_reopen
         if lateral is not None and reopen is None and did_reopen and i >= lateral:
             reopen = i
@@ -219,10 +229,12 @@ def run_real_episode(env, seed, strategy, factory, signature, deadline, v7):
     world_hash = str(signature(env))
     transitions = []
     last = None
-    saw_forward_masked = False
     side_reopens = 0
     last_contacts = 0
     max_dwell = 0
+    side_contact_options = []
+    forward_reopen_options = []
+    side_proposals = 0
     for option in range(MAX_OPTIONS):
         if time.monotonic() >= deadline:
             raise TimeoutError("V8_PROSPECTIVE_REAL_PHYSICS_DEADLINE")
@@ -232,19 +244,21 @@ def run_real_episode(env, seed, strategy, factory, signature, deadline, v7):
         action = controller(observed.copy(), allowed.copy())
         v8.require(type(action) is int and 0 <= action < v8.ACTION_COUNT and allowed[action],
                    "V8_PROSPECTIVE_ACTION_VIOLATED_ORIGINAL_SEVEN_SHIELD")
-        saw_forward_masked |= not(allowed[1] or allowed[2])
         before = observed.copy()
         observed, reward, done, last = env.step(action)
         observed = np.asarray(observed, dtype=np.float64)
         next_mask = env.mask(observed)
         _, _, next_legal = v8.PublicMemory().features(observed, next_mask)
-        reopened = bool(saw_forward_masked and action in (3, 4) and
-                        (next_legal[1] or next_legal[2]))
+        reopened = direct_side_reopened_forward(allowed, next_legal, action)
         side_reopens += int(reopened)
-        if reopened:
-            saw_forward_masked = False
+        if action in (3, 4):
+            side_proposals += 1
+            if int(last["contacts"]) > last_contacts:
+                side_contact_options.append(option + 1)
         last_contacts = int(last["contacts"])
         max_dwell = max(max_dwell, int(env.dwell))
+        if reopened:
+            forward_reopen_options.append(option + 1)
         transitions.append({"observation": before.tolist(),
                             "mask": allowed.astype(int).tolist(),
                             "action": action, "reward": float(reward),
@@ -253,25 +267,38 @@ def run_real_episode(env, seed, strategy, factory, signature, deadline, v7):
                             "dwell_ticks_current": int(env.dwell),
                             "dwell_ticks_cumulative": max_dwell,
                             "success_info": bool(last["success"]),
-                            "next_observation": observed.tolist(),
-                            "forward_reopened_after_side": reopened})
+                            "next_observation": observed.tolist()})
         if done:
             break
     v8.require(bool(transitions) and last is not None,
                "V8_PROSPECTIVE_NO_REAL_PHYSICS")
     v7.verify_contact_trace(transitions, env.contacts)
+    lateral = round(signed_away(first_observation, observed), 8)
+    sparse_indices = v7.sparse_indices(len(transitions))
     result = {"seed": seed, "world_hash": world_hash, "strategy": strategy,
               "success": bool(last["success"]), "unsafe": bool(last["unsafe"]),
               "abstained": bool(last["abstained"]),
+              "zero_physics_abstain": int(env.physics_steps) == 0,
               "physics_steps": int(env.physics_steps),
               "option_steps": int(env.steps), "contacts": int(env.contacts),
+              "side_contact_option_steps": side_contact_options,
               "dwell_ticks_final": int(env.dwell),
-              "signed_lateral_displacement": round(signed_away(first_observation,
-                                                                  observed), 8),
+              "lateral_displacement": lateral,
+              "away_lateral_displacement": round(max(0., lateral), 8),
+              "final_error": float(last["error"]),
+              "total_reward": round(sum(t["reward"] for t in transitions), 8),
+              "side_proposals": side_proposals,
               "forward_reopened_after_side": side_reopens,
+              "forward_reopen_option_steps": forward_reopen_options,
+              "contact_to_forward_to_dwell": bool(
+                  side_contact_options and forward_reopen_options and
+                  int(env.dwell) >= MIN_SUCCESS_DWELL_TICKS and bool(last["success"])),
               "full_transition_count": len(transitions),
               "full_transition_sha256": v8.digest(transitions),
-              "stage_funnel": stage_funnel(transitions)}
+              "sparse_trace": True,
+              "sparse_transition_indices": sparse_indices,
+              "transitions": [transitions[i] for i in sparse_indices],
+              "stage_funnel": stage_funnel(transitions, forward_reopen_options)}
     v7.verify_terminal_success(transitions, result)
     v8.require(result["physics_steps"] > 0 or
                (result["abstained"] and not result["unsafe"] and
@@ -296,9 +323,9 @@ def paired_readout(trials):
                    for pairs in by_seed.values()),
                "V8_PROSPECTIVE_UNPAIRED_REAL_WORLDS")
     cohort = {"near": sorted(seed for seed, pairs in by_seed.items()
-                             if pairs["frozen_v8"]["observed_corridor"]),
+                             if pairs["v8_hierarchical"]["observed_corridor"]),
               "clear": sorted(seed for seed, pairs in by_seed.items()
-                              if not pairs["frozen_v8"]["observed_corridor"])}
+                              if not pairs["v8_hierarchical"]["observed_corridor"])}
     v8.require(len(cohort["near"]) == NEAR_TARGET and
                len(cohort["clear"]) == CLEAR_TARGET,
                "V8_PROSPECTIVE_WRONG_NEAR_CLEAR_COHORT")
@@ -324,7 +351,7 @@ def paired_readout(trials):
     lost, novel, new_unsafe = [], [], []
     for seed in cohort["near"]:
         pairs = by_seed[seed]
-        v8row = pairs["frozen_v8"]
+        v8row = pairs["v8_hierarchical"]
         baseline_goal = any(pairs[p]["success"] and not pairs[p]["unsafe"]
                             for p in ("frozen_v5", "frozen_v6"))
         v8_goal = v8row["success"] and not v8row["unsafe"]
@@ -351,6 +378,8 @@ def import_v7_and_physics():
         sys.path.insert(0, str(MUJOCO_ROOT))
     path = MUJOCO_ROOT / "v7_feasibility" / "run.py"
     v8.require(path.is_file(), "V8_ORIGINAL_V7_REAL_ROLLOUT_MISSING")
+    v8.require(sha_file(path) == FROZEN_V7_RUN_FILE_SHA256,
+               "V8_FROZEN_V7_REAL_ROLLOUT_SOURCE_SHA_MISMATCH")
     spec = importlib.util.spec_from_file_location("v8_frozen_v7_source", path)
     v8.require(spec is not None and spec.loader is not None,
                "V8_FROZEN_V7_IMPORT_UNAVAILABLE")
@@ -363,6 +392,50 @@ def import_v7_and_physics():
         raise RuntimeError("V8_REAL_MUJOCO_REQUIRED_NO_EMULATION") from exc
     v8.require(mujoco.__version__ == "3.3.7", "V8_MUJOCO_3_3_7_REQUIRED")
     return mod, MovingContactEnv
+
+
+_CACHED_V7_SOURCE = None
+
+
+class _LazyV7Source:
+    """Read-only compatibility shim for independent V7 replay world-signature API."""
+    def __getattr__(self, attribute):
+        global _CACHED_V7_SOURCE
+        if _CACHED_V7_SOURCE is None:
+            _CACHED_V7_SOURCE, _ = import_v7_and_physics()
+        return getattr(_CACHED_V7_SOURCE, attribute)
+
+
+v7 = _LazyV7Source()
+
+
+def policy_factory(name, frozen_weights, *, frozen_v7=None):
+    """Stable policy factory for independent physics replay of every strategy.
+
+    Signature intentionally matches V7 `policy_factory`, with the immutable
+    V8 weights supplied explicitly. Every policy gets only (obs, original
+    shield mask), and every episode gets its own fresh controller state.
+    """
+    v8.require(name in STRATEGIES, "V8_UNREGISTERED_PROSPECTIVE_POLICY")
+    if name == "v8_hierarchical":
+        # An independent physics replayer may pass an immutable checkpoint
+        # Path rather than already verified NumPy arrays. In that case the
+        # exact reviewed original model + receipt SHA is checked again.
+        if isinstance(frozen_weights, (str, Path)):
+            path = Path(frozen_weights).resolve(strict=True)
+            weights, _, _ = verify_frozen_model(
+                path, path.with_name("training-receipt.json"), FROZEN_WEIGHTS_SHA256)
+        else:
+            weights = np.asarray(frozen_weights, dtype=np.float64)
+        v8.require(weights.shape == (4, 41, 7) and np.all(np.isfinite(weights)),
+                   "V8_INDEPENDENT_REPLAY_MODEL_WEIGHTS_INVALID")
+        return lambda: v8.HierarchicalPolicy(weights.copy())
+    global _CACHED_V7_SOURCE
+    if frozen_v7 is None:
+        if _CACHED_V7_SOURCE is None:
+            _CACHED_V7_SOURCE, _ = import_v7_and_physics()
+        frozen_v7 = _CACHED_V7_SOURCE
+    return frozen_v7.policy_factory(name)
 
 
 def main(argv=None):
@@ -401,8 +474,7 @@ def main(argv=None):
                "V8_PROSPECTIVE_COMPLETE_PAIRED_SCHEDULE_REQUIRED")
     # Never adapt, early-stop by score, retry favorable worlds, or sample a
     # second cohort after seeing any outcome.
-    factories = {s: v7.policy_factory(s) for s in STRATEGIES if s != "frozen_v8"}
-    factories["frozen_v8"] = lambda: v8.HierarchicalPolicy(weights.copy())
+    factories = {s: policy_factory(s, weights, frozen_v7=v7) for s in STRATEGIES}
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
     trials = []
     raw_path = output / "full_transitions.jsonl.gz"
@@ -426,20 +498,29 @@ def main(argv=None):
     training = {"schema": SCHEMA + ".training", "executed_head": head,
                 "actual_physics_engine": "mujoco-3.3.7", "training_only": True,
                 "train_first_seed": TRAIN_FIRST_SEED,
+                "selection_seed_limit": SELECTION_MAX_SEEDS,
                 "selection_max_seeds": SELECTION_MAX_SEEDS,
                 "selected_near_count": NEAR_TARGET,
                 "selected_clear_count": CLEAR_TARGET,
                 "selection_scan": selection_scan,
+                "near_seeds": [r["seed"] for r in cohort if r["observed_corridor"]],
+                "clear_seeds": [r["seed"] for r in cohort if not r["observed_corridor"]],
                 "strategies": list(STRATEGIES), "cohort": cohort,
+                "allocation": "all four frozen strategies on identical 160 fresh training worlds",
                 "actual_trials": len(trials),
+                "actual_transition_count": sum(r["full_transition_count"] for r in trials),
                 "full_option_transitions": sum(r["full_transition_count"] for r in trials),
                 "frozen_weights_sha256": frozen_sha,
                 "historical_frozen_trainer_head": TRAINER_HEAD,
                 "frozen_training_receipt_sha256": sha_file(receipt_path),
                 "parent_v7_source_sha": v8.V7_SOURCE_SHA,
                 "v7_training_dataset_sha256": v8.V7_DATASET_SHA256,
+                "no_dev_evaluation": True,
                 "dev_cal_test_ood_opened": False,
                 "model_promotion_authorized": False,
+                "no_provider_billing_assertion": True,
+                "source_sha256": {"rollout_train.py": sha_file(HERE / "rollout_train.py"),
+                                  "run.py": sha_file(HERE / "run.py")},
                 "trials": trials, "dataset_sha256": dataset_sha}
     v8.write_new(output / "training.json", training)
     v8.require((output / "training.json").stat().st_size <= MAX_CAPTURED_JSON_BYTES,
@@ -457,13 +538,16 @@ def main(argv=None):
                 "historical_frozen_trainer_head": TRAINER_HEAD,
                 "file_sha256": {p.name: sha_file(p) for p in
                                 (raw_path, output / "training.json", output / "paired-readout.json")},
+                "source_sha256": training["source_sha256"],
+                "auxiliary_file_sha256": {"paired-readout.json": sha_file(
+                    output / "paired-readout.json")},
                 "actual_trials": len(trials), "train_only": True,
                 "dev_cal_test_ood_opened": False, "promotion_authorized": False}
     v8.write_new(output / "manifest.json", manifest)
     print(json.dumps({"executed_head": head, "train_only_real_trials": len(trials),
                       "model_weights_sha256": frozen_sha,
                       "dataset_sha256": dataset_sha,
-                      "v8_safe_near_goals": readout["strategies"]["frozen_v8"]["safe_near_goals"],
+            "v8_safe_near_goals": readout["strategies"]["v8_hierarchical"]["safe_near_goals"],
                       "promotion_authorized": False}, sort_keys=True))
     return 0
 
