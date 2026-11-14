@@ -1935,8 +1935,12 @@ jobs:
     - name: Install pinned MuJoCo wheels and base R
       run: |
         set -euo pipefail
-        sudo apt-get update -qq
-        sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends r-base-core libdigest-sha-perl python3-venv
+        # The runner's unrelated Microsoft apt feed is blocked (HTTP 403).
+        # Install only from Ubuntu's signed OS repos, covered by the ubuntu network preset.
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -f "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends r-base-core libdigest-sha-perl python3-venv
         python3 -m venv "$RUNNER_TEMP/rokoko-venv"
         "$RUNNER_TEMP/rokoko-venv/bin/python" -m pip install --only-binary=:all: --no-cache-dir mujoco==3.3.7 numpy==2.4.6
         "$RUNNER_TEMP/rokoko-venv/bin/python" -c 'import mujoco,numpy; assert mujoco.__version__=="3.3.7"; assert numpy.__version__=="2.4.6"'
@@ -2045,8 +2049,12 @@ jobs:
     - name: Install base R without external model or data services
       run: |
         set -euo pipefail
-        sudo apt-get update -qq
-        sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends r-base-core
+        # The runner's unrelated Microsoft apt feed is blocked (HTTP 403).
+        # Install only from Ubuntu's signed OS repos, covered by the ubuntu network preset.
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -f "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends r-base-core
         Rscript --version
     - name: Evaluate 384 synthetic days with strict no-qualification guard
       id: qualification
