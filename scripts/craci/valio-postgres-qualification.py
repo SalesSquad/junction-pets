@@ -44,7 +44,9 @@ def main():
     allowed = {"PATH", "HOME", "USER", "LOGNAME", "LANG", "LC_ALL",
                "LC_CTYPE", "TMPDIR", "TZ", "RUNNER_TEMP", "CI"}
     pg_env = {k: v for k, v in env.items() if k in allowed}
-    user, database, port = getpass.getuser(), "valio_j26_lab", "54329"
+    # The node-postgres `socket:` URL defaults to PostgreSQL port 5432.
+    # A private socket directory already isolates this ephemeral cluster.
+    user, database, port = getpass.getuser(), "valio_j26_lab", "5432"
     started = False
     try:
         subprocess.run(
