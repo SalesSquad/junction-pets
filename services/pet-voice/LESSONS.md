@@ -20,6 +20,23 @@ _Updated 2026-11-14T21:55:11Z from 3 run(s), 74/74 turns ok._
 
 ## Curated lessons
 
+### Personality (persona lab, `persona_lab.py`)
+
+- **Company copy in → brochure out.** Relay personas built from `pet.json` taglines gave 86 %
+  template lines ("statement + Name, how do you X?"), 91 % question endings, no line under
+  9 words, no acting. Every pet sounded like the same assistant in another language. (2026-11-15)
+- **Character bibles + craft rules beat it blind.** Same writer, same scenes: Claude Haiku as
+  blind judge preferred the bible arm 4/4 (both orders) — distinct 7.5 vs 5.3, not-generic
+  6.5 vs 3.0, natural 7.3 vs 4.8, want-to-listen 7.8 vs 4.3. Mean line 9–11 words vs 25.
+  Evidence: `persona-evidence/pilot-20261115.json`. (2026-11-15)
+- **Bibles create new tics.** `[short pause]` landed in 8/10 lines, DeepMind opened with
+  "Interesting." every time and Codex reused an anchor verbatim. Next: tag budget, catchphrase
+  cooldown per scene, verbatim-anchor rejection, and a critic pass before a line is final.
+  Delivery notes came out as stage directions ("gestures wildly") — they must be vocal
+  (pace, volume, emotion) to be useful for `speech_metadata.style`. (2026-11-15)
+- **Scenes beat relays.** A situation with stakes (03:12, crashed demo, 3 % battery) gives
+  the pets something to react to; a ring of introductions only produces interviews. (2026-11-15)
+
 - **Use the MBP Keychain key directly in-process.** `gemini-agent` deliberately refuses
   generation (`status|inventory|probe` only); voice work uses `pet_voice.py`, which reads the
   same Keychain item with `/usr/bin/security` and never prints it. (2026-11-14)
