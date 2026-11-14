@@ -47,7 +47,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab', 'rokoko-r-tournament', 'meta-r-tournament', 'meta-r-robust', 'lens-real-bop-train', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab', 'rokoko-r-tournament', 'meta-r-tournament', 'meta-r-robust', 'lens-real-bop-train', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision', 'lens-hb-scene8-ood',
 ]);
 
 function choose(value, choices, label) {
@@ -146,6 +146,12 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
       if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
       add(`hb-vision-${index}-${model}`, harnessSha, {model});
     }
+  } else if (workload === 'lens-hb-scene8-ood') {
+    // A single new public physical-scene contrast. No previously exposed
+    // test11, no upload of original image crops, no automatic model promotion.
+    if (override && override !== harnessSha)
+      throw new Error('HB scene8 OOD requires exact source/harness SHA');
+    add('hb-scene8-ood-public', harnessSha, {scene: 8});
   } else if (workload === 'rokoko-rl-ablations') {
     for (const learnerSeed of [17,43]) add(`rokoko-ablation-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});
   } else if (workload === 'rokoko-rl-seed-sweep') {

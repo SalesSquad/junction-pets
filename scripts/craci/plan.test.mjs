@@ -147,3 +147,14 @@ test('HB real AppleVision open-set source is pinned, four models and independent
   assert.throws(()=>resolvePlan({workload:'lens-hb-vision',lane_slice:'invalid'},context),
     /Unsupported HB lane slice/);
 });
+
+test('fresh public HB scene8 OOD has exactly one pinned source, no old-scene replay',()=>{
+ const p=resolvePlan({workload:'lens-hb-scene8-ood'},context);
+ assert.equal(p.jobCount,1);
+ assert.equal(p.maxParallel,1);
+ assert.deepEqual(p.matrix.include.map(x=>x.scene),[8]);
+ assert.deepEqual(p.matrix.include.map(x=>x.cell),['hb-scene8-ood-public']);
+ assert.equal(p.matrix.include[0].source_sha,context.harnessSha);
+ assert.throws(()=>resolvePlan({workload:'lens-hb-scene8-ood',source_sha:candidate},context),
+   /exact source\/harness SHA/);
+});
