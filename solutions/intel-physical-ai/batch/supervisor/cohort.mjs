@@ -1,6 +1,6 @@
 // Predeclared deterministic synthetic fault matrix. No population inference or GPU.
 import {plan} from '../cell.mjs';
-import {runSupervisedBatch} from './supervisor.mjs';
+import {runSupervisedBatch,replaySupervisedBatch} from './supervisor.mjs';
 
 const families = [
   ['GRIP_LOSS',e=>{e.grip=false;}],
@@ -31,6 +31,7 @@ for(const [family,applyFault] of families){
   const controls=family==='GLOBAL_OPERATOR_STOP'?{globalStopEpisodeId:p.episodes[pos].id}:{};
   applyFault(p.episodes[pos]);
   const receipt=await runSupervisedBatch(p,controls);
+  await replaySupervisedBatch(receipt);
   const m=receipt.summary;
   if(receipt.trip?.reason!==family || m.supervisedPostTripSoftwareBowls!==0) {
     throw Error('Fault cohort failed invariant');
@@ -44,6 +45,7 @@ for(const [label,localStop] of [['NO_FAULT',false],['LOCAL_ITEM_STOP',true]]){
  const p=clean(330+n*19);if(localStop)p.episodes[2].operator={decision:'stop',reason:'Local inspection only'};
  const receipt=await runSupervisedBatch(p);
  if(receipt.trip!==null || receipt.summary.subsequentBlocked!==0)throw Error('Unexpected global STOP');
+ await replaySupervisedBatch(receipt);
  const m=receipt.summary;
  console.log([label,`case-${++n}`,-1,p.seed,'SYNTHETIC_CONTROLLED','NONE',
    m.globalLatchTrips,m.subsequentBlocked,m.baselinePostTripSoftwareBowls,

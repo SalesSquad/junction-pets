@@ -24,6 +24,10 @@ trip cause, a reused M2 receipt, a control matrix and a SHA-256 root.
 replay. Unsigned hashes prove *local reproducibility*, not identity or
 trusted capture. All times are simulated fixture clock times, not camera time.
 
+The generator replays every complete supervisor packet before emitting CSV.
+The R consumer checks the exact 6×3 fault-family/location grid and two
+controls; a standalone CSV/root hash is still **not an identity signature**.
+
 The study deliberately exposes the **cost of conservatism**: fewer
 software destinations after a safety trip, with every downstream
 episode stopped. The baseline is M2's per-episode STOP, not a hardware
