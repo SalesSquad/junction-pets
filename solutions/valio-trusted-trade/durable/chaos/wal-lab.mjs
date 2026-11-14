@@ -12,8 +12,9 @@ import {payment,refund,createWalWorkload,flightApplicationNames} from './plan.mj
 import {createOwnedCluster,startOwnedCluster,sigkillOwnedPostmaster,
   recoverySignals,closeOwnedCluster} from './cluster.mjs';
 import {captureOwnedPgFailure,redactPgLine} from './forensics.mjs';
+import {guardPgPool} from './pg-faults.mjs';
 
-const workerPath=fileURLToPath(new URL('../worker.mjs',import.meta.url));
+const workerPath=fileURLToPath(new URL('./flight-worker.mjs',import.meta.url));
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const assert=(good,reason)=>{if(!good)throw new Error(reason);};
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -23,13 +24,14 @@ async function spawnOwnedWorker(dsn,schema) {
     VALIO_TEST_DATABASE_URL:dsn,VALIO_LAB_SCHEMA:schema},
     stdio:['ignore','ignore','inherit','ipc']});
   let serial=0,readyResolve,readyReject;
-  const pending=new Map();
+  const pending=new Map(),faults=[];
   const ready=new Promise((resolve,reject)=>{readyResolve=resolve;readyReject=reject;});
   const rejectAll=err=>{readyReject(err);for(const p of pending.values())p.reject(err);pending.clear();};
   child.on('message',m=>{
+    if(m.pgFault){faults.push(m.pgFault);return;}
     if(m.ready){readyResolve(m.pid);return;}
     const p=pending.get(m.taskId);if(!p)return;pending.delete(m.taskId);
-    p.resolve(m.error?{error:m.error,pid:m.pid}:{result:m.result,pid:m.pid});
+    p.resolve(m.error?{error:m.error,pid:m.pid}:m.controlAck?{controlAck:m.controlAck,pid:m.pid}:{result:m.result,pid:m.pid});
   });
   child.once('error',rejectAll);
   child.once('exit',(code,signal)=>{
@@ -37,7 +39,7 @@ async function spawnOwnedWorker(dsn,schema) {
     rejectAll(err);
   });
   await ready;
-  return {pid:child.pid,child,
+  return {pid:child.pid,child,faults,
     call:task=>new Promise((resolve,reject)=>{
       const taskId=++serial;pending.set(taskId,{resolve,reject});
       child.send({...task,taskId},err=>{if(err){pending.delete(taskId);reject(err);}});
@@ -133,6 +135,12 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
   const startedAt=new Date().toISOString(),deadline=Date.now()+maxMinutes*60_000;
   const t0=performance.now();
   let c=null,pool=null,workers=[],cleanup=null,failure=null,failureStage='INITDB';
+  let controllerCrashExpected=false;
+  const controllerPgFaults=[];
+  const observedPool=dsn=>guardPgPool(new pg.Pool({connectionString:dsn,max:4,connectionTimeoutMillis:8000}),{
+    expectedCrash:()=>controllerCrashExpected,
+    onFault:fault=>controllerPgFaults.push(fault)
+  });
   const facts={workId:'J26-VALIO-WAL-CHAOS-20261114',startedAt,
     simulatedOnly:true,sourceSha:process.env.CRACI_SOURCE_SHA||null,
     workload:{requests:plan.requests,orders:plan.orders,seed,planDigest:plan.planDigest}};
@@ -140,7 +148,7 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     c=await createOwnedCluster();
     failureStage='INITIAL_CLUSTER_START';
     const firstPid=await startOwnedCluster(c);
-    pool=new pg.Pool({connectionString:c.dsn,max:4,connectionTimeoutMillis:8000});
+    pool=observedPool(c.dsn);
     const schema=`j26_${randomBytes(10).toString('hex')}`;
     await createLabSchema(pool,schema);
     await seedAccounts(pool,{schema,buyerFundsCents:2_000_000,
@@ -181,12 +189,27 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     const interruptedOutcomes=Promise.allSettled(pending);
     failureStage='VERIFY_EIGHT_SOURCE_BOUND_FLIGHTS';
     const observedPgSleep=await waitForInFlightDbWork(pool,schema);
+    // A checked-out pg Client has no pg-pool idle error listener. All eight
+    // workers and the controller must explicitly enter the EXPECTED outage
+    // boundary before the verified server SIGKILL, never globally suppressing
+    // unrelated PostgreSQL/SQL errors.
+    const crashAcks=await Promise.all(workers.map(w=>w.call({control:'expectCrash'})));
+    assert(crashAcks.every(r=>r.controlAck==='expectCrash'),
+      'A WAL worker did not acknowledge the narrow intentional disconnect boundary.');
+    assert(workers.every(w=>w.faults.every(f=>f.expected)),
+      'Unexpected PostgreSQL client error before authorized SIGKILL.');
+    controllerCrashExpected=true;
     failureStage='SIGKILL_OWNED_POSTMASTER';
     const crash=await sigkillOwnedPostmaster(c);
     for(const w of workers)w.kill();
     await interruptedOutcomes;
+    const unexpectedFlightErrors=workers.flatMap(w=>w.faults.filter(f=>!f.expected));
+    assert(unexpectedFlightErrors.length===0,'A flight worker reported non-disconnect PostgreSQL errors during SIGKILL.');
     workers=[];
     await pool.end();pool=null;
+    controllerCrashExpected=false;
+    assert(controllerPgFaults.every(f=>f.expected),
+      'Controller pool had unrelated PostgreSQL client errors, not only intentional disconnects.');
 
     // The exact same PGDATA/WAL is restarted after an abnormal SIGKILL.
     failureStage='RESTART_SAME_PGDATA_WAL';
@@ -195,7 +218,7 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     const signals=await recoverySignals(c);
     assert(signals.interrupted&&signals.redo&&signals.accepting,
       'WAL crash-recovery log evidence missing; not qualified.');
-    pool=new pg.Pool({connectionString:c.dsn,max:4,connectionTimeoutMillis:8000});
+    pool=observedPool(c.dsn);
     failureStage='WAL_RECOVERY_INVARIANTS';
     const version=(await pool.query('SHOW server_version')).rows[0]?.server_version;
     const settings=(await pool.query("SELECT current_setting('fsync') AS fsync,current_setting('synchronous_commit') AS sync_commit,current_setting('full_page_writes') AS full_page_writes")).rows[0];
@@ -243,6 +266,9 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
     assert(final.batches===expected&&final.outboxEvents===expected,
       'Exactly-once durable batch/outbox count does not match executed unique operations.');
     assert(final.balanced&&final.matching&&final.nonnegative,'Final persistent double-entry audit failed.');
+    assert(controllerPgFaults.every(f=>f.expected) &&
+      workers.every(w=>w.faults.every(f=>f.expected)),
+      'Unexpected PostgreSQL EventEmitter client/pool errors occurred outside SIGKILL.');
 
     const report={...facts,status:'PASS',postgresVersion:version,
       cluster:{isolated:true,serverFsync:settings.fsync==='on',
@@ -254,6 +280,7 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
         observedBackendPids:observedPgSleep.pids,
         matchedFlightIds:observedPgSleep.matchedFlightIds,
         insertQueryMatched:observedPgSleep.queryMatched,
+        handledExpectedPgDisconnectEvents:controllerPgFaults.filter(f=>f.expected).length,
         ...crash,walRecoverySignals:signals},
       recovery:{priorConfirmedCommits:2,ambiguousCommittedNoAck:1,
         recoveredOrdersBeforeReplay:before.orders,replayedFlightIntents:flights.length,
