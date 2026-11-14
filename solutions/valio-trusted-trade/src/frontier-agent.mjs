@@ -16,6 +16,7 @@ if (base.protocol !== 'http:' || !['127.0.0.1', 'localhost', '[::1]'].includes(b
   throw new Error('Synthetic supplier must be localhost HTTP with no URL credentials.');
 }
 let token;
+let paymentOutcome = null;
 const requests = [];
 const call = async (path, payload, errorCode) => {
   const url = new URL(path, base);
@@ -115,6 +116,38 @@ if (scenario === 'refusal') {
       assert.equal(repeated.order.id, order.id);
       assert.equal(repeated.order.idempotentReplay, true);
     }
+    // Optional explicit fictional-human approval; agent cannot silently grant
+    // itself payment authority. Even a scripted approval is NOT real consent.
+    const paymentDecision = process.argv.find((x) => x.startsWith('--payment-decision='))?.split('=')[1];
+    if (paymentDecision) {
+      assert.ok(['approve', 'reject'].includes(paymentDecision), 'Only an explicit fictional payment choice is supported.');
+      await call(`/api/orders/${order.id}/payment-approval`, { buyerId: policy.buyerId, decision: paymentDecision });
+      if (paymentDecision === 'approve') {
+        const instruction = { buyerId: policy.buyerId, idempotencyKey: randomUUID() };
+        const paid = await call(`/api/orders/${order.id}/settlement`, instruction);
+        assert.equal(paid.transfer.amountCents, order.totalCents);
+        assert.equal(paid.transfer.rail, 'IN_MEMORY_NO_BANK_OR_PSP');
+        const repeated = await call(`/api/orders/${order.id}/settlement`, instruction);
+        assert.equal(repeated.idempotentReplay, true);
+        assert.equal(repeated.transfer.id, paid.transfer.id);
+        const ledger = await call(discovery.endpoints.ledgerVerify);
+        assert.equal(ledger.valid, true, 'Fictional double-entry posting must balance.');
+        paymentOutcome = { transferId: paid.transfer.id, amountCents: paid.transfer.amountCents,
+          supplierCount: paid.transfer.allocations.length, ledgerEntries: ledger.journalEntries,
+          rail: paid.transfer.rail };
+        if (process.argv.includes('--refund-demo')) {
+          const reversed = await call(`/api/orders/${order.id}/cancel`, { buyerId: policy.buyerId });
+          assert.equal(reversed.order.status, 'SIMULATED_CANCELLED');
+          const verification = await call(discovery.endpoints.ledgerVerify);
+          assert.equal(verification.valid, true);
+          assert.equal((await call(discovery.endpoints.wallet)).wallet.buyerBalanceCents, 250000);
+          paymentOutcome.refunded = true;
+        }
+      } else {
+        await call(`/api/orders/${order.id}/settlement`, { buyerId: policy.buyerId, idempotencyKey: randomUUID() }, 'PAYMENT_APPROVAL_REQUIRED');
+        paymentOutcome = { decision: 'reject', transferId: null };
+      }
+    }
     stdout.write(`SIMULATED ${scenario}: independently signed offer + buyer mandate → one ${order.id} (${order.totalCents} cents); no commercial purchase.\n`);
   }
 }
@@ -128,5 +161,5 @@ for (const receipt of audit.receipts) {
 }
 assert.equal((await call(discovery.endpoints.auditVerify)).headDigest, previous);
 stdout.write(JSON.stringify({ mode: 'SYNTHETIC', actor: 'INDEPENDENT_BUYER_PROCESS',
-  scenario, signed_buyer_private_key_location: 'THIS_PROCESS_ONLY',
+  scenario, payment: paymentOutcome, signed_buyer_private_key_location: 'THIS_PROCESS_ONLY',
   durationMs: +(performance.now() - started).toFixed(2), HTTP_requests: requests, auditReceipts: audit.receipts.length }) + '\n');
