@@ -1,101 +1,30 @@
-# Intel Physical AI M5 — Nemotron-guided cross-batch continuity
+# Intel M330 — cross-batch software continuity (Nemotron M5)
 
-**Source parent:** `SalesSquad/junction-pets` `main=16947f0ccd33d6e3895f08619b7ba425bf453a59`;
-stacked on verified [M4 draft #169](https://github.com/SalesSquad/junction-pets/pull/169)
-head `a31e2b314037f4a345ad4dbe3cd74a9e8df5712a`. Source route
-`junction.intel`/`junction.ignite-next` →
-`partnerEvidenceKey=ignite-next-and-intel`, `ownedBriefRefs=[M330]`.
-Current 14 Nov partner clarification was read before the prior dated guidance;
-Intel rubric conflict is unresolved.
+**Scope:** private, synthetic, offline, non-actuating JavaScript prototype. Stack base: M4 PR #169 at `a31e2b314037f4a345ad4dbe3cd74a9e8df5712a`; source provenance: authenticated main `16947f0ccd33d6e3895f08619b7ba425bf453a59` (14 Nov 2026). Partner key `ignite-next-and-intel`, brief `M330`. Sponsor evaluation rubric formats remain contradictory. This is not an SO-101 / Anomalib / VLA / OpenVINO / real camera, physical robot or emergency-stop qualification.
 
-## What was improved
+## Problem and algorithm
 
-The preceding M4 supervisor detects faults and stops later episodes **within
-the same batch**, but creating a new batch resets that local latch. M5 adds a
-pure, stateful **synthetic cross-batch continuity layer** that reuses M4 unchanged.
-One corrupt/stale camera, dropped grip, low confidence or global operator STOP
-latches the logical session. A newly constructed batch cannot bypass it.
-A per-**item** STOP remains local; it does not become an emergency STOP.
+M4's global latch prevents later software bowl placements **within one batch**, but a caller could create a new batch and recover routing without a durable operator reset. M5 wraps the unchanged M4 policy in a versioned immutable state ledger with **cross-batch STOP** until a distinct proposal and host-authorized rearm, monotonically incremented epoch, separate reusable physical item IDs (not merely same episode sequence), idempotent exact request keys, per-event SHA256 audit chain, and deterministic recomputation against the source policy. Ordinary local item STOP remains per-item; only a global STOP or sensor interlock latches the complete software session.
 
-Each admitted RUN consumes a globally unique batch ID and 1–64 **stable
-item IDs** supplied by a trustworthy external host, preventing duplicate items
-after a later rearm. Replayed event ID + identical bytes returns the original
-receipt without re-execution. Same ID with changed content is refused.
-All mutations bind to an exact operational revision **and epoch**; missing,
-stale or conflicting versions fail closed. No time service, motor API,
-camera stream or model inference is installed.
+`genesis()` creates a synthetic session; `dispatch(snapshot,request,{authorize})` returns `ADMITTED`, `CACHED` or `DENIED`. `verifyLedger(snapshot)` fully reconstructs the bounded chain. Each RUN has unique globally stable `itemIds` in episode order, `batchId`, `batchRequest` (existing M2 plan), and `batchControl` (M4 `globalStopEpisodeId` or empty). Expected operational revision and epoch are required for CAS integration. An event ID is idempotent **only for an identical full request**. Same ID/different body, stale revisions, stale epochs, global latch, replayed batch/item IDs, missing authorization and invalid sensor input fail closed. Post-trip *sensor recovery alone* does not clear the latch.
 
-To rearm: (1) request a proposal while LATCHED, which does not clear anything;
-(2) a distinct REARM confirmation calls a host-injected authorization
-function, bound to the exact request digest, epoch, revision and preceding
-ledger root; (3) only a matching positive host decision increments the epoch.
-An external application must authenticate operator proof and must durably
-compare-and-swap the returned snapshot root. A simple `true` or
-`rearm:true` supplied by a client is NOT sufficient to this API.
+A proposed rearm does not authorize routing. The trusted host must **authenticate an operator/device externally**, bind an approval to the exact `{scope,requestHash,previousRoot,revision,epoch}`, and **durably CAS** the result against the previous root before acknowledging. The `authorize` callback represents a host-supplied decision, **not a signature or secure proof**; never accept an untrusted client's callback or approval envelope. This module does **not implement persistence, filesystem audit logs, host authentication, cryptographic receipt signatures, distributed consensus, replay protection against a malicious host, physical identity proof, or real hardware interlocks**. A forged host callback, state rollback, deleted ledger, copied item with a new ID, or non-atomic host storage defeats its software claims. Denials return separate deterministic `auditHash` for the external host to persist; denials themselves do not alter operational state. Every snapshot and ledger has conservative caps (64 admitted events, 1,024 unique items, 64 items per batch); caps exhaust **closed**, not auto-rearm. Host must independently persist the audit and enforce identifier namespaces and privacy minimization. Receipts are **unsigned SHA256**, not authenticity.
 
-The audit ledger hashes the original event/request/host decision, M4 replay
-root, result, revision and previous root. `verifyLedger` regenerates M4
-decisions and compares the complete ledger. Denied requests produce a
-separate return envelope for host-side negative auditing and **never modify**
-the operational snapshot, version or its latch.
+## How to reproduce
 
-## Try the synthetic M5 flow
+From repository root:
 
 ```sh
 node --test solutions/intel-physical-ai/batch/continuity/continuity.test.mjs
-node solutions/intel-physical-ai/batch/continuity/demo.mjs
+node solutions/intel-physical-ai/batch/continuity/cohort.mjs
 ```
 
-The demo's `hostStub` is **insecure test scaffolding only**. It shows a
-sensor-trip → new-batch rejection → proposed/denied rearm → test-host-confirmed
-rearm → new-epoch batch → retry idempotency. It cannot establish any
-physical safety or authenticated operator permission.
+The bounded targeted suite exercises global vs local STOP, cross-batch deny, per-epoch rearm, invalid and forged host claims, stale/mutated request replay, invalid inputs, missing authority, negative fault families, deterministic receipts and the explicit **host CAS is not implemented** limitation.
 
-## Model evidence and limits
+The cohort runs exactly **18 synthetic comparisons** (six predefined faults at three positions), comparing M4's new-batch behavior with M5's refusal after a global latch. The numerator/denominator are controlled replays of one synthetic generator, **not independent episodes, measured safety, confidence intervals, or real throughput**. It prints case-by-case receipt roots and a JSON SHA256 so results can be reproduced. It makes no quality claim about real SORT accuracy, latency, energy, actuators, or sensor integration.
 
-Two actual read-only Nemotron 3.5 Super VL calls on the owner's already
-authorized MBP `opencode-nemotron` (Verda-hosted) completed with exit 0 on
-14 Nov. First produced an epoch/ledger proposal; second red-teamed it.
-Corrections in this M5 source include **preserving local item STOP**,
-rejecting reused IDs and conflicting idempotency keys, separating proposal from
-host admission, and forbidding stale epoch/revision actions. Model prompts
-were abstract source-safe descriptions without credentials, customer data
-or source-code exports. No GPU VM was provisioned; actual provider cost and
-remaining credits are **unknown**. Model output is design advice, not a
-robot safety qualification or evidence that a trained anomaly model improved.
+## Sponsor path after this software milestone
 
+Integrate the M3 operator studio only after a single owner handles the PR stack; qualify the actual Intel station (SO-101 sensors, Anomalib output, VLA command staging, OpenVINO on Intel hardware) separately with physical safety authority and hardwired interlocks. Report true robot cycle time, correct-bowl rate and fault recovery on held-out physical runs with an approved supervisor and operator. No physical action may be inferred from a software STOP receipt.
 
-### Verifiable bounded Nemotron inference receipts (owner-private host)
-
-Both calls used `/Users/mikaelervamaa/.local/bin/opencode-nemotron run
---model verda-nemotron/nemotron --agent plan` on the existing authorized MBP
-under named tmux `j26-intel-nemotron-m5-20261114`, and returned process
-**exit code 0**. Prompt and response bytes remain under owner-private
-`/private/tmp/j26-intel-nemotron-20261114/` (not Git). SHA-256:
-
-- plan prompt: `4d9ed0657609f72be356e1cad4de0660e8d7347d4c157fc3b0d7d36d0f2cca71` (2,139 bytes)
-- plan response: `6788ccd83684bdbef5e592c1edb766cc4ec2fb1490cc824981b25309afcb5e30` (10,831 bytes)
-- red-team prompt: `296268a967820845a4e52d3422a91ec99521255e98d5707890f5d8f6c310d365` (2,158 bytes)
-- red-team response: `18a56cc0d1a4eb094a887f470f460f57bcbea4c21b5c1a63c20ba2b1ad28701e` (4,797 bytes)
-
-Provider invoice and actual token charge were not visible; cost **unknown**.
-Model advice was independently checked against the unchanged source contract;
-passing source tests do not prove the external model is a trained robotics model.
-\n**Hard limitations:** snapshots and SHA-256 chains are UNSIGNED and FORGEABLE
-by an untrusted host. A caller-supplied fake authorization callback can grant
-itself approval; therefore this code MUST be embedded inside a trusted,
-host-owned authorization boundary with durable CAS, isolated signer
-and independent physical emergency-stop/rearm hardware before any motion.
-The library itself has **no** persistence, CAS, identity, clock calibration,
-real camera timestamps, motor actuation, Intel CPU/GPU/NPU or OpenVINO,
-Anomalib, VLA, Isaac Lab, or robot connection. It does not authenticate
-physical item IDs, and it does not measure real safety probability, cycle
-time or anomaly-detection quality. The 64-event and 1,024-item caps fail
-closed; host migration/archive remains unspecified. There is no user
-consent/data persistence in this software prototype.
-
-**Next acceptance gate:** an authorized SO-101/Intel station with verified
-camera synchronization, trained anomaly/vision models, actual external
-host proof, durable snapshot CAS, a real physical E-stop and cross-batch rearm,
-plus measured held-out correct-bowl and safety/latency outcomes. No
-production deployment, physical task, sponsor submission or merge was made.
+**Model evidence:** MBP Verda-hosted Nemotron 3.5 Super VL generated two bounded **read-only** design/red-team analyses on 14 Nov 2026 (CLI exits 0). The first draft erroneously treated local STOP as global; the second explicitly corrected that. Implemented core here is human-reviewed source, **not model self-certification**. Provider token billing/actual cost unknown; no new GPU VM or credential export.
