@@ -70,6 +70,7 @@ def main():
             "lanes": list(LANES), "max_concurrent_calls": 4, "maximum_inference_calls": expected_calls,
             "start_index": args.start_index, "case_count": args.case_count,
             "max_output_tokens_per_call": args.max_output_tokens, "max_attempts_per_job": 1,
+            "chat_template_kwargs": {"enable_thinking": False},
             "deadline_seconds": args.deadline_seconds, "started_utc": datetime.now(timezone.utc).isoformat(),
             "new_gpu_instances": 0, "same_backbone_specialists_are_independent_models": False,
             "verified_cost_usd": None, "qualification": False, "action_authorized": False}
@@ -89,7 +90,8 @@ def main():
             try:
                 messages = make_messages(case, lane)
                 payload = {"model": NEMOTRON.model, "messages": messages,
-                           "temperature": 0, "max_tokens": args.max_output_tokens, "stream": False}
+                           "temperature": 0, "max_tokens": args.max_output_tokens, "stream": False,
+                           "chat_template_kwargs": {"enable_thinking": False}}
                 write_json(folder / (case_id + ".request.json"),
                     {**record, "request_sha256": sha256(canonical(payload)), "cases_sha256": input_hash,
                      "query_image_sha256": case["query"]["image_sha256"],
