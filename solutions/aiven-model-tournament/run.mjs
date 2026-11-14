@@ -73,9 +73,12 @@ async function one(job) {
   const { model, c, rep } = job;
   const a = await claude(model, c.prompt, system);
   if (a.error) return { model, case: c.id, suite: c.suite, rep, error: a.error };
-  const j = await claude(judgeModel, judgePrompt(c, a.text));
-  let g = null;
-  try { g = JSON.parse((j.text ?? '').replace(/^```json\s*|```\s*$/g, '').trim()); } catch {}
+  let j, g = null;
+  for (let attempt = 0; attempt < 2 && !g; attempt++) { // a judge formatting slip is a measurement error, not a model failure
+    j = await claude(judgeModel, judgePrompt(c, a.text));
+    try { g = JSON.parse((j.text ?? '').replace(/^```json\s*|```\s*$/g, '').trim()); } catch {}
+  }
+  if (!g) return { model, case: c.id, suite: c.suite, rep, error: 'judge output unparseable' };
   const det = deterministic(c, a.text);
   const inc = g?.include?.filter(Boolean).length ?? 0, viol = (g?.violations?.filter(Boolean).length ?? 0) + det.forbidden;
   const score = g ? Math.max(0, (inc - det.missing) / c.mustInclude.length - 0.5 * viol) : 0;
