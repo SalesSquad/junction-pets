@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 
@@ -128,8 +129,19 @@ def main():
     require(python.is_file(), "V8_PINNED_MUJOCO_PYTHON_MISSING")
     product = source_root / V8_PRODUCT
     model_dir = product / "checkpoints"
-    weights_path = model_dir / "weights.json"
-    receipt_path = model_dir / "training-receipt.json"
+    source_weights_path = model_dir / "weights.json"
+    source_receipt_path = model_dir / "training-receipt.json"
+    verify_checkpoint(source_weights_path, source_receipt_path)
+    # Keep immutable reviewed source CHECKOUT CLEAN during training/evaluation.
+    # The product intentionally disallows private checkpoint paths inside
+    # checkout, so copy the byte-exact pinned checkpoint to private runner temp.
+    private_model = Path(os.environ["RUNNER_TEMP"]) / "v8-private-checkpoint"
+    require(not private_model.exists(), "V8_CHECKPOINT_STAGING_MUST_BE_NEW")
+    private_model.mkdir(mode=0o700)
+    weights_path = private_model / "weights.json"
+    receipt_path = private_model / "training-receipt.json"
+    shutil.copyfile(source_weights_path, weights_path)
+    shutil.copyfile(source_receipt_path, receipt_path)
     verify_checkpoint(weights_path, receipt_path)
     subprocess.run([str(python), "-c",
                     "import mujoco,numpy;assert mujoco.__version__=='3.3.7'"],
