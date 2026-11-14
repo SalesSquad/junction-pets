@@ -24,7 +24,7 @@ BACKBONES={
              'sha256':'3d0c6ca08444680d7d4a46f95c1fb6a54f88f0419ae7331cebaa32e47e531c98'}
 }
 MODEL_CONFIG={'backbone':'resnet18','layers':['layer2','layer3'],'neighbors':9,'seed':330,
-              'input_size':256,'cpu_threads':2,'maximum_training_patches':60000,'coreset_ratio':.02}
+              'input_size':256,'cpu_threads':2,'maximum_training_patches':60000,'coreset_ratio':.10}
 
 def digest(b):return hashlib.sha256(b).hexdigest()
 def write_json(p,j):
@@ -91,7 +91,7 @@ def create_model(cache,profile="resnet18",weights_file=None):
     extractor.load_state_dict(state,strict=True)
     return model
 
-def fit_model(model,rows,data_root):
+def fit_model(model,rows,data_root,out=None):
     import torch
     model.train();bank=None;keys=None;generator=torch.Generator().manual_seed(330);object_count=0
     for i,row in enumerate(rows):
@@ -106,8 +106,11 @@ def fit_model(model,rows,data_root):
                 indices=torch.topk(keys,60000,sorted=False).indices.sort().values
                 bank=bank[indices];keys=keys[indices]
         if (i+1)%64==0:print('FIT_IMAGES',i+1,'OBJECTS',object_count,flush=True)
+    if out is not None:
+        from safetensors.torch import save_file
+        save_file({'normal_training_patch_reservoir':bank.detach().cpu().contiguous()},str(out/'training-patch-reservoir.safetensors'))
     model.embedding_store=[bank]
-    model.subsample_embedding(sampling_ratio=.02);model.eval()
+    model.subsample_embedding(sampling_ratio=MODEL_CONFIG['coreset_ratio']);model.eval()
     return {'fit_images':len(rows),'fit_objects':object_count,'reservoir_patches':len(bank),'coreset_patches':len(model.memory_bank)}
 
 def torch_map(model,tensor):
@@ -172,7 +175,7 @@ def run(args):
         torch.set_num_threads(2);torch.set_num_interop_threads(2);torch.manual_seed(330);np.random.seed(330)
         config={'model':dict(MODEL_CONFIG,backbone=args.profile), 'backbone_pin':BACKBONES[args.profile],'roi':ROI_CONFIG,'input_pins':PINS,'mode':'REAL_DATA_OFFLINE_NEW_CATEGORY','category':'cashew','actuation':False,'physical_object_session_independence':'UNKNOWN','versions':{k:metadata.version(k) for k in ['anomalib','torch','openvino','numpy','opencv-python-headless']},'host':{'system':platform.system(),'machine':platform.machine()},'code_sha256':{p.name:digest(p.read_bytes()) for p in [Path(__file__),Path(__file__).with_name('object_core.py'),Path(legacy.__file__)]},'calibration_comparator':'float64 midpoint candidate search, strict >; refusal prevents primary acceptance'}
         write_json(out/'config.json',config)
-        model=create_model(args.cache,args.profile,args.weights);fit=fit_model(model,[r for r in rows if r['role']=='fit'],data)
+        model=create_model(args.cache,args.profile,args.weights);fit=fit_model(model,[r for r in rows if r['role']=='fit'],data,out)
         save_file({k:v.detach().cpu().contiguous() for k,v in model.state_dict().items()},str(out/'model.safetensors'))
         write_json(out/'fit.json',fit);print('MODEL_FITTED',fit,flush=True)
         cal_predictions=[predict(model,r,data,out) for r in rows if r['role']=='calibration']
