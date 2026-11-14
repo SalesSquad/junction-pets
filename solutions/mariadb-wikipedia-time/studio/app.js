@@ -4,6 +4,7 @@ const ui = {page:byId('page'), target:byId('target'), baseline:byId('baseline'),
   events:byId('events'), state:byId('snapshot-state'), diffState:byId('diff-state'),
   count:byId('count'), reverts:byId('reverts'), source:byId('source')};
 let catalog;
+let requestSerial = 0;
 const el = (tag, text, className) => {
   const node = document.createElement(tag);
   if (text !== undefined) node.textContent = String(text);
@@ -81,16 +82,26 @@ function draw(result) {
   ui.status.textContent='Historical view computed. No network source or database was consulted.';
 }
 async function run() {
+  const serial = ++requestSerial;
+  clear(ui.snapshot); clear(ui.difference);
+  ui.reverts.textContent='Historical revert evidence pending this request.';
+  ui.state.textContent='LOADING'; ui.diffState.textContent='LOADING';
   try {
     const req={page_id:ui.page.value, as_of:ui.target.value, compare_at:ui.baseline.value};
     ui.status.textContent='Inspecting the synthetic historical boundary…';
     const response=await fetch('/api/compare',{method:'POST',headers:{'Content-Type':'application/json'},
       cache:'no-store',body:JSON.stringify(req)});
     const result=await response.json();
+    if(serial !== requestSerial) return;
     if(!response.ok || result.mode!=='SYNTHETIC_REPLAY_NO_MARIADB' || result.verified_live_source!==false)
       throw new Error(result.reason || 'Untrusted response');
     draw(result); syncSelection();
-  }catch(err){clear(ui.snapshot);clear(ui.difference);warn('No trustworthy result: '+err.message);}
+  }catch(err){
+    if(serial !== requestSerial) return;
+    clear(ui.snapshot); clear(ui.difference);
+    ui.reverts.textContent='No reliable as-of revert finding for this request.';
+    warn('No trustworthy result: '+err.message);
+  }
 }
 byId('query').addEventListener('submit',event=>{event.preventDefault();void run();});
 ui.page.addEventListener('change',()=>{renderHistory();void run();});
