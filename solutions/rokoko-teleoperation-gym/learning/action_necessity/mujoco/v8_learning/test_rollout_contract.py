@@ -78,6 +78,19 @@ def synthetic_frozen():
 
 
 class V8ProspectiveTrainContracts(unittest.TestCase):
+    def test_forward_reopen_requires_immediate_side_causality(self):
+        before_masked = [1, 0, 0, 1, 1, 0, 1]
+        after_open = [1, 1, 1, 1, 1, 0, 1]
+        already_open = [1, 1, 0, 1, 1, 0, 1]
+        self.assertTrue(rollout.direct_side_reopened_forward(
+            before_masked, after_open, 3))
+        self.assertFalse(rollout.direct_side_reopened_forward(
+            before_masked, after_open, 0))
+        self.assertFalse(rollout.direct_side_reopened_forward(
+            already_open, after_open, 3))
+        self.assertFalse(rollout.direct_side_reopened_forward(
+            before_masked, before_masked, 3))
+
     def test_all_worlds_train_only_first_128_near_32_clear(self):
         rollout.validate_train_bounds()
         env = FakeSelectionOnly()
@@ -94,19 +107,42 @@ class V8ProspectiveTrainContracts(unittest.TestCase):
                              list(rollout.STRATEGIES))
 
     def test_signed_lateral_and_stage_order_is_chronological(self):
-        complete = rollout.stage_funnel(synthetic_transitions())
+        complete = rollout.stage_funnel(synthetic_transitions(), [2])
         self.assertTrue(all(complete[key] for key in (
             "contact", "any_signed_lateral25", "signed_lateral25_after_contact",
             "any_forward_reopen_after_side", "forward_reopen_after_lateral25",
             "full_contact_lateral_reopen_goal_dwell")))
         out_of_order = rollout.stage_funnel(synthetic_transitions(
-            contact_at=2, lateral_at=1, reopen_at=0))
+            contact_at=2, lateral_at=1, reopen_at=0), [1])
         self.assertTrue(out_of_order["any_signed_lateral25"])
         self.assertTrue(out_of_order["any_forward_reopen_after_side"])
         self.assertFalse(out_of_order["forward_reopen_after_lateral25"])
         self.assertFalse(out_of_order["full_contact_lateral_reopen_goal_dwell"])
         self.assertFalse(rollout.stage_funnel(
-            synthetic_transitions(win=False))["full_contact_lateral_reopen_goal_dwell"])
+            synthetic_transitions(win=False), [2])["full_contact_lateral_reopen_goal_dwell"])
+
+    def test_stable_independent_replay_policy_factory(self):
+        # Contract only; actual MuJoCo replay must occur independently.
+        matrix = np.zeros((4, 41, 7))
+        class Source:
+            @staticmethod
+            def policy_factory(name):
+                return lambda: name
+        self.assertEqual(rollout.policy_factory("frozen_v5", matrix,
+                                                 frozen_v7=Source())(), "frozen_v5")
+        self.assertEqual(rollout.policy_factory("repeat_left", matrix,
+                                                 frozen_v7=Source())(), "repeat_left")
+        ctor = rollout.policy_factory("v8_hierarchical", matrix, frozen_v7=Source())
+        self.assertIsNot(ctor(), ctor())
+        with self.assertRaisesRegex(ValueError, "UNREGISTERED_PROSPECTIVE_POLICY"):
+            rollout.policy_factory("retreat_right", matrix, frozen_v7=Source())
+        original = MODULE.parent / "checkpoints" / "weights.json"
+        if original.exists():
+            factory = rollout.policy_factory("v8_hierarchical", original)
+            policy = factory()
+            obs = np.zeros(18)
+            obs[16] = .10
+            self.assertIn(policy(obs, [1, 1, 1, 1, 1, 1, 1]), range(7))
 
     def test_paired_near_loss_novel_and_unsafe_are_reported(self):
         rows = []
@@ -115,10 +151,10 @@ class V8ProspectiveTrainContracts(unittest.TestCase):
                 seed = definition["seed"]
                 baseline = ((seed == 513001 and strategy == "frozen_v5") or
                             (seed == 513002 and strategy == "frozen_v6"))
-                new_model = (strategy == "frozen_v8" and seed in (513001, 513003))
+                new_model = (strategy == "v8_hierarchical" and seed in (513001, 513003))
                 rows.append({**definition, "strategy": strategy,
                              "success": baseline or new_model,
-                             "unsafe": strategy == "frozen_v8" and seed == 513004,
+                             "unsafe": strategy == "v8_hierarchical" and seed == 513004,
                              "abstained": False,
                              "stage_funnel": {"any_signed_lateral25": True,
                                               "signed_lateral25_after_contact": True,
