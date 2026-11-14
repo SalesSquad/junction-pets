@@ -20,7 +20,7 @@ npm run test:http
 # Both suites together: npm test
 ```
 
-`PORT=4174 npm start` selects another unprivileged localhost port. Server always binds IPv4 loopback; Host is allowlisted. Native ES modules need no installation/bundler. Build checks JS syntax and static asset presence; no generated files. Stop with Ctrl-C. All runtime actions are local. Fictional citation links are explicit opt-in navigations to reserved `example.invalid` (not real evidence); they do not resolve. There are no real source websites to fetch.
+`PORT=4174 npm start` selects another unprivileged localhost port. Server always binds IPv4 loopback; Host is allowlisted. Native ES modules need no installation/bundler. Build rejects stale product source metadata, checks JS syntax and static asset presence; no generated files. Stop with Ctrl-C. All runtime actions are local. Fictional citation links are explicit opt-in navigations to reserved `example.invalid` (not real evidence); they do not resolve. There are no real source websites to fetch.
 
 ## Evidence policy
 
@@ -30,7 +30,7 @@ npm run test:http
 - Explicit `INVESTOR` + `lead === true` + primary source with source/origin IDs required. `ISSUER` is not an investor. Circular secondary repetition is not primary lead evidence. Contradictory lead or event dates withhold that round; unaffected rounds remain eligible and warnings remain visible.
 - Event date must be within the founder window; source publication must be a valid date on/after the event and no later than fixed fixture snapshot 2026-11-14. Invalid/missing dates cannot establish a lead. “Active” means a supported lead event in the preceding 365 days relative to that snapshot, not a claim of live activity.
 - Missing is `UNKNOWN`/null, never zero. No aggregate funding amount is inferred; same-round amount reconciliation and currency conversion are not implemented.
-- Export rebuilds canonical evidence from the fixture; accepts only eligible stable IDs, bounded notes and explicit approval. It preserves goal, source SHA, event/source dates, citations, dedup key and local human approval state. Approval is a local user assertion, not authenticated attestation. Freeform notes remain user assertions. JSON escapes HTML delimiters.
+- Export rebuilds canonical evidence from the fixture; accepts only eligible stable IDs, bounded notes and explicit approval. It preserves goal, base source SHA, product source digest, event/source dates, citations, dedup key and local human approval state. Approval is a local user assertion, not authenticated attestation. Freeform notes remain user assertions. JSON escapes HTML delimiters.
 
 The fixture contains ten entities, same-name identity collisions, repeated round/filing, issuer record, unknown lead/amount, stale evidence, circular claim, and contradictory lead claims. All are invented, including URLs and excerpts. Exact links are fixture references, **not real citations supporting real companies**. Supported result is two investors / one round each for the default goal. The graph is a semantic investor → economic round → issuer/source trail; source cards expose exact round and issuer IDs.
 
@@ -52,3 +52,38 @@ Partner evidence key **cala**, owned brief **M350**, catalog snapshot 2026-11-14
 `cala-contract.mjs` and `.d.ts` define a bounded proposed adapter contract, not a verified Cala SDK wire schema. Stub always refuses, even caller-asserted authority. It has no transport, key loader or provider URL. Proposed limits: 5s, 256KiB response, 25 entities; a future adapter must **enforce** these with abort, streaming byte cap, schema validation, exact entity binding, data rights and host authorization checks at each stage. Limits are declarative while transport is absent. Future host alone holds the key (sponsor describes X-API-KEY); never supply it to browser/local form or exported JSON.
 
 **Exactly next external gate: approved Cala account + host-managed key, then held-out live entity_search/entity_lookup → entity_introspection → entity_retrieval qualification**, including duplicate round/filing, source-date and identity-conflict labels. No account, key, credits, data rights or live quality is assumed. This milestone does not meet live Cala execution qualification. Atlas technology T55 could later store materialized evidence; no Atlas integration or call is present.
+
+## Export source provenance (canonical manifest v1)
+
+P2 repair `J26-PF-CALA-PROVENANCE-FIX-20261114` addresses the independent Codex Plus read-only review of `91bf2fc4f068f1ae5d8a3008f6891a9830b511e0`: the old `sourceSha` named only the initial base, which did not contain this product. Export now calls it `baseSourceSha` (`a33f525171b6424d39dfc4c889b63e0fc5cb459e`), never a product commit claim. `productSourceDigest` is a lowercase SHA256 content digest, imported from the single static `source-meta.mjs` module by `core.mjs` and exported unchanged.
+
+The complete covered product source list is, in sorted order:
+
+```text
+cala-contract.d.ts
+cala-contract.mjs
+core.mjs
+fixture.mjs
+public/app.mjs
+public/index.html
+public/style.css
+server.mjs
+```
+
+For each relative POSIX path, hash the raw file bytes with SHA256. Concatenate `path + NUL + lowercase_hex_file_hash + LF` for all paths sorted by ordinary code-unit order (all paths are ASCII); hash that UTF-8 manifest with SHA256. No timestamps, absolute paths, platform newline normalization, or Git state enter the digest. This covers all executable application files, the type contract and browser assets. Exclusions: the single self-referential `source-meta.mjs`, README/verification, tests, build tooling and `package.json` (launch metadata, no application implementation). It is source-byte identity, not a signed attestation, Git commit, deployed-state check or protection against an attacker changing both source and metadata. New runtime files must be added to the canonical list in build/tests/docs.
+
+Independently reproduce from this directory (Node 22+, no dependencies or network):
+
+```sh
+node --input-type=module <<'JS'
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+const paths = ['core.mjs','fixture.mjs','server.mjs','cala-contract.mjs','cala-contract.d.ts','public/app.mjs','public/index.html','public/style.css'].sort();
+const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+const manifest = paths.map(path => path + '\0' + hash(readFileSync(path)) + '\n').join('');
+console.log(hash(Buffer.from(manifest, 'utf8')));
+JS
+npm run build
+```
+
+After an intentional source change, independently recompute/review the digest and explicitly update `source-meta.mjs`; build only verifies and fails on mismatch, never rewrites metadata. No self-referential Git SHA is required. The server allowlists `/source-meta.mjs` so the browser resolves the core import with the existing CSP and read-only Host/method restrictions.

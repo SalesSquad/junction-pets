@@ -2,6 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 const files = new Map([
+  ['/source-meta.mjs',['source-meta.mjs','text/javascript; charset=utf-8']],
   ['/', ['public/index.html','text/html; charset=utf-8']], ['/app.mjs',['public/app.mjs','text/javascript; charset=utf-8']],
   ['/style.css',['public/style.css','text/css; charset=utf-8']], ['/core.mjs',['core.mjs','text/javascript; charset=utf-8']], ['/fixture.mjs',['fixture.mjs','text/javascript; charset=utf-8']]
 ]);

@@ -1,4 +1,5 @@
-export const SOURCE_SHA = 'a33f525171b6424d39dfc4c889b63e0fc5cb459e';
+import { PRODUCT_SOURCE_DIGEST } from './source-meta.mjs';
+export const BASE_SOURCE_SHA = 'a33f525171b6424d39dfc4c889b63e0fc5cb459e';
 export const DEFAULT_GOAL = { sector: 'Climate software', geography: 'Nordics', stage: 'Seed', from: '2025-11-14', to: '2026-11-14' };
 export const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function safeURL(value) {
@@ -62,6 +63,6 @@ export function makeArtifact(data, goal, reviews) {
     if (!row) throw Error('Unresolved or unsupported candidate cannot be shortlisted');
     return { entity: row.entity, humanReview: { state:'APPROVED_BY_LOCAL_USER', note:r.note }, score:row.score, active:row.active, economicRoundCount:row.roundCount, totalFunding:'UNKNOWN', rounds:row.accepted, warnings:row.reasons };
   });
-  return { schema:'roundlens.shortlist.v1', mode:data.mode, sourceSha:SOURCE_SHA, asOf:data.asOf, goal, rankingPolicy:'10 points per unique primary-sourced explicit lead round; identity abstention; 365-day active threshold', approvalMeaning:'Local user assertion, not verified identity or investment advice', shortlist, autoSend:false };
+  return { schema:'roundlens.shortlist.v1', mode:data.mode, baseSourceSha:BASE_SOURCE_SHA, productSourceDigest:PRODUCT_SOURCE_DIGEST, asOf:data.asOf, goal, rankingPolicy:'10 points per unique primary-sourced explicit lead round; identity abstention; 365-day active threshold', approvalMeaning:'Local user assertion, not verified identity or investment advice', shortlist, autoSend:false };
 }
 export const safeJSON = value => JSON.stringify(value,null,2).replace(/</g,'\\u003c').replace(/>/g,'\\u003e').replace(/&/g,'\\u0026');

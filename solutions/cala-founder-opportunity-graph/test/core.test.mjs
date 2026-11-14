@@ -28,3 +28,28 @@ test('provider refuses even caller-asserted authority; no network or secret look
 test('application contains no outbound API, secret access, auto-send or storage',async()=>{for(const path of ['../public/app.mjs','../core.mjs','../fixture.mjs','../cala-contract.mjs']){const s=await readFile(new URL(path,import.meta.url),'utf8');assert.doesNotMatch(s,/\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon|localStorage|process\.env|readFile|https\.request/);}const server=await readFile(new URL('../server.mjs',import.meta.url),'utf8');assert.match(server,/listen\(port,'127\.0\.0\.1'/);});
 
 test('issuer records remain visible as context without adding investor rounds',()=>{const r=row(fixture);assert.equal(r.issuerRecords[0].role,'ISSUER');assert.equal(r.roundCount,1);assert.ok(r.reasons.some(s=>s.includes('ISSUER')));});
+
+test('export provenance matches current canonical product bytes, not a product Git SHA',async()=>{
+ const { computeSourceDigest } = await import('../build.mjs');
+ const a=makeArtifact(fixture,DEFAULT_GOAL,[{id:'inv-larch',note:'',approved:true}]);
+ assert.equal(a.baseSourceSha,'a33f525171b6424d39dfc4c889b63e0fc5cb459e');
+ assert.equal(Object.hasOwn(a,'sourceSha'),false);
+ assert.equal(a.productSourceDigest,await computeSourceDigest());
+});
+test('canonical manifest is independently reproducible and any covered source edit fails build verification',async()=>{
+ const { mkdtemp, mkdir, writeFile, rm }=await import('node:fs/promises');
+ const { tmpdir }=await import('node:os');
+ const { pathToFileURL }=await import('node:url');
+ const { createHash }=await import('node:crypto');
+ const { PRODUCT_SOURCE_FILES, verifySourceDigest }=await import('../build.mjs');
+ const expected=['cala-contract.d.ts','cala-contract.mjs','core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css','server.mjs'];
+ assert.deepEqual(PRODUCT_SOURCE_FILES,expected);
+ const dir=await mkdtemp(`${tmpdir()}/cala-provenance-`), root=pathToFileURL(`${dir}/`);
+ try {
+  await mkdir(new URL('public/',root));
+  let manifest='';
+  for(const path of expected){const bytes=await readFile(new URL(`../${path}`,import.meta.url));await writeFile(new URL(path,root),bytes);manifest+=path+'\0'+createHash('sha256').update(bytes).digest('hex')+'\n';}
+  assert.equal(await verifySourceDigest(root),createHash('sha256').update(manifest,'utf8').digest('hex'));
+  for(const path of expected){const target=new URL(path,root),bytes=await readFile(target);await writeFile(target,Buffer.concat([bytes,Buffer.from('\n')]));await assert.rejects(verifySourceDigest(root),/Stale productSourceDigest/);await writeFile(target,bytes);}
+ } finally {await rm(dir,{recursive:true,force:true});}
+});
