@@ -174,6 +174,37 @@ def independent_paired_science(training: dict, readout: dict):
             "near_seeds": near, "clear_seeds": clear}
 
 
+def bind_terminal_dwell_and_timeout(training: dict, raw_gzip: Path):
+    """Close the V7 historical verifier's row-vs-raw terminal dwell gap."""
+    row_by_key = {(r["seed"], r["strategy"]): r for r in training["trials"]}
+    require(len(row_by_key) == len(training["trials"]),
+            "HYBRID_DUPLICATE_RAW_TERMINAL_IDENTITY")
+    seen = set()
+    with gzip.open(raw_gzip, "rt", encoding="utf8") as stream:
+        for line in stream:
+            doc = json.loads(line)
+            key = (doc.get("seed"), doc.get("strategy"))
+            require(key in row_by_key and key not in seen,
+                    "HYBRID_UNKNOWN_OR_DUPLICATE_RAW_TERMINAL")
+            transitions = doc.get("transitions")
+            require(isinstance(transitions, list) and transitions,
+                    "HYBRID_MISSING_RAW_TERMINAL_EVENT")
+            last = transitions[-1]
+            row = row_by_key[key]
+            require(type(last.get("dwell_ticks_current")) is int and
+                    type(row.get("dwell_ticks_final")) is int and
+                    last["dwell_ticks_current"] == row["dwell_ticks_final"] and
+                    type(row.get("safe_goal_dwell250")) is bool and
+                    row["safe_goal_dwell250"] == safe_goal(row) and
+                    type(row.get("timeout")) is bool and
+                    row["timeout"] == (not (row["success"] or row["unsafe"] or
+                                            row["abstained"])),
+                    "HYBRID_FORGED_TERMINAL_DWELL_OR_TIMEOUT")
+            seen.add(key)
+    require(seen == set(row_by_key), "HYBRID_RAW_TERMINAL_COVERAGE_INCOMPLETE")
+    return len(seen)
+
+
 def main():
     source_root = Path(os.environ["CRACI_SOURCE_ROOT"]).resolve(strict=True)
     harness_root = Path(os.environ["CRACI_HARNESS_ROOT"]).resolve(strict=True)
@@ -291,6 +322,13 @@ def main():
             raw_check["selected_clear_worlds"] == CLEAR and
             raw_check["strategies"] == {name: NEAR + CLEAR for name in STRATEGIES},
             "HYBRID_INCOMPLETE_INDEPENDENT_PUBLIC_OBS_COHORT")
+    require(bind_terminal_dwell_and_timeout(
+        training, destination / "full_transitions.jsonl.gz") == 640,
+        "HYBRID_INCOMPLETE_INDEPENDENT_TERMINAL_BINDING")
+    require(manifest.get("actual_real_mujoco_trials") == 640 and
+            manifest.get("actual_real_option_transitions") ==
+            raw_check["actual_real_option_transitions"],
+            "HYBRID_MANIFEST_COUNT_OMITTED_NEGATIVE_TRIALS")
     science = independent_paired_science(training, readout)
 
     v8shim = import_source(harness_root / "scripts/craci/rokoko-mujoco-v8-prospective-qualification.py",
