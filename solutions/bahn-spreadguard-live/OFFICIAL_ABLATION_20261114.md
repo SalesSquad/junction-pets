@@ -100,6 +100,13 @@ do not account for the initial seed-based parameter selection, a
 changing competitor mix or system-wide correlated failures.
 The blind-five exact one-sided sign-test p-value is 0.03125
 (exploratory; no claims of pre-registered hypothesis testing).
+For the distinct **eligibility event** (a world clears 90%), 10/10
+successes have only a **74.11% one-sided 95% exact lower confidence
+bound** on the per-world success probability, assuming independent,
+representative worlds. It would require **299 independent successful
+worlds with zero failures** to establish a 99% pass probability at the
+same confidence level by this strict calculation. We make no such
+guarantee from ten worlds.
 
 ## Conclusions and caveats
 
