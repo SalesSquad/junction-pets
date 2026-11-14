@@ -197,5 +197,18 @@ class TerminalDwellBinding(unittest.TestCase):
                     "seed": qual.FIRST, "strategy": qual.STRATEGIES[0]}]}, raw)
 
 
+class AllPhysicalGoalsMustReplay(unittest.TestCase):
+    def test_clear_world_goal_is_never_omitted_by_legacy_near_only_selector(self):
+        clear_goal = {"observed_corridor": False, "success": True,
+                      "lateral_displacement": 0.0}
+        old_v7_near_only = lambda row: bool(row["observed_corridor"] and
+                                         (row["success"] or row["lateral_displacement"] >= .025))
+        self.assertFalse(old_v7_near_only(clear_goal))
+        self.assertTrue(qual.all_goals_plus_original_positive(clear_goal, old_v7_near_only))
+        near_lateral = {"observed_corridor": True, "success": False,
+                        "lateral_displacement": .03}
+        self.assertTrue(qual.all_goals_plus_original_positive(near_lateral, old_v7_near_only))
+
+
 if __name__ == "__main__":
     unittest.main()
