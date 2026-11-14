@@ -48,8 +48,13 @@ def verify_scores(candidates, training):
     """Compare every candidate score and every query with independent Python runtime."""
     model_path = training / "model.json"
     model = ResearchReranker.from_file(model_path, expected_sha256=digest(model_path))
+    query_metrics = {}
     with (training / "query_metrics.csv").open(newline="") as handle:
-        query_metrics = {(r["split"], r["query_id"]): r for r in csv.DictReader(handle)}
+        for row in csv.DictReader(handle):
+            key = (row["split"], row["query_id"])
+            if key in query_metrics:
+                raise ValueError("duplicate_query_metric")
+            query_metrics[key] = row
     rows = queries = 0
     max_score_error = max_confidence_error = 0.0
     with candidates.open(newline="") as source, (training / "predictions.csv").open(newline="") as fitted:
@@ -74,7 +79,10 @@ def verify_scores(candidates, training):
             if result["candidates"][0]["candidate_id"] != reference["candidate_id"]:
                 raise ValueError("r_python_top_candidate_mismatch")
             if len(batch) >= 2:
-                error = abs(result["confidence"] - float(reference["confidence"]))
+                reference_confidence = float(reference["confidence"])
+                if not math.isfinite(reference_confidence):
+                    raise ValueError("nonfinite_reference_confidence")
+                error = abs(result["confidence"] - reference_confidence)
                 max_confidence_error = max(max_confidence_error, error)
                 if error > 1e-10:
                     raise ValueError("r_python_confidence_mismatch")
