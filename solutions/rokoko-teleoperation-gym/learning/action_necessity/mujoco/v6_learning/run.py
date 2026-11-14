@@ -167,6 +167,37 @@ def perturb(center, rng, radius):
     return validate_weights(proposed)
 
 
+def score_training(rows):
+    """Use *training-only public-observation* corridor failure reward.
+
+    Without this term, the 2/3 easy clear worlds would dominate the search.
+    Classification uses the FIRST noisy observed obstacle y from the actual
+    training transition, never simulator ground truth or opened dev labels.
+    Genuine success still dominates displacement; any unsafe costs severely.
+    """
+    base = v5.score_training(rows)
+    corridor = [row for row in rows if
+                abs(float(row["transitions"][0]["observation"][7])) < .122]
+    corridor_wins = sum(int(row["success"]) for row in corridor)
+    corridor_unsafe = sum(int(row["unsafe"]) for row in corridor)
+    corridor_abstain = sum(int(row["abstained"]) for row in corridor)
+    lateral = 0.
+    for row in corridor:
+        initial = row["transitions"][0]["observation"]
+        final = row["transitions"][-1]["next_observation"]
+        sign = 1. if initial[7] >= initial[1] else -1.
+        lateral += max(0., (float(initial[1])-float(final[1]))*sign)
+    return dict(**{k:v for k,v in base.items() if k!="objective"},
+                objective=round(base["objective"] + 300*corridor_wins
+                                - 1000*corridor_unsafe - 6*corridor_abstain
+                                + 15*lateral,6),
+                train_observed_corridor_worlds=len(corridor),
+                train_observed_corridor_wins=corridor_wins,
+                train_observed_corridor_unsafe=corridor_unsafe,
+                train_observed_corridor_abstain=corridor_abstain,
+                train_observed_lateral_displacement_m=round(lateral,6))
+
+
 def learn(env, train_count, deadline):
     """Six real reward/cost-trained macro policies over one train-only cohort."""
     rng = random.Random(RNG_SEED)
@@ -187,7 +218,7 @@ def learn(env, train_count, deadline):
                 row = training_episode(env, seed, weights)
                 episodes.append(row)
                 rollouts.append({"generation":generation, "candidate":idx, **row})
-            scores = v5.score_training(episodes)
+            scores = score_training(episodes)
             entry = dict(generation=generation, candidate=idx, weights=weights, **scores)
             experiments.append(entry)
             ranking = (scores["objective"], -scores["unsafe"], scores["success"],
