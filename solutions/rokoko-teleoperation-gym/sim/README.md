@@ -42,7 +42,7 @@ was implicitly acting as an operator acknowledgement. After changing that safety
 logic, a **new, frozen +50000 holdout** was run without tuning to its outcomes.
 Previous +40000 metrics are historical, not final evidence. No broad CI suites were run.
 
-## Final executed results
+## Historical M3 results before Anthropic review
 
 Paired shifted holdout (30 scenarios per policy, 50104–50133), AFTER ACK repair:
 
@@ -67,6 +67,97 @@ counterexample generator with modest improvement, not a solved manipulation task
 or statistical/real-world generalization claim. Occlusion HOLD, deadman release,
 obstacle abstention, friction-dependent slip, lateral instability and goal
 overshoot remain explicit failure modes. Raw trial data retain failures.
+
+## API-reviewed M3.1 — fresh shifted cohort after safety corrections
+
+The **50104–50133 result above and its original `receipt.json` are historical**.
+The independent Anthropic API Sonnet/high code review on this earlier M3 source
+cost **$0.2225865** (per-call $1.50 cap, separate from the $40 owner envelope).
+It identified three medium and four low findings. Those were checked against code,
+not blindly accepted. Source corrections now:
+
+- Measure forbidden target/control changes **at the actuator command boundary**,
+  with injected negative unit cases; a result of zero is no longer tautological.
+- Enforce the observation-driven REPLAN and fail closed when a model requests
+  unavailable human budget. Even a 100% confidence fixture cannot bypass bounds.
+- Apply axis-specific actuator bounds and refuse invalid *proposals* without
+  spuriously latching an already-safe position. Refusals are counted.
+- Count one human-help request on transition, never every 20 ms tick. Requests
+  remain pending with **zero actual person interventions**.
+- Reject zero-length/missing demonstrations before trajectory normalization;
+  keep cumulative XY progress and preserve the M2 original synthetic provenance.
+- Use exceptions, not optimized-out Python `assert`, for compulsory contact/
+  deadman evidence gates. No tests, thresholds or safety limits were weakened.
+
+A new **paired and disjoint** 30-scenario shifted cohort was run exactly once
+after these corrections, with synthetic seed IDs `60104–60133`.
+The previous `50104–50133` cohort was NOT overwritten. The new receipt is
+`receipt-anthropic-review.json`, containing exact source/input SHA-256 values.
+Executed on the same local CPU MuJoCo 3.3.7 installation; **no learned RL policy**.
+
+| Independently scored metric | Open-loop | Observed-object closed-loop |
+| --- | ---: | ---: |
+| Safe goal success | 0/30 | 5/30 |
+| Final hidden ground-truth goal error | 0.149822 m | 0.106428 m |
+| Episodes with pusher/object contact | 14/30 | 30/30 |
+| Simulated damage events | 0 | 2 |
+| Episodes with object/obstacle contacts | 0 | 6 |
+| Episodes with object workspace excursions | 0 | 1 |
+| Unsafe deadman command changes | 0 | 0 |
+| Human-help requests, **not actual takeovers** | 0 / 0 | 11 / 0 |
+
+
+### Independent scientific critique — baseline NOT qualified as comparative RL evidence
+
+A second **read-only** Claude Sonnet/high Anthropic API call ($0.3023963)
+identified a deeper baseline defect: a 20 mm-radius puck and 12 mm-radius
+pusher require roughly 32 mm centre-to-centre contact geometry, yet the current
+object-centred controller repeatedly targets only **25 mm behind the puck
+centre**, potentially pressing 7 mm into it. Conversely, the open-loop pusher
+finishes at x=**0.175 m**, already beyond the object-centre goal x=0.16 m
+*without accounting for contact radii*. A zero-success open-loop baseline is
+therefore potentially structurally disadvantaged. The 5/30 vs 0/30 numbers
+above are **engineering diagnostics, NOT evidence of a better learned policy**.
+
+Additional limitations: true simulated object XY is sampled as noiseless,
+1 mm-quantised synthetic "vision"; obstacle map coordinates and occlusion flags
+are artificial sensor conveniences; no actual force feedback is available to
+the policy; HOLD may retain residual servo pressure on an object; the final
+pose has no minimum dwell requirement, and "train" seeds trained no model.
+The benchmark cannot validate robot performance, fracture safety, real HIL,
+or model calibration. The first review fixed software guardrails, not these
+research-design limitations. These observations are **not retroactive fixes**:
+both raw receipts are intentionally retained.
+
+**Next source-owned evaluation requirement:** first make the open-loop and
+object-centred baselines geometrically feasible using the scene's *actual*
+contact radii, add an observed pusher pose/force-proxy boundary, a compliant
+release/retreat action and independent goal-dwell and unsafe-cost accounting.
+Then freeze parameters on a development cohort and run a new, untouched,
+paired and pre-registered holdout, with fixed adversarial shifts and a safe
+abstain baseline. Only after that compare a **genuinely trained CPU option-value
+learner** using held-out source-verified episode observations and explicit
+synthetic intervention masks. Older offsets through +60000 are development
+evidence and must not be silently recycled as sealed holdouts. NVIDIA Isaac
+Lab, Google DeepMind Playground and live Rokoko SDK remain independently
+unverified/unused.
+
+Both Anthropic read-only calls together cost **$0.5249828** against the
+owner's $40 maximum API consultation budget; the **remaining authorized
+allowance is $39.4750172** at this bounded checkpoint. This is NOT a verified
+balance on the Anthropic billing account. The API calls reviewed/advised on
+code; **no Anthropic model controlled the simulated pusher or submitted
+commands**.
+
+**Important adverse result:** The closed-loop controller made
+2 simulated fragile-object damage violations.
+The existing toy impulse threshold (0.006 N·s per 2 ms step) is **not calibrated**
+against real materials or a robot's safe forces. The success rate is limited and
+the controller is **not safe for live actuation**. More physics/sensing experiments,
+independent holdout evaluation and a genuinely learned baseline must precede any
+real glove/robot adapter. Report these failures; never suppress them or treat
+an API review as hardware qualification. External Anthropic inference was used
+for **read-only analysis of this source**, never the motion controller itself.
 
 ## What is physically simulated
 

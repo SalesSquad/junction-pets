@@ -3,7 +3,7 @@ import copy
 import json
 from pathlib import Path
 import unittest
-from experiment import Hold, score, decision
+from experiment import Hold, score, decision, target_inside, unsafe_target_update, normalize_demo_progress, record_human_request, CHOICES
 from decisions import observed, validate_request, validate_answer, guarded_choice, normalize_response
 
 
@@ -25,6 +25,49 @@ class SafetyTests(unittest.TestCase):
         self.assertTrue(h.update(True, 0, 1, True, False))
         self.assertTrue(h.update(True, 0, 1, True, False))
         self.assertFalse(h.update(True, 0, 1, True, True))
+
+    def test_command_boundary_deadman_detector_and_workspace(self):
+        before = (-0.06, 0)
+        self.assertTrue(unsafe_target_update(False, before, (0.06, 0), (0, 0), (0, 0)))
+        self.assertTrue(unsafe_target_update(False, before, before, (0, 0), (0.1, 0)))
+        self.assertFalse(unsafe_target_update(False, before, before, (0, 0), (0, 0)))
+        self.assertFalse(unsafe_target_update(True, before, (0.06, 0), (0, 0), (0.1, 0)))
+        self.assertTrue(target_inside((0.29, 0.19)))
+        self.assertFalse(target_inside((0.29, 0.20)))
+        self.assertFalse(target_inside((float('nan'), 0)))
+        self.assertFalse(target_inside((0.3, 0)))
+
+    def test_request_budget_is_event_based(self):
+        pending, budget, n = record_human_request('REQUEST_HUMAN', False, 2)
+        self.assertEqual((pending, budget, n), (True, 1, 1))
+        for _ in range(50):
+            pending, budget, n = record_human_request('REQUEST_HUMAN', pending, budget)
+            self.assertEqual((pending, budget, n), (True, 1, 0))
+        self.assertEqual(record_human_request('REQUEST_HUMAN', False, 0), (False, 0, 0))
+
+    def test_demo_progress_rejects_degenerate_input(self):
+        with self.assertRaises(ValueError):
+            normalize_demo_progress([{'hand': {'x':0, 'y':0}}])
+        with self.assertRaises(ValueError):
+            normalize_demo_progress([{'hand': {'x':0, 'y':0}}, {'hand': {'x':0,'y':0}}])
+        self.assertEqual(normalize_demo_progress([
+            {'hand': {'x':0,'y':0}},
+            {'hand': {'x':1,'y':0}},
+            {'hand': {'x':1,'y':1}}
+        ]), [0, 0.5, 1])
+
+    def test_model_cannot_downgrade_replan_or_overspend(self):
+        def answer(choice):
+            return dict(type='choice', name='next_step', choice=choice,
+                        confidence=1.0, probabilities={x: float(x == choice) for x in CHOICES})
+        obs = dict(object=[0.02, 0.025], age=0, quality=1, deadman=True,
+                   inside=True, obstacle_distance=0.1)
+        self.assertEqual(guarded_choice(obs, 2, answer('CONTINUE')), 'REPLAN')
+        self.assertEqual(guarded_choice(obs, 2, answer('HALT')), 'HALT')
+        self.assertEqual(guarded_choice(dict(obs, object=[0, 0]), 0,
+                                        answer('REQUEST_HUMAN')), 'HALT')
+        self.assertEqual(guarded_choice(dict(obs, object=[0, 0]), 2,
+                                        answer('REQUEST_HUMAN')), 'REQUEST_HUMAN')
 
     def test_false_success_and_contact_required(self):
         self.assertFalse(score(0, False, 0, 0, False))

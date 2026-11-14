@@ -15,6 +15,41 @@ DT = 0.002
 GOAL = (0.16, 0.0)
 IMPULSE_LIMIT = 0.006  # N s per physics step; toy fragility proxy, not material calibration
 CHOICES = ('CONTINUE', 'REPLAN', 'REOBSERVE', 'REQUEST_HUMAN', 'HALT')
+TARGET_LIMITS = ((-0.19, 0.29), (-0.19, 0.19))
+
+
+def target_inside(target):
+    return (isinstance(target, (tuple, list)) and len(target) == 2 and
+            all(type(value) in (int, float) and math.isfinite(value) and
+                lower <= value <= upper
+                for value, (lower, upper) in zip(target, TARGET_LIMITS)))
+
+
+def unsafe_target_update(deadman, prior_target, target, prior_ctrl, ctrl):
+    # Inspect commands at the actual command boundary, not inside a reachable-
+    # only-with-deadman-true branch. Counterexamples in tests must trip this.
+    return not deadman and (tuple(prior_target) != tuple(target) or
+                            tuple(prior_ctrl) != tuple(ctrl))
+
+
+def normalize_demo_progress(steps):
+    if not isinstance(steps, list) or len(steps) < 2:
+        raise ValueError('REFUSED: demonstration needs at least two poses')
+    distances, previous = [0.0], None
+    for step in steps:
+        try:
+            hand = step['hand']
+            xy = (hand['x'], hand['y'])
+            if any(type(v) not in (int, float) or not math.isfinite(v) for v in xy):
+                raise ValueError('non-finite XY coordinate')
+        except (KeyError, TypeError) as error:
+            raise ValueError('REFUSED: invalid demonstration XY coordinates') from error
+        if previous is not None:
+            distances.append(distances[-1] + math.dist(xy, previous))
+        previous = xy
+    if distances[-1] <= 1e-9:
+        raise ValueError('REFUSED: demonstration has zero XY movement')
+    return [value / distances[-1] for value in distances]
 
 
 def sha(path):
@@ -57,6 +92,14 @@ def decision(obs, budget):
     return 'CONTINUE'
 
 
+def record_human_request(choice, pending, budget):
+    # A request is one event, not a 20ms polling-tick charge. No synthetic
+    # helper may claim an actual human takeover or clear this pending state.
+    if choice != 'REQUEST_HUMAN' or pending or budget < 1:
+        return pending, budget, 0
+    return True, budget - 1, 1
+
+
 def scenario(seed, shifted):
     r = random.Random(seed)
     return dict(x=r.uniform(-0.012, 0.012), y=r.uniform(-0.045 if shifted else -0.01, 0.045 if shifted else 0.01),
@@ -90,6 +133,8 @@ def run(seed, policy, shifted, progress, force_deadman=False):
     # This is not a real person's approval or physical emergency stop.
     ack_tick = (s['stale_start'] + s['stale_length'] + 2) if s['stale_length'] else None
     ack_events = 0
+    pending_human = False  # remains held; no real human response is simulated.
+    rejected_candidates = 0
     target = [-0.06, 0.0]
     last_seen = [s['x'], s['y']]
     seen_at = 0.0
@@ -102,6 +147,8 @@ def run(seed, policy, shifted, progress, force_deadman=False):
     force = np.zeros(6)
     # 300 sensor/controller ticks, 10 actual physics steps per tick (6 seconds).
     for tick in range(300):
+        prior_target = tuple(target)
+        prior_ctrl = tuple(float(v) for v in d.ctrl)
         t = tick * 0.02
         occluded = s['stale_start'] <= tick < s['stale_start'] + s['stale_length']
         if not occluded:
@@ -110,17 +157,20 @@ def run(seed, policy, shifted, progress, force_deadman=False):
             seen_at = t
         deadman = not (force_deadman or tick >= s['deadman_step'] >= 0)
         obs = dict(object=last_seen[:], age=t-seen_at, quality=0.6 if occluded else 0.99,
-                   deadman=deadman, inside=all(-0.19 <= v <= 0.29 for v in target),
+                   deadman=deadman, inside=target_inside(target),
                    obstacle_distance=math.dist(last_seen, [0.09, s['obstacle_y']]))
         choice = decision(obs, budget)
+        if pending_human and choice in ('CONTINUE', 'REPLAN', 'REQUEST_HUMAN'):
+            # The help request stays pending even after sensors become healthy.
+            choice = 'REQUEST_HUMAN'
+        pending_human, budget, new_requests = record_human_request(
+            choice, pending_human, budget)
+        requests += new_requests
         counts[choice] += 1
-        if choice == 'REQUEST_HUMAN':
-            budget -= 1
-            requests += 1  # No simulated oracle takeover: request then abstain.
         scripted_ack = bool(ack_tick is not None and tick == ack_tick and deadman and not occluded)
         ack_events += int(scripted_ack)
         held = hold.update(deadman, obs['age'], obs['quality'], obs['inside'], scripted_ack)
-        if held or choice in ('HALT', 'REQUEST_HUMAN'):
+        if held or pending_human or choice in ('HALT', 'REQUEST_HUMAN'):
             held_steps += 1
             # Freeze requested joint target, not object physics; no teleport or qvel reset.
         else:
@@ -142,13 +192,16 @@ def run(seed, policy, shifted, progress, force_deadman=False):
             delta = [desired[j]-target[j] for j in range(2)]
             length = max(math.hypot(*delta), 1e-12)
             candidate = [target[j]+delta[j]*min(1.0, 0.0016/length) for j in range(2)]
-            if all(-0.19 <= v <= 0.29 for v in candidate):
+            if target_inside(candidate):
                 target = candidate
             else:
-                hold.update(True, 0, 1, False, False)
-            if not deadman:
-                unsafe_commands += 1
-        d.ctrl[:] = [target[0]+0.06, target[1]]
+                # The invalid candidate never reaches the actuator. Refusal of
+                # an unexecuted proposal does not fabricate an operator ACK.
+                rejected_candidates += 1
+        control_command = (target[0] + 0.06, target[1])
+        d.ctrl[:] = control_command
+        unsafe_commands += int(unsafe_target_update(
+            deadman, prior_target, target, prior_ctrl, control_command))
         for _ in range(10):
             mj.mj_step(m, d)
             workspace_violation |= not (-0.2 <= d.xpos[oid, 0] <= 0.3 and -0.2 <= d.xpos[oid, 1] <= 0.2 and 0 <= d.xpos[oid, 2] <= 0.06)
@@ -171,7 +224,8 @@ def run(seed, policy, shifted, progress, force_deadman=False):
                 max_step_impulse_ns=max_impulse, pusher_object_contact_steps=contacts,
                 obstacle_contact_steps=obstacle_contacts, held_ticks=held_steps,
                 unsafe_deadman_commands=unsafe_commands, human_requests=requests, human_takeovers=0,
-                synthetic_operator_ack_events=ack_events,
+                synthetic_operator_ack_events=ack_events, human_request_pending=pending_human,
+                workspace_candidate_refusals=rejected_candidates,
                 remaining_human_budget=budget, decisions=counts, final_object_xyz=d.xpos[oid].tolist())
 
 
@@ -185,7 +239,8 @@ def summarize(rows):
                     contact_trials=sum(r['pusher_object_contact_steps'] > 0 for r in rs),
                     mean_error_m=sum(r['error_m'] for r in rs)/len(rs),
                     human_requests=sum(r['human_requests'] for r in rs),
-                    unsafe_deadman_commands=sum(r['unsafe_deadman_commands'] for r in rs))
+                    unsafe_deadman_commands=sum(r['unsafe_deadman_commands'] for r in rs),
+                    workspace_candidate_refusals=sum(r['workspace_candidate_refusals'] for r in rs))
             for p in ('open_loop', 'object_centered') if (rs := [r for r in rows if r['policy'] == p])}
 
 
@@ -200,15 +255,16 @@ def main():
     import mujoco
     source = demo()
     steps = source['episode']['steps']
-    path = [math.dist([steps[0]['hand'][k] for k in ('x','y')], [s['hand'][k] for k in ('x','y')]) for s in steps]
-    progress = [p/path[-1] for p in path]
+    progress = normalize_demo_progress(steps)
     train_seeds = list(range(args.seed, args.seed+6))
-    holdout_seeds = list(range(args.seed+50000, args.seed+50000+args.trials))
+    holdout_seeds = list(range(args.seed+60000, args.seed+60000+args.trials))
     train = [run(s, p, False, progress) for s in train_seeds for p in ('open_loop','object_centered')]
     holdout = [run(s, p, True, progress) for s in holdout_seeds for p in ('open_loop','object_centered')]
     negative = run(args.seed, 'object_centered', False, progress, force_deadman=True)
-    assert negative['pusher_object_contact_steps'] == 0 and negative['unsafe_deadman_commands'] == 0
-    assert any(r['pusher_object_contact_steps'] > 0 for r in train), 'No real contact evidence'
+    if negative['pusher_object_contact_steps'] or negative['unsafe_deadman_commands']:
+        raise RuntimeError('SAFETY_GATE_FAILED: deadman release changed target or made contact')
+    if not any(r['pusher_object_contact_steps'] > 0 for r in train):
+        raise RuntimeError('SAFETY_GATE_FAILED: no real MuJoCo contact evidence')
     import platform
     from datetime import datetime, timezone
     result = dict(executed_at_utc=datetime.now(timezone.utc).isoformat(), executor=platform.platform(),

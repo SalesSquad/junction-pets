@@ -76,7 +76,16 @@ def guarded_choice(obs, budget, answer):
         a = validate_answer(answer)
     except (ValueError, TypeError, KeyError):
         return 'REOBSERVE'
-    return a['choice'] if a['confidence'] >= 0.8 else 'REOBSERVE'
+    if a['confidence'] < 0.8:
+        return 'REOBSERVE'
+    candidate = a['choice']
+    if candidate == 'REQUEST_HUMAN' and budget <= 0:
+        return 'HALT'
+    # Observation-driven replanning is a mandatory lower bound on caution:
+    # a confident external model may abstain, but never downgrade it to CONTINUE.
+    if hard == 'REPLAN' and candidate == 'CONTINUE':
+        return 'REPLAN'
+    return candidate
 
 
 if __name__ == '__main__':
