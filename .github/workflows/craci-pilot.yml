@@ -20,7 +20,7 @@ on:
         description: Product for the browser workload
         type: choice
         default: stoa
-        options: [stoa, valio, sbank, hostinger, espoo, all]
+        options: [stoa, valio, sbank, hostinger, espoo, exa, all]
       browser:
         description: Run all engines or only the engine needing qualification
         type: choice
@@ -378,10 +378,10 @@ jobs:
       fail-fast: false
       max-parallel: 8
       matrix:
-        product: ${{ fromJSON(inputs.product == 'sbank' && '["sbank"]' || inputs.product == 'hostinger' && '["hostinger"]' || inputs.product == 'espoo' && '["espoo"]' || '["sbank","hostinger","espoo"]') }}
+        product: ${{ fromJSON(inputs.product == 'sbank' && '["sbank"]' || inputs.product == 'hostinger' && '["hostinger"]' || inputs.product == 'espoo' && '["espoo"]' || inputs.product == 'exa' && '["exa"]' || '["sbank","hostinger","espoo","exa"]') }}
         browser: ${{ fromJSON(inputs.browser == 'chromium' && '["chromium"]' || inputs.browser == 'firefox' && '["firefox"]' || inputs.browser == 'webkit' && '["webkit"]' || '["chromium","firefox","webkit"]') }}
     env:
-      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || fromJSON('{"sbank":"b2bb7f532fd496287aace73da98296306080df6c","hostinger":"23a029a48794ba275a0309584bf9968f7f5b665c","espoo":"ccd67d64f9a94952b0cd0f0ae1a6e2c8e8901a0a"}')[matrix.product] }}
+      PRODUCT_SOURCE_SHA: ${{ inputs.source_sha || fromJSON('{"sbank":"b2bb7f532fd496287aace73da98296306080df6c","hostinger":"23a029a48794ba275a0309584bf9968f7f5b665c","espoo":"ccd67d64f9a94952b0cd0f0ae1a6e2c8e8901a0a","exa":"2ce520f55a97f2491d34fb4582de728e7f379c1b"}')[matrix.product] }}
     steps:
       - name: Configure browser installation networking
         uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
@@ -410,7 +410,7 @@ jobs:
           test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
           [[ "$PRODUCT_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
           if [ -n "$SOURCE_OVERRIDE" ]; then
-            case "$SELECTED_PRODUCT" in sbank|hostinger|espoo) ;; *) exit 1;; esac
+            case "$SELECTED_PRODUCT" in sbank|hostinger|espoo|exa) ;; *) exit 1;; esac
           fi
       - name: Check out the pinned harness
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683

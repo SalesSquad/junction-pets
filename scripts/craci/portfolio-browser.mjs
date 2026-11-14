@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdir } from 'node:fs/promises';
 import { createServer as createPortReservation } from 'node:net';
 import { resolve } from 'node:path';
@@ -11,6 +12,7 @@ const products = {
   sbank: { server: 'solutions/s-pankki-economic-trainer/server.mjs', run: sbankJourney },
   hostinger: { server: 'solutions/hostinger-manipulation-radar/server.mjs', run: hostingerJourney },
   espoo: { server: 'solutions/espoo-proofmatch/serve.mjs', run: espooJourney },
+  exa: { server: 'solutions/exa-internet-butler/server.mjs', run: exaJourney },
 };
 const engines = { chromium, firefox, webkit };
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -341,6 +343,190 @@ async function espooJourney(page) {
   return coverage;
 }
 
+async function exaJourney(page) {
+  const goal = 'Find confirmed Exa sponsor opportunities at Junction and prepare my next actions';
+  const sourcePins = {
+    M298: {
+      url: 'https://hackjunction.app/participate/45/challenges/298',
+      sha256: '3615f5883fd0c42b671f299885c429d9424916b4309d8c67c336bd5883da2bea',
+    },
+    workshop: {
+      url: 'https://discord.com/channels/1268184974784336004/1564622353198088253/1570911365697372380',
+      sha256: '96aa21b92b6567c7f672b9726dcd1fce36cf02fea45f23fa1aee2e7bc913c816',
+    },
+  };
+  const posts = [];
+  const recordPost = request => {
+    if (request.method() === 'POST') posts.push(new URL(request.url()).pathname);
+  };
+  page.on('request', recordPost);
+  const submitPacket = async () => {
+    const [response] = await Promise.all([
+      page.waitForResponse(r => r.request().method() === 'POST' && new URL(r.url()).pathname === '/api/packet'),
+      page.locator('#build').click(),
+    ]);
+    assert.equal(response.status(), 200);
+    return response.json();
+  };
+  const approvalCleared = async () => {
+    await textIs(page, '#approval', 'Not approved');
+    assert.equal(await page.locator('#ack').isChecked(), false);
+    assert.equal(await page.locator('#approve').isDisabled(), true);
+    assert.equal(await page.locator('#export').isDisabled(), true);
+    assert.equal(await page.locator('#copy').isDisabled(), true);
+  };
+  const approveLocally = async () => {
+    const count = posts.length;
+    await page.locator('#ack').check();
+    assert.equal(await page.locator('#approve').isEnabled(), true);
+    assert.equal(await page.locator('#export').isDisabled(), true);
+    await page.locator('#approve').click();
+    await textIs(page, '#approval', 'Approved locally · no task executed');
+    assert.equal(await page.locator('#export').isEnabled(), true);
+    assert.equal(await page.locator('#copy').isEnabled(), true);
+    assert.equal(posts.length, count, 'Local review must not issue an HTTP action');
+  };
+
+  try {
+    await includesText(page, '#provider-status', 'EXA_API_KEY absent');
+    assert.equal(await page.locator('#goal-input').inputValue(), goal);
+    assert.equal(await page.locator('#workspace').isHidden(), true);
+    assert.equal(await page.locator('#live-results').isHidden(), true);
+
+    await page.locator('#goal-input').fill('Find a fictional conference on the Moon for this synthetic test.');
+    const refused = await submitPacket();
+    assert.equal(refused.state, 'CONNECTION_NEEDED');
+    assert.equal(refused.sponsorAPI, 'NOT VERIFIED');
+    assert.equal(Object.hasOwn(refused, 'sources'), false);
+    assert.equal(Object.hasOwn(refused, 'draft'), false);
+    await includesText(page, '#notice', 'No result was searched or invented');
+    assert.equal(await page.locator('#workspace').isHidden(), true);
+
+    await page.locator('#example').click();
+    assert.equal(await page.locator('#goal-input').inputValue(), goal);
+    const packet = await submitPacket();
+    assert.equal(packet.state, 'EVIDENCE_READY');
+    assert.equal(packet.mode, 'REPLAYED_OFFICIAL_FIXTURE');
+    assert.equal(packet.sponsorAPI, 'NOT VERIFIED');
+    assert.equal(packet.goal, goal);
+    assert.deepEqual(packet.sources.map(s => s.id), ['M298', 'workshop']);
+    for (const source of packet.sources) {
+      const pin = sourcePins[source.id];
+      assert.equal(source.url, pin.url);
+      assert.equal(source.snapshotSHA256, pin.sha256);
+      assert.equal(createHash('sha256').update(source.text).digest('hex'), pin.sha256);
+      assert.equal(source.mode, 'REPLAYED_OFFICIAL_FIXTURE');
+      assert.equal(source.publishedAt, null);
+    }
+    assert.deepEqual(packet.claims.map(c => c.id), ['usefulness', 'sources', 'live', 'credits']);
+    assert.ok(packet.claims.every(c => c.sourceId === 'M298' && packet.sources[0].text.includes(c.excerpt)));
+    assert.ok(packet.discrepancies.some(g => g.kind === 'CONFLICT'));
+    assert.equal(packet.discrepancies.filter(g => g.kind === 'UNKNOWN').length, 2);
+    await textIs(page, '#packet-mode', 'REPLAYED_OFFICIAL_FIXTURE');
+    assert.equal(await page.locator('#sources article.source').count(), 2);
+    assert.equal(await page.locator('#claims .claim').count(), 4);
+    assert.deepEqual(await page.locator('#sources article.source > a').evaluateAll(links => links.map(a => ({
+      href: a.href, target: a.target, safeRelation: a.rel.includes('noopener') && a.rel.includes('noreferrer'),
+    }))), Object.values(sourcePins).map(s => ({ href: s.url, target: '_blank', safeRelation: true })));
+    const firstSource = page.locator('#sources article.source').first();
+    await firstSource.locator('summary').click();
+    assert.equal(await firstSource.locator('details > p').isVisible(), true);
+    await includesText(page, '#sources', 'Publication: UNKNOWN');
+    await includesText(page, '#gaps', 'placeholders');
+    await includesText(page, '#gaps', 'eligibility');
+    assert.equal(await page.locator('#actions .action').count(), 3);
+    assert.equal(await page.locator('#draft').inputValue(), packet.draft);
+    await approvalCleared();
+
+    // Each distinct kind of local edit must revoke the prior human review.
+    await approveLocally();
+    const action = 'Recheck the source ledger before any real-world use.';
+    await page.locator('#own-action').fill(action);
+    await page.locator('#add-action button').click();
+    assert.equal(await page.locator('#actions .action').count(), 4);
+    await includesText(page, '#actions .action:last-child', 'USER-SUPPLIED · no source-based claim');
+    await approvalCleared();
+    await approveLocally();
+    await page.locator('#actions input[type="checkbox"]').first().check();
+    await approvalCleared();
+    await approveLocally();
+    const reviewedDraft = packet.draft + '\n\nSynthetic rehearsal: a human must confirm current terms before any use.';
+    await page.locator('#draft').fill(reviewedDraft);
+    await approvalCleared();
+    await approveLocally();
+    const [download] = await Promise.all([
+      page.waitForEvent('download'), page.locator('#export').click(),
+    ]);
+    assert.equal(download.suggestedFilename(), 'fieldnote-exa-opportunity.json');
+    const report = await readDownload(download);
+    assert.equal(report.draft, reviewedDraft);
+    assert.equal(report.approval.scope, 'LOCAL_REVIEW_ONLY');
+    assert.equal(report.approval.executesRealWorldTask, false);
+    assert.ok(Number.isFinite(Date.parse(report.approval.at)));
+    assert.deepEqual(report.externalEffects, []);
+    assert.deepEqual(report.sources, packet.sources);
+    assert.deepEqual(report.claims, packet.claims);
+    assert.deepEqual(report.discrepancies, packet.discrepancies);
+    assert.equal(report.actions.length, 4);
+    assert.equal(report.actions[0].done, true);
+    assert.deepEqual(report.actions.at(-1), {
+      id: 'user-3', text: action, kind: 'user_supplied', sourceIds: [], done: false,
+    });
+    await includesText(page, '#notice', 'No task was executed');
+    await page.locator('#ack').uncheck();
+    await approvalCleared();
+
+    // This server receives no API key. Verify both UI consent and safe missing-
+    // connection behavior locally; no provider request can leave this process.
+    await page.locator('#goal-input').fill('Prepare another fictional conference rehearsal.');
+    assert.equal(await page.locator('#workspace').isHidden(), true);
+    await page.locator('details.connection > summary').click();
+    const liveRequestsBefore = posts.filter(path => path === '/api/live').length;
+    await page.locator('#live').click();
+    await includesText(page, '#notice', 'Approve sending this goal');
+    assert.equal(posts.filter(path => path === '/api/live').length, liveRequestsBefore);
+    await page.locator('#live-consent').check();
+    const [missingConnection] = await Promise.all([
+      page.waitForResponse(r => r.request().method() === 'POST' && new URL(r.url()).pathname === '/api/live'),
+      page.locator('#live').click(),
+    ]);
+    assert.equal(missingConnection.status(), 400);
+    const missing = await missingConnection.json();
+    assert.equal(missing.state, 'CONNECTION_NEEDED');
+    assert.equal(missing.mode, 'LIVE_NOT_VERIFIED');
+    assert.match(missing.error, /EXA_API_KEY is not configured/);
+    await includesText(page, '#notice', 'EXA_API_KEY is not configured');
+    assert.equal(await page.locator('#live-consent').isChecked(), false);
+    assert.equal(await page.locator('#live').isEnabled(), true);
+    assert.equal(await page.locator('#live-results').isHidden(), true);
+    assert.equal(await page.locator('#workspace').isHidden(), true);
+    assert.equal(Object.hasOwn(missing, 'sources'), false);
+
+    await page.locator('#example').click();
+    const recovered = await submitPacket();
+    assert.equal(recovered.state, 'EVIDENCE_READY');
+    await textIs(page, '#packet-mode', 'REPLAYED_OFFICIAL_FIXTURE');
+    assert.equal(await page.locator('#actions .action').count(), 3);
+    assert.equal(await page.locator('#actions input[type="checkbox"]').first().isChecked(), false);
+    assert.equal(await page.locator('#draft').inputValue(), packet.draft);
+    await approvalCleared();
+    assert.deepEqual(posts, ['/api/packet', '/api/packet', '/api/live', '/api/packet']);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await includesText(page, '#provider-status', 'EXA_API_KEY absent');
+    assert.equal(await page.locator('#workspace').isHidden(), true);
+    assert.equal(await page.locator('#export').isDisabled(), true);
+    return {
+      mode: 'REPLAYED_OFFICIAL_FIXTURE', liveSponsorAPI: 'not-qualified',
+      sourceTextHashesVerified: 2, exactSourceClaims: 4,
+      unsupportedGoal: 'refused-without-substitution', evidenceInspection: 'passed',
+      localReviewPrerequisite: 'passed', editRevokesApproval: ['user-action', 'checklist', 'draft'],
+      exactReviewedPacketDownload: 'passed', exportedExternalEffects: 0,
+      unconsentedLookup: 'no-request', missingKey: 'refused-without-substitution',
+      replayRecovery: 'passed', reloadClearsSession: 'passed',
+    };
+  } finally { page.off('request', recordPost); }
+}
+
 async function availablePort() {
   const reservation = createPortReservation();
   await new Promise((resolve, reject) => {
@@ -396,7 +582,7 @@ async function startProduct(root, serverPath) {
 async function main() {
   const product = process.env.CRACI_PRODUCT || process.argv[2];
   const engineName = process.env.CRACI_BROWSER || process.argv[3];
-  assert.ok(Object.hasOwn(products, product), 'CRACI_PRODUCT must be sbank, hostinger or espoo');
+  assert.ok(Object.hasOwn(products, product), 'CRACI_PRODUCT must be sbank, hostinger, espoo or exa');
   assert.ok(Object.hasOwn(engines, engineName), 'CRACI_BROWSER must be chromium, firefox or webkit');
   assert.ok(process.env.SOURCE_DIR, 'SOURCE_DIR is required');
   assert.match(process.env.EXPECTED_SOURCE_SHA ?? '', /^[0-9a-f]{40}$/, 'A lowercase full EXPECTED_SOURCE_SHA is required');
