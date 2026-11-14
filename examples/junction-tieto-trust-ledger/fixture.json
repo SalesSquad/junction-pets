@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "sample": {
+    "repository": "te-industry-tech-office/junction26-messagepack-csharp",
+    "issueUrl": "https://github.com/MessagePack-CSharp/MessagePack-CSharp/issues/2283",
+    "baseSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+    "headSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+    "license": "MIT"
+  },
+  "requirement": {
+    "id": "MSG-2283",
+    "summary": "Handle closed generic types from referenced assemblies without the analyzer reporting diagnostics against the consuming compilation."
+  },
+  "reviewer": {"name": "Mikael Ervamaa", "decision": "pending"},
+  "claims": [
+    {
+      "id": "C-CRASH",
+      "requirementId": "MSG-2283",
+      "summary": "The metadata-reference scenario distinguishes an unfixed base from the changed head.",
+      "paths": ["src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs", "tests/MessagePack.SourceGenerator.Tests/GenericsFormatterTests.cs"],
+      "checkIds": ["CHECK-DIFF"]
+    },
+    {
+      "id": "C-FALSE-ASSURANCE",
+      "requirementId": "MSG-2283",
+      "summary": "An AI summary claims a check proves the fix, but it passes on both revisions.",
+      "paths": ["tests/MessagePack.SourceGenerator.Tests/GenericsFormatterTests.cs"],
+      "checkIds": ["CHECK-BOTH-PASS"]
+    }
+  ],
+  "checks": [
+    {
+      "id": "CHECK-DIFF", "requirementId": "MSG-2283",
+      "baseSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+      "headSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+      "baseOutcome": "fail", "headOutcome": "pass", "evidenceClass": "synthetic", "logSha256": null
+    },
+    {
+      "id": "CHECK-BOTH-PASS", "requirementId": "MSG-2283",
+      "baseSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+      "headSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+      "baseOutcome": "pass", "headOutcome": "pass", "evidenceClass": "synthetic", "logSha256": null
+    }
+  ]
+}
