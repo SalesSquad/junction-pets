@@ -81,3 +81,14 @@ test('shift-calibrated Meta R robustness study has twelve independent CPU cohort
   assert.throws(()=>resolvePlan({workload:'meta-r-robust',source_sha:candidate},context),
                 /pinned Meta/);
 });
+
+test('real MIT-licensed image feature trials use only pinned harness and four nonidentical feature sets', () => {
+  const plan = resolvePlan({workload: 'lens-real-bop-train'}, context);
+  assert.equal(plan.jobCount, 4);
+  assert.equal(plan.maxParallel, 4);
+  assert.deepEqual(plan.matrix.include.map(x => x.profile),
+                   ['all', 'color', 'spatial', 'gradient']);
+  assert.ok(plan.matrix.include.every(x => x.source_sha === context.harnessSha));
+  assert.throws(() => resolvePlan({workload: 'lens-real-bop-train',source_sha:candidate},context),
+                /pinned harness SHA/);
+});
