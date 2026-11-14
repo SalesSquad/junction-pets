@@ -1,0 +1,106 @@
+{
+  "work_id": "META-LENS-ADAPTER-R3-20261114",
+  "reason": "retained_OS_volume_provider_deleted; affordable_GPU_and_CPU_stock_unavailable_at_admission",
+  "prior_request_preflight_failed_before_any_create": true,
+  "new_r3_instances": [],
+  "new_cloud_compute_usd": 0.0,
+  "actual_executor": "verified_authorized_Mac_CPU_and_MPS_fallback",
+  "private_credentials_exported": false,
+  "observations": [
+    {
+      "operation": [
+        "vm",
+        "availability"
+      ],
+      "observed_utc": "2026-11-14T18:43:37.393992+00:00",
+      "exit_code": 0,
+      "response": [
+        {
+          "location": "FIN-02",
+          "instance_type": "1RTX6000ADA.10V",
+          "gpu": "1x RTX 6000 Ada 48GB",
+          "vram": "48GB",
+          "ram": "60GB",
+          "cpu_cores": 10,
+          "price_per_hour": 1.606,
+          "spot_price": 0.803
+        },
+        {
+          "location": "FIN-01",
+          "instance_type": "1A100.22V",
+          "gpu": "1x A100 SXM4 80GB",
+          "vram": "80GB",
+          "ram": "120GB",
+          "cpu_cores": 22,
+          "price_per_hour": 2.386,
+          "spot_price": 1.193
+        },
+        {
+          "location": "FIN-03",
+          "instance_type": "8B300.240V.CC.AMD",
+          "gpu": "8x B300 CC SXM6 268GB",
+          "vram": "2144GB",
+          "ram": "2040GB",
+          "cpu_cores": 240,
+          "price_per_hour": 101.3,
+          "spot_price": 50.63
+        }
+      ]
+    },
+    {
+      "operation": [
+        "vm",
+        "availability",
+        "--kind",
+        "cpu"
+      ],
+      "observed_utc": "2026-11-14T18:43:38.579328+00:00",
+      "exit_code": 0,
+      "response": null
+    },
+    {
+      "operation": [
+        "volume",
+        "describe",
+        "8f1c5809-f017-4090-85b1-3a38f2654722"
+      ],
+      "observed_utc": "2026-11-14T18:43:38.959356+00:00",
+      "exit_code": 0,
+      "response": {
+        "id": "8f1c5809-f017-4090-85b1-3a38f2654722",
+        "name": "jv-8f6fd908345846dba494731f-os",
+        "size": 100,
+        "type": "NVMe",
+        "status": "deleted",
+        "created_at": "2026-11-13T20:56:36.233Z",
+        "instance_id": null,
+        "instances": [],
+        "location": "FIN-01",
+        "contract": "PAY_AS_YOU_GO",
+        "is_os_volume": true,
+        "target": null,
+        "ssh_key_ids": [
+          "cd500ec0-7a98-4a30-8b17-70229b6799f1"
+        ],
+        "pseudo_path": null,
+        "create_directory_command": null,
+        "mount_command": null,
+        "filesystem_to_fstab_command": null,
+        "base_hourly_cost": 0.0273972602739726,
+        "monthly_price": 20,
+        "currency": "usd",
+        "long_term": null,
+        "tags": []
+      }
+    },
+    {
+      "operation": [
+        "vm",
+        "list"
+      ],
+      "observed_utc": "2026-11-14T18:43:39.602869+00:00",
+      "exit_code": 0,
+      "response": []
+    }
+  ]
+}
