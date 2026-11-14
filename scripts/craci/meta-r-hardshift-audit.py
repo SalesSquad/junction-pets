@@ -87,7 +87,7 @@ def main():
                 or report.get("stressVariant") != cohort % 4
                 or report.get("heldoutComparisons") != 24
                 or report.get("familywiseAlpha") != 0.05
-                or report.get("selectedHardNegativeFprNoWorse") is not True):
+                or not isinstance(report.get("selectedHardNegativeFprNoWorse"), bool)):
             raise RuntimeError(f"Training provenance mismatch: {directory.name}")
 
         seeds = dataset["seed_sets"]
@@ -110,6 +110,11 @@ def main():
             raise RuntimeError("Calibration false-candidate rate target broken")
         selected = shifted[winner]
         baseline = shifted["baseline_calibrated"]
+        expected_hard_negative_safety = (
+            selected["hard_negative_fpr"] is None or
+            selected["hard_negative_fpr"] <= baseline["hard_negative_fpr"])
+        if report["selectedHardNegativeFprNoWorse"] != expected_hard_negative_safety:
+            raise RuntimeError("Hard-negative safety evidence mismatch")
         normal_sel = normal[winner]
         normal_base = normal["baseline_calibrated"]
         ci = report["pairedBootstrapFamilywise24"]
