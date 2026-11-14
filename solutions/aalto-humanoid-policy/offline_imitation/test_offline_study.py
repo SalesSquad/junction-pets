@@ -96,6 +96,27 @@ class MetadataGuard(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "joint order"):
                         s.dataset_preflight(root)
 
+    def test_unsafe_data_symlink_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "meta").mkdir()
+            (root / "data/chunk-000").mkdir(parents=True)
+            names = [[f"joint{i}" for i in range(28)]]
+            feature = {"dtype": "float32", "shape": [28], "names": names}
+            info = {"codebase_version": "v3.0", "total_episodes": 20,
+                    "total_frames": 11720, "fps": 30,
+                    "features": {"observation.state": feature, "action": feature}}
+            raw = json.dumps(info).encode()
+            (root / "meta/info.json").write_bytes(raw)
+            (root / "README.md").write_bytes(b"card")
+            external = root / "outside"
+            external.write_bytes(b"Parquet")
+            (root / "data/chunk-000/file-000.parquet").symlink_to(external)
+            with patch.object(s, "INFO_SHA256", hashlib.sha256(raw).hexdigest()), \
+                 patch.object(s, "README_SHA256", hashlib.sha256(b"card").hexdigest()):
+                with self.assertRaisesRegex(ValueError, "escapes"):
+                    s.dataset_preflight(root)
+
 
 class VisionHelpers(unittest.TestCase):
     def test_episode_uniform_frame_selection(self):
@@ -125,6 +146,14 @@ class VisionHelpers(unittest.TestCase):
                                 rows=np.array([1, 2]), embeddings=np.zeros((2, 12)))
             with self.assertRaisesRegex(ValueError, "mismatched"):
                 v.recover_progress(root, np.array([1, 2, 3]))
+
+    def test_empty_checkpoint_can_resume(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            v.save_progress(root, [], [])
+            rows, features = v.recover_progress(root, np.array([1, 2]))
+            self.assertEqual(rows, [])
+            self.assertEqual(features, [])
 
 
 if __name__ == "__main__":
