@@ -2,6 +2,10 @@
 
 **Purpose:** give each of the 34 Junction companions a stable, source-controlled development owner and a recorded Codex Cloud environment identity. This playbook is for the integrator, reviewer and future company agents. The 34 Pro/**Legacy** IDs are in dated source evidence; this is **not** a claim that 34 workers are online or the IDs are selectable in the new Cloud picker. Start with root [`AGENTS.md`](../AGENTS.md), [`ARCHITECTURE.md`](../ARCHITECTURE.md), [`ops/AGENTS.md`](../ops/AGENTS.md), the [durable queue](DEVELOPMENT_QUEUE.md) and the assigned pet only.
 
+## Development rule
+
+The root `AGENTS.md` lightweight rule applies: ordinary code, docs and features proceed without required tests, repeat reviews, separate QA workers or per-commit CI receipts. For a concrete bug or material credentials, company/source provenance, tenant consent or privileged-integration risk, choose one targeted check or reviewer when useful. Full suites are optional milestone evidence; retain actual project safeguards and merge/release authority.
+
 ## Inventory and current activation truth
 
 [`ops/registry.mjs`](../ops/registry.mjs) validates 34 company manifests under [`ops/environments/`](../ops/environments/) and 34 unique stable agent IDs. For a company slug `mariadb`:
@@ -27,11 +31,13 @@ This produces **34 logical owners, 34 desired configurations and 102 planned rol
 Do these steps **for each company independently**; one blocked company must not halt unrelated work.
 
 1. **Select the actual account and repo.** Use an already authorized authenticated Codex Cloud environment management surface, confirm access to **private** `SalesSquad/junction-pets` and its correct task branch. Never transfer browser session databases, bearer tokens, credentials or personal data between accounts/runners.
-2. **Publish the desired configuration.** Name it exactly `junction-<company>`, bind the correct repository and `ops/AGENTS.md` instructions; select a Node 22+ runner with setup `npm ci --ignore-scripts` and project checks `npm run validate`, `npm test`, `npm run build`. Keep optional Python tests isolated. Cloud environment is a reusable setup **not an always-on virtual machine**.
+2. **Publish the desired configuration.** Name it exactly `junction-<company>`, bind the correct repository and `ops/AGENTS.md` instructions; select a Node 22+ runner with setup `npm ci --ignore-scripts` and available milestone checks `npm run validate`, `npm test`, `npm run build`. Keep optional Python tests isolated. Cloud environment is a reusable setup **not an always-on virtual machine**.
 3. **Read back independent provider evidence.** Confirm published/selectable state **and immutable environment ID** plus account/repo/branch access from an authenticated provider surface. If UI shows it published but not the ID, retain `published-id-pending` and `null` ID with an exact observation URL, time, tested SHA and blocker. A plausible name or task URL is **not** an environment ID.
 4. **Integrate via the registry owner.** Only the orchestration integrator updates `ops/environments/<company>.json` with schema-valid state, opaque provider ID and evidence. Do not force `ready` for unsupported evidence; validate registry. Keep any source/task-check receipt bound to its original revision.
-5. **Run a source-pinned smoke.** Open an actual Cloud task against a dedicated task branch and exact GitHub commit; perform setup, `validate`, `test`, `build` and a safe per-pet read. Record task/job ID, provider evidence URL, runner/tool versions, UTC time and tested SHA. A successful task in a **different** environment does not activate this company.
+5. **Qualify the environment when needed.** For provisioning or a changed execution path, use one bounded source-pinned smoke in the actual Cloud environment, with setup and the smallest check that establishes the claimed capability. Broader suites are optional milestone evidence. Record task/job ID, provider evidence URL, runner/tool versions, UTC time, actual command and tested SHA. A successful task in a **different** environment does not activate this company.
 6. **Assign continuity.** Attach future work requests to the stable `junction-dev-<company>` owner and `pets/<company>/` path. Preserve the last accepted commit, pending PR, failures, next actionable work and review owner. Do **not** persist an unbounded interactive conversation as the only source of truth.
+
+The manifests' `checkCommands` list available project checks; the root lightweight rule determines whether a task needs them. They do not require every listed command for ordinary changes. If an older generated task prompt mandates the full suite, apply the root rule rather than treating that stale prompt as new authority.
 
 Authenticated Cloud management may require the owner to complete a mandatory sign-in/verification. An unavailable Cloud API is an explicit provisioning blocker, **not** a reason to invent an ID, switch Pro/Plus profiles to evade quotas or silently use a paid external agent API. The [Cloud dispatch script](../scripts/ops-cloud-dispatch.mjs) creates an inspectable **dry-run plan**; it does **not** provision or execute a task.
 
@@ -43,13 +49,13 @@ Authenticated Cloud management may require the owner to complete a mandatory sig
 
 | Role | Work mode | Write scope | Acceptance |
 | --- | --- | --- | --- |
-| Company author (`junction-dev-<slug>`) | Bounded Cloud task per requested slice | `pets/<slug>/` exclusively | Content + citations + tests + commit/PR handoff |
-| Company test agent (planned) | Source-pinned independent run | Test fixture/report paths only when assigned | Exact cases, runner and failures; never green by assumption |
-| Company reviewer (planned) | Independent, generally read-only | None unless explicitly assigned a repair branch | Findings on actual final diff/evidence |
-| Root integrator | One serialized integration lane | Shared schemas, exports, lockfiles, ops registry, cross-pet/service files | No overlap, latest HEAD, decisive tests, staged PR |
+| Company author (`junction-dev-<slug>`) | Bounded Cloud task per requested slice | `pets/<slug>/` exclusively | Content + citations + commit/PR handoff; targeted evidence when useful |
+| Company test agent (optional, when assigned) | Source-pinned independent run | Test fixture/report paths only when assigned | Exact cases, runner and failures; never green by assumption |
+| Company reviewer (optional, when assigned) | Independent, generally read-only | None unless explicitly assigned a repair branch | Findings on actual final diff/evidence |
+| Root integrator | One serialized integration lane | Shared schemas, exports, lockfiles, ops registry, cross-pet/service files | No overlap, latest HEAD, affected checks when needed, staged PR |
 | Fleet coordinator (planned/admission owner) | Capacity/ownership control, not an implemented daemon | Durable queue and its own receipts only | Fresh source/lease/task URL and explicit next owner; no phantom running status |
 
-Start with one or two independent pet tasks plus one integrator/reviewer when capacity is verified. Widen based on measured latency, cost, merge rework and authenticated Cloud quotas; **do not launch 34 × 3 jobs** from the mere existence of a roster. Reviewers must be independent of the bytes they verify. Where two specialists touch shared schemas/generators, serialize through the integrator or split by strictly disjoint paths and fixtures.
+Start with one or two independent pet tasks when capacity is verified; the integrator owns shared changes, and a targeted independent reviewer may address a concrete risk. Widen based on measured latency, cost, merge rework and authenticated Cloud quotas; **do not launch 34 × 3 jobs** from the mere existence of a roster. Reviewers must be independent of the bytes they verify. Where two specialists touch shared schemas/generators, serialize through the integrator or split by strictly disjoint paths and fixtures.
 
 [`scripts/ops-work.mjs`](../scripts/ops-work.mjs) supports `status`, `claim`, `release`, and guarded `reclaim-stale-lock`. Its atomic lease only coordinates **one shared filesystem**. Two isolated Cloud workspaces do **not** share that mutex. For cross-cloud concurrency, first inspect remote PRs and owner assignments, use disjoint task branches and a **remote expected-HEAD** check before update; on conflict, stop and rebase/review with preserved work. Database fencing tokens (for application dispatch) do not replace Git branch compare-and-swap.
 
@@ -58,11 +64,11 @@ Start with one or two independent pet tasks plus one integrator/reviewer when ca
 1. **Discover:** record GitHub upstream SHA, outstanding PRs, pet version, latest receipts, dirty/unpushed files and owner. If a previous task is paused, inspect its PR and worktree before claiming an overlapping task.
 2. **Claim:** create `junction.<slug>.<slice>` work ID and bounded path lease. Pair it with a unique `codex/junction-<slug>-<slice>` branch at the exact base SHA.
 3. **Implement:** change only owned paths; update citations/uncertainties and version as appropriate. If host/model or Cloud is unavailable, continue source-only tasks while preserving a `blocked` gate.
-4. **Verify:** run the baseline Node commands and targeted services/Python/browser suites as relevant. Mark a missing real model/provider/Chibi gate `blocked` or `not_verified`; **204 authored eval cases are not 204 live passes**. No validator relaxation to hide failures.
-5. **Commit and review:** push to the verified task branch, record latest commit SHA/PR HEAD, obtain independent review and rerun decisive checks on final bytes. Previous receipts become `stale` when HEAD changes.
+4. **Check when useful:** select a targeted check or reviewer for the concrete bug or material risk described above; ordinary changes need no test cycle. Run a broader suite only for a justified milestone or an actual project safeguard. Mark a missing real model/provider/Chibi gate `blocked` or `not_verified`; **204 authored eval cases are not 204 live passes**. No validator relaxation to hide failures.
+5. **Commit and publish:** push to the verified task branch and record the latest commit SHA/PR HEAD. Add targeted independent review when useful for the concrete risk; recheck only the affected gate needed for a qualification claim or actual safeguard. Keep earlier receipts bound to their original source; they do not prove a newer untested HEAD passed.
 6. **Handoff:** store durable record in task PR/registry, preserve failed logs, set a specific next owner/action and release your local lease. When a new Cloud task starts, it reads this source record and resumes independently of chat history.
 
-Use [`ops/AGENTS.md`](../ops/AGENTS.md) for the **machine-readable YAML handoff schema**, [`ops/README.md`](../ops/README.md) for valid receipts and [`DEVELOPMENT_QUEUE.md`](DEVELOPMENT_QUEUE.md) for the 34 current proposed/observed work items. A minimum handoff includes `work_id`, `agent_id`, exact `source_commit`, dirty baseline, owned paths, branch/committed HEAD, draft PR, checks and evidence URLs, `verified`, `not_verified`, blocker/owner and one next action. Never put user credentials or private conversation transcripts in receipts.
+For routine changes, a brief commit/changed-path/risks handoff and next action in the PR is enough. For consequential or qualification work, use [`ops/AGENTS.md`](../ops/AGENTS.md) for the **machine-readable YAML handoff schema** and [`ops/README.md`](../ops/README.md) for valid receipts; record the work/agent IDs, exact source and committed HEAD, dirty baseline, owned paths, PR, actual checks/evidence, verified and missing gates, blocker/owner and next action. [`DEVELOPMENT_QUEUE.md`](DEVELOPMENT_QUEUE.md) preserves the dated work queue. Never put user credentials or private conversation transcripts in receipts.
 
 ## Recovery and portable fallback
 
@@ -70,10 +76,10 @@ Use [`ops/AGENTS.md`](../ops/AGENTS.md) for the **machine-readable YAML handoff 
 | --- | --- | --- |
 | Cloud ID is missing | Keep manifest `unprovisioned`/`published-id-pending`; queue a provisioning check with owner and task URL | Desired name or old task means `ready` |
 | Cloud task outage/quota | Continue with an **existing authorized** isolated Cloud/local Node runner, pinned SHA and logs; defer provider-qualified work | Portable unit test is a Codex Cloud provider receipt |
-| Owner Mac unavailable | Run Node/Python/fixture tests in a verified Cloud; use Mac only for Mac/Apple-specific tasks when actually online and authorized | iCloud storage or SSH automatically wakes an offline Mac |
+| Owner Mac unavailable | Use a verified Cloud for any needed Node/Python/fixture checks; use Mac only for Mac/Apple-specific tasks when actually online and authorized | iCloud storage or SSH automatically wakes an offline Mac |
 | PR diverged/another author active | Stop overlap; compare current remote heads, preserve diffs, ask integrator to reassign/rebase safely | Local lease protects every Cloud sandbox |
-| PostgreSQL/Aiven/Chibi host unavailable | Run deterministic synthetic contracts and unit tests; mark external gates missing, keep independent pet work moving | Synthetic Council proves signed host receipts |
-| Model/reviewer unavailable | Retain authored eval definitions and source/unit evidence; schedule a bounded real provider run/review once available | A Haiku smoke or registration is a finished provider model evaluation |
+| PostgreSQL/Aiven/Chibi host unavailable | Use deterministic synthetic checks when useful; mark external gates missing, keep independent pet work moving | Synthetic Council proves signed host receipts |
+| Model/reviewer unavailable | Retain existing source/eval evidence; keep any required qualification gate missing and continue ordinary development. Request a bounded run/review only when useful and authorized | A Haiku smoke or registration is a finished provider model evaluation |
 
 ## First-task prompt template
 
@@ -90,9 +96,12 @@ Read: root AGENTS.md; ARCHITECTURE.md; ops/AGENTS.md;
       docs/CLOUD_DEVELOPER_PLAYBOOK.md; catalog-contract.md;
       assigned pet's four source files and prior PR/receipt
 Deliver: scoped implementation, exact citations/versions,
-         task branch, tests, draft PR, independent review findings,
-         machine-readable handoff and next_action
-Checks: npm ci --ignore-scripts; npm run validate; npm test; npm run build
+         task branch, draft PR, brief handoff and next_action;
+         detailed evidence only for consequential/qualification work
+Checks: none required for ordinary code/docs/features. For a concrete bug
+        or material source/credentials/tenant/privilege risk, choose one
+        targeted check/reviewer when useful. Full suites are optional
+        milestone evidence; retain actual project safeguards.
 Do not claim: model execution, Chibi deployment, published Cloud
               environment, company endorsement or user acceptance
               without independent exact-source proof.

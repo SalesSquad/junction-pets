@@ -30,9 +30,9 @@ export function planCloudDispatch(manifest,{petSlug,branch,sourceCommit,profile}
     'Owned path: '+manifest.ownedPath,
     'Read root AGENTS.md, catalog-contract.md, ops/AGENTS.md and the selected pet instructions.',
     'Before writing, fetch and compare the exact source SHA and verify a clean baseline.',
-    'Run npm ci --ignore-scripts, npm run validate, npm test and npm run build.',
+    'Ordinary code/docs/features need no required tests, repeat reviews, separate QA workers or per-commit CI receipts. For a concrete bug or material credentials, company/source provenance, tenant consent or privileged-integration risk, choose one targeted check/reviewer when useful; retain actual project safeguards and merge/release authority. Available milestone commands: npm ci --ignore-scripts, npm run validate, npm test and npm run build; full suites are optional.',
     'Commit on the isolated task branch. Open a draft PR. Do not merge or deploy.',
-    'Return source-bound checks, PR URL, blocker, owner and next action.',
+    'Return PR URL, commit/changed paths/risks, blocker, owner and next action; include actual source-bound check/review results when available and identify any missing qualification gate.',
     'Keep Chibi private code outside this repository and never move credentials.'
   ].join('\n');
   const executable=profile==='plus'?'codex-plus':'codex';
