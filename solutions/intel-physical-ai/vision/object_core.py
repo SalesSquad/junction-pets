@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 MEAN=np.asarray([.485,.456,.406],dtype=np.float32)
 STD=np.asarray([.229,.224,.225],dtype=np.float32)
-ROI_CONFIG={'size':256,'minimum_area_fraction':.005,'maximum_objects':8,'bbox_context':.12,'mask_context':.04,'method':'otsu-border-hull-and-nearby-components','preevaluation_refinement':'Convex hull retains exterior notches; include detached foreground inside crop context. Outside-context fragments remain unqualified.'}
+ROI_CONFIG={'size':256,'minimum_area_fraction':.005,'maximum_objects':8,'bbox_context':.12,'mask_context':.04,'method':'otsu-border-hull-distance-bounded-neighbors','preevaluation_refinement':'Convex hull retains exterior notches; include detached foreground within12percent distance of the hull. Farther fragments remain unqualified.'}
 class CaptureRefusal(ValueError):
     """Observation unsuitable for bounded inspection."""
 
@@ -37,7 +37,9 @@ def extract_objects(rgb: np.ndarray) -> list[dict]:
         crop[y0-top:y1-top,x0-left:x1-left]=rgb[y0:y1,x0:x1]
         mask=np.zeros((height,width),dtype=np.uint8);cv2.drawContours(mask,[cv2.convexHull(contour)],-1,255,cv2.FILLED)
         # Include small detached foreground inside this object's fixed context.
-        mask[y0:y1,x0:x1] |= fg[y0:y1,x0:x1]
+        nearby_radius=max(1,int(math.ceil(.12*max(w,h))))
+        nearby=cv2.dilate(mask,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*nearby_radius+1,2*nearby_radius+1)))
+        mask |= cv2.bitwise_and(fg,nearby)
         radius=max(1,int(math.ceil(.04*max(w,h))))
         mask=cv2.dilate(mask,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*radius+1,2*radius+1)))
         local=np.zeros((side,side),dtype=np.uint8);local[y0-top:y1-top,x0-left:x1-left]=mask[y0:y1,x0:x1]

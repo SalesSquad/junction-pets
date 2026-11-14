@@ -24,7 +24,7 @@ BACKBONES={
              'sha256':'3d0c6ca08444680d7d4a46f95c1fb6a54f88f0419ae7331cebaa32e47e531c98'}
 }
 MODEL_CONFIG={'backbone':'resnet18','layers':['layer2','layer3'],'neighbors':9,'seed':330,
-              'input_size':256,'cpu_threads':2,'maximum_training_patches':60000,'coreset_ratio':.10}
+              'input_size':256,'cpu_threads':2,'maximum_training_patches':60000,'coreset_ratio':.02}
 
 def digest(b):return hashlib.sha256(b).hexdigest()
 def write_json(p,j):
@@ -90,6 +90,38 @@ def create_model(cache,profile="resnet18",weights_file=None):
         state[key]=weights[source]
     extractor.load_state_dict(state,strict=True)
     return model
+
+
+def restore_verified_fit(model,bundle,ledger_sha256,profile):
+    """Reuse a locally trusted pinned fit when only scoring-mask geometry changes."""
+    import torch
+    from safetensors.torch import load_file
+    bundle=Path(bundle)
+    if not ledger_sha256 or digest(legacy.safe_file(bundle,'artifacts.json').read_bytes())!=ledger_sha256:
+        raise ValueError('Fit bundle ledger pin mismatch')
+    legacy.verify(bundle)
+    config=json.loads((bundle/'config.json').read_bytes())
+    if config['model']!=dict(MODEL_CONFIG,backbone=profile) or config.get('backbone_pin')!=BACKBONES[profile] or config['input_pins']!=PINS:
+        raise ValueError('Fit configuration mismatch')
+    for key in ['size','minimum_area_fraction','maximum_objects','bbox_context']:
+        if config['roi'][key]!=ROI_CONFIG[key]:raise ValueError('Feature crop changed; fit reuse not valid')
+    # This exact reviewed predecessor differs only in the scoring mask. The
+    # calibration-only audit confirmed all104 feature tensors are identical.
+    if config['code_sha256']['object_core.py']!='b1eccd07754f093ad470a9e9d1a7aaa9545e3b1532267089308e0b60c9ee5554':
+        raise ValueError('Unreviewed feature producer for fit reuse')
+    previous=json.loads((bundle/'report.json').read_bytes())
+    if previous.get('evaluation_images_scored')!=0 or previous.get('status')!='CALIBRATION_REJECTED_EVALUATION_UNTOUCHED':
+        raise ValueError('Fit reuse requires a pre-evaluation calibration-only bundle')
+    path=legacy.safe_file(bundle,'model.safetensors')
+    if path.stat().st_size>350*1024*1024:raise ValueError('Fit artifact size limit')
+    state=load_file(str(path),device='cpu')
+    if not all(torch.isfinite(v).all() for v in state.values()):raise ValueError('Nonfinite fitted state')
+    fit=json.loads((bundle/'fit.json').read_bytes())
+    if state['memory_bank'].shape[0]!=fit['coreset_patches'] or fit['fit_images']!=256:raise ValueError('Fit memory/count mismatch')
+    model.load_state_dict(state,strict=True);model.eval()
+    return dict(fit,reused_fit=True,source_ledger_sha256=ledger_sha256,
+                source_model_sha256=digest(path.read_bytes()),no_training_repeated=True)
+
 
 def fit_model(model,rows,data_root,out=None):
     import torch
@@ -175,7 +207,10 @@ def run(args):
         torch.set_num_threads(2);torch.set_num_interop_threads(2);torch.manual_seed(330);np.random.seed(330)
         config={'model':dict(MODEL_CONFIG,backbone=args.profile), 'backbone_pin':BACKBONES[args.profile],'roi':ROI_CONFIG,'input_pins':PINS,'mode':'REAL_DATA_OFFLINE_NEW_CATEGORY','category':'cashew','actuation':False,'physical_object_session_independence':'UNKNOWN','versions':{k:metadata.version(k) for k in ['anomalib','torch','openvino','numpy','opencv-python-headless']},'host':{'system':platform.system(),'machine':platform.machine()},'code_sha256':{p.name:digest(p.read_bytes()) for p in [Path(__file__),Path(__file__).with_name('object_core.py'),Path(legacy.__file__)]},'calibration_comparator':'float64 midpoint candidate search, strict >; refusal prevents primary acceptance'}
         write_json(out/'config.json',config)
-        model=create_model(args.cache,args.profile,args.weights);fit=fit_model(model,[r for r in rows if r['role']=='fit'],data,out)
+        model=create_model(args.cache,args.profile,args.weights)
+        if bool(args.fit_bundle)!=bool(args.fit_ledger):raise ValueError('Fit bundle and ledger pin must be supplied together')
+        fit=(restore_verified_fit(model,args.fit_bundle,args.fit_ledger,args.profile) if args.fit_bundle
+             else fit_model(model,[r for r in rows if r['role']=='fit'],data,out))
         save_file({k:v.detach().cpu().contiguous() for k,v in model.state_dict().items()},str(out/'model.safetensors'))
         write_json(out/'fit.json',fit);print('MODEL_FITTED',fit,flush=True)
         cal_predictions=[predict(model,r,data,out) for r in rows if r['role']=='calibration']
@@ -259,6 +294,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__);sub=p.add_subparsers(dest='command',required=True)
     r=sub.add_parser('run');r.add_argument('--inputs',required=True);r.add_argument('--cache',required=True);r.add_argument('--output',required=True)
     r.add_argument('--profile',choices=sorted(BACKBONES),default='resnet18');r.add_argument('--weights',help='Optional local exact-hash-pinned public safetensors file')
+    r.add_argument('--fit-bundle',help='Explicit trusted calibration-only fit for compatible mask correction');r.add_argument('--fit-ledger',help='SHA256 of that fit bundle artifact ledger')
     i=sub.add_parser('inspect');i.add_argument('--bundle',required=True);i.add_argument('--image',required=True);i.add_argument('--sha256',required=True);i.add_argument('--output',required=True)
     v=sub.add_parser('verify');v.add_argument('--bundle',required=True)
     a=p.parse_args()
