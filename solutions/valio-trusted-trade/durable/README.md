@@ -7,7 +7,7 @@ This is a **self-contained, disposable PostgreSQL experiment**, not the applicat
 ## Concrete invariants
 
 1. `SERIALIZABLE` transactions with bounded retries for SQLSTATE `40001` and `40P01`. Account rows lock in sorted order, debit is conditionally nonnegative in SQL, and every cent is represented by corresponding supplier/buyer postings.
-2. A **deferred PostgreSQL constraint trigger** rejects a batch unless its committed entries count at least two and net to exactly zero. Ledger batch/entry rows refuse updates or deletes; a second trigger blocks any later insertion into an already outbox-sealed batch. Payment order IDs and keys are unique; a different key for a settled order is refused.
+2. A **deferred PostgreSQL constraint trigger** rejects a batch unless its committed entries count at least two and net to exactly zero. Ledger batch/entry rows refuse updates, deletes and truncation; a second trigger blocks any later insertion into an already outbox-sealed batch. Outbox receipts cannot be deleted, retargeted or truncated; only the one-time `delivered_at` transition from unset to set may advance. Payment order IDs and keys are unique; a different key for a settled order is refused.
 3. Replaying a command with identical frozen terms gives its original persisted response; changing frozen terms under the same key is refused. A refund is a **new compensating balanced batch**, never an erasure; only one refund per order.
 4. A database outbox row is inserted atomically with each payment/refund. One unique outbox row per batch is guaranteed; **external delivery is not implemented**. A future dispatcher must use at-least-once retries and downstream idempotency, not claim exactly-once network delivery.
 5. Test namespaces are unique `j26_*` schemas in an explicitly disposable PostgreSQL database. The harness drops only the exact namespace it created, unless `--keep-schema` is provided for inspection. Never point `VALIO_TEST_DATABASE_URL` at a production database.
@@ -46,9 +46,10 @@ The harness creates eight distinct Node **OS processes** on one shared PostgreSQ
 
 - two signed-intent *fixtures* competing for €2,500 with €1,500 simulated requests → one settlement, one overdraft refusal;
 - a separate refund restores the winning transfer;
+- two **different OS processes** attempt to refund that single order under distinct idempotency keys simultaneously; exactly one durable refund is posted, and the other is refused;
 - one OS worker exits with code 42 **after PostgreSQL COMMIT but before replying**; another worker replays the exact key and reads the single persisted batch;
 - 100 unique €7 payments plus 100 refunds and N mixed replays/conflicts; durable audit matches stored balances, zero-sum batches, no negative balances, exactly 203 outbox events for 203 committed ledger batches.
-- a **negative SQL tamper probe** attempts to append one cent to a previously committed and outbox-sealed batch; PostgreSQL must refuse and the original audit must remain intact.
+- **negative SQL tamper probes** attempt to DELETE, retarget and TRUNCATE the outbox seal, then append one cent to that previously committed batch; PostgreSQL must refuse every attack and the original audit must remain intact.
 
 Proof is the **actual CLI JSON receipt plus PostgreSQL query** for an observed run, not a passing JavaScript format-only test. The simple local unit tests cover canonical intent validation only. If the executor lacks PostgreSQL or `VALIO_TEST_DATABASE_URL`, the integration test reports **BLOCKED/skipped**, and durable multi-process qualification remains unverified. PostgreSQL superusers can change schemas/triggers; this is test infrastructure, not an immutable external financial audit service.
 
