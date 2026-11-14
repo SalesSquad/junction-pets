@@ -37,9 +37,9 @@ def successful_stage_trace():
     return [
         event(0, -.005, contacts=0),
         event(-.005, -.015, contacts=1),
-        event(-.015, -.030),
-        event(-.030, -.031),
-        event(-.031, -.04, action=1, mask=[1, 1, 1, 1, 1, 1, 1],
+        event(-.015, -.031),
+        event(-.031, -.032),
+        event(-.032, -.04, action=1, mask=[1, 1, 1, 1, 1, 1, 1],
               dwell=256, success=True, done=True),
     ]
 
@@ -99,6 +99,21 @@ class ImmutableEvidenceContracts(unittest.TestCase):
             step["mask"][1] = 1
         graph = v9.grade_stage_graph(trace, row())
         self.assertTrue(graph["safe_goal_dwell_any_path"])
+        self.assertFalse(graph["full_stage_safe_goal_dwell"])
+
+    def test_precontact_lateral_cannot_masquerade_as_postcontact(self):
+        trace = successful_stage_trace()
+        trace[0]["next_observation"][1] = -.028
+        trace[1]["observation"][1] = -.028
+        trace[1]["next_observation"][1] = -.029
+        trace[2]["observation"][1] = -.029
+        trace[2]["next_observation"][1] = -.030
+        trace[3]["observation"][1] = -.030
+        trace[3]["next_observation"][1] = -.031
+        trace[4]["observation"][1] = -.031
+        graph = v9.grade_stage_graph(trace, row())
+        self.assertTrue(graph["any_signed_lateral25"])
+        self.assertFalse(graph["lateral25_after_contact"])
         self.assertFalse(graph["full_stage_safe_goal_dwell"])
 
     def test_never_overwrite_prior_receipt(self):
