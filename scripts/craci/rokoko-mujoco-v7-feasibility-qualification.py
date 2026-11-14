@@ -72,6 +72,13 @@ def validate_transition(t):
     require(finite(t.get("reward")) and
             type(t.get("cost")) is int and t["cost"] in (0, 1) and
             type(t.get("done")) is bool, "INVALID_REWARD_COST_OR_TERMINAL_FLAG")
+    require(type(t.get("contacts_cumulative")) is int and
+            t["contacts_cumulative"] >= 0,
+            "UNVERIFIED_ACTUAL_MUJOCO_CONTACT_COUNTER")
+    require(type(t.get("success_info")) is bool and
+            type(t.get("dwell_ticks_cumulative")) is int and
+            t["dwell_ticks_cumulative"] >= 0,
+            "MISSING_TRUE_MUJOCO_GOAL_DWELL_OUTCOME")
 
 
 def verify_training(training, manifest, source, evidence_dir):
@@ -183,6 +190,9 @@ def verify_training(training, manifest, source, evidence_dir):
         else:
             require(row["physics_steps"] <= row["option_steps"] * 100,
                     "IMPOSSIBLE_MUJOCO_STEP_COUNT")
+        require(row["success"] or row["unsafe"] or row["abstained"] or
+                row["option_steps"] == 60,
+                "NONTERMINAL_OPTION_SEQUENCE_CANNOT_END_EPISODE")
         require(type(row.get("contacts")) is int and row["contacts"] >= 0 and
                 finite(row.get("lateral_displacement")) and
                 finite(row.get("final_error")) and row["final_error"] >= 0 and
@@ -232,9 +242,34 @@ def verify_training(training, manifest, source, evidence_dir):
                     "FORGED_FULL_ACTION_DATASET_SHA")
             for t in full:
                 validate_transition(t)
+            contact_trace = [t["contacts_cumulative"] for t in full]
+            require(contact_trace == sorted(contact_trace) and
+                    contact_trace[-1] == row["contacts"],
+                    "FORGED_CONTACT_COUNT_NOT_BOUND_TO_REAL_STEP_INFO")
+            require(row["success"] == full[-1]["success_info"],
+                    "FORGED_SUCCESS_NOT_BOUND_TO_TRUE_TERMINAL_INFO")
+            if row["success"]:
+                last = full[-1]
+                obs = last["next_observation"]
+                require(row["physics_steps"] > 0 and not row["unsafe"] and
+                        not row["abstained"] and last["action"] != 6 and
+                        last["contacts_cumulative"] > 0 and
+                        last["dwell_ticks_cumulative"] >= 250 and
+                        math.hypot(obs[0] - obs[16], obs[1] - obs[17]) < .025,
+                        "UNPHYSICAL_DWELL_OR_CONTACT_SUCCESS")
+            if row["abstained"]:
+                require(full[-1]["action"] == 6,
+                        "ABSTAIN_EPISODE_WITHOUT_TERMINAL_ABSTAIN_OPTION")
             require(abs(float(full[0]["observation"][7]) -
                         row["initial_observed_obstacle_y"]) < 1e-5,
                     "SCENARIO_LABEL_CANNOT_BE_RECONSTRUCTED_FROM_PUBLIC_INPUT")
+            first_obj_y = float(full[0]["observation"][1])
+            final_obj_y = float(full[-1]["next_observation"][1])
+            away_sign = (-1. if float(full[0]["observation"][7]) >= first_obj_y
+                         else 1.)
+            observed_away_displacement = (final_obj_y - first_obj_y) * away_sign
+            require(abs(observed_away_displacement - row["lateral_displacement"]) < 1e-5,
+                    "FORGED_OBSTACLE_AWAY_LATERAL_DISPLACEMENT")
             require([full[i] for i in sparse_indices(len(full))] ==
                     row["transitions"], "SPARSE_TRACE_DOES_NOT_MATCH_TRUE_FULL_TRACE")
             require(abs(sum(t["reward"] for t in full) - row["total_reward"]) < 1e-4,
@@ -245,6 +280,10 @@ def verify_training(training, manifest, source, evidence_dir):
                     "UNFINISHED_PHYSICS_ROLLOUT_CLAIMED_COMPLETE")
             if row["physics_steps"] == 0:
                 require(full[0]["action"] == 6, "ZERO_STEP_NONABSTAIN_ACTION")
+                require(all(abs(float(full[0]["observation"][i]) -
+                                float(full[0]["next_observation"][i])) < 1e-6
+                            for i in range(4)),
+                        "ZERO_PHYSICS_CANNOT_MOVE_OBJECT_OR_PUSHER")
             seen.add(key)
             raw_actual += len(full)
     require(seen == set(row_map) and raw_actual == trial_transition_sum,
@@ -257,7 +296,7 @@ def verify_training(training, manifest, source, evidence_dir):
     corridor_displacement = {
         seed for (seed, _), row in row_map.items()
         if row["observed_corridor"] and not row["unsafe"] and
-        abs(row["lateral_displacement"]) >= .025
+        row["lateral_displacement"] >= .025
     }
     result = {
         "schema": "junction.rokoko.mujoco-v7-feasibility.craci.train.v1",
@@ -326,6 +365,24 @@ def main():
     training = read_json(dest / "training.json")
     manifest = read_json(dest / "manifest.json")
     result = verify_training(training, manifest, requested, dest)
+    # Producer flags, even when self-consistent with its JSON, cannot certify
+    # a new contact capability. Re-run every CLAIMED positive TRAIN trace on
+    # the reviewed MuJoCo physics with the exact seed and action sequence.
+    # This deliberately spends extra CPU instead of trusting copied flags.
+    replay_script = Path(__file__).with_name("rokoko-mujoco-v7-positive-replay.py")
+    require(replay_script.is_file(), "INDEPENDENT_POSITIVE_REPLAY_MISSING")
+    subprocess.run([
+        str(py), str(replay_script), "--evidence-dir", str(dest),
+        "--physics-dir", str(src / PRODUCT.parent),
+    ], cwd=src, check=True)
+    replay = read_json(dest / "independent-positive-replay.json", max_bytes=1024 * 1024)
+    require(replay.get("claim_verified") is True and
+            replay.get("verified_near_corridor_success_worlds") ==
+            result["worlds_safe_corridor_success"] and
+            replay.get("verified_obstacle_away_displacement_worlds") ==
+            result["worlds_safe_lateral_displacement_ge_25mm"],
+            "MECHANISM_NOT_INDEPENDENTLY_REPLAYED_ON_REAL_MUJOCO")
+    result["independent_true_physics_positive_replay"] = replay
     result["producer_exit_code"] = process.returncode
     result["experiment_complete"] &= process.returncode == 0
     result["decision"] = ("valid_train_only_feasibility_evidence" if
