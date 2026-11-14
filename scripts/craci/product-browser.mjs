@@ -32,7 +32,7 @@ async function textIs(page, selector, expected) {
   );
 }
 
-async function clickedPost(page, selector, path) {
+async function clickedPost(page, selector, path, { captureAuthorization = false } = {}) {
   const [response] = await Promise.all([
     page.waitForResponse(response =>
       response.request().method() === 'POST' &&
@@ -40,14 +40,17 @@ async function clickedPost(page, selector, path) {
     ),
     page.locator(selector).click(),
   ]);
-  return {
+  const result = {
     status: response.status(),
     body: await response.json(),
     payload: response.request().postDataJSON(),
-    // In-memory synthetic capability for an independent, same-buyer replay probe.
-    // Never include this authorization header in the logged test receipt.
-    authorization: response.request().headers().authorization ?? null,
   };
+  // Only the explicit same-buyer replay probe needs this ephemeral header.
+  // Do not add it to ordinary quote/mission result objects or test receipts.
+  if (captureAuthorization) {
+    result.authorization = (await response.request().allHeaders()).authorization ?? null;
+  }
+  return result;
 }
 
 async function getJson(page, base, path) {
@@ -244,7 +247,7 @@ async function valioSmoke(page, base, { frontier = false } = {}) {
   await textIs(page, '#quote-status', 'APPROVED');
   assert.equal(await page.locator('#order').isEnabled(), true);
 
-  const committed = await clickedPost(page, '#order', '/api/orders');
+  const committed = await clickedPost(page, '#order', '/api/orders', { captureAuthorization: frontier });
   assert.equal(committed.status, 201);
   const order = committed.body.order;
   assert.equal(order.status, 'SIMULATED_COMMITTED');
@@ -256,17 +259,23 @@ async function valioSmoke(page, base, { frontier = false } = {}) {
   // Frontier V3 requires the synthetic buyer capability on every write.
   // Prove an anonymous replay is refused, then replay the exact original
   // payload with the SAME buyer capability (not a fresh authorization).
+  let replayAuthorization;
   if (frontier) {
+    // Do not retain the synthetic capability on an object that an assertion
+    // could accidentally serialize. Never include it in an error message.
+    replayAuthorization = committed.authorization;
+    delete committed.authorization;
     const unboundReplay = await page.request.post(base + '/api/orders', {
       data: committed.payload,
     });
     assert.equal(unboundReplay.status(), 403);
     assert.equal((await unboundReplay.json()).error.code, 'BUYER_CAPABILITY_REQUIRED');
-    assert.match(committed.authorization ?? '', /^Bearer [0-9a-f-]{36}$/i);
+    assert.ok(/^Bearer [0-9a-f-]{36}$/i.test(replayAuthorization ?? ''),
+      'Expected a same-buyer synthetic bearer capability');
   }
   const replayResponse = await page.request.post(base + '/api/orders', {
     data: committed.payload,
-    ...(frontier ? { headers: { Authorization: committed.authorization } } : {}),
+    ...(frontier ? { headers: { Authorization: replayAuthorization } } : {}),
   });
   assert.equal(replayResponse.status(), 201);
   const replay = (await replayResponse.json()).order;
