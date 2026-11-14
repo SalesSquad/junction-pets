@@ -21,7 +21,7 @@
 
 ## 2. Järkevä yhteinen alusta: *Evidence-to-Action* — ei megamonoliittia
 
-Yhteiset kaavat ovat kalliita keksiä kuudesti: tapahtuma-aika, kameran koordinaatisto, yksiköt, luvalliset vaikutukset, turvallinen kieltäytyminen, alkuperä ja testiepisodin toistettavuus. Rakennetaan vain **viisi pientä, versioitua sopimusta**, tarvittaessa aluksi oman tuotteen sisällä. Yhteinen integraattori kokoaa ne vasta, kun vähintään kaksi riippumatonta tuotetta tarvitsee samaa todettua koodia.
+Yhteiset kaavat ovat kalliita keksiä kuudesti: tapahtuma-aika, kameran koordinaatisto, yksiköt, luvalliset vaikutukset, turvallinen kieltäytyminen, alkuperä ja testiepisodin toistettavuus. Nämä ovat **ehdotettuja yhteensopivuussopimuksia, eivät rakennettavaa yhteistä ajoympäristöä**. Hackathon-vaiheessa tehdään vain yksi sivu konventioita ja muutama golden-esimerkkitiedosto; ei uutta Rust-kerneliä, keskitettyä tallennusta eikä yleistä politiikkamoottoria. Yhteinen integraattori saa nostaa koodia jaettuina kirjastoina vasta, kun vähintään kaksi tuotetta tarvitsee samaa todettua toimivaa moduulia. Viisi rajapintaehtoa voidaan supistaa tuotteissa niitä tarvitseviin kenttiin.
 
 1. **`observation.v1`** (robotit/edge): `event_id`, `source`, `clock_domain`, `captured_at_utc`, `monotonic_ns`, `frame_id`, `units`, `calibration_version`, `data_digest`, `synthetic_or_real`, `quality_flags`. Kameralla, käsineellä ja MCU:lla on eri kellot — niiden aikaleimoja ei oleteta automaattisesti yhteismitallisiksi.
 2. **`action-proposal.v1`** (robotit/edge): ehdotettu liike/ohjaus, rajat, havaintoviitteet, vastuullinen ohjauspolitiikka, `deadline`, `idempotency_key`, pysäytys- ja manuaaliohitusmahdollisuus. Tämä on **ehdotus**; vain paikallinen turvallisuuskontrolleri voi hyväksyä fyysisen toiminnon.
@@ -171,10 +171,12 @@ Yhteiset kaavat ovat kalliita keksiä kuudesti: tapahtuma-aika, kameran koordina
 | `solutions/astrazeneca-care-equity/**` | `astrazeneca` | epidemiologia / virheelliset tulkinnat | `decision-evidence.v1` |
 | `solutions/rokoko-motionbridge/**` | `rokoko` | sensorigeometria + turvallinen stop | `observation.v1`, `episode-receipt.v1` |
 | `solutions/aalto-humanoid/**` | `aalto-university/M320` | nopeus/rajoitus/pudotus | `action-proposal.v1`, `episode-receipt.v1` |
-| `solutions/aalto-recovery-compass/**` | `aalto-university/M343`, **eri writer** kuin humanoidilla, sama yhteinen sponsoriraja | suostumus/terveyssisältö | `decision-evidence.v1` vain skeemana |
+| `solutions/aalto-recovery-compass/**` | **sama yksi `aalto-university`-kirjoittaja** kuin M320:ssä; kaksi erillistä työviipaletta **peräkkäin**, erilliset tarkastajat | suostumus/terveyssisältö | `decision-evidence.v1` vain skeemana |
 | `solutions/arduino-green-edge/**` | `arduino` | fyysinen sähköturva/MCU/edge-data | `observation.v1` rajattuna |
 | `solutions/intel-physical-ai-cell/**` | `ignite-next` / `intel` **yksi writer** | robottisolun turvallisuus + vika-FPR | `episode-receipt.v1` |
 | shared root/agents/manifests | nykyinen root-integraattori | source + versioning | muutos vain hyväksytyn rajapintatarpeen kautta |
+
+**Yhden kirjoittajan lukko:** M320 ja M343 ovat erilliset kilpailutuotteet, mutta Aalto-yhtiörajauksen writer-lease on yhteinen. Älä käynnistä niihin kahta samanaikaista lähdekoodikirjoittajaa ilman nykyisen omistajan erikseen todennettua siirtoa/rajausta.
 
 **Prosessi:** (1) tarkista nykyinen authenticated main, PR HEAD ja epäpuhtaat worktreet; (2) lukitse yksi tuotepolku/branch, toinen kirjoittaja ei koske siihen; (3) toteuta yksi toimiva kyvykkyys, merkitse fixture-vs-real; (4) tee vain riskin mukainen tarkistus, säilytä aidot epäonnistumiset; (5) commit ja push draft PR, remote HEAD -verifiointi; (6) anna nykyiselle **Portfolio PR Recovery** -integraattorille tarkka lähde, este ja seuraava riippuvuus. Ei suoraa mainia, mergeä, tuotantodeployta tai julkaisemista tässä dokumenttityössä.
 
@@ -217,7 +219,7 @@ Kaupallinen vaihe alkaa todellisesta käyttäjätarpeesta, lisenssistä ja toimi
 
 ## 12. Riippumaton arviointi ja muutospäätökset
 
-**Fable 5.2 -arviointi:** erillinen lukutilainen henkilökohtaisen Claude Code -tilauksen `claude-fable-5-2` -ajo on pyydetty 14.11.2026 lähdepinnatulla julkisia haasteita kuvaavalla promptilla; ei tuloksia ennen lokin ja valmiin tulostiedoston lukua. Prompt- ja kuittitiedostot säilyvät omistajan MBP:llä erillään checkoutista. Vain valmistuneen tuloksen perustellut huomiot integroidaan tähän suunnitelmaan; jos ajo on kesken/estyy, kerrotaan se erikseen eikä keksitä arviointia.
+**Fable 5.2 -arviointi VALMIS:** riippumaton, työkaluton Anthropic Claude Code -ajon (`claude-fable-5-2`) lähdekoodiin koskematon katselmointi valmistui 14.11.2026: natiivi CLI palautti `subtype=success`, `is_error=false`, `stop_reason=end_turn`, 15 054 merkin suomenkielisen arvion. Tarkastuksen tekstin SHA-256 on `a5867b439890822b2ff6686559e9b12d6a79e627777afc0337c914459166d223`. Arvio ei itse selannut sponsoriportaaleja, testannut koodia tai vahvistanut laitteistoa; se on riippumaton tekninen kritiikki annettuja lähdetietoja vasten. Tulokset ja hyväksytyt muutokset ovat jäljempänä luvussa 14 sekä erillisessä Fable-liitteessä; omistajan MBP:llä säilyy täsmällinen alkuperäistulos.
 
 **Reunaehdot:** yksi tuote = yksi kirjuri; root-manifestien omistajuutta ei ohiteta. L9 #77 erillinen; CRACI:n ajanjakson sulku erillisellä olemassa olevalla automaatiolla. Ei uusia salaisuuksia/tilisiirtoja, julkaisuja, tuotantodeployta eikä maksullista GPU-provisiointia tällä suunnitelmalla. Jokainen tuleva PR linkitetään Issue #80:n kyseiseen rivin tarkkaan lähde-SHA:han ja yhteen seuraavaan todelliseen riippuvuuteen.
 
@@ -236,3 +238,49 @@ Kaupallinen vaihe alkaa todellisesta käyttäjätarpeesta, lisenssistä ja toimi
 - [Suomen kansallinen syöpästrategia 2026–2035](https://fican.fi/wp-content/uploads/2026/01/National_Cancer_Strategy_2026-2035_Finland.pdf), [Syöpä Suomessa 2024](https://syoparekisteri.fi/assets/themes/ssy3/factsheets/cancer_in_finland_2024.html), [OpenNeuro ds003478 -kohorttiraja](https://nemar.org/dataset/on003478).
 
 **Lähderajoitus:** sponsorin reaalilaitteiden läsnäolo, kirjautuminen, dataoikeudet, uusin PR-tila, ja asiakkaiden pilottisopimukset on todennettava nimenomaan suoritushetkellä. Tämä roadmap ei ole todiste niiden toteutumisesta.
+
+
+## 14. Fable 5.2:n riippumaton kriittinen katselmointi — hyväksytyt muutokset (14.11.2026)
+
+**Alkuperäinen arvio:** Claude Code `claude-fable-5-2`, omistajan valtuuttama natiivi tilaus, ajettu omassa työhakemistossa ilman työkaluja, selaamista tai lähdekirjoitusta; `stop_reason=end_turn`, `is_error=false`, 15 054 merkkiä, SHA-256 `a5867b439890822b2ff6686559e9b12d6a79e627777afc0337c914459166d223`. Se ei ole tuomarin lausunto, sponsorin hyväksyntä, kliininen arvio eikä ajotesti. Erillinen sanatarkka Fable-liite säilyttää sen argumentit ja eriävät näkemykset.
+
+### 14.1 Kaksi eri kelloa: eventtituote ja pitkäikäinen flagship
+
+**Kilpailuikkuna:** kuuden tuotteen tekeminen valmiiksi virallisina fyysisinä/aidosti integroituneina demoina ennen 15.11.2026 aamun määräaikoja ei ole lähtötiedolla realistinen: kuusi ovat tutkimus-/helper-vaiheessa eikä yhdellekään kuudesta ole todennettua itsenäistä laiteajoa. Fable ehdottaa korkeintaan kahta rehellistä ohjelmistodemoa, yhtä laitteistosta ehdollista ja kolmea myöhemmin toteutettavaa tuotelinjaa. Tämä on kapasiteettipriorisoinnin neuvo, **ei kuuden tuotteen hylkääminen eikä lupa tehdä uusia kilpailupalautuksia**; J26 FINAL L9 #77 ja kaikki aikarajat/mergaus- ja julkaisuvaltuudet pysyvät omalla ohjaimellaan.
+
+**30–90 päivän tuotekello:** jokaiselle kuudelle rakennetaan oma ostettavaa hyötyä tuottava käyttäjäpolku ja erikseen todennettava sponsorin todellinen integraatio. Yhteistä koodia kerätään todennetun tarpeen perusteella. Ei palkita portfolioa makettien, testiajojen tai PR-määrän mukaan.
+
+### 14.2 Kriittiset P0/P1-portit, joiden vuoksi suunnitelmaa tarkennettiin
+
+| Arvion riskitaso | Kriittinen havainto | Päätetty rajaus ja hyväksyntä |
+|---|---|---|
+| P0 | Kuusi täyttä palautusta vähällä ajalla ei ole uskottavaa. | Demon tavoite valitaan omistajien todellisten resurssien mukaan; ei kuutta kuvitteellista E2E:tä. |
+| P0 | Aiempaa yksityistä Chibi/Taimi/Valmet-koodia tai sponsorin dataa ei voi olettaa Junction-palautuskelpoiseksi. | Tapahtuman kelpoisuusehdot, lisenssit ja palautusten määrä tarkistetaan nimenomaisesti; yksityistä IP:tä/SDK-binäärejä ei kopioida. |
+| P0 | Yhteinen Rust-kernel varastaisi toteutusaikaa ja sekoittaisi hoidon/robotiikan luottamusrajat. | **Ei yhteistä ajoympäristöä kilpailuikkunaan.** Yksi sivu yksikkö-, kello-, kuitti- ja frame-konventioita + golden-fixturet. Saman koodin poiminta vasta todetun 2 tuotteen käytön jälkeen. |
+| P0 | Aallon vaadittua RTX-simulointia/Intel-asemaa tai oikeaa laitearviota ei ole todennettu. | Edistetään offline-kontraktia; suljetun silmukan tai robotin onnistumista ei raportoida ennen oikeaa ajoa. GPU-menoa ei lisätä ilman sallittua budjettia. |
+| P0 | AstraZenecan aggregaattidatasta ei seuraa kausaalinen politiikkasäästö tai eritelty potilas-/järjestelmäviive. | Toimenpidekortti näyttää lähteen, rajoitteet, ikävakioinnin, epävarmuuden ja sen, mitä **ei tiedetä**. Kaikki numerollinen vaikutus on eksplisiittinen skenaario. |
+| P1 | Rokokon CSV:n 161 saraketta ja toistuvat otsikot, kellot ja 83/200Hz syötteet voivat rikkoa retargetoinnin. | Parseri säilyttää alkuperäisen sarakeposition, SLERP/kvaternion merkkijatkuvuus, molemmat kellot ja epävarmuus; turvaportti ei ekstrapoloi kadonnutta mittausta. |
+| P1 | Aallon 20 suboptimaalista demonstraatioepisodia ja Intelin ristiriitaiset pisteytykset eivät tue yleistyvyys- tai pisteväitettä. | Holdout erotellaan episodi- ja esinetasolla; raportoi n+luottamusväli; Intel käyttää molemmat kilpailevat rubric-lähteet, kunnes sponsorin ratkaisu löytyy. |
+| P1 | Beyond Clinic voisi huomaamatta muuttua relapsin ennustamiseksi tai potilaan valvonnaksi. | Ei EEG-datasettiin perustuvaa TMS-tehoväitettä, ei kliinistä riskipisteytystä; käyttäjä hallitsee jakonäkymää ja peruuttamista, kriisiohjeet ovat tarkistettuja, eivät generoituja. |
+| P1 | Arduinon summerin hälytys ei itsessään säästä energiaa; laitteen tehonkulutus sekoittuu väitettyyn säästöön. | Mittaa ensin tarkkuus, offline-tila, laitteen kulutus, MCU-failsafe ja vasta myöhemmin havaittu **nettokWh** todellisella interventiolla. |
+
+### 14.3 Fable-arvion paremmat tuotekärjet ja numerolliset hyväksyntäkohteet
+
+1. **AstraZeneca:** *todistuskelpoinen toimenpidekortti*, joka **pidättyy alueiden järjestämisestä** jos ikävakiointi/luottamusväli/pienet solut ovat puutteellisia. Tavoitteena 100 % lukujen lähteistys + päivämäärä, yhden komennon toistettava julkinen dataputki ja enintään 110 sekunnin asiakasdemo. Ei kuolleisuuden kausaaliväitteitä.
+2. **Rokoko:** kaupallinen **demonstraatiodatan laatuportti** ennemmin kuin pelkkä motion-avatar. Kohdistuksen, dropoutin ja joint-rajojen kuitti → kelvollinen LeRobot v3 -episodi. Tavoitteina kaikkien sponsorinäytteiden sarake-eheyden tarkistus, 200Hz offline-käsittelyn p95 ja nolla oman portin läpi hyväksyttyä rajanylitystä; oikean laiteviiveen mittaus erikseen.
+3. **Aalto Humanoid:** nimi ei vielä *generalist*. Eksplisiittinen ohje→väri–laatikko-mäppäys (kuusi permutaatiota), epäselvistä pyynnöistä pidättäytyminen ja järjestäjän 30Hz target / vähintään 27Hz toteutunut kytkettyyn turvallisuussuodattimeen. Ehdotetut mittarit: p99 enintään ~33 ms kohdelaitteella ja vähintään 50 aitoa simulaatioepisodia ennen onnistumisväitettä; tavoitteet eivät ole tuloksia.
+4. **Beyond Clinic:** tuotteen erottuvuus on **"näytä, mitä vastaanottaja näkisi"** ja peruttava suostumus, ei masennuksen automaattinen riskiluokitus. Tavoite kaikille jaoille suostumuskuitti, revokaatio ja kriisiavun löytyminen kahdella napautuksella; arvioi käyttäjän omia tavoitteita, älä käyttäjän maksimaalista ruutuaikaa.
+5. **Arduino:** ennen kuin "OS" ansaitaan, ensimmäinen tuote **huoneen paikallinen yksityinen hukkavahti**: laite itse katkaisee havainnon pilviviennin, MCU jatkaa Linuxin kaatuessa. Mahdolliset kvalifikaatiot: F1≥0,90 vähintään 200 itse merkityllä kehyksellä, nolla ulkoista liikennettä offline-testissä, watchdog-reaktio alle 1 s ja laitteen oma energiankulutus mittarilla.
+6. **Intel:** wow = **jokaisen kappaleen tarkastuspassi** (kuva, heatmap, vika-score, uudelleentarkastus/viimeinen kulho, cycle time ja *mitatut*, ei arvellut joulet). Anomalibin veto-oikeus VLA-ehdotukseen. G3-tavoite vähintään 30 peräkkäistä autonomista yritystä, oikea kulho ≥80 % + n + luottamusväli; CPU/GPU/NPU-käyttö vain aidosti mitatuilla laitteilla.
+
+**Robottilaitteiston etenemisportit:** G0 varmennettu käyttöoikeus ja oikea hardware; G1 turvallinen offline-/kuiva-ajo; G2 rajattu hidas ajo, erillinen hätäpysäytys ja paikalla oleva valvoja; G3 kirjattu autonominen otos; G4 lähde- ja tuloskuitillinen demo. Yksikään simulaatiotesti ei sertifioi ihmisten turvallisuutta, eikä yleinen Rust-portti korvaa järjestäjän/ohjaimen alemman tason pysäytyksiä.
+
+**Erillinen hoitoetiikka:** lääkeyhtiön sponsorietu ilmoitetaan AstraZenecan lähteissä; aluevertailu ei saa leimata väestöryhmiä. Beyond Clinic on oma suostumus- ja käyttödatasaarekkeensa ilman yhteisiä identiteettejä/robottitallenteita; keskeytys tai vähäinen käyttö ei tarkoita hoidon epäonnistumista. Hätä- tai kriisitilanteen vastaukset perustuvat hyväksyttyihin staattisiin ohjeisiin.
+
+### 14.4 Eriävä johtopäätös — priorisointi ja ylläpito
+
+Fable nosti tapahtumaikkunan ohjelmistoprioriteetiksi (1) **AstraZenecan**, (2) **Rokokon**, jos hyväksytty SDK tai tallenne+simulaatio on sponsoriehtojen mukaan riittävä; muuten **Beyond the Clinic**. Robotit/Arduino nousevat kilpailupolulle vain oikealla laitteella ja omistajan hyväksymän turvallisuusrutiinin läpäisseenä. Tämä on riippumattoman arvion ehdollinen ehdotus, ei Junctionin sisäänjättöpäätös eikä L9-ohjaimen muutos.
+
+Pitkän aikavälin kolme vahvinta kaupallista kiilaa Fable-arvion mukaan: Rokokon laadukas harjoitusdata, Intelin auditoitu teollinen tarkastussolu ja AstraZenecan päivittyvä hoitoketjun toimenpideanalytiikka. Jokainen näistä vaatii todellisen sponsoridatan, ostajakäyttäjän ja saavutetun mittarin ennen liiketoimintaväitettä. Kuusi erillistä flagship-ohjelmaa säilyy; yhteisten sopimusten ylläpito ei saa olla niiden julkaisun pullonkaula.
+
+**Tuloksen läpinäkyvyys:** Fable ei avannut uusia sponsoripages-, Discord- tai GitHub-tilejä eikä nähnyt nykyisiä tuotantokoneita. Se ei vahvistanut 90 päivän ostaja-arvoja, kliinistä vaikuttavuutta, kolmannen osapuolen laitekelpoisuutta tai sponsorin lopullisia pisteytyksiä. Nimelliset prosentit ja aikarajat yllä ovat ehdotettuja hyväksymiskriteereitä, eivät jo suoritetun testin tuloksia.
