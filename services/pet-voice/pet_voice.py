@@ -400,14 +400,29 @@ def speak(text: str, voice: str, style: str, key: str, models: list[str], log: l
         if model in EXHAUSTED:
             continue
         if model.startswith("live:"):
-            t0 = time.monotonic()
-            try:
-                wav, said = live_speak(text, voice, style, key, model.removeprefix("live:"))
-                return {"wav": wav, "model": model, "variant": "live-recite", "latency": round(time.monotonic() - t0, 2),
-                        "mime": "audio/pcm", "spoken": said, "fidelity": heard_accuracy(text, said) if said else None}
-            except ProviderError as e:
-                log.append(e.record(model))
-                continue
+            # Live models sometimes *answer* the line instead of reading it (fidelity 0.19 on 14 Nov).
+            # Check what was actually said; re-voice once with a stricter frame before accepting.
+            best = None
+            for variant, script in (("live-recite", text),
+                                    ("live-recite-strict", f"Read exactly this text aloud and say nothing else:\n\n{text}")):
+                t0 = time.monotonic()
+                try:
+                    wav, said = live_speak(script, voice, style, key, model.removeprefix("live:"))
+                except ProviderError as e:
+                    log.append(e.record(model))
+                    break
+                fid = heard_accuracy(text, said) if said else None
+                attempt = {"wav": wav, "model": model, "variant": variant, "latency": round(time.monotonic() - t0, 2),
+                           "mime": "audio/pcm", "spoken": said, "fidelity": fid}
+                if fid is None or fid >= 0.8:
+                    return attempt
+                log.append({"model": model, "status": 200, "code": "LOW_FIDELITY", "daily": False, "retryAfter": None,
+                            "message": f"{variant} fidelity {fid}"})
+                if best is None or fid > (best["fidelity"] or 0):
+                    best = attempt
+            if best:
+                return best
+            continue
         variants = tts_variants(text, voice, style)
         if prefer and prefer.get(model):
             variants.sort(key=lambda v: v[0] != prefer[model])
@@ -420,9 +435,7 @@ def speak(text: str, voice: str, style: str, key: str, models: list[str], log: l
             except ProviderError as e:
                 if e.status == 400:
                     continue          # request shape not accepted by this model: try next variant
-                if e.status in (404, 403, 429) or e.daily or e.code in ("NO_AUDIO", "TIMEOUT"):
-                    break             # model unavailable or out of quota: next model
-                raise
+                break                 # quota, outage, timeout, no audio: next model
     raise ProviderError(0, "TTS_UNAVAILABLE", "no TTS model produced audio")
 
 
@@ -470,9 +483,7 @@ def think(system: str, prompt: str, audio: bytes | None, key: str, models: list[
                 if e.status == 400 and body is low:
                     bodies.pop(0)      # model rejects thinkingLevel: retry without it
                     continue
-                if e.status in (400, 403, 404, 429) or e.daily or e.code == "TIMEOUT":
-                    break
-                raise
+                break                  # quota, outage (503 after retries), timeout, 4xx: next model
     raise ProviderError(0, "MIND_UNAVAILABLE", "no text model produced a reply")
 
 
@@ -757,6 +768,7 @@ def learn_from(evidence_runs: list[dict]) -> dict:
     kept_model: dict[str, list[int]] = {}   # mind model -> [replies the next listener heard in the target language, judged]
     kept_lang: dict[str, list[int]] = {}
     cooldown: dict[str, str] = {}           # model -> UTC time its per-day quota resets (from RetryInfo)
+    fidelity: dict[str, list[float]] = {}   # tts model -> how closely the voiced audio matched the script
     for run in evidence_runs:
         finished = run.get("finishedAt")
         for t in run.get("turns", []):
@@ -798,12 +810,18 @@ def learn_from(evidence_runs: list[dict]) -> dict:
                     s = stats[kind].setdefault(model, {"ok": 0, "hardFail": 0, "latency": []})
                     s["ok"] += 1
                     s["latency"].append(lat)
+            if t.get("ttsFidelity") is not None:
+                fidelity.setdefault(t["ttsModel"], []).append(t["ttsFidelity"])
             variants.setdefault(t["ttsModel"], {}).setdefault(t["ttsVariant"], 0)
             variants[t["ttsModel"]][t["ttsVariant"]] += 1
             src = by_id.get(t.get("inReplyTo") or "")
             if src and t.get("heardAccuracy") is not None:
-                voice_lang.setdefault(f"{src['voice']}|{src['language']}", []).append(t["heardAccuracy"])
-                lang_acc.setdefault(src["language"], []).append(t["heardAccuracy"])
+                # Score the *voice* against what was actually spoken when we know it (Live voices report it),
+                # so a model that paraphrased the script is not blamed on the voice/language pair.
+                clarity = heard_accuracy(src["ttsSpoken"], t.get("heard", "")) if src.get("ttsSpoken") else t["heardAccuracy"]
+                if clarity is not None:
+                    voice_lang.setdefault(f"{src['voice']}|{src['language']}", []).append(clarity)
+                    lang_acc.setdefault(src["language"], []).append(clarity)
 
     def follow_rate(kind: str, m: str) -> float:
         hit, need = address.get(m, (0, 0)) if kind == "mind" else (0, 0)
@@ -813,10 +831,14 @@ def learn_from(evidence_runs: list[dict]) -> dict:
         hit, n = kept_model.get(m, (0, 0)) if kind == "mind" else (0, 0)
         return hit / n if n else 1.0
 
+    def fid_rate(kind: str, m: str) -> float:
+        xs = fidelity.get(m) if kind == "tts" else None
+        return sum(xs) / len(xs) if xs else 1.0
+
     def order(kind: str) -> list[str]:
-        # reliability × instruction-following (named the next pet, kept its language), then speed
-        rows = [(m, s["ok"] / max(1, s["ok"] + s["hardFail"]) * follow_rate(kind, m) * kept_rate(kind, m), p50(s["latency"]) or 999)
-                for m, s in stats[kind].items()]
+        # reliability × instruction-following (named next pet, kept language, read the script), then speed
+        rows = [(m, s["ok"] / max(1, s["ok"] + s["hardFail"]) * follow_rate(kind, m) * kept_rate(kind, m) * fid_rate(kind, m),
+                 p50(s["latency"]) or 999) for m, s in stats[kind].items()]
         return [m for m, score, lat in sorted(rows, key=lambda r: (-round(r[1], 2), r[2])) if score > 0]
 
     mean = lambda xs: round(sum(xs) / len(xs), 4)  # noqa: E731
@@ -826,7 +848,7 @@ def learn_from(evidence_runs: list[dict]) -> dict:
             "modelStats": {k: {m: {"ok": s["ok"], "hardFail": s["hardFail"], "p50LatencyS": p50(s["latency"]),
                                    **({"namedNextRate": round(follow_rate(k, m), 3), "namedNextSamples": address.get(m, (0, 0))[1],
                                        "languageKeptRate": round(kept_rate(k, m), 3), "languageKeptSamples": kept_model.get(m, (0, 0))[1]}
-                                      if k == "mind" else {})}
+                                      if k == "mind" else {"meanFidelity": round(fid_rate(k, m), 3), "fidelitySamples": len(fidelity.get(m, []))})}
                                for m, s in v.items()} for k, v in stats.items()},
             "languageKept": {k: {"n": v[1], "rate": round(v[0] / v[1], 3)} for k, v in sorted(kept_lang.items())},
             "cooldownUntil": dict(sorted(cooldown.items())),
@@ -844,7 +866,8 @@ def lessons_markdown(learned: dict) -> str:
             st = learned["modelStats"][kind][m]
             named = f", named next pet {st['namedNextRate']:.0%} of {st['namedNextSamples']}" if st.get("namedNextSamples") else ""
             kept = f", kept target language {st['languageKeptRate']:.0%} of {st['languageKeptSamples']}" if st.get("languageKeptSamples") else ""
-            parts.append(f"`{m}` ok {st['ok']}, fail {st['hardFail']}, p50 {st['p50LatencyS']} s{named}{kept}")
+            fid = f", read the script {st['meanFidelity']:.0%} (n={st['fidelitySamples']})" if st.get("fidelitySamples") else ""
+            parts.append(f"`{m}` ok {st['ok']}, fail {st['hardFail']}, p50 {st['p50LatencyS']} s{named}{kept}{fid}")
         out.append(f"- **{label}:** " + ("; ".join(parts) or "none yet"))
     if learned["ttsVariant"]:
         out.append("- **Accepted TTS request shape:** " + "; ".join(f"`{m}` → `{v}`" for m, v in learned["ttsVariant"].items()))

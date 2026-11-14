@@ -43,6 +43,18 @@ The next `talk`/`relay` reads that file, so dead or rate-limited models are skip
 `--adapt` replaces voices that listeners keep mis-hearing. New manual lessons go in the
 curated section of `LESSONS.md`.
 
+## Evidence (14 Nov 2026, owner's MBP, free-tier personal Gemini key)
+
+| Run | Turns | Pets spoke / replied | Languages | Heard accuracy | Language kept | Voices |
+| --- | --- | --- | --- | --- | --- | --- |
+| `relay-all34-20261114` | 35/35 | 34 / 34 | 18 | 0.97 | 91 % | Gemini TTS; last 3 turns Live (TTS daily quota out) |
+| `relay-all34-langrule-20261114` | 35/35 | 34 / 34 | 18 | 0.80 | 97 % | Live native audio (TTS in cooldown); 2 off-script turns |
+
+Run 2 added the explicit language rule learned from run 1 (91 % → 97 %). Its lower heard
+accuracy came from the Live voice paraphrasing two lines, which led to the script-fidelity
+check now in `speak()`. An independent read-only verifier confirmed run 1's receipt, hashes,
+durations and iCloud copies.
+
 ## Boundaries
 
 Synthetic companion dialogue; not a Chibi-authorized transport (no grants, no private

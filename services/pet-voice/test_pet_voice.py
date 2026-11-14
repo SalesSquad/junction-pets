@@ -97,6 +97,17 @@ class Learning(unittest.TestCase):
         self.assertEqual(pv.summarize(run["turns"])["languageKeptRate"], 0.5)
         self.assertIn("even if you heard another language", pv.turn_prompt(1, False, pv.persona("rokoko"), pv.persona("s-pankki"), "fi-FI"))
 
+    def test_paraphrasing_voice_is_not_blamed_on_the_voice_language_pair(self):
+        base = {"status": "ok", "ttsVariant": "live-recite", "ttsLatencyS": 1, "mindLatencyS": 1, "mindModel": "m",
+                "ttsEvents": [], "mindEvents": [], "speakerSlug": "x", "language": "en-US", "voice": "Gacrux"}
+        run = {"turns": [{**base, "turnId": "r.t0", "inReplyTo": None, "text": "Hello Modal, how do you scale jobs?",
+                          "ttsModel": "live:x", "ttsSpoken": "Scaling jobs is easy with queues.", "ttsFidelity": 0.2},
+                         {**base, "turnId": "r.t1", "inReplyTo": "r.t0", "text": "x", "ttsModel": "tts",
+                          "heard": "Scaling jobs is easy with queues.", "heardAccuracy": 0.2}]}
+        learned = pv.learn_from([run])
+        self.assertEqual(learned["voiceLanguage"]["Gacrux|en-US"]["mean"], 1.0)      # the voice was clear
+        self.assertEqual(learned["modelStats"]["tts"]["live:x"]["meanFidelity"], 0.2)  # the model went off-script
+
 
 if __name__ == "__main__":
     unittest.main()

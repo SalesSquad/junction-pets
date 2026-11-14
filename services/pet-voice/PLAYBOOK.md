@@ -58,8 +58,13 @@ in the language they heard, `--reply-language sv-SE` forces one language.
 - `GET /v1beta/voices` lists the extended voice library; custom/cloned voices exist but are not
   used here.
 - Real-time duplex: Live API models `gemini-3.8-live`, `gemini-3.1-flash-live-preview`,
-  `gemini-3.5-live-translate-preview` (bidiGenerateContent, 16 kHz in / 24 kHz out PCM).
-  Use ephemeral tokens for browsers — never ship the key.
+  `gemini-2.5-flash-native-audio-latest`, `gemini-3.5-live-translate-preview`
+  (bidiGenerateContent over WebSocket, 16 kHz in / 24 kHz out PCM). `pet_voice.py` already
+  uses them as `live:<model>` voices (stdlib WebSocket, `outputAudioTranscription` for a
+  fidelity check) when the TTS models are out of quota. Use ephemeral tokens for browsers —
+  never ship the key.
+- Free tier: TTS models are capped per day (~45 calls across four models on 14 Nov). Plan
+  bigger demos after the reset (≈08:00 UTC) or on a paid key — paid use needs the owner's OK.
 
 **OpenAI (secondary, not wired in)** — [Text to speech](https://developers.openai.com/api/docs/guides/text-to-speech),
 [Realtime / voice agents](https://developers.openai.com/api/docs/guides/realtime).
