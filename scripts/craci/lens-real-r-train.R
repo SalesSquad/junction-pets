@@ -113,6 +113,10 @@ pred_prob <- function(name, data) {
       rowSums(sweep(x, 2, centroids[, j])^2),
       numeric(nrow(x)))
     scores <- softmax(-distances / 0.07)
+    # vapply over unnamed numeric class indices creates no column labels.
+    # Bind to the *pre-registered* four class IDs, never infer from truth.
+    stopifnot(is.matrix(scores), ncol(scores) == length(levels))
+    colnames(scores) <- levels
   } else if (name == "multinom") {
     scores <- predict(multi, newdata = data, type = "probs")
   } else if (name == "tree") {

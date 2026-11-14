@@ -46,3 +46,9 @@ node --test scripts/craci/plan.test.mjs
 ```
 
 The source local ZIP is NOT in the repo; the exact archive SHA, official license reference and derivation script pin the reproducible evidence. Physical Camera glasses SDK quality, JPEG feature robustness, domain generalization, BOP official test performance, rights to private captures and Chibi deployment all remain unqualified until genuinely corresponding field data and approvals exist.
+
+## Hosted first-run failure and focused correction
+
+[Source-pinned CRACI run #43632712936](https://github.com/SalesSquad/junction-pets/actions/runs/43632712936) at harness commit `f3a825d2a8aa46044dbf280b570c20a1e3441146` admitted all four 8-vCPU profiles. Ubuntu R dependencies and the exact public-source/license gate **passed**. All four R jobs later **failed** in prediction: `Error in FUN(X[[i]], ...): all(levels %in% colnames(scores)) is not TRUE`. The zero-label centroid comparator was computed using `vapply()` over unlabelled class indices and thus produced an unnamed probability matrix. This is an evaluation-code bug, **not** an evidence of poor real-image recognition performance. The failure receipts remain intact.
+
+The focused fix attaches the exact pre-registered four class IDs to the centroid probability columns *before* the existing class membership/finite-probability assertions. It does not invent ground-truth labels, reorder fitted-model outputs, change source bytes/scene split, relax the calibration FPR limit, or alter the original provenance gate. New immutable harness HEAD and a fresh failed-path requalification run are required to claim successful R training.
