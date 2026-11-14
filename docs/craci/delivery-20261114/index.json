@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "workId": "J26-CRACI-DELIVERY-20261114",
+  "implementationPr": "https://github.com/SalesSquad/junction-pets/pull/115",
+  "baseCommit": "1283d38c0352055fb487f0c2d7af06f86a915f9b",
+  "initialHarness": "ea6670964176617bf45dda8a43e1671c48316fe0",
+  "fixedHarness": "a6c0e4a3d3cf6ac6eabe7cbd81272e2331024474",
+  "codeFileSha256": {
+    ".github/workflows/craci-pilot.yml": "8ae282b70ce4f36a64c1362127129a42abc1f0f72508ddd6ee8645a749debbc0",
+    "scripts/craci/plan.mjs": "00932e4f022a30b19d1bebdf4025682d6303be5bb9605d1c4c80b8da49448dff",
+    "scripts/craci/plan.test.mjs": "af3e2d9b4947b7844567266a20dbbd5f87ba3e4bc89928e3ffeba4a63fb6c063",
+    "scripts/craci/run-receipt.mjs": "bbd777749eff8df18f5ff42dfd511615808992db8eafca6eaf3cd036bc45f35b",
+    "scripts/craci/run-receipt.test.mjs": "9abe3cc74b2231a6b81987ea8150d4a294e64fa3badd7beecde2fd4b696c10d6"
+  },
+  "localTargetedChecks": {
+    "command": "node --test scripts/craci/plan.test.mjs scripts/craci/run-receipt.test.mjs",
+    "passed": 16,
+    "failed": 0,
+    "node": "v24.22.1",
+    "scope": "isolated source admission, failure propagation, safe retained evidence and elapsed-time unit regression",
+    "independentReview": "No blocking findings on final hashes; initial review missed the timing unit bug, caught through actual artifact inspection and corrected."
+  },
+  "workflows": [
+    {
+      "runId": 43575939909,
+      "workload": "mariadb-runtime",
+      "planJobId": 132390076191,
+      "runtimeJobIds": [
+        132390122200
+      ],
+      "sourceCommit": "83c45015f475471a861d663677d060e26b2692c3",
+      "harnessCommit": "ea6670964176617bf45dda8a43e1671c48316fe0",
+      "result": "success",
+      "checksPassed": 80,
+      "checksFailed": 0,
+      "timing": "Original millisecond-labelled-as-second value retained; explicit derived correction in timing-corrections.json."
+    },
+    {
+      "runId": 43575942647,
+      "workload": "meta-browser",
+      "planJobId": 132390085178,
+      "runtimeJobIds": [
+        132390130647
+      ],
+      "sourceCommit": "01065ebcffb74ebbb801f126ae8b46dba15b3a80",
+      "harnessCommit": "ea6670964176617bf45dda8a43e1671c48316fe0",
+      "result": "success",
+      "scope": "Existing local synthetic Chromium consent/correction/resume journey; 600x600 display, visible primary action, no page errors.",
+      "setupSeconds": {
+        "dependencies": 1,
+        "browser": 30
+      },
+      "timing": "Original millisecond-labelled-as-second value retained; explicit derived correction in timing-corrections.json."
+    },
+    {
+      "runId": 43576465580,
+      "workload": "native-probe",
+      "planJobId": 132391673663,
+      "runtimeJobIds": [
+        132391718451,
+        132391718495
+      ],
+      "sourceCommit": "83c45015f475471a861d663677d060e26b2692c3",
+      "harnessCommit": "a6c0e4a3d3cf6ac6eabe7cbd81272e2331024474",
+      "result": "success",
+      "checksPassedByArchitecture": {
+        "x64": 9,
+        "arm64": 9
+      },
+      "commandWallSeconds": {
+        "x64": 0.363,
+        "arm64": 0.423
+      },
+      "independentUtcEndpointSeconds": {
+        "x64": 0.364,
+        "arm64": 0.423
+      },
+      "outputSha256": "6f323fd6052fa020c02de088673774a7373cbc07b5a55a8da5d9779bb0853a6e",
+      "purpose": "Qualify the corrected receipt measurement in actual CRACI, using the existing bounded workload and corrected product source."
+    }
+  ],
+  "executedJobCount": 7,
+  "artifacts": [
+    {
+      "id": 14106357860,
+      "name": "craci-mariadb-runtime-mariadb-runtime-43575939909-1",
+      "size_in_bytes": 8698,
+      "digest": "sha256:83228d2ed80b4d11ccdda608afafd5346703d0a93a81fd26d277875ac0f7cb4b",
+      "created_at": "2026-11-14T08:28:43Z",
+      "expires_at": "2026-11-21T08:28:42Z",
+      "runId": 43575939909,
+      "harnessCommit": "ea6670964176617bf45dda8a43e1671c48316fe0"
+    },
+    {
+      "id": 14105484556,
+      "name": "craci-plan-43575939909-1",
+      "size_in_bytes": 432,
+      "digest": "sha256:f3e853a06a7339634fc7b536c2b70065682671967eaea5cbbb57e2eacc9762da",
+      "created_at": "2026-11-14T08:27:55Z",
+      "expires_at": "2026-11-21T08:27:54Z",
+      "runId": 43575939909,
+      "harnessCommit": "ea6670964176617bf45dda8a43e1671c48316fe0"
+    },
+    {
+      "id": 14106317904,
+      "name": "craci-plan-43575942647-1",
+      "size_in_bytes": 428,
+      "digest": "sha256:91beb9a5f94072ee250ab5f1ec963ede67cb665cfc171b32a03473a6b1f18769",
+      "created_at": "2026-11-14T08:27:57Z",
+      "expires_at": "2026-11-21T08:27:56Z",
+      "runId": 43575942647,
+      "harnessCommit": "ea6670964176617bf45dda8a43e1671c48316fe0"
+    },
+    {
+      "id": 14105414688,
+      "name": "craci-meta-browser-meta-browser-43575942647-1",
+      "size_in_bytes": 242127,
+      "digest": "sha256:fcb3736c6964f4fc6a58b1aef5e5dbefb1b0e26c6109908ce3b091731616a201",
+      "created_at": "2026-11-14T08:29:17Z",
+      "expires_at": "2026-11-21T08:29:16Z",
+      "runId": 43575942647,
+      "harnessCommit": "ea6670964176617bf45dda8a43e1671c48316fe0"
+    },
+    {
+      "id": 14106890291,
+      "name": "craci-plan-43576465580-1",
+      "size_in_bytes": 479,
+      "digest": "sha256:9acffee5b2026e07141ac1ec1c695a59cd3fa84f7adeeea389a9a4597a6ac4d3",
+      "created_at": "2026-11-14T08:34:38Z",
+      "expires_at": "2026-11-21T08:34:37Z",
+      "runId": 43576465580,
+      "harnessCommit": "a6c0e4a3d3cf6ac6eabe7cbd81272e2331024474"
+    },
+    {
+      "id": 14106373739,
+      "name": "craci-native-probe-native-arm64-43576465580-1",
+      "size_in_bytes": 6861,
+      "digest": "sha256:863f9ccb9d2ecb2466c8bb017b34439bb4634f9480ae0ac55a33d196e647496a",
+      "created_at": "2026-11-14T08:35:11Z",
+      "expires_at": "2026-11-21T08:35:10Z",
+      "runId": 43576465580,
+      "harnessCommit": "a6c0e4a3d3cf6ac6eabe7cbd81272e2331024474"
+    },
+    {
+      "id": 14105719418,
+      "name": "craci-native-probe-native-x64-43576465580-1",
+      "size_in_bytes": 6860,
+      "digest": "sha256:33cd006944b2a0e0eca69e9e0f9b457eb783c7f458cd9cf0444a2eae323c49c5",
+      "created_at": "2026-11-14T08:34:56Z",
+      "expires_at": "2026-11-21T08:34:55Z",
+      "runId": 43576465580,
+      "harnessCommit": "a6c0e4a3d3cf6ac6eabe7cbd81272e2331024474"
+    }
+  ],
+  "registryRecords": [
+    {
+      "path": "ops/experiments/runs/craci.43575939909.1.7fee397ca276abbc.timing-corrected.json",
+      "runId": "craci.43575939909.1.7fee397ca276abbc.timing-corrected",
+      "status": "succeeded",
+      "kind": "historical-result",
+      "sha256": "076789521096a3fd48a9b62299702715c32b78186dd7b96a5772602508bd0bf4"
+    },
+    {
+      "path": "ops/experiments/runs/craci.43575942647.1.29e976e45d79a5ae.timing-corrected.json",
+      "runId": "craci.43575942647.1.29e976e45d79a5ae.timing-corrected",
+      "status": "succeeded",
+      "kind": "historical-result",
+      "sha256": "c7eb2dd87c131ee51b9cf4a73bb6f6f33e79ceda6c105310bc8d8a4ac77c4b3a"
+    },
+    {
+      "path": "ops/experiments/runs/craci.43576465580.1.3f6b02c38640b6df.json",
+      "runId": "craci.43576465580.1.3f6b02c38640b6df",
+      "status": "succeeded",
+      "kind": "synthetic-test",
+      "sha256": "7b3fe7a174ace72337f1c8bb95d8baf3ab84be069314817eace1a5d4591ad8b7"
+    },
+    {
+      "path": "ops/experiments/runs/craci.43576465580.1.8fa10b8e8667336f.json",
+      "runId": "craci.43576465580.1.8fa10b8e8667336f",
+      "status": "succeeded",
+      "kind": "synthetic-test",
+      "sha256": "fa3ea50303ea14b5c429cf5396ce3689c2227f938c08673edfa48acdf8799bb0"
+    },
+    {
+      "path": "ops/experiments/runs/craci.baseline.mariadb.43564983185.json",
+      "runId": "craci.baseline.mariadb.43564983185",
+      "status": "failed",
+      "kind": "historical-result",
+      "sha256": "a39e122f3e577395a293df0d2945158283ffec55e8e1043f36fce350fa030dda"
+    }
+  ],
+  "budget": {
+    "reservationEur": 10,
+    "authorizedExistingCreditCeilingEur": 1000,
+    "actualTaskCostEur": null,
+    "latestBalanceEur": null,
+    "latestBalanceObservation": "CRACI existing browser session rendered a blank project page at2026-11-14T08:24:42Z; current billing was not observable.",
+    "historicalBalanceEur": 1009.48,
+    "historicalBalanceAt": "2026-11-14T06:13:19.588Z",
+    "creditFlagObserved": true,
+    "stopAt": "2026-11-15T17:00:00Z",
+    "newCashSpendAuthorized": false
+  },
+  "nextOwners": {
+    "integration": "Portfolio PR Recovery; no merge performed by this task",
+    "mariadb": "Existing PR111/PR103 owner; corrected fresh-schema gate now qualified, populated-database migration remains separate",
+    "meta": "Existing Meta/private Chibi owner; browser acceptance qualified, physical glasses and authenticated host persistence remain unverified"
+  },
+  "attestation": "Source-reported, hashes independently downloaded and checked; not cryptographic provider attestation."
+}
