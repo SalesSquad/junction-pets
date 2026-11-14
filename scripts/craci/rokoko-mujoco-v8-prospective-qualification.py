@@ -8,6 +8,7 @@ qualification, development-set evaluation, or real robot safety certificate.
 from __future__ import annotations
 
 import hashlib
+import gzip
 import importlib.util
 import json
 import os
@@ -16,6 +17,8 @@ import re
 import shutil
 import subprocess
 import sys
+
+import numpy as np
 
 
 V8_PRODUCT = Path("solutions/rokoko-teleoperation-gym/learning/action_necessity/mujoco/v8_learning")
@@ -113,10 +116,8 @@ def verify_paired_train_result(training, manifest, source_head, evidence_dir,
                                    for row in rows),
             "unsafe_near": sum(int(row["unsafe"]) for row in rows),
             "safe_lateral_ge_25mm": sum(int(not row["unsafe"] and
-                                           row["away_lateral_displacement"] >= .025)
+                                           row["lateral_displacement"] >= .025)
                                       for row in rows),
-            "forward_reopen_worlds": sum(int(row["forward_reopened_after_side"] > 0)
-                                         for row in rows),
         }
     check["prospective_train_only_paired_candidate_and_controls"] = by_name
     check["candidate_v8_safe_goal_difference_vs_best_frozen_baseline"] = (
@@ -129,6 +130,53 @@ def verify_paired_train_result(training, manifest, source_head, evidence_dir,
         "next_step": "scientific_review_then_independent_new_train_cohort",
         "note": "No promotion based on TRAIN-only difference; no locked dev/test authorization"}
     return check
+
+
+def independently_verify_all_masks_and_reopening(evidence_dir, training,
+                                                  env_factory):
+    """Recalculate each forward-opening event from original public physics mask.
+
+    Neither producer-reported count nor stage-funnel claims are considered
+    authoritative. V7 full-trace hashes are checked separately before this.
+    """
+    rows = {(row["seed"], row["strategy"]): row for row in training["trials"]}
+    verified = set()
+    reopen_worlds = {name: set() for name in STRATEGIES}
+    env = env_factory()
+    with gzip.open(evidence_dir / "full_transitions.jsonl.gz", "rt",
+                   encoding="utf8") as stream:
+        for line in stream:
+            doc = json.loads(line)
+            key = (doc["seed"], doc["strategy"])
+            require(key in rows and key not in verified,
+                    "V8_INDEPENDENT_FORWARD_TRACE_IDENTITY_INVALID")
+            verified.add(key)
+            env.reset(seed=doc["seed"], ood=False)
+            reopened = []
+            for index, event in enumerate(doc["transitions"]):
+                before = np.asarray(event["observation"], dtype=np.float64)
+                after = np.asarray(event["next_observation"], dtype=np.float64)
+                require(before.shape == (18,) and after.shape == (18,) and
+                        np.all(np.isfinite(before)) and np.all(np.isfinite(after)),
+                        "V8_INDEPENDENT_REAL_OBSERVATION_MALFORMED")
+                before_mask = [int(v) for v in env.mask(before)]
+                after_mask = [int(v) for v in env.mask(after)]
+                require(before_mask == event["mask"],
+                        "V8_PRODUCER_SEVEN_OPTION_SHIELD_NOT_REAL_PHYSICS")
+                if (event["action"] in (3, 4) and
+                        not (before_mask[1] or before_mask[2]) and
+                        (after_mask[1] or after_mask[2])):
+                    reopened.append(index + 1)
+            row = rows[key]
+            require(row.get("forward_reopened_after_side") == len(reopened) and
+                    row.get("forward_reopen_option_steps") == reopened and
+                    row.get("stage_funnel", {}).get(
+                        "any_forward_reopen_after_side") == bool(reopened),
+                    "V8_PRODUCER_REOPEN_COUNTER_NOT_DERIVED_FROM_REAL_PUBLIC_MASK")
+            if reopened and row["observed_corridor"]:
+                reopen_worlds[row["strategy"]].add(row["seed"])
+    require(verified == set(rows), "V8_INDEPENDENT_MASK_TRACE_COVERAGE_INCOMPLETE")
+    return {strategy: len(seeds) for strategy, seeds in reopen_worlds.items()}
 
 
 def main():
@@ -214,6 +262,12 @@ def main():
         "v7_independent_true_physics_replayer")
     sys.path.insert(0, str(source_root / V7_PHYSICS))
     from physics import MovingContactEnv
+    independently_verified_reopens = independently_verify_all_masks_and_reopening(
+        output, training, lambda: MovingContactEnv(max_options=60))
+    for strategy, count in independently_verified_reopens.items():
+        check["prospective_train_only_paired_candidate_and_controls"][strategy][
+            "forward_reopen_worlds"] = count
+    check["independent_full_trace_public_mask_replay"] = True
     product_runner = import_verified_module(product / "rollout_train.py",
                                             "v8_actual_frozen_policy_runner")
     require(callable(product_runner.policy_factory),
