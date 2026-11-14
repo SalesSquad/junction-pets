@@ -69,7 +69,8 @@ class RescueSDKContract(unittest.TestCase):
         order = won_order(self.req)
         order["lastPickupAt"] = 700
         fees = self.desk.fees_for(order, 1)
-        self.assertEqual(fees[0]["feeCents"], 17400)
+        self.assertEqual(fees[0]["feeCents"], 12000)  # cheap 10-minute offer window
+        self.assertEqual(fees[1]["feeCents"], 17400)
         self.assertLessEqual(fees[-1]["feeCents"], order["priceCents"] * 85 // 100)
         self.assertEqual([x["feeCents"] for x in fees],
                          sorted(x["feeCents"] for x in fees))
@@ -78,27 +79,28 @@ class RescueSDKContract(unittest.TestCase):
         self.assertLessEqual(len(fees), 48)
 
     def test_target_offer_resolves_new_post_id_immediately(self):
-        order = self._win()
+        order = self._win(urgent_pickup=True)
         posts = [x for x in self.world.sent if x["type"] == "post"]
         offers = [x for x in self.desk.outbox if x["type"] == "offer"]
         self.assertEqual(len(posts), 1)
-        self.assertEqual(len(offers), 1)
+        self.assertEqual(len(offers), 2)
         self.assertIn(offers[0]["gigId"], self.desk.posts)
         self.assertLessEqual(offers[0]["feeCents"], order["priceCents"] * 85 // 100)
-        self.assertEqual(offers[0]["feeCents"], posts[0]["schedule"][0]["feeCents"])
+        self.assertEqual(offers[0]["feeCents"], 13200)
+        self.assertEqual(offers[1]["feeCents"], 13800)
 
     def test_manual_premium_audience_and_candidate_filter(self):
         self.desk.roster[0]["rating"] = 4.3
         self.desk.roster[1]["completedGigs"] = 10
         self.desk.roster[2]["licence"] = "automatic_only"
         self.req["legs"][0]["car"]["premium"] = True
-        self._win()
+        self._win(urgent_pickup=True)
         offers = [x for x in self.desk.outbox if x["type"] == "offer"]
         self.assertEqual([o["driverId"] for o in offers], ["D3"])
 
     def test_night_suppresses_offers(self):
         self.desk.now = 1380  # 23:00 world time, unopened until 07:00.
-        self._win()
+        self._win(urgent_pickup=True)
         self.assertEqual(len([x for x in self.desk.outbox if x["type"] == "offer"]), 0)
 
     def test_day_offer_budget_and_dedup(self):
@@ -111,6 +113,7 @@ class RescueSDKContract(unittest.TestCase):
             req["id"] = f"R{i}"
             order = won_order(req)
             order["id"] = req["id"]
+            order["lastPickupAt"] = self.desk.now + 250
             self.desk.requests[order["id"]] = req
             self.desk.orders[order["id"]] = order
             gid = f"manual-gig-{i}"
@@ -126,7 +129,7 @@ class RescueSDKContract(unittest.TestCase):
         self.assertEqual(self.desk.offer_day_counts[("D0", 0)], OFFER_DAY_LIMIT)
 
     def test_offer_blocked_when_fee_budget_exhausted(self):
-        order = self._win()
+        order = self._win(urgent_pickup=True)
         gid = next(iter(self.desk.posts))
         self.desk.outbox.clear()
         self.desk.pending_offers.clear()
@@ -154,6 +157,7 @@ class RescueSDKContract(unittest.TestCase):
 
     def test_failed_visit_reuses_sdk_retry_and_privacy_constraints(self):
         self._win()
+        self.desk.send()  # neutral-risk posts use normal starter batching
         gid = next(iter(self.desk.posts))
         self.desk.outbox.clear()
         self.desk.handle({"kind": "gig_booked", "seq": 2, "at": 520,
@@ -195,6 +199,39 @@ class RescueSDKContract(unittest.TestCase):
             "schedule": [{"at": 480, "feeCents": 12000}]}, "g1")
         self.desk._maybe_offer("g1")
         self.assertFalse([x for x in self.desk.outbox if x["type"] == "offer"])
+
+    def test_rush_curve_available_as_ablation(self):
+        with patch.dict(os.environ, {"SPREAD_RESCUE_CURVE": "rush"}):
+            desk = RescueDesk(self.world, 8, 480)
+            desk.requests["R1"] = self.req
+            order = won_order(self.req)
+            order["lastPickupAt"] = 700
+            self.assertEqual(desk.fees_for(order, 1)[0]["feeCents"], 17400)
+
+    def test_sponsor_refused_offer_keeps_daily_quota(self):
+        self._win(urgent_pickup=True)
+        first = next(x for x in self.desk.outbox if x["type"] == "offer")
+        driver = first["driverId"]
+        quota_before = self.desk.offer_day_counts[(driver, 0)]
+        self.desk.outbox.clear()
+        self.desk.read_results([first], [{"ok": False, "reason": "not_available"}])
+        self.assertEqual(self.desk.offer_day_counts[(driver, 0)], quota_before)
+        self.assertIn((first["gigId"], driver), self.desk.offer_attempts)
+
+    def test_no_show_blacklists_driver_and_preserves_no_urgent_budget(self):
+        self._win(urgent_pickup=True)
+        gid = next(iter(self.desk.posts))
+        self.desk.outbox.clear()
+        self.desk.handle({"kind": "gig_booked", "seq": 2, "at": 500,
+                          "gigId": gid, "driverId": "D0", "feeCents": 12000})
+        self.desk.now = 510
+        self.desk.handle({"kind": "no_show", "seq": 3, "at": 510,
+                          "gigId": gid, "driverId": "D0"})
+        self.assertNotIn("R1", self.desk.urgent)
+        self.assertIn("D0", self.desk.bad_driver_by_order["R1"])
+        self.assertTrue([a for a in self.desk.outbox if a["type"] == "reprice"])
+        self.assertTrue(all(a["driverId"] != "D0" for a in self.desk.outbox
+                            if a["type"] == "offer"))
 
 
 if __name__ == "__main__":
