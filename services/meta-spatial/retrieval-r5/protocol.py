@@ -25,7 +25,12 @@ SYSTEM_PROMPT = (
     "hidden correct answer. Candidate order is deliberately shuffled. Report only "
     "visible evidence, admit uncertainty, and never invent readable text or extra "
     "views. Your output grants no identity or action authority. Return only one JSON "
-    "object matching the requested schema, with no extra keys and no prose."
+    "object matching the requested schema, with no extra keys and no prose. "
+    "Use exactly the written field names, including contradicting_visible_traits. "
+    "Each trait list has at most 4 strings, each at most 160 characters. "
+    "Each reason is at most 256 characters. OCR has at most 32 spans, each "
+    "text_verbatim at most 256 characters; split long paragraphs into shorter spans. "
+    "Use a null OCR box unless its position is clear; never invent a box."
 )
 OCR_SCHEMA = '{"status":"observed|no_legible_text","spans":[{"text_verbatim":"visible text","box_normalized":null}]}'
 RANK_SCHEMA = ('{"ranking":["c01","c02","c03"],"proposed_candidate":null,'
@@ -38,6 +43,36 @@ PROMPTS = {
     "detail": "Inspect which visible details can distinguish the QUERY from the three CANDIDATE variants. No additional capture exists in this request. Rank the aliases, identify uncertainty, and name the most useful additional observation. Never claim that a requested side/back/label image was actually supplied. proposed_candidate must be null when identifiability=insufficient. Schema: " + RANK_SCHEMA,
     "critic": "Independently challenge exact-variant identification using only the supplied QUERY and CANDIDATE images. Look for contradictions and indistinguishable variants; do not assume any candidate must be correct. Rank all aliases but abstain with proposed_candidate=null when evidence is insufficient. Do not use guessed catalog text. Schema: " + RANK_SCHEMA,
 }
+
+
+def response_format(lane):
+    """Documented vLLM JSON-schema output; local semantic validation still applies."""
+    if lane not in LANES:
+        raise ValueError("unsupported_lane")
+    def obj(properties):
+        return {"type": "object", "properties": properties,
+                "required": list(properties), "additionalProperties": False}
+    def text(limit):
+        return {"type": "string", "minLength": 1, "maxLength": limit}
+    alias = {"type": "string", "enum": ["c01", "c02", "c03"]}
+    traits = {"type": "array", "items": text(160), "maxItems": 4}
+    if lane == "ocr":
+        box = {"anyOf": [{"type": "null"}, {"type": "array", "minItems": 4,
+               "maxItems": 4, "items": {"type": "number", "minimum": 0, "maximum": 1}}]}
+        schema = obj({"status": {"type": "string", "enum": ["observed", "no_legible_text"]},
+                      "spans": {"type": "array", "maxItems": 32,
+                                "items": obj({"text_verbatim": text(256), "box_normalized": box})}})
+    else:
+        schema = obj({
+            "ranking": {"type": "array", "items": alias, "minItems": 3, "maxItems": 3},
+            "proposed_candidate": {"anyOf": [alias, {"type": "null"}]},
+            "identifiability": {"type": "string", "enum": ["distinguishable", "insufficient"]},
+            "observations": {"type": "array", "maxItems": 3, "items": obj({
+                "candidate": alias, "matching_visible_traits": traits, "contradicting_visible_traits": traits})},
+            "additional_observation": obj({
+                "kind": {"type": "string", "enum": list(OBSERVATION_KINDS)},
+                "reason": {"type": "string", "maxLength": 256}})})
+    return {"type": "json_schema", "json_schema": {"name": "meta_r5_" + lane, "schema": schema}}
 
 
 def sha256_bytes(data):

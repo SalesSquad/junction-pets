@@ -10,7 +10,7 @@ import subprocess
 import threading
 import time
 
-from protocol import LANES, make_messages, parse_response
+from protocol import LANES, make_messages, parse_response, response_format
 from provider import NEMOTRON, canonical, completion_text, load_nemotron_key, post, sha256
 
 ROOT = Path(__file__).resolve().parent
@@ -71,6 +71,7 @@ def main():
             "start_index": args.start_index, "case_count": args.case_count,
             "max_output_tokens_per_call": args.max_output_tokens, "max_attempts_per_job": 1,
             "chat_template_kwargs": {"enable_thinking": False},
+            "response_format": "json_schema",
             "deadline_seconds": args.deadline_seconds, "started_utc": datetime.now(timezone.utc).isoformat(),
             "new_gpu_instances": 0, "same_backbone_specialists_are_independent_models": False,
             "verified_cost_usd": None, "qualification": False, "action_authorized": False}
@@ -91,7 +92,8 @@ def main():
                 messages = make_messages(case, lane)
                 payload = {"model": NEMOTRON.model, "messages": messages,
                            "temperature": 0, "max_tokens": args.max_output_tokens, "stream": False,
-                           "chat_template_kwargs": {"enable_thinking": False}}
+                           "chat_template_kwargs": {"enable_thinking": False},
+                           "response_format": response_format(lane)}
                 write_json(folder / (case_id + ".request.json"),
                     {**record, "request_sha256": sha256(canonical(payload)), "cases_sha256": input_hash,
                      "query_image_sha256": case["query"]["image_sha256"],
