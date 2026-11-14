@@ -1,0 +1,2308 @@
+{
+  "work_id": "J26-CRACI-EXPLORE2-20261114",
+  "harness_sha": "0e03dc2c5ce27ee2e46400e71ed3d12ad2af3063",
+  "native": [
+    {
+      "schemaVersion": 1,
+      "experiment": "native",
+      "source_sha": "d0be3abf66c86d6817f82ca5ae5598ae003b5360",
+      "arch": "x64",
+      "kernel": "Linux x86_64",
+      "node": "v22.23.5",
+      "synthetic": true,
+      "provider_integration": false,
+      "observed_at": "2026-11-14T05:59:40.964Z",
+      "cases": 9,
+      "output_sha256": "6f323fd6052fa020c02de088673774a7373cbc07b5a55a8da5d9779bb0853a6e",
+      "fixture_sha256": "dbc4b82dcd1fbb0f3f12f7e2d7b0e5f0133c43a0830fd00474dd10d890ed52d1",
+      "results": [
+        {
+          "name": "before-first",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "NO_EVIDENCE",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-09T23:59:59Z"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "exact-first",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-10T00:00:00Z",
+              "revision_id": "101",
+              "revised_at": "2025-01-10T00:00:00Z",
+              "title": "Fictional Harbor Energy",
+              "text": "The fictional harbor announced a pilot solar project and public consultation.",
+              "sha256": "1687534ba0f70f76df60a8397692c25debf9e23f62aaf9ee3506dd3cc23f25b8",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "before-change",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-10T23:59:59.999Z",
+              "revision_id": "101",
+              "revised_at": "2025-01-10T00:00:00Z",
+              "title": "Fictional Harbor Energy",
+              "text": "The fictional harbor announced a pilot solar project and public consultation.",
+              "sha256": "1687534ba0f70f76df60a8397692c25debf9e23f62aaf9ee3506dd3cc23f25b8",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "exact-change",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-11T00:00:00Z",
+              "revision_id": "102",
+              "revised_at": "2025-01-11T00:00:00Z",
+              "title": "Fictional Harbor Energy",
+              "text": "The fictional harbor cancelled its solar project overnight.",
+              "sha256": "3aaddd673c8f562c6c5b79053d3459f7f73cf09b036b70a31443109ff51d5308",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "before-revert",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-11T02:59:59.999Z",
+              "revision_id": "102",
+              "revised_at": "2025-01-11T00:00:00Z",
+              "title": "Fictional Harbor Energy",
+              "text": "The fictional harbor cancelled its solar project overnight.",
+              "sha256": "3aaddd673c8f562c6c5b79053d3459f7f73cf09b036b70a31443109ff51d5308",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "exact-revert",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-11T03:00:00Z",
+              "revision_id": "103",
+              "revised_at": "2025-01-11T03:00:00Z",
+              "title": "Fictional Harbor Energy",
+              "text": "The fictional harbor announced a pilot solar project and public consultation.",
+              "sha256": "1687534ba0f70f76df60a8397692c25debf9e23f62aaf9ee3506dd3cc23f25b8",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "other-page",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:civic-debate",
+              "as_of": "2025-02-01T00:00:00Z",
+              "revision_id": "201",
+              "revised_at": "2025-02-01T00:00:00Z",
+              "title": "Fictional Civic Debate",
+              "text": "Public debate records were opened for inspection.",
+              "sha256": "2ce0f3d71b9f463f83b1efc535d3f14fb9c457e033f8b41c436f52080604fd9b",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": []
+          }
+        },
+        {
+          "name": "unknown-page",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "NO_EVIDENCE",
+              "page_id": "demo:absent",
+              "as_of": "2025-02-01T00:00:00Z"
+            },
+            "comparison": null,
+            "suspected_reverts": []
+          }
+        },
+        {
+          "name": "invalid-calendar-date",
+          "value": {
+            "status": "REFUSED",
+            "reason": "INVALID_UTC"
+          }
+        }
+      ],
+      "status": "passed"
+    },
+    {
+      "schemaVersion": 1,
+      "experiment": "native",
+      "source_sha": "d0be3abf66c86d6817f82ca5ae5598ae003b5360",
+      "arch": "arm64",
+      "kernel": "Linux aarch64",
+      "node": "v22.23.5",
+      "synthetic": true,
+      "provider_integration": false,
+      "observed_at": "2026-11-14T06:00:00.195Z",
+      "cases": 9,
+      "output_sha256": "6f323fd6052fa020c02de088673774a7373cbc07b5a55a8da5d9779bb0853a6e",
+      "fixture_sha256": "dbc4b82dcd1fbb0f3f12f7e2d7b0e5f0133c43a0830fd00474dd10d890ed52d1",
+      "results": [
+        {
+          "name": "before-first",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "NO_EVIDENCE",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-09T23:59:59Z"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "exact-first",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-10T00:00:00Z",
+              "revision_id": "101",
+              "revised_at": "2025-01-10T00:00:00Z",
+              "title": "Fictional Harbor Energy",
+              "text": "The fictional harbor announced a pilot solar project and public consultation.",
+              "sha256": "1687534ba0f70f76df60a8397692c25debf9e23f62aaf9ee3506dd3cc23f25b8",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "before-change",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-10T23:59:59.999Z",
+              "revision_id": "101",
+              "revised_at": "2025-01-10T00:00:00Z",
+              "title": "Fictional Harbor Energy",
+              "text": "The fictional harbor announced a pilot solar project and public consultation.",
+              "sha256": "1687534ba0f70f76df60a8397692c25debf9e23f62aaf9ee3506dd3cc23f25b8",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "exact-change",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-11T00:00:00Z",
+              "revision_id": "102",
+              "revised_at": "2025-01-11T00:00:00Z",
+              "title": "Fictional Harbor Energy",
+              "text": "The fictional harbor cancelled its solar project overnight.",
+              "sha256": "3aaddd673c8f562c6c5b79053d3459f7f73cf09b036b70a31443109ff51d5308",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "before-revert",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-11T02:59:59.999Z",
+              "revision_id": "102",
+              "revised_at": "2025-01-11T00:00:00Z",
+              "title": "Fictional Harbor Energy",
+              "text": "The fictional harbor cancelled its solar project overnight.",
+              "sha256": "3aaddd673c8f562c6c5b79053d3459f7f73cf09b036b70a31443109ff51d5308",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "exact-revert",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:harbor-energy",
+              "as_of": "2025-01-11T03:00:00Z",
+              "revision_id": "103",
+              "revised_at": "2025-01-11T03:00:00Z",
+              "title": "Fictional Harbor Energy",
+              "text": "The fictional harbor announced a pilot solar project and public consultation.",
+              "sha256": "1687534ba0f70f76df60a8397692c25debf9e23f62aaf9ee3506dd3cc23f25b8",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": [
+              {
+                "revision_ids": [
+                  "101",
+                  "102",
+                  "103"
+                ],
+                "label": "REVERT_CANDIDATE_NOT_VANDALISM_PROOF"
+              }
+            ]
+          }
+        },
+        {
+          "name": "other-page",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "FOUND",
+              "page_id": "demo:civic-debate",
+              "as_of": "2025-02-01T00:00:00Z",
+              "revision_id": "201",
+              "revised_at": "2025-02-01T00:00:00Z",
+              "title": "Fictional Civic Debate",
+              "text": "Public debate records were opened for inspection.",
+              "sha256": "2ce0f3d71b9f463f83b1efc535d3f14fb9c457e033f8b41c436f52080604fd9b",
+              "source_url": null,
+              "provenance": "SYNTHETIC",
+              "source_integrity": "LOCAL_HASH_ONLY_UNVERIFIED",
+              "dataset_id": "j26-synthetic-chronicle-v1",
+              "license": "CC0 synthetic demonstration, not Wikipedia data"
+            },
+            "comparison": null,
+            "suspected_reverts": []
+          }
+        },
+        {
+          "name": "unknown-page",
+          "value": {
+            "mode": "OFFLINE_DETERMINISTIC",
+            "provider": "NO_MARIADB_CONNECTION",
+            "verified_live_source": false,
+            "provenance": "SYNTHETIC",
+            "dataset_id": "j26-synthetic-chronicle-v1",
+            "snapshot": {
+              "status": "NO_EVIDENCE",
+              "page_id": "demo:absent",
+              "as_of": "2025-02-01T00:00:00Z"
+            },
+            "comparison": null,
+            "suspected_reverts": []
+          }
+        },
+        {
+          "name": "invalid-calendar-date",
+          "value": {
+            "status": "REFUSED",
+            "reason": "INVALID_UTC"
+          }
+        }
+      ],
+      "status": "passed"
+    }
+  ],
+  "cache": [
+    {
+      "schemaVersion": 1,
+      "experiment": "cache",
+      "source_sha": "98d5a524d61e431ca36acd62b268ede343fc7fe2",
+      "arch": "x64",
+      "kernel": "Linux x86_64",
+      "node": "v22.23.5",
+      "synthetic": true,
+      "provider_integration": false,
+      "observed_at": "2026-11-14T06:01:03.290Z",
+      "mode": "cold",
+      "cache_hit": false,
+      "cache_key": "j26-craci-probe-v1-43564229034-1-Linux-X64-v22.23.5-595e8eb06b348cbe82ca299d09541c98a70840f2ddbeedfb902f2eb88af1b0f9",
+      "offline_install": false,
+      "install_ms": 1857,
+      "lock_sha256": "fca1e4c5f201ef8f43bcdda22c79190cd3f3d4679bc8b705ae2c40cb7fd627bb",
+      "package_graph_sha256": "33627b52c24cc0b804b940b2d668772e574679eb6908ac2d8cb3a3349bc48977",
+      "installed_graph_entries": 138,
+      "source_validation": "passed",
+      "packages": [
+        {
+          "path": "@chibi/junction-catalog",
+          "version": "0.1.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/qrcode",
+          "version": "1.5.6"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/qrcode>@types/node",
+          "version": "26.6.6"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/qrcode>@types/node>undici-types",
+          "version": "8.9.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/react",
+          "version": "19.3.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/react>csstype",
+          "version": "3.2.3"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/react-dom",
+          "version": "19.3.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/react-dom>@types/react",
+          "version": "19.3.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react",
+          "version": "6.3.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react>@rolldown/plugin-babel",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react>@rolldown/pluginutils",
+          "version": "1.1.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react>babel-plugin-react-compiler",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react>oxc-transform-react",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react>vite",
+          "version": "8.3.8"
+        },
+        {
+          "path": "@chibi/junction-catalog>qrcode",
+          "version": "1.5.4"
+        },
+        {
+          "path": "@chibi/junction-catalog>react",
+          "version": "19.3.1"
+        },
+        {
+          "path": "@chibi/junction-catalog>react-dom",
+          "version": "19.3.1"
+        },
+        {
+          "path": "@chibi/junction-catalog>react-dom>react",
+          "version": "19.3.1"
+        },
+        {
+          "path": "@chibi/junction-catalog>react-dom>scheduler",
+          "version": "0.28.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript",
+          "version": "7.0.2"
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-aix-ppc64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-darwin-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-darwin-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-freebsd-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-freebsd-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-arm",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-loong64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-mips64el",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-ppc64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-riscv64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-s390x",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-x64",
+          "version": "7.0.2"
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-netbsd-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-netbsd-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-openbsd-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-openbsd-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-sunos-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-win32-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-win32-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite",
+          "version": "8.3.8"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>@types/node",
+          "version": "26.6.6"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>@vitejs/devtools",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>esbuild",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>fsevents",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>jiti",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>less",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss",
+          "version": "1.33.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>detect-libc",
+          "version": "2.1.2"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-android-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-darwin-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-darwin-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-freebsd-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-linux-arm-gnueabihf",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-linux-arm64-gnu",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-linux-arm64-musl",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-linux-x64-gnu",
+          "version": "1.33.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-linux-x64-musl",
+          "version": "1.33.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-win32-arm64-msvc",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-win32-x64-msvc",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>picomatch",
+          "version": "4.0.7"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>postcss",
+          "version": "8.5.32"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>postcss>nanoid",
+          "version": "3.3.20"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>postcss>picocolors",
+          "version": "1.1.1"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>postcss>source-map-js",
+          "version": "1.2.2"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown",
+          "version": "1.2.19"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@oxc-project/types",
+          "version": "0.156.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-android-arm-eabi",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-android-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-darwin-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-darwin-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-freebsd-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-arm-gnueabihf",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-arm64-gnu",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-arm64-musl",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-ppc64-gnu",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-s390x-gnu",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-x64-gnu",
+          "version": "1.2.19"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-x64-musl",
+          "version": "1.2.19"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-openharmony-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-wasm32-wasi",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-win32-arm64-msvc",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-win32-x64-msvc",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/pluginutils",
+          "version": "1.1.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>sass",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>sass-embedded",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>stylus",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>sugarss",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>terser",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>tinyglobby",
+          "version": "0.2.17"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>tinyglobby>fdir",
+          "version": "6.5.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>tinyglobby>fdir>picomatch",
+          "version": "4.0.7"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>tinyglobby>picomatch",
+          "version": "4.0.7"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>tsx",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>yaml",
+          "version": null
+        },
+        {
+          "path": "ajv",
+          "version": "8.20.0"
+        },
+        {
+          "path": "ajv>fast-deep-equal",
+          "version": "3.1.3"
+        },
+        {
+          "path": "ajv>fast-uri",
+          "version": "3.1.9"
+        },
+        {
+          "path": "ajv>json-schema-traverse",
+          "version": "1.0.0"
+        },
+        {
+          "path": "ajv>require-from-string",
+          "version": "2.0.2"
+        },
+        {
+          "path": "jsqr",
+          "version": "1.4.0"
+        },
+        {
+          "path": "playwright",
+          "version": "1.65.0"
+        },
+        {
+          "path": "playwright>playwright-core",
+          "version": "1.65.0"
+        },
+        {
+          "path": "pngjs",
+          "version": "7.0.0"
+        },
+        {
+          "path": "qrcode",
+          "version": "1.5.4"
+        },
+        {
+          "path": "qrcode>dijkstrajs",
+          "version": "1.0.3"
+        },
+        {
+          "path": "qrcode>pngjs",
+          "version": "5.0.0"
+        },
+        {
+          "path": "qrcode>yargs",
+          "version": "15.4.1"
+        },
+        {
+          "path": "qrcode>yargs>cliui",
+          "version": "6.0.0"
+        },
+        {
+          "path": "qrcode>yargs>cliui>string-width",
+          "version": "4.2.3"
+        },
+        {
+          "path": "qrcode>yargs>cliui>strip-ansi",
+          "version": "6.0.1"
+        },
+        {
+          "path": "qrcode>yargs>cliui>strip-ansi>ansi-regex",
+          "version": "5.0.1"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi",
+          "version": "6.2.0"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi>ansi-styles",
+          "version": "4.3.0"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi>ansi-styles>color-convert",
+          "version": "2.0.1"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi>ansi-styles>color-convert>color-name",
+          "version": "1.1.4"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi>string-width",
+          "version": "4.2.3"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi>strip-ansi",
+          "version": "6.0.1"
+        },
+        {
+          "path": "qrcode>yargs>decamelize",
+          "version": "1.2.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up",
+          "version": "4.1.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up>locate-path",
+          "version": "5.0.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up>locate-path>p-locate",
+          "version": "4.1.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up>locate-path>p-locate>p-limit",
+          "version": "2.3.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up>locate-path>p-locate>p-limit>p-try",
+          "version": "2.2.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up>path-exists",
+          "version": "4.0.0"
+        },
+        {
+          "path": "qrcode>yargs>get-caller-file",
+          "version": "2.0.5"
+        },
+        {
+          "path": "qrcode>yargs>require-directory",
+          "version": "2.1.1"
+        },
+        {
+          "path": "qrcode>yargs>require-main-filename",
+          "version": "2.0.0"
+        },
+        {
+          "path": "qrcode>yargs>set-blocking",
+          "version": "2.0.0"
+        },
+        {
+          "path": "qrcode>yargs>string-width",
+          "version": "4.2.3"
+        },
+        {
+          "path": "qrcode>yargs>string-width>emoji-regex",
+          "version": "8.0.0"
+        },
+        {
+          "path": "qrcode>yargs>string-width>is-fullwidth-code-point",
+          "version": "3.0.0"
+        },
+        {
+          "path": "qrcode>yargs>string-width>strip-ansi",
+          "version": "6.0.1"
+        },
+        {
+          "path": "qrcode>yargs>which-module",
+          "version": "2.0.1"
+        },
+        {
+          "path": "qrcode>yargs>y18n",
+          "version": "4.0.3"
+        },
+        {
+          "path": "qrcode>yargs>yargs-parser",
+          "version": "18.1.3"
+        },
+        {
+          "path": "qrcode>yargs>yargs-parser>camelcase",
+          "version": "5.3.1"
+        },
+        {
+          "path": "qrcode>yargs>yargs-parser>decamelize",
+          "version": "1.2.0"
+        }
+      ],
+      "status": "passed"
+    },
+    {
+      "schemaVersion": 1,
+      "experiment": "cache",
+      "source_sha": "98d5a524d61e431ca36acd62b268ede343fc7fe2",
+      "arch": "x64",
+      "kernel": "Linux x86_64",
+      "node": "v22.23.5",
+      "synthetic": true,
+      "provider_integration": false,
+      "observed_at": "2026-11-14T06:01:28.257Z",
+      "mode": "warm",
+      "cache_hit": true,
+      "cache_key": "j26-craci-probe-v1-43564229034-1-Linux-X64-v22.23.5-595e8eb06b348cbe82ca299d09541c98a70840f2ddbeedfb902f2eb88af1b0f9",
+      "offline_install": true,
+      "install_ms": 1516,
+      "lock_sha256": "fca1e4c5f201ef8f43bcdda22c79190cd3f3d4679bc8b705ae2c40cb7fd627bb",
+      "package_graph_sha256": "33627b52c24cc0b804b940b2d668772e574679eb6908ac2d8cb3a3349bc48977",
+      "installed_graph_entries": 138,
+      "source_validation": "passed",
+      "packages": [
+        {
+          "path": "@chibi/junction-catalog",
+          "version": "0.1.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/qrcode",
+          "version": "1.5.6"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/qrcode>@types/node",
+          "version": "26.6.6"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/qrcode>@types/node>undici-types",
+          "version": "8.9.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/react",
+          "version": "19.3.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/react>csstype",
+          "version": "3.2.3"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/react-dom",
+          "version": "19.3.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@types/react-dom>@types/react",
+          "version": "19.3.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react",
+          "version": "6.3.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react>@rolldown/plugin-babel",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react>@rolldown/pluginutils",
+          "version": "1.1.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react>babel-plugin-react-compiler",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react>oxc-transform-react",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>@vitejs/plugin-react>vite",
+          "version": "8.3.8"
+        },
+        {
+          "path": "@chibi/junction-catalog>qrcode",
+          "version": "1.5.4"
+        },
+        {
+          "path": "@chibi/junction-catalog>react",
+          "version": "19.3.1"
+        },
+        {
+          "path": "@chibi/junction-catalog>react-dom",
+          "version": "19.3.1"
+        },
+        {
+          "path": "@chibi/junction-catalog>react-dom>react",
+          "version": "19.3.1"
+        },
+        {
+          "path": "@chibi/junction-catalog>react-dom>scheduler",
+          "version": "0.28.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript",
+          "version": "7.0.2"
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-aix-ppc64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-darwin-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-darwin-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-freebsd-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-freebsd-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-arm",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-loong64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-mips64el",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-ppc64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-riscv64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-s390x",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-linux-x64",
+          "version": "7.0.2"
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-netbsd-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-netbsd-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-openbsd-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-openbsd-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-sunos-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-win32-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>typescript>@typescript/typescript-win32-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite",
+          "version": "8.3.8"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>@types/node",
+          "version": "26.6.6"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>@vitejs/devtools",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>esbuild",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>fsevents",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>jiti",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>less",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss",
+          "version": "1.33.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>detect-libc",
+          "version": "2.1.2"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-android-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-darwin-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-darwin-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-freebsd-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-linux-arm-gnueabihf",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-linux-arm64-gnu",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-linux-arm64-musl",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-linux-x64-gnu",
+          "version": "1.33.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-linux-x64-musl",
+          "version": "1.33.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-win32-arm64-msvc",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>lightningcss>lightningcss-win32-x64-msvc",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>picomatch",
+          "version": "4.0.7"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>postcss",
+          "version": "8.5.32"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>postcss>nanoid",
+          "version": "3.3.20"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>postcss>picocolors",
+          "version": "1.1.1"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>postcss>source-map-js",
+          "version": "1.2.2"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown",
+          "version": "1.2.19"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@oxc-project/types",
+          "version": "0.156.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-android-arm-eabi",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-android-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-darwin-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-darwin-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-freebsd-x64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-arm-gnueabihf",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-arm64-gnu",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-arm64-musl",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-ppc64-gnu",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-s390x-gnu",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-x64-gnu",
+          "version": "1.2.19"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-linux-x64-musl",
+          "version": "1.2.19"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-openharmony-arm64",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-wasm32-wasi",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-win32-arm64-msvc",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/binding-win32-x64-msvc",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>rolldown>@rolldown/pluginutils",
+          "version": "1.1.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>sass",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>sass-embedded",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>stylus",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>sugarss",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>terser",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>tinyglobby",
+          "version": "0.2.17"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>tinyglobby>fdir",
+          "version": "6.5.0"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>tinyglobby>fdir>picomatch",
+          "version": "4.0.7"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>tinyglobby>picomatch",
+          "version": "4.0.7"
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>tsx",
+          "version": null
+        },
+        {
+          "path": "@chibi/junction-catalog>vite>yaml",
+          "version": null
+        },
+        {
+          "path": "ajv",
+          "version": "8.20.0"
+        },
+        {
+          "path": "ajv>fast-deep-equal",
+          "version": "3.1.3"
+        },
+        {
+          "path": "ajv>fast-uri",
+          "version": "3.1.9"
+        },
+        {
+          "path": "ajv>json-schema-traverse",
+          "version": "1.0.0"
+        },
+        {
+          "path": "ajv>require-from-string",
+          "version": "2.0.2"
+        },
+        {
+          "path": "jsqr",
+          "version": "1.4.0"
+        },
+        {
+          "path": "playwright",
+          "version": "1.65.0"
+        },
+        {
+          "path": "playwright>playwright-core",
+          "version": "1.65.0"
+        },
+        {
+          "path": "pngjs",
+          "version": "7.0.0"
+        },
+        {
+          "path": "qrcode",
+          "version": "1.5.4"
+        },
+        {
+          "path": "qrcode>dijkstrajs",
+          "version": "1.0.3"
+        },
+        {
+          "path": "qrcode>pngjs",
+          "version": "5.0.0"
+        },
+        {
+          "path": "qrcode>yargs",
+          "version": "15.4.1"
+        },
+        {
+          "path": "qrcode>yargs>cliui",
+          "version": "6.0.0"
+        },
+        {
+          "path": "qrcode>yargs>cliui>string-width",
+          "version": "4.2.3"
+        },
+        {
+          "path": "qrcode>yargs>cliui>strip-ansi",
+          "version": "6.0.1"
+        },
+        {
+          "path": "qrcode>yargs>cliui>strip-ansi>ansi-regex",
+          "version": "5.0.1"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi",
+          "version": "6.2.0"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi>ansi-styles",
+          "version": "4.3.0"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi>ansi-styles>color-convert",
+          "version": "2.0.1"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi>ansi-styles>color-convert>color-name",
+          "version": "1.1.4"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi>string-width",
+          "version": "4.2.3"
+        },
+        {
+          "path": "qrcode>yargs>cliui>wrap-ansi>strip-ansi",
+          "version": "6.0.1"
+        },
+        {
+          "path": "qrcode>yargs>decamelize",
+          "version": "1.2.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up",
+          "version": "4.1.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up>locate-path",
+          "version": "5.0.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up>locate-path>p-locate",
+          "version": "4.1.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up>locate-path>p-locate>p-limit",
+          "version": "2.3.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up>locate-path>p-locate>p-limit>p-try",
+          "version": "2.2.0"
+        },
+        {
+          "path": "qrcode>yargs>find-up>path-exists",
+          "version": "4.0.0"
+        },
+        {
+          "path": "qrcode>yargs>get-caller-file",
+          "version": "2.0.5"
+        },
+        {
+          "path": "qrcode>yargs>require-directory",
+          "version": "2.1.1"
+        },
+        {
+          "path": "qrcode>yargs>require-main-filename",
+          "version": "2.0.0"
+        },
+        {
+          "path": "qrcode>yargs>set-blocking",
+          "version": "2.0.0"
+        },
+        {
+          "path": "qrcode>yargs>string-width",
+          "version": "4.2.3"
+        },
+        {
+          "path": "qrcode>yargs>string-width>emoji-regex",
+          "version": "8.0.0"
+        },
+        {
+          "path": "qrcode>yargs>string-width>is-fullwidth-code-point",
+          "version": "3.0.0"
+        },
+        {
+          "path": "qrcode>yargs>string-width>strip-ansi",
+          "version": "6.0.1"
+        },
+        {
+          "path": "qrcode>yargs>which-module",
+          "version": "2.0.1"
+        },
+        {
+          "path": "qrcode>yargs>y18n",
+          "version": "4.0.3"
+        },
+        {
+          "path": "qrcode>yargs>yargs-parser",
+          "version": "18.1.3"
+        },
+        {
+          "path": "qrcode>yargs>yargs-parser>camelcase",
+          "version": "5.3.1"
+        },
+        {
+          "path": "qrcode>yargs>yargs-parser>decamelize",
+          "version": "1.2.0"
+        }
+      ],
+      "status": "passed"
+    }
+  ],
+  "browser": [
+    {
+      "job_id": 132354108638,
+      "schema": "craci.new-products-browser.v1",
+      "label": "cala-webkit-1440",
+      "product": "cala",
+      "browser": "webkit",
+      "browserVersion": "27.2",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "ff6b0bacb1d796a098dba6798d61f59dc977420c",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "mode": "FICTIONAL_FIXTURE",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "FICTIONAL_FIXTURE",
+        "eligibleInvestors": 2,
+        "filingAndIssuerDedup": "passed",
+        "identityAbstention": "passed",
+        "conflictingRoundExclusion": "passed",
+        "keyboardCandidateAndDisclosure": "passed",
+        "notesRevokeApproval": "passed",
+        "allCandidatesRequireApproval": "passed",
+        "exactDownloadedCitations": 3,
+        "productSourceDigest": "28d12b5e69bc709fc55b6a6b30cb91bde509f70b4bfa71008518fb56cb6517c7",
+        "goalChangeClearsReview": "passed",
+        "inclusiveEventDateFilter": "passed",
+        "reloadClearsReview": "passed",
+        "liveCala": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "cala-webkit-1440.png",
+      "durationMs": 2080,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108638,
+      "schema": "craci.new-products-browser.v1",
+      "label": "cala-webkit-390",
+      "product": "cala",
+      "browser": "webkit",
+      "browserVersion": "27.2",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "ff6b0bacb1d796a098dba6798d61f59dc977420c",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "FICTIONAL_FIXTURE",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "FICTIONAL_FIXTURE",
+        "eligibleInvestors": 2,
+        "filingAndIssuerDedup": "passed",
+        "identityAbstention": "passed",
+        "conflictingRoundExclusion": "passed",
+        "keyboardCandidateAndDisclosure": "passed",
+        "notesRevokeApproval": "passed",
+        "allCandidatesRequireApproval": "passed",
+        "exactDownloadedCitations": 3,
+        "productSourceDigest": "28d12b5e69bc709fc55b6a6b30cb91bde509f70b4bfa71008518fb56cb6517c7",
+        "goalChangeClearsReview": "passed",
+        "inclusiveEventDateFilter": "passed",
+        "reloadClearsReview": "passed",
+        "liveCala": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "cala-webkit-390.png",
+      "durationMs": 1262,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108673,
+      "schema": "craci.new-products-browser.v1",
+      "label": "context-webkit-1440",
+      "product": "context",
+      "browser": "webkit",
+      "browserVersion": "27.2",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "76f0405ac49f2017129ec11d891c2a2cbe7d1838",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "mode": "SYNTHETIC_REPLAY",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "SYNTHETIC_REPLAY",
+        "beforeWinner": "north",
+        "afterWinner": "coast",
+        "quantity": 40,
+        "independentlyCheckedTotalsCents": [
+          48000,
+          54000
+        ],
+        "sourceAndPolicyHashes": "passed",
+        "cosmeticChangeKeepsDecision": "passed",
+        "http200FailedJSON": "whole-comparison-refused",
+        "keyboardReplayEvidenceAndReview": "passed",
+        "scenarioChangeClosesReview": "passed",
+        "actualMemoDownloads": 4,
+        "downloadMatchesCurrentReview": "passed",
+        "reloadRecovery": "passed",
+        "liveContextAPI": false,
+        "externalActions": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "context-webkit-1440.png",
+      "durationMs": 1501,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108673,
+      "schema": "craci.new-products-browser.v1",
+      "label": "context-webkit-390",
+      "product": "context",
+      "browser": "webkit",
+      "browserVersion": "27.2",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "76f0405ac49f2017129ec11d891c2a2cbe7d1838",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "SYNTHETIC_REPLAY",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "SYNTHETIC_REPLAY",
+        "beforeWinner": "north",
+        "afterWinner": "coast",
+        "quantity": 40,
+        "independentlyCheckedTotalsCents": [
+          48000,
+          54000
+        ],
+        "sourceAndPolicyHashes": "passed",
+        "cosmeticChangeKeepsDecision": "passed",
+        "http200FailedJSON": "whole-comparison-refused",
+        "keyboardReplayEvidenceAndReview": "passed",
+        "scenarioChangeClosesReview": "passed",
+        "actualMemoDownloads": 4,
+        "downloadMatchesCurrentReview": "passed",
+        "reloadRecovery": "passed",
+        "liveContextAPI": false,
+        "externalActions": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "context-webkit-390.png",
+      "durationMs": 1000,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108686,
+      "schema": "craci.new-products-browser.v1",
+      "label": "cala-firefox-1440",
+      "product": "cala",
+      "browser": "firefox",
+      "browserVersion": "159.0",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "ff6b0bacb1d796a098dba6798d61f59dc977420c",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "mode": "FICTIONAL_FIXTURE",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "FICTIONAL_FIXTURE",
+        "eligibleInvestors": 2,
+        "filingAndIssuerDedup": "passed",
+        "identityAbstention": "passed",
+        "conflictingRoundExclusion": "passed",
+        "keyboardCandidateAndDisclosure": "passed",
+        "notesRevokeApproval": "passed",
+        "allCandidatesRequireApproval": "passed",
+        "exactDownloadedCitations": 3,
+        "productSourceDigest": "28d12b5e69bc709fc55b6a6b30cb91bde509f70b4bfa71008518fb56cb6517c7",
+        "goalChangeClearsReview": "passed",
+        "inclusiveEventDateFilter": "passed",
+        "reloadClearsReview": "passed",
+        "liveCala": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "cala-firefox-1440.png",
+      "durationMs": 2335,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108686,
+      "schema": "craci.new-products-browser.v1",
+      "label": "cala-firefox-390",
+      "product": "cala",
+      "browser": "firefox",
+      "browserVersion": "159.0",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "ff6b0bacb1d796a098dba6798d61f59dc977420c",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "FICTIONAL_FIXTURE",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "FICTIONAL_FIXTURE",
+        "eligibleInvestors": 2,
+        "filingAndIssuerDedup": "passed",
+        "identityAbstention": "passed",
+        "conflictingRoundExclusion": "passed",
+        "keyboardCandidateAndDisclosure": "passed",
+        "notesRevokeApproval": "passed",
+        "allCandidatesRequireApproval": "passed",
+        "exactDownloadedCitations": 3,
+        "productSourceDigest": "28d12b5e69bc709fc55b6a6b30cb91bde509f70b4bfa71008518fb56cb6517c7",
+        "goalChangeClearsReview": "passed",
+        "inclusiveEventDateFilter": "passed",
+        "reloadClearsReview": "passed",
+        "liveCala": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "cala-firefox-390.png",
+      "durationMs": 1477,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108688,
+      "schema": "craci.new-products-browser.v1",
+      "label": "context-chromium-1440",
+      "product": "context",
+      "browser": "chromium",
+      "browserVersion": "158.0.8127.18",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "76f0405ac49f2017129ec11d891c2a2cbe7d1838",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "mode": "SYNTHETIC_REPLAY",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "SYNTHETIC_REPLAY",
+        "beforeWinner": "north",
+        "afterWinner": "coast",
+        "quantity": 40,
+        "independentlyCheckedTotalsCents": [
+          48000,
+          54000
+        ],
+        "sourceAndPolicyHashes": "passed",
+        "cosmeticChangeKeepsDecision": "passed",
+        "http200FailedJSON": "whole-comparison-refused",
+        "keyboardReplayEvidenceAndReview": "passed",
+        "scenarioChangeClosesReview": "passed",
+        "actualMemoDownloads": 4,
+        "downloadMatchesCurrentReview": "passed",
+        "reloadRecovery": "passed",
+        "liveContextAPI": false,
+        "externalActions": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "context-chromium-1440.png",
+      "durationMs": 963,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108688,
+      "schema": "craci.new-products-browser.v1",
+      "label": "context-chromium-390",
+      "product": "context",
+      "browser": "chromium",
+      "browserVersion": "158.0.8127.18",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "76f0405ac49f2017129ec11d891c2a2cbe7d1838",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "SYNTHETIC_REPLAY",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "SYNTHETIC_REPLAY",
+        "beforeWinner": "north",
+        "afterWinner": "coast",
+        "quantity": 40,
+        "independentlyCheckedTotalsCents": [
+          48000,
+          54000
+        ],
+        "sourceAndPolicyHashes": "passed",
+        "cosmeticChangeKeepsDecision": "passed",
+        "http200FailedJSON": "whole-comparison-refused",
+        "keyboardReplayEvidenceAndReview": "passed",
+        "scenarioChangeClosesReview": "passed",
+        "actualMemoDownloads": 4,
+        "downloadMatchesCurrentReview": "passed",
+        "reloadRecovery": "passed",
+        "liveContextAPI": false,
+        "externalActions": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "context-chromium-390.png",
+      "durationMs": 877,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108695,
+      "schema": "craci.new-products-browser.v1",
+      "label": "context-firefox-1440",
+      "product": "context",
+      "browser": "firefox",
+      "browserVersion": "159.0",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "76f0405ac49f2017129ec11d891c2a2cbe7d1838",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "mode": "SYNTHETIC_REPLAY",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "SYNTHETIC_REPLAY",
+        "beforeWinner": "north",
+        "afterWinner": "coast",
+        "quantity": 40,
+        "independentlyCheckedTotalsCents": [
+          48000,
+          54000
+        ],
+        "sourceAndPolicyHashes": "passed",
+        "cosmeticChangeKeepsDecision": "passed",
+        "http200FailedJSON": "whole-comparison-refused",
+        "keyboardReplayEvidenceAndReview": "passed",
+        "scenarioChangeClosesReview": "passed",
+        "actualMemoDownloads": 4,
+        "downloadMatchesCurrentReview": "passed",
+        "reloadRecovery": "passed",
+        "liveContextAPI": false,
+        "externalActions": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "context-firefox-1440.png",
+      "durationMs": 2380,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108695,
+      "schema": "craci.new-products-browser.v1",
+      "label": "context-firefox-390",
+      "product": "context",
+      "browser": "firefox",
+      "browserVersion": "159.0",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "76f0405ac49f2017129ec11d891c2a2cbe7d1838",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "SYNTHETIC_REPLAY",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "SYNTHETIC_REPLAY",
+        "beforeWinner": "north",
+        "afterWinner": "coast",
+        "quantity": 40,
+        "independentlyCheckedTotalsCents": [
+          48000,
+          54000
+        ],
+        "sourceAndPolicyHashes": "passed",
+        "cosmeticChangeKeepsDecision": "passed",
+        "http200FailedJSON": "whole-comparison-refused",
+        "keyboardReplayEvidenceAndReview": "passed",
+        "scenarioChangeClosesReview": "passed",
+        "actualMemoDownloads": 4,
+        "downloadMatchesCurrentReview": "passed",
+        "reloadRecovery": "passed",
+        "liveContextAPI": false,
+        "externalActions": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "context-firefox-390.png",
+      "durationMs": 1351,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108765,
+      "schema": "craci.new-products-browser.v1",
+      "label": "cala-chromium-1440",
+      "product": "cala",
+      "browser": "chromium",
+      "browserVersion": "158.0.8127.18",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "ff6b0bacb1d796a098dba6798d61f59dc977420c",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "mode": "FICTIONAL_FIXTURE",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "FICTIONAL_FIXTURE",
+        "eligibleInvestors": 2,
+        "filingAndIssuerDedup": "passed",
+        "identityAbstention": "passed",
+        "conflictingRoundExclusion": "passed",
+        "keyboardCandidateAndDisclosure": "passed",
+        "notesRevokeApproval": "passed",
+        "allCandidatesRequireApproval": "passed",
+        "exactDownloadedCitations": 3,
+        "productSourceDigest": "28d12b5e69bc709fc55b6a6b30cb91bde509f70b4bfa71008518fb56cb6517c7",
+        "goalChangeClearsReview": "passed",
+        "inclusiveEventDateFilter": "passed",
+        "reloadClearsReview": "passed",
+        "liveCala": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "cala-chromium-1440.png",
+      "durationMs": 943,
+      "pageErrors": [],
+      "deniedRequests": []
+    },
+    {
+      "job_id": 132354108765,
+      "schema": "craci.new-products-browser.v1",
+      "label": "cala-chromium-390",
+      "product": "cala",
+      "browser": "chromium",
+      "browserVersion": "158.0.8127.18",
+      "nodeVersion": "v22.23.3",
+      "sourceSha": "ff6b0bacb1d796a098dba6798d61f59dc977420c",
+      "harnessSha256": "3c47bf0d4d1966f92d76cf75642c4a2bf6a651bde19453b2f6647dafcd2c579b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "FICTIONAL_FIXTURE",
+      "liveSponsorAPI": false,
+      "status": "passed",
+      "coverage": {
+        "mode": "FICTIONAL_FIXTURE",
+        "eligibleInvestors": 2,
+        "filingAndIssuerDedup": "passed",
+        "identityAbstention": "passed",
+        "conflictingRoundExclusion": "passed",
+        "keyboardCandidateAndDisclosure": "passed",
+        "notesRevokeApproval": "passed",
+        "allCandidatesRequireApproval": "passed",
+        "exactDownloadedCitations": 3,
+        "productSourceDigest": "28d12b5e69bc709fc55b6a6b30cb91bde509f70b4bfa71008518fb56cb6517c7",
+        "goalChangeClearsReview": "passed",
+        "inclusiveEventDateFilter": "passed",
+        "reloadClearsReview": "passed",
+        "liveCala": false
+      },
+      "overflowPixels": 0,
+      "screenshot": "cala-chromium-390.png",
+      "durationMs": 871,
+      "pageErrors": [],
+      "deniedRequests": []
+    }
+  ],
+  "sbom_baseline": {
+    "format": "CycloneDX",
+    "specVersion": "1.7",
+    "components": 76,
+    "uniqueRefs": 77,
+    "duplicateRefs": 0,
+    "dependencyNodes": 31,
+    "unresolvedReferences": [],
+    "componentTypes": [
+      "library"
+    ],
+    "purls": 76,
+    "licenseEntries": 73
+  },
+  "mariadb_initial": {
+    "run_id": 43564231865,
+    "job_id": 132354442895,
+    "result": "infrastructure_error",
+    "sql_executed": false,
+    "error": "Docker image configuration download denied: Forbidden",
+    "cleanup": "own resources removed"
+  },
+  "mariadb_retry": {
+    "run_id": 43564983185,
+    "job_id": 132356742162,
+    "harness_sha": "6d85bb9a1b02cb06eef2d1da77f7cd86008a7e25",
+    "source_sha": "d0be3abf66c86d6817f82ca5ae5598ae003b5360",
+    "summary": {
+      "event": "summary",
+      "execution_error": null,
+      "external_provider_verified": false,
+      "failed": 5,
+      "failed_cases": [
+        "case_distinct_latest:database",
+        "case_no_cross_page_history:database",
+        "diacritic_distinct_latest:database",
+        "diacritic_no_cross_page_history:database",
+        "dataset_case_identity_distinct"
+      ],
+      "passed": 72,
+      "result": "fail",
+      "source_commit": "d0be3abf66c86d6817f82ca5ae5598ae003b5360",
+      "sponsor_data_verified": false,
+      "work_id": "J26-CRACI-EXPLORE2-20261114"
+    },
+    "events_file": "mariadb-runtime-events.json",
+    "events_sha256": "96b785abcd904b6057a6af0baf151ffc43328633d67d98d77f4f03d40d69571d"
+  },
+  "cache_sbom": {
+    "comparison_file": "cache-sbom-comparison.json",
+    "cold_job_id": 132354436993,
+    "warm_job_id": 132354538189,
+    "components_each": 81,
+    "npm_components_each": 74,
+    "npm_restored_cold": 0,
+    "npm_restored_warm": 74,
+    "identical_component_purls": true,
+    "cache_id": "6629298651489501153",
+    "cache_size_ui": "42.2 MiB",
+    "ui_packages_each": 0,
+    "ui_completeness_each": "Complete SBOM certified",
+    "observed_discrepancy": "The UI package count is 0 despite 81 components in each raw export."
+  },
+  "budget": {
+    "reservation_eur": 10,
+    "billing_remaining_eur": 1009.48,
+    "billing_observed_at": "2026-11-14T06:13:19.588Z",
+    "actual_job_cost_eur": null,
+    "note": "Billing balance is organization-wide, unchanged at the observed precision; it is not a per-job cost receipt. No new spending authority requested or used.",
+    "cutoff_utc": "2026-11-15T17:00:00Z"
+  },
+  "runs": [
+    {
+      "run_id": 43564116021,
+      "workload": "native-probe",
+      "executed_jobs": 2,
+      "conclusion": "success",
+      "harness_sha": "0e03dc2c5ce27ee2e46400e71ed3d12ad2af3063"
+    },
+    {
+      "run_id": 43564118119,
+      "workload": "new-products-browser",
+      "executed_jobs": 6,
+      "conclusion": "success",
+      "harness_sha": "0e03dc2c5ce27ee2e46400e71ed3d12ad2af3063"
+    },
+    {
+      "run_id": 43564229034,
+      "workload": "cache-proof",
+      "executed_jobs": 2,
+      "conclusion": "success",
+      "harness_sha": "0e03dc2c5ce27ee2e46400e71ed3d12ad2af3063"
+    },
+    {
+      "run_id": 43564231865,
+      "workload": "mariadb-runtime",
+      "executed_jobs": 1,
+      "conclusion": "failure-before-SQL",
+      "harness_sha": "0e03dc2c5ce27ee2e46400e71ed3d12ad2af3063"
+    },
+    {
+      "run_id": 43564983185,
+      "workload": "mariadb-runtime",
+      "executed_jobs": 1,
+      "conclusion": "failure-product-sql-identity",
+      "harness_sha": "6d85bb9a1b02cb06eef2d1da77f7cd86008a7e25"
+    }
+  ]
+}
