@@ -32,7 +32,7 @@ async function textIs(page, selector, expected) {
   );
 }
 
-async function clickedPost(page, selector, path) {
+async function clickedPost(page, selector, path, { captureAuthorization = false } = {}) {
   const [response] = await Promise.all([
     page.waitForResponse(response =>
       response.request().method() === 'POST' &&
@@ -40,11 +40,17 @@ async function clickedPost(page, selector, path) {
     ),
     page.locator(selector).click(),
   ]);
-  return {
+  const result = {
     status: response.status(),
     body: await response.json(),
     payload: response.request().postDataJSON(),
   };
+  // Only the explicit same-buyer replay probe needs this ephemeral header.
+  // Do not add it to ordinary quote/mission result objects or test receipts.
+  if (captureAuthorization) {
+    result.authorization = (await response.request().allHeaders()).authorization ?? null;
+  }
+  return result;
 }
 
 async function getJson(page, base, path) {
@@ -178,7 +184,41 @@ async function stoaSmoke(page, base) {
   return { syntheticImport: 'passed', citationInteraction: 'passed', sponsor };
 }
 
-async function valioSmoke(page, base) {
+async function valioMissionSmoke(page, base) {
+  // Frontier V3 adds a distinct landing journey; preserve the classic safety
+  // controls while testing the new form, planning and commitment boundary.
+  await page.waitForFunction(() =>
+    document.querySelector('#buyer-context')?.textContent.includes('Demo capability'));
+  assert.equal(await page.locator('#commit-button').isDisabled(), true);
+  await page.locator('#dairy').fill('480');
+  await page.locator('#oat').fill('240');
+  await page.locator('#budget').fill('1750');
+
+  const planned = await clickedPost(page, '#plan-button', '/api/plans');
+  assert.equal(planned.status, 201);
+  const plan = planned.body.plan;
+  assert.equal(plan.totalLitres, 720);
+  assert.equal(plan.options.length, 3);
+  await page.waitForFunction(() =>
+    document.querySelectorAll('#option-grid .option-card').length === 3);
+  await page.waitForFunction(() =>
+    document.querySelector('#quote-button')?.disabled === false);
+  assert.equal(await page.locator('#commit-button').isDisabled(), true);
+
+  const fixed = await clickedPost(page, '#quote-button', '/api/plans/' + plan.id + '/quotes');
+  assert.equal(fixed.status, 201);
+  assert.ok(fixed.body.quote.totalCents > 0);
+  assert.equal(fixed.body.quote.planId, plan.id);
+  assert.equal(await page.locator('#commit-button').isDisabled(), true);
+  const audit = (await getJson(page, base, '/api/audit')).receipts;
+  assert.equal(audit.some(row => row.event === 'ORDER_SIMULATED'), false);
+  const missionOverflow = await page.evaluate(() =>
+    Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) - window.innerWidth);
+  assert.ok(missionOverflow <= 1, 'Mission horizontal overflow: ' + missionOverflow + 'px');
+  return { missionPlanning: 'passed', fixedQuote: 'passed', unsignedOrderBlocked: 'passed', missionOverflow };
+}
+
+async function valioSmoke(page, base, { frontier = false } = {}) {
   const initial = (await getJson(page, base, '/api/catalog')).products;
   const amounts = products =>
     Object.fromEntries(products.map(p => [p.sku, p.unitsAvailable]));
@@ -207,7 +247,7 @@ async function valioSmoke(page, base) {
   await textIs(page, '#quote-status', 'APPROVED');
   assert.equal(await page.locator('#order').isEnabled(), true);
 
-  const committed = await clickedPost(page, '#order', '/api/orders');
+  const committed = await clickedPost(page, '#order', '/api/orders', { captureAuthorization: frontier });
   assert.equal(committed.status, 201);
   const order = committed.body.order;
   assert.equal(order.status, 'SIMULATED_COMMITTED');
@@ -216,9 +256,26 @@ async function valioSmoke(page, base) {
   await textIs(page, '#policy-title', 'Simulation committed · no purchase');
   assert.equal(await page.locator('#order').isDisabled(), true);
 
-  // The UI disables its commit button. Replay its actual HTTP payload directly.
+  // Frontier V3 requires the synthetic buyer capability on every write.
+  // Prove an anonymous replay is refused, then replay the exact original
+  // payload with the SAME buyer capability (not a fresh authorization).
+  let replayAuthorization;
+  if (frontier) {
+    // Do not retain the synthetic capability on an object that an assertion
+    // could accidentally serialize. Never include it in an error message.
+    replayAuthorization = committed.authorization;
+    delete committed.authorization;
+    const unboundReplay = await page.request.post(base + '/api/orders', {
+      data: committed.payload,
+    });
+    assert.equal(unboundReplay.status(), 403);
+    assert.equal((await unboundReplay.json()).error.code, 'BUYER_CAPABILITY_REQUIRED');
+    assert.ok(/^Bearer [0-9a-f-]{36}$/i.test(replayAuthorization ?? ''),
+      'Expected a same-buyer synthetic bearer capability');
+  }
   const replayResponse = await page.request.post(base + '/api/orders', {
     data: committed.payload,
+    ...(frontier ? { headers: { Authorization: replayAuthorization } } : {}),
   });
   assert.equal(replayResponse.status(), 201);
   const replay = (await replayResponse.json()).order;
@@ -314,7 +371,25 @@ async function main() {
         page.on('pageerror', error => errors.push(error.message));
         const document = await page.goto(base, { waitUntil: 'domcontentloaded' });
         assert.equal(document.status(), 200);
-        const coverage = await cfg.run(page, base);
+        let mission = null;
+        if (product === 'valio') {
+          // Older source serves the classic form at /. Frontier V3 introduces
+          // Mission Control at / and preserves the classic form at /classic.
+          const classic = await page.request.get(base + '/classic');
+          if (classic.status() === 200) {
+            assert.equal(await page.locator('#mission-form').count(), 1,
+              'New Valio source must present Mission Control at /');
+            mission = await valioMissionSmoke(page, base);
+            await page.screenshot({ path: output + '/' + label + '-mission.png', fullPage: true });
+            const legacyDocument = await page.goto(base + '/classic', { waitUntil: 'domcontentloaded' });
+            assert.equal(legacyDocument.status(), 200);
+          } else {
+            assert.equal(await page.locator('#request-text').count(), 1,
+              'Legacy Valio source must expose the classic request form at /');
+          }
+        }
+        const coverage = await cfg.run(page, base, { frontier: Boolean(mission) });
+        if (mission) coverage.mission = mission;
         const overflow = await page.evaluate(() =>
           Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) - window.innerWidth,
         );
