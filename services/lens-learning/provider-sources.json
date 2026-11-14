@@ -1,0 +1,39 @@
+{
+  "schema": "lens.learning-provider-sources/v1",
+  "factory": {
+    "repository": "SalesSquad/factory",
+    "commit": "3d279f11341081ba4fa030db90ede0f329370dd3",
+    "adapterPath": "tools/factory_os/decision_assist.py",
+    "adapterSha256": "1ac50753e7e889b7f75474d38bea08bff9f672ee477e75843448001aa9c93a17",
+    "url": "https://github.com/SalesSquad/factory/blob/3d279f11341081ba4fa030db90ede0f329370dd3/tools/factory_os/decision_assist.py",
+    "moduleHashes": {
+      "tools/factory_os/decision_assist.py": "1ac50753e7e889b7f75474d38bea08bff9f672ee477e75843448001aa9c93a17",
+      "tools/factory_os/common.py": "c8c684cae274fd7f64a975cdcc37789d582865be2b88a3181af61f49862bb888",
+      "tools/factory_os/model_gateway.py": "c7b20a6b4ac94d2c66cd8238ced7689d2239ca05e3920e9cfc0b0b6dd7eec046",
+      "tools/factory_os/secure_fs.py": "6f630584765c8fc53268fb45760b1bf2f7b4afbb4a5161e39de96a37f96944f9",
+      "tools/factory_os/__init__.py": "a97949b30f1a4daa2d7694e85b22ae6994f985c1eb01e08bddac02c2238b105c",
+      "tools/factory_os/log.py": "05ad6abf394508a3c10300c75518f9f1bfe59048c358ba307404342d89cb43fd",
+      "tools/factory_os/transcript.py": "88fdd2ef6ee5136cf319e22358c0235140cca8be36331080bda19340c4284215",
+      "kernel/factory_kernel/__init__.py": "4d0bbee2fe32fd29a6e6cdd9449e9f2a6c7025aed8d8c3bfd5451914f002f88e",
+      "kernel/factory_kernel/common.py": "232c066fa19977175eb75e2f24e5e76df6d9c328e03d4310a74fc8109db57fb5",
+      "kernel/factory_kernel/secure_fs.py": "f3228c1e143e36a70b27999a7db340cb037db159747d15a0a6e79f691389e51f",
+      "tools/factory_os/deadline.py": "2b7e193e5ea3266c374ac94d0a2150e9d2c7afdba4d5b577567190073406da08"
+    }
+  },
+  "providers": {
+    "jev": {
+      "name": "TypeSafe Jev",
+      "endpoint": "https://api.typesafe.ai/v1/systemone",
+      "model": "jev-1.13.0",
+      "keyEnvironment": "TYPESAFE_API_KEY"
+    },
+    "openai": {
+      "name": "OpenAI Decisions",
+      "endpoint": "https://api.openai.com/v1/decisions",
+      "model": "gpt-6-luna",
+      "keyEnvironment": "OPENAI_API_KEY"
+    }
+  },
+  "authority": "advisory_only",
+  "sourceNote": "External private implementation is referenced, never vendored. Source pin does not prove live provider availability. Offline responses are transport fixtures, not provider decisions."
+}
