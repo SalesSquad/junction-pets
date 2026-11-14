@@ -10,7 +10,7 @@ import sys
 
 V2 = "f96788807c262b2233f034c045df4373cb3c428c"
 TD = "f7b512d93ca46e6ddf7204f62f118eee800f285b"
-EXPERIMENT = "dc6fbe5434fbd28ccf5a50eafbe4c3c5fde36b7e"
+EXPERIMENT = "fe43527be1b1c59c7e1e7e62a3cdff7ddecb88cb"
 SPLITS = (("locked_test", "test", 327000, 500), ("locked_ood", "ood", 427000, 300))
 
 
