@@ -74,7 +74,7 @@ function renderOptions() {
     const selected = option.id === state.optionId;
     const card = node('button', undefined, `option-card${selected ? ' selected' : ''}${option.withinBudget ? '' : ' over-budget'}`);
     card.type = 'button';
-    card.disabled = !option.withinBudget || state.busy;
+    card.disabled = !option.withinBudget || state.busy || state.order?.status === 'SIMULATED_COMMITTED';
     card.setAttribute('aria-pressed', String(selected));
     card.title = option.explanation;
     const head = node('div', undefined, 'option-head');
@@ -138,6 +138,7 @@ function renderPayment() {
   $('payment-send-button').disabled = state.busy || !active || pay?.approval?.decision !== 'approve' || Boolean(transfer);
   $('payment-replay-button').disabled = state.busy || !transfer;
   $('payment-refund-button').disabled = state.busy || !active;
+  $('payment-refund-button').textContent = transfer ? 'Cancel & reverse fictional payment' : 'Cancel unpaid demo order';
   $('payment-status').textContent = transfer?.status === 'SIMULATED_REFUNDED' ? 'REVERSED ✓' :
     transfer ? 'BALANCED ✓' : pay?.approval?.decision === 'approve' ? 'READY TO TRANSFER' :
     pay?.approval?.decision === 'reject' ? 'REFUSED' : order ? 'APPROVAL REQUIRED' : 'AWAITING ORDER';
@@ -147,8 +148,8 @@ function renderPayment() {
     const allocations = transfer.allocations.map((item) => `${item.supplierId}: ${euro(item.amountCents)}`).join(' · ');
     $('payment-description').textContent = `${transfer.id} · ${transfer.status.replaceAll('_', ' ')} · ${transfer.journalEntryIds.length} balanced postings. ${allocations}. Fictional funds only.`;
   } else {
-    const suppliers = [...new Set(order.lines.map((line) => line.supplierId ?? 'supplier-demo'))];
-    $('payment-description').textContent = `Server-owned order ${order.id} for ${euro(order.totalCents)} across ${suppliers.length} invented supplier wallet(s). A separate synthetic human payment decision is mandatory.`;
+    const recipients = (pay?.proposal?.allocations ?? []).map(({ supplierId, amountCents }) => `${supplierId}: ${euro(amountCents)}`).join(' · ');
+    $('payment-description').textContent = `Server-owned ${order.id}: ${recipients}. Proposal ${pay?.proposal?.digest.slice(0, 12) ?? 'pending'}… A separate synthetic human payment decision is mandatory.`;
   }
 }
 
@@ -319,7 +320,7 @@ $('commit-button').addEventListener('click', () => act('Simulated order commitme
 }));
 
 $('payment-approve-button').addEventListener('click', () => act('Independent demo payment approval', async () => {
-  state.payment = await api(`/api/orders/${encodeURIComponent(state.order.id)}/payment-approval`, { buyerId: BUYER, decision: 'approve' });
+  state.payment = await api(`/api/orders/${encodeURIComponent(state.order.id)}/payment-approval`, { buyerId: BUYER, decision: 'approve', proposalDigest: state.payment.proposal.digest });
   state.wallet = state.payment.wallet;
   timeline('Explicit payment consent recorded', `Separate fictional approval for ${state.order.id} · ${euro(state.order.totalCents)} · NOT banking consent`);
 }));
@@ -341,14 +342,17 @@ $('payment-replay-button').addEventListener('click', () => act('Payment replay d
 }));
 
 $('payment-refund-button').addEventListener('click', () => act('Simulated order cancellation and refund', async () => {
+  const hadTransfer = Boolean(state.payment?.transfer);
   const { order } = await api(`/api/orders/${encodeURIComponent(state.order.id)}/cancel`, { buyerId: BUYER });
   state.order = order;
   state.payment = await api(`/api/orders/${encodeURIComponent(order.id)}/payment`);
   state.wallet = state.payment.wallet;
   const verification = await api('/api/demo/ledger/verify');
   if (!verification.valid) throw Error('The fictional refund journal did not balance.');
-  timeline('Fictional transfer reversed', `${order.id} cancelled · ${euro(order.totalCents)} back in buyer demo wallet · original order restored stock`);
-  $('timeline-status').textContent = 'CANCELLED / REVERSED';
+  timeline(hadTransfer ? 'Fictional transfer reversed' : 'Unpaid order cancelled',
+    hadTransfer ? `${order.id} cancelled · ${euro(order.totalCents)} back in buyer demo wallet · stock restored` :
+      `${order.id} cancelled before payment · no wallet transfer or refund was needed · stock restored`);
+  $('timeline-status').textContent = hadTransfer ? 'CANCELLED / REVERSED' : 'CANCELLED / UNPAID';
 }));
 
 $('replay-button').addEventListener('click', () => act('Replay resistance', async () => {
