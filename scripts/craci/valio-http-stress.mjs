@@ -37,7 +37,7 @@ const outcomes = {
   seed, fixtures, width,
   same_key_storms:0, distinct_key_storms:0, cancel_races:0,
   parallel_settlement_posts:0, parallel_cancel_posts:0,
-  unapproved_payment_denials:0, unsigned_term_denials:0,
+  unapproved_payment_denials:0, tampered_term_denials:0,
   successful_original_settlements:0, idempotent_replays:0,
   duplicate_charge:0, journal_failures:0, nonzero_final_wallets:0,
   violation_count:0, no_real_money:true, no_external_calls:true,
@@ -101,7 +101,7 @@ async function fixture(i) {
     assert.equal(approval.status,200);
     const illegal=await call(settlePath,{buyerId,idempotencyKey:'j26-stress-injected-'+i,amountCents:1},token);
     assert.equal(illegal.error?.code,'PAYMENT_TERMS_FORBIDDEN');
-    outcomes.unsigned_term_denials++;
+    outcomes.tampered_term_denials++;
     const kind=i%3;
     let first=0,replay=0;
     if(kind===0) {
