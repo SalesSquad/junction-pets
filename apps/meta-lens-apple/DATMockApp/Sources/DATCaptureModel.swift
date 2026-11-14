@@ -36,6 +36,8 @@ final class DATCaptureModel: ObservableObject {
     private var hasStreamed = false
     private var importedVideo: URL?
     private var mockEnabled = false
+    var isMockKitEnabled: Bool { MockDeviceKit.shared.isEnabled }
+    var hasImportedVideo: Bool { importedVideo != nil }
 
     private static let configurationError: String? = {
         do {
@@ -74,7 +76,7 @@ final class DATCaptureModel: ObservableObject {
             self.stop(reason: "No SDK frames received — use the manual path")
         }
         startup = Task { [weak self] in
-            guard let self else { return }
+            guard let self, self.epoch.accepts(generation), !Task.isCancelled else { return }
             do {
                 MockDeviceKit.shared.enable()
                 self.mockEnabled = true
@@ -269,7 +271,8 @@ final class DATCaptureModel: ObservableObject {
         selector = nil
         mock = nil
         status = reason
-        guard !cleaning, mockEnabled else { return }
+        guard !cleaning else { return }
+        guard mockEnabled else { removeImportedVideo(); return }
         mockEnabled = false
         cleaning = true
         let oldListeners = listeners
@@ -278,11 +281,15 @@ final class DATCaptureModel: ObservableObject {
             for token in oldListeners { await token.cancel() }
             await MockDeviceKit.shared.disable()
             guard let self else { return }
-            if let importedVideo = self.importedVideo {
-                try? FileManager.default.removeItem(at: importedVideo)
-                self.importedVideo = nil
-            }
+            self.removeImportedVideo()
             self.cleaning = false
+        }
+    }
+
+    private func removeImportedVideo() {
+        if let importedVideo {
+            try? FileManager.default.removeItem(at: importedVideo)
+            self.importedVideo = nil
         }
     }
 
