@@ -374,6 +374,7 @@ def main():
     subprocess.run([
         str(py), str(replay_script), "--evidence-dir", str(dest),
         "--physics-dir", str(src / PRODUCT.parent),
+        "--product-run", str(module / "run.py"),
     ], cwd=src, check=True)
     replay = read_json(dest / "independent-positive-replay.json", max_bytes=1024 * 1024)
     require(replay.get("claim_verified") is True and
