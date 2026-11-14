@@ -7,6 +7,10 @@ when the error among skipped notes stays at or below a target on validation note
   scribe/.venv/bin/python scribe/v3/cascade.py record --judge jev|decisions --summary <run.py stdout file>
   scribe/.venv/bin/python scribe/v3/cascade.py analyse
       thresholds and the logistic fit on validation notes only (asserted), report on the two test sets
+  --resolve A' (default) | A | off    before any outcome is scored or any judge input is written, the student's
+      prediction goes through the relative-date resolver (scribe/v3/resolve.py, frozen in
+      data/scribe/v4/resolver/freeze.json), as in the product client. The outcome is then exact match of the resolved
+      prediction. Resolved runs write their own *-v2-resolved-<arm> files; "--resolve off" is the recorded v1 analysis.
 
 Signals: the student's confidence (mean token log-probability), a judge score built from Jev's answers, their
 logistic combination, and on a hash-chosen subset the same with OpenAI Decisions. For each signal the threshold is
@@ -30,6 +34,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from common import ROOT, order_key, read_jsonl, save_json, sha256_file, share, wilson, write_jsonl  # noqa: E402
 
+import resolve as date_resolve  # noqa: E402  (relative-date rule; standard library only)
+
 sys.path.insert(0, str(ROOT / "scribe/judges"))
 import core  # noqa: E402  (request bodies only, to check and size the inputs; this file sends nothing)
 
@@ -47,6 +53,41 @@ RUNS = dict(jev=OUT / "run-jev-v1.json", decisions=OUT / "run-decisions-v1.json"
 NOTES = OUT / "notes-v1.jsonl"
 RESULT = OUT / "cascade-v1.json"
 RESULTS_MD = OUT / "RESULTS.md"
+RESOLVE_ARMS = ("A'", "A", "off")
+RESOLVE = "off"  # on import: the v1 file set; the command line sets --resolve (default A', the product arm chosen on
+# validation in data/scribe/v4/resolver/reproduce-v1.json) through use_resolver(), which also switches the file set
+RESOLVER_FREEZE = ROOT / "data/scribe/v4/resolver/freeze.json"
+
+
+def use_resolver(arm):
+    """Select the resolver arm; a resolved run reads and writes its own file set, so v1 files stay as recorded."""
+    global RESOLVE, PLAN, PAIRS, ANSWERS, RUNS, NOTES, RESULT, RESULTS_MD
+    if arm not in RESOLVE_ARMS:
+        raise SystemExit(f"--resolve must be one of {RESOLVE_ARMS}")
+    RESOLVE = arm
+    if arm == "off":
+        return
+    tag = "v2-resolved-" + ("Aprime" if arm == "A'" else arm)
+    PLAN = OUT / f"plan-{tag}.json"
+    PAIRS = dict(jev=OUT / f"pairs-jev-{tag}.jsonl", decisions=OUT / f"pairs-decisions-{tag}.jsonl")
+    ANSWERS = dict(jev=OUT / f"answers-jev-{tag}.jsonl", decisions=OUT / f"answers-decisions-{tag}.jsonl")
+    RUNS = dict(jev=OUT / f"run-jev-{tag}.json", decisions=OUT / f"run-decisions-{tag}.json")
+    NOTES = OUT / f"notes-{tag}.jsonl"
+    RESULT = OUT / f"cascade-{tag}.json"
+    RESULTS_MD = OUT / f"RESULTS-{tag}.md"
+
+
+def resolver_record():
+    """What resolved the predictions; the frozen hashes are checked before use."""
+    if RESOLVE == "off":
+        return dict(arm="off")
+    freeze = json.loads(RESOLVER_FREEZE.read_text())
+    now_sha = {f: sha256_file(ROOT / f) for f in freeze["files"]}
+    if now_sha != freeze["files"]:
+        raise SystemExit(f"resolver files changed since {rel(RESOLVER_FREEZE)}")
+    return dict(arm=RESOLVE, rule=date_resolve.RULE, freeze=rel(RESOLVER_FREEZE), frozen_at_utc=freeze["frozen_at_utc"],
+                files=freeze["files"], applied="to every parsed student prediction before its outcome is scored and before "
+                "any judge input is written; outcome = exact match of the resolved prediction")
 
 TEST_GROUPS = ("test_nemotron", "test_haiku")
 ALPHA_PCT = (5, 10)  # target error among accepted notes, percent
@@ -331,8 +372,26 @@ def same_conf(a, b):
     return (a is None and b is None) or (a is not None and b is not None and abs(a - b) <= 1e-12)
 
 
-def build_notes(run):
-    """Per-note outcomes, confidences and predictions of the chosen run, checked against the dataset files."""
+def resolve_note(rec, meta, stored_outcome, arm):
+    """Resolve one stored prediction before scoring. Returns (record with the resolved prediction, outcome)."""
+    gold = json.loads(meta["target_json"])
+    pred = rec.get("prediction")
+    if bool(stored_outcome) != (pred == gold):
+        raise SystemExit(f"stored outcome of {meta['id']} is not exact match of its prediction")
+    if arm == "off":
+        return rec, stored_outcome
+    try:
+        fixed = date_resolve.repair(pred, meta["note_text"], meta["note_date"], arm)
+    except (KeyError, TypeError, AttributeError):  # a malformed prediction stays as it is (and is not judgeable)
+        fixed = pred
+    return dict(rec, prediction=fixed, prediction_unresolved=pred), fixed == gold
+
+
+def build_notes(run, arm=None):
+    """Per-note outcomes, confidences and predictions of the chosen run, checked against the dataset files.
+
+    arm (default: the --resolve setting) resolves relative dates in each prediction before its outcome is scored."""
+    arm = RESOLVE if arm is None else arm
     d = STUDENT / run
     m = json.loads((d / "result.json").read_text())["val"]["metrics"]
     recs = {r["id"]: r for r in json.loads((d / "val-records.json").read_text())}
@@ -344,7 +403,8 @@ def build_notes(run):
         if not same_conf(recs[ident]["confidence"], m["confidences"][i]):
             raise SystemExit(f"confidence mismatch for {ident}")
         group = "val_haiku" if "haiku" in meta[ident]["writer"] else "val_nemotron"
-        notes.append(note_row(ident, "val", group, m["outcomes"][i], m["confidences"][i], recs[ident], meta[ident]))
+        rec, outcome = resolve_note(recs[ident], meta[ident], m["outcomes"][i], arm)
+        notes.append(note_row(ident, "val", group, outcome, m["confidences"][i], rec, meta[ident]))
     ev = json.loads((d / "eval-test.json").read_text())
     for g in TEST_GROUPS:
         s = ev["splits"][g]
@@ -356,7 +416,8 @@ def build_notes(run):
         for i, ident in enumerate(mm["ids"]):
             if not same_conf(recs[ident]["confidence"], mm["confidences"][i]):
                 raise SystemExit(f"confidence mismatch for {ident}")
-            notes.append(note_row(ident, "test", g, mm["outcomes"][i], mm["confidences"][i], recs[ident], meta[ident]))
+            rec, outcome = resolve_note(recs[ident], meta[ident], mm["outcomes"][i], arm)
+            notes.append(note_row(ident, "test", g, outcome, mm["confidences"][i], rec, meta[ident]))
     val_ids = {n["id"] for n in notes if n["split"] == "val"}
     test_ids = {n["id"] for n in notes if n["split"] == "test"}
     if val_ids & test_ids or len(val_ids) + len(test_ids) != len(notes):
@@ -439,6 +500,7 @@ def cmd_prepare(_args):
         synthetic=True,
         not_for_clinical_use=True,
         written_utc=now(),
+        resolver=resolver_record(),
         written_before_any_judge_answer=True,
         student=dict(chosen=run, rule="highest validation exact match; prefer the pre-registered primary of "
                      "compare-v1.json when it and the highest run lie within each other's Wilson 95% intervals; test "
@@ -469,7 +531,7 @@ def cmd_prepare(_args):
         design=dict(alpha_pct=list(ALPHA_PCT), min_accepted=MIN_ACCEPTED, bootstrap=BOOT, seed=SEED, l2=L2),
     )
     save_json(PLAN, plan)
-    log("prepare", "scribe/.venv/bin/python scribe/v3/cascade.py prepare",
+    log("prepare", f"scribe/.venv/bin/python scribe/v3/cascade.py --resolve \"{RESOLVE}\" prepare",
         inputs=[c["val_file"] for c in cands] + [rel(STUDENT / run / "eval-test.json"), rel(COMPARE), rel(PREREG),
                 "data/scribe/v3/dataset/{val,test_nemotron,test_haiku}.parquet", rel(core.POLICY)],
         outputs=[rel(PLAN), rel(PAIRS["jev"]), rel(PAIRS["decisions"])],
@@ -642,6 +704,8 @@ def cost_block(rows, judge):
 
 def cmd_analyse(_args):
     plan = json.loads(PLAN.read_text())
+    if (plan.get("resolver") or dict(arm="off"))["arm"] != RESOLVE:
+        raise SystemExit(f"{rel(PLAN)} was prepared with another resolver arm than --resolve {RESOLVE}")
     run = plan["student"]["chosen"]
     notes = build_notes(run)
     jev, dec = answers("jev"), answers("decisions")
@@ -785,6 +849,7 @@ def cmd_analyse(_args):
         synthetic=True,
         not_for_clinical_use=True,
         generated_utc=now(),
+        resolver=resolver_record(),
         question="At the same target error among notes that skip review, does adding an independent judge let more notes skip review than the student's own confidence?",
         student=plan["student"],
         inputs={rel(p): sha256_file(p) for p in [STUDENT / run / "result.json", STUDENT / run / "val-records.json",
@@ -828,7 +893,7 @@ def cmd_analyse(_args):
                              combo_student_jev_logit=r4(logit(models["student+jev"], n["features"])) if n["parsed"] else None)
                         for n in notes])
     RESULTS_MD.write_text(render_md(result))
-    log("analyse", "scribe/.venv/bin/python scribe/v3/cascade.py analyse",
+    log("analyse", f"scribe/.venv/bin/python scribe/v3/cascade.py --resolve \"{RESOLVE}\" analyse",
         inputs=list(result["inputs"]), outputs=[rel(RESULT), rel(NOTES), rel(RESULTS_MD)],
         metrics=dict(verdict=result["verdict"]["lines"], judges={j: {k: v for k, v in s.items() if k != "cost"} for j, s in judge_stats.items()}),
         cost_usd=0.0)
@@ -960,7 +1025,7 @@ def render_md(res):
     chosen = next(c for c in s["candidates"] if c["run"] == s["chosen"])
     d = res["design"]
     L = ["# Cascade at inference: does a judge let more notes skip review?\n",
-         "Generated by `scribe/v3/cascade.py analyse`; every number is in `data/scribe/v3/cascade/cascade-v1.json`. All notes are "
+         f"Generated by `scribe/v3/cascade.py --resolve \"{RESOLVE}\" analyse`; every number is in `{rel(RESULT)}`. All notes are "
          "SYNTHETIC (simulated pathways, model-written notes). Nothing here is for clinical use or shows patient benefit, and a "
          "judge is a language model that gives a second opinion, not the truth.\n",
          "The idea: the student proposes events and a person confirms them. A note may skip the person only if the error among "
@@ -1079,7 +1144,10 @@ def main():
     r.add_argument("--judge", choices=("jev", "decisions"), required=True)
     r.add_argument("--summary", required=True)
     sub.add_parser("analyse")
+    ap.add_argument("--resolve", choices=RESOLVE_ARMS, default="A'",
+                    help="relative-date resolver arm applied before scoring (scribe/v3/resolve.py); off = recorded v1 analysis")
     a = ap.parse_args()
+    use_resolver(a.resolve)
     dict(prepare=cmd_prepare, record=cmd_record, analyse=cmd_analyse)[a.cmd](a)
 
 

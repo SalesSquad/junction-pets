@@ -92,6 +92,77 @@ def familywise_reading(study):
             f"{len(above)} of the {len(cells)} cells have a 95% interval entirely above the 5% target: "
             +'; '.join(f"{x['familywise_false_positive_rate']:.3f} ({x['ci95'][0]:.3f} to {x['ci95'][1]:.3f}; {where(x)})" for x in above)+". The family-wise rate is not controlled there.")
 
+SLOTS=['FIRST_CONTACT','REFERRAL_SENT','DIAGNOSIS','TREATMENT_START']
+
+def interval_block(study):
+    """Section 4, current adapter: within-note interval errors as is and with the code date resolver.
+    Every number comes from the study file."""
+    from .extraction_intervals import fake_inequality,null_rate
+    from .schema import EVENT_TYPES
+    S=study['measured_interval_extraction']; rows=S['rows']; F=fake_inequality(S); A=S['agreement_with_interval_impact_v1']; X=S['note_exact_match']
+    P={(p['arm'],p['writer']):p for p in S['profiles']}
+    sizes=sorted({x['n'] for x in rows if x['kind']=='planted'}); small=sizes[0]; reps=rows[0]['replications']
+    variants=[(None,False),('off',False),('A',False),('off',True),('A',True)]
+    cell=lambda kind,arm,x,n=None:next(r for r in rows if r['kind']==kind and r['arm']==arm and r['extras_modelled']==x and (n is None or r['n']==n))
+    lab=lambda arm,x:next(r['label'] for r in rows if r['kind']=='planted' and r['arm']==arm and r['extras_modelled']==x)
+    days=lambda v:f"{round(v,1)+0.:+.1f}"
+    frac=lambda r:f"{r['k']:,}/{r['n']:,} ({r['value']:.3f}; 95% interval {r['wilson95'][0]:.3f} to {r['wilson95'][1]:.3f})"
+    N=lambda c,arm,w,x=False:null_rate(S,c,arm,w,x)
+    nominal=F['numbers']['nominal_at_most']; writer=dict(all='both writers',nemotron='Nemotron-written',haiku='Haiku-written')
+    res_loc=[cell('planted','A',x,small)['intervals'][k]['located'] for x in (False,True) for k in CORE]
+    conf_loc=[cell('planted',None,False,small)['intervals'][k]['located'] for k in CORE]
+    asis_loc=[cell('planted','off',False,small)['intervals'][k]['located'] for k in CORE]
+    asis_bias=[cell('planted','off',x,n)['intervals'][k]['median_bias_days'] for x in (False,True) for n in sizes for k in CORE]
+    res_bias=[cell('planted','A',x,n)['intervals'][k]['median_bias_days'] for x in (False,True) for n in sizes for k in CORE]
+    res_null=[r for r in rows if r['kind']=='null' and r['arm']=='A']
+    worst=max(res_null,key=lambda r:r['county_false_positive_rate'])
+    ok=min(res_loc)>=.8 and worst['county_false_positive_rate_ci95'][0]<=nominal
+    span=lambda v:f"{min(v):.3f}" if f"{min(v):.3f}"==f"{max(v):.3f}" else f"{min(v):.3f} to {max(v):.3f}"
+    lines=[f"**{F['headline']}** {F['text']}",'',
+      f"**The current scribe, as is and with the code date resolver.** `eventlog/extraction_intervals.py` takes the stored predictions of `{S['run']}` (Gemma 3 270M) on its 700 held-out test notes "
+      "and the product's frozen relative-date resolver (`scribe/v3/resolve.py`, arm A; the product default A' gives "
+      +("the same pairs" if S['checks']['product_default_arm_Aprime_equals_A_on_these_notes'] else "different pairs")+" on these notes). "
+      "For every pair of day-precision gold events in one note it records whether both were found with the right type and the predicted span minus the true span, so errors that share a date in a note stay correlated. "
+      f"The recomputed pairs equal the lists of the earlier scratch analysis in `runs/diagnose/` ({'; '.join(S['checks']['recomputed_equals_stored'].values())}). "
+      f"Note-level exact match of the same notes (`{X['source']}`): validation {frac(X['validation']['as_is'])} as is and {frac(X['validation']['resolver'])} with the resolver ({X['validation']['role']}); "
+      f"test {frac(X['test']['as_is'])} and {frac(X['test']['resolver'])} ({X['test']['role']}; Nemotron-written {X['test']['resolver_by_writer']['nemotron']['k']:,}/{X['test']['resolver_by_writer']['nemotron']['n']:,}, "
+      f"Haiku-written {X['test']['resolver_by_writer']['haiku']['k']:,}/{X['test']['resolver_by_writer']['haiku']['n']:,}); the resolver made {X['notes_made_worse_all_runs']} notes worse across the stored runs.",'',
+      '| dates | test notes | within-note pairs | found | exact interval among found | interval error, mean / SD, days | extra predicted events (gold events) | episodes with an extra: first contact / referral sent / diagnosis / treatment start |',
+      '| --- | --- | --- | --- | --- | --- | --- | --- |',
+      *[f"| {ARMS_LABEL[arm]} | {writer[w]} ({P[(arm,w)]['notes']:,}) | {P[(arm,w)]['pairs']:,} | {P[(arm,w)]['found']:,} | {P[(arm,w)]['exact_interval']:.3f} | {P[(arm,w)]['mean_err']:+.1f} / {P[(arm,w)]['sd_err']:.1f} | "
+        f"{P[(arm,w)]['extra_events']} ({P[(arm,w)]['gold_events']:,}) | "+' / '.join(f"{P[(arm,w)]['extra_slot_probability'][EVENT_TYPES.index(t)]:.3f}" for t in SLOTS)+' |' for arm in ('off','A') for w in ('all','nemotron','haiku')],'',
+      f"A 30% slowdown planted in one interval of one county, {reps:,} runs per cell, the rest of the country read the same way. Located: share of runs in which the planted interval is the one flagged:",'',
+      '| county episodes | dates | located: primary care / diagnostic / treatment | median bias, days | testable episodes, mean |','| --- | --- | --- | --- | --- |',
+      *[f"| {n:,} | {lab(arm,x)} | "+' / '.join(f"{cell('planted',arm,x,n)['intervals'][k]['located']:.3f}" for k in CORE)+' | '
+        +' / '.join(days(cell('planted',arm,x,n)['intervals'][k]['median_bias_days']) for k in CORE)+' | '
+        +' / '.join(f"{cell('planted',arm,x,n)['intervals'][k]['testable_mean']:.0f}" for k in CORE)+' |' for n in sizes for arm,x in variants],'',
+      "A 20% slowdown at the per-interval county size of section 2 ("+', '.join(f"{NAMES[k]} {cell('planted_table_n',None,False)['n'][k]:,}" for k in CORE)+"), the size at which the formula of section 2 gives power 0.8:",'',
+      '| dates | located: primary care / diagnostic / treatment |','| --- | --- |',
+      *[f"| {lab(arm,x)} | "+' / '.join(f"{cell('planted_table_n',arm,x)['intervals'][k]['located']:.3f}" for k in CORE)+' |' for arm,x in variants],'',
+      f"No slowdown anywhere, one county of {F['numbers']['county_episodes']:,} episodes: share of {reps:,} runs in which it is flagged (nominal at most {nominal:.5f}; every event confirmed: {F['numbers']['confirmed']:.3f}):",'',
+      '| county | rest of the country | as is | with the resolver | as is, extra events modelled | with the resolver, extra events modelled |','| --- | --- | --- | --- | --- | --- |',
+      *[f"| {a} | {b} | "+' | '.join(f"{N(c,arm,w,x):.3f}" for x in (False,True) for arm in ('off','A'))+' |' for a,b,c,w in [
+        ('read from notes (both writers)','read from notes the same way','measured_everywhere','all'),
+        ('read from notes (both writers)','structured fields','county_extracted_country_structured','all'),
+        ('read from Nemotron-written-like notes','structured fields','county_extracted_country_structured','nemotron'),
+        ('read from Haiku-written-like notes','structured fields','county_extracted_country_structured','haiku'),
+        ('read from Haiku-written-like notes','read from Nemotron-written-like notes','county_haiku_like_country_nemotron_like','haiku vs nemotron')]],'',
+      f"Agreement with the scratch analysis `{A['source']}`: {A['compared_rates']} rates compared, {A['beyond_3_se']} more than three binomial standard errors apart, "
+      f"largest difference {A['largest_rate_difference']:.3f}; median bias differs by at most {A['largest_median_bias_difference_days']:.2f} days. {A['note']}",'',
+      "Reading. As is, the relative-date errors shift the county median of each interval by "+f"{days(min(asis_bias))} to {days(max(asis_bias))} days"
+      +f" and a county of {small:,} episodes locates a 30% slowdown in {span(asis_loc)} of runs instead of {span(conf_loc)}. "
+      +(f"With the code date resolver the median is off by {days(min(res_bias))} to {days(max(res_bias))} days, the slowdown is located in {span(res_loc)} of runs, "
+        f"and the largest false-flag rate with no slowdown is {worst['county_false_positive_rate']:.3f} (95% interval {worst['county_false_positive_rate_ci95'][0]:.3f} to {worst['county_false_positive_rate_ci95'][1]:.3f}), consistent with the nominal bound. "
+        "In this simulation on SYNTHETIC error profiles the resolver removes the fake inequality; it says nothing about real clinical notes, on which the scribe has not been tested. "
+        "Every extracted event stays a proposal, pre-filled for one-click confirmation by a person, and a date the resolver cannot place needs editing." if ok else
+        f"Even with the code date resolver the slowdown is located in {span(res_loc)} of runs and the largest false-flag rate is {worst['county_false_positive_rate']:.3f}. "
+        "So at the measured error, text extraction is not accurate enough to fill the county indicator without a person confirming every extracted date."),'',
+      "Extra predicted events: "+S['extra_events_model'],'',
+      "Limits: "+' '.join(S['limits'])]
+    return '\n'.join(lines)
+
+ARMS_LABEL=dict(off='as is',A='with the resolver')
+
 def extraction_block(study):
     """Section 4: the measured scribe error fed into the design study. Every number comes from the study file."""
     M=study['measured_text_extraction']; rows=M['rows']; profiles=M['profiles']
@@ -107,8 +178,9 @@ def extraction_block(study):
     bias=[P(p['profile'],n,k,'median_bias_days') for p in profiles for n in sizes for k in CORE]
     only=[N('measured_county_only',p['profile'],n) for p in profiles for n in sizes]
     not_enough=min(meas_small)<.8 or max(only)>.05
-    lines=["**What the measured error does to the county indicator (design study, SYNTHETIC).** `eventlog/design_study.measured_extraction_study` replaces the assumed error rates of section 3 "
-      "by the measured per-event error of the scribe. For every true event of a test note it takes the predicted event of the same type, if any, and the signed date error in days. "
+    head=[interval_block(study),''] if 'measured_interval_extraction' in study else []
+    lines=[*head,"**Earlier adapters, errors drawn independently per date (design study, SYNTHETIC).** `eventlog/design_study.measured_extraction_study` replaces the assumed error rates of section 3 "
+      "by the measured per-event error of earlier adapters. For every true event of a test note it takes the predicted event of the same type, if any, and the signed date error in days. "
       "Each simulated date then gets an error drawn independently from that list, and each event is lost with the measured share that was not found:",'',
       '| model and test notes | true events | found with the right type | exact date among those | wrong-date share | not found | largest error, days | extra predicted events | check |','| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
       *[f"| {p['system']} | {p['true_events']:,} | {p['events_with_type_found']:,} | {p['exact_dates']:,} | {p['wrong_date_share']:.3f} | {p['missing_share']:.3f} | {p['largest_absolute_error_days']} | "
@@ -121,11 +193,11 @@ def extraction_block(study):
       f"No slowdown anywhere: share of runs in which the county is flagged (nominal at most {nominal:.5f}). Every event confirmed: "+', '.join(f"{N('confirmed',None,n):.3f} ({n:,} episodes)" for n in sizes)+'.','',
       '| model and test notes | county episodes | county and country extracted | only the county extracted, the rest from structured fields |','| --- | --- | --- | --- |',
       *[f"| {short(p)} | {n:,} | {N('measured_everywhere',p['profile'],n):.3f} | {N('measured_county_only',p['profile'],n):.3f} |" for p in profiles for n in sizes],'',
-      f"Reading. With the selected version-2 adapter's error on Nemotron-written notes, a county of {small:,} episodes locates the planted interval in {span(main_small)} of runs instead of {span(conf_small)}, "
+      f"Reading for these earlier adapters. With the selected version-2 adapter's error on Nemotron-written notes, a county of {small:,} episodes locates the planted interval in {span(main_small)} of runs instead of {span(conf_small)}, "
       f"and a county of {big:,} in {span(main_big)}. Across the three error profiles the median interval is off by {days(min(bias))} to {days(max(bias))} days at both county sizes; more episodes do not remove a bias. "
       f"A county whose dates come from text while the others come from structured fields is flagged in {span(only)} of runs when nothing is wrong. "
-      +("So at the measured error, text extraction is not accurate enough to fill the county indicator without a person confirming every extracted date." if not_enough else
-        "At the measured error the county indicator keeps most of its power; human confirmation is still required by the Gemma terms and by the lack of validation on real notes."),'',
+      +("So at that error, text extraction was not accurate enough to fill the county indicator without a person confirming every extracted date." if not_enough else
+        "At that error the county indicator keeps most of its power; human confirmation is still required by the Gemma terms and by the lack of validation on real notes."),'',
       "Limits: "+' '.join(M['limits'])]
     return '\n'.join(lines)
 
@@ -349,6 +421,13 @@ def artifacts(out=Path('data/eventlog')):
         measured_extraction_min_localisation_smallest_county=min(x['stage_power'] for x in study['measured_text_extraction']['rows'] if x['kind']=='planted' and x['condition']=='measured_everywhere' and x['n']==min(r['n'] for r in study['measured_text_extraction']['rows'])),
         measured_extraction_localisation_confirmed_smallest_county=min(x['stage_power'] for x in study['measured_text_extraction']['rows'] if x['kind']=='planted' and x['condition']=='confirmed' and x['n']==min(r['n'] for r in study['measured_text_extraction']['rows'])),
         measured_extraction_county_only_null_rate=max(x['county_false_positive_rate'] for x in study['measured_text_extraction']['rows'] if x['kind']=='null' and x['condition']=='measured_county_only'))
+    if 'measured_interval_extraction' in study:
+        from .extraction_intervals import fake_inequality
+        F=fake_inequality(study['measured_interval_extraction'])['numbers']
+        summary.update(fake_inequality_county_text_country_structured=F['county_text_country_structured'],
+            fake_inequality_county_haiku_like_country_nemotron_like=F['county_haiku_like_country_nemotron_like'],
+            fake_inequality_extra_events_modelled=F['extra_events_modelled'],
+            interval_extraction_agreement_beyond_3_se=study['measured_interval_extraction']['agreement_with_interval_impact_v1']['beyond_3_se'])
     return study,roster,table,report,files,summary
 
 def write_results(out=Path('data/eventlog')):
@@ -381,6 +460,12 @@ def main():
     for prof in study['measured_text_extraction']['profiles']:
         for src,sha in prof['sources'].items():
             assert hashlib.sha256(Path(src).read_bytes()).hexdigest()==sha, f'{src} changed since the study ran: rerun eventlog.run_all'
+    S=study['measured_interval_extraction']
+    for src,sha in S['sources'].items():
+        assert hashlib.sha256(Path(src).read_bytes()).hexdigest()==sha, f'{src} changed since the study ran: rerun eventlog.run_all'
+    assert all(S['checks']['resolver_frozen'].values()) and S['checks']['profiles_equal_interval_impact_v1'] and len(S['checks']['recomputed_equals_stored'])==2
+    assert {(x['kind'],x['condition']) for x in S['rows']}=={('planted','confirmed'),('planted','measured_everywhere'),('planted_table_n','confirmed'),('planted_table_n','measured_everywhere'),
+        ('null','confirmed'),('null','measured_everywhere'),('null','county_extracted_country_structured'),('null','county_haiku_like_country_nemotron_like')}
     assert len(study['county_detectability'])==23 and len(study['rest_of_country_check'])==12
     doc=Path('DATA_COLLECTION.md').read_text()
     assert doc==render_document(doc,study), 'DATA_COLLECTION.md generated blocks are stale: run eventlog.audit.write_results()'
@@ -404,6 +489,7 @@ def main():
         'The simulator matches the published step means but not the published median of the whole pathway; real intervals may be more spread.',
         'The per-interval SDs depend on the assumed route shares and step distributions, and county sizes on an assumed national case count; real data will give other values.',
         'The measured extraction experiment uses the scribe adapters\' per-event errors on synthetic, model-labelled notes, drawn independently per date; it is not a measurement on clinical text.',
+        'The interval extraction experiment draws within-note interval errors of the current adapter, as is and with the code date resolver, measured on 700 synthetic, model-labelled test notes that had been read before; extra predicted events are modelled as collisions that make an interval underivable, not as substitutes for missing true events.',
         'No git operations.']))
     Path('eventlog/RESULTS.md').write_text(results_markdown(summary,study))
     log('final_artifact_audit','eventlog/.venv/bin/python -m eventlog.audit',

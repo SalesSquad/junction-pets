@@ -115,6 +115,22 @@ the assumed route shares and step distributions.
 - **Measured extraction error** fed back into the design study (`measured_extraction_study`), with
   its own random stream so that every earlier experiment keeps its draws.
 
+## Current adapter and the code date resolver (14 November 2026, evening)
+
+- `extraction_intervals.interval_extraction_study` (own random stream `[seed, 3]`) feeds the
+  within-note interval errors of `C-270m-all-v2data` into the detector, as is and after the
+  product's frozen relative-date resolver (`scribe/v3/resolve.py`, arm A). The pairs are recomputed
+  from the stored predictions with the diagnosis code's matching and must equal
+  `runs/diagnose/intervals-*.json`; the profile counts must equal `runs/diagnose/interval-impact-v1.json`.
+- Extra predicted events are measured per writer and event type and modelled as a second event of
+  the same type, which `intervals.derive` cannot pair (it needs exactly one start and one end
+  event). An extra standing in for a missing true event is not modelled.
+- Conditions: planted 30% (n = 500, 2,000), 20% at the section-2 n, and null runs with the county
+  read from notes against a country read the same way, against structured fields, and with the
+  county written like Haiku-written notes against a country written like Nemotron-written notes.
+- `audit.interval_block` writes the result, including the "fake county inequality" headline, into
+  the `STUDY:EXTRACTION` block of `DATA_COLLECTION.md`; every number comes from the study file.
+
 ## Other choices and limits
 
 The specification does not enumerate derived-table columns or age-band limits; `schema.py`

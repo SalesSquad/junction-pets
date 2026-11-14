@@ -1,0 +1,546 @@
+{
+ "schema": "scribe-v4-mlx-validation-v1",
+ "synthetic": true,
+ "created_utc": "2026-11-14T23:37:20Z",
+ "role": "validation = selection evidence (310 SYNTHETIC notes: 250 Nemotron-written, 60 Haiku-written). No test or stress note was read; step 8 scores those once.",
+ "scoring": "Exact match = the code-resolved prediction equals the canonical label (route, every event type, date and precision).\n  absolute arm: model JSON -> canonicalise -> scribe/v3/resolve.py repair() with resolver arm A' (product default)\n                and A; \"off\" is the model as is.\n  expression arm: model JSON -> scribe/v2/data_tools.resolve_expression (code computes every date).\nA parse failure is an output that does not survive that path; it counts as wrong. Wilson 95% intervals, exact\nMcNemar between arms on the same notes, groups by date form (groups overlap) and by writer.",
+ "arms": {
+  "A-270m-abs": {
+   "status": "ok",
+   "format": "absolute",
+   "primary_variant": "A'",
+   "resolution": "scribe/v3/resolve.py repair(); A' = product default, A = digits only, off = model as is",
+   "exact_match": {
+    "off": {
+     "k": 135,
+     "n": 310,
+     "value": 0.4355,
+     "ci95": [
+      0.3814,
+      0.4911
+     ]
+    },
+    "A": {
+     "k": 293,
+     "n": 310,
+     "value": 0.9452,
+     "ci95": [
+      0.9139,
+      0.9655
+     ]
+    },
+    "A'": {
+     "k": 293,
+     "n": 310,
+     "value": 0.9452,
+     "ci95": [
+      0.9139,
+      0.9655
+     ]
+    }
+   },
+   "parse": {
+    "strict": 310,
+    "tolerant": 0,
+    "failed": 0,
+    "failure_rate": 0.0
+   },
+   "by_date_form": {
+    "days": {
+     "k": 118,
+     "n": 121,
+     "value": 0.9752,
+     "ci95": [
+      0.9296,
+      0.9915
+     ]
+    },
+    "long": {
+     "k": 124,
+     "n": 134,
+     "value": 0.9254,
+     "ci95": [
+      0.8681,
+      0.959
+     ]
+    },
+    "month": {
+     "k": 119,
+     "n": 126,
+     "value": 0.9444,
+     "ci95": [
+      0.8898,
+      0.9728
+     ]
+    },
+    "no_year": {
+     "k": 68,
+     "n": 71,
+     "value": 0.9577,
+     "ci95": [
+      0.883,
+      0.9855
+     ]
+    },
+    "numeric": {
+     "k": 190,
+     "n": 203,
+     "value": 0.936,
+     "ci95": [
+      0.8935,
+      0.9622
+     ]
+    },
+    "weeks": {
+     "k": 95,
+     "n": 99,
+     "value": 0.9596,
+     "ci95": [
+      0.9007,
+      0.9842
+     ]
+    }
+   },
+   "by_writer": {
+    "haiku": {
+     "k": 53,
+     "n": 60,
+     "value": 0.8833,
+     "ci95": [
+      0.7782,
+      0.9423
+     ]
+    },
+    "nemotron": {
+     "k": 240,
+     "n": 250,
+     "value": 0.96,
+     "ci95": [
+      0.9279,
+      0.9781
+     ]
+    }
+   },
+   "with_relative_date": {
+    "k": 159,
+    "n": 166,
+    "value": 0.9578,
+    "ci95": [
+     0.9155,
+     0.9794
+    ]
+   },
+   "absolute_dates_only": {
+    "k": 134,
+    "n": 144,
+    "value": 0.9306,
+    "ci95": [
+     0.8769,
+     0.9618
+    ]
+   },
+   "hit_max_tokens": 0,
+   "mean_new_tokens": 72.0,
+   "seconds_per_note": 0.938,
+   "by_writer_off": {
+    "haiku": {
+     "k": 28,
+     "n": 60,
+     "value": 0.4667,
+     "ci95": [
+      0.3463,
+      0.5911
+     ]
+    },
+    "nemotron": {
+     "k": 107,
+     "n": 250,
+     "value": 0.428,
+     "ci95": [
+      0.3682,
+      0.49
+     ]
+    }
+   },
+   "with_relative_date_off": {
+    "k": 1,
+    "n": 166,
+    "value": 0.006,
+    "ci95": [
+     0.0011,
+     0.0333
+    ]
+   },
+   "training": {
+    "base": "270m",
+    "batch": 2,
+    "grad_accumulation_steps": 8,
+    "optimizer_steps": 324,
+    "training_examples": 5184,
+    "wall_seconds": 732.5,
+    "peak_memory_gb_reported": 4.140557282,
+    "adapter": "scribe/v4/artifacts/A-270m-abs/adapter",
+    "adapter_sha256": "326f255e4dc19a20ed0bc70cffe093f3b88960a3a1dc043cc08bd6f76a2322f0",
+    "killed": null,
+    "returncode": 0
+   },
+   "records": "data/scribe/v4/mlx/outputs/A-270m-abs/val-records.jsonl"
+  },
+  "B-270m-expr-aug": {
+   "status": "ok",
+   "format": "expression",
+   "primary_variant": "code",
+   "resolution": "scribe/v2/data_tools.resolve_expression",
+   "exact_match": {
+    "code": {
+     "k": 290,
+     "n": 310,
+     "value": 0.9355,
+     "ci95": [
+      0.9025,
+      0.9579
+     ]
+    }
+   },
+   "parse": {
+    "strict": 308,
+    "tolerant": 0,
+    "failed": 2,
+    "failure_rate": 0.0065
+   },
+   "by_date_form": {
+    "days": {
+     "k": 115,
+     "n": 121,
+     "value": 0.9504,
+     "ci95": [
+      0.896,
+      0.9771
+     ]
+    },
+    "long": {
+     "k": 127,
+     "n": 134,
+     "value": 0.9478,
+     "ci95": [
+      0.8961,
+      0.9745
+     ]
+    },
+    "month": {
+     "k": 124,
+     "n": 126,
+     "value": 0.9841,
+     "ci95": [
+      0.944,
+      0.9956
+     ]
+    },
+    "no_year": {
+     "k": 69,
+     "n": 71,
+     "value": 0.9718,
+     "ci95": [
+      0.903,
+      0.9922
+     ]
+    },
+    "numeric": {
+     "k": 196,
+     "n": 203,
+     "value": 0.9655,
+     "ci95": [
+      0.9305,
+      0.9832
+     ]
+    },
+    "weeks": {
+     "k": 97,
+     "n": 99,
+     "value": 0.9798,
+     "ci95": [
+      0.9293,
+      0.9944
+     ]
+    }
+   },
+   "by_writer": {
+    "haiku": {
+     "k": 46,
+     "n": 60,
+     "value": 0.7667,
+     "ci95": [
+      0.6456,
+      0.8556
+     ]
+    },
+    "nemotron": {
+     "k": 244,
+     "n": 250,
+     "value": 0.976,
+     "ci95": [
+      0.9486,
+      0.989
+     ]
+    }
+   },
+   "with_relative_date": {
+    "k": 160,
+    "n": 166,
+    "value": 0.9639,
+    "ci95": [
+     0.9234,
+     0.9833
+    ]
+   },
+   "absolute_dates_only": {
+    "k": 130,
+    "n": 144,
+    "value": 0.9028,
+    "ci95": [
+     0.8434,
+     0.9412
+    ]
+   },
+   "hit_max_tokens": 0,
+   "mean_new_tokens": 78.8,
+   "seconds_per_note": 1.081,
+   "training": {
+    "base": "270m",
+    "batch": 2,
+    "grad_accumulation_steps": 8,
+    "optimizer_steps": 324,
+    "training_examples": 5184,
+    "wall_seconds": 1004.4,
+    "peak_memory_gb_reported": 4.440448738,
+    "adapter": "scribe/v4/artifacts/B-270m-expr-aug/adapter",
+    "adapter_sha256": "64b94f1615c798d022bec546579c179641acdc26a4c9c06eda3b02200ac3b160",
+    "killed": null,
+    "returncode": 0
+   },
+   "records": "data/scribe/v4/mlx/outputs/B-270m-expr-aug/val-records.jsonl"
+  },
+  "C-1b-expr-aug": {
+   "status": "ok",
+   "format": "expression",
+   "primary_variant": "code",
+   "resolution": "scribe/v2/data_tools.resolve_expression",
+   "exact_match": {
+    "code": {
+     "k": 304,
+     "n": 310,
+     "value": 0.9806,
+     "ci95": [
+      0.9584,
+      0.9911
+     ]
+    }
+   },
+   "parse": {
+    "strict": 310,
+    "tolerant": 0,
+    "failed": 0,
+    "failure_rate": 0.0
+   },
+   "by_date_form": {
+    "days": {
+     "k": 120,
+     "n": 121,
+     "value": 0.9917,
+     "ci95": [
+      0.9547,
+      0.9985
+     ]
+    },
+    "long": {
+     "k": 131,
+     "n": 134,
+     "value": 0.9776,
+     "ci95": [
+      0.9362,
+      0.9924
+     ]
+    },
+    "month": {
+     "k": 125,
+     "n": 126,
+     "value": 0.9921,
+     "ci95": [
+      0.9564,
+      0.9986
+     ]
+    },
+    "no_year": {
+     "k": 69,
+     "n": 71,
+     "value": 0.9718,
+     "ci95": [
+      0.903,
+      0.9922
+     ]
+    },
+    "numeric": {
+     "k": 198,
+     "n": 203,
+     "value": 0.9754,
+     "ci95": [
+      0.9436,
+      0.9894
+     ]
+    },
+    "weeks": {
+     "k": 98,
+     "n": 99,
+     "value": 0.9899,
+     "ci95": [
+      0.945,
+      0.9982
+     ]
+    }
+   },
+   "by_writer": {
+    "haiku": {
+     "k": 59,
+     "n": 60,
+     "value": 0.9833,
+     "ci95": [
+      0.9114,
+      0.9971
+     ]
+    },
+    "nemotron": {
+     "k": 245,
+     "n": 250,
+     "value": 0.98,
+     "ci95": [
+      0.954,
+      0.9914
+     ]
+    }
+   },
+   "with_relative_date": {
+    "k": 164,
+    "n": 166,
+    "value": 0.988,
+    "ci95": [
+     0.9571,
+     0.9967
+    ]
+   },
+   "absolute_dates_only": {
+    "k": 140,
+    "n": 144,
+    "value": 0.9722,
+    "ci95": [
+     0.9308,
+     0.9891
+    ]
+   },
+   "hit_max_tokens": 0,
+   "mean_new_tokens": 77.7,
+   "seconds_per_note": 3.026,
+   "training": {
+    "base": "1b",
+    "batch": 1,
+    "grad_accumulation_steps": 16,
+    "optimizer_steps": 324,
+    "training_examples": 5184,
+    "wall_seconds": 1968.8,
+    "peak_memory_gb_reported": 7.074580642,
+    "adapter": "scribe/v4/artifacts/C-1b-expr-aug/adapter",
+    "adapter_sha256": "76522a4972a842b9b78592a3e0190a5f0fff488b70a813f887aec935ee6d3b30",
+    "killed": null,
+    "returncode": 0
+   },
+   "records": "data/scribe/v4/mlx/outputs/C-1b-expr-aug/val-records.jsonl"
+  }
+ },
+ "comparisons": [
+  {
+   "a": "A-270m-abs (resolver A')",
+   "b": "B-270m-expr-aug",
+   "a_only_correct": 15,
+   "b_only_correct": 12,
+   "exact_p": 0.701108,
+   "difference_points": -0.97
+  },
+  {
+   "a": "A-270m-abs (resolver A')",
+   "b": "C-1b-expr-aug",
+   "a_only_correct": 3,
+   "b_only_correct": 14,
+   "exact_p": 0.012726,
+   "difference_points": 3.55
+  },
+  {
+   "a": "B-270m-expr-aug",
+   "b": "C-1b-expr-aug",
+   "a_only_correct": 5,
+   "b_only_correct": 19,
+   "exact_p": 0.006611,
+   "difference_points": 4.52
+  }
+ ],
+ "rules": {
+  "C_gate": "train arm C only if arm B reaches at least 0.80 exact match on validation",
+  "B_at_least_0.80": true,
+  "success_preregistered_in_NVIDIA_OPTIONS_step3": "B or C >= 0.90 on validation with code resolution, within 3 points of A, McNemar not significant, under 1% parse failures",
+  "success_B": {
+   "at_least_0.90": true,
+   "within_3_points_of_A": true,
+   "mcnemar_not_significant": true,
+   "mcnemar_direction": "worse than A",
+   "parse_failures_under_1pct": true,
+   "met": true,
+   "met_reading_as_not_worse_than_A": true,
+   "note": "'met' reads the plan literally (McNemar not significant in either direction). The criterion guards against an arm worse than A; an arm significantly better than A fails the literal reading and passes 'met_reading_as_not_worse_than_A'."
+  },
+  "success_C": {
+   "at_least_0.90": true,
+   "within_3_points_of_A": true,
+   "mcnemar_not_significant": false,
+   "mcnemar_direction": "better than A",
+   "parse_failures_under_1pct": true,
+   "met": false,
+   "met_reading_as_not_worse_than_A": true,
+   "note": "'met' reads the plan literally (McNemar not significant in either direction). The criterion guards against an arm worse than A; an arm significantly better than A fails the literal reading and passes 'met_reading_as_not_worse_than_A'."
+  }
+ },
+ "person_confirms": "Every extracted event is a proposal: pre-filled for one-click confirmation or flagged as needing editing. A person confirms every event.",
+ "inference_timing_20_val_notes_base_models": {
+  "270m": {
+   "status": "ok",
+   "model": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/scribe/v4/artifacts/hf-cache/hub/models--mlx-community--gemma-3-270m-it-bf16/snapshots/c806ef3a4ed971bd75aaee3346e0fef808512f03",
+   "adapter": null,
+   "format": "absolute",
+   "source": "val",
+   "notes": 20,
+   "load_seconds": 1.9,
+   "wall_seconds": 40.96,
+   "seconds_per_note": 2.048,
+   "generated_tokens": 6875,
+   "tokens_per_second": 167.8,
+   "peak_memory_gb": 1.146,
+   "hit_max_tokens": 17,
+   "mean_new_tokens": 343.8,
+   "mean_prompt_tokens": 447.8
+  },
+  "1b": {
+   "status": "ok",
+   "model": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/scribe/artifacts/hf-cache/hub/models--mlx-community--gemma-3-1b-it-bf16/snapshots/60444cd9d4be58ce6995614c6551b4d8db047483",
+   "adapter": null,
+   "format": "absolute",
+   "source": "val",
+   "notes": 20,
+   "load_seconds": 3.33,
+   "wall_seconds": 21.04,
+   "seconds_per_note": 1.052,
+   "generated_tokens": 1478,
+   "tokens_per_second": 70.2,
+   "peak_memory_gb": 3.101,
+   "hit_max_tokens": 0,
+   "mean_new_tokens": 73.9,
+   "mean_prompt_tokens": 447.8
+  }
+ }
+}

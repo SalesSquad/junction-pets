@@ -1,5 +1,7 @@
-// Bundles the three supporting tracks into app.json: the event-log design study (SYNTHETIC), the Gemma
-// "pathway scribe" with its teaching loop (SYNTHETIC) and the Evo 2 benchmark on BRCA1 (RESEARCH).
+// Bundles the supporting tracks into app.json: the event-log design study (SYNTHETIC), the Gemma
+// "pathway scribe" with its teaching loop (SYNTHETIC), the Evo 2 benchmark on BRCA1 (RESEARCH), and the
+// two product panels of the ship wave: the county safety-net worklist (SYNTHETIC, data/safetynet/) and
+// the FLARE comparability gate (SYNTHETIC clock and gate, PUBLISHED public stage chip, data/flare/).
 // Every figure is copied from a result file written by executed code. This module only selects,
 // renames, counts rows and averages rows that are named in the output; it types no figure itself.
 //
@@ -21,8 +23,21 @@ const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
 const uniq = (a) => [...new Set(a)].sort((x, y) => (x < y ? -1 : x > y ? 1 : 0));
 const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o && k in o).map((k) => [k, o[k]]));
 
+// Product wording rule (NVIDIA_OPTIONS.md 3): a person confirms every extracted event; no note "skips review".
+// The teaching summary was written before that rule, so its cascade sentences are reworded here, word for word
+// otherwise; every figure in them is unchanged.
+const ONE_CLICK = [
+  [/\bnotes that skipped (?:human )?review\b/gi, 'notes pre-filled for one-click confirmation'],
+  [/\bSkip review:/g, 'Pre-filled for one-click confirmation:'],
+  [/\bskip (?:human )?review\b/gi, 'be pre-filled for one-click confirmation'],
+  [/\bskipped (?:human )?review\b/gi, 'were pre-filled for one-click confirmation'],
+  [/\bamong skipped\b/gi, 'among pre-filled'],
+  [/\bskips? (?:the|a) person\b/gi, 'be pre-filled for one-click confirmation'],
+];
+export const oneClickWording = (s) => (typeof s === 'string' ? ONE_CLICK.reduce((t, [re, to]) => t.replace(re, to), s) : s);
+
 export const SYNTHETIC = 'SYNTHETIC: simulated people and simulated notes under stated assumptions. Not Finnish patients. Not for clinical use.';
-export const RESEARCH = 'Research use only; not for clinical decisions. Nothing here classifies a variant or decides eligibility for any treatment.';
+export const RESEARCH = 'Research use only; not for clinical decisions. Nothing here classifies a variant or informs any clinical choice.';
 export const FILES = {
   eventLog: 'data/eventlog/design-study-v1.json',
   ablation: 'data/scribe/v2/ablation-v1.json',
@@ -39,6 +54,8 @@ export const FILES = {
   scribeHaiku: 'data/scribe/haiku-test.jsonl',
   scribeLabelAudit: 'data/scribe/label-audit-v1.json',
   genomics: 'data/genomics/brca1-evo2-v1.json',
+  safetyNet: 'data/safetynet/safetynet-v1.json',
+  flareGate: 'data/flare/gate-v1.json',
 };
 
 // ------------------------------------------------------------------ required fields
@@ -323,7 +340,7 @@ export function buildTeaching(summary, file = FILES.teaching) {
       rejected: { wrongLabel: get.share('audit.rejected.wrong_label'), routeNotOk: get.share('audit.rejected.route_not_ok'), either: get.share('audit.rejected.wrong_label_or_route_not_ok') } },
     studentNoResult: get.keys().filter((k) => k.startsWith('student.') && summary[k] === null).map((k) => ({ key: k, run: k.split('.')[1], reason: get.notDone[k] })),
     cascade: { chosenStudent: get('cascade.chosen_student'), choiceReason: get('cascade.student_choice_reason'), thresholdRule: get('cascade.threshold_rule'),
-      empiricalNotGuaranteed: get('cascade.empirical_not_guaranteed'), verdict: get('cascade.verdict'), targets, signals,
+      empiricalNotGuaranteed: get('cascade.empirical_not_guaranteed'), verdict: (get('cascade.verdict') || []).map(oneClickWording), targets, signals,
       aurcBest: get('cascade.aurc_best_possible.test_pooled'), aurcRandom: get('cascade.aurc_random_order.test_pooled'),
       decisionsSubset: { perSplit: get('cascade.decisions_subset.per_split'), signals: subset },
       cost: Object.fromEntries(['jev', 'decisions'].map((j) => [j, { notesAnswered: get(`cascade.cost.${j}.notes_answered`), errors: get(`cascade.cost.${j}.errors`),
@@ -435,6 +452,77 @@ function baselines(b) {
     strongestReached: Object.fromEntries(Object.entries(v.acmg_amp_evidence ?? {}).map(([c, e]) => [c, e.strongest_reached])), missenseStrongestReached: v.missense_strongest_reached ?? null }]));
 }
 
+// ------------------------------------------------------------------ 4. safety-net worklist (DO #2)
+// Rendered on the page by web/safetynet.mjs, which reads the file's own shape; the bundle keeps that shape
+// and adds the source and its SHA-256. Every field the panel reads is required. A county carries at most
+// three example rows, every row is SYNTHETIC, and every numeric clock threshold is labelled PLACEHOLDER.
+const SAFETYNET_REQUIRED = ['schemaVersion', 'schemaDoc', 'dataClass', 'synthetic', 'generatedAt', 'asOf', 'pilotRegionId',
+  'text.title', 'text.synthetic', 'text.clock', 'text.as_of', 'text.governance', 'text.legal', 'text.legal_url', 'text.regulatory', 'text.pilot',
+  'text.scope', 'text.rule', 'text.neutrality', 'text.roadmap', 'thresholds', 'kpis', 'suppression.below',
+  'rule.version', 'rule.sha256', 'rule.caveat', 'rule.metrics.lines', 'rule.metrics.exact_due_date.k', 'rule.metrics.exact_due_date.n',
+  'rule.metrics.sent_to_person_when_gold_person.k', 'rule.metrics.sent_to_person_when_gold_person.n', 'rule.metrics.none_correct.k', 'rule.metrics.none_correct.n',
+  'cohort.assumptions.p_followup_on_time', 'cohort.imaging_loops.loops', 'cohort.imaging_loops.errors.wrong_due_date',
+  'cohort.imaging_loops.errors.invented_date_for_person_line', 'cohort.imaging_loops.errors.invented_date_for_none_line',
+  'cohort.imaging_loops.errors.missed_recommendation', 'cohort.imaging_loops.errors.due_line_sent_to_person',
+  'national.open_loops', 'national.overdue', 'counties', 'provenance.command'];
+const SAFETYNET_COUNTY_REQUIRED = ['regionId', 'name', 'synthetic', 'counts.open_loops', 'counts.overdue', 'counts.imaging.overdue', 'counts.imaging.done_by_due',
+  'counts.imaging.due_passed', 'counts.referral.overdue', 'counts.referral.overdue_at_sensitivity_days', 'counts.referral.diagnosed_by_threshold',
+  'counts.referral.clock_passed', 'by_route', 'by_language', 'examples'];
+const SAFETYNET_EXAMPLE_REQUIRED = ['episode_code', 'loop_kind', 'age_band', 'route', 'contact_language', 'interpreter', 'days_overdue', 'missing_step', 'owner_role', 'status', 'synthetic'];
+export function buildSafetyNet(data, regions = [], file = FILES.safetyNet) {
+  needAll(data, SAFETYNET_REQUIRED, file);
+  if (data.synthetic !== true || data.dataClass !== 'SYNTHETIC') throw new Error(`${file}: the safety-net worklist is not marked synthetic`);
+  if (!Array.isArray(data.counties) || !data.counties.length) throw new Error(`${file}: no county rows`);
+  const known = new Set(regions.map((r) => r.regionId ?? r.id));
+  for (const c of data.counties) {
+    needAll(c, SAFETYNET_COUNTY_REQUIRED, `${file} county ${c.regionId}`);
+    if (c.synthetic !== true) throw new Error(`${file}: county ${c.regionId} is not marked synthetic`);
+    if (known.size && !known.has(c.regionId)) throw new Error(`${file}: county ${c.regionId} is not an area of the public snapshot`);
+    if (c.examples.length > 3) throw new Error(`${file}: county ${c.regionId} has ${c.examples.length} example rows; at most three are shown`);
+    for (const e of c.examples) {
+      needAll(e, SAFETYNET_EXAMPLE_REQUIRED, `${file} county ${c.regionId} example`);
+      if (e.synthetic !== true) throw new Error(`${file}: an example row of ${c.regionId} is not marked synthetic`);
+    }
+  }
+  if (!data.counties.some((c) => c.regionId === data.pilotRegionId)) throw new Error(`${file}: the pilot county ${data.pilotRegionId} has no row`);
+  for (const t of data.thresholds) {
+    needAll(t, ['clock', 'days', 'label', 'source'], `${file} threshold`);
+    if (typeof t.days === 'number' && t.label !== 'PLACEHOLDER') throw new Error(`${file}: the ${t.days}-day threshold "${t.clock}" is not labelled PLACEHOLDER`);
+  }
+  return { ...data, statement: SYNTHETIC, source: src(file) };
+}
+
+// ------------------------------------------------------------------ 5. FLARE comparability gate (DO #3)
+// Rendered by web/flare.mjs from the file's own shape. Every field the panel reads is required; the FLARE
+// equivalence block is required only when the file says FLARE ran, and the public stage chip only when it
+// is present (the panel shows the fallback wording otherwise). The 42-day clock must carry its placeholder label.
+const GATE_REQUIRED = ['schema', 'synthetic', 'label', 'title', 'lede', 'clock.start_event', 'clock.end_event', 'clock.starts', 'clock.threshold_days',
+  'clock.histogram_edge_days', 'clock.threshold_label', 'clock.threshold_text', 'clock.sources', 'rule.label', 'rule.bias_limit_days', 'rule.missed_limit',
+  'rule.median_bias_definition', 'rule.missed_definition', 'rule.median_bias_computed_in', 'scribe_input.assignment', 'scribe_input.scenario', 'counties',
+  'national.n', 'national.share_within', 'summary.raw.not_comparable', 'summary.raw.of', 'summary.resolver.not_comparable', 'summary.resolver.of',
+  'flare.ran', 'limits'];
+const GATE_FLARE_REQUIRED = ['flare.nvflare', 'flare.sites', 'flare.equivalence.success', 'flare.equivalence.cells', 'flare.equivalence.cells_ok', 'flare.equivalence.tolerance'];
+const GATE_REAL_REQUIRED = ['kind', 'question', 'rule', 'aim_pct', 'areas', 'note', 'source.name', 'source.url'];
+const GATE_ARM_REQUIRED = ['comparable', 'median_bias_days', 'missed_share', 'events', 'intervals'];
+export function buildFlareGate(gate, regions = [], file = FILES.flareGate) {
+  needAll(gate, GATE_REQUIRED, file);
+  if (gate.synthetic !== true || gate.label !== 'SYNTHETIC') throw new Error(`${file}: the comparability gate is not marked synthetic`);
+  if (!/placeholder/i.test(gate.clock.threshold_label)) throw new Error(`${file}: the ${gate.clock.threshold_days}-day clock threshold is not labelled a placeholder`);
+  if (gate.flare.ran === true) needAll(gate, GATE_FLARE_REQUIRED, file);
+  if (gate.realData != null) {
+    needAll(gate.realData, GATE_REAL_REQUIRED, `${file} realData`);
+    if (gate.realData.kind !== 'PUBLISHED') throw new Error(`${file}: realData is not labelled PUBLISHED`);
+  }
+  if (!Array.isArray(gate.counties) || !gate.counties.length) throw new Error(`${file}: no county rows`);
+  const known = new Set(regions.map((r) => r.regionId ?? r.id));
+  for (const c of gate.counties) {
+    needAll(c, ['county', 'rtt.n', 'rtt.share_within', 'rtt.suppressed', 'completeness.complete_share', 'completeness.open_share', 'scribe.raw', 'scribe.resolver'], `${file} county ${c.county}`);
+    for (const arm of ['raw', 'resolver']) needAll(c.scribe[arm], GATE_ARM_REQUIRED, `${file} county ${c.county} ${arm}`);
+    if (known.size && !known.has(c.county)) throw new Error(`${file}: county ${c.county} is not an area of the public snapshot`);
+  }
+  return { ...gate, statement: SYNTHETIC, source: src(file) };
+}
+
 // ------------------------------------------------------------------ assembly
 // Optional keys for app.json. A part whose source file is absent is left out and reported; a part whose
 // file is present but lacks a required field throws, so the build fails loudly instead of guessing.
@@ -465,5 +553,11 @@ export function buildTracks(regions = [], files = FILES) {
 
   const genomics = part('genomics', [F.genomics], (g) => buildGenomics(g, F.genomics));
   if (genomics) out.genomics = genomics;
+
+  // Product panels of the ship wave (section 05 of the page): same missing-file and required-field rules.
+  const safetyNet = part('safetyNet', [F.safetyNet], (s) => buildSafetyNet(s, regions, F.safetyNet));
+  if (safetyNet) out.safetyNet = safetyNet;
+  const flareGate = part('flareGate', [F.flareGate], (g) => buildFlareGate(g, regions, F.flareGate));
+  if (flareGate) out.flareGate = flareGate;
   return { ...out, trackProblems: problems };
 }

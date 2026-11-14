@@ -1,0 +1,642 @@
+{
+ "schema": "sama-scribe-demo-cpu-vs-cuda-v1",
+ "synthetic": true,
+ "generated_utc": "2026-11-14T22:34:11Z",
+ "what": "CPU worker (float32, merged LoRA, batch 1) against the stored CUDA outputs (A100, bfloat16, batch 16) of the same run C-270m-all-v2data on the same note text, both post-processed by the same code with resolver arm A'.",
+ "cuda_file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+ "cpu_provenance": {
+  "synthetic_training_data": true,
+  "base_model": {
+   "repo": "unsloth/gemma-3-270m-it",
+   "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+  },
+  "adapter": {
+   "run": "C-270m-all-v2data",
+   "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+   "format": "PEFT LoRA r16",
+   "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+  },
+  "decoding": {
+   "strategy": "greedy",
+   "max_new_tokens": 134,
+   "device": "cpu",
+   "dtype": "float32",
+   "lora_merged": true,
+   "threads": 8,
+   "batch_size": 1,
+   "prompt": "scribe/prompts.py messages (v1, absolute format)",
+   "stop_token_ids": [
+    1,
+    106
+   ]
+  },
+  "resolver": {
+   "rule": "scribe-v3-relative-resolver-v1",
+   "arm": "A'",
+   "frozen": true,
+   "lexicon": "fi-relative-lexicon-v1",
+   "freeze_file": "data/scribe/v4/resolver/freeze.json",
+   "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+  },
+  "versions": {
+   "python": "3.12.13",
+   "torch": "2.15.0",
+   "transformers": "5.23.0",
+   "peft": "0.21.3"
+  },
+  "gpu": null,
+  "load_seconds": 3.992,
+  "warm_up_seconds": 1.389
+ },
+ "cold_start_seconds": 17.414,
+ "demo_notes_with_cuda_output": {
+  "n": 17,
+  "raw_identical": {
+   "k": 15,
+   "n": 17,
+   "value": 0.8824,
+   "wilson95": [
+    0.6566,
+    0.9671
+   ]
+  },
+  "model_parse_identical": {
+   "k": 15,
+   "n": 17,
+   "value": 0.8824,
+   "wilson95": [
+    0.6566,
+    0.9671
+   ]
+  },
+  "resolved_identical": {
+   "k": 17,
+   "n": 17,
+   "value": 1.0,
+   "wilson95": [
+    0.8157,
+    1.0
+   ]
+  },
+  "cpu_exact": {
+   "k": 15,
+   "n": 17,
+   "value": 0.8824,
+   "wilson95": [
+    0.6566,
+    0.9671
+   ]
+  },
+  "cuda_exact": {
+   "k": 15,
+   "n": 17,
+   "value": 0.8824,
+   "wilson95": [
+    0.6566,
+    0.9671
+   ]
+  }
+ },
+ "same_text_all_20_sources": {
+  "n": 20,
+  "raw_identical": {
+   "k": 16,
+   "n": 20,
+   "value": 0.8,
+   "wilson95": [
+    0.584,
+    0.9193
+   ]
+  },
+  "model_parse_identical": {
+   "k": 16,
+   "n": 20,
+   "value": 0.8,
+   "wilson95": [
+    0.584,
+    0.9193
+   ]
+  },
+  "resolved_identical": {
+   "k": 20,
+   "n": 20,
+   "value": 1.0,
+   "wilson95": [
+    0.8389,
+    1.0
+   ]
+  },
+  "cpu_exact": {
+   "k": 18,
+   "n": 20,
+   "value": 0.9,
+   "wilson95": [
+    0.699,
+    0.9721
+   ]
+  },
+  "cuda_exact": {
+   "k": 18,
+   "n": 20,
+   "value": 0.9,
+   "wilson95": [
+    0.699,
+    0.9721
+   ]
+  },
+  "note": "the 17 verbatim demo notes plus the 3 unrewritten source notes of the rewritten ones"
+ },
+ "rewritten_notes_cpu_exact": {
+  "demo-01": true,
+  "demo-02": true,
+  "demo-03": true
+ },
+ "demo_exact_match_cpu": {
+  "k": 18,
+  "n": 20,
+  "value": 0.9,
+  "wilson95": [
+   0.699,
+   0.9721
+  ]
+ },
+ "timing_demo_notes": {
+  "generate_seconds": {
+   "n": 20,
+   "median": 3.755,
+   "p90": 6.366,
+   "max": 6.497,
+   "mean": 3.752,
+   "under_3s": 7
+  },
+  "worker_total_seconds": {
+   "n": 20,
+   "median": 3.768,
+   "p90": 6.414,
+   "max": 6.576,
+   "mean": 3.786,
+   "under_3s": 7
+  },
+  "client_wall_seconds": {
+   "n": 20,
+   "median": 3.769,
+   "p90": 6.419,
+   "max": 6.589,
+   "mean": 3.789,
+   "under_3s": 7
+  },
+  "load_average_1m": {
+   "n": 20,
+   "median": 22.73,
+   "p90": 25.77,
+   "max": 25.9,
+   "mean": 23.028
+  },
+  "cpu_count": 18
+ },
+ "per_note": [
+  {
+   "demo_id": "demo-01-source",
+   "text": "unrewritten source of a rewritten demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-02-source",
+   "text": "unrewritten source of a rewritten demo note",
+   "raw_identical": false,
+   "model_parse_identical": false,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": "{\"entry_route\":\"OCCUPATIONAL\",\"events\":[{\"type\":\"REFERRAL_SENT\",\"date\":\"2025-08-01\",\"precision\":\"DAY\"}]}",
+   "cuda_raw": "{\"entry_route\":\"OCCUPATIONAL\",\"events\":[{\"type\":\"REFERRAL_SENT\",\"date\":\"2025-08-15\",\"precision\":\"DAY\"}]}"
+  },
+  {
+   "demo_id": "demo-03-source",
+   "text": "unrewritten source of a rewritten demo note",
+   "raw_identical": false,
+   "model_parse_identical": false,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": "{\"entry_route\":\"EMERGENCY\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2023-07-16\",\"precision\":\"DAY\"},{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2023-09-01\",\"precision\":\"MONTH\"},{\"type\":\"DIAGNOSIS\",\"date\":\"2024-01-24\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2024-03-05\",\"precision\":\"DAY\"}]}",
+   "cuda_raw": "{\"entry_route\":\"EMERGENCY\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2023-07-16\",\"precision\":\"DAY\"},{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2023-09-01\",\"precision\":\"MONTH\"},{\"type\":\"DIAGNOSIS\",\"date\":\"2024-01-24\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2024-02-05\",\"precision\":\"DAY\"}]}"
+  },
+  {
+   "demo_id": "demo-04",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-05",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-06",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-07",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-08",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-09",
+   "text": "demo note",
+   "raw_identical": false,
+   "model_parse_identical": false,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": "{\"entry_route\":\"PRIVATE\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2023-02-17\",\"precision\":\"DAY\"},{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2023-08-05\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_SENT\",\"date\":\"2023-11-18\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2023-12-26\",\"precision\":\"DAY\"}]}",
+   "cuda_raw": "{\"entry_route\":\"PRIVATE\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2023-02-15\",\"precision\":\"DAY\"},{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2023-08-05\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_SENT\",\"date\":\"2023-11-18\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2023-12-26\",\"precision\":\"DAY\"}]}"
+  },
+  {
+   "demo_id": "demo-10",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-11",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-12",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-13",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-14",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-15",
+   "text": "demo note",
+   "raw_identical": false,
+   "model_parse_identical": false,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": "{\"entry_route\":\"EMERGENCY\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2025-07-01\",\"precision\":\"MONTH\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2025-08-01\",\"precision\":\"MONTH\"},{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2025-10-16\",\"precision\":\"DAY\"},{\"type\":\"MDT_DECISION\",\"date\":\"2025-12-22\",\"precision\":\"DAY\"}]}",
+   "cuda_raw": "{\"entry_route\":\"EMERGENCY\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2025-07-01\",\"precision\":\"MONTH\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2025-08-01\",\"precision\":\"MONTH\"},{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2025-10-14\",\"precision\":\"DAY\"},{\"type\":\"MDT_DECISION\",\"date\":\"2025-12-22\",\"precision\":\"DAY\"}]}"
+  },
+  {
+   "demo_id": "demo-16",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-17",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-18",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": true,
+   "cuda_exact": true,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-19",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": false,
+   "cuda_exact": false,
+   "cpu_raw": null,
+   "cuda_raw": null
+  },
+  {
+   "demo_id": "demo-20",
+   "text": "demo note",
+   "raw_identical": true,
+   "model_parse_identical": true,
+   "resolved_identical": true,
+   "cpu_exact": false,
+   "cuda_exact": false,
+   "cpu_raw": null,
+   "cuda_raw": null
+  }
+ ],
+ "per_demo_note_timing": [
+  {
+   "demo_id": "demo-01",
+   "worker_wall_seconds": 6.589,
+   "generate_seconds": 6.497,
+   "total_seconds": 6.576,
+   "prompt_tokens": 424,
+   "new_tokens": 84,
+   "stopped": true,
+   "load_average_1m": 23.79,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-02",
+   "worker_wall_seconds": 2.84,
+   "generate_seconds": 2.813,
+   "total_seconds": 2.839,
+   "prompt_tokens": 367,
+   "new_tokens": 37,
+   "stopped": true,
+   "load_average_1m": 22.31,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-03",
+   "worker_wall_seconds": 6.419,
+   "generate_seconds": 6.366,
+   "total_seconds": 6.414,
+   "prompt_tokens": 458,
+   "new_tokens": 117,
+   "stopped": true,
+   "load_average_1m": 23.41,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-04",
+   "worker_wall_seconds": 6.219,
+   "generate_seconds": 6.05,
+   "total_seconds": 6.216,
+   "prompt_tokens": 448,
+   "new_tokens": 111,
+   "stopped": true,
+   "load_average_1m": 25.9,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-05",
+   "worker_wall_seconds": 4.37,
+   "generate_seconds": 4.341,
+   "total_seconds": 4.368,
+   "prompt_tokens": 505,
+   "new_tokens": 86,
+   "stopped": true,
+   "load_average_1m": 24.94,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-06",
+   "worker_wall_seconds": 4.71,
+   "generate_seconds": 4.685,
+   "total_seconds": 4.705,
+   "prompt_tokens": 412,
+   "new_tokens": 66,
+   "stopped": true,
+   "load_average_1m": 24.71,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-07",
+   "worker_wall_seconds": 4.253,
+   "generate_seconds": 4.221,
+   "total_seconds": 4.251,
+   "prompt_tokens": 413,
+   "new_tokens": 64,
+   "stopped": true,
+   "load_average_1m": 25.77,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-08",
+   "worker_wall_seconds": 4.866,
+   "generate_seconds": 4.842,
+   "total_seconds": 4.864,
+   "prompt_tokens": 454,
+   "new_tokens": 90,
+   "stopped": true,
+   "load_average_1m": 25.77,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-09",
+   "worker_wall_seconds": 4.693,
+   "generate_seconds": 4.677,
+   "total_seconds": 4.692,
+   "prompt_tokens": 445,
+   "new_tokens": 114,
+   "stopped": true,
+   "load_average_1m": 24.83,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-10",
+   "worker_wall_seconds": 2.09,
+   "generate_seconds": 2.071,
+   "total_seconds": 2.088,
+   "prompt_tokens": 433,
+   "new_tokens": 61,
+   "stopped": true,
+   "load_average_1m": 23.32,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-11",
+   "worker_wall_seconds": 3.34,
+   "generate_seconds": 3.324,
+   "total_seconds": 3.338,
+   "prompt_tokens": 468,
+   "new_tokens": 61,
+   "stopped": true,
+   "load_average_1m": 22.73,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-12",
+   "worker_wall_seconds": 3.209,
+   "generate_seconds": 3.196,
+   "total_seconds": 3.208,
+   "prompt_tokens": 412,
+   "new_tokens": 86,
+   "stopped": true,
+   "load_average_1m": 22.73,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-13",
+   "worker_wall_seconds": 4.199,
+   "generate_seconds": 4.186,
+   "total_seconds": 4.199,
+   "prompt_tokens": 485,
+   "new_tokens": 109,
+   "stopped": true,
+   "load_average_1m": 22.36,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-14",
+   "worker_wall_seconds": 2.557,
+   "generate_seconds": 2.543,
+   "total_seconds": 2.556,
+   "prompt_tokens": 497,
+   "new_tokens": 61,
+   "stopped": true,
+   "load_average_1m": 21.85,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-15",
+   "worker_wall_seconds": 4.402,
+   "generate_seconds": 4.385,
+   "total_seconds": 4.4,
+   "prompt_tokens": 448,
+   "new_tokens": 110,
+   "stopped": true,
+   "load_average_1m": 21.85,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-16",
+   "worker_wall_seconds": 3.182,
+   "generate_seconds": 3.165,
+   "total_seconds": 3.18,
+   "prompt_tokens": 426,
+   "new_tokens": 61,
+   "stopped": true,
+   "load_average_1m": 21.3,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-17",
+   "worker_wall_seconds": 2.272,
+   "generate_seconds": 2.256,
+   "total_seconds": 2.271,
+   "prompt_tokens": 409,
+   "new_tokens": 37,
+   "stopped": true,
+   "load_average_1m": 21.3,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-18",
+   "worker_wall_seconds": 2.352,
+   "generate_seconds": 2.338,
+   "total_seconds": 2.351,
+   "prompt_tokens": 420,
+   "new_tokens": 60,
+   "stopped": true,
+   "load_average_1m": 20.55,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-19",
+   "worker_wall_seconds": 2.409,
+   "generate_seconds": 2.355,
+   "total_seconds": 2.404,
+   "prompt_tokens": 416,
+   "new_tokens": 40,
+   "stopped": true,
+   "load_average_1m": 20.55,
+   "cpu_count": 18
+  },
+  {
+   "demo_id": "demo-20",
+   "worker_wall_seconds": 0.805,
+   "generate_seconds": 0.721,
+   "total_seconds": 0.797,
+   "prompt_tokens": 386,
+   "new_tokens": 13,
+   "stopped": true,
+   "load_average_1m": 20.59,
+   "cpu_count": 18
+  }
+ ],
+ "success_rule": "NVIDIA_OPTIONS.md step 7: at least 18 of 20 demo notes match the stored CUDA outputs where they exist, under 3 s per note"
+}

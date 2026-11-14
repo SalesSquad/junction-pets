@@ -1,0 +1,481 @@
+{
+ "title": "Cascade agreement: Gemma 3 270M (C-270m-all-v2data) + code date resolver vs Nemotron 3.5 Super VL reader",
+ "synthetic": "All notes are SYNTHETIC. A person confirms every note: agreement only decides whether the answer is pre-filled for one-click confirmation or flagged as needing editing.",
+ "rule": "pre-filled for one-click confirmation when the two canonical answers are identical; otherwise flagged as needing editing (no threshold, nothing tuned)",
+ "nemotron_version": "v3",
+ "baseline_today": "263/700 notes in the 'no edit needed' group with 7 errors (scribe/TEACHING.md, Jev scores at a 5% error target)",
+ "generated_utc": "2026-11-14T21:46:20+00:00",
+ "val": {
+  "missing_gemma": 0,
+  "missing_nemotron": 0,
+  "all": {
+   "notes": 310,
+   "gemma_resolver_exact": {
+    "k": 289,
+    "n": 310,
+    "value": 0.9323,
+    "ci95": [
+     0.8987,
+     0.9553
+    ]
+   },
+   "nemotron_exact": {
+    "k": 304,
+    "n": 310,
+    "value": 0.9806,
+    "ci95": [
+     0.9584,
+     0.9911
+    ]
+   },
+   "prefilled_for_one_click_confirmation": {
+    "k": 286,
+    "n": 310,
+    "value": 0.9226,
+    "ci95": [
+     0.8874,
+     0.9474
+    ]
+   },
+   "prefilled_and_correct": {
+    "k": 286,
+    "n": 310,
+    "value": 0.9226,
+    "ci95": [
+     0.8874,
+     0.9474
+    ]
+   },
+   "error_among_prefilled": {
+    "k": 0,
+    "n": 286,
+    "value": 0.0,
+    "ci95": [
+     0,
+     0.0133
+    ]
+   },
+   "flagged_needs_editing": {
+    "k": 24,
+    "n": 310,
+    "value": 0.0774,
+    "ci95": [
+     0.0526,
+     0.1126
+    ]
+   },
+   "flagged_where_nemotron_answer_is_exact": {
+    "k": 18,
+    "n": 24,
+    "value": 0.75,
+    "ci95": [
+     0.551,
+     0.88
+    ]
+   },
+   "flagged_where_gemma_answer_is_exact": {
+    "k": 3,
+    "n": 24,
+    "value": 0.125,
+    "ci95": [
+     0.0434,
+     0.31
+    ]
+   },
+   "per_100_notes_prefilled_correct": 92.3
+  },
+  "by_writer": {
+   "haiku_written": {
+    "notes": 60,
+    "gemma_resolver_exact": {
+     "k": 49,
+     "n": 60,
+     "value": 0.8167,
+     "ci95": [
+      0.7008,
+      0.8944
+     ]
+    },
+    "nemotron_exact": {
+     "k": 60,
+     "n": 60,
+     "value": 1.0,
+     "ci95": [
+      0.9398,
+      1.0
+     ]
+    },
+    "prefilled_for_one_click_confirmation": {
+     "k": 49,
+     "n": 60,
+     "value": 0.8167,
+     "ci95": [
+      0.7008,
+      0.8944
+     ]
+    },
+    "prefilled_and_correct": {
+     "k": 49,
+     "n": 60,
+     "value": 0.8167,
+     "ci95": [
+      0.7008,
+      0.8944
+     ]
+    },
+    "error_among_prefilled": {
+     "k": 0,
+     "n": 49,
+     "value": 0.0,
+     "ci95": [
+      0.0,
+      0.0727
+     ]
+    },
+    "flagged_needs_editing": {
+     "k": 11,
+     "n": 60,
+     "value": 0.1833,
+     "ci95": [
+      0.1056,
+      0.2992
+     ]
+    },
+    "flagged_where_nemotron_answer_is_exact": {
+     "k": 11,
+     "n": 11,
+     "value": 1.0,
+     "ci95": [
+      0.7412,
+      1
+     ]
+    },
+    "flagged_where_gemma_answer_is_exact": {
+     "k": 0,
+     "n": 11,
+     "value": 0.0,
+     "ci95": [
+      0,
+      0.2588
+     ]
+    },
+    "per_100_notes_prefilled_correct": 81.7
+   },
+   "nemotron_written": {
+    "notes": 250,
+    "gemma_resolver_exact": {
+     "k": 240,
+     "n": 250,
+     "value": 0.96,
+     "ci95": [
+      0.9279,
+      0.9781
+     ]
+    },
+    "nemotron_exact": {
+     "k": 244,
+     "n": 250,
+     "value": 0.976,
+     "ci95": [
+      0.9486,
+      0.989
+     ]
+    },
+    "prefilled_for_one_click_confirmation": {
+     "k": 237,
+     "n": 250,
+     "value": 0.948,
+     "ci95": [
+      0.9131,
+      0.9694
+     ]
+    },
+    "prefilled_and_correct": {
+     "k": 237,
+     "n": 250,
+     "value": 0.948,
+     "ci95": [
+      0.9131,
+      0.9694
+     ]
+    },
+    "error_among_prefilled": {
+     "k": 0,
+     "n": 237,
+     "value": 0.0,
+     "ci95": [
+      0,
+      0.016
+     ]
+    },
+    "flagged_needs_editing": {
+     "k": 13,
+     "n": 250,
+     "value": 0.052,
+     "ci95": [
+      0.0306,
+      0.0869
+     ]
+    },
+    "flagged_where_nemotron_answer_is_exact": {
+     "k": 7,
+     "n": 13,
+     "value": 0.5385,
+     "ci95": [
+      0.2914,
+      0.7679
+     ]
+    },
+    "flagged_where_gemma_answer_is_exact": {
+     "k": 3,
+     "n": 13,
+     "value": 0.2308,
+     "ci95": [
+      0.0818,
+      0.5026
+     ]
+    },
+    "per_100_notes_prefilled_correct": 94.8
+   }
+  },
+  "agreed_but_wrong_differences": {}
+ },
+ "test": {
+  "missing_gemma": 0,
+  "missing_nemotron": 0,
+  "all": {
+   "notes": 700,
+   "gemma_resolver_exact": {
+    "k": 651,
+    "n": 700,
+    "value": 0.93,
+    "ci95": [
+     0.9087,
+     0.9466
+    ]
+   },
+   "nemotron_exact": {
+    "k": 690,
+    "n": 700,
+    "value": 0.9857,
+    "ci95": [
+     0.9739,
+     0.9922
+    ]
+   },
+   "prefilled_for_one_click_confirmation": {
+    "k": 651,
+    "n": 700,
+    "value": 0.93,
+    "ci95": [
+     0.9087,
+     0.9466
+    ]
+   },
+   "prefilled_and_correct": {
+    "k": 647,
+    "n": 700,
+    "value": 0.9243,
+    "ci95": [
+     0.9023,
+     0.9417
+    ]
+   },
+   "error_among_prefilled": {
+    "k": 4,
+    "n": 651,
+    "value": 0.0061,
+    "ci95": [
+     0.0024,
+     0.0157
+    ]
+   },
+   "flagged_needs_editing": {
+    "k": 49,
+    "n": 700,
+    "value": 0.07,
+    "ci95": [
+     0.0534,
+     0.0913
+    ]
+   },
+   "flagged_where_nemotron_answer_is_exact": {
+    "k": 43,
+    "n": 49,
+    "value": 0.8776,
+    "ci95": [
+     0.7576,
+     0.9427
+    ]
+   },
+   "flagged_where_gemma_answer_is_exact": {
+    "k": 4,
+    "n": 49,
+    "value": 0.0816,
+    "ci95": [
+     0.0322,
+     0.1919
+    ]
+   },
+   "per_100_notes_prefilled_correct": 92.4
+  },
+  "by_writer": {
+   "haiku_written": {
+    "notes": 200,
+    "gemma_resolver_exact": {
+     "k": 170,
+     "n": 200,
+     "value": 0.85,
+     "ci95": [
+      0.7939,
+      0.8929
+     ]
+    },
+    "nemotron_exact": {
+     "k": 199,
+     "n": 200,
+     "value": 0.995,
+     "ci95": [
+      0.9722,
+      0.9991
+     ]
+    },
+    "prefilled_for_one_click_confirmation": {
+     "k": 169,
+     "n": 200,
+     "value": 0.845,
+     "ci95": [
+      0.7884,
+      0.8886
+     ]
+    },
+    "prefilled_and_correct": {
+     "k": 169,
+     "n": 200,
+     "value": 0.845,
+     "ci95": [
+      0.7884,
+      0.8886
+     ]
+    },
+    "error_among_prefilled": {
+     "k": 0,
+     "n": 169,
+     "value": 0.0,
+     "ci95": [
+      0,
+      0.0222
+     ]
+    },
+    "flagged_needs_editing": {
+     "k": 31,
+     "n": 200,
+     "value": 0.155,
+     "ci95": [
+      0.1114,
+      0.2116
+     ]
+    },
+    "flagged_where_nemotron_answer_is_exact": {
+     "k": 30,
+     "n": 31,
+     "value": 0.9677,
+     "ci95": [
+      0.8381,
+      0.9943
+     ]
+    },
+    "flagged_where_gemma_answer_is_exact": {
+     "k": 1,
+     "n": 31,
+     "value": 0.0323,
+     "ci95": [
+      0.0057,
+      0.1619
+     ]
+    },
+    "per_100_notes_prefilled_correct": 84.5
+   },
+   "nemotron_written": {
+    "notes": 500,
+    "gemma_resolver_exact": {
+     "k": 481,
+     "n": 500,
+     "value": 0.962,
+     "ci95": [
+      0.9414,
+      0.9755
+     ]
+    },
+    "nemotron_exact": {
+     "k": 491,
+     "n": 500,
+     "value": 0.982,
+     "ci95": [
+      0.9661,
+      0.9905
+     ]
+    },
+    "prefilled_for_one_click_confirmation": {
+     "k": 482,
+     "n": 500,
+     "value": 0.964,
+     "ci95": [
+      0.9438,
+      0.9771
+     ]
+    },
+    "prefilled_and_correct": {
+     "k": 478,
+     "n": 500,
+     "value": 0.956,
+     "ci95": [
+      0.9343,
+      0.9708
+     ]
+    },
+    "error_among_prefilled": {
+     "k": 4,
+     "n": 482,
+     "value": 0.0083,
+     "ci95": [
+      0.0032,
+      0.0211
+     ]
+    },
+    "flagged_needs_editing": {
+     "k": 18,
+     "n": 500,
+     "value": 0.036,
+     "ci95": [
+      0.0229,
+      0.0562
+     ]
+    },
+    "flagged_where_nemotron_answer_is_exact": {
+     "k": 13,
+     "n": 18,
+     "value": 0.7222,
+     "ci95": [
+      0.4913,
+      0.875
+     ]
+    },
+    "flagged_where_gemma_answer_is_exact": {
+     "k": 3,
+     "n": 18,
+     "value": 0.1667,
+     "ci95": [
+      0.0584,
+      0.3922
+     ]
+    },
+    "per_100_notes_prefilled_correct": 95.6
+   }
+  },
+  "agreed_but_wrong_differences": {
+   "wrong_type:REFERRAL_RECEIVED->REFERRAL_SENT:nemotron_written": 4
+  }
+ },
+ "statement": "Test (700 SYNTHETIC notes, rule fixed in advance): 651/700 notes are pre-filled for one-click confirmation because Gemma + resolver and Nemotron agree; 4 of those are wrong (0.6%, Wilson 0.2-1.6). That is 92.4 of every 100 notes pre-filled correctly; the person still confirms each one. The other 49 notes need editing; Nemotron's answer is exact on 43 of them. Haiku-written notes: 169/200 pre-filled, 0 wrong among them. Baseline today: 263/700 notes in the 'no edit needed' group with 7 errors (scribe/TEACHING.md, Jev scores at a 5% error target)."
+}

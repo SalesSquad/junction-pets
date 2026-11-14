@@ -88,6 +88,13 @@ With 23 counties x 3 intervals = 69 comparisons, Bonferroni `a = 0.05/69` gives 
 0.8 gives `z = 0.84`. That family is one look at one stratum; repeated looks and site strata are
 treated below.
 
+**Read with the generated block below.** Its cohort means, 207 and 123 days, are read from Figure 1
+of Kuitunen J et al. 2026; the paper's text gives means of 201 days (public route) and 126 days
+(private or occupational) with the same medians, 127 and 76 (evidence row
+`kuitunen-2026-route-medians`). With the text means, `s = sqrt(2 ln(mean/median))` is 0.958 and
+1.006 instead of 0.988 and 0.981 (computed tonight from that row). The simulator was calibrated to
+the Figure 1 means. The block itself is written by `eventlog/audit.py` and is left unchanged here.
+
 <!-- STUDY:SIZES:BEGIN -->
 **Which `s`, and where each value comes from.** Computed from the cohort: in the Finnish DLBCL cohort (Kuitunen 2026, doi:10.1002/cam4.71920) the mean and median from symptom onset to treatment are 207 and 127 days on the public route and 123 and 76 days on the private or occupational route. A single log-normal with that mean and median has `s = sqrt(2 ln(mean/median))`: 0.988 and 0.981. Computed from the simulator: the per-interval values of the next paragraph, which the per-interval columns use. Neither: the simulator's own step value `s = 0.96` is an input chosen near the cohort figures; neither route reproduces it, so it is a modelling choice, not a derived number. The `s = 0.96` column is kept only to show what that input alone would give.
 
@@ -274,15 +281,75 @@ real clinical text.
 | Serving | vLLM served the selected adapter on `unsloth/gemma-3-270m-it` with structured outputs (`serve/smoke/vllm.log`). On 100 held-out notes (50 Nemotron-written, 50 Haiku-written) all 100 outputs were valid; exact match 0.22 (95% interval 0.150 to 0.311), route accuracy 0.91, event F1 0.583, p95 latency 1.80 s. All 100 notes went to human review because no confidence threshold is calibrated. | `serve/smoke/smoke-guided.json` |
 | Teaching round 2 | The teacher (Nemotron 3.5 Super VL) wrote 1,600 notes; 1,589 passed the code check and 1,465 of those were read back by a blind second call of the same model exactly as specified (0.922). On notes that should contain no event only 170 of 238 were read back as specified. | `data/scribe/v3/teacher/stats.json` |
 | Judges | The gate accepted 1,506 of the 1,589 checked notes (Jev rule). On the report half of a benchmark with planted corruptions (80 corrupted, 80 clean pairs) the Jev rule with the second question set caught 66 of 80 corruptions and rejected none of the 80 clean pairs; with the first question set 60 of 80 and 1 of 80; the Decisions judge 58 of 80 and 11 of 80. The second question set was designed after the first set's results on both halves had been seen (`data/scribe/v3/judges/policy.json`), so its report-half figure is not a clean held-out estimate. The gate's thresholds were not calibrated for notes with no event, terse notes or long notes. | `data/scribe/v3/judges/benchmark-v1.json` (generated 2026-11-14T19:10:35Z), `data/scribe/v3/gate/gate-v1.json` |
-| Student trained on round-2 notes | Pre-registered (`data/scribe/v3/student/preregistration.json`); no test result in the repository: not yet measured. | |
+| Students trained since | Pre-registered (`data/scribe/v3/student/preregistration.json`); results are in the files of the next column and are not summarised in this table. The adapter `C-270m-all-v2data` and the code date resolver are measured in the generated block below. | `data/scribe/v3/student/compare-v1.json`, `data/scribe/v4/resolver/reproduce-v1.json` |
 
-**Extraction accuracy now.** The best measured note-level exact match on held-out SYNTHETIC notes is
-42.0% on notes written by the teacher model and 13.0% on notes written by a different model: most
-notes have at least one wrong, missing or extra event. No confidence threshold could be certified at
-1% error, and the 5% threshold gave an observed error of 15.4% (2 of 13) on the other writer's notes.
+**Extraction accuracy of version 2.** The selected version-2 adapter's note-level exact match on
+held-out SYNTHETIC notes was 42.0% on notes written by the teacher model and 13.0% on notes written
+by a different model: most notes had at least one wrong, missing or extra event. No confidence
+threshold could be certified at 1% error, and the 5% threshold gave an observed error of 15.4% (2 of
+13) on the other writer's notes. Most errors of the current adapter are date arithmetic ("N days
+ago" against the note date); a declared code rule (`scribe/v3/resolve.py`) now does that arithmetic
+after the model has read the note. Its effect on exact match and on the county indicator is
+generated into the block below from the files on disk.
 
 <!-- STUDY:EXTRACTION:BEGIN -->
-**What the measured error does to the county indicator (design study, SYNTHETIC).** `eventlog/design_study.measured_extraction_study` replaces the assumed error rates of section 3 by the measured per-event error of the scribe. For every true event of a test note it takes the predicted event of the same type, if any, and the signed date error in days. Each simulated date then gets an error drawn independently from that list, and each event is lost with the measured share that was not found:
+**Extraction errors manufacture fake county inequality (simulation on SYNTHETIC error profiles).** With no real difference anywhere, one county of 500 episodes whose dates are read from notes by the current scribe (C-270m-all-v2data) while the rest of the country comes from structured fields is flagged in 1.000 of 1,000 runs as is and in 0.003 with the code date resolver (every event confirmed: 0.003; nominal at most 0.00217). If both are read from notes, but the county's notes are written like the Haiku-written test notes and the country's like the Nemotron-written ones, the county is flagged in 0.018 of runs as is and 0.004 with the resolver. Extra predicted events are modelled at the measured rate per writer and event type (an extra makes the interval underivable, as eventlog.intervals.derive does): then 1.000 and 0.002 for the first comparison, 0.015 and 0.004 for the second. An extra that stands in for a true event missing from the record is not modelled.
+
+**The current scribe, as is and with the code date resolver.** `eventlog/extraction_intervals.py` takes the stored predictions of `C-270m-all-v2data` (Gemma 3 270M) on its 700 held-out test notes and the product's frozen relative-date resolver (`scribe/v3/resolve.py`, arm A; the product default A' gives the same pairs on these notes). For every pair of day-precision gold events in one note it records whether both were found with the right type and the predicted span minus the true span, so errors that share a date in a note stay correlated. The recomputed pairs equal the lists of the earlier scratch analysis in `runs/diagnose/` (recomputed 1,131 within-note pairs equal runs/diagnose/intervals-C-270m-all-v2data.json; recomputed 1,131 within-note pairs equal runs/diagnose/intervals-C-270m-all-v2data-resolved.json). Note-level exact match of the same notes (`data/scribe/v4/resolver/reproduce-v1.json`): validation 134/310 (0.432; 95% interval 0.378 to 0.488) as is and 289/310 (0.932; 95% interval 0.899 to 0.955) with the resolver (selection result); test 305/700 (0.436; 95% interval 0.399 to 0.473) and 651/700 (0.930; 95% interval 0.909 to 0.947) (already seen, post hoc; Nemotron-written 481/500, Haiku-written 170/200); the resolver made 0 notes worse across the stored runs.
+
+| dates | test notes | within-note pairs | found | exact interval among found | interval error, mean / SD, days | extra predicted events (gold events) | episodes with an extra: first contact / referral sent / diagnosis / treatment start |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| as is | both writers (700) | 1,131 | 1,095 | 0.374 | -4.7 / 68.4 | 19 (1,658) | 0.053 / 0.027 / 0.000 / 0.005 |
+| as is | Nemotron-written (500) | 857 | 839 | 0.377 | -5.9 / 69.2 | 7 (1,251) | 0.028 / 0.021 / 0.000 / 0.000 |
+| as is | Haiku-written (200) | 274 | 256 | 0.367 | -0.5 / 65.6 | 12 (407) | 0.124 / 0.043 / 0.000 / 0.022 |
+| with the resolver | both writers (700) | 1,131 | 1,095 | 0.991 | -1.3 / 27.8 | 16 (1,658) | 0.053 / 0.011 / 0.000 / 0.005 |
+| with the resolver | Nemotron-written (500) | 857 | 839 | 0.990 | -1.7 / 31.4 | 4 (1,251) | 0.028 / 0.000 / 0.000 / 0.000 |
+| with the resolver | Haiku-written (200) | 274 | 256 | 0.992 | +0.0 / 8.0 | 12 (407) | 0.124 / 0.043 / 0.000 / 0.022 |
+
+A 30% slowdown planted in one interval of one county, 1,000 runs per cell, the rest of the country read the same way. Located: share of runs in which the planted interval is the one flagged:
+
+| county episodes | dates | located: primary care / diagnostic / treatment | median bias, days | testable episodes, mean |
+| --- | --- | --- | --- | --- |
+| 500 | every event confirmed by a person | 0.995 / 0.996 / 1.000 | +0.0 / +0.0 / +0.0 | 500 / 500 / 500 |
+| 500 | as is | 0.705 / 0.429 / 0.442 | +17.6 / +15.6 / +12.5 | 410 / 382 / 376 |
+| 500 | with the code date resolver (arm A) | 0.993 / 0.994 / 1.000 | +0.2 / +0.1 / +0.1 | 481 / 481 / 481 |
+| 500 | as is, extra events modelled | 0.648 / 0.398 / 0.464 | +17.8 / +15.8 / +12.5 | 377 / 372 / 373 |
+| 500 | with the code date resolver (arm A), extra events modelled | 0.995 / 0.996 / 1.000 | +0.2 / +0.1 / +0.1 | 451 / 476 / 479 |
+| 2,000 | every event confirmed by a person | 1.000 / 1.000 / 1.000 | +0.0 / +0.0 / +0.0 | 2000 / 2000 / 2000 |
+| 2,000 | as is | 1.000 / 0.998 / 1.000 | +17.6 / +15.7 / +12.5 | 1640 / 1527 / 1501 |
+| 2,000 | with the code date resolver (arm A) | 1.000 / 1.000 / 1.000 | +0.1 / +0.1 / +0.1 | 1925 / 1924 / 1924 |
+| 2,000 | as is, extra events modelled | 1.000 / 0.997 / 0.997 | +17.6 / +15.7 / +12.4 | 1510 / 1486 / 1494 |
+| 2,000 | with the code date resolver (arm A), extra events modelled | 1.000 / 1.000 / 1.000 | +0.2 / +0.1 / +0.1 | 1804 / 1904 / 1914 |
+
+A 20% slowdown at the per-interval county size of section 2 (primary care 473, diagnostic 513, treatment 347), the size at which the formula of section 2 gives power 0.8:
+
+| dates | located: primary care / diagnostic / treatment |
+| --- | --- |
+| every event confirmed by a person | 0.786 / 0.745 / 0.759 |
+| as is | 0.232 / 0.127 / 0.049 |
+| with the code date resolver (arm A) | 0.772 / 0.704 / 0.708 |
+| as is, extra events modelled | 0.212 / 0.114 / 0.073 |
+| with the code date resolver (arm A), extra events modelled | 0.731 / 0.712 / 0.703 |
+
+No slowdown anywhere, one county of 500 episodes: share of 1,000 runs in which it is flagged (nominal at most 0.00217; every event confirmed: 0.003):
+
+| county | rest of the country | as is | with the resolver | as is, extra events modelled | with the resolver, extra events modelled |
+| --- | --- | --- | --- | --- | --- |
+| read from notes (both writers) | read from notes the same way | 0.003 | 0.004 | 0.002 | 0.002 |
+| read from notes (both writers) | structured fields | 1.000 | 0.003 | 1.000 | 0.002 |
+| read from Nemotron-written-like notes | structured fields | 1.000 | 0.005 | 1.000 | 0.003 |
+| read from Haiku-written-like notes | structured fields | 1.000 | 0.005 | 1.000 | 0.003 |
+| read from Haiku-written-like notes | read from Nemotron-written-like notes | 0.018 | 0.004 | 0.015 | 0.004 |
+
+Agreement with the scratch analysis `runs/diagnose/interval-impact-v1.json`: 34 rates compared, 0 more than three binomial standard errors apart, largest difference 0.043; median bias differs by at most 0.28 days. Different random streams; the reference pool of 100,000 episodes is drawn once per study, so its error is shared by all cells of one study and is not in the binomial SE.
+
+Reading. As is, the relative-date errors shift the county median of each interval by +12.4 to +17.8 days and a county of 500 episodes locates a 30% slowdown in 0.429 to 0.705 of runs instead of 0.995 to 1.000. With the code date resolver the median is off by +0.1 to +0.2 days, the slowdown is located in 0.993 to 1.000 of runs, and the largest false-flag rate with no slowdown is 0.005 (95% interval 0.002 to 0.012), consistent with the nominal bound. In this simulation on SYNTHETIC error profiles the resolver removes the fake inequality; it says nothing about real clinical notes, on which the scribe has not been tested. Every extracted event stays a proposal, pre-filled for one-click confirmation by a person, and a date the resolver cannot place needs editing.
+
+Extra predicted events: Measured per writer and event type; an episode slot receives an extra with probability 1 - exp(-9 x extras of the type / gold events). An extra makes both core intervals that use the slot underivable, because eventlog.intervals.derive needs exactly one start and one end event. An extra that stands in for a true event missing from the record is not modelled.
+
+Limits: The error profiles come from 700 SYNTHETIC test notes written and labelled by language models, not from clinical text; the test notes had been read before (post hoc). The resolver was designed on the generator's own six date forms; notes with other relative phrasings are not represented. Interval errors are drawn from all within-note pairs, not per interval type; extra events that stand in for a missing true event are not modelled. The confirmed condition assumes that a person removes every error; that was not measured.
+
+**Earlier adapters, errors drawn independently per date (design study, SYNTHETIC).** `eventlog/design_study.measured_extraction_study` replaces the assumed error rates of section 3 by the measured per-event error of earlier adapters. For every true event of a test note it takes the predicted event of the same type, if any, and the signed date error in days. Each simulated date then gets an error drawn independently from that list, and each event is lost with the measured share that was not found:
 
 | model and test notes | true events | found with the right type | exact date among those | wrong-date share | not found | largest error, days | extra predicted events | check |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -314,7 +381,7 @@ No slowdown anywhere: share of runs in which the county is flagged (nominal at m
 | Gemma 3 1B LoRA (MLX), 200 Nemotron-written test notes | 500 | 0.000 | 1.000 |
 | Gemma 3 1B LoRA (MLX), 200 Nemotron-written test notes | 2,000 | 0.001 | 1.000 |
 
-Reading. With the selected version-2 adapter's error on Nemotron-written notes, a county of 500 episodes locates the planted interval in 0.486 to 0.777 of runs instead of 0.997 to 0.999, and a county of 2,000 in 1.000. Across the three error profiles the median interval is off by +9.9 to +24.3 days at both county sizes; more episodes do not remove a bias. A county whose dates come from text while the others come from structured fields is flagged in 1.000 of runs when nothing is wrong. So at the measured error, text extraction is not accurate enough to fill the county indicator without a person confirming every extracted date.
+Reading for these earlier adapters. With the selected version-2 adapter's error on Nemotron-written notes, a county of 500 episodes locates the planted interval in 0.486 to 0.777 of runs instead of 0.997 to 0.999, and a county of 2,000 in 1.000. Across the three error profiles the median interval is off by +9.9 to +24.3 days at both county sizes; more episodes do not remove a bias. A county whose dates come from text while the others come from structured fields is flagged in 1.000 of runs when nothing is wrong. So at that error, text extraction was not accurate enough to fill the county indicator without a person confirming every extracted date.
 
 Limits: The measured errors come from synthetic notes written and labelled by language models, not from clinical text. Errors are drawn independently per date; real errors cluster within a note. Extra predicted events are not modelled. The confirmed condition assumes that a person removes every error; that was not measured.
 <!-- STUDY:EXTRACTION:END -->

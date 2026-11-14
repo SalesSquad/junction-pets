@@ -8,8 +8,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { buildApp } from '../src/build.mjs';
-import { buildAblation, buildEventLog, buildGenomics, buildServing, buildStudents, buildTeaching, buildTracks, FILES, RESEARCH, SYNTHETIC } from '../src/tracks.mjs';
-import { chip, dataPlanHtml, genomicsHtml, scribeHtml } from '../web/tracks.mjs';
+import { buildAblation, buildEventLog, buildGenomics, buildServing, buildStudents, buildTeaching, buildTracks, FILES, oneClickWording, RESEARCH, SYNTHETIC } from '../src/tracks.mjs';
+import { chip, dataPlanHtml, genomicsHtml, pilotHtml, processHtml, roadmapLine, routeDisclosure, scribeHtml, whoHtml } from '../web/tracks.mjs';
 
 const url = (p) => new URL(p, import.meta.url);
 const has = (p) => existsSync(url(`../${p}`));
@@ -175,7 +175,8 @@ test('scribe teaching loop: teacher, judges, gate, audit and cascade equal summa
   assert.equal(t.dataset.trainRows, t.dataset.fromV2 + t.dataset.fromRound2);
   assert.equal(t.audit.accepted.wrongLabel.n, s['audit.accepted.wrong_label.n']);
   assert.equal(t.cascade.chosenStudent, s['cascade.chosen_student']);
-  assert.deepEqual(t.cascade.verdict, s['cascade.verdict']);
+  assert.deepEqual(t.cascade.verdict, s['cascade.verdict'].map(oneClickWording), 'the verdict is the summary reworded for one-click confirmation, figures unchanged');
+  for (const [v, w] of s['cascade.verdict'].map((x) => [x, oneClickWording(x)])) assert.deepEqual(v.match(/[-+]?\d[\d.,/]*/g), w.match(/[-+]?\d[\d.,/]*/g), 'rewording keeps every figure');
   for (const sig of t.cascade.signals) for (const b of sig.byTarget) {
     const k = `cascade.${sig.signal}.${b.target}pct.test_pooled`;
     assert.equal(b.pooled.coverage.n, s[`${k}.coverage.n`]); assert.equal(b.pooled.error.n, s[`${k}.error_among_accepted.n`]);
@@ -184,7 +185,7 @@ test('scribe teaching loop: teacher, judges, gate, audit and cascade equal summa
   }
   assert.equal(t.cost.nemotron.usd, null); assert.ok(t.cost.nemotron.usdMissingBecause, 'an unpriced step says why');
   const html = scribeHtml(app);
-  for (const v of s['cascade.verdict']) assert.ok(html.includes(v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')), 'each cascade verdict is shown as written');
+  for (const v of s['cascade.verdict'].map(oneClickWording)) assert.ok(html.includes(v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')), 'each cascade verdict is shown as written');
 });
 
 test('scribe history: version 1 is kept, marked superseded, and still equals its evaluation file', { skip: !has(FILES.scribeEval) }, () => {
@@ -256,7 +257,7 @@ test('an absent file leaves its part out and names the reason in trackProblems',
 
 test('the app file on disk carries the same tracks as a fresh build', { skip: !has('web/data/app.json') }, () => {
   const disk = read('web/data/app.json');
-  for (const k of ['eventLog', 'scribe', 'genomics']) assert.deepEqual(disk[k], JSON.parse(JSON.stringify(app[k] ?? null)) ?? undefined, `web/data/app.json is stale for ${k}: run node src/build.mjs`);
+  for (const k of ['eventLog', 'scribe', 'genomics', 'safetyNet', 'flareGate']) assert.deepEqual(disk[k], JSON.parse(JSON.stringify(app[k] ?? null)) ?? undefined, `web/data/app.json is stale for ${k}: run node src/build.mjs`);
   assert.deepEqual(disk.trackProblems, app.trackProblems);
 });
 
@@ -266,7 +267,7 @@ test('the side tracks do not touch the analysis or the recommendations', () => {
   assert.ok(app.analysis.regions.length === 23 && app.recommendation.portfolio.picks.length > 0);
   if (disk) assert.deepEqual(disk.recommendation.portfolio, JSON.parse(JSON.stringify(app.recommendation.portfolio)));
   const cited = JSON.stringify(app.recommendation) + JSON.stringify(app.analysis.goal3);
-  assert.ok(!/eventLog|scribe|genomics|evo2|gemma/i.test(cited), 'no recommendation is derived from synthetic or research-only tracks');
+  assert.ok(!/eventLog|scribe|genomics|evo2|gemma|safetyNet|flareGate/i.test(cited), 'no recommendation is derived from synthetic or research-only tracks');
 });
 
 // ------------------------------------------------------------------ page
@@ -293,7 +294,7 @@ for (const [title, render, kind, key] of sections) {
     let t = dec(render(clone(app)).replace(/<svg[\s\S]*?<\/svg>/g, ' ').replace(/<(t?span) class="n">[^<]*<\/\1>/g, ' ').replace(/<code>[^<]*<\/code>/g, ' ').replace(/<[^>]+>/g, ' '));
     const js = [...new Set(strings(app[key]))].filter((s) => s.length >= 8).flatMap((s) => [s, `${s[0].toUpperCase()}${s.slice(1)}`]).sort((a, b) => b.length - a.length);
     for (const s of js) t = t.split(s).join(' ');
-    const allowedPhrases = [/Tavtigian 2018/g, /Pejaver 2022/g, /Evo 2/g, /Gemma 3/g, /[Vv]ersion [12]\b/g, /round 2/g, /0\.5 is chance, 1 is perfect/g, /stage [BC]\b/g];
+    const allowedPhrases = [/Figure 1\b/g, /Tavtigian 2018/g, /Pejaver 2022/g, /Evo 2/g, /Gemma 3/g, /[Vv]ersion [12]\b/g, /round 2/g, /0\.5 is chance, 1 is perfect/g, /stage [BC]\b/g];
     for (const re of allowedPhrases) t = t.replace(re, ' ');
     const allowed = /^(D[1-4]|F1|p50|p95|BRCA1|95%|1,000|v[12]|version-[12]|round-2|data\/scribe\/v3\/)$/;
     const left = [...t.matchAll(/\S*\d\S*/g)].map((m) => m[0].replace(/^[(]+|[.,;:()]+$/g, '')).filter((w) => !allowed.test(w));
@@ -308,7 +309,7 @@ test('page sections show failures instead of hiding them', () => {
     assert.match(html, /The first planned run did not happen/);
     assert.match(html, /None, on this evidence/);
     assert.match(html, /Dropped for time/);
-    assert.ok(!/can skip review/i.test(html.replace(/[^.]*not let measurably more notes skip review[^.]*\./g, '')), 'no claim that notes can skip review');
+    assert.ok(!/skip(s|ped)? (human )?review|skips? (the|a) person|among skipped/i.test(html), 'no wording that notes skip review');
     const noTeaching = scribeHtml({ scribe: { ...app.scribe, teaching: null }, trackProblems: [{ track: 'scribe.teaching', problem: 'source file missing: x' }] });
     assert.ok(!/The teaching loop/.test(noTeaching) && /Parts left out/.test(noTeaching));
   }
@@ -321,18 +322,81 @@ test('page sections show failures instead of hiding them', () => {
   }
 });
 
-test('the page shell keeps the main product first, then the three tracks, in the sticky navigation, with their chips styled', () => {
-  const html = text('../web/index.html'), css = text('../web/styles.css'), appJs = text('../web/app.mjs');
-  const order = ['gap', 'county', 'goal', 'action', 'brief', 'warning', 'collect', 'scribe', 'variant', 'evidence'].map((s) => html.indexOf(`<section id="${s}"`));
+test('the page shell keeps the main product first, then the two synthetic tracks; the research benchmark lives on its own appendix page', () => {
+  const html = text('../web/index.html'), css = text('../web/styles.css'), appJs = text('../web/app.mjs'), research = text('../web/research.html');
+  const order = ['gap', 'who', 'county', 'goal', 'action', 'plan', 'brief', 'collect', 'scribe', 'evidence'].map((s) => html.indexOf(`<section id="${s}"`));
   assert.ok(order.every((i) => i > 0) && order.every((v, i) => !i || v > order[i - 1]), 'section order');
-  assert.ok(html.indexOf('class="tracks-intro"') > html.indexOf('<section id="warning"') && html.indexOf('class="tracks-intro"') < html.indexOf('<section id="collect"'), 'the tracks are introduced as supporting, after the product');
+  assert.ok(html.indexOf('class="tracks-intro"') > html.indexOf('<section id="brief"') && html.indexOf('class="tracks-intro"') < html.indexOf('<section id="collect"'), 'the tracks are introduced as supporting, after the product');
+  assert.ok(html.indexOf('<section id="who"') === html.indexOf('</section>', html.indexOf('<section id="gap"')) + '</section>\n'.length, 'the who, how and where panel comes directly after the map');
   const nav = html.slice(html.indexOf('<nav'), html.indexOf('</nav>'));
-  for (const [href, label] of [['#collect', 'The data to collect'], ['#scribe', 'Pathway scribe'], ['#variant', 'Same variant, same answer']]) assert.ok(nav.includes(`<a href="${href}">${label}</a>`));
-  assert.match(css, /nav\{position:sticky/); assert.match(css, /\.chip\.synthetic\{/); assert.match(css, /\.chip\.research\{/);
+  for (const [href, label] of [['#who', 'Who, how and where'], ['#plan', 'Nemotron county plan'], ['#collect', 'The data to collect'], ['#scribe', 'Gemma demo']]) assert.ok(nav.includes(`<a href="${href}">${label}</a>`));
+  // Off the AstraZeneca page: the Evo 2 benchmark (appendix page only) and the early-warning signals section.
+  assert.ok(!/<section id="(variant|warning)"/.test(html) && !/TREATMENT SELECTION/i.test(html) && !nav.includes('#variant'));
+  assert.ok(research.includes('<section id="variant"') && /RESEARCH ONLY/.test(research) && !/treatment/i.test(research) && html.includes('href="/research.html"'));
+  assert.ok(!/genomicsHtml|renderForecast/.test(appJs), 'the main page renders neither the genomics benchmark nor the forecast');
+  // Mount points for the integrator, and the two lane modules imported, not copied.
+  for (const id of ['safety-net', 'comparability-gate']) assert.match(html, new RegExp(`<div id="${id}"[^>]*data-mount="${id}"`));
+  assert.match(appJs, /from '\.\/planner\.mjs'/); assert.match(appJs, /from '\.\/scribe-demo\.mjs'/); assert.match(appJs, /\/api\/scribe/); assert.match(appJs, /demo-outputs\.json/);
+  assert.match(html, /wherever they live, whoever they are, however they enter care/);
+  assert.match(css, /nav\{position:sticky/); assert.match(css, /\.chip\.synthetic\{/); assert.match(css, /\.chip\.research\{/); assert.match(css, /\.chip\.ecological\{/); assert.match(css, /\.chip\.published\{/);
   assert.match(css, /\.flow\{[^}]*grid-template-columns/); assert.match(css, /@media\(max-width:640px\)\{\.flow\{grid-template-columns:minmax\(0,1fr\)\}/);
   assert.match(appJs, /from '\.\/tracks\.mjs'/);
   for (const f of readdirSync(url('../web/')).filter((x) => /\.(html|css|mjs)$/.test(x))) {
     const body = text(`../web/${f}`);
     assert.ok(!/(src|href)=["']https?:\/\/[^"']+\.(js|css|woff2?|png|jpg|svg)/i.test(body) && !/@import|url\(\s*['"]?https?:/i.test(body), `${f} loads nothing from the network`);
+    if (/\.(html|mjs)$/.test(f)) assert.ok(!/\sstyle=/.test(body), `${f} uses no inline style (the CSP blocks it)`);
   }
+});
+
+// ------------------------------------------------------------------ product panels
+test('who, how and where: county gradients are labelled ECOLOGICAL with intervals, individual figures come from verified evidence rows', () => {
+  const html = whoHtml(clone(app));
+  assert.ok(!/undefined|NaN|\[object Object\]/.test(html));
+  const nums = numbersWithScope(html);
+  assert.ok(nums.length >= 40, `expected many data numbers, found ${nums.length}`);
+  assert.equal(nums.filter((x) => !x.scope || !x.scope.chips.has(x.scope.kind)).length, 0, 'every number sits in a block that carries its own chip');
+  const grads = app.analysis.gradients;
+  const zero = grads.filter((g) => g.siiLow <= 0 && g.siiHigh >= 0).length;
+  if (zero === grads.length) assert.match(html, new RegExp(`All <span class="n">${grads.length}</span> county education gradients include zero`));
+  for (const g of grads) assert.ok(html.includes(`(<span class="n">${g.siiLow.toFixed(2)}</span> to <span class="n">${g.siiHigh.toFixed(2)}</span>)`.replace('-0.00', '0.00')), g.id);
+  const ids = ['oecd-2025-survival-education', 'oecd-2025-breast-screening-education', 'oecd-2025-breast-screening-language', 'oecd-2025-cervical-screening-education', 'oecd-2025-cervical-screening-language', 'kuitunen-2026-route-medians'];
+  for (const id of ids) {
+    const r = app.evidence.find((x) => x.id === id);
+    assert.ok(r && r.verified && r.url && r.citation && r.checked?.at, id);
+    for (const v of Object.values(r.figures).filter((x) => typeof x === 'number' && x > 1 && x !== r.figures.cohortPatients && !String(x).includes('.'))) {
+      if (['publicMeanDays', 'privateOccupationalMeanDays', 'occupationalPatients', 'privatePatients'].some((k) => r.figures[k] === v)) continue;
+      assert.ok(html.includes(`<span class="n">${v}</span>`), `${id} figure ${v} on the panel`);
+    }
+  }
+  const med = app.evidence.find((x) => x.id === 'kuitunen-2026-route-medians').figures;
+  assert.deepEqual([med.publicMedianDays, med.privateOccupationalMedianDays, med.publicPatients, med.privateOccupationalPatients, med.p], [127, 76, 48, 39, 0.027]);
+  assert.match(app.evidence.find((x) => x.id === 'kuitunen-2026-route-medians').citation, /^Kuitunen J,/);
+  assert.ok(!app.evidence.some((r) => /Kuitunen H,/.test(r.citation)), 'first author is Kuitunen J');
+  assert.match(html, /1\.3\.1/);
+});
+
+test('route, target and area wording: medians, OECD-reported six weeks against six months in law, 21 counties plus Helsinki and Åland', () => {
+  const html = text('../web/index.html'), appJs = text('../web/app.mjs'), readme = text('../README.md');
+  assert.ok(!/207 vs 123|207 days|123 days/.test(html + appJs + readme.replace(/[^.]*Figure 1[^.]*\./g, '')), 'the Figure 1 means appear only where they are labelled as read from Figure 1');
+  assert.match(readme, /127 vs 76/); assert.match(readme, /48 vs 39/); assert.match(readme, /Kuitunen J/);
+  assert.ok(!/23 wellbeing services counties/i.test(html + appJs + readme));
+  assert.match(readme, /21 wellbeing services counties/);
+  const process = processHtml(clone(app));
+  assert.match(process, /OECD\/EU reports/); assert.match(process, /months of the need being established/);
+  assert.ok(app.evidence.find((x) => x.id === 'oecd-2025-six-week-target').verified && app.evidence.find((x) => x.id === 'stm-2026-care-guarantee').figures.treatmentMonths === 6);
+  assert.match(routeDisclosure(clone(app)), /read from Figure 1/);
+});
+
+test('every action carries its roadmap measure id, and the pilot card is Satakunta with its language scope', () => {
+  for (const iv of app.recommendation.interventions) {
+    const line = roadmapLine(clone(app), iv.id);
+    assert.match(line, /\d\.\d\.\d+|No roadmap measure/, iv.id);
+  }
+  const card = pilotHtml(clone(app));
+  assert.match(card, /Satakunta/); assert.match(card, /Finnish notes only/); assert.match(card, /No patient data leaves the county/);
+  assert.ok(!/highest lung/i.test(card));
+  for (const w of ['auto-confirmed', 'skips review', 'clinically accurate', 'works on real notes']) {
+    for (const body of [card, whoHtml(clone(app)), processHtml(clone(app)), text('../web/index.html'), text('../web/app.mjs')]) assert.ok(!body.toLowerCase().includes(w), w);
+  }
+  assert.ok(!/low-dose CT screening, starting where/.test(JSON.stringify(app.recommendation.interventions)), 'the lung action joins the existing pilot');
 });

@@ -1,0 +1,135 @@
+{
+  "synthetic": true,
+  "nvflare": "2.9.1",
+  "precision": 12,
+  "min_count": 5,
+  "sites": [
+    "HVA01",
+    "HVA02",
+    "HVA03",
+    "HVA04",
+    "HVA05",
+    "HVA06",
+    "HVA07",
+    "HVA08",
+    "HVA09",
+    "HVA10",
+    "HVA11",
+    "HVA12",
+    "HVA13",
+    "HVA14",
+    "HVA15",
+    "HVA16",
+    "HVA17",
+    "HVA18",
+    "HVA19",
+    "HVA20",
+    "HVA21",
+    "HVA90",
+    "HVA91"
+  ],
+  "simulator_threads": 1,
+  "statistic_configs": {
+    "count": {},
+    "sum": {},
+    "mean": {},
+    "stddev": {},
+    "histogram": {
+      "log_days_rtt": {
+        "bins": 10,
+        "range": [
+          -1.7435573674101779,
+          9.24256551927092
+        ]
+      },
+      "rtt_complete": {
+        "bins": 2,
+        "range": [
+          -0.5,
+          1.5
+        ]
+      },
+      "rtt_open": {
+        "bins": 2,
+        "range": [
+          -0.5,
+          1.5
+        ]
+      },
+      "raw_missed": {
+        "bins": 2,
+        "range": [
+          -0.5,
+          1.5
+        ]
+      },
+      "raw_err_days": {
+        "bins": 2,
+        "range": [
+          -3650.5,
+          3650.5
+        ]
+      },
+      "raw_err_gt3": {
+        "bins": 2,
+        "range": [
+          -0.5,
+          1.5
+        ]
+      },
+      "raw_err_lt_m3": {
+        "bins": 2,
+        "range": [
+          -0.5,
+          1.5
+        ]
+      },
+      "resolver_missed": {
+        "bins": 2,
+        "range": [
+          -0.5,
+          1.5
+        ]
+      },
+      "resolver_err_days": {
+        "bins": 2,
+        "range": [
+          -3650.5,
+          3650.5
+        ]
+      },
+      "resolver_err_gt3": {
+        "bins": 2,
+        "range": [
+          -0.5,
+          1.5
+        ]
+      },
+      "resolver_err_lt_m3": {
+        "bins": 2,
+        "range": [
+          -0.5,
+          1.5
+        ]
+      }
+    }
+  },
+  "rtt_threshold_days": 42,
+  "rtt_histogram_threshold_edge_index": 5,
+  "privacy_filters": [
+    "MinCountCleanser(min_count)",
+    "AddNoiseToMinMax(0.1, 0.3)",
+    "HistogramBinsCleanser(10%)"
+  ],
+  "inputs_sha256": {
+    "data/eventlog/sample-roster.json": "300f3a0fb5f11d63af75c1ce6f29213763e7612516b6110b6803392cc872a9a6",
+    "data/flare/gate-sites/assignment.json": "a1fc021375f6b06a218e6447f423de4eab12cc317273d3a7ce6044534979d6a0",
+    "data/eventlog/sample/*": "800593c81baef7f47be5822f29c8792f6a9d1a08a99616b875c24053bdf73275",
+    "data/flare/gate-sites/county=*/scribe.json": "66d419029195ccfb05167e209aff433153bc3f8a97f3267e545bf89ca30c4dbb"
+  },
+  "run_status": "FINISHED:COMPLETED",
+  "result_dir": "flare/workspace/sama_gate_p12",
+  "elapsed_seconds": 179.63,
+  "output": "data/flare/fedstats-gate-p12.json",
+  "output_sha256": "056ab20e690a4e47a3a2732b4c92c8e35db12cd4d98ec7a82f419e1461214922"
+}

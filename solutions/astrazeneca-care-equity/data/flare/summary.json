@@ -1,0 +1,105 @@
+{
+ "synthetic": true,
+ "intervals": [
+  {
+   "interval": "primary_care",
+   "threshold_days": 90,
+   "national_n": 19792,
+   "national_share_within_flare": 0.8367016976556184,
+   "national_share_within_central": 0.8367016976556184,
+   "county_share_within_min": 0.8,
+   "county_share_within_max": 0.8594890510948905
+  },
+  {
+   "interval": "diagnostic",
+   "threshold_days": 60,
+   "national_n": 19718,
+   "national_share_within_flare": 0.8911147175169896,
+   "national_share_within_central": 0.8911147175169896,
+   "county_share_within_min": 0.8660130718954249,
+   "county_share_within_max": 0.9306122448979591
+  },
+  {
+   "interval": "treatment",
+   "threshold_days": 30,
+   "national_n": 19581,
+   "national_share_within_flare": 0.7798375976712119,
+   "national_share_within_central": 0.7798375976712119,
+   "county_share_within_min": 0.7508896797153025,
+   "county_share_within_max": 0.8317757009345794
+  },
+  {
+   "interval": "total",
+   "threshold_days": 180,
+   "national_n": 19581,
+   "national_share_within_flare": 0.8695163679076656,
+   "national_share_within_central": 0.8695163679076656,
+   "county_share_within_min": 0.8539325842696629,
+   "county_share_within_max": 0.8839694656488549
+  }
+ ],
+ "equivalence": {
+  "none-p12": {
+   "cells": 92,
+   "cells_ok": 92,
+   "cells_failed": 0,
+   "cells_suppressed_central": 0,
+   "cells_suppressed_flare": 0,
+   "suppressed_sets_identical": true,
+   "histograms_dropped_by_bins_cleanser": 0,
+   "max_abs_diff_mean_log": 4.960476474025199e-13,
+   "max_abs_diff_sd_log": 4.968248035197576e-13,
+   "max_abs_diff_share_within": 0.0,
+   "national_ok": true,
+   "success": true
+  },
+  "none-p4": {
+   "cells": 92,
+   "cells_ok": 0,
+   "cells_failed": 92,
+   "cells_suppressed_central": 0,
+   "cells_suppressed_flare": 0,
+   "suppressed_sets_identical": true,
+   "histograms_dropped_by_bins_cleanser": 0,
+   "max_abs_diff_mean_log": 4.971619584326348e-05,
+   "max_abs_diff_sd_log": 4.911203257296215e-05,
+   "max_abs_diff_share_within": 0.0,
+   "national_ok": false,
+   "success": false
+  },
+  "age_band-p12": {
+   "cells": 1932,
+   "cells_ok": 1932,
+   "cells_failed": 0,
+   "cells_suppressed_central": 40,
+   "cells_suppressed_flare": 40,
+   "suppressed_sets_identical": true,
+   "histograms_dropped_by_bins_cleanser": 1758,
+   "max_abs_diff_mean_log": 5.000444502911705e-13,
+   "max_abs_diff_sd_log": 4.99933427988708e-13,
+   "max_abs_diff_share_within": 0.0,
+   "national_ok": null,
+   "success": true
+  }
+ },
+ "global_rows_with_suppression": {
+  "datasets": 84,
+  "datasets_with_a_suppressed_county": 40,
+  "global_count_includes_suppressed_counties": 84,
+  "global_mean_equals_unsuppressed_sum_over_all_counts": 40,
+  "max_abs_gap_global_mean_vs_unsuppressed_mean_log": 0.01959353706915934,
+  "worst": {
+   "dataset": "total|10-14",
+   "flare_global_count": 912,
+   "n_suppressed_counties": 1,
+   "flare_global_mean": 4.447732914666,
+   "mean_of_unsuppressed_counties": 4.467326451735159
+  },
+  "note": "County rows are exact. FLARE's national row for a stratum with a suppressed county divides the sum of unsuppressed counties by a count that still includes suppressed counties; do not use it as-is."
+ },
+ "elapsed_seconds": {
+  "none-p12": 70.85,
+  "none-p4": 71.39,
+  "age_band-p12": 97.07
+ }
+}

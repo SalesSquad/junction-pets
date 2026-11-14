@@ -1,0 +1,18 @@
+{
+ "rule": "resolve_expression(json.loads(expression_target(row)), note_date) == canonical label, and stored expression_json == to_expression(row)",
+ "synthetic": true,
+ "counts": {
+  "train": {
+   "rows": 2354,
+   "ok": 2354
+  },
+  "val": {
+   "rows": 310,
+   "ok": 310
+  }
+ },
+ "failures": {
+  "train": [],
+  "val": []
+ }
+}
