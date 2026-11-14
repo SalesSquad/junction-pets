@@ -1,5 +1,5 @@
 name: CRACI portable CI
-run-name: CRACI ${{ inputs.workload || 'portable' }} ${{ inputs.product || '' }} ${{ inputs.source_sha || github.sha }}
+run-name: CRACI ${{ inputs.workload || 'portable' }} ${{ inputs.workload == 'product-browser' && inputs.product || '' }} ${{ inputs.source_sha || github.sha }}
 
 on:
   pull_request:
@@ -21,6 +21,11 @@ on:
         type: choice
         default: stoa
         options: [stoa, valio]
+      browser:
+        description: Run all engines or only the engine needing qualification
+        type: choice
+        default: all
+        options: [all, chromium, firefox, webkit]
 
 permissions:
   contents: read
@@ -103,7 +108,7 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        browser: [chromium, firefox, webkit]
+        browser: ${{ fromJSON(inputs.browser == 'chromium' && '["chromium"]' || inputs.browser == 'firefox' && '["firefox"]' || inputs.browser == 'webkit' && '["webkit"]' || '["chromium","firefox","webkit"]') }}
     steps:
       - name: Configure browser installation networking
         uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
@@ -122,6 +127,7 @@ jobs:
                   serverNamePatterns:
                     - cdn.playwright.dev
                     - playwright.download.prss.microsoft.com
+                    - storage.googleapis.com
                     - fwjydgxpttajiqpfmqtj.supabase.co
                   ports: [443]
       - name: Enforce the credit window and immutable input

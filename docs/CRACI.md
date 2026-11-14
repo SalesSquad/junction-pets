@@ -76,6 +76,18 @@ No product assertion ran in this attempt. The repair adds only the documented
 package-aware custom APT source `https://packages.microsoft.com/ubuntu/24.04/prod`;
 all other unmatched egress remains denied. This failed receipt is retained.
 
+The repaired [run43549188651](https://github.com/SalesSquad/junction-pets/actions/runs/43549188651)
+on harness `d99035ec053381d299a1968974c2fc00ded29b87` passed Stoa's complete
+Firefox and WebKit journeys at both widths, including the official sponsor
+sample and source hash. Chromium still failed before product assertions:
+its pinned Chrome-for-Testing download redirected from `cdn.playwright.dev`
+to `storage.googleapis.com`, which the CRACI trace recorded as denied.
+An independent public HEAD request confirmed the same307 redirect and a200
+response at the exact official object. Only that TLS host is added; there is
+no Google wildcard or default-allow policy. The fixed `browser` selector admits
+one engine so this repair does not repeat the already-passed Firefox/WebKit
+product assertions. Their browser-harness bytes are unchanged.
+
 The actual CRACI UI for portable Valio job132303896493 reported
 **Complete SBOM certified** and no known vulnerabilities among its76 packages.
 That is a provider UI observation for this job; no exported SBOM was independently
