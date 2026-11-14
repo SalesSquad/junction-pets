@@ -84,7 +84,7 @@ export async function createLabSchema(pool,schema) {
 
 async function tx(pool,schema,operation) {
   const quoted=safeSchema(schema);
-  for(let attempt=0;attempt<7;attempt++) {
+  for(let attempt=0;attempt<16;attempt++) {
     const c=await pool.connect();
     let begun=false;
     try {
@@ -95,7 +95,11 @@ async function tx(pool,schema,operation) {
       return out;
     } catch (error) {
       if (begun) try { await c.query('ROLLBACK'); } catch { /* connection may be broken */ }
-      if ((error.code==='40001'||error.code==='40P01') && attempt<6) continue;
+      if ((error.code==='40001'||error.code==='40P01') && attempt<15) {
+        // Bounded retry jitter alleviates a shared synthetic wallet hot row.
+        await new Promise(resolve=>setTimeout(resolve,Math.min(5*(attempt+1),80)));
+        continue;
+      }
       throw error;
     } finally { c.release(); }
   }
