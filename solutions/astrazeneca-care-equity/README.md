@@ -67,10 +67,12 @@ server environment; without it the interface reports "not configured" and nothin
   added causal claim) were stopped.
 - `src/narratives.mjs`: plain-language Finnish summaries written by Claude Haiku. A sentence is
   shown only if every number in it occurs in its source claims and the TypeSafe check passes;
-  failed sentences are dropped, never repaired.
+  failed sentences are dropped, never repaired. Of 139 generated sentences 91 are shown.
 - `ml/`: an early-warning forecaster for the pathway indicators, trained on the THL municipal panel
-  with a rolling-origin backtest against persistence, drift and ridge baselines. The product ships
-  whichever method wins on validation, and says so when a baseline wins.
+  with a rolling-origin backtest against persistence, drift and ridge baselines. A GPU sweep of 14
+  transformer configurations (3 seeds each, with and without 150 extra covariates) found none that
+  beats the best baseline by more than the seed-to-seed spread, so the product ships the validated
+  winner per indicator: a baseline for 6 of 8. For yearly indicators the limit is the data.
 - `web/`: static demo with a self-only content security policy.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the model equations and limits, and
@@ -90,4 +92,5 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the model equations and limits, and
 
 The `engine.mjs` guardrail module and its 14 tests were written earlier in the event as milestone 1
 on invented fixtures (`fixtures/regions.json`, still labelled synthetic). Everything else here was
-built during Junction 2026 on public data. Built with Claude Code and Codex CLI.
+built during Junction 2026 on public data. Built with Claude Code and Codex CLI; runtime services are
+TypeSafe System One (claim check) and Claude Haiku (Finnish summaries); training ran on Verda GPUs in Finland.
