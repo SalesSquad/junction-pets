@@ -1,0 +1,238 @@
+{
+ "schemaVersion": "scribe-dataset-v3-stats",
+ "generated": "2026-11-14T19:10:51+00:00",
+ "synthetic": true,
+ "sources": {
+  "v2_dataset": "data/scribe/v2/dataset",
+  "candidates": "data/scribe/v3/teacher/candidates.jsonl",
+  "candidates_sha256": "009b78400e14fec86c0549a775164d17c5519b0ab5608185185834e06599229e",
+  "judged": "data/scribe/v3/gate/judged.jsonl",
+  "judged_sha256": "24e0e7b7ab83682ac14e95fc63c8880e0e3d9b38243aed6f6e36fd2cc242cf81",
+  "policy_sha256": "50817023f2b8326a63fb79f8fc6049391e80deee7232f1e2cf2baabf9bb0eda3"
+ },
+ "columns": [
+  "id",
+  "split",
+  "note_text",
+  "note_date",
+  "style",
+  "entry_route",
+  "events",
+  "target_json",
+  "date_forms",
+  "teacher_model",
+  "verifier_probabilities",
+  "accepted",
+  "synthetic",
+  "distractors",
+  "writer",
+  "kind",
+  "expression_json",
+  "focus",
+  "facts",
+  "reject_stage"
+ ],
+ "schema_equal_to_v2": {
+  "train": true,
+  "val": true,
+  "test_nemotron": true,
+  "test_haiku": true,
+  "rejected": true
+ },
+ "files": {
+  "train": {
+   "file": "train.parquet",
+   "sha256": "4a9dbf6165c2bc5cf099d0d06039ef2831bb6724c96bf48d98845ba3dadd9257",
+   "v2_sha256": "427214680ff8115057f6584674d9d47b8db77ed3d5bf133161ee84315128b309",
+   "byte_identical_to_v2": false,
+   "v2_rows": 2354,
+   "rows": 3860,
+   "by_writer": {
+    "nemotron-3.5-super-vl": 3222,
+    "claude-haiku-5-5": 638
+   },
+   "by_kind": {
+    "standard": 3072,
+    "careful": 445,
+    "no_event": 343
+   },
+   "round2_rows": 1506,
+   "round2_by_curriculum": {
+    "hard_standard": 468,
+    "careful": 382,
+    "no_event": 236,
+    "long_multi_visit": 199,
+    "terse": 221
+   }
+  },
+  "val": {
+   "file": "val.parquet",
+   "sha256": "21fe91d739be63eda18754b7eb90ceaafaf047653421d6224e9db85912571f40",
+   "v2_sha256": "21fe91d739be63eda18754b7eb90ceaafaf047653421d6224e9db85912571f40",
+   "byte_identical_to_v2": true,
+   "v2_rows": 310,
+   "rows": 310,
+   "by_writer": {
+    "nemotron-3.5-super-vl": 250,
+    "claude-haiku-5-5": 60
+   },
+   "by_kind": {
+    "standard": 294,
+    "no_event": 10,
+    "careful": 6
+   },
+   "round2_rows": 0,
+   "round2_by_curriculum": {
+    "hard_standard": 0,
+    "careful": 0,
+    "no_event": 0,
+    "long_multi_visit": 0,
+    "terse": 0
+   }
+  },
+  "test_nemotron": {
+   "file": "test_nemotron.parquet",
+   "sha256": "9f5b4a3a713b47ce13a8029fe7dc0dd3eefa5a8871f16ec4fbfd377130c8482c",
+   "v2_sha256": "9f5b4a3a713b47ce13a8029fe7dc0dd3eefa5a8871f16ec4fbfd377130c8482c",
+   "byte_identical_to_v2": true,
+   "v2_rows": 500,
+   "rows": 500,
+   "by_writer": {
+    "nemotron-3.5-super-vl": 500
+   },
+   "by_kind": {
+    "standard": 500
+   },
+   "round2_rows": 0,
+   "round2_by_curriculum": {
+    "hard_standard": 0,
+    "careful": 0,
+    "no_event": 0,
+    "long_multi_visit": 0,
+    "terse": 0
+   }
+  },
+  "test_haiku": {
+   "file": "test_haiku.parquet",
+   "sha256": "1539d8b71a8cd631d37ad7deee045df2d352692581dac2c6b74c8568e3ad73c0",
+   "v2_sha256": "1539d8b71a8cd631d37ad7deee045df2d352692581dac2c6b74c8568e3ad73c0",
+   "byte_identical_to_v2": true,
+   "v2_rows": 200,
+   "rows": 200,
+   "by_writer": {
+    "claude-haiku-5-5": 200
+   },
+   "by_kind": {
+    "no_event": 33,
+    "standard": 147,
+    "careful": 20
+   },
+   "round2_rows": 0,
+   "round2_by_curriculum": {
+    "hard_standard": 0,
+    "careful": 0,
+    "no_event": 0,
+    "long_multi_visit": 0,
+    "terse": 0
+   }
+  },
+  "rejected": {
+   "file": "rejected.parquet",
+   "sha256": "a09d7be5ff8959be2c92bd87e30fb8641b7d11153e733cd6dade860c92829962",
+   "v2_sha256": "3ce97c7c585f832f810c44607dd70ffc571eb9d2a9562ffc48456ee32d81db85",
+   "byte_identical_to_v2": false,
+   "v2_rows": 2290,
+   "rows": 2384,
+   "by_writer": {
+    "nemotron-3.5-super-vl": 2084,
+    "claude-haiku-5-5": 300
+   },
+   "by_kind": {
+    "standard": 2301,
+    "careful": 79,
+    "no_event": 4
+   },
+   "round2_rows": 94,
+   "round2_by_curriculum": {
+    "hard_standard": 12,
+    "careful": 18,
+    "no_event": 4,
+    "long_multi_visit": 41,
+    "terse": 19
+   }
+  }
+ },
+ "round2": {
+  "candidates": 1600,
+  "added_to_train": 1506,
+  "added_to_rejected": 94,
+  "rejected_by_stage": {
+   "verifier": 83,
+   "code_check": 11
+  },
+  "passed_code_check_but_not_judged": 0,
+  "added_to_train_by_curriculum": {
+   "hard_standard": 468,
+   "careful": 382,
+   "no_event": 236,
+   "long_multi_visit": 199,
+   "terse": 221
+  },
+  "added_to_rejected_by_curriculum": {
+   "hard_standard": 12,
+   "careful": 18,
+   "no_event": 4,
+   "long_multi_visit": 41,
+   "terse": 19
+  },
+  "candidates_by_curriculum": {
+   "hard_standard": 480,
+   "careful": 400,
+   "no_event": 240,
+   "long_multi_visit": 240,
+   "terse": 240
+  },
+  "added_to_train_by_kind": {
+   "standard": 888,
+   "careful": 382,
+   "no_event": 236
+  },
+  "added_to_train_readback_consistent": 1395,
+  "added_to_train_readback_inconsistent": 111,
+  "added_to_train_starts_with_style_label": 87,
+  "added_to_train_starts_with_style_label_by_curriculum": {
+   "hard_standard": 2,
+   "careful": 10,
+   "no_event": 0,
+   "long_multi_visit": 1,
+   "terse": 74
+  },
+  "added_to_train_repaired": 252,
+  "side_file": "round2.jsonl",
+  "side_file_rows": 1600
+ },
+ "checks": {
+  "v2_train_rows_unchanged_and_first": true,
+  "v2_rejected_rows_unchanged_and_first": true,
+  "train_rows": 3860,
+  "train_rows_from_v2": 2354,
+  "train_rows_from_round2": 1506,
+  "expression_targets_not_resolving_to_target_json": 0,
+  "heldout": {
+   "val": {
+    "ids_shared_with_train": 0,
+    "note_texts_shared_with_train": 0
+   },
+   "test_nemotron": {
+    "ids_shared_with_train": 0,
+    "note_texts_shared_with_train": 0
+   },
+   "test_haiku": {
+    "ids_shared_with_train": 0,
+    "note_texts_shared_with_train": 0
+   }
+  },
+  "duplicate_note_texts_in_train": 0,
+  "ids_in_two_files": 0
+ }
+}

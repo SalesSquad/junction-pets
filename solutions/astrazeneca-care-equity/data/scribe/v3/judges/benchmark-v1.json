@@ -1,0 +1,1305 @@
+{
+ "schemaVersion": "scribe-judges-benchmark-v1",
+ "generated": "2026-11-14T19:10:35+00:00",
+ "synthetic": true,
+ "not_for_clinical_use": true,
+ "design": {
+  "notes": 300,
+  "pairs": 600,
+  "source": "data/scribe/v2/dataset/train.parquet, accepted notes, 150 per writer by sha256('judges-bench-v1:'+id)",
+  "eligibility": "kind is not no_event; 2 to 8 events with distinct types; at least one DAY-precision event",
+  "halves": "per writer, first 75 by sha256('judges-split-v1:'+id) are calibration, the rest report",
+  "corruption_kinds": [
+   "date_shift_days",
+   "date_shift_month",
+   "type_swap",
+   "event_removed",
+   "event_added",
+   "route_swap"
+  ],
+  "type_neighbours": {
+   "SYMPTOM_ONSET_REPORTED": "FIRST_CONTACT",
+   "FIRST_CONTACT": "PHYSICIAN_ASSESSMENT",
+   "PHYSICIAN_ASSESSMENT": "SPECIALIST_VISIT",
+   "REFERRAL_SENT": "REFERRAL_RECEIVED",
+   "REFERRAL_RECEIVED": "REFERRAL_SENT",
+   "SPECIALIST_VISIT": "PHYSICIAN_ASSESSMENT",
+   "DIAGNOSIS": "MDT_DECISION",
+   "MDT_DECISION": "TREATMENT_START",
+   "TREATMENT_START": "MDT_DECISION"
+  },
+  "pairs_by_half": {
+   "calibration": 300,
+   "report": 300
+  },
+  "jev_answered_pairs": 600,
+  "decisions_answered_pairs": 320,
+  "decisions_scope": "Decisions was asked for 320 of the 600 pairs (the first 40 notes by hash in each half x writer stratum), a limit fixed before the run from the 1,190 tokens of the probe request: 600 such requests would exceed the 500,000-token allowance. The four-rule comparison, kappa and the missed-by-both share use only pairs that both judges answered.",
+  "paid_requests": {
+   "jev": {
+    "requests_sent": 2737,
+    "failed_attempts": 0,
+    "distinct_answers_in_cache": 2687,
+    "identical_requests_paid_twice": 50,
+    "tokens_total": 4084483,
+    "note": "the benchmark run sent a clean pair and its route-swapped pair (same request) at the same time before the per-request lock was added to core.py, so those requests were paid twice; the lock and a test now prevent it. The count includes the one probe request per service."
+   },
+   "decisions": {
+    "requests_sent": 690,
+    "failed_attempts": 1,
+    "distinct_answers_in_cache": 663,
+    "identical_requests_paid_twice": 26,
+    "tokens_total": 1038484,
+    "note": "the benchmark run sent a clean pair and its route-swapped pair (same request) at the same time before the per-request lock was added to core.py, so those requests were paid twice; the lock and a test now prevent it. The count includes the one probe request per service."
+   }
+  },
+  "errors": {
+   "jev": {},
+   "decisions": {}
+  }
+ },
+ "services": {
+  "jev": "ok",
+  "decisions": "ok"
+ },
+ "calibration": {
+  "objective": "per judge: thresholds maximising caught share minus false-reject share on the calibration half",
+  "grid": {
+   "event_min": [
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    0.95
+   ],
+   "unlisted_max": [
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.01
+   ],
+   "route_min": [
+    0.0,
+    0.5,
+    0.7,
+    0.9
+   ]
+  },
+  "judges": {
+   "jev": {
+    "thresholds": {
+     "event_min": 0.3,
+     "unlisted_max": 0.6,
+     "route_min": 0.0
+    },
+    "calibration_caught": 0.7,
+    "calibration_false_reject": 0.03333333333333333,
+    "youden_j": 0.666666666667
+   },
+   "decisions": {
+    "thresholds": {
+     "event_min": 0.2,
+     "unlisted_max": 1.01,
+     "route_min": 0.0
+    },
+    "calibration_caught": 0.5875,
+    "calibration_false_reject": 0.1,
+    "youden_j": 0.4875
+   },
+   "jev_hint": {
+    "thresholds": {
+     "event_min": 0.3,
+     "unlisted_max": 0.6,
+     "route_min": 0.0
+    },
+    "calibration_caught": 0.8133333333333334,
+    "calibration_false_reject": 0.02666666666666667,
+    "youden_j": 0.786666666667
+   }
+  },
+  "n_pairs_used": {
+   "jev": 300,
+   "rules": 160
+  },
+  "rules": {
+   "jev": {
+    "caught": {
+     "k": 54,
+     "n": 80,
+     "share": 0.675,
+     "wilson95": [
+      0.5664052731061473,
+      0.7675583815564182
+     ]
+    },
+    "false_reject": {
+     "k": 1,
+     "n": 80,
+     "share": 0.0125,
+     "wilson95": [
+      0.0022099755204522745,
+      0.06746270077668665
+     ]
+    },
+    "noise_after_e010": 0.03527815468113975
+   },
+   "decisions": {
+    "caught": {
+     "k": 47,
+     "n": 80,
+     "share": 0.5875,
+     "wilson95": [
+      0.47804040345890164,
+      0.6889414238723812
+     ]
+    },
+    "false_reject": {
+     "k": 8,
+     "n": 80,
+     "share": 0.1,
+     "wilson95": [
+      0.05154761556738083,
+      0.18510688806104086
+     ]
+    },
+    "noise_after_e010": 0.048458149779735685
+   },
+   "both": {
+    "caught": {
+     "k": 56,
+     "n": 80,
+     "share": 0.7,
+     "wilson95": [
+      0.5923184607866026,
+      0.7893542873991866
+     ]
+    },
+    "false_reject": {
+     "k": 9,
+     "n": 80,
+     "share": 0.1125,
+     "wilson95": [
+      0.060326869466304764,
+      0.20018218092372875
+     ]
+    },
+    "noise_after_e010": 0.036199095022624445
+   },
+   "either": {
+    "caught": {
+     "k": 45,
+     "n": 80,
+     "share": 0.5625,
+     "wilson95": [
+      0.4534113429694972,
+      0.6658613908385618
+     ]
+    },
+    "false_reject": {
+     "k": 0,
+     "n": 80,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.0458181295355271
+     ]
+    },
+    "noise_after_e010": 0.04635761589403974
+   },
+   "jev_hint": {
+    "caught": {
+     "k": 63,
+     "n": 80,
+     "share": 0.7875,
+     "wilson95": [
+      0.6857784426940333,
+      0.8628761328230384
+     ]
+    },
+    "false_reject": {
+     "k": 1,
+     "n": 80,
+     "share": 0.0125,
+     "wilson95": [
+      0.0022099755204522745,
+      0.06746270077668665
+     ]
+    },
+    "noise_after_e010": 0.023351648351648355
+   }
+  },
+  "rule_selection": "among rules with calibration false-reject share <= 0.3, lowest noise_after at e = 0.1; a cheaper rule within 0.01 absolute of it is preferred (cost order assumed: jev = jev_hint < decisions < both = either)",
+  "cleanest_rule": "jev_hint",
+  "chosen_rule": "jev_hint"
+ },
+ "report": {
+  "n_pairs": 160,
+  "n_corrupted": 80,
+  "n_clean": 80,
+  "rules": {
+   "jev": {
+    "caught": {
+     "k": 60,
+     "n": 80,
+     "share": 0.75,
+     "wilson95": [
+      0.6451532538076602,
+      0.8319376814245761
+     ]
+    },
+    "false_reject": {
+     "k": 1,
+     "n": 80,
+     "share": 0.0125,
+     "wilson95": [
+      0.0022099755204522745,
+      0.06746270077668665
+     ]
+    },
+    "caught_by_kind": {
+     "date_shift_days": {
+      "k": 12,
+      "n": 14,
+      "share": 0.8571428571428571,
+      "wilson95": [
+       0.6005862050302965,
+       0.9599060787285351
+      ]
+     },
+     "date_shift_month": {
+      "k": 8,
+      "n": 13,
+      "share": 0.6153846153846154,
+      "wilson95": [
+       0.355228915126657,
+       0.8229029220223743
+      ]
+     },
+     "type_swap": {
+      "k": 9,
+      "n": 13,
+      "share": 0.6923076923076923,
+      "wilson95": [
+       0.42369343180549035,
+       0.8731929634428948
+      ]
+     },
+     "event_removed": {
+      "k": 6,
+      "n": 14,
+      "share": 0.42857142857142855,
+      "wilson95": [
+       0.21380798904474121,
+       0.6740935542034926
+      ]
+     },
+     "event_added": {
+      "k": 12,
+      "n": 13,
+      "share": 0.9230769230769231,
+      "wilson95": [
+       0.6668604907890041,
+       0.9862895787574435
+      ]
+     },
+     "route_swap": {
+      "k": 13,
+      "n": 13,
+      "share": 1.0,
+      "wilson95": [
+       0.7719046276458016,
+       0.9999999999999999
+      ]
+     }
+    },
+    "noise_after": {
+     "e=0.05": 0.01314924391847469,
+     "e=0.10": 0.027359781121751026,
+     "e=0.20": 0.05952380952380952
+    },
+    "accepted_share_at_e010": 0.9137500000000001
+   },
+   "decisions": {
+    "caught": {
+     "k": 58,
+     "n": 80,
+     "share": 0.725,
+     "wilson95": [
+      0.6185594135898548,
+      0.810822428119158
+     ]
+    },
+    "false_reject": {
+     "k": 11,
+     "n": 80,
+     "share": 0.1375,
+     "wilson95": [
+      0.07854714324339108,
+      0.22967100066986607
+     ]
+    },
+    "caught_by_kind": {
+     "date_shift_days": {
+      "k": 12,
+      "n": 14,
+      "share": 0.8571428571428571,
+      "wilson95": [
+       0.6005862050302965,
+       0.9599060787285351
+      ]
+     },
+     "date_shift_month": {
+      "k": 10,
+      "n": 13,
+      "share": 0.7692307692307693,
+      "wilson95": [
+       0.49743624053272495,
+       0.9182047128150143
+      ]
+     },
+     "type_swap": {
+      "k": 9,
+      "n": 13,
+      "share": 0.6923076923076923,
+      "wilson95": [
+       0.42369343180549035,
+       0.8731929634428948
+      ]
+     },
+     "event_removed": {
+      "k": 1,
+      "n": 14,
+      "share": 0.07142857142857142,
+      "wilson95": [
+       0.012722215247890939,
+       0.31468704424151117
+      ]
+     },
+     "event_added": {
+      "k": 13,
+      "n": 13,
+      "share": 1.0,
+      "wilson95": [
+       0.7719046276458016,
+       0.9999999999999999
+      ]
+     },
+     "route_swap": {
+      "k": 13,
+      "n": 13,
+      "share": 1.0,
+      "wilson95": [
+       0.7719046276458016,
+       0.9999999999999999
+      ]
+     }
+    },
+    "noise_after": {
+     "e=0.05": 0.01650412603150788,
+     "e=0.10": 0.034214618973561435,
+     "e=0.20": 0.0738255033557047
+    },
+    "accepted_share_at_e010": 0.8037500000000001
+   },
+   "both": {
+    "caught": {
+     "k": 65,
+     "n": 80,
+     "share": 0.8125,
+     "wilson95": [
+      0.7134167737100688,
+      0.8829468953302267
+     ]
+    },
+    "false_reject": {
+     "k": 12,
+     "n": 80,
+     "share": 0.15,
+     "wilson95": [
+      0.08794040506163547,
+      0.24413228561323347
+     ]
+    },
+    "caught_by_kind": {
+     "date_shift_days": {
+      "k": 12,
+      "n": 14,
+      "share": 0.8571428571428571,
+      "wilson95": [
+       0.6005862050302965,
+       0.9599060787285351
+      ]
+     },
+     "date_shift_month": {
+      "k": 10,
+      "n": 13,
+      "share": 0.7692307692307693,
+      "wilson95": [
+       0.49743624053272495,
+       0.9182047128150143
+      ]
+     },
+     "type_swap": {
+      "k": 11,
+      "n": 13,
+      "share": 0.8461538461538461,
+      "wilson95": [
+       0.5776536898051745,
+       0.9567418216419186
+      ]
+     },
+     "event_removed": {
+      "k": 6,
+      "n": 14,
+      "share": 0.42857142857142855,
+      "wilson95": [
+       0.21380798904474121,
+       0.6740935542034926
+      ]
+     },
+     "event_added": {
+      "k": 13,
+      "n": 13,
+      "share": 1.0,
+      "wilson95": [
+       0.7719046276458016,
+       0.9999999999999999
+      ]
+     },
+     "route_swap": {
+      "k": 13,
+      "n": 13,
+      "share": 1.0,
+      "wilson95": [
+       0.7719046276458016,
+       0.9999999999999999
+      ]
+     }
+    },
+    "noise_after": {
+     "e=0.05": 0.011476664116296864,
+     "e=0.10": 0.02392344497607656,
+     "e=0.20": 0.052264808362369346
+    },
+    "accepted_share_at_e010": 0.7837500000000001
+   },
+   "either": {
+    "caught": {
+     "k": 53,
+     "n": 80,
+     "share": 0.6625,
+     "wilson95": [
+      0.5535652339817697,
+      0.756543873919184
+     ]
+    },
+    "false_reject": {
+     "k": 0,
+     "n": 80,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.0458181295355271
+     ]
+    },
+    "caught_by_kind": {
+     "date_shift_days": {
+      "k": 12,
+      "n": 14,
+      "share": 0.8571428571428571,
+      "wilson95": [
+       0.6005862050302965,
+       0.9599060787285351
+      ]
+     },
+     "date_shift_month": {
+      "k": 8,
+      "n": 13,
+      "share": 0.6153846153846154,
+      "wilson95": [
+       0.355228915126657,
+       0.8229029220223743
+      ]
+     },
+     "type_swap": {
+      "k": 7,
+      "n": 13,
+      "share": 0.5384615384615384,
+      "wilson95": [
+       0.29143795714506004,
+       0.7679393219046169
+      ]
+     },
+     "event_removed": {
+      "k": 1,
+      "n": 14,
+      "share": 0.07142857142857142,
+      "wilson95": [
+       0.012722215247890939,
+       0.31468704424151117
+      ]
+     },
+     "event_added": {
+      "k": 12,
+      "n": 13,
+      "share": 0.9230769230769231,
+      "wilson95": [
+       0.6668604907890041,
+       0.9862895787574435
+      ]
+     },
+     "route_swap": {
+      "k": 13,
+      "n": 13,
+      "share": 1.0,
+      "wilson95": [
+       0.7719046276458016,
+       0.9999999999999999
+      ]
+     }
+    },
+    "noise_after": {
+     "e=0.05": 0.017453135100193928,
+     "e=0.10": 0.03614457831325301,
+     "e=0.20": 0.07780979827089338
+    },
+    "accepted_share_at_e010": 0.9337500000000001
+   },
+   "jev_hint": {
+    "caught": {
+     "k": 66,
+     "n": 80,
+     "share": 0.825,
+     "wilson95": [
+      0.7274245802116865,
+      0.8927936355902206
+     ]
+    },
+    "false_reject": {
+     "k": 0,
+     "n": 80,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.0458181295355271
+     ]
+    },
+    "caught_by_kind": {
+     "date_shift_days": {
+      "k": 13,
+      "n": 14,
+      "share": 0.9285714285714286,
+      "wilson95": [
+       0.6853129557584889,
+       0.9872777847521093
+      ]
+     },
+     "date_shift_month": {
+      "k": 13,
+      "n": 13,
+      "share": 1.0,
+      "wilson95": [
+       0.7719046276458016,
+       0.9999999999999999
+      ]
+     },
+     "type_swap": {
+      "k": 7,
+      "n": 13,
+      "share": 0.5384615384615384,
+      "wilson95": [
+       0.29143795714506004,
+       0.7679393219046169
+      ]
+     },
+     "event_removed": {
+      "k": 7,
+      "n": 14,
+      "share": 0.5,
+      "wilson95": [
+       0.26799202452413634,
+       0.7320079754758637
+      ]
+     },
+     "event_added": {
+      "k": 13,
+      "n": 13,
+      "share": 1.0,
+      "wilson95": [
+       0.7719046276458016,
+       0.9999999999999999
+      ]
+     },
+     "route_swap": {
+      "k": 13,
+      "n": 13,
+      "share": 1.0,
+      "wilson95": [
+       0.7719046276458016,
+       0.9999999999999999
+      ]
+     }
+    },
+    "noise_after": {
+     "e=0.05": 0.0091264667535854,
+     "e=0.10": 0.019073569482288836,
+     "e=0.20": 0.04191616766467067
+    },
+    "accepted_share_at_e010": 0.9175
+   }
+  },
+  "jev_alone_all_report_pairs": {
+   "n_pairs": 300,
+   "caught": {
+    "k": 110,
+    "n": 150,
+    "share": 0.7333333333333333,
+    "wilson95": [
+     0.6573854995109168,
+     0.7976283864506474
+    ]
+   },
+   "false_reject": {
+    "k": 8,
+    "n": 150,
+    "share": 0.05333333333333334,
+    "wilson95": [
+     0.027269539920193826,
+     0.1017038783819546
+    ]
+   },
+   "caught_by_kind": {
+    "date_shift_days": {
+     "k": 20,
+     "n": 25,
+     "share": 0.8,
+     "wilson95": [
+      0.6086904963045967,
+      0.9113941531319742
+     ]
+    },
+    "date_shift_month": {
+     "k": 15,
+     "n": 25,
+     "share": 0.6,
+     "wilson95": [
+      0.40739457358967,
+      0.7659669762225203
+     ]
+    },
+    "type_swap": {
+     "k": 15,
+     "n": 25,
+     "share": 0.6,
+     "wilson95": [
+      0.40739457358967,
+      0.7659669762225203
+     ]
+    },
+    "event_removed": {
+     "k": 12,
+     "n": 25,
+     "share": 0.48,
+     "wilson95": [
+      0.30031285954112974,
+      0.6650148304964322
+     ]
+    },
+    "event_added": {
+     "k": 23,
+     "n": 25,
+     "share": 0.92,
+     "wilson95": [
+      0.7503389104960468,
+      0.9777795987151524
+     ]
+    },
+    "route_swap": {
+     "k": 25,
+     "n": 25,
+     "share": 1.0,
+     "wilson95": [
+      0.8668077490609515,
+      0.9999999999999999
+     ]
+    }
+   },
+   "noise_after": {
+    "e=0.05": 0.014609203798392992,
+    "e=0.10": 0.03034901365705615,
+    "e=0.20": 0.06578947368421054
+   }
+  },
+  "jev_hint_alone_all_report_pairs": {
+   "n_pairs": 300,
+   "caught": {
+    "k": 126,
+    "n": 150,
+    "share": 0.84,
+    "wilson95": [
+     0.7729603179581628,
+     0.890059915871545
+    ]
+   },
+   "false_reject": {
+    "k": 2,
+    "n": 150,
+    "share": 0.013333333333333334,
+    "wilson95": [
+     0.0036641291512270503,
+     0.04730690870036751
+    ]
+   },
+   "caught_by_kind": {
+    "date_shift_days": {
+     "k": 23,
+     "n": 25,
+     "share": 0.92,
+     "wilson95": [
+      0.7503389104960468,
+      0.9777795987151524
+     ]
+    },
+    "date_shift_month": {
+     "k": 24,
+     "n": 25,
+     "share": 0.96,
+     "wilson95": [
+      0.8045593626380625,
+      0.9929037664980127
+     ]
+    },
+    "type_swap": {
+     "k": 14,
+     "n": 25,
+     "share": 0.56,
+     "wilson95": [
+      0.3706733186979878,
+      0.7333436111893266
+     ]
+    },
+    "event_removed": {
+     "k": 15,
+     "n": 25,
+     "share": 0.6,
+     "wilson95": [
+      0.40739457358967,
+      0.7659669762225203
+     ]
+    },
+    "event_added": {
+     "k": 25,
+     "n": 25,
+     "share": 1.0,
+     "wilson95": [
+      0.8668077490609515,
+      0.9999999999999999
+     ]
+    },
+    "route_swap": {
+     "k": 25,
+     "n": 25,
+     "share": 1.0,
+     "wilson95": [
+      0.8668077490609515,
+      0.9999999999999999
+     ]
+    }
+   },
+   "noise_after": {
+    "e=0.05": 0.008462623413258112,
+    "e=0.10": 0.01769911504424779,
+    "e=0.20": 0.03896103896103897
+   }
+  },
+  "agreement": {
+   "n_pairs": 160,
+   "cohen_kappa_pass_fail": 0.6898723954126957,
+   "table": {
+    "both_pass": 83,
+    "jev_pass_decisions_fail": 16,
+    "jev_fail_decisions_pass": 8,
+    "both_fail": 53
+   },
+   "cohen_kappa_on_corrupted": 0.6129032258064516,
+   "cohen_kappa_on_clean": -0.023454157782516638,
+   "corrupted_missed_by_both": {
+    "k": 15,
+    "n": 80,
+    "share": 0.1875,
+    "wilson95": [
+     0.11705310466977323,
+     0.28658322628993116
+    ]
+   },
+   "corrupted_missed_by_jev": {
+    "k": 20,
+    "n": 80,
+    "share": 0.25,
+    "wilson95": [
+     0.16806231857542375,
+     0.3548467461923397
+    ]
+   },
+   "corrupted_missed_by_decisions": {
+    "k": 22,
+    "n": 80,
+    "share": 0.275,
+    "wilson95": [
+     0.18917757188084197,
+     0.3814405864101452
+    ]
+   },
+   "clean_rejected_by_both": {
+    "k": 0,
+    "n": 80,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.0458181295355271
+    ]
+   }
+  },
+  "false_reject_note": "A 'clean' pair can still carry a real label error (the independent audit found 2 wrong labels in 60 accepted notes, data/scribe/label-audit-v1.json), so the false-reject share is an upper bound."
+ },
+ "diagnostics_calibration_half": {
+  "jev": {
+   "clean_event_questions_below_050_by_date_form": {
+    "days": {
+     "k": 24,
+     "n": 83,
+     "share": 0.2891566265060241,
+     "wilson95": [
+      0.20267448849174827,
+      0.3942922083452287
+     ]
+    },
+    "long": {
+     "k": 0,
+     "n": 93,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.03966750261173514
+     ]
+    },
+    "month": {
+     "k": 0,
+     "n": 66,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ]
+    },
+    "no_year": {
+     "k": 0,
+     "n": 34,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.10151455415332376
+     ]
+    },
+    "numeric": {
+     "k": 0,
+     "n": 124,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.030048615340677695
+     ]
+    },
+    "weeks": {
+     "k": 28,
+     "n": 50,
+     "share": 0.56,
+     "wilson95": [
+      0.4230602802165686,
+      0.6883780078874284
+     ]
+    }
+   },
+   "corrupted_altered_question_on_the_wrong_side_of_050": {
+    "date_shift_days": {
+     "k": 20,
+     "n": 25,
+     "share": 0.8,
+     "wilson95": [
+      0.6086904963045967,
+      0.9113941531319742
+     ]
+    },
+    "date_shift_month": {
+     "k": 21,
+     "n": 25,
+     "share": 0.84,
+     "wilson95": [
+      0.6534637839282114,
+      0.9359654854332355
+     ]
+    },
+    "event_added": {
+     "k": 25,
+     "n": 25,
+     "share": 1.0,
+     "wilson95": [
+      0.8668077490609515,
+      0.9999999999999999
+     ]
+    },
+    "event_removed": {
+     "k": 19,
+     "n": 25,
+     "share": 0.76,
+     "wilson95": [
+      0.5657031664457093,
+      0.8850368630659855
+     ]
+    },
+    "route_swap": {
+     "k": 25,
+     "n": 25,
+     "share": 1.0,
+     "wilson95": [
+      0.8668077490609515,
+      0.9999999999999999
+     ]
+    },
+    "type_swap": {
+     "k": 14,
+     "n": 25,
+     "share": 0.56,
+     "wilson95": [
+      0.3706733186979878,
+      0.7333436111893266
+     ]
+    }
+   },
+   "note": "date forms are those of the answer key (numeric, long, no_year, days, weeks, month); for event_removed the altered question is 'unlisted' (caught when >= 0.5), otherwise the changed event or route question (caught when < 0.5)"
+  },
+  "decisions": {
+   "clean_event_questions_below_050_by_date_form": {
+    "days": {
+     "k": 11,
+     "n": 54,
+     "share": 0.2037037037037037,
+     "wilson95": [
+      0.11774054087421391,
+      0.3290230668833543
+     ]
+    },
+    "long": {
+     "k": 0,
+     "n": 45,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.07865159873288836
+     ]
+    },
+    "month": {
+     "k": 0,
+     "n": 28,
+     "share": 0.0,
+     "wilson95": [
+      1.3877787807814457e-17,
+      0.12064330476584563
+     ]
+    },
+    "no_year": {
+     "k": 1,
+     "n": 15,
+     "share": 0.06666666666666667,
+     "wilson95": [
+      0.011866895493268553,
+      0.2981652987378003
+     ]
+    },
+    "numeric": {
+     "k": 0,
+     "n": 68,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.053471336520070537
+     ]
+    },
+    "weeks": {
+     "k": 10,
+     "n": 28,
+     "share": 0.35714285714285715,
+     "wilson95": [
+      0.2070582950773768,
+      0.5416969348557219
+     ]
+    }
+   },
+   "corrupted_altered_question_on_the_wrong_side_of_050": {
+    "date_shift_days": {
+     "k": 7,
+     "n": 14,
+     "share": 0.5,
+     "wilson95": [
+      0.26799202452413634,
+      0.7320079754758637
+     ]
+    },
+    "date_shift_month": {
+     "k": 8,
+     "n": 13,
+     "share": 0.6153846153846154,
+     "wilson95": [
+      0.355228915126657,
+      0.8229029220223743
+     ]
+    },
+    "event_added": {
+     "k": 13,
+     "n": 13,
+     "share": 1.0,
+     "wilson95": [
+      0.7719046276458016,
+      0.9999999999999999
+     ]
+    },
+    "event_removed": {
+     "k": 7,
+     "n": 14,
+     "share": 0.5,
+     "wilson95": [
+      0.26799202452413634,
+      0.7320079754758637
+     ]
+    },
+    "route_swap": {
+     "k": 13,
+     "n": 13,
+     "share": 1.0,
+     "wilson95": [
+      0.7719046276458016,
+      0.9999999999999999
+     ]
+    },
+    "type_swap": {
+     "k": 7,
+     "n": 13,
+     "share": 0.5384615384615384,
+     "wilson95": [
+      0.29143795714506004,
+      0.7679393219046169
+     ]
+    }
+   },
+   "note": "date forms are those of the answer key (numeric, long, no_year, days, weeks, month); for event_removed the altered question is 'unlisted' (caught when >= 0.5), otherwise the changed event or route question (caught when < 0.5)"
+  },
+  "jev_hint": {
+   "clean_event_questions_below_050_by_date_form": {
+    "days": {
+     "k": 9,
+     "n": 83,
+     "share": 0.10843373493975904,
+     "wilson95": [
+      0.058104915192981194,
+      0.19340466464711883
+     ]
+    },
+    "long": {
+     "k": 4,
+     "n": 93,
+     "share": 0.043010752688172046,
+     "wilson95": [
+      0.016851153993758472,
+      0.10542559570513925
+     ]
+    },
+    "month": {
+     "k": 0,
+     "n": 66,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.05500255701354129
+     ]
+    },
+    "no_year": {
+     "k": 0,
+     "n": 34,
+     "share": 0.0,
+     "wilson95": [
+      0.0,
+      0.10151455415332376
+     ]
+    },
+    "numeric": {
+     "k": 1,
+     "n": 124,
+     "share": 0.008064516129032258,
+     "wilson95": [
+      0.0014250064581251692,
+      0.04426798605447708
+     ]
+    },
+    "weeks": {
+     "k": 1,
+     "n": 50,
+     "share": 0.02,
+     "wilson95": [
+      0.003539259271646236,
+      0.10495443589637815
+     ]
+    }
+   },
+   "corrupted_altered_question_on_the_wrong_side_of_050": {
+    "date_shift_days": {
+     "k": 22,
+     "n": 25,
+     "share": 0.88,
+     "wilson95": [
+      0.7004420607907267,
+      0.9583318284955964
+     ]
+    },
+    "date_shift_month": {
+     "k": 25,
+     "n": 25,
+     "share": 1.0,
+     "wilson95": [
+      0.8668077490609515,
+      0.9999999999999999
+     ]
+    },
+    "event_added": {
+     "k": 25,
+     "n": 25,
+     "share": 1.0,
+     "wilson95": [
+      0.8668077490609515,
+      0.9999999999999999
+     ]
+    },
+    "event_removed": {
+     "k": 19,
+     "n": 25,
+     "share": 0.76,
+     "wilson95": [
+      0.5657031664457093,
+      0.8850368630659855
+     ]
+    },
+    "route_swap": {
+     "k": 25,
+     "n": 25,
+     "share": 1.0,
+     "wilson95": [
+      0.8668077490609515,
+      0.9999999999999999
+     ]
+    },
+    "type_swap": {
+     "k": 15,
+     "n": 25,
+     "share": 0.6,
+     "wilson95": [
+      0.40739457358967,
+      0.7659669762225203
+     ]
+    }
+   },
+   "note": "date forms are those of the answer key (numeric, long, no_year, days, weeks, month); for event_removed the altered question is 'unlisted' (caught when >= 0.5), otherwise the changed event or route question (caught when < 0.5)"
+  }
+ },
+ "cost": {
+  "jev": {
+   "distinct_requests": 550,
+   "tokens_total": 762994,
+   "tokens_mean_per_request": 1387.2618181818182,
+   "tokens_per_1000_notes": 1387261.8181818181,
+   "latency_s_p50": 0.196,
+   "latency_s_p95": 0.386,
+   "latency_note": "wall time of single requests sent concurrently (Jev 12, Decisions 8 in flight); nearest-rank percentiles",
+   "usd_per_1000_notes": 0.05826499636363637,
+   "usd_price_source": "owner's TypeSafe price, USD 0.042 per million tokens"
+  },
+  "jev_hint": {
+   "distinct_requests": 550,
+   "tokens_total": 809200,
+   "tokens_mean_per_request": 1471.2727272727273,
+   "tokens_per_1000_notes": 1471272.7272727273,
+   "latency_s_p50": 0.192,
+   "latency_s_p95": 0.369,
+   "latency_note": "wall time of single requests sent concurrently (Jev 12, Decisions 8 in flight); nearest-rank percentiles",
+   "usd_per_1000_notes": 0.061793454545454554,
+   "usd_price_source": "owner's TypeSafe price, USD 0.042 per million tokens"
+  },
+  "decisions": {
+   "distinct_requests": 294,
+   "tokens_total": 423847,
+   "tokens_mean_per_request": 1441.656462585034,
+   "tokens_per_1000_notes": 1441656.462585034,
+   "latency_s_p50": 0.211,
+   "latency_s_p95": 0.608,
+   "latency_note": "wall time of single requests sent concurrently (Jev 12, Decisions 8 in flight); nearest-rank percentiles",
+   "usd_per_1000_notes": 0.14416564625850342,
+   "usd_price_source": "OpenAI Decisions guide (https://developers.openai.com/api/docs/guides/decisions, opened 2026-11-14): gpt-6-luna uncached input USD 0.10 per million tokens, output tokens not charged; list rate, cache discounts not applied"
+  }
+ },
+ "ledgers": {
+  "typesafe": {
+   "requests": 2737,
+   "tokens": 4084483,
+   "input_tokens": 3706234,
+   "output_tokens": 378249,
+   "reserved_tokens": 0,
+   "failed_attempts": 0,
+   "updated": "2026-11-14T18:51:02+00:00",
+   "cost_usd": 0.17154828600000002,
+   "cost_usd_counting_reservations": 0.17154828600000002
+  },
+  "openai": {
+   "requests": 690,
+   "tokens": 1038484,
+   "input_tokens": 1038484,
+   "output_tokens": 0,
+   "reserved_tokens": 3000,
+   "failed_attempts": 1,
+   "updated": "2026-11-14T18:52:16+00:00"
+  }
+ },
+ "recommendation": {
+  "rule": "jev_hint",
+  "thresholds": {
+   "jev": {
+    "event_min": 0.3,
+    "unlisted_max": 0.6,
+    "route_min": 0.0
+   },
+   "decisions": {
+    "event_min": 0.2,
+    "unlisted_max": 1.01,
+    "route_min": 0.0
+   },
+   "jev_hint": {
+    "event_min": 0.3,
+    "unlisted_max": 0.6,
+    "route_min": 0.0
+   }
+  },
+  "sentence": "Use Jev alone with the v2 questions (code adds each date's day offset to the question) with event_min 0.3, unlisted_max 0.6 and the chosen route equal to the claimed one: on the report half it caught 126/150 planted errors and rejected 2/150 clean pairs at USD 0.0618 per 1,000 notes, which takes label noise from 0.10 to 0.0177 by the section 4 formula."
+ },
+ "question_sets": {
+  "v1": "the questions as specified: '<event definition> happened on <ISO date>; relative expressions are resolved against the note date'",
+  "v2": "v1 plus the day offset computed by code for each DAY-precision date, e.g. '(that is 156 days, i.e. 22 weeks and 2 days before the note date 2026-03-22)'. Asked of Jev only (rule 'jev_hint'); the OpenAI allowance was used up by v1.",
+  "disclosure": "v2 was designed after the v1 results (both halves) had been seen, because v1 false rejects sat on relative dates. Its thresholds were still chosen on the calibration half only, but its report-half numbers are not as clean a test as those of v1."
+ }
+}

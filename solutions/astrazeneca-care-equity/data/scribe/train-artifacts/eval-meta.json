@@ -1,0 +1,80 @@
+{
+ "base_model": "mlx-community/gemma-3-1b-it-bf16",
+ "meta": {
+  "synthetic": true,
+  "host": "Mikael-MacBook-Pro.local",
+  "host_hardware": "Apple M5 Pro, 24 GB",
+  "framework": "MLX 0.32.4, mlx-lm 0.32.2 (Apple silicon GPU)",
+  "fallback": "local MLX run because the CUDA box was unreachable; the planned unsloth/gemma-3-4b-it run was not executed",
+  "base_model_snapshot": "60444cd9d4be58ce6995614c6551b4d8db047483",
+  "test_subset_seed": 20261114,
+  "training": {
+   "iterations_planned": 1200,
+   "iterations_reached": 1200,
+   "iterations_used": 1200,
+   "share_of_epoch": "70%",
+   "wall_clock_cap_minutes": 14.0,
+   "wall_clock_seconds": 726,
+   "train_start_utc": "2026-11-14T16:59:20+00:00",
+   "train_end_utc": "2026-11-14T17:11:26+00:00",
+   "batch_size": 1,
+   "grad_accumulation": 4,
+   "learning_rate": 0.0001,
+   "optimizer": "adamw",
+   "seed": 20261114,
+   "max_seq_length": 768,
+   "lora_rank": 16,
+   "lora_scale": 2.0,
+   "lora_dropout": 0.05,
+   "lora_keys": [
+    "self_attn.q_proj",
+    "self_attn.k_proj",
+    "self_attn.v_proj",
+    "self_attn.o_proj",
+    "mlp.gate_proj",
+    "mlp.up_proj",
+    "mlp.down_proj"
+   ],
+   "lora_layers": 26,
+   "trainable_parameters": "1.002% (13.046M/1301.876M)",
+   "val_notes_per_pass": 50,
+   "first_train_iter": 10,
+   "first_train_loss": 1.158,
+   "last_train_iter": 1200,
+   "last_train_loss": 0.04,
+   "val_losses": "1: 1.769, 200: 0.135, 400: 0.062, 600: 0.07, 800: 0.057, 1000: 0.061, 1200: 0.056",
+   "adapter_file": "scribe/artifacts/adapter-v1/adapters.safetensors",
+   "adapter_bytes": 52222556,
+   "adapter_sha256": "be9d01ea8eb0db95ae9a3d6ac28c07f4ed6fee2278f8d1f588729055953ecc5d"
+  },
+  "dataset": {
+   "train": 1716,
+   "val": 250,
+   "test": 500,
+   "rejected": 1990,
+   "audit_disagreements": 43,
+   "audit_sampled": 60
+  },
+  "haiku": {
+   "seed": 77020261,
+   "sampled": 60,
+   "written": 60,
+   "accepted": 46,
+   "rejected": 14,
+   "calls_ok": 11,
+   "calls_failed": 4,
+   "cost_usd_successful": 0.045947,
+   "cost_usd_failed": 0.024789,
+   "cost_usd_total": 0.070736
+  },
+  "gpu": {
+   "planned_model": "unsloth/gemma-3-4b-it",
+   "setup": "venv, torch 2.15.0, transformers 5.23.0, peft 0.21.3, model snapshot downloaded, 8.1 GB",
+   "last_contact_utc": "16:29:42",
+   "unreachable_from_utc": "16:31",
+   "host_key_changed_utc": "17:01",
+   "known_key": "SHA256:DL8CyF/fJUllLqkZIa8QnwXZiPtVNuNIXu2aWtJyn98",
+   "new_key": "SHA256:Ee09o+q1BBreAYd+PL1hPBW68QajVwoxNb3oUia4aKg"
+  }
+ }
+}

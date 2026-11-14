@@ -1,0 +1,168 @@
+{
+ "schema": "scribe-v3-cascade-plan-v1",
+ "synthetic": true,
+ "not_for_clinical_use": true,
+ "written_utc": "2026-11-14T19:38:44Z",
+ "written_before_any_judge_answer": true,
+ "student": {
+  "chosen": "V3-270m-nemotron",
+  "rule": "highest validation exact match; prefer the pre-registered primary of compare-v1.json when it and the highest run lie within each other's Wilson 95% intervals; test results are never read for the choice",
+  "primary": "V3-270m-nemotron",
+  "why": "highest validation exact match is C-270m-all-v2data (134/310); the pre-registered primary V3-270m-nemotron (124/310) and it lie within each other's Wilson 95% intervals, so the rule prefers the primary",
+  "candidates": [
+   {
+    "run": "C-270m-all-v2data",
+    "k": 134,
+    "n": 310,
+    "exact_match": 0.432258064516129,
+    "wilson95": [
+     0.37827346492464153,
+     0.48790100368182865
+    ],
+    "val_file": "data/scribe/v3/student/C-270m-all-v2data/result.json",
+    "test_file": "data/scribe/v3/student/C-270m-all-v2data/eval-test.json"
+   },
+   {
+    "run": "S-1b-lora-r16",
+    "k": 125,
+    "n": 310,
+    "exact_match": 0.4032258064516129,
+    "wilson95": [
+     0.35012587380613364,
+     0.45869479563168086
+    ],
+    "val_file": "data/scribe/v3/student/S-1b-lora-r16/result.json",
+    "test_file": "data/scribe/v3/student/S-1b-lora-r16/eval-test.json"
+   },
+   {
+    "run": "V3-270m-all",
+    "k": 125,
+    "n": 310,
+    "exact_match": 0.4032258064516129,
+    "wilson95": [
+     0.35012587380613364,
+     0.45869479563168086
+    ],
+    "val_file": "data/scribe/v3/student/V3-270m-all/result.json",
+    "test_file": "data/scribe/v3/student/V3-270m-all/eval-test.json"
+   },
+   {
+    "run": "V3-270m-nemotron",
+    "k": 124,
+    "n": 310,
+    "exact_match": 0.4,
+    "wilson95": [
+     0.34701028448811405,
+     0.4554377405976277
+    ],
+    "val_file": "data/scribe/v3/student/V3-270m-nemotron/result.json",
+    "test_file": "data/scribe/v3/student/V3-270m-nemotron/eval-test.json"
+   },
+   {
+    "run": "v2-selected",
+    "k": 112,
+    "n": 310,
+    "exact_match": 0.36129032258064514,
+    "wilson95": [
+     0.3098147568028864,
+     0.416161536057981
+    ],
+    "val_file": "data/scribe/v3/student/v2-selected/result.json",
+    "test_file": "data/scribe/v3/student/v2-selected/A-270m-lora-r16--test_nemotron+test_haiku--off.json"
+   }
+  ]
+ },
+ "counts": {
+  "val_nemotron": {
+   "notes": 250,
+   "parsed": 249,
+   "judgeable": 249
+  },
+  "val_haiku": {
+   "notes": 60,
+   "parsed": 59,
+   "judgeable": 59
+  },
+  "test_nemotron": {
+   "notes": 500,
+   "parsed": 499,
+   "judgeable": 499
+  },
+  "test_haiku": {
+   "notes": 200,
+   "parsed": 200,
+   "judgeable": 200
+  }
+ },
+ "jev": {
+  "pairs": "data/scribe/v3/cascade/pairs-jev-v1.jsonl",
+  "rows": 1007,
+  "question_set": "v2",
+  "note": "every note whose prediction parsed; notes whose prediction did not parse go to a person and are not asked"
+ },
+ "decisions": {
+  "pairs": "data/scribe/v3/cascade/pairs-decisions-v1.jsonl",
+  "per_split": 93,
+  "rows": 186,
+  "val_groups": {
+   "val_nemotron": 75,
+   "val_haiku": 18
+  },
+  "test_groups": {
+   "test_nemotron": 73,
+   "test_haiku": 20
+  },
+  "order": "sha256('scribe-v3-cascade-decisions|' + id) ascending, within validation and within the pooled test notes",
+  "size_rule": "largest K <= 120 per split whose estimated tokens stay <= 270000 (90% of the 300000 cap)",
+  "estimated_tokens": 269625,
+  "tokens_per_char": {
+   "requests": 320,
+   "mean": 0.40568297753814664,
+   "max": 0.43628654318232535
+  },
+  "estimate": "ceil(characters of the JSON request body x the maximum tokens-per-character over the cached benchmark Decisions requests)"
+ },
+ "ledgers_before": {
+  "openai": {
+   "requests": 690,
+   "tokens": 1038484,
+   "input_tokens": 1038484,
+   "output_tokens": 0,
+   "reserved_tokens": 3000,
+   "failed_attempts": 1,
+   "updated": "2026-11-14T18:52:16+00:00"
+  },
+  "typesafe": {
+   "requests": 2737,
+   "tokens": 4084483,
+   "input_tokens": 3706234,
+   "output_tokens": 378249,
+   "reserved_tokens": 0,
+   "failed_attempts": 0,
+   "updated": "2026-11-14T18:51:02+00:00",
+   "cost_usd": 0.17154828600000002,
+   "cost_usd_counting_reservations": 0.17154828600000002
+  },
+  "openai_committed": 1041484,
+  "typesafe_committed_usd": 0.17154828600000002
+ },
+ "limits": {
+  "max_tokens_openai": 1341484,
+  "max_usd_typesafe": 1.171548,
+  "meaning": "run.py limits are cumulative ledger limits; these equal the committed amount before this step plus 300000 OpenAI tokens and USD 1.00 TypeSafe"
+ },
+ "commands": {
+  "jev": "scribe/.venv/bin/python scribe/judges/run.py --in data/scribe/v3/cascade/pairs-jev-v1.jsonl --out data/scribe/v3/cascade/answers-jev-v1.jsonl --judges jev --max-usd-typesafe 1.171548 --max-tokens-openai 1341484",
+  "decisions": "scribe/.venv/bin/python scribe/judges/run.py --in data/scribe/v3/cascade/pairs-decisions-v1.jsonl --out data/scribe/v3/cascade/answers-decisions-v1.jsonl --judges decisions --max-usd-typesafe 1.171548 --max-tokens-openai 1341484"
+ },
+ "design": {
+  "alpha_pct": [
+   5,
+   10
+  ],
+  "min_accepted": 20,
+  "bootstrap": 2000,
+  "seed": 20261114,
+  "l2": 1.0
+ }
+}

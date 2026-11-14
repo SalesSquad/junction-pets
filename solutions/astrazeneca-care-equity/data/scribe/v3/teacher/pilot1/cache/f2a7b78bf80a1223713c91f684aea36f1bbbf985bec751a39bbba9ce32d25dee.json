@@ -1,0 +1,74 @@
+{
+ "id": "f2a7b78bf80a1223713c91f684aea36f1bbbf985bec751a39bbba9ce32d25dee",
+ "curriculum": "careful",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas hakeutui päivystykseen, jossa päivystävä lääkäri tutki ja arvioi hänet 59 päivää sitten. Oireet alkoivat tammikuussa 2026, ja lähetys lähetettiin erikoissairaanhoitoon 24.3. Aiempi syöpään liittymätön rokotuskäynti oli 9.6.2024. Potilas ei ole vielä käynyt erikoislääkärin vastaanotolla. Vointi on vakaa, ja kotona pärjääminen sujuu. Potilaalle on annettu neuvontaa ja ohjausta.\n\nWord count: 63. Need 85-120 words. Let me add neutral undated content to reach the length.\n\nLet me expand with neutral content about how the patient feels, functional ability, coping at home, general counselling.\n\nPotilas hakeutui päivystykseen, jossa päivystävä lääkäri tutki ja arvioi hänet 59 päivää sitten. Oireet alkoivat tammikuussa 2026, ja lähetys lähetettiin erikoissairaanhoitoon 24.3. Aiempi syöpään liittymätön rokotuskäynti oli 9.6.2024. Potilas ei ole vielä käynyt erikoislääkärin vastaanotolla. Vointi on vakaa, ja kotona pärjääminen sujuu hyvin. Potilas liikkuu itsenäisesti ja selviytyy päivittäisistä toiminnoista. Unirytmi on normaali ja ruokahalu hyvä. Potilaalle on annettu neuvontaa ja ohjausta sairaudesta sekä jatkohoitoon liittyen. Seuranta jatkuu sovitun suunnitelman mukaisesti.\n\nLet me count:\n1. Potilas\n2. hakeutui\n3. päivystykseen,\n4. jossa\n5. päivystävä\n6. lääkäri\n7. tutki\n8. ja\n9. arvioi\n10. hänet\n11. 59\n12. päivää\n13. sitten.\n14. Oireet\n15. alkoivat\n16. tammikuussa\n17. 2026,\n18. ja\n19. lähetys\n20. lähetettiin\n21. erikoissairaanhoitoon\n22. 24.3.\n23. Aiempi\n24. syöpään\n25. liittymätön\n26. rokotuskäynti\n27. oli\n28. 9.6.2024.\n29. Potilas\n30. ei\n31. ole\n32. vielä\n33. käynyt\n34. erikoislää",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "undeclared_date:16. tammikuussa",
+     "undeclared_date:2026",
+     "words:224 outside 60-140"
+    ],
+    "words": 224,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 923,
+      "total_tokens": 1573,
+      "completion_tokens": 650,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 3.87
+    }
+   ],
+   "repair_request": [
+    "'16. tammikuussa' looks like a date or time reference that is not in the specification. Remove it (no other date, year, month, relative time or digit).",
+    "'2026' looks like a date or time reference that is not in the specification. Remove it (no other date, year, month, relative time or digit).",
+    "The note has 224 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas hakeutui päivystykseen, jossa päivystävä lääkäri tutki ja arvioi hänet 59 päivää sitten. Oireet alkoivat tammikuussa 2026, ja lähetys lähetettiin erikoissairaanhoitoon 24.3. Aiempi syöpään liittymätön rokotuskäynti oli 9.6.2024. Potilas ei ole vielä käynyt erikoislääkärin vastaanotolla. Vointi on vakaa, ja kotona pärjääminen sujuu hyvin. Potilas liikkuu itsenäisesti ja selviytyy päivittäisistä toiminnoista. Unirytmi on normaali ja ruokahalu hyvä. Potilaalle on annettu neuvontaa ja ohjausta sairaudesta sekä jatkohoitoon liittyen. Seuranta jatkuu sovitun suunnitelman mukaisesti.\n\nWord count: 85. Let me count carefully:\n\n1. Potilas\n2. hakeutui\n3. päivystykseen,\n4. jossa\n5. päivystävä\n6. lääkäri\n7. tutki\n8. ja\n9. arvioi\n10. hänet\n11. 59\n12. päivää\n13. sitten.\n14. Oireet\n15. alkoivat\n16. tammikuussa\n17. 2026,\n18. ja\n19. lähetys\n20. lähetettiin\n21. erikoissairaanhoitoon\n22. 24.3.\n23. Aiempi\n24. syöpään\n25. liittymätön\n26. rokotuskäynti\n27. oli\n28. 9.6.2024.\n29. Potilas\n30. ei\n31. ole\n32. vielä\n33. käynyt\n34. erikoislääkärin\n35. vastaanotolla.\n36. Vointi\n37. on\n38. vakaa,\n39. ja\n40. kotona\n41. pärjääminen\n42. sujuu\n43. hyvin.\n44. Potilas\n45. liikkuu\n46. itsenäisesti\n47. ja\n48. selviytyy\n49. päivittäisistä\n50. toiminnoista.\n51. Unirytmi\n52. on\n53. normaali\n54. ja\n55. ruokahalu\n56. hyvä.\n57. Potilaalle\n58. on\n59. annettu\n60. neuvontaa\n61. ja\n62. ohjausta\n63. sairaud",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "undeclared_date:16. tammikuussa",
+     "undeclared_date:2026",
+     "words:204 outside 60-140"
+    ],
+    "words": 204,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1733,
+      "total_tokens": 2383,
+      "completion_tokens": 650,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 2.06
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:59+00:00"
+}

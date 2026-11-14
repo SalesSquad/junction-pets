@@ -1,0 +1,924 @@
+[
+{"slice": 12, "n": 1, "part": 1, "id": "feebfc5e95ed61c1c5430e9c91116833c586e964b720ac9eb916ec15c5f36967", "kind": "careful", "focus": "referral_received_only", "style": "hoitajan puhelinmerkintä", "note_date": "2025-04-09", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 10.1.2025",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 47 päivää sitten",
+  "syntymäaika [not a pathway event]: 21.9.1973"
+ ], "date_strings": ["10.1.2025", "47 päivää sitten", "21.9.1973"], "wording": [
+  "Perspective: the specialised-care unit that received the referral.",
+  "Say that the referral arrived at the unit or was registered as received there on the given date ('lähete saapunut', 'lähete tullut', 'lähete vastaanotettu', 'lähete kirjattu saapuneeksi', ...).",
+  "Do not say when the referral was written or sent. Never 'potilas sai lähetteen' or 'lähete tehty', and never a referral without a verb that shows sending or arrival."
+ ], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-01-10", "precision": "DAY", "expression": "10.1.2025", "form": "numeric", "meaning": "oireiden alku"}, {"type": "REFERRAL_RECEIVED", "date": "2025-02-21", "precision": "DAY", "expression": "47 päivää sitten", "form": "days", "meaning": "lähetteen vastaanottaminen"}],
+ "distractors": [{"kind": "birth", "expression": "21.9.1973", "date": "1973-09-21", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-01-10", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2025-02-21", "precision": "DAY"}]}, "date_forms": ["numeric", "days"], "distractor_forms": ["numeric"], "split_hint": "test", "sampler": {"source": "build_careful", "seed": 21361114, "index": 66, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 2, "part": 1, "id": "5ba6666dd538eed42de3df711644bcc090249128690ae86cb90e0cf384e5d0a7", "kind": "careful", "focus": "referral_sent_only", "style": "lähetekirje", "note_date": "2025-10-03", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 29.7.2025",
+  "tuleva, vielä toteutumaton erikoislääkärin vastaanottoaika [has not happened yet]: 20.12.2025",
+  "syntymäaika [not a pathway event]: 6.1.1969"
+ ], "date_strings": ["29.7.2025", "20.12.2025", "6.1.1969"], "wording": [
+  "Perspective: the referring unit (the physician or a nurse of the entry service).",
+  "Say that the referring physician wrote the referral and sent it to specialised care on the given date ('lähetin lähetteen', 'lähete lähti', 'lähete lähetetty', 'lähete toimitettu', ...).",
+  "Do not say or imply that the referral has arrived, been received, processed or accepted in specialised care. Never 'potilas sai lähetteen' or 'lähete tehty', and never a referral without a verb that shows sending or arrival."
+ ], "facts": [{"type": "REFERRAL_SENT", "date": "2025-07-29", "precision": "DAY", "expression": "29.7.2025", "form": "numeric", "meaning": "lähetteen lähettäminen"}],
+ "distractors": [{"kind": "future_specialist", "expression": "20.12.2025", "date": "2025-12-20", "meaning": "tuleva, vielä toteutumaton erikoislääkärin vastaanottoaika"}, {"kind": "birth", "expression": "6.1.1969", "date": "1969-01-06", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "REFERRAL_SENT", "date": "2025-07-29", "precision": "DAY"}]}, "date_forms": ["numeric"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "build_careful", "seed": 21361114, "index": 44, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 3, "part": 1, "id": "d328ae8210de8656f918fe62a74360080c41017f42e1b2e6b098eb221fa1a1c2", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2025-03-02", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: päivystyksen hoitaja; no physician examined the patient then]: 5. syyskuuta 2024",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 11. lokakuuta 2024"
+ ], "date_strings": ["5. syyskuuta 2024", "11. lokakuuta 2024"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2024-09-05", "precision": "DAY", "expression": "5. syyskuuta 2024", "form": "long", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "DIAGNOSIS", "date": "2024-10-11", "precision": "DAY", "expression": "11. lokakuuta 2024", "form": "long", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "FIRST_CONTACT", "date": "2024-09-05", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2024-10-11", "precision": "DAY"}]}, "date_forms": ["long", "long"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 175}, "synthetic": true},
+{"slice": 12, "n": 4, "part": 1, "id": "770cd9f3c05be0a1021fa83760bc8cd628f81ea397fc2c5a20d5d58ea2153aab", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2026-11-12", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 29. joulukuuta 2025"
+ ], "date_strings": ["29. joulukuuta 2025"], "wording": [], "facts": [{"type": "DIAGNOSIS", "date": "2025-12-29", "precision": "DAY", "expression": "29. joulukuuta 2025", "form": "long", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "DIAGNOSIS", "date": "2025-12-29", "precision": "DAY"}]}, "date_forms": ["long"], "distractor_forms": [], "split_hint": "val", "sampler": {"source": "sample.py", "seed": 21261114, "index": 545}, "synthetic": true},
+{"slice": 12, "n": 5, "part": 1, "id": "fd402ff5290b47e8eccb0a58a957da5499370680d770be2ebc730b4c6e21183f", "kind": "no_event", "focus": "minor_or_checkup", "style": "hoitajan puhelinmerkintä", "note_date": "2025-11-24", "facts_fi": [
+  "asiointipaikka: työterveyshuolto",
+  "määräaikainen työterveystarkastus: marraskuussa 2025"
+ ], "date_strings": ["marraskuussa 2025"], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka)."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "marraskuussa 2025", "date": "2025-11-01", "meaning": "määräaikainen työterveystarkastus"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": []}, "date_forms": [], "distractor_forms": ["month"], "split_hint": "train", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 100, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 6, "part": 1, "id": "15c06f344d7abbfe91c985e9614e837c39d23317fe9a9c5bc4e584f7aa5b864c", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-06-07", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 35 viikkoa sitten",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: päivystyksen hoitaja; no physician examined the patient then]: joulukuussa 2023",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 22. helmikuuta 2024",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 37 päivää sitten",
+  "syntymäaika [not a pathway event]: 17.4.1978"
+ ], "date_strings": ["35 viikkoa sitten", "joulukuussa 2023", "22. helmikuuta 2024", "37 päivää sitten", "17.4.1978"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-10-06", "precision": "DAY", "expression": "35 viikkoa sitten", "form": "weeks", "meaning": "oireiden alku"}, {"type": "FIRST_CONTACT", "date": "2023-12-01", "precision": "MONTH", "expression": "joulukuussa 2023", "form": "month", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "REFERRAL_RECEIVED", "date": "2024-02-22", "precision": "DAY", "expression": "22. helmikuuta 2024", "form": "long", "meaning": "lähetteen vastaanottaminen"}, {"type": "SPECIALIST_VISIT", "date": "2024-05-01", "precision": "DAY", "expression": "37 päivää sitten", "form": "days", "meaning": "erikoislääkärikäynti"}],
+ "distractors": [{"kind": "birth", "expression": "17.4.1978", "date": "1978-04-17", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-10-06", "precision": "DAY"}, {"type": "FIRST_CONTACT", "date": "2023-12-01", "precision": "MONTH"}, {"type": "REFERRAL_RECEIVED", "date": "2024-02-22", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2024-05-01", "precision": "DAY"}]}, "date_forms": ["weeks", "month", "long", "days"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 832}, "synthetic": true},
+{"slice": 12, "n": 7, "part": 1, "id": "6ff1b9f8c0b7699162be4ee3c5412029abb301a4c7d59c088726ecc81dc42f0f", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2024-05-15", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 353 päivää sitten",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: seulontayksikön ajanvaraus; no physician examined the patient then]: 35 viikkoa sitten",
+  "lääkärin arvio [examined and assessed by: seulontayksikön lääkäri; not a nurse, not the treating specialist in specialised care]: huhtikuussa 2024"
+ ], "date_strings": ["353 päivää sitten", "35 viikkoa sitten", "huhtikuussa 2024"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-05-28", "precision": "DAY", "expression": "353 päivää sitten", "form": "days", "meaning": "oireiden alku"}, {"type": "FIRST_CONTACT", "date": "2023-09-13", "precision": "DAY", "expression": "35 viikkoa sitten", "form": "weeks", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2024-04-01", "precision": "MONTH", "expression": "huhtikuussa 2024", "form": "month", "meaning": "lääkärin arvio"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-05-28", "precision": "DAY"}, {"type": "FIRST_CONTACT", "date": "2023-09-13", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2024-04-01", "precision": "MONTH"}]}, "date_forms": ["days", "weeks", "month"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 625}, "synthetic": true},
+{"slice": 12, "n": 8, "part": 1, "id": "5b5f24f72fc15b24a4eb469187cd7abeea7d6f756be7e7c93d595802392b2a3a", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2026-08-07", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 35 viikkoa sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 26.5.2026",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 14.3.2025",
+  "syntymäaika [not a pathway event]: 28.3.1943"
+ ], "date_strings": ["35 viikkoa sitten", "26.5.2026", "14.3.2025", "28.3.1943"], "wording": [], "facts": [{"type": "DIAGNOSIS", "date": "2025-12-05", "precision": "DAY", "expression": "35 viikkoa sitten", "form": "weeks", "meaning": "syöpädiagnoosin vahvistaminen"}, {"type": "MDT_DECISION", "date": "2026-05-26", "precision": "DAY", "expression": "26.5.2026", "form": "numeric", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "vaccination", "expression": "14.3.2025", "date": "2025-03-14", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}, {"kind": "birth", "expression": "28.3.1943", "date": "1943-03-28", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "DIAGNOSIS", "date": "2025-12-05", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2026-05-26", "precision": "DAY"}]}, "date_forms": ["weeks", "numeric"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 606}, "synthetic": true},
+{"slice": 12, "n": 9, "part": 1, "id": "979a33917f3a41925f6fdbe789c3decb75f44831f2e5f86f8df8b20bcbd18f4e", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2025-08-18", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 31.8.2024",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: helmikuussa 2025",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 5 viikkoa sitten"
+ ], "date_strings": ["31.8.2024", "helmikuussa 2025", "5 viikkoa sitten"], "wording": [], "facts": [{"type": "REFERRAL_SENT", "date": "2024-08-31", "precision": "DAY", "expression": "31.8.2024", "form": "numeric", "meaning": "lähetteen lähettäminen"}, {"type": "DIAGNOSIS", "date": "2025-02-01", "precision": "MONTH", "expression": "helmikuussa 2025", "form": "month", "meaning": "syöpädiagnoosin vahvistaminen"}, {"type": "MDT_DECISION", "date": "2025-07-14", "precision": "DAY", "expression": "5 viikkoa sitten", "form": "weeks", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "REFERRAL_SENT", "date": "2024-08-31", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2025-02-01", "precision": "MONTH"}, {"type": "MDT_DECISION", "date": "2025-07-14", "precision": "DAY"}]}, "date_forms": ["numeric", "month", "weeks"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 119}, "synthetic": true},
+{"slice": 12, "n": 10, "part": 1, "id": "8a67bd7039e5bf9d75f033af009f57899fb66db580d3d2af4ad99395c5f90045", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2026-10-30", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "lääkärin arvio [examined and assessed by: terveyskeskuslääkäri; not a nurse, not the treating specialist in specialised care]: joulukuussa 2025",
+  "syöpähoidon aloitus [the first cancer treatment started]: elokuussa 2026"
+ ], "date_strings": ["joulukuussa 2025", "elokuussa 2026"], "wording": [], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2025-12-01", "precision": "MONTH", "expression": "joulukuussa 2025", "form": "month", "meaning": "lääkärin arvio"}, {"type": "TREATMENT_START", "date": "2026-08-01", "precision": "MONTH", "expression": "elokuussa 2026", "form": "month", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2025-12-01", "precision": "MONTH"}, {"type": "TREATMENT_START", "date": "2026-08-01", "precision": "MONTH"}]}, "date_forms": ["month", "month"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 572}, "synthetic": true},
+{"slice": 12, "n": 11, "part": 1, "id": "ad39e4c39466ee5c3e4ff24aea7702823d21929275cf4880bb8d7bddd7665d24", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-07-22", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 317 päivää sitten",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: terveyskeskuksen hoitaja; no physician examined the patient then]: 15.10.2023",
+  "syöpähoidon aloitus [the first cancer treatment started]: 5. huhtikuuta 2024",
+  "syntymäaika [not a pathway event]: 26.8.1962",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 5.10.2024"
+ ], "date_strings": ["317 päivää sitten", "15.10.2023", "5. huhtikuuta 2024", "26.8.1962", "5.10.2024"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-09-09", "precision": "DAY", "expression": "317 päivää sitten", "form": "days", "meaning": "oireiden alku"}, {"type": "FIRST_CONTACT", "date": "2023-10-15", "precision": "DAY", "expression": "15.10.2023", "form": "numeric", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "TREATMENT_START", "date": "2024-04-05", "precision": "DAY", "expression": "5. huhtikuuta 2024", "form": "long", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "birth", "expression": "26.8.1962", "date": "1962-08-26", "meaning": "syntymäaika"}, {"kind": "future", "expression": "5.10.2024", "date": "2024-10-05", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-09-09", "precision": "DAY"}, {"type": "FIRST_CONTACT", "date": "2023-10-15", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2024-04-05", "precision": "DAY"}]}, "date_forms": ["days", "numeric", "long"], "distractor_forms": ["numeric", "numeric"], "split_hint": "val", "sampler": {"source": "sample.py", "seed": 21261114, "index": 497}, "synthetic": true},
+{"slice": 12, "n": 12, "part": 1, "id": "470b76b21c0a91290e6ed2ca4f46ba8f34611538234a51b1beefa43e088c0649", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2026-07-08", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "lääkärin arvio [examined and assessed by: seulontayksikön lääkäri; not a nurse, not the treating specialist in specialised care]: 23.7.2025",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 212 päivää sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: kesäkuussa 2026"
+ ], "date_strings": ["23.7.2025", "212 päivää sitten", "kesäkuussa 2026"], "wording": [], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2025-07-23", "precision": "DAY", "expression": "23.7.2025", "form": "numeric", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_RECEIVED", "date": "2025-12-08", "precision": "DAY", "expression": "212 päivää sitten", "form": "days", "meaning": "lähetteen vastaanottaminen"}, {"type": "MDT_DECISION", "date": "2026-06-01", "precision": "MONTH", "expression": "kesäkuussa 2026", "form": "month", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2025-07-23", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2025-12-08", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2026-06-01", "precision": "MONTH"}]}, "date_forms": ["numeric", "days", "month"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 248}, "synthetic": true},
+{"slice": 12, "n": 13, "part": 1, "id": "da02243e5e653c62bcba34ed5d6f8a603214267f665eb5c8efb5696fb0629c70", "kind": "careful", "focus": "first_contact_and_physician_assessment", "style": "lähetekirje", "note_date": "2025-05-05", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 17 viikkoa sitten",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: päivystyksen hoitaja; no physician examined the patient then]: 22.3.",
+  "lääkärin arvio [examined and assessed by: päivystävä lääkäri; not a nurse, not the treating specialist in specialised care]: 17. huhtikuuta 2025",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 19. huhtikuuta 2025",
+  "tuleva, vielä toteutumaton erikoislääkärin vastaanottoaika [has not happened yet]: 8.8.2025",
+  "ilman päivämäärää: the patient has not yet been to a specialist's appointment"
+ ], "date_strings": ["17 viikkoa sitten", "22.3.", "17. huhtikuuta 2025", "19. huhtikuuta 2025", "8.8.2025"], "wording": [
+  "The first contact and the physician's assessment are two separate events on two dates.",
+  "First contact: the patient got in touch personally (a telephone call, an electronic message or a walk-in to a nurse) and was answered by: päivystyksen hoitaja. No physician examined the patient on that date.",
+  "Physician's assessment: the patient was examined and assessed by: päivystävä lääkäri. It is not a nurse's contact and not the appointment of the treating specialist in specialised care.",
+  "Never a bare 'käynti', 'vastaanotto' or 'kontakti': for every dated contact the reader must be able to tell who received the patient."
+ ], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-01-06", "precision": "DAY", "expression": "17 viikkoa sitten", "form": "weeks", "meaning": "oireiden alku"}, {"type": "FIRST_CONTACT", "date": "2025-03-22", "precision": "DAY", "expression": "22.3.", "form": "no_year", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2025-04-17", "precision": "DAY", "expression": "17. huhtikuuta 2025", "form": "long", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_SENT", "date": "2025-04-19", "precision": "DAY", "expression": "19. huhtikuuta 2025", "form": "long", "meaning": "lähetteen lähettäminen"}],
+ "distractors": [{"kind": "future_specialist", "expression": "8.8.2025", "date": "2025-08-08", "meaning": "tuleva, vielä toteutumaton erikoislääkärin vastaanottoaika"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-01-06", "precision": "DAY"}, {"type": "FIRST_CONTACT", "date": "2025-03-22", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2025-04-17", "precision": "DAY"}, {"type": "REFERRAL_SENT", "date": "2025-04-19", "precision": "DAY"}]}, "date_forms": ["weeks", "no_year", "long", "long"], "distractor_forms": ["numeric"], "split_hint": "val", "sampler": {"source": "build_careful", "seed": 21361114, "index": 89, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 14, "part": 1, "id": "cd451e2c8497ea30965143417374d41b4452c7f52ad3c3910d7f8438888ee81e", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2024-02-03", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 20 viikkoa sitten",
+  "syntymäaika [not a pathway event]: 8.10.1976",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 4.3.2024"
+ ], "date_strings": ["20 viikkoa sitten", "8.10.1976", "4.3.2024"], "wording": [], "facts": [{"type": "SPECIALIST_VISIT", "date": "2023-09-16", "precision": "DAY", "expression": "20 viikkoa sitten", "form": "weeks", "meaning": "erikoislääkärikäynti"}],
+ "distractors": [{"kind": "birth", "expression": "8.10.1976", "date": "1976-10-08", "meaning": "syntymäaika"}, {"kind": "future", "expression": "4.3.2024", "date": "2024-03-04", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "SPECIALIST_VISIT", "date": "2023-09-16", "precision": "DAY"}]}, "date_forms": ["weeks"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 604}, "synthetic": true},
+{"slice": 12, "n": 15, "part": 1, "id": "ccf11a42222a095d1071ca21a1760a0ccc8591a3841a5fd60fb839b6342f88bb", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2024-04-15", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: yksityisen lääkäriaseman ajanvaraus; no physician examined the patient then]: 50 viikkoa sitten",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 3.2.2024",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 30.6.2024"
+ ], "date_strings": ["50 viikkoa sitten", "3.2.2024", "30.6.2024"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2023-05-01", "precision": "DAY", "expression": "50 viikkoa sitten", "form": "weeks", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "SPECIALIST_VISIT", "date": "2024-02-03", "precision": "DAY", "expression": "3.2.2024", "form": "numeric", "meaning": "erikoislääkärikäynti"}],
+ "distractors": [{"kind": "future", "expression": "30.6.2024", "date": "2024-06-30", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "FIRST_CONTACT", "date": "2023-05-01", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2024-02-03", "precision": "DAY"}]}, "date_forms": ["weeks", "numeric"], "distractor_forms": ["numeric"], "split_hint": "test", "sampler": {"source": "sample.py", "seed": 21261114, "index": 184}, "synthetic": true},
+{"slice": 12, "n": 16, "part": 1, "id": "a8e09b0004663f445dd9f9fb5fdecf84bbb529024023f9820a921d41b1fa2c74", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2024-08-18", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: terveyskeskuksen ajanvaraus; no physician examined the patient then]: 315 päivää sitten",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 15.12.2023",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 14.7.2024",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 13.5.2022",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 7.9.2024"
+ ], "date_strings": ["315 päivää sitten", "15.12.2023", "14.7.2024", "13.5.2022", "7.9.2024"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2023-10-08", "precision": "DAY", "expression": "315 päivää sitten", "form": "days", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "DIAGNOSIS", "date": "2023-12-15", "precision": "DAY", "expression": "15.12.2023", "form": "numeric", "meaning": "syöpädiagnoosin vahvistaminen"}, {"type": "MDT_DECISION", "date": "2024-07-14", "precision": "DAY", "expression": "14.7.2024", "form": "numeric", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "vaccination", "expression": "13.5.2022", "date": "2022-05-13", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}, {"kind": "future", "expression": "7.9.2024", "date": "2024-09-07", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "FIRST_CONTACT", "date": "2023-10-08", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2023-12-15", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2024-07-14", "precision": "DAY"}]}, "date_forms": ["days", "numeric", "numeric"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 35}, "synthetic": true},
+{"slice": 12, "n": 17, "part": 1, "id": "a61691845d05e2979e94b5c293eddfc2d64d96d49271490357ca26c3ae852711", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2026-07-24", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: seulontayksikön ajanvaraus; no physician examined the patient then]: 21.11.2025",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 29.1.",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 9.4.",
+  "syntymäaika [not a pathway event]: 7.5.1984",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 22.3.2025"
+ ], "date_strings": ["21.11.2025", "29.1.", "9.4.", "7.5.1984", "22.3.2025"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2025-11-21", "precision": "DAY", "expression": "21.11.2025", "form": "numeric", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "DIAGNOSIS", "date": "2026-01-29", "precision": "DAY", "expression": "29.1.", "form": "no_year", "meaning": "syöpädiagnoosin vahvistaminen"}, {"type": "MDT_DECISION", "date": "2026-04-09", "precision": "DAY", "expression": "9.4.", "form": "no_year", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "birth", "expression": "7.5.1984", "date": "1984-05-07", "meaning": "syntymäaika"}, {"kind": "vaccination", "expression": "22.3.2025", "date": "2025-03-22", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "FIRST_CONTACT", "date": "2025-11-21", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2026-01-29", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2026-04-09", "precision": "DAY"}]}, "date_forms": ["numeric", "no_year", "no_year"], "distractor_forms": ["numeric", "numeric"], "split_hint": "test", "sampler": {"source": "sample.py", "seed": 21261114, "index": 172}, "synthetic": true},
+{"slice": 12, "n": 18, "part": 1, "id": "77e830759b079f98fa860a044b74a59238b28b9af1ac8ae250677f115331e836", "kind": "careful", "focus": "referral_sent_and_received", "style": "käyntimerkintä", "note_date": "2024-07-07", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 35 päivää sitten",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 4 viikkoa sitten"
+ ], "date_strings": ["35 päivää sitten", "4 viikkoa sitten"], "wording": [
+  "Perspective: a specialised-care unit, or a summary that knows both dates of the referral.",
+  "Two separate acts on two dates: the referring physician SENT the referral, and the referral ARRIVED in specialised care and was registered there. The verb at each date string must show the direction (sending: 'lähetti', 'lähti', 'lähetetty', 'toimitettu'; arrival: 'saapui', 'tuli', 'vastaanotettu', 'kirjattu saapuneeksi').",
+  "Never 'potilas sai lähetteen' or 'lähete tehty', and never a referral without a verb that shows sending or arrival."
+ ], "facts": [{"type": "REFERRAL_SENT", "date": "2024-06-02", "precision": "DAY", "expression": "35 päivää sitten", "form": "days", "meaning": "lähetteen lähettäminen"}, {"type": "REFERRAL_RECEIVED", "date": "2024-06-09", "precision": "DAY", "expression": "4 viikkoa sitten", "form": "weeks", "meaning": "lähetteen vastaanottaminen"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "REFERRAL_SENT", "date": "2024-06-02", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2024-06-09", "precision": "DAY"}]}, "date_forms": ["days", "weeks"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "build_careful", "seed": 21361114, "index": 27, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 19, "part": 1, "id": "f89ffd8e84a8ab156868918eb071ea46eba9427217ef05f4021ef12af8de35b1", "kind": "careful", "focus": "referral_received_only", "style": "loppulausunnon ote", "note_date": "2024-06-24", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 109 päivää sitten",
+  "syöpähoidon aloitus [the first cancer treatment started]: 7.5.",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 4.8.2024"
+ ], "date_strings": ["109 päivää sitten", "7.5.", "4.8.2024"], "wording": [
+  "Perspective: the specialised-care unit that received the referral.",
+  "Say that the referral arrived at the unit or was registered as received there on the given date ('lähete saapunut', 'lähete tullut', 'lähete vastaanotettu', 'lähete kirjattu saapuneeksi', ...).",
+  "Do not say when the referral was written or sent. Never 'potilas sai lähetteen' or 'lähete tehty', and never a referral without a verb that shows sending or arrival."
+ ], "facts": [{"type": "REFERRAL_RECEIVED", "date": "2024-03-07", "precision": "DAY", "expression": "109 päivää sitten", "form": "days", "meaning": "lähetteen vastaanottaminen"}, {"type": "TREATMENT_START", "date": "2024-05-07", "precision": "DAY", "expression": "7.5.", "form": "no_year", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "future", "expression": "4.8.2024", "date": "2024-08-04", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "REFERRAL_RECEIVED", "date": "2024-03-07", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2024-05-07", "precision": "DAY"}]}, "date_forms": ["days", "no_year"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "build_careful", "seed": 21361114, "index": 53, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 20, "part": 1, "id": "e9d48220e99115b3356869e0c1e575a2b1d5a6a55191d815bee581ec79f1a0c9", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2025-10-26", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 21. helmikuuta 2025",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 7.6.",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 6.7.2024",
+  "syntymäaika [not a pathway event]: 25.4.1943"
+ ], "date_strings": ["21. helmikuuta 2025", "7.6.", "6.7.2024", "25.4.1943"], "wording": [], "facts": [{"type": "DIAGNOSIS", "date": "2025-02-21", "precision": "DAY", "expression": "21. helmikuuta 2025", "form": "long", "meaning": "syöpädiagnoosin vahvistaminen"}, {"type": "MDT_DECISION", "date": "2025-06-07", "precision": "DAY", "expression": "7.6.", "form": "no_year", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "vaccination", "expression": "6.7.2024", "date": "2024-07-06", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}, {"kind": "birth", "expression": "25.4.1943", "date": "1943-04-25", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "DIAGNOSIS", "date": "2025-02-21", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2025-06-07", "precision": "DAY"}]}, "date_forms": ["long", "no_year"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 614}, "synthetic": true},
+{"slice": 12, "n": 21, "part": 1, "id": "bd4f0970675cdde6a5e4e05394223f6b21628dec5d683dbbe684df4306999bf1", "kind": "no_event", "focus": "minor_or_checkup", "style": "hoitajan puhelinmerkintä", "note_date": "2026-07-09", "facts_fi": [
+  "asiointipaikka: työterveyshuolto",
+  "verenpaineen seurantakäynti hoitajan vastaanotolla: 6.7."
+ ], "date_strings": ["6.7."], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka)."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "6.7.", "date": "2026-07-06", "meaning": "verenpaineen seurantakäynti hoitajan vastaanotolla"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": []}, "date_forms": [], "distractor_forms": ["no_year"], "split_hint": "val", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 92, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 22, "part": 1, "id": "be3dc876dd69eca5a8ab6430edbeed63f39c980f311ea63947989a634e8486b6", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2024-12-14", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: seulontayksikön hoitaja; no physician examined the patient then]: 35 viikkoa sitten",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 106 päivää sitten",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: marraskuussa 2024"
+ ], "date_strings": ["35 viikkoa sitten", "106 päivää sitten", "marraskuussa 2024"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2024-04-13", "precision": "DAY", "expression": "35 viikkoa sitten", "form": "weeks", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "REFERRAL_SENT", "date": "2024-08-30", "precision": "DAY", "expression": "106 päivää sitten", "form": "days", "meaning": "lähetteen lähettäminen"}, {"type": "DIAGNOSIS", "date": "2024-11-01", "precision": "MONTH", "expression": "marraskuussa 2024", "form": "month", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "FIRST_CONTACT", "date": "2024-04-13", "precision": "DAY"}, {"type": "REFERRAL_SENT", "date": "2024-08-30", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2024-11-01", "precision": "MONTH"}]}, "date_forms": ["weeks", "days", "month"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 447}, "synthetic": true},
+{"slice": 12, "n": 23, "part": 1, "id": "d6b7b6219b8b177c3d6e5946c6250826c5532ffc241d0e43ce03a9e08b23332c", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2025-08-28", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 21. marraskuuta 2024",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 26. joulukuuta 2024",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 25 viikkoa sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 72 päivää sitten"
+ ], "date_strings": ["21. marraskuuta 2024", "26. joulukuuta 2024", "25 viikkoa sitten", "72 päivää sitten"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-11-21", "precision": "DAY", "expression": "21. marraskuuta 2024", "form": "long", "meaning": "oireiden alku"}, {"type": "REFERRAL_SENT", "date": "2024-12-26", "precision": "DAY", "expression": "26. joulukuuta 2024", "form": "long", "meaning": "lähetteen lähettäminen"}, {"type": "SPECIALIST_VISIT", "date": "2025-03-06", "precision": "DAY", "expression": "25 viikkoa sitten", "form": "weeks", "meaning": "erikoislääkärikäynti"}, {"type": "MDT_DECISION", "date": "2025-06-17", "precision": "DAY", "expression": "72 päivää sitten", "form": "days", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-11-21", "precision": "DAY"}, {"type": "REFERRAL_SENT", "date": "2024-12-26", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2025-03-06", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2025-06-17", "precision": "DAY"}]}, "date_forms": ["long", "long", "weeks", "days"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 164}, "synthetic": true},
+{"slice": 12, "n": 24, "part": 1, "id": "1c7c1743fb7e9914b9c83b4b953e026b75a8cd32900b19d9d166553991a888f4", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-11-02", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "lääkärin arvio [examined and assessed by: päivystävä lääkäri; not a nurse, not the treating specialist in specialised care]: marraskuussa 2023",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 25.1.2024",
+  "syntymäaika [not a pathway event]: 22.3.1958"
+ ], "date_strings": ["marraskuussa 2023", "25.1.2024", "22.3.1958"], "wording": [], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2023-11-01", "precision": "MONTH", "expression": "marraskuussa 2023", "form": "month", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_SENT", "date": "2024-01-25", "precision": "DAY", "expression": "25.1.2024", "form": "numeric", "meaning": "lähetteen lähettäminen"}],
+ "distractors": [{"kind": "birth", "expression": "22.3.1958", "date": "1958-03-22", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2023-11-01", "precision": "MONTH"}, {"type": "REFERRAL_SENT", "date": "2024-01-25", "precision": "DAY"}]}, "date_forms": ["month", "numeric"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 95}, "synthetic": true},
+{"slice": 12, "n": 25, "part": 1, "id": "d833ae9f40baf91e9a131f26679e45383bf3c81a04d4230a36747cb53e5eecb0", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-06-07", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 30 viikkoa sitten",
+  "lääkärin arvio [examined and assessed by: työterveyslääkäri; not a nurse, not the treating specialist in specialised care]: 177 päivää sitten",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 15 viikkoa sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 2.5.2024",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 17.7.2024"
+ ], "date_strings": ["30 viikkoa sitten", "177 päivää sitten", "15 viikkoa sitten", "2.5.2024", "17.7.2024"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-11-10", "precision": "DAY", "expression": "30 viikkoa sitten", "form": "weeks", "meaning": "oireiden alku"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2023-12-13", "precision": "DAY", "expression": "177 päivää sitten", "form": "days", "meaning": "lääkärin arvio"}, {"type": "DIAGNOSIS", "date": "2024-02-23", "precision": "DAY", "expression": "15 viikkoa sitten", "form": "weeks", "meaning": "syöpädiagnoosin vahvistaminen"}, {"type": "MDT_DECISION", "date": "2024-05-02", "precision": "DAY", "expression": "2.5.2024", "form": "numeric", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "future", "expression": "17.7.2024", "date": "2024-07-17", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-11-10", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2023-12-13", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2024-02-23", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2024-05-02", "precision": "DAY"}]}, "date_forms": ["weeks", "days", "weeks", "numeric"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 80}, "synthetic": true},
+{"slice": 12, "n": 26, "part": 2, "id": "4ddcf49b0f49d9dcd53c099255ba9a9dd4312bdd46667f041c68ec7c759a7d51", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2024-03-22", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 280 päivää sitten",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 25.2.2022"
+ ], "date_strings": ["280 päivää sitten", "25.2.2022"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-06-16", "precision": "DAY", "expression": "280 päivää sitten", "form": "days", "meaning": "oireiden alku"}],
+ "distractors": [{"kind": "vaccination", "expression": "25.2.2022", "date": "2022-02-25", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-06-16", "precision": "DAY"}]}, "date_forms": ["days"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 342}, "synthetic": true},
+{"slice": 12, "n": 27, "part": 2, "id": "f991fc8a3578afaf00a8c2638b0aab26caee7316fa83e83ff8dbccaa659bf527", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2025-06-27", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 19. syyskuuta 2024",
+  "lääkärin arvio [examined and assessed by: yksityisen lääkäriaseman yleislääkäri; not a nurse, not the treating specialist in specialised care]: 27.11.2024",
+  "syöpähoidon aloitus [the first cancer treatment started]: 18.4."
+ ], "date_strings": ["19. syyskuuta 2024", "27.11.2024", "18.4."], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-09-19", "precision": "DAY", "expression": "19. syyskuuta 2024", "form": "long", "meaning": "oireiden alku"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2024-11-27", "precision": "DAY", "expression": "27.11.2024", "form": "numeric", "meaning": "lääkärin arvio"}, {"type": "TREATMENT_START", "date": "2025-04-18", "precision": "DAY", "expression": "18.4.", "form": "no_year", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-09-19", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2024-11-27", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2025-04-18", "precision": "DAY"}]}, "date_forms": ["long", "numeric", "no_year"], "distractor_forms": [], "split_hint": "test", "sampler": {"source": "sample.py", "seed": 21261114, "index": 551}, "synthetic": true},
+{"slice": 12, "n": 28, "part": 2, "id": "ca17ebccb1b16630d9e4967a6d0a828b44d8984a697d4d26d0b28115126ad082", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2026-12-06", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 353 päivää sitten",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 16.3.2027",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 19.7.2025"
+ ], "date_strings": ["353 päivää sitten", "16.3.2027", "19.7.2025"], "wording": [], "facts": [{"type": "MDT_DECISION", "date": "2025-12-18", "precision": "DAY", "expression": "353 päivää sitten", "form": "days", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "future", "expression": "16.3.2027", "date": "2027-03-16", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}, {"kind": "vaccination", "expression": "19.7.2025", "date": "2025-07-19", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "MDT_DECISION", "date": "2025-12-18", "precision": "DAY"}]}, "date_forms": ["days"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 309}, "synthetic": true},
+{"slice": 12, "n": 29, "part": 2, "id": "cc3c237c183f8fc72d91f16b5e45fb43bc3fd59246339e188498fd2791269b3e", "kind": "careful", "focus": "first_contact_and_physician_assessment", "style": "lähetekirje", "note_date": "2024-01-30", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 23 viikkoa sitten",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: terveyskeskuksen ajanvaraus; no physician examined the patient then]: 1.11.2023",
+  "lääkärin arvio [examined and assessed by: terveyskeskuslääkäri; not a nurse, not the treating specialist in specialised care]: 27. marraskuuta 2023",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 3.12.2023",
+  "ilman päivämäärää: the patient has not yet been to a specialist's appointment"
+ ], "date_strings": ["23 viikkoa sitten", "1.11.2023", "27. marraskuuta 2023", "3.12.2023"], "wording": [
+  "The first contact and the physician's assessment are two separate events on two dates.",
+  "First contact: the patient got in touch personally (a telephone call, an electronic message or a walk-in to a nurse) and was answered by: terveyskeskuksen ajanvaraus. No physician examined the patient on that date.",
+  "Physician's assessment: the patient was examined and assessed by: terveyskeskuslääkäri. It is not a nurse's contact and not the appointment of the treating specialist in specialised care.",
+  "Never a bare 'käynti', 'vastaanotto' or 'kontakti': for every dated contact the reader must be able to tell who received the patient."
+ ], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-08-22", "precision": "DAY", "expression": "23 viikkoa sitten", "form": "weeks", "meaning": "oireiden alku"}, {"type": "FIRST_CONTACT", "date": "2023-11-01", "precision": "DAY", "expression": "1.11.2023", "form": "numeric", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2023-11-27", "precision": "DAY", "expression": "27. marraskuuta 2023", "form": "long", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_SENT", "date": "2023-12-03", "precision": "DAY", "expression": "3.12.2023", "form": "numeric", "meaning": "lähetteen lähettäminen"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-08-22", "precision": "DAY"}, {"type": "FIRST_CONTACT", "date": "2023-11-01", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2023-11-27", "precision": "DAY"}, {"type": "REFERRAL_SENT", "date": "2023-12-03", "precision": "DAY"}]}, "date_forms": ["weeks", "numeric", "long", "numeric"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "build_careful", "seed": 21361114, "index": 87, "attempt": 2}, "synthetic": true},
+{"slice": 12, "n": 30, "part": 2, "id": "5f67053519f0ab1e9927d5c0fa82e4db53aa25c28b45dc86470a27d45a0159c0", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-07-19", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: päivystyksen hoitaja; no physician examined the patient then]: 4. elokuuta 2023",
+  "lääkärin arvio [examined and assessed by: päivystävä lääkäri; not a nurse, not the treating specialist in specialised care]: 12.10.2023",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 23.1.2024",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 8.5.",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 2.12.2022"
+ ], "date_strings": ["4. elokuuta 2023", "12.10.2023", "23.1.2024", "8.5.", "2.12.2022"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2023-08-04", "precision": "DAY", "expression": "4. elokuuta 2023", "form": "long", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2023-10-12", "precision": "DAY", "expression": "12.10.2023", "form": "numeric", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_SENT", "date": "2024-01-23", "precision": "DAY", "expression": "23.1.2024", "form": "numeric", "meaning": "lähetteen lähettäminen"}, {"type": "DIAGNOSIS", "date": "2024-05-08", "precision": "DAY", "expression": "8.5.", "form": "no_year", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [{"kind": "vaccination", "expression": "2.12.2022", "date": "2022-12-02", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "FIRST_CONTACT", "date": "2023-08-04", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2023-10-12", "precision": "DAY"}, {"type": "REFERRAL_SENT", "date": "2024-01-23", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2024-05-08", "precision": "DAY"}]}, "date_forms": ["long", "numeric", "numeric", "no_year"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 718}, "synthetic": true},
+{"slice": 12, "n": 31, "part": 2, "id": "3c35079e9cc2825dea05135cc724169c9b00a142a86434b3d0ed37cd59be9021", "kind": "no_event", "focus": "prescription_renewal", "style": "hoitajan puhelinmerkintä", "note_date": "2025-04-22", "facts_fi": [
+  "asiointipaikka: yksityinen terveydenhuolto",
+  "astman hoitolääkkeen reseptin uusiminen: huhtikuussa 2025",
+  "edellinen, jo toteutunut lääkityksen seurantakäynti: 26.3.2023"
+ ], "date_strings": ["huhtikuussa 2025", "26.3.2023"], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka)."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "huhtikuussa 2025", "date": "2025-04-01", "meaning": "astman hoitolääkkeen reseptin uusiminen"}, {"kind": "earlier", "expression": "26.3.2023", "date": "2023-03-26", "meaning": "edellinen, jo toteutunut lääkityksen seurantakäynti"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": []}, "date_forms": [], "distractor_forms": ["month", "numeric"], "split_hint": "train", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 32, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 32, "part": 2, "id": "96a55baf9600fdc3a98ae6ffb69a59892bb68481c00d4da2932fa95044726e8c", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-03-14", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: yksityisen lääkäriaseman hoitaja; no physician examined the patient then]: 3.5.2023",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 6. kesäkuuta 2023",
+  "syöpähoidon aloitus [the first cancer treatment started]: 20 viikkoa sitten",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 8.5.2024"
+ ], "date_strings": ["3.5.2023", "6. kesäkuuta 2023", "20 viikkoa sitten", "8.5.2024"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2023-05-03", "precision": "DAY", "expression": "3.5.2023", "form": "numeric", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "REFERRAL_RECEIVED", "date": "2023-06-06", "precision": "DAY", "expression": "6. kesäkuuta 2023", "form": "long", "meaning": "lähetteen vastaanottaminen"}, {"type": "TREATMENT_START", "date": "2023-10-26", "precision": "DAY", "expression": "20 viikkoa sitten", "form": "weeks", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "future", "expression": "8.5.2024", "date": "2024-05-08", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "FIRST_CONTACT", "date": "2023-05-03", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2023-06-06", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2023-10-26", "precision": "DAY"}]}, "date_forms": ["numeric", "long", "weeks"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 836}, "synthetic": true},
+{"slice": 12, "n": 33, "part": 2, "id": "b89ae880b1417e9fe17582ececdc81418b38ec46c8e0d0419e9dcd9fd0032e47", "kind": "careful", "focus": "single_physician_assessment", "style": "käyntimerkintä", "note_date": "2024-12-04", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "lääkärin arvio [examined and assessed by: yksityisen lääkäriaseman yleislääkäri; not a nurse, not the treating specialist in specialised care]: 12 päivää sitten",
+  "ilman päivämäärää: the patient has not yet been to a specialist's appointment"
+ ], "date_strings": ["12 päivää sitten"], "wording": [
+  "The note has exactly one dated contact, and it is the physician's assessment.",
+  "Physician's assessment: the patient was examined and assessed by: yksityisen lääkäriaseman yleislääkäri. It is not a nurse's contact and not the appointment of the treating specialist in specialised care.",
+  "Never a bare 'käynti', 'vastaanotto' or 'kontakti': for every dated contact the reader must be able to tell who received the patient."
+ ], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2024-11-22", "precision": "DAY", "expression": "12 päivää sitten", "form": "days", "meaning": "lääkärin arvio"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2024-11-22", "precision": "DAY"}]}, "date_forms": ["days"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "build_careful", "seed": 21361114, "index": 138, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 34, "part": 2, "id": "44563381469456006846a99b3f19c8a6e601cb31e29159e9f88cf9c3673a2508", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2025-02-28", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: seulontayksikön hoitaja; no physician examined the patient then]: 106 päivää sitten",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 27.4.2025",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 29.5.2023"
+ ], "date_strings": ["106 päivää sitten", "27.4.2025", "29.5.2023"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2024-11-14", "precision": "DAY", "expression": "106 päivää sitten", "form": "days", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}],
+ "distractors": [{"kind": "future", "expression": "27.4.2025", "date": "2025-04-27", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}, {"kind": "vaccination", "expression": "29.5.2023", "date": "2023-05-29", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "FIRST_CONTACT", "date": "2024-11-14", "precision": "DAY"}]}, "date_forms": ["days"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 331}, "synthetic": true},
+{"slice": 12, "n": 35, "part": 2, "id": "34d193a9bd4ff16d2551df02eeebf56587bef64fe60b43abe76cc8990be9af8b", "kind": "careful", "focus": "first_contact_physician_assessment_and_specialist_visit", "style": "loppulausunnon ote", "note_date": "2026-12-07", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: päivystysapu; no physician examined the patient then]: 19.6.",
+  "lääkärin arvio [examined and assessed by: päivystävä lääkäri; not a nurse, not the treating specialist in specialised care]: 24 viikkoa sitten",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 20 viikkoa sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 25. elokuuta 2026",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 5. helmikuuta 2027",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 15. lokakuuta 2024"
+ ], "date_strings": ["19.6.", "24 viikkoa sitten", "20 viikkoa sitten", "25. elokuuta 2026", "5. helmikuuta 2027", "15. lokakuuta 2024"], "wording": [
+  "The first contact, the physician's assessment and the specialist appointment are three separate events on three dates.",
+  "First contact: the patient got in touch personally (a telephone call, an electronic message or a walk-in to a nurse) and was answered by: päivystysapu. No physician examined the patient on that date.",
+  "Physician's assessment: the patient was examined and assessed by: päivystävä lääkäri. It is not a nurse's contact and not the appointment of the treating specialist in specialised care.",
+  "Specialist appointment: the patient attended the appointment of the treating specialist in specialised care. Name the specialty or the clinic (onkologi, kirurgi, urologi, hematologi, keuhkolääkäri, gynekologi, ...).",
+  "Never a bare 'käynti', 'vastaanotto' or 'kontakti': for every dated contact the reader must be able to tell who received the patient."
+ ], "facts": [{"type": "FIRST_CONTACT", "date": "2026-06-19", "precision": "DAY", "expression": "19.6.", "form": "no_year", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2026-06-22", "precision": "DAY", "expression": "24 viikkoa sitten", "form": "weeks", "meaning": "lääkärin arvio"}, {"type": "SPECIALIST_VISIT", "date": "2026-07-20", "precision": "DAY", "expression": "20 viikkoa sitten", "form": "weeks", "meaning": "erikoislääkärikäynti"}, {"type": "MDT_DECISION", "date": "2026-08-25", "precision": "DAY", "expression": "25. elokuuta 2026", "form": "long", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "future", "expression": "5. helmikuuta 2027", "date": "2027-02-05", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}, {"kind": "vaccination", "expression": "15. lokakuuta 2024", "date": "2024-10-15", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "FIRST_CONTACT", "date": "2026-06-19", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2026-06-22", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2026-07-20", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2026-08-25", "precision": "DAY"}]}, "date_forms": ["no_year", "weeks", "weeks", "long"], "distractor_forms": ["long", "long"], "split_hint": "test", "sampler": {"source": "build_careful", "seed": 21361114, "index": 116, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 36, "part": 2, "id": "f7f71da6504b5856892e60fe3ae47d58f4261f446d006e1eac1c1a89e17480c4", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2024-10-24", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "syöpähoidon aloitus [the first cancer treatment started]: 13. elokuuta 2024"
+ ], "date_strings": ["13. elokuuta 2024"], "wording": [], "facts": [{"type": "TREATMENT_START", "date": "2024-08-13", "precision": "DAY", "expression": "13. elokuuta 2024", "form": "long", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "TREATMENT_START", "date": "2024-08-13", "precision": "DAY"}]}, "date_forms": ["long"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 58}, "synthetic": true},
+{"slice": 12, "n": 37, "part": 2, "id": "04567632888ed94dbd454b9bbe294f810d9ce193a6e2f23deccbce194e9739b8", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2025-10-04", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 40 viikkoa sitten",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 7. maaliskuuta 2025",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 7.12.2025"
+ ], "date_strings": ["40 viikkoa sitten", "7. maaliskuuta 2025", "7.12.2025"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-12-28", "precision": "DAY", "expression": "40 viikkoa sitten", "form": "weeks", "meaning": "oireiden alku"}, {"type": "REFERRAL_RECEIVED", "date": "2025-03-07", "precision": "DAY", "expression": "7. maaliskuuta 2025", "form": "long", "meaning": "lähetteen vastaanottaminen"}],
+ "distractors": [{"kind": "future", "expression": "7.12.2025", "date": "2025-12-07", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-12-28", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2025-03-07", "precision": "DAY"}]}, "date_forms": ["weeks", "long"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 70}, "synthetic": true},
+{"slice": 12, "n": 38, "part": 2, "id": "4bdeb95a14d84621bc43e9286f68b968863fb2e6be5ffffd737f871e43a4064a", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2025-09-25", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "lääkärin arvio [examined and assessed by: työterveyslääkäri; not a nurse, not the treating specialist in specialised care]: 50 viikkoa sitten"
+ ], "date_strings": ["50 viikkoa sitten"], "wording": [], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2024-10-10", "precision": "DAY", "expression": "50 viikkoa sitten", "form": "weeks", "meaning": "lääkärin arvio"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2024-10-10", "precision": "DAY"}]}, "date_forms": ["weeks"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 84}, "synthetic": true},
+{"slice": 12, "n": 39, "part": 2, "id": "b402c25cb8196e08f74e1cbbc73eb28bee6f4a70c94f8095dad07815e913140e", "kind": "no_event", "focus": "dental_check", "style": "käyntimerkintä", "note_date": "2026-07-11", "facts_fi": [
+  "asiointipaikka: yksityinen terveydenhuolto",
+  "lohjenneen paikan uusiminen hammaslääkärin vastaanotolla: 19.10.2025",
+  "edellinen, jo toteutunut hammastarkastus: 20.9.2024"
+ ], "date_strings": ["19.10.2025", "20.9.2024"], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka)."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "19.10.2025", "date": "2025-10-19", "meaning": "lohjenneen paikan uusiminen hammaslääkärin vastaanotolla"}, {"kind": "earlier", "expression": "20.9.2024", "date": "2024-09-20", "meaning": "edellinen, jo toteutunut hammastarkastus"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": []}, "date_forms": [], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 67, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 40, "part": 2, "id": "6efcaaeac09d852ba3dd48ffaa79675dbd1a82ff603e06e4f5e75cd60464784e", "kind": "no_event", "focus": "non_cancer_lookalike", "style": "käyntimerkintä", "note_date": "2024-09-26", "facts_fi": [
+  "asiointipaikka: yksityinen terveydenhuolto",
+  "aikuistyypin diabeteksen toteaminen verikokeiden perusteella: 9.9."
+ ], "date_strings": ["9.9."], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka).",
+  "Keep the benign reason of the dated line explicit, so that it cannot be read as a cancer-pathway step."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "9.9.", "date": "2024-09-09", "meaning": "aikuistyypin diabeteksen toteaminen verikokeiden perusteella"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": []}, "date_forms": [], "distractor_forms": ["no_year"], "split_hint": "train", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 124, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 41, "part": 2, "id": "abee4918bc80964a7a5a0c7da2012d147c2b816b313d3bc8b4e508609f105ee2", "kind": "no_event", "focus": "prescription_renewal", "style": "hoitajan puhelinmerkintä", "note_date": "2024-12-13", "facts_fi": [
+  "asiointipaikka: työterveyshuolto",
+  "verenpainelääkkeen reseptin uusiminen: 4.12.2024",
+  "tuleva, vielä toteutumaton lääkityksen seurantakäynti: 22. tammikuuta 2025"
+ ], "date_strings": ["4.12.2024", "22. tammikuuta 2025"], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka).",
+  "The upcoming appointment has not happened; do not write it as done."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "4.12.2024", "date": "2024-12-04", "meaning": "verenpainelääkkeen reseptin uusiminen"}, {"kind": "future", "expression": "22. tammikuuta 2025", "date": "2025-01-22", "meaning": "tuleva, vielä toteutumaton lääkityksen seurantakäynti"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": []}, "date_forms": [], "distractor_forms": ["numeric", "long"], "split_hint": "train", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 46, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 42, "part": 2, "id": "fdceffcb3de392f07b0cc0bba3429debb3ab774ee5767203f8095ce41beffda2", "kind": "careful", "focus": "referral_sent_and_received", "style": "hoitajan puhelinmerkintä", "note_date": "2026-09-10", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 12.6.2026",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 23.6.2026",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 38 päivää sitten"
+ ], "date_strings": ["12.6.2026", "23.6.2026", "38 päivää sitten"], "wording": [
+  "Perspective: a specialised-care unit, or a summary that knows both dates of the referral.",
+  "Two separate acts on two dates: the referring physician SENT the referral, and the referral ARRIVED in specialised care and was registered there. The verb at each date string must show the direction (sending: 'lähetti', 'lähti', 'lähetetty', 'toimitettu'; arrival: 'saapui', 'tuli', 'vastaanotettu', 'kirjattu saapuneeksi').",
+  "Never 'potilas sai lähetteen' or 'lähete tehty', and never a referral without a verb that shows sending or arrival."
+ ], "facts": [{"type": "REFERRAL_SENT", "date": "2026-06-12", "precision": "DAY", "expression": "12.6.2026", "form": "numeric", "meaning": "lähetteen lähettäminen"}, {"type": "REFERRAL_RECEIVED", "date": "2026-06-23", "precision": "DAY", "expression": "23.6.2026", "form": "numeric", "meaning": "lähetteen vastaanottaminen"}, {"type": "SPECIALIST_VISIT", "date": "2026-08-03", "precision": "DAY", "expression": "38 päivää sitten", "form": "days", "meaning": "erikoislääkärikäynti"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "REFERRAL_SENT", "date": "2026-06-12", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2026-06-23", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2026-08-03", "precision": "DAY"}]}, "date_forms": ["numeric", "numeric", "days"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "build_careful", "seed": 21361114, "index": 14, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 43, "part": 2, "id": "702d16aba6c23da99175d59686cf460bcd074ec2c74cc19ab3373e216d2c3429", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2026-09-13", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 6.12.2025",
+  "lääkärin arvio [examined and assessed by: seulontayksikön lääkäri; not a nurse, not the treating specialist in specialised care]: 19.3.",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 23.4.",
+  "syöpähoidon aloitus [the first cancer treatment started]: 4.7.",
+  "syntymäaika [not a pathway event]: 27.6.1957",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 27.3.2024"
+ ], "date_strings": ["6.12.2025", "19.3.", "23.4.", "4.7.", "27.6.1957", "27.3.2024"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-12-06", "precision": "DAY", "expression": "6.12.2025", "form": "numeric", "meaning": "oireiden alku"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2026-03-19", "precision": "DAY", "expression": "19.3.", "form": "no_year", "meaning": "lääkärin arvio"}, {"type": "MDT_DECISION", "date": "2026-04-23", "precision": "DAY", "expression": "23.4.", "form": "no_year", "meaning": "moniammatillinen hoitopäätös"}, {"type": "TREATMENT_START", "date": "2026-07-04", "precision": "DAY", "expression": "4.7.", "form": "no_year", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "birth", "expression": "27.6.1957", "date": "1957-06-27", "meaning": "syntymäaika"}, {"kind": "vaccination", "expression": "27.3.2024", "date": "2024-03-27", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-12-06", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2026-03-19", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2026-04-23", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2026-07-04", "precision": "DAY"}]}, "date_forms": ["numeric", "no_year", "no_year", "no_year"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 136}, "synthetic": true},
+{"slice": 12, "n": 44, "part": 2, "id": "161eea716d710f6307fa0dbacb998ec4211cbbcaa9f35db82893fce9fdc7307a", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-09-29", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: työterveyshoitaja; no physician examined the patient then]: marraskuussa 2023",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 21.12.2023",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 16.6.",
+  "syöpähoidon aloitus [the first cancer treatment started]: heinäkuussa 2024",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 6.1.2025"
+ ], "date_strings": ["marraskuussa 2023", "21.12.2023", "16.6.", "heinäkuussa 2024", "6.1.2025"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2023-11-01", "precision": "MONTH", "expression": "marraskuussa 2023", "form": "month", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "REFERRAL_RECEIVED", "date": "2023-12-21", "precision": "DAY", "expression": "21.12.2023", "form": "numeric", "meaning": "lähetteen vastaanottaminen"}, {"type": "SPECIALIST_VISIT", "date": "2024-06-16", "precision": "DAY", "expression": "16.6.", "form": "no_year", "meaning": "erikoislääkärikäynti"}, {"type": "TREATMENT_START", "date": "2024-07-01", "precision": "MONTH", "expression": "heinäkuussa 2024", "form": "month", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "future", "expression": "6.1.2025", "date": "2025-01-06", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "FIRST_CONTACT", "date": "2023-11-01", "precision": "MONTH"}, {"type": "REFERRAL_RECEIVED", "date": "2023-12-21", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2024-06-16", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2024-07-01", "precision": "MONTH"}]}, "date_forms": ["month", "numeric", "no_year", "month"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 891}, "synthetic": true},
+{"slice": 12, "n": 45, "part": 2, "id": "aeb6b53d24dcbb4980849c85d08aed47eb6235ebbc092989c581bfe60568bfb5", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2024-05-29", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 12.6.2023",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 23. elokuuta 2023",
+  "syöpähoidon aloitus [the first cancer treatment started]: 27.9.2023",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 7.7.2024",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 13.12.2021"
+ ], "date_strings": ["12.6.2023", "23. elokuuta 2023", "27.9.2023", "7.7.2024", "13.12.2021"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-06-12", "precision": "DAY", "expression": "12.6.2023", "form": "numeric", "meaning": "oireiden alku"}, {"type": "MDT_DECISION", "date": "2023-08-23", "precision": "DAY", "expression": "23. elokuuta 2023", "form": "long", "meaning": "moniammatillinen hoitopäätös"}, {"type": "TREATMENT_START", "date": "2023-09-27", "precision": "DAY", "expression": "27.9.2023", "form": "numeric", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "future", "expression": "7.7.2024", "date": "2024-07-07", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}, {"kind": "vaccination", "expression": "13.12.2021", "date": "2021-12-13", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-06-12", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2023-08-23", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2023-09-27", "precision": "DAY"}]}, "date_forms": ["numeric", "long", "numeric"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 157}, "synthetic": true},
+{"slice": 12, "n": 46, "part": 2, "id": "bbe3659fc7df2c1cb86aa2c8d665f9fe9754e0d17f3463de72cec63e559d1444", "kind": "no_event", "focus": "prescription_renewal", "style": "käyntimerkintä", "note_date": "2026-05-23", "facts_fi": [
+  "asiointipaikka: yksityinen terveydenhuolto",
+  "närästyslääkkeen reseptin uusiminen: 12. toukokuuta 2026",
+  "syntymäaika: 23.8.1986"
+ ], "date_strings": ["12. toukokuuta 2026", "23.8.1986"], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka)."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "12. toukokuuta 2026", "date": "2026-05-12", "meaning": "närästyslääkkeen reseptin uusiminen"}, {"kind": "birth", "expression": "23.8.1986", "date": "1986-08-23", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": []}, "date_forms": [], "distractor_forms": ["long", "numeric"], "split_hint": "train", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 52, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 47, "part": 2, "id": "ca0d5f8639d5bc3bd99b997b4b548094b38fd2ccf1bcb16295d22e0d8b534fa0", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2026-02-21", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "lääkärin arvio [examined and assessed by: päivystävä lääkäri; not a nurse, not the treating specialist in specialised care]: 1.10.2025",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 15 viikkoa sitten",
+  "syöpähoidon aloitus [the first cancer treatment started]: 14.1.",
+  "syntymäaika [not a pathway event]: 10.6.1951"
+ ], "date_strings": ["1.10.2025", "15 viikkoa sitten", "14.1.", "10.6.1951"], "wording": [], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2025-10-01", "precision": "DAY", "expression": "1.10.2025", "form": "numeric", "meaning": "lääkärin arvio"}, {"type": "MDT_DECISION", "date": "2025-11-08", "precision": "DAY", "expression": "15 viikkoa sitten", "form": "weeks", "meaning": "moniammatillinen hoitopäätös"}, {"type": "TREATMENT_START", "date": "2026-01-14", "precision": "DAY", "expression": "14.1.", "form": "no_year", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "birth", "expression": "10.6.1951", "date": "1951-06-10", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2025-10-01", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2025-11-08", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2026-01-14", "precision": "DAY"}]}, "date_forms": ["numeric", "weeks", "no_year"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 687}, "synthetic": true},
+{"slice": 12, "n": 48, "part": 2, "id": "e9aeb9f8b97c34bf6ad933858f1858b8b99892269db0773fdaea18690689a817", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2026-12-10", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 213 päivää sitten",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 20 viikkoa sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 2.11."
+ ], "date_strings": ["213 päivää sitten", "20 viikkoa sitten", "2.11."], "wording": [], "facts": [{"type": "REFERRAL_SENT", "date": "2026-05-11", "precision": "DAY", "expression": "213 päivää sitten", "form": "days", "meaning": "lähetteen lähettäminen"}, {"type": "REFERRAL_RECEIVED", "date": "2026-07-23", "precision": "DAY", "expression": "20 viikkoa sitten", "form": "weeks", "meaning": "lähetteen vastaanottaminen"}, {"type": "MDT_DECISION", "date": "2026-11-02", "precision": "DAY", "expression": "2.11.", "form": "no_year", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "REFERRAL_SENT", "date": "2026-05-11", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2026-07-23", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2026-11-02", "precision": "DAY"}]}, "date_forms": ["days", "weeks", "no_year"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 595}, "synthetic": true},
+{"slice": 12, "n": 49, "part": 2, "id": "1b2dc81ff530f9fad9e52c4c420b4e3879fee53b71e0828ba741528d16d39569", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2026-02-21", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 45 viikkoa sitten",
+  "syntymäaika [not a pathway event]: 18.12.1994",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 28.10.2023"
+ ], "date_strings": ["45 viikkoa sitten", "18.12.1994", "28.10.2023"], "wording": [], "facts": [{"type": "DIAGNOSIS", "date": "2025-04-12", "precision": "DAY", "expression": "45 viikkoa sitten", "form": "weeks", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [{"kind": "birth", "expression": "18.12.1994", "date": "1994-12-18", "meaning": "syntymäaika"}, {"kind": "vaccination", "expression": "28.10.2023", "date": "2023-10-28", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "DIAGNOSIS", "date": "2025-04-12", "precision": "DAY"}]}, "date_forms": ["weeks"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 906}, "synthetic": true},
+{"slice": 12, "n": 50, "part": 2, "id": "ad4f0eee16cbde1eec685d28f44fc23034b9521be142ce96150f7e5a1b9924e6", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2026-10-10", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 23.10.2025",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: yksityisen lääkäriaseman hoitaja; no physician examined the patient then]: tammikuussa 2026",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 30 viikkoa sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 25.6.2026",
+  "syntymäaika [not a pathway event]: 28.2.1993"
+ ], "date_strings": ["23.10.2025", "tammikuussa 2026", "30 viikkoa sitten", "25.6.2026", "28.2.1993"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-10-23", "precision": "DAY", "expression": "23.10.2025", "form": "numeric", "meaning": "oireiden alku"}, {"type": "FIRST_CONTACT", "date": "2026-01-01", "precision": "MONTH", "expression": "tammikuussa 2026", "form": "month", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "DIAGNOSIS", "date": "2026-03-14", "precision": "DAY", "expression": "30 viikkoa sitten", "form": "weeks", "meaning": "syöpädiagnoosin vahvistaminen"}, {"type": "MDT_DECISION", "date": "2026-06-25", "precision": "DAY", "expression": "25.6.2026", "form": "numeric", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "birth", "expression": "28.2.1993", "date": "1993-02-28", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-10-23", "precision": "DAY"}, {"type": "FIRST_CONTACT", "date": "2026-01-01", "precision": "MONTH"}, {"type": "DIAGNOSIS", "date": "2026-03-14", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2026-06-25", "precision": "DAY"}]}, "date_forms": ["numeric", "month", "weeks", "numeric"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 495}, "synthetic": true},
+{"slice": 12, "n": 51, "part": 3, "id": "99139b4f86820947996e546ee5112e0880a4ba34f19a0789f8547546baaef42f", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-09-16", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 352 päivää sitten",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 20.10.2024"
+ ], "date_strings": ["352 päivää sitten", "20.10.2024"], "wording": [], "facts": [{"type": "MDT_DECISION", "date": "2023-09-30", "precision": "DAY", "expression": "352 päivää sitten", "form": "days", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "future", "expression": "20.10.2024", "date": "2024-10-20", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "MDT_DECISION", "date": "2023-09-30", "precision": "DAY"}]}, "date_forms": ["days"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 73}, "synthetic": true},
+{"slice": 12, "n": 52, "part": 3, "id": "8f0626a5c79aa321aa0c8d0e8fd12fdbc59473768ba1c670f6bdfa4da0ec860f", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2026-09-25", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 12.6."
+ ], "date_strings": ["12.6."], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2026-06-12", "precision": "DAY", "expression": "12.6.", "form": "no_year", "meaning": "oireiden alku"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2026-06-12", "precision": "DAY"}]}, "date_forms": ["no_year"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 208}, "synthetic": true},
+{"slice": 12, "n": 53, "part": 3, "id": "874132cd68f352b7884496fd27916b733889bae4fb96e9c83a9d15c1b862071d", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2026-10-17", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 11.2.2026",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 178 päivää sitten",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 26.6.2025"
+ ], "date_strings": ["11.2.2026", "178 päivää sitten", "26.6.2025"], "wording": [], "facts": [{"type": "DIAGNOSIS", "date": "2026-02-11", "precision": "DAY", "expression": "11.2.2026", "form": "numeric", "meaning": "syöpädiagnoosin vahvistaminen"}, {"type": "MDT_DECISION", "date": "2026-04-22", "precision": "DAY", "expression": "178 päivää sitten", "form": "days", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "vaccination", "expression": "26.6.2025", "date": "2025-06-26", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "DIAGNOSIS", "date": "2026-02-11", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2026-04-22", "precision": "DAY"}]}, "date_forms": ["numeric", "days"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 547}, "synthetic": true},
+{"slice": 12, "n": 54, "part": 3, "id": "5b89c2a90adda29ba84977c4ecf59bf3d376e0ac7020891a23f0aa99990343b2", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2026-12-23", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 280 päivää sitten",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: elokuussa 2026",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 15 viikkoa sitten",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 16.8.2025"
+ ], "date_strings": ["280 päivää sitten", "elokuussa 2026", "15 viikkoa sitten", "16.8.2025"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2026-03-18", "precision": "DAY", "expression": "280 päivää sitten", "form": "days", "meaning": "oireiden alku"}, {"type": "REFERRAL_RECEIVED", "date": "2026-08-01", "precision": "MONTH", "expression": "elokuussa 2026", "form": "month", "meaning": "lähetteen vastaanottaminen"}, {"type": "DIAGNOSIS", "date": "2026-09-09", "precision": "DAY", "expression": "15 viikkoa sitten", "form": "weeks", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [{"kind": "vaccination", "expression": "16.8.2025", "date": "2025-08-16", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2026-03-18", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2026-08-01", "precision": "MONTH"}, {"type": "DIAGNOSIS", "date": "2026-09-09", "precision": "DAY"}]}, "date_forms": ["days", "month", "weeks"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 496}, "synthetic": true},
+{"slice": 12, "n": 55, "part": 3, "id": "1fca00fe2fbca05ab3b5d79e1162e57a2e587f17ab515b82eadc4c05ff3b106f", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2024-06-11", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: seulontayksikön ajanvaraus; no physician examined the patient then]: 20.1.",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 4. toukokuuta 2024",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 22.6.2024",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 26.11.2022"
+ ], "date_strings": ["20.1.", "4. toukokuuta 2024", "22.6.2024", "26.11.2022"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2024-01-20", "precision": "DAY", "expression": "20.1.", "form": "no_year", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "MDT_DECISION", "date": "2024-05-04", "precision": "DAY", "expression": "4. toukokuuta 2024", "form": "long", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "future", "expression": "22.6.2024", "date": "2024-06-22", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}, {"kind": "vaccination", "expression": "26.11.2022", "date": "2022-11-26", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "FIRST_CONTACT", "date": "2024-01-20", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2024-05-04", "precision": "DAY"}]}, "date_forms": ["no_year", "long"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 413}, "synthetic": true},
+{"slice": 12, "n": 56, "part": 3, "id": "2875897dbd9ae0cb272a1b59713f530cf75ca1f89d6bcbddafe0b69175a88d41", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2025-12-29", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: helmikuussa 2025",
+  "syntymäaika [not a pathway event]: 4.5.1945",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 12.2.2026"
+ ], "date_strings": ["helmikuussa 2025", "4.5.1945", "12.2.2026"], "wording": [], "facts": [{"type": "REFERRAL_RECEIVED", "date": "2025-02-01", "precision": "MONTH", "expression": "helmikuussa 2025", "form": "month", "meaning": "lähetteen vastaanottaminen"}],
+ "distractors": [{"kind": "birth", "expression": "4.5.1945", "date": "1945-05-04", "meaning": "syntymäaika"}, {"kind": "future", "expression": "12.2.2026", "date": "2026-02-12", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "REFERRAL_RECEIVED", "date": "2025-02-01", "precision": "MONTH"}]}, "date_forms": ["month"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 361}, "synthetic": true},
+{"slice": 12, "n": 57, "part": 3, "id": "a84d18bd045c7770ace49fc9af78fbae408b39f2a4943ac6a21b16525a846aea", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2025-08-29", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "syöpähoidon aloitus [the first cancer treatment started]: 175 päivää sitten",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 25.8.2023"
+ ], "date_strings": ["175 päivää sitten", "25.8.2023"], "wording": [], "facts": [{"type": "TREATMENT_START", "date": "2025-03-07", "precision": "DAY", "expression": "175 päivää sitten", "form": "days", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "vaccination", "expression": "25.8.2023", "date": "2023-08-25", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "TREATMENT_START", "date": "2025-03-07", "precision": "DAY"}]}, "date_forms": ["days"], "distractor_forms": ["numeric"], "split_hint": "test", "sampler": {"source": "sample.py", "seed": 21261114, "index": 114}, "synthetic": true},
+{"slice": 12, "n": 58, "part": 3, "id": "e47e1eda3aae51805ed1de22d2a6097ed55bbfbef9f6d40c707bcd904d313eee", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2026-02-22", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 11.4.2025",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: yksityisen lääkäriaseman hoitaja; no physician examined the patient then]: 35 viikkoa sitten",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 36 päivää sitten"
+ ], "date_strings": ["11.4.2025", "35 viikkoa sitten", "36 päivää sitten"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-04-11", "precision": "DAY", "expression": "11.4.2025", "form": "numeric", "meaning": "oireiden alku"}, {"type": "FIRST_CONTACT", "date": "2025-06-22", "precision": "DAY", "expression": "35 viikkoa sitten", "form": "weeks", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "DIAGNOSIS", "date": "2026-01-17", "precision": "DAY", "expression": "36 päivää sitten", "form": "days", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-04-11", "precision": "DAY"}, {"type": "FIRST_CONTACT", "date": "2025-06-22", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2026-01-17", "precision": "DAY"}]}, "date_forms": ["numeric", "weeks", "days"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 543}, "synthetic": true},
+{"slice": 12, "n": 59, "part": 3, "id": "b57a492057992c4623bb2de7b2954313a2557e9a7691c0a8700fc8cd1f059a9b", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2025-07-22", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 35 viikkoa sitten",
+  "lääkärin arvio [examined and assessed by: työterveyslääkäri; not a nurse, not the treating specialist in specialised care]: tammikuussa 2025",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 13.5.2025",
+  "syntymäaika [not a pathway event]: 22.9.1969"
+ ], "date_strings": ["35 viikkoa sitten", "tammikuussa 2025", "13.5.2025", "22.9.1969"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-11-19", "precision": "DAY", "expression": "35 viikkoa sitten", "form": "weeks", "meaning": "oireiden alku"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2025-01-01", "precision": "MONTH", "expression": "tammikuussa 2025", "form": "month", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_RECEIVED", "date": "2025-05-13", "precision": "DAY", "expression": "13.5.2025", "form": "numeric", "meaning": "lähetteen vastaanottaminen"}],
+ "distractors": [{"kind": "birth", "expression": "22.9.1969", "date": "1969-09-22", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-11-19", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2025-01-01", "precision": "MONTH"}, {"type": "REFERRAL_RECEIVED", "date": "2025-05-13", "precision": "DAY"}]}, "date_forms": ["weeks", "month", "numeric"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 538}, "synthetic": true},
+{"slice": 12, "n": 60, "part": 3, "id": "b32ca99ca74456d07fd821da4a916325c312d27e0ecad68e967d7735c9b5ce06", "kind": "no_event", "focus": "prescription_renewal", "style": "hoitajan puhelinmerkintä", "note_date": "2025-04-28", "facts_fi": [
+  "asiointipaikka: yksityinen terveydenhuolto",
+  "migreenilääkkeen reseptin uusiminen: 8.4.",
+  "syntymäaika: 9.11.1985"
+ ], "date_strings": ["8.4.", "9.11.1985"], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka)."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "8.4.", "date": "2025-04-08", "meaning": "migreenilääkkeen reseptin uusiminen"}, {"kind": "birth", "expression": "9.11.1985", "date": "1985-11-09", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": []}, "date_forms": [], "distractor_forms": ["no_year", "numeric"], "split_hint": "train", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 59, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 61, "part": 3, "id": "1f209d244be447176943e334f0f96838eab97d43675eb26b7794275f72fa5477", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2024-09-09", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 25. syyskuuta 2023",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 29.10.2023",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 281 päivää sitten",
+  "syöpähoidon aloitus [the first cancer treatment started]: 70 päivää sitten",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 15.12.2024"
+ ], "date_strings": ["25. syyskuuta 2023", "29.10.2023", "281 päivää sitten", "70 päivää sitten", "15.12.2024"], "wording": [], "facts": [{"type": "REFERRAL_SENT", "date": "2023-09-25", "precision": "DAY", "expression": "25. syyskuuta 2023", "form": "long", "meaning": "lähetteen lähettäminen"}, {"type": "DIAGNOSIS", "date": "2023-10-29", "precision": "DAY", "expression": "29.10.2023", "form": "numeric", "meaning": "syöpädiagnoosin vahvistaminen"}, {"type": "MDT_DECISION", "date": "2023-12-03", "precision": "DAY", "expression": "281 päivää sitten", "form": "days", "meaning": "moniammatillinen hoitopäätös"}, {"type": "TREATMENT_START", "date": "2024-07-01", "precision": "DAY", "expression": "70 päivää sitten", "form": "days", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "future", "expression": "15.12.2024", "date": "2024-12-15", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "REFERRAL_SENT", "date": "2023-09-25", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2023-10-29", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2023-12-03", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2024-07-01", "precision": "DAY"}]}, "date_forms": ["long", "numeric", "days", "days"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 669}, "synthetic": true},
+{"slice": 12, "n": 62, "part": 3, "id": "1cde0753ed7b78b705ee6a651cabe4fc46f47c4b8cfbd93d6f9292df316a3bd4", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-06-04", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: seulontayksikön hoitaja; no physician examined the patient then]: 26. elokuuta 2023",
+  "syöpähoidon aloitus [the first cancer treatment started]: joulukuussa 2023",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 12.9.2022"
+ ], "date_strings": ["26. elokuuta 2023", "joulukuussa 2023", "12.9.2022"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2023-08-26", "precision": "DAY", "expression": "26. elokuuta 2023", "form": "long", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "TREATMENT_START", "date": "2023-12-01", "precision": "MONTH", "expression": "joulukuussa 2023", "form": "month", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "vaccination", "expression": "12.9.2022", "date": "2022-09-12", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "FIRST_CONTACT", "date": "2023-08-26", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2023-12-01", "precision": "MONTH"}]}, "date_forms": ["long", "month"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 777}, "synthetic": true},
+{"slice": 12, "n": 63, "part": 3, "id": "ced2ea94538a494c3de43e656b887837c3840434b0bc99dd62e44280f7fc1f6a", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2025-09-27", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 211 päivää sitten",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 9.5.",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 72 päivää sitten",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 15.10.2025",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 22.9.2023"
+ ], "date_strings": ["211 päivää sitten", "9.5.", "72 päivää sitten", "15.10.2025", "22.9.2023"], "wording": [], "facts": [{"type": "REFERRAL_SENT", "date": "2025-02-28", "precision": "DAY", "expression": "211 päivää sitten", "form": "days", "meaning": "lähetteen lähettäminen"}, {"type": "REFERRAL_RECEIVED", "date": "2025-05-09", "precision": "DAY", "expression": "9.5.", "form": "no_year", "meaning": "lähetteen vastaanottaminen"}, {"type": "SPECIALIST_VISIT", "date": "2025-07-17", "precision": "DAY", "expression": "72 päivää sitten", "form": "days", "meaning": "erikoislääkärikäynti"}],
+ "distractors": [{"kind": "future", "expression": "15.10.2025", "date": "2025-10-15", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}, {"kind": "vaccination", "expression": "22.9.2023", "date": "2023-09-22", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "REFERRAL_SENT", "date": "2025-02-28", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2025-05-09", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2025-07-17", "precision": "DAY"}]}, "date_forms": ["days", "no_year", "days"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 692}, "synthetic": true},
+{"slice": 12, "n": 64, "part": 3, "id": "b69e94fe0b808f0e304fb1f039e6495128805a499291cb755d68fc06cd9572ef", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-03-05", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "syöpähoidon aloitus [the first cancer treatment started]: 28. toukokuuta 2023"
+ ], "date_strings": ["28. toukokuuta 2023"], "wording": [], "facts": [{"type": "TREATMENT_START", "date": "2023-05-28", "precision": "DAY", "expression": "28. toukokuuta 2023", "form": "long", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "TREATMENT_START", "date": "2023-05-28", "precision": "DAY"}]}, "date_forms": ["long"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 61}, "synthetic": true},
+{"slice": 12, "n": 65, "part": 3, "id": "e3aff6356ab3b0cea738734900b7b39e35ca714c95141e0acf845b9f67591ee0", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2024-03-07", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: terveysaseman sairaanhoitaja; no physician examined the patient then]: toukokuussa 2023",
+  "lääkärin arvio [examined and assessed by: terveyskeskuslääkäri; not a nurse, not the treating specialist in specialised care]: 11.9.2023",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 17. lokakuuta 2023",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 20.11.2023",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 24.9.2021"
+ ], "date_strings": ["toukokuussa 2023", "11.9.2023", "17. lokakuuta 2023", "20.11.2023", "24.9.2021"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2023-05-01", "precision": "MONTH", "expression": "toukokuussa 2023", "form": "month", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2023-09-11", "precision": "DAY", "expression": "11.9.2023", "form": "numeric", "meaning": "lääkärin arvio"}, {"type": "SPECIALIST_VISIT", "date": "2023-10-17", "precision": "DAY", "expression": "17. lokakuuta 2023", "form": "long", "meaning": "erikoislääkärikäynti"}, {"type": "DIAGNOSIS", "date": "2023-11-20", "precision": "DAY", "expression": "20.11.2023", "form": "numeric", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [{"kind": "vaccination", "expression": "24.9.2021", "date": "2021-09-24", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "FIRST_CONTACT", "date": "2023-05-01", "precision": "MONTH"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2023-09-11", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2023-10-17", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2023-11-20", "precision": "DAY"}]}, "date_forms": ["month", "numeric", "long", "numeric"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 498}, "synthetic": true},
+{"slice": 12, "n": 66, "part": 3, "id": "f214ceba794345483a7bdd044672f3315f6a1965d7a18990f6f7d533109fcbd2", "kind": "no_event", "focus": "vaccination", "style": "käyntimerkintä", "note_date": "2025-01-15", "facts_fi": [
+  "asiointipaikka: työterveyshuolto",
+  "B-hepatiittirokotesarjan annos: 18. maaliskuuta 2024",
+  "syntymäaika: 14.10.1964"
+ ], "date_strings": ["18. maaliskuuta 2024", "14.10.1964"], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka)."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "18. maaliskuuta 2024", "date": "2024-03-18", "meaning": "B-hepatiittirokotesarjan annos"}, {"kind": "birth", "expression": "14.10.1964", "date": "1964-10-14", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": []}, "date_forms": [], "distractor_forms": ["long", "numeric"], "split_hint": "train", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 5, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 67, "part": 3, "id": "f8d44df97570804fb0e9b3c9c854bbcb17970308a9b367732667cb047b34046c", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2024-07-24", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: syyskuussa 2023",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 17.8.2024",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 22.3.2023"
+ ], "date_strings": ["syyskuussa 2023", "17.8.2024", "22.3.2023"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-09-01", "precision": "MONTH", "expression": "syyskuussa 2023", "form": "month", "meaning": "oireiden alku"}],
+ "distractors": [{"kind": "future", "expression": "17.8.2024", "date": "2024-08-17", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}, {"kind": "vaccination", "expression": "22.3.2023", "date": "2023-03-22", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-09-01", "precision": "MONTH"}]}, "date_forms": ["month"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 666}, "synthetic": true},
+{"slice": 12, "n": 68, "part": 3, "id": "32a0130afa172eca9dd5995e656d86cb4956a3e92bfd46f6b68573090a5b499d", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2024-08-27", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: terveysaseman sairaanhoitaja; no physician examined the patient then]: 282 päivää sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 23. heinäkuuta 2024"
+ ], "date_strings": ["282 päivää sitten", "23. heinäkuuta 2024"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2023-11-19", "precision": "DAY", "expression": "282 päivää sitten", "form": "days", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "MDT_DECISION", "date": "2024-07-23", "precision": "DAY", "expression": "23. heinäkuuta 2024", "form": "long", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "FIRST_CONTACT", "date": "2023-11-19", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2024-07-23", "precision": "DAY"}]}, "date_forms": ["days", "long"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 226}, "synthetic": true},
+{"slice": 12, "n": 69, "part": 3, "id": "69d3b851ca5e7402370facdb9e746e2d83827fa88ab40b6169c60e200e240007", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2024-11-08", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: tammikuussa 2024",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 211 päivää sitten",
+  "syöpähoidon aloitus [the first cancer treatment started]: 25.7.",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 28.1.2025"
+ ], "date_strings": ["tammikuussa 2024", "211 päivää sitten", "25.7.", "28.1.2025"], "wording": [], "facts": [{"type": "REFERRAL_RECEIVED", "date": "2024-01-01", "precision": "MONTH", "expression": "tammikuussa 2024", "form": "month", "meaning": "lähetteen vastaanottaminen"}, {"type": "SPECIALIST_VISIT", "date": "2024-04-11", "precision": "DAY", "expression": "211 päivää sitten", "form": "days", "meaning": "erikoislääkärikäynti"}, {"type": "TREATMENT_START", "date": "2024-07-25", "precision": "DAY", "expression": "25.7.", "form": "no_year", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "future", "expression": "28.1.2025", "date": "2025-01-28", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "REFERRAL_RECEIVED", "date": "2024-01-01", "precision": "MONTH"}, {"type": "SPECIALIST_VISIT", "date": "2024-04-11", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2024-07-25", "precision": "DAY"}]}, "date_forms": ["month", "days", "no_year"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 9}, "synthetic": true},
+{"slice": 12, "n": 70, "part": 3, "id": "26e6cb840e71da44505a4b9505b178afc9b35577362e57fc37653ca82084c7b1", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2024-06-11", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 315 päivää sitten",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 17.6.2022",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 16.8.2024"
+ ], "date_strings": ["315 päivää sitten", "17.6.2022", "16.8.2024"], "wording": [], "facts": [{"type": "DIAGNOSIS", "date": "2023-08-01", "precision": "DAY", "expression": "315 päivää sitten", "form": "days", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [{"kind": "vaccination", "expression": "17.6.2022", "date": "2022-06-17", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}, {"kind": "future", "expression": "16.8.2024", "date": "2024-08-16", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "DIAGNOSIS", "date": "2023-08-01", "precision": "DAY"}]}, "date_forms": ["days"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 420}, "synthetic": true},
+{"slice": 12, "n": 71, "part": 3, "id": "9cee1a6dc4f3ef2eb2cb92f6f60b7efb44a8ddd0da476af8017472d0f9e5acae", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2026-12-28", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "syöpähoidon aloitus [the first cancer treatment started]: 70 päivää sitten",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 7.2.2027"
+ ], "date_strings": ["70 päivää sitten", "7.2.2027"], "wording": [], "facts": [{"type": "TREATMENT_START", "date": "2026-10-19", "precision": "DAY", "expression": "70 päivää sitten", "form": "days", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "future", "expression": "7.2.2027", "date": "2027-02-07", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "TREATMENT_START", "date": "2026-10-19", "precision": "DAY"}]}, "date_forms": ["days"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 220}, "synthetic": true},
+{"slice": 12, "n": 72, "part": 3, "id": "75932fa0c222f8257801ea91a6423fac0206e5d9cc52fad7282567181d2f37f7", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2025-04-10", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: työterveyshuollon ajanvaraus; no physician examined the patient then]: 4.7.2024",
+  "lääkärin arvio [examined and assessed by: työterveyslääkäri; not a nurse, not the treating specialist in specialised care]: lokakuussa 2024",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 15 viikkoa sitten",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 3.3.2025",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 24.5.2025",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 18.11.2023"
+ ], "date_strings": ["4.7.2024", "lokakuussa 2024", "15 viikkoa sitten", "3.3.2025", "24.5.2025", "18.11.2023"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2024-07-04", "precision": "DAY", "expression": "4.7.2024", "form": "numeric", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2024-10-01", "precision": "MONTH", "expression": "lokakuussa 2024", "form": "month", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_SENT", "date": "2024-12-26", "precision": "DAY", "expression": "15 viikkoa sitten", "form": "weeks", "meaning": "lähetteen lähettäminen"}, {"type": "REFERRAL_RECEIVED", "date": "2025-03-03", "precision": "DAY", "expression": "3.3.2025", "form": "numeric", "meaning": "lähetteen vastaanottaminen"}],
+ "distractors": [{"kind": "future", "expression": "24.5.2025", "date": "2025-05-24", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}, {"kind": "vaccination", "expression": "18.11.2023", "date": "2023-11-18", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "FIRST_CONTACT", "date": "2024-07-04", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2024-10-01", "precision": "MONTH"}, {"type": "REFERRAL_SENT", "date": "2024-12-26", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2025-03-03", "precision": "DAY"}]}, "date_forms": ["numeric", "month", "weeks", "numeric"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 584}, "synthetic": true},
+{"slice": 12, "n": 73, "part": 3, "id": "4ba8ddb9697e40129b6ffe79e4fb03ba749a22465a1154eed55ae8fd6cb1ec82", "kind": "careful", "focus": "physician_assessment_and_specialist_visit", "style": "hoitajan puhelinmerkintä", "note_date": "2024-02-01", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "lääkärin arvio [examined and assessed by: päivystävä lääkäri; not a nurse, not the treating specialist in specialised care]: 21. heinäkuuta 2023",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 28. syyskuuta 2023",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 6.11.2023",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 11.5.2024"
+ ], "date_strings": ["21. heinäkuuta 2023", "28. syyskuuta 2023", "6.11.2023", "11.5.2024"], "wording": [
+  "The physician's assessment and the specialist appointment are two separate events on two dates.",
+  "Physician's assessment: the patient was examined and assessed by: päivystävä lääkäri. It is not a nurse's contact and not the appointment of the treating specialist in specialised care.",
+  "Specialist appointment: the patient attended the appointment of the treating specialist in specialised care. Name the specialty or the clinic (onkologi, kirurgi, urologi, hematologi, keuhkolääkäri, gynekologi, ...).",
+  "Never a bare 'käynti', 'vastaanotto' or 'kontakti': for every dated contact the reader must be able to tell who received the patient."
+ ], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2023-07-21", "precision": "DAY", "expression": "21. heinäkuuta 2023", "form": "long", "meaning": "lääkärin arvio"}, {"type": "SPECIALIST_VISIT", "date": "2023-09-28", "precision": "DAY", "expression": "28. syyskuuta 2023", "form": "long", "meaning": "erikoislääkärikäynti"}, {"type": "DIAGNOSIS", "date": "2023-11-06", "precision": "DAY", "expression": "6.11.2023", "form": "numeric", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [{"kind": "future", "expression": "11.5.2024", "date": "2024-05-11", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2023-07-21", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2023-09-28", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2023-11-06", "precision": "DAY"}]}, "date_forms": ["long", "long", "numeric"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "build_careful", "seed": 21361114, "index": 96, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 74, "part": 3, "id": "2e6db0c04c782cb1cab0c882577454df77f2bf62af6ee9e6b2938145fe4e3db4", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2026-03-10", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 40 viikkoa sitten",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 16.6.2026"
+ ], "date_strings": ["40 viikkoa sitten", "16.6.2026"], "wording": [], "facts": [{"type": "DIAGNOSIS", "date": "2025-06-03", "precision": "DAY", "expression": "40 viikkoa sitten", "form": "weeks", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [{"kind": "future", "expression": "16.6.2026", "date": "2026-06-16", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "DIAGNOSIS", "date": "2025-06-03", "precision": "DAY"}]}, "date_forms": ["weeks"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 754}, "synthetic": true},
+{"slice": 12, "n": 75, "part": 3, "id": "91adaa0b8c864290660e8029a352b94cfda8d5755f11202335b4a570b1177951", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2025-08-05", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 26.10.2024",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 21.4.",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 30.6.",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 2.1.2024"
+ ], "date_strings": ["26.10.2024", "21.4.", "30.6.", "2.1.2024"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-10-26", "precision": "DAY", "expression": "26.10.2024", "form": "numeric", "meaning": "oireiden alku"}, {"type": "REFERRAL_RECEIVED", "date": "2025-04-21", "precision": "DAY", "expression": "21.4.", "form": "no_year", "meaning": "lähetteen vastaanottaminen"}, {"type": "MDT_DECISION", "date": "2025-06-30", "precision": "DAY", "expression": "30.6.", "form": "no_year", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "vaccination", "expression": "2.1.2024", "date": "2024-01-02", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-10-26", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2025-04-21", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2025-06-30", "precision": "DAY"}]}, "date_forms": ["numeric", "no_year", "no_year"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 285}, "synthetic": true},
+{"slice": 12, "n": 76, "part": 4, "id": "c69f1e58295b43bd19e34e722b238474a6e9edfab667c0b23b4470ad3ba3fee8", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2026-06-08", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 21.6.2025",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 45 viikkoa sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 15 viikkoa sitten",
+  "syöpähoidon aloitus [the first cancer treatment started]: 30. maaliskuuta 2026",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 11.5.2024",
+  "syntymäaika [not a pathway event]: 6.5.1964"
+ ], "date_strings": ["21.6.2025", "45 viikkoa sitten", "15 viikkoa sitten", "30. maaliskuuta 2026", "11.5.2024", "6.5.1964"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-06-21", "precision": "DAY", "expression": "21.6.2025", "form": "numeric", "meaning": "oireiden alku"}, {"type": "REFERRAL_RECEIVED", "date": "2025-07-28", "precision": "DAY", "expression": "45 viikkoa sitten", "form": "weeks", "meaning": "lähetteen vastaanottaminen"}, {"type": "MDT_DECISION", "date": "2026-02-23", "precision": "DAY", "expression": "15 viikkoa sitten", "form": "weeks", "meaning": "moniammatillinen hoitopäätös"}, {"type": "TREATMENT_START", "date": "2026-03-30", "precision": "DAY", "expression": "30. maaliskuuta 2026", "form": "long", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "vaccination", "expression": "11.5.2024", "date": "2024-05-11", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}, {"kind": "birth", "expression": "6.5.1964", "date": "1964-05-06", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-06-21", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2025-07-28", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2026-02-23", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2026-03-30", "precision": "DAY"}]}, "date_forms": ["numeric", "weeks", "weeks", "long"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 177}, "synthetic": true},
+{"slice": 12, "n": 77, "part": 4, "id": "17cf519f6cc00746d9b0ff8215ad15bb1cf4581e9c3e2842a735631f575bac08", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2026-02-21", "facts_fi": [
+  "syöpäpolun tuloreitti: päivystys",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: maaliskuussa 2025",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 1. lokakuuta 2025",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 14.4.2026"
+ ], "date_strings": ["maaliskuussa 2025", "1. lokakuuta 2025", "14.4.2026"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-03-01", "precision": "MONTH", "expression": "maaliskuussa 2025", "form": "month", "meaning": "oireiden alku"}, {"type": "SPECIALIST_VISIT", "date": "2025-10-01", "precision": "DAY", "expression": "1. lokakuuta 2025", "form": "long", "meaning": "erikoislääkärikäynti"}],
+ "distractors": [{"kind": "future", "expression": "14.4.2026", "date": "2026-04-14", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "EMERGENCY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-03-01", "precision": "MONTH"}, {"type": "SPECIALIST_VISIT", "date": "2025-10-01", "precision": "DAY"}]}, "date_forms": ["month", "long"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 851}, "synthetic": true},
+{"slice": 12, "n": 78, "part": 4, "id": "f33b7617a91f932200810e67586b55e172a191cd8701180e78afb5f48726275b", "kind": "no_event", "focus": "non_cancer_screening", "style": "käyntimerkintä", "note_date": "2024-09-24", "facts_fi": [
+  "asiointipaikka: seulonta",
+  "diabeetikon silmänpohjakuvaus seulontana, ei muutoksia: 16.9.2024",
+  "edellinen, jo toteutunut vastaava seulontatutkimus: 6. kesäkuuta 2023"
+ ], "date_strings": ["16.9.2024", "6. kesäkuuta 2023"], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka)."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "16.9.2024", "date": "2024-09-16", "meaning": "diabeetikon silmänpohjakuvaus seulontana, ei muutoksia"}, {"kind": "earlier", "expression": "6. kesäkuuta 2023", "date": "2023-06-06", "meaning": "edellinen, jo toteutunut vastaava seulontatutkimus"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": []}, "date_forms": [], "distractor_forms": ["numeric", "long"], "split_hint": "test", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 105, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 79, "part": 4, "id": "0b5544add21cff47205c622d325301b718f4e58352cfdb78727334bda5acc241", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2024-01-22", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 10 viikkoa sitten",
+  "lääkärin arvio [examined and assessed by: terveyskeskuslääkäri; not a nurse, not the treating specialist in specialised care]: 15. joulukuuta 2023",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 17.4.2022"
+ ], "date_strings": ["10 viikkoa sitten", "15. joulukuuta 2023", "17.4.2022"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-11-13", "precision": "DAY", "expression": "10 viikkoa sitten", "form": "weeks", "meaning": "oireiden alku"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2023-12-15", "precision": "DAY", "expression": "15. joulukuuta 2023", "form": "long", "meaning": "lääkärin arvio"}],
+ "distractors": [{"kind": "vaccination", "expression": "17.4.2022", "date": "2022-04-17", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-11-13", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2023-12-15", "precision": "DAY"}]}, "date_forms": ["weeks", "long"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 445}, "synthetic": true},
+{"slice": 12, "n": 80, "part": 4, "id": "960f945aa192bed74308a533f2aea8bfe7b1cdb734258e15a789778c0522416a", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2025-10-03", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: joulukuussa 2024",
+  "syöpähoidon aloitus [the first cancer treatment started]: 15 viikkoa sitten",
+  "syntymäaika [not a pathway event]: 13.1.1983"
+ ], "date_strings": ["joulukuussa 2024", "15 viikkoa sitten", "13.1.1983"], "wording": [], "facts": [{"type": "REFERRAL_RECEIVED", "date": "2024-12-01", "precision": "MONTH", "expression": "joulukuussa 2024", "form": "month", "meaning": "lähetteen vastaanottaminen"}, {"type": "TREATMENT_START", "date": "2025-06-20", "precision": "DAY", "expression": "15 viikkoa sitten", "form": "weeks", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "birth", "expression": "13.1.1983", "date": "1983-01-13", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "REFERRAL_RECEIVED", "date": "2024-12-01", "precision": "MONTH"}, {"type": "TREATMENT_START", "date": "2025-06-20", "precision": "DAY"}]}, "date_forms": ["month", "weeks"], "distractor_forms": ["numeric"], "split_hint": "test", "sampler": {"source": "sample.py", "seed": 21261114, "index": 721}, "synthetic": true},
+{"slice": 12, "n": 81, "part": 4, "id": "d7698b275d14f6d55e01dd98f5dffaa20f704bf799c47c65759abf9292141bb0", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2024-10-07", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 13. huhtikuuta 2024",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 5 viikkoa sitten",
+  "syntymäaika [not a pathway event]: 18.9.1970"
+ ], "date_strings": ["13. huhtikuuta 2024", "5 viikkoa sitten", "18.9.1970"], "wording": [], "facts": [{"type": "REFERRAL_SENT", "date": "2024-04-13", "precision": "DAY", "expression": "13. huhtikuuta 2024", "form": "long", "meaning": "lähetteen lähettäminen"}, {"type": "REFERRAL_RECEIVED", "date": "2024-09-02", "precision": "DAY", "expression": "5 viikkoa sitten", "form": "weeks", "meaning": "lähetteen vastaanottaminen"}],
+ "distractors": [{"kind": "birth", "expression": "18.9.1970", "date": "1970-09-18", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "REFERRAL_SENT", "date": "2024-04-13", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2024-09-02", "precision": "DAY"}]}, "date_forms": ["long", "weeks"], "distractor_forms": ["numeric"], "split_hint": "test", "sampler": {"source": "sample.py", "seed": 21261114, "index": 820}, "synthetic": true},
+{"slice": 12, "n": 82, "part": 4, "id": "e669bc2bfd1c5f808d48d40a70560058bc5c2de645b1b3352fa70b501a482838", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2025-12-18", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "lääkärin arvio [examined and assessed by: terveyskeskuslääkäri; not a nurse, not the treating specialist in specialised care]: 315 päivää sitten",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 12.3.",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: toukokuussa 2025",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 105 päivää sitten",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 26.11.2023"
+ ], "date_strings": ["315 päivää sitten", "12.3.", "toukokuussa 2025", "105 päivää sitten", "26.11.2023"], "wording": [], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2025-02-06", "precision": "DAY", "expression": "315 päivää sitten", "form": "days", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_SENT", "date": "2025-03-12", "precision": "DAY", "expression": "12.3.", "form": "no_year", "meaning": "lähetteen lähettäminen"}, {"type": "REFERRAL_RECEIVED", "date": "2025-05-01", "precision": "MONTH", "expression": "toukokuussa 2025", "form": "month", "meaning": "lähetteen vastaanottaminen"}, {"type": "SPECIALIST_VISIT", "date": "2025-09-04", "precision": "DAY", "expression": "105 päivää sitten", "form": "days", "meaning": "erikoislääkärikäynti"}],
+ "distractors": [{"kind": "vaccination", "expression": "26.11.2023", "date": "2023-11-26", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2025-02-06", "precision": "DAY"}, {"type": "REFERRAL_SENT", "date": "2025-03-12", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2025-05-01", "precision": "MONTH"}, {"type": "SPECIALIST_VISIT", "date": "2025-09-04", "precision": "DAY"}]}, "date_forms": ["days", "no_year", "month", "days"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 104}, "synthetic": true},
+{"slice": 12, "n": 83, "part": 4, "id": "95e180b0b42e0a88e7702962ed75975194621d5eee32e18e92f1e13965334810", "kind": "no_event", "focus": "non_cancer_lookalike", "style": "käyntimerkintä", "note_date": "2024-08-04", "facts_fi": [
+  "asiointipaikka: työterveyshuolto",
+  "käynti ortopedin vastaanotolla polven nivelrikon vuoksi: 20 päivää sitten"
+ ], "date_strings": ["20 päivää sitten"], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka).",
+  "Keep the benign reason of the dated line explicit, so that it cannot be read as a cancer-pathway step."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "20 päivää sitten", "date": "2024-07-15", "meaning": "käynti ortopedin vastaanotolla polven nivelrikon vuoksi"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": []}, "date_forms": [], "distractor_forms": ["days"], "split_hint": "train", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 135, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 84, "part": 4, "id": "f74907718124e35b1cc457fe0b0e557458abc0d256887d64ee8bb6a464124617", "kind": "careful", "focus": "referral_sent_only", "style": "käyntimerkintä", "note_date": "2024-03-18", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 16. tammikuuta 2024",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 15.2.2024",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 1. joulukuuta 2021"
+ ], "date_strings": ["16. tammikuuta 2024", "15.2.2024", "1. joulukuuta 2021"], "wording": [
+  "Perspective: the referring unit (the physician or a nurse of the entry service).",
+  "Say that the referring physician wrote the referral and sent it to specialised care on the given date ('lähetin lähetteen', 'lähete lähti', 'lähete lähetetty', 'lähete toimitettu', ...).",
+  "Do not say or imply that the referral has arrived, been received, processed or accepted in specialised care. Never 'potilas sai lähetteen' or 'lähete tehty', and never a referral without a verb that shows sending or arrival."
+ ], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-01-16", "precision": "DAY", "expression": "16. tammikuuta 2024", "form": "long", "meaning": "oireiden alku"}, {"type": "REFERRAL_SENT", "date": "2024-02-15", "precision": "DAY", "expression": "15.2.2024", "form": "numeric", "meaning": "lähetteen lähettäminen"}],
+ "distractors": [{"kind": "vaccination", "expression": "1. joulukuuta 2021", "date": "2021-12-01", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2024-01-16", "precision": "DAY"}, {"type": "REFERRAL_SENT", "date": "2024-02-15", "precision": "DAY"}]}, "date_forms": ["long", "numeric"], "distractor_forms": ["long"], "split_hint": "val", "sampler": {"source": "build_careful", "seed": 21361114, "index": 35, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 85, "part": 4, "id": "c78b254a50be3388f9b83b18420c4d505a80ab3fb5e0d9cef1e8aa24bfa131fe", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2026-09-07", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 18. huhtikuuta 2026"
+ ], "date_strings": ["18. huhtikuuta 2026"], "wording": [], "facts": [{"type": "MDT_DECISION", "date": "2026-04-18", "precision": "DAY", "expression": "18. huhtikuuta 2026", "form": "long", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "MDT_DECISION", "date": "2026-04-18", "precision": "DAY"}]}, "date_forms": ["long"], "distractor_forms": [], "split_hint": "test", "sampler": {"source": "sample.py", "seed": 21261114, "index": 616}, "synthetic": true},
+{"slice": 12, "n": 86, "part": 4, "id": "73ee54df60676f79b9ac3d462a69139749d45b7cccc06c7a06362e36171d805a", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2024-11-25", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "lääkärin arvio [examined and assessed by: seulontayksikön lääkäri; not a nurse, not the treating specialist in specialised care]: 352 päivää sitten",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: huhtikuussa 2024",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 25 viikkoa sitten",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 14.9.2024",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 17.1.2025",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 18.10.2022"
+ ], "date_strings": ["352 päivää sitten", "huhtikuussa 2024", "25 viikkoa sitten", "14.9.2024", "17.1.2025", "18.10.2022"], "wording": [], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2023-12-09", "precision": "DAY", "expression": "352 päivää sitten", "form": "days", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_SENT", "date": "2024-04-01", "precision": "MONTH", "expression": "huhtikuussa 2024", "form": "month", "meaning": "lähetteen lähettäminen"}, {"type": "SPECIALIST_VISIT", "date": "2024-06-03", "precision": "DAY", "expression": "25 viikkoa sitten", "form": "weeks", "meaning": "erikoislääkärikäynti"}, {"type": "DIAGNOSIS", "date": "2024-09-14", "precision": "DAY", "expression": "14.9.2024", "form": "numeric", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [{"kind": "future", "expression": "17.1.2025", "date": "2025-01-17", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}, {"kind": "vaccination", "expression": "18.10.2022", "date": "2022-10-18", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2023-12-09", "precision": "DAY"}, {"type": "REFERRAL_SENT", "date": "2024-04-01", "precision": "MONTH"}, {"type": "SPECIALIST_VISIT", "date": "2024-06-03", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2024-09-14", "precision": "DAY"}]}, "date_forms": ["days", "month", "weeks", "numeric"], "distractor_forms": ["numeric", "numeric"], "split_hint": "val", "sampler": {"source": "sample.py", "seed": 21261114, "index": 752}, "synthetic": true},
+{"slice": 12, "n": 87, "part": 4, "id": "b588e2e06936f390cd2c510b995b4ee3205b9c8fbd11ddb7c6649564c5ec4ca6", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2025-06-25", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "ensimmäinen yhteydenotto terveydenhuoltoon [the patient got in touch for the first time; answered by: yksityisen lääkäriaseman hoitaja; no physician examined the patient then]: 353 päivää sitten",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: syyskuussa 2024",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 20 viikkoa sitten",
+  "syöpähoidon aloitus [the first cancer treatment started]: toukokuussa 2025",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 31.7.2025",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 27.3.2024"
+ ], "date_strings": ["353 päivää sitten", "syyskuussa 2024", "20 viikkoa sitten", "toukokuussa 2025", "31.7.2025", "27.3.2024"], "wording": [], "facts": [{"type": "FIRST_CONTACT", "date": "2024-07-07", "precision": "DAY", "expression": "353 päivää sitten", "form": "days", "meaning": "ensimmäinen yhteydenotto terveydenhuoltoon"}, {"type": "REFERRAL_RECEIVED", "date": "2024-09-01", "precision": "MONTH", "expression": "syyskuussa 2024", "form": "month", "meaning": "lähetteen vastaanottaminen"}, {"type": "DIAGNOSIS", "date": "2025-02-05", "precision": "DAY", "expression": "20 viikkoa sitten", "form": "weeks", "meaning": "syöpädiagnoosin vahvistaminen"}, {"type": "TREATMENT_START", "date": "2025-05-01", "precision": "MONTH", "expression": "toukokuussa 2025", "form": "month", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "future", "expression": "31.7.2025", "date": "2025-07-31", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}, {"kind": "vaccination", "expression": "27.3.2024", "date": "2024-03-27", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "FIRST_CONTACT", "date": "2024-07-07", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2024-09-01", "precision": "MONTH"}, {"type": "DIAGNOSIS", "date": "2025-02-05", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2025-05-01", "precision": "MONTH"}]}, "date_forms": ["days", "month", "weeks", "month"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 609}, "synthetic": true},
+{"slice": 12, "n": 88, "part": 4, "id": "4c5805c91ad6279c321987ade8615dff3559c6776867daf401f1f13b5c78b680", "kind": "no_event", "focus": "prescription_renewal", "style": "hoitajan puhelinmerkintä", "note_date": "2024-08-18", "facts_fi": [
+  "asiointipaikka: työterveyshuolto",
+  "närästyslääkkeen reseptin uusiminen: 15 päivää sitten"
+ ], "date_strings": ["15 päivää sitten"], "wording": [
+  "This note has nothing to do with cancer: no cancer, tumour, suspicious finding, cancer screening or further investigations.",
+  "Say clearly in which service the contact takes place (the given asiointipaikka)."
+ ], "facts": [],
+ "distractors": [{"kind": "ordinary", "expression": "15 päivää sitten", "date": "2024-08-03", "meaning": "närästyslääkkeen reseptin uusiminen"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": []}, "date_forms": [], "distractor_forms": ["days"], "split_hint": "val", "sampler": {"source": "build_no_event", "seed": 21461114, "index": 44, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 89, "part": 4, "id": "ff57f439e7f4a539bde556fa9dc32563b7672f40f0379b235b58c6f4544b3944", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2026-08-01", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 15.8.2025",
+  "syöpähoidon aloitus [the first cancer treatment started]: 246 päivää sitten"
+ ], "date_strings": ["15.8.2025", "246 päivää sitten"], "wording": [], "facts": [{"type": "MDT_DECISION", "date": "2025-08-15", "precision": "DAY", "expression": "15.8.2025", "form": "numeric", "meaning": "moniammatillinen hoitopäätös"}, {"type": "TREATMENT_START", "date": "2025-11-28", "precision": "DAY", "expression": "246 päivää sitten", "form": "days", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "MDT_DECISION", "date": "2025-08-15", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2025-11-28", "precision": "DAY"}]}, "date_forms": ["numeric", "days"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 11}, "synthetic": true},
+{"slice": 12, "n": 90, "part": 4, "id": "7c33d88cc745e35f2e401e21c33b2f0699bff99bb11296f513a7e65cb10406c1", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-09-25", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "lääkärin arvio [examined and assessed by: työterveyslääkäri; not a nurse, not the treating specialist in specialised care]: 21.1.",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 5.5.",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 10. kesäkuuta 2024",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 31.12.2022",
+  "syntymäaika [not a pathway event]: 7.8.1977"
+ ], "date_strings": ["21.1.", "5.5.", "10. kesäkuuta 2024", "31.12.2022", "7.8.1977"], "wording": [], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2024-01-21", "precision": "DAY", "expression": "21.1.", "form": "no_year", "meaning": "lääkärin arvio"}, {"type": "SPECIALIST_VISIT", "date": "2024-05-05", "precision": "DAY", "expression": "5.5.", "form": "no_year", "meaning": "erikoislääkärikäynti"}, {"type": "MDT_DECISION", "date": "2024-06-10", "precision": "DAY", "expression": "10. kesäkuuta 2024", "form": "long", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "vaccination", "expression": "31.12.2022", "date": "2022-12-31", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}, {"kind": "birth", "expression": "7.8.1977", "date": "1977-08-07", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2024-01-21", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2024-05-05", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2024-06-10", "precision": "DAY"}]}, "date_forms": ["no_year", "no_year", "long"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 147}, "synthetic": true},
+{"slice": 12, "n": 91, "part": 4, "id": "9140f6c64aa0ef24bb4e1e3b8b53e8cf4ab004ffdddea6375e14f47a242e7e27", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2026-03-16", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 15.8.2025",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 28. marraskuuta 2025",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: tammikuussa 2026"
+ ], "date_strings": ["15.8.2025", "28. marraskuuta 2025", "tammikuussa 2026"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-08-15", "precision": "DAY", "expression": "15.8.2025", "form": "numeric", "meaning": "oireiden alku"}, {"type": "SPECIALIST_VISIT", "date": "2025-11-28", "precision": "DAY", "expression": "28. marraskuuta 2025", "form": "long", "meaning": "erikoislääkärikäynti"}, {"type": "MDT_DECISION", "date": "2026-01-01", "precision": "MONTH", "expression": "tammikuussa 2026", "form": "month", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-08-15", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2025-11-28", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2026-01-01", "precision": "MONTH"}]}, "date_forms": ["numeric", "long", "month"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 408}, "synthetic": true},
+{"slice": 12, "n": 92, "part": 4, "id": "6f0b7df437d5160445bd8bc9de72844add6796c5d5fc11649444f838810813e0", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2025-03-13", "facts_fi": [
+  "syöpäpolun tuloreitti: seulonta",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 4. kesäkuuta 2024",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 175 päivää sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: helmikuussa 2025",
+  "syntymäaika [not a pathway event]: 24.5.1976"
+ ], "date_strings": ["4. kesäkuuta 2024", "175 päivää sitten", "helmikuussa 2025", "24.5.1976"], "wording": [], "facts": [{"type": "REFERRAL_SENT", "date": "2024-06-04", "precision": "DAY", "expression": "4. kesäkuuta 2024", "form": "long", "meaning": "lähetteen lähettäminen"}, {"type": "SPECIALIST_VISIT", "date": "2024-09-19", "precision": "DAY", "expression": "175 päivää sitten", "form": "days", "meaning": "erikoislääkärikäynti"}, {"type": "MDT_DECISION", "date": "2025-02-01", "precision": "MONTH", "expression": "helmikuussa 2025", "form": "month", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "birth", "expression": "24.5.1976", "date": "1976-05-24", "meaning": "syntymäaika"}],
+ "ground_truth": {"entry_route": "SCREENING", "events": [{"type": "REFERRAL_SENT", "date": "2024-06-04", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2024-09-19", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2025-02-01", "precision": "MONTH"}]}, "date_forms": ["long", "days", "month"], "distractor_forms": ["numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 159}, "synthetic": true},
+{"slice": 12, "n": 93, "part": 4, "id": "1e0a7b13f19d2e75b4e24ad395ade61ecd94bef459e592eaafc0644a918149f2", "kind": "careful", "focus": "single_physician_assessment", "style": "hoitajan puhelinmerkintä", "note_date": "2025-07-03", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 8.3.",
+  "lääkärin arvio [examined and assessed by: terveyskeskuslääkäri; not a nurse, not the treating specialist in specialised care]: 7.4.2025",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 12 viikkoa sitten",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 3. joulukuuta 2023",
+  "ilman päivämäärää: the patient has not yet been to a specialist's appointment"
+ ], "date_strings": ["8.3.", "7.4.2025", "12 viikkoa sitten", "3. joulukuuta 2023"], "wording": [
+  "The note has exactly one dated contact, and it is the physician's assessment.",
+  "Physician's assessment: the patient was examined and assessed by: terveyskeskuslääkäri. It is not a nurse's contact and not the appointment of the treating specialist in specialised care.",
+  "Never a bare 'käynti', 'vastaanotto' or 'kontakti': for every dated contact the reader must be able to tell who received the patient."
+ ], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-03-08", "precision": "DAY", "expression": "8.3.", "form": "no_year", "meaning": "oireiden alku"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2025-04-07", "precision": "DAY", "expression": "7.4.2025", "form": "numeric", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_SENT", "date": "2025-04-10", "precision": "DAY", "expression": "12 viikkoa sitten", "form": "weeks", "meaning": "lähetteen lähettäminen"}],
+ "distractors": [{"kind": "vaccination", "expression": "3. joulukuuta 2023", "date": "2023-12-03", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2025-03-08", "precision": "DAY"}, {"type": "PHYSICIAN_ASSESSMENT", "date": "2025-04-07", "precision": "DAY"}, {"type": "REFERRAL_SENT", "date": "2025-04-10", "precision": "DAY"}]}, "date_forms": ["no_year", "numeric", "weeks"], "distractor_forms": ["long"], "split_hint": "test", "sampler": {"source": "build_careful", "seed": 21361114, "index": 137, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 94, "part": 4, "id": "4a4a1f921b2221cd243f79746c51b462711071700fc9da8b5cbb42b3cc1eca83", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2024-01-17", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 30 viikkoa sitten"
+ ], "date_strings": ["30 viikkoa sitten"], "wording": [], "facts": [{"type": "REFERRAL_RECEIVED", "date": "2023-06-21", "precision": "DAY", "expression": "30 viikkoa sitten", "form": "weeks", "meaning": "lähetteen vastaanottaminen"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "REFERRAL_RECEIVED", "date": "2023-06-21", "precision": "DAY"}]}, "date_forms": ["weeks"], "distractor_forms": [], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 581}, "synthetic": true},
+{"slice": 12, "n": 95, "part": 4, "id": "199bd0a6bc5c905298980e0f6651cfea23c86482592428004a76f4e133753716", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2024-08-05", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "oireiden alku [the patient's own report of when the symptoms behind the cancer suspicion began]: 45 viikkoa sitten"
+ ], "date_strings": ["45 viikkoa sitten"], "wording": [], "facts": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-09-25", "precision": "DAY", "expression": "45 viikkoa sitten", "form": "weeks", "meaning": "oireiden alku"}],
+ "distractors": [],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "SYMPTOM_ONSET_REPORTED", "date": "2023-09-25", "precision": "DAY"}]}, "date_forms": ["weeks"], "distractor_forms": [], "split_hint": "test", "sampler": {"source": "sample.py", "seed": 21261114, "index": 348}, "synthetic": true},
+{"slice": 12, "n": 96, "part": 4, "id": "0bcbce5237fde225c65f0852af1a7ff720f4db6dd5ef0c604aee6b1c2dcda9d2", "kind": "careful", "focus": "referral_sent_and_received", "style": "käyntimerkintä", "note_date": "2026-03-08", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "lähetteen lähettäminen [the referring physician wrote the referral and SENT it to specialised care; this is not its arrival]: 12 viikkoa sitten",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 74 päivää sitten",
+  "syöpähoidon aloitus [the first cancer treatment started]: 19. helmikuuta 2026",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 15. lokakuuta 2024"
+ ], "date_strings": ["12 viikkoa sitten", "74 päivää sitten", "19. helmikuuta 2026", "15. lokakuuta 2024"], "wording": [
+  "Perspective: a specialised-care unit, or a summary that knows both dates of the referral.",
+  "Two separate acts on two dates: the referring physician SENT the referral, and the referral ARRIVED in specialised care and was registered there. The verb at each date string must show the direction (sending: 'lähetti', 'lähti', 'lähetetty', 'toimitettu'; arrival: 'saapui', 'tuli', 'vastaanotettu', 'kirjattu saapuneeksi').",
+  "Never 'potilas sai lähetteen' or 'lähete tehty', and never a referral without a verb that shows sending or arrival."
+ ], "facts": [{"type": "REFERRAL_SENT", "date": "2025-12-14", "precision": "DAY", "expression": "12 viikkoa sitten", "form": "weeks", "meaning": "lähetteen lähettäminen"}, {"type": "REFERRAL_RECEIVED", "date": "2025-12-24", "precision": "DAY", "expression": "74 päivää sitten", "form": "days", "meaning": "lähetteen vastaanottaminen"}, {"type": "TREATMENT_START", "date": "2026-02-19", "precision": "DAY", "expression": "19. helmikuuta 2026", "form": "long", "meaning": "syöpähoidon aloitus"}],
+ "distractors": [{"kind": "vaccination", "expression": "15. lokakuuta 2024", "date": "2024-10-15", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "REFERRAL_SENT", "date": "2025-12-14", "precision": "DAY"}, {"type": "REFERRAL_RECEIVED", "date": "2025-12-24", "precision": "DAY"}, {"type": "TREATMENT_START", "date": "2026-02-19", "precision": "DAY"}]}, "date_forms": ["weeks", "days", "long"], "distractor_forms": ["long"], "split_hint": "train", "sampler": {"source": "build_careful", "seed": 21361114, "index": 23, "attempt": 1}, "synthetic": true},
+{"slice": 12, "n": 97, "part": 4, "id": "2f2cab24dd99d837949320adf5fd8d88830445b793d1d1f661b534d05ebe3b46", "kind": "standard", "focus": "sampler_v1", "style": "hoitajan puhelinmerkintä", "note_date": "2026-06-15", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 40 viikkoa sitten",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 210 päivää sitten",
+  "syntymäaika [not a pathway event]: 27.6.1945",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 15.2.2024"
+ ], "date_strings": ["40 viikkoa sitten", "210 päivää sitten", "27.6.1945", "15.2.2024"], "wording": [], "facts": [{"type": "SPECIALIST_VISIT", "date": "2025-09-08", "precision": "DAY", "expression": "40 viikkoa sitten", "form": "weeks", "meaning": "erikoislääkärikäynti"}, {"type": "MDT_DECISION", "date": "2025-11-17", "precision": "DAY", "expression": "210 päivää sitten", "form": "days", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "birth", "expression": "27.6.1945", "date": "1945-06-27", "meaning": "syntymäaika"}, {"kind": "vaccination", "expression": "15.2.2024", "date": "2024-02-15", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "SPECIALIST_VISIT", "date": "2025-09-08", "precision": "DAY"}, {"type": "MDT_DECISION", "date": "2025-11-17", "precision": "DAY"}]}, "date_forms": ["weeks", "days"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 607}, "synthetic": true},
+{"slice": 12, "n": 98, "part": 4, "id": "d839b3e5631b8cf14b4a58b06595e5142fc5073c0580664984bb6fa30dd063c9", "kind": "standard", "focus": "sampler_v1", "style": "lähetekirje", "note_date": "2025-01-29", "facts_fi": [
+  "syöpäpolun tuloreitti: julkinen perusterveydenhuolto",
+  "moniammatillinen hoitopäätös [the multidisciplinary meeting decided on treatment]: 19.11.2024",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 17.1.2023",
+  "tuleva, vielä toteutumaton kontrolliaika [has not happened yet]: 26.3.2025"
+ ], "date_strings": ["19.11.2024", "17.1.2023", "26.3.2025"], "wording": [], "facts": [{"type": "MDT_DECISION", "date": "2024-11-19", "precision": "DAY", "expression": "19.11.2024", "form": "numeric", "meaning": "moniammatillinen hoitopäätös"}],
+ "distractors": [{"kind": "vaccination", "expression": "17.1.2023", "date": "2023-01-17", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}, {"kind": "future", "expression": "26.3.2025", "date": "2025-03-26", "meaning": "tuleva, vielä toteutumaton kontrolliaika"}],
+ "ground_truth": {"entry_route": "PUBLIC_PRIMARY", "events": [{"type": "MDT_DECISION", "date": "2024-11-19", "precision": "DAY"}]}, "date_forms": ["numeric"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 431}, "synthetic": true},
+{"slice": 12, "n": 99, "part": 4, "id": "41cdc489aa94f1d73cdab326eb7c281047b0d7b9367687887d5fa9a2eebdd605", "kind": "standard", "focus": "sampler_v1", "style": "loppulausunnon ote", "note_date": "2025-08-22", "facts_fi": [
+  "syöpäpolun tuloreitti: työterveyshuolto",
+  "lääkärin arvio [examined and assessed by: työterveyslääkäri; not a nurse, not the treating specialist in specialised care]: syyskuussa 2024",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 15.11.2024",
+  "erikoislääkärikäynti [the patient attended the appointment of the treating specialist in specialised care]: 19.12.2024",
+  "syöpädiagnoosin vahvistaminen [the cancer diagnosis was confirmed]: 1.4.2025",
+  "syntymäaika [not a pathway event]: 25.10.1966",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 12.4.2024"
+ ], "date_strings": ["syyskuussa 2024", "15.11.2024", "19.12.2024", "1.4.2025", "25.10.1966", "12.4.2024"], "wording": [], "facts": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2024-09-01", "precision": "MONTH", "expression": "syyskuussa 2024", "form": "month", "meaning": "lääkärin arvio"}, {"type": "REFERRAL_RECEIVED", "date": "2024-11-15", "precision": "DAY", "expression": "15.11.2024", "form": "numeric", "meaning": "lähetteen vastaanottaminen"}, {"type": "SPECIALIST_VISIT", "date": "2024-12-19", "precision": "DAY", "expression": "19.12.2024", "form": "numeric", "meaning": "erikoislääkärikäynti"}, {"type": "DIAGNOSIS", "date": "2025-04-01", "precision": "DAY", "expression": "1.4.2025", "form": "numeric", "meaning": "syöpädiagnoosin vahvistaminen"}],
+ "distractors": [{"kind": "birth", "expression": "25.10.1966", "date": "1966-10-25", "meaning": "syntymäaika"}, {"kind": "vaccination", "expression": "12.4.2024", "date": "2024-04-12", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "OCCUPATIONAL", "events": [{"type": "PHYSICIAN_ASSESSMENT", "date": "2024-09-01", "precision": "MONTH"}, {"type": "REFERRAL_RECEIVED", "date": "2024-11-15", "precision": "DAY"}, {"type": "SPECIALIST_VISIT", "date": "2024-12-19", "precision": "DAY"}, {"type": "DIAGNOSIS", "date": "2025-04-01", "precision": "DAY"}]}, "date_forms": ["month", "numeric", "numeric", "numeric"], "distractor_forms": ["numeric", "numeric"], "split_hint": "val", "sampler": {"source": "sample.py", "seed": 21261114, "index": 266}, "synthetic": true},
+{"slice": 12, "n": 100, "part": 4, "id": "163c870b7f3bf2fa7d19b340e3dce5042f8234d7f803bb7dfc2f02df10755200", "kind": "standard", "focus": "sampler_v1", "style": "käyntimerkintä", "note_date": "2025-05-11", "facts_fi": [
+  "syöpäpolun tuloreitti: yksityinen terveydenhuolto",
+  "lähetteen vastaanottaminen [the referral ARRIVED at the specialised-care unit and was registered there; this is not its sending and not the patient getting a referral]: 6.9.2024",
+  "syntymäaika [not a pathway event]: 13.10.1973",
+  "aiempi syöpään liittymätön rokotuskäynti [not a pathway event]: 12.3.2023"
+ ], "date_strings": ["6.9.2024", "13.10.1973", "12.3.2023"], "wording": [], "facts": [{"type": "REFERRAL_RECEIVED", "date": "2024-09-06", "precision": "DAY", "expression": "6.9.2024", "form": "numeric", "meaning": "lähetteen vastaanottaminen"}],
+ "distractors": [{"kind": "birth", "expression": "13.10.1973", "date": "1973-10-13", "meaning": "syntymäaika"}, {"kind": "vaccination", "expression": "12.3.2023", "date": "2023-03-12", "meaning": "aiempi syöpään liittymätön rokotuskäynti"}],
+ "ground_truth": {"entry_route": "PRIVATE", "events": [{"type": "REFERRAL_RECEIVED", "date": "2024-09-06", "precision": "DAY"}]}, "date_forms": ["numeric"], "distractor_forms": ["numeric", "numeric"], "split_hint": "train", "sampler": {"source": "sample.py", "seed": 21261114, "index": 801}, "synthetic": true}
+]

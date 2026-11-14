@@ -1,0 +1,455 @@
+{
+ "schemaVersion": "scribe-dataset-v2-stats",
+ "built_utc": "2026-11-14T18:16:43+00:00",
+ "synthetic_only": true,
+ "counts": {
+  "train": {
+   "rows": 2354,
+   "by_writer": {
+    "claude-haiku-5-5": 638,
+    "nemotron-3.5-super-vl": 1716
+   },
+   "by_kind": {
+    "careful": 63,
+    "no_event": 107,
+    "standard": 2184
+   },
+   "by_writer_and_kind": {
+    "claude-haiku-5-5|careful": 63,
+    "claude-haiku-5-5|no_event": 107,
+    "claude-haiku-5-5|standard": 468,
+    "nemotron-3.5-super-vl|standard": 1716
+   }
+  },
+  "val": {
+   "rows": 310,
+   "by_writer": {
+    "claude-haiku-5-5": 60,
+    "nemotron-3.5-super-vl": 250
+   },
+   "by_kind": {
+    "careful": 6,
+    "no_event": 10,
+    "standard": 294
+   },
+   "by_writer_and_kind": {
+    "claude-haiku-5-5|careful": 6,
+    "claude-haiku-5-5|no_event": 10,
+    "claude-haiku-5-5|standard": 44,
+    "nemotron-3.5-super-vl|standard": 250
+   }
+  },
+  "test_nemotron": {
+   "rows": 500,
+   "by_writer": {
+    "nemotron-3.5-super-vl": 500
+   },
+   "by_kind": {
+    "standard": 500
+   },
+   "by_writer_and_kind": {
+    "nemotron-3.5-super-vl|standard": 500
+   }
+  },
+  "test_haiku": {
+   "rows": 200,
+   "by_writer": {
+    "claude-haiku-5-5": 200
+   },
+   "by_kind": {
+    "careful": 20,
+    "no_event": 33,
+    "standard": 147
+   },
+   "by_writer_and_kind": {
+    "claude-haiku-5-5|careful": 20,
+    "claude-haiku-5-5|no_event": 33,
+    "claude-haiku-5-5|standard": 147
+   }
+  },
+  "rejected": {
+   "rows": 2290,
+   "by_writer": {
+    "claude-haiku-5-5": 300,
+    "nemotron-3.5-super-vl": 1990
+   },
+   "by_kind": {
+    "careful": 61,
+    "standard": 2229
+   },
+   "by_writer_and_kind": {
+    "claude-haiku-5-5|careful": 61,
+    "claude-haiku-5-5|standard": 239,
+    "nemotron-3.5-super-vl|standard": 1990
+   }
+  }
+ },
+ "total_rows": 5654,
+ "haiku": {
+  "writer": "claude-haiku-5-5",
+  "specifications": 1200,
+  "writer_files": 48,
+  "writer_files_not_valid_json": [],
+  "notes_loaded": 1198,
+  "specifications_without_note": 2,
+  "specifications_without_note_ids": [
+   "76ca9183010924415aabd4e393f096e23f992db28be9a9275dc0fb94eb199872",
+   "cf295d3773631e0d2f37d2f181344e2132455c9307ffc2b7a9831aa3128b1661"
+  ],
+  "notes_per_slice": {
+   "slice-01": 99,
+   "slice-02": 99,
+   "slice-03": 100,
+   "slice-04": 100,
+   "slice-05": 100,
+   "slice-06": 100,
+   "slice-07": 100,
+   "slice-08": 100,
+   "slice-09": 100,
+   "slice-10": 100,
+   "slice-11": 100,
+   "slice-12": 100
+  },
+  "load_problems": 0,
+  "notes_not_verified": 0,
+  "all_kinds": {
+   "notes": 1198,
+   "code_check_failure": {
+    "k": 0,
+    "value": 0.0,
+    "n": 1198,
+    "ci95": [
+     0,
+     0.003196310788332725
+    ]
+   },
+   "jev_rejection_given_code_pass": {
+    "k": 300,
+    "value": 0.25041736227045075,
+    "n": 1198,
+    "ci95": [
+     0.2267077372442492,
+     0.27572247465176325
+    ]
+   },
+   "accepted": {
+    "k": 898,
+    "value": 0.7495826377295493,
+    "n": 1198,
+    "ci95": [
+     0.7242775253482368,
+     0.7732922627557508
+    ]
+   }
+  },
+  "by_kind": {
+   "standard": {
+    "notes": 898,
+    "code_check_failure": {
+     "k": 0,
+     "value": 0.0,
+     "n": 898,
+     "ci95": [
+      4.336808689942018e-19,
+      0.004259572215406312
+     ]
+    },
+    "jev_rejection_given_code_pass": {
+     "k": 239,
+     "value": 0.2661469933184855,
+     "n": 898,
+     "ci95": [
+      0.23828238817063013,
+      0.29600382600584046
+     ]
+    },
+    "accepted": {
+     "k": 659,
+     "value": 0.7338530066815144,
+     "n": 898,
+     "ci95": [
+      0.7039961739941594,
+      0.7617176118293698
+     ]
+    }
+   },
+   "careful": {
+    "notes": 150,
+    "code_check_failure": {
+     "k": 0,
+     "value": 0.0,
+     "n": 150,
+     "ci95": [
+      1.734723475976807e-18,
+      0.0249702443680766
+     ]
+    },
+    "jev_rejection_given_code_pass": {
+     "k": 61,
+     "value": 0.4066666666666667,
+     "n": 150,
+     "ci95": [
+      0.33134109612869495,
+      0.4866533494866793
+     ]
+    },
+    "accepted": {
+     "k": 89,
+     "value": 0.5933333333333334,
+     "n": 150,
+     "ci95": [
+      0.5133466505133206,
+      0.6686589038713051
+     ]
+    }
+   },
+   "no_event": {
+    "notes": 150,
+    "code_check_failure": {
+     "k": 0,
+     "value": 0.0,
+     "n": 150,
+     "ci95": [
+      1.734723475976807e-18,
+      0.0249702443680766
+     ]
+    },
+    "jev_rejection_given_code_pass": {
+     "k": 0,
+     "value": 0.0,
+     "n": 150,
+     "ci95": [
+      1.734723475976807e-18,
+      0.0249702443680766
+     ]
+    },
+    "accepted": {
+     "k": 150,
+     "value": 1.0,
+     "n": 150,
+     "ci95": [
+      0.9750297556319235,
+      1
+     ]
+    }
+   }
+  },
+  "code_check_failure_reasons": {},
+  "jev_rejection_reasons": {
+   "event_below_0.8": 65,
+   "route_below_0.8": 215,
+   "unlisted_event_at_or_above_0.5": 38,
+   "distractor_at_or_above_0.5": 0
+  },
+  "rejected_by_focus": {
+   "dental_check": {
+    "rejected": 0,
+    "notes": 25
+   },
+   "first_contact_and_physician_assessment": {
+    "rejected": 7,
+    "notes": 15
+   },
+   "first_contact_physician_assessment_and_specialist_visit": {
+    "rejected": 9,
+    "notes": 15
+   },
+   "minor_or_checkup": {
+    "rejected": 0,
+    "notes": 20
+   },
+   "non_cancer_lookalike": {
+    "rejected": 0,
+    "notes": 30
+   },
+   "non_cancer_screening": {
+    "rejected": 0,
+    "notes": 15
+   },
+   "physician_assessment_and_specialist_visit": {
+    "rejected": 5,
+    "notes": 15
+   },
+   "prescription_renewal": {
+    "rejected": 0,
+    "notes": 30
+   },
+   "referral_received_only": {
+    "rejected": 2,
+    "notes": 23
+   },
+   "referral_sent_and_received": {
+    "rejected": 14,
+    "notes": 30
+   },
+   "referral_sent_only": {
+    "rejected": 9,
+    "notes": 22
+   },
+   "sampler_v1": {
+    "rejected": 239,
+    "notes": 898
+   },
+   "single_first_contact": {
+    "rejected": 5,
+    "notes": 10
+   },
+   "single_physician_assessment": {
+    "rejected": 7,
+    "notes": 10
+   },
+   "single_specialist_visit": {
+    "rejected": 3,
+    "notes": 10
+   },
+   "vaccination": {
+    "rejected": 0,
+    "notes": 30
+   }
+  },
+  "events_scored_below_0.8_by_type": {
+   "SYMPTOM_ONSET_REPORTED": {
+    "below": 0,
+    "events": 278
+   },
+   "FIRST_CONTACT": {
+    "below": 8,
+    "events": 277
+   },
+   "PHYSICIAN_ASSESSMENT": {
+    "below": 23,
+    "events": 304
+   },
+   "REFERRAL_SENT": {
+    "below": 6,
+    "events": 330
+   },
+   "REFERRAL_RECEIVED": {
+    "below": 10,
+    "events": 317
+   },
+   "SPECIALIST_VISIT": {
+    "below": 12,
+    "events": 284
+   },
+   "DIAGNOSIS": {
+    "below": 2,
+    "events": 258
+   },
+   "MDT_DECISION": {
+    "below": 5,
+    "events": 259
+   },
+   "TREATMENT_START": {
+    "below": 1,
+    "events": 262
+   }
+  },
+  "accepted_notes_with_a_date_string_printed_more_than_once": 0,
+  "no_event_gate_positive_control": {
+   "what": "the no_event question asked about accepted Haiku notes that do hold pathway events",
+   "judged_to_contain_an_event": {
+    "k": 60,
+    "value": 1.0,
+    "n": 60,
+    "ci95": [
+     0.93982814785791,
+     0.9999999999999998
+    ]
+   },
+   "lowest_probability": 0.69
+  },
+  "no_event_highest_probability": 0.04,
+  "gates": {
+   "code_check": "scribe/verify.py code_check, unchanged",
+   "jev_standard_and_careful": "scribe/verify.py questions + accept, unchanged (events and route >= 0.8; unlisted and distractors < 0.5)",
+   "jev_no_event": {
+    "question": "Does the note describe any dated cancer-pathway event? Cancer-pathway events are: reported onset of cancer-related symptoms, first contact with healthcare about cancer-related symptoms, physician assessment on the cancer pathway, cancer referral sent or received, cancer specialist visit, cancer diagnosis confirmed, multidisciplinary team treatment decision and cancer treatment started. Care that is unrelated to cancer (vaccination, prescription renewal, dental check, minor complaint, routine check-up, screening for something other than cancer, a referral or a specialist visit for a non-cancer condition), birth dates and future appointments do not count.",
+    "rule": "noul < 0.5"
+   },
+   "model": "jev-latest"
+  }
+ },
+ "heldout": {
+  "rule": "per kind, ids sorted by sha256(seed:id); first to test_haiku, next to val, rest to train",
+  "seed": "sama-scribe-v2-heldout-21661114",
+  "accepted_by_kind": {
+   "no_event": 150,
+   "standard": 659,
+   "careful": 89
+  },
+  "test_haiku_by_kind": {
+   "no_event": 33,
+   "standard": 147,
+   "careful": 20
+  },
+  "val_haiku_by_kind": {
+   "no_event": 10,
+   "standard": 44,
+   "careful": 6
+  }
+ },
+ "expression_target": {
+  "kinds_in_train_val_test": {
+   "ABSOLUTE": 4068,
+   "DAYS_AGO": 1381,
+   "MONTH": 1357,
+   "WEEKS_AGO": 1249
+  },
+  "rows_checked_to_resolve_to_absolute_target": 5654,
+  "rows_that_do_not_resolve": 0,
+  "event_order": "order in which the date strings first appear in the note"
+ },
+ "typesafe": {
+  "tokens": 1410864,
+  "input_tokens": 1300516,
+  "output_tokens": 110348,
+  "requests": 1258,
+  "tokens_verifying_notes": 1369795,
+  "requests_verifying_notes": 1198,
+  "tokens_no_event_gate_positive_control": 41069,
+  "failed_attempts": 0,
+  "tokens_still_reserved_for_failed_attempts": 0,
+  "price_usd_per_million_tokens": 0.042,
+  "cost_usd": 0.05925628800000001,
+  "cost_usd_counting_reservations": 0.05925628800000001,
+  "limit_usd": 3.0
+ },
+ "inputs": {
+  "version_1": {
+   "data/scribe/dataset-v1/train.parquet": "ab76725f947a9e10520c552f03c598814f3620e7c12c7171ebc9a12d7523bd50",
+   "data/scribe/dataset-v1/val.parquet": "a518cc6262382905504d24588b8409ec2d19aefb0b3ba82a7f2e61d8a1f062be",
+   "data/scribe/dataset-v1/test.parquet": "b0c465c4318bf8ff0a563e92bdc8b06bc2d089f90c5150549313ec159fae0cfe",
+   "data/scribe/dataset-v1/rejected.parquet": "a31b295c589479ee3b3d39777e6cff77dd70def2893d4dbfb6f6e5f3a4927f83"
+  },
+  "writer_instructions_sha256": "579341e3decd3c5df8c836566607ebd7953192427bf61e0e77bd33fe662a05a4",
+  "scribe_verify_py_sha256": "4e9ed75740fb11a9a40b27a639dca4703747fcb8466a062aa0ba8dc8cc0e94c6"
+ },
+ "outputs": {
+  "data/scribe/v2/dataset/train.parquet": {
+   "sha256": "427214680ff8115057f6584674d9d47b8db77ed3d5bf133161ee84315128b309",
+   "bytes": 654267,
+   "rows": 2354
+  },
+  "data/scribe/v2/dataset/val.parquet": {
+   "sha256": "21fe91d739be63eda18754b7eb90ceaafaf047653421d6224e9db85912571f40",
+   "bytes": 111221,
+   "rows": 310
+  },
+  "data/scribe/v2/dataset/test_nemotron.parquet": {
+   "sha256": "9f5b4a3a713b47ce13a8029fe7dc0dd3eefa5a8871f16ec4fbfd377130c8482c",
+   "bytes": 154865,
+   "rows": 500
+  },
+  "data/scribe/v2/dataset/test_haiku.parquet": {
+   "sha256": "1539d8b71a8cd631d37ad7deee045df2d352692581dac2c6b74c8568e3ad73c0",
+   "bytes": 82626,
+   "rows": 200
+  },
+  "data/scribe/v2/dataset/rejected.parquet": {
+   "sha256": "3ce97c7c585f832f810c44607dd70ffc571eb9d2a9562ffc48456ee32d81db85",
+   "bytes": 650592,
+   "rows": 2290
+  }
+ }
+}

@@ -1,0 +1,121 @@
+{
+ "id": "8b426e9869f48c1a395abf58dbcba6ef3b8c2fb8fc3b517d561f5b792b34e065",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on hakeutunut syöpäpolulle päivystyksen kautta. Oireet alkoivat 248 päivää sitten, ja ensimmäinen yhteydenotto terveydenhuoltoon oli toukokuussa 2024, jolloin päivystysapu vastasi. Päivystävä lääkäri tutki ja arvioi potilaan 141 päivää sitten. Syöpähoito aloitettiin 37 päivää sitten. Syntymäaika on 23.1.1951. Seuraava kontrolliaika on 26.3.2025, mutta se ei ole vielä toteutunut. Potilas voi tällä hetkellä kohtalaisesti, selviytyy kotona ja on saanut neuvontaa jatkosta.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 60,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2024-04-12",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2024-01-12",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "EMERGENCY",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2024-01-12",
+       "precision": "DAY"
+      },
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2024-05-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-07-28",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2024-11-09",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 880,
+      "total_tokens": 1063,
+      "completion_tokens": 183,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.73
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 771,
+      "total_tokens": 896,
+      "completion_tokens": 125,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.84
+    }
+   ],
+   "repair_request": [
+    "An independent reader dated 'oireiden alku' to 2024-01-12 (DAY) instead of '248 päivää sitten' (= 2024-04-12, DAY). Put that date string directly with that fact and no other date near it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas on hakeutunut syöpäpolulle päivystyksen kautta. Oireet alkoivat 248 päivää sitten. Ensimmäinen yhteydenotto terveydenhuoltoon oli toukokuussa 2024, jolloin päivystysapu vastasi. Päivystävä lääkäri tutki ja arvioi potilaan 141 päivää sitten. Syöpähoito aloitettiin 37 päivää sitten. Syntymäaika on 23.1.1951. Seuraava kontrolliaika on 26.3.2025, mutta se ei ole vielä toteutunut. Potilas voi tällä hetkellä kohtalaisesti, selviytyy kotona ja on saanut neuvontaa jatkosta.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:59 outside 60-140"
+    ],
+    "words": 59,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1189,
+      "total_tokens": 1373,
+      "completion_tokens": 184,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.37
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:53+00:00"
+}

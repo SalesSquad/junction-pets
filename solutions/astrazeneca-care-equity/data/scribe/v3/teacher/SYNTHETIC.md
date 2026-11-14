@@ -1,0 +1,1 @@
+SYNTHETIC ONLY. Every note in this directory is invented text written by a language model from a sampled answer key. No real patients or clinicians. A research artefact, not a medical device, not for clinical use.

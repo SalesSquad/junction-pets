@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { analyse } from './analysis.mjs';
 import { recommend } from './recommend.mjs';
+import { buildTracks } from './tracks.mjs';
 
 const at = (p) => new URL(p, import.meta.url);
 const readJson = (p) => JSON.parse(readFileSync(at(p), 'utf8'));
@@ -43,6 +44,9 @@ export function buildApp() {
     },
     analysis, recommendation, forecast, claimCheck, narratives,
     evidence: evidence.rows, evidenceMethod: evidence.method,
+    // Optional side tracks (present only when their result files exist): eventLog and scribe are
+    // SYNTHETIC, genomics is research-only. They never feed the analysis or the recommendations above.
+    ...buildTracks(analysis.regions),
   };
 }
 
@@ -53,6 +57,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const r = app.recommendation;
   console.log(JSON.stringify({
     out: 'web/data/app.json', regions: app.analysis.regions.length, evidenceRows: app.evidence.length, forecast: !!app.forecast, claimCheck: !!app.claimCheck, narratives: app.narratives ? Object.keys(app.narratives.counties).length : 0,
+    tracks: { eventLog: !!app.eventLog, scribe: !!app.scribe, genomics: app.genomics ? app.genomics.status : false, problems: app.trackProblems },
     portfolio: { budget: r.budget, picks: r.portfolio.picks.length, deathsPostponed: r.portfolio.deathsPostponed, range: [r.portfolio.low, r.portfolio.high] },
   }));
 }

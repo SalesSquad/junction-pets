@@ -1,0 +1,67 @@
+{
+ "frozen": true,
+ "frozen_utc": "2026-11-14T18:49:54Z",
+ "config": {
+  "name": "A-270m-lora-r16",
+  "base": "270m",
+  "method": "lora",
+  "init": "default",
+  "loraplus_ratio": 0.0,
+  "rank": 16,
+  "alpha": 32.0,
+  "dropout": 0.0,
+  "targets": "attn_mlp",
+  "output_format": "absolute",
+  "train_data": "nemotron",
+  "learning_rate": 0.0002,
+  "max_steps": 324,
+  "batch_size": 16,
+  "grad_accum": 1,
+  "eval_every": 108,
+  "warmup_fraction": 0.05,
+  "scheduler": "cosine",
+  "weight_decay": 0.0,
+  "max_grad_norm": 1.0,
+  "max_length": 1024,
+  "gradient_checkpointing": false,
+  "supervise_stop_token": true,
+  "seed": 20261114
+ },
+ "config_id": "5bc648b1983f",
+ "description": "270m, lora, r16, alpha 32, scale 2, lr 0.0002, absolute, nemotron",
+ "run": "A-270m-lora-r16",
+ "decoding": "off",
+ "decoding_check": {
+  "chosen": "off",
+  "rationale": "constrained decoding (native-dfa) is not higher on validation: 0.361 vs 0.361",
+  "backend": "native-dfa",
+  "backend_detail": "schema compiled to a character automaton",
+  "validation_exact_match_unconstrained": 0.36129032258064514,
+  "validation_exact_match_constrained": 0.36129032258064514,
+  "paired_test": {
+   "a": "constrained",
+   "b": "unconstrained",
+   "a_exact": 0.36129032258064514,
+   "b_exact": 0.36129032258064514,
+   "a_only_correct": 0,
+   "b_only_correct": 0,
+   "exact_p": 1.0
+  }
+ },
+ "rationale": [
+  "A-270m-lora-r16 has the highest validation exact match (0.361)",
+  "no arm beat A-270m-lora-r16 with p < 0.05 on the paired validation notes; the control stays",
+  "no arm beat A-270m-lora-r16 with p < 0.05 on the paired validation notes; the control stays",
+  "no arm beat A-270m-lora-r16 with p < 0.05 on the paired validation notes; the control stays",
+  "A-270m-full-finetune does not displace A-270m-lora-r16"
+ ],
+ "validation_exact_match": {
+  "value": 0.36129032258064514,
+  "n": 310,
+  "ci95": [
+   0.3098147568028864,
+   0.416161536057981
+  ]
+ },
+ "serving_notes": []
+}

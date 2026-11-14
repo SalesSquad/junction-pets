@@ -1,0 +1,68 @@
+{
+ "id": "7dff352e2f21f62cba48d7904aec7572952e89c80a399c72166e43677fda0a05",
+ "curriculum": "long_multi_visit",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on saapunut hoitoon päivystyksen kautta, mikä on syöpäpolun tuloreitti. Ensimmäinen yhteydenotto terveydenhuoltoon tapahtui 18 viikkoa sitten, jolloin päivystysapu vastasi eikä lääkäri tutkinut potilasta. Lähetteen vastaanottaminen erikoissairaanhoidon yksikössä rekisteröitiin 31.12.2023. Syöpädiagnoosi vahvistettiin 27.2.2024. Potilaan oireet alkoivat marraskuussa 2023. Erikoislääkärikäynti hoitavalla lääkärillä erikoissairaanhoidossa oli tammikuussa 2024. Moniammatillinen hoitopäätös tehtiin 28 päivää sitten. Syntymäaika on 8.4.1950. Potilas voi tällä hetkellä kohtuullisesti ja selviytyy kotona perustoiminnoistaan. Yleinen neuvonta on annettu, ja potilaan toimintakykyä sekä jaksamista seurataan jatkossa.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:74 outside 110-260"
+    ],
+    "words": 74,
+    "v1_ok": true
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 1020,
+      "total_tokens": 1291,
+      "completion_tokens": 271,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 2.1
+    }
+   ],
+   "repair_request": [
+    "The note has 74 words. Write 150 to 220 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas on saapunut hoitoon päivystyksen kautta, mikä on syöpäpolun tuloreitti. Ensimmäinen yhteydenotto terveydenhuoltoon tapahtui 18 viikkoa sitten, jolloin päivystysapu vastasi eikä lääkäri tutkinut potilasta. Lähetteen vastaanottaminen erikoissairaanhoidon yksikössä rekisteröitiin 31.12.2023. Syöpädiagnoosi vahvistettiin 27.2.2024. Potilaan oireet alkoivat marraskuussa 2023. Erikoislääkärikäynti hoitavalla lääkärillä erikoissairaanhoidossa oli tammikuussa 2024. Moniammatillinen hoitopäätös tehtiin 28 päivää sitten. Syntymäaika on 8.4.1950. Potilas voi tällä hetkellä kohtuullisesti ja selviytyy kotona perustoiminnoistaan. Yleinen neuvonta on annettu, ja potilaan toimintakykyä sekä jaksamista seurataan jatkossa. Potilaan yleistila on vakaa, ja hän pystyy liikkumaan itsenäisesti kotonaan. Hoitoon sitoutuminen on hyvällä tasolla, ja potilas noudattaa annettuja ohjeita. Keskustelu jatkohoidon suunnitelmista on käyty, ja potilas on tietoinen seuraavista vaiheista. Tuki on tarjolla tarvittaessa.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:109 outside 110-260"
+    ],
+    "words": 109,
+    "v1_ok": true
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1372,
+      "total_tokens": 1739,
+      "completion_tokens": 367,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.43
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:53+00:00"
+}

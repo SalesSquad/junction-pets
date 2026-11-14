@@ -1,0 +1,129 @@
+{
+ "id": "41e167378bdfc9bf56722b3141e36209e7643d73fdd689946d7fcb5e3e61a0f5",
+ "curriculum": "careful",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on tullut syöpäpolulle seulonnan kautta. Lähettävä lääkäri lähetti lähetteen erikoissairaanhoitoon 25 viikkoa sitten, ja lähete saapui erikoissairaanhoidon yksikköön ja kirjattiin saapuneeksi 163 päivää sitten. Moniammatillinen hoitopäätös tehtiin 11.9.2023. Potilas voi kohtuullisesti ja selviytyy arjesta kotona. Tunnelmallinen olo on vakaa. Yleistä neuvontaa on annettu, ja jatkosta keskustellaan vastaanotolla.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:48 outside 60-140"
+    ],
+    "words": 48,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 913,
+      "total_tokens": 1073,
+      "completion_tokens": 160,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.08
+    }
+   ],
+   "repair_request": [
+    "The note has 48 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas on tullut syöpäpolulle seulonnan kautta. Lähettävä lääkäri lähetti lähetteen erikoissairaanhoitoon 25 viikkoa sitten, ja lähete saapui erikoissairaanhoidon yksikköön ja kirjattiin saapuneeksi 163 päivää sitten. Moniammatillinen hoitopäätös tehtiin 11.9.2023. Potilas voi tällä hetkellä kohtuullisesti ja selviytyy arjesta kotona. Yleistä neuvontaa on annettu, ja jatkosta keskustellaan vastaanotolla. Potilaan toimintakyky on säilynyt, ja hän pystyy huolehtimaan perustoiminnoistaan itsenäisesti. Oireet ovat hallinnassa, eikä uusia huolenaiheita ole ilmennyt. Seuranta jatkuu sovitun suunnitelman mukaisesti.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 69,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "REFERRAL_SENT",
+       "date": "2023-07-11",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "REFERRAL_SENT",
+       "date": "2023-06-19",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-07-23",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-08-23",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2023-06-19",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-08-23",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2023-09-11",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1153,
+      "total_tokens": 1375,
+      "completion_tokens": 222,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.96
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 810,
+      "total_tokens": 902,
+      "completion_tokens": 92,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.31
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:35:01+00:00"
+}

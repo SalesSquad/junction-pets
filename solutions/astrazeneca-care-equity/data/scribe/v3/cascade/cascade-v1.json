@@ -1,0 +1,3010 @@
+{
+ "schema": "scribe-v3-cascade-v1",
+ "synthetic": true,
+ "not_for_clinical_use": true,
+ "generated_utc": "2026-11-14T19:43:11Z",
+ "question": "At the same target error among notes that skip review, does adding an independent judge let more notes skip review than the student's own confidence?",
+ "student": {
+  "chosen": "V3-270m-nemotron",
+  "rule": "highest validation exact match; prefer the pre-registered primary of compare-v1.json when it and the highest run lie within each other's Wilson 95% intervals; test results are never read for the choice",
+  "primary": "V3-270m-nemotron",
+  "why": "highest validation exact match is C-270m-all-v2data (134/310); the pre-registered primary V3-270m-nemotron (124/310) and it lie within each other's Wilson 95% intervals, so the rule prefers the primary",
+  "candidates": [
+   {
+    "run": "C-270m-all-v2data",
+    "k": 134,
+    "n": 310,
+    "exact_match": 0.432258064516129,
+    "wilson95": [
+     0.37827346492464153,
+     0.48790100368182865
+    ],
+    "val_file": "data/scribe/v3/student/C-270m-all-v2data/result.json",
+    "test_file": "data/scribe/v3/student/C-270m-all-v2data/eval-test.json"
+   },
+   {
+    "run": "S-1b-lora-r16",
+    "k": 125,
+    "n": 310,
+    "exact_match": 0.4032258064516129,
+    "wilson95": [
+     0.35012587380613364,
+     0.45869479563168086
+    ],
+    "val_file": "data/scribe/v3/student/S-1b-lora-r16/result.json",
+    "test_file": "data/scribe/v3/student/S-1b-lora-r16/eval-test.json"
+   },
+   {
+    "run": "V3-270m-all",
+    "k": 125,
+    "n": 310,
+    "exact_match": 0.4032258064516129,
+    "wilson95": [
+     0.35012587380613364,
+     0.45869479563168086
+    ],
+    "val_file": "data/scribe/v3/student/V3-270m-all/result.json",
+    "test_file": "data/scribe/v3/student/V3-270m-all/eval-test.json"
+   },
+   {
+    "run": "V3-270m-nemotron",
+    "k": 124,
+    "n": 310,
+    "exact_match": 0.4,
+    "wilson95": [
+     0.34701028448811405,
+     0.4554377405976277
+    ],
+    "val_file": "data/scribe/v3/student/V3-270m-nemotron/result.json",
+    "test_file": "data/scribe/v3/student/V3-270m-nemotron/eval-test.json"
+   },
+   {
+    "run": "v2-selected",
+    "k": 112,
+    "n": 310,
+    "exact_match": 0.36129032258064514,
+    "wilson95": [
+     0.3098147568028864,
+     0.416161536057981
+    ],
+    "val_file": "data/scribe/v3/student/v2-selected/result.json",
+    "test_file": "data/scribe/v3/student/v2-selected/A-270m-lora-r16--test_nemotron+test_haiku--off.json"
+   }
+  ]
+ },
+ "inputs": {
+  "data/scribe/v3/student/V3-270m-nemotron/result.json": "32ff271157409750326736802878d9b1f0ed147ac2d511c84aadf16f84e91c09",
+  "data/scribe/v3/student/V3-270m-nemotron/val-records.json": "6a3e1c4cad8999333fa27d27297f785ab8c6ebc1ce85dd0724fda84c15c781a2",
+  "data/scribe/v3/student/V3-270m-nemotron/eval-test.json": "95a65add9ef76187f05592ccdb77908381da411fbcc5d8eca4d13099b384f04a",
+  "data/scribe/v3/cascade/plan-v1.json": "199d8aee53af44d62d58f42935f68418585c524bcd9e1eda65a2226b5fff517f",
+  "data/scribe/v3/cascade/pairs-jev-v1.jsonl": "749f7f1b4cc0986d831df654f1485f3c2bddef7458518736404efc2bd0f8b7d7",
+  "data/scribe/v3/cascade/pairs-decisions-v1.jsonl": "4dc4feb70a8a31a6939b765a43ba1c4fdff421e45835dfced0ab5aeeafb4a457",
+  "data/scribe/v3/cascade/answers-jev-v1.jsonl": "e204020bc19448c9834df0e41f5b121b922fed1be2867ba06cfe5115dd204256",
+  "data/scribe/v3/cascade/answers-decisions-v1.jsonl": "3ea24fb2760311886adcb0effed2e90b52da658c062a2f31244527b97ee7938c",
+  "data/scribe/v3/judges/policy.json": "50817023f2b8326a63fb79f8fc6049391e80deee7232f1e2cf2baabf9bb0eda3"
+ },
+ "design": {
+  "targets_pct": [
+   5,
+   10
+  ],
+  "threshold_rule": "on validation notes only: accept a note when its score >= t; t is the value with the largest validation coverage whose observed error among accepted notes is <= the target, with at least 20 accepted notes; otherwise no threshold is set",
+  "empirical_not_guaranteed": "the thresholds are chosen on 310 synthetic validation notes (the subset ones on fewer); the error on new notes can be higher",
+  "coverage_denominator": "every note in the set, including notes whose prediction did not parse (they always go to a person)",
+  "signals": {
+   "student": "mean token log-probability of the student's answer (higher = more confident)",
+   "jev": "judge score from Jev: min over predicted events of P(event stated) x (1 - P(unlisted event)); 0 when Jev's route choice differs from the student's route",
+   "decisions": "the same judge score from OpenAI Decisions (question set v1), on the subset only",
+   "student+jev": "ridge logistic regression of exact match on (student, jev), fitted on validation notes",
+   "student+jev+decisions": "ridge logistic regression on (student, jev, decisions), fitted on the validation part of the subset",
+   "student@subset": "student confidence alone with its threshold re-chosen on the validation part of the subset (like-for-like control)"
+  },
+  "leak_guard": "assert_validation_only() raises before any fit or threshold sees a note whose split is not 'val' or whose id is a test id; unit-tested in scribe/v3/tests/test_cascade.py",
+  "bootstrap": "paired percentile bootstrap over test notes, 2000 resamples, seed '20261114|<section>|<set>'; thresholds held fixed, so it omits the noise of choosing them (see pipeline_bootstrap)",
+  "jev_question_set": "v2",
+  "decisions_subset": {
+   "pairs": "data/scribe/v3/cascade/pairs-decisions-v1.jsonl",
+   "per_split": 93,
+   "rows": 186,
+   "val_groups": {
+    "val_nemotron": 75,
+    "val_haiku": 18
+   },
+   "test_groups": {
+    "test_nemotron": 73,
+    "test_haiku": 20
+   },
+   "order": "sha256('scribe-v3-cascade-decisions|' + id) ascending, within validation and within the pooled test notes",
+   "size_rule": "largest K <= 120 per split whose estimated tokens stay <= 270000 (90% of the 300000 cap)",
+   "estimated_tokens": 269625,
+   "tokens_per_char": {
+    "requests": 320,
+    "mean": 0.40568297753814664,
+    "max": 0.43628654318232535
+   },
+   "estimate": "ceil(characters of the JSON request body x the maximum tokens-per-character over the cached benchmark Decisions requests)"
+  },
+  "unparsed": "notes whose prediction did not parse are not sent to a judge and are never accepted by any signal"
+ },
+ "counts": {
+  "val_nemotron": {
+   "notes": 250,
+   "exact_match": 106,
+   "parsed": 249,
+   "judgeable": 249,
+   "jev_score": 249,
+   "decisions_score": 75
+  },
+  "val_haiku": {
+   "notes": 60,
+   "exact_match": 18,
+   "parsed": 59,
+   "judgeable": 59,
+   "jev_score": 59,
+   "decisions_score": 18
+  },
+  "test_nemotron": {
+   "notes": 500,
+   "exact_match": 209,
+   "parsed": 499,
+   "judgeable": 499,
+   "jev_score": 499,
+   "decisions_score": 73
+  },
+  "test_haiku": {
+   "notes": 200,
+   "exact_match": 58,
+   "parsed": 200,
+   "judgeable": 200,
+   "jev_score": 200,
+   "decisions_score": 20
+  }
+ },
+ "logistic": {
+  "student+jev": {
+   "features": [
+    "student",
+    "jev"
+   ],
+   "mean": [
+    4.410835738181296,
+    0.2736435064935065
+   ],
+   "sd": [
+    2.216237446444905,
+    0.2732804569890062
+   ],
+   "weights": [
+    -1.1453796446561866,
+    2.157310037922532,
+    2.4238808285401934
+   ],
+   "l2": 1.0,
+   "n": 308,
+   "positives": 124,
+   "iterations": 9,
+   "fitted_on": "validation notes only (asserted)",
+   "feature_definitions": {
+    "student": "-ln(-mean token log-probability)",
+    "jev": "Jev judge score",
+    "decisions": "Decisions judge score"
+   },
+   "note": "weights are on standardised features (mean/sd of the fitting notes); the cascade ranks by the linear predictor"
+  },
+  "student+jev+decisions": {
+   "features": [
+    "student",
+    "jev",
+    "decisions"
+   ],
+   "mean": [
+    4.622821400716843,
+    0.2990193548387097,
+    0.3315591397849462
+   ],
+   "sd": [
+    2.3196327070028873,
+    0.2825542247922881,
+    0.3553077739712731
+   ],
+   "weights": [
+    -0.9281796064475297,
+    1.5103510514661795,
+    1.7640069082492587,
+    0.6981585726254858
+   ],
+   "l2": 1.0,
+   "n": 93,
+   "positives": 40,
+   "iterations": 8,
+   "fitted_on": "validation notes only (asserted)",
+   "feature_definitions": {
+    "student": "-ln(-mean token log-probability)",
+    "jev": "Jev judge score",
+    "decisions": "Decisions judge score"
+   },
+   "note": "weights are on standardised features (mean/sd of the fitting notes); the cascade ranks by the linear predictor"
+  }
+ },
+ "validation_in_sample": {
+  "student": {
+   "5pct": {
+    "threshold": -0.015700866506940955,
+    "accepted": 123,
+    "wrong": 6,
+    "n": 310,
+    "coverage": 0.3968,
+    "error": 0.0488,
+    "alpha_pct": 5,
+    "min_accepted": 20
+   },
+   "10pct": {
+    "threshold": -0.02117185944514373,
+    "accepted": 131,
+    "wrong": 13,
+    "n": 310,
+    "coverage": 0.4226,
+    "error": 0.0992,
+    "alpha_pct": 10,
+    "min_accepted": 20
+   }
+  },
+  "jev": {
+   "5pct": {
+    "threshold": 0.3774,
+    "accepted": 128,
+    "wrong": 6,
+    "n": 310,
+    "coverage": 0.4129,
+    "error": 0.0469,
+    "alpha_pct": 5,
+    "min_accepted": 20
+   },
+   "10pct": {
+    "threshold": 0.18000000000000005,
+    "accepted": 135,
+    "wrong": 12,
+    "n": 310,
+    "coverage": 0.4355,
+    "error": 0.0889,
+    "alpha_pct": 10,
+    "min_accepted": 20
+   }
+  },
+  "student+jev": {
+   "5pct": {
+    "threshold": -0.586942826357614,
+    "accepted": 129,
+    "wrong": 6,
+    "n": 310,
+    "coverage": 0.4161,
+    "error": 0.0465,
+    "alpha_pct": 5,
+    "min_accepted": 20
+   },
+   "10pct": {
+    "threshold": -3.0535151084855277,
+    "accepted": 137,
+    "wrong": 13,
+    "n": 310,
+    "coverage": 0.4419,
+    "error": 0.0949,
+    "alpha_pct": 10,
+    "min_accepted": 20
+   }
+  },
+  "student@subset": {
+   "5pct": {
+    "threshold": -0.01720507137739334,
+    "accepted": 40,
+    "wrong": 2,
+    "n": 93,
+    "coverage": 0.4301,
+    "error": 0.05,
+    "alpha_pct": 5,
+    "min_accepted": 20
+   },
+   "10pct": {
+    "threshold": -0.019443466657774112,
+    "accepted": 43,
+    "wrong": 4,
+    "n": 93,
+    "coverage": 0.4624,
+    "error": 0.093,
+    "alpha_pct": 10,
+    "min_accepted": 20
+   }
+  },
+  "decisions": {
+   "5pct": {
+    "threshold": 0.52,
+    "accepted": 28,
+    "wrong": 1,
+    "n": 93,
+    "coverage": 0.3011,
+    "error": 0.0357,
+    "alpha_pct": 5,
+    "min_accepted": 20
+   },
+   "10pct": {
+    "threshold": 0.28709999999999997,
+    "accepted": 35,
+    "wrong": 3,
+    "n": 93,
+    "coverage": 0.3763,
+    "error": 0.0857,
+    "alpha_pct": 10,
+    "min_accepted": 20
+   }
+  },
+  "student+jev+decisions": {
+   "5pct": {
+    "threshold": 0.9658780195127,
+    "accepted": 42,
+    "wrong": 2,
+    "n": 93,
+    "coverage": 0.4516,
+    "error": 0.0476,
+    "alpha_pct": 5,
+    "min_accepted": 20
+   },
+   "10pct": {
+    "threshold": -2.5903128042020884,
+    "accepted": 44,
+    "wrong": 4,
+    "n": 93,
+    "coverage": 0.4731,
+    "error": 0.0909,
+    "alpha_pct": 10,
+    "min_accepted": 20
+   }
+  }
+ },
+ "test": {
+  "all_notes": {
+   "student": {
+    "aurc": {
+     "test_nemotron": 0.2212,
+     "test_haiku": 0.5055,
+     "test_pooled": 0.2689
+    },
+    "5pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 209,
+       "denominator": 500,
+       "share": 0.418,
+       "wilson95": [
+        0.3756,
+        0.4617
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 7,
+       "denominator": 209,
+       "share": 0.0335,
+       "wilson95": [
+        0.0163,
+        0.0675
+       ]
+      },
+      "threshold": -0.015700866506940955
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 61,
+       "denominator": 200,
+       "share": 0.305,
+       "wilson95": [
+        0.2454,
+        0.372
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 21,
+       "denominator": 61,
+       "share": 0.3443,
+       "wilson95": [
+        0.2375,
+        0.4695
+       ]
+      },
+      "threshold": -0.015700866506940955
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 270,
+       "denominator": 700,
+       "share": 0.3857,
+       "wilson95": [
+        0.3504,
+        0.4223
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 28,
+       "denominator": 270,
+       "share": 0.1037,
+       "wilson95": [
+        0.0727,
+        0.1458
+       ]
+      },
+      "threshold": -0.015700866506940955
+     }
+    },
+    "10pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 214,
+       "denominator": 500,
+       "share": 0.428,
+       "wilson95": [
+        0.3853,
+        0.4718
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 8,
+       "denominator": 214,
+       "share": 0.0374,
+       "wilson95": [
+        0.0191,
+        0.072
+       ]
+      },
+      "threshold": -0.02117185944514373
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 73,
+       "denominator": 200,
+       "share": 0.365,
+       "wilson95": [
+        0.3014,
+        0.4337
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 28,
+       "denominator": 73,
+       "share": 0.3836,
+       "wilson95": [
+        0.2805,
+        0.4983
+       ]
+      },
+      "threshold": -0.02117185944514373
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 287,
+       "denominator": 700,
+       "share": 0.41,
+       "wilson95": [
+        0.3742,
+        0.4468
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 36,
+       "denominator": 287,
+       "share": 0.1254,
+       "wilson95": [
+        0.092,
+        0.1688
+       ]
+      },
+      "threshold": -0.02117185944514373
+     }
+    }
+   },
+   "jev": {
+    "aurc": {
+     "test_nemotron": 0.2205,
+     "test_haiku": 0.361,
+     "test_pooled": 0.2545
+    },
+    "aurc_difference_vs_student": {
+     "test_nemotron": {
+      "difference": -0.0007,
+      "paired_bootstrap95": [
+       -0.0042,
+       0.0026
+      ]
+     },
+     "test_haiku": {
+      "difference": -0.1446,
+      "paired_bootstrap95": [
+       -0.2052,
+       -0.0923
+      ]
+     },
+     "test_pooled": {
+      "difference": -0.0144,
+      "paired_bootstrap95": [
+       -0.021,
+       -0.0083
+      ]
+     }
+    },
+    "5pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 208,
+       "denominator": 500,
+       "share": 0.416,
+       "wilson95": [
+        0.3736,
+        0.4597
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 4,
+       "denominator": 208,
+       "share": 0.0192,
+       "wilson95": [
+        0.0075,
+        0.0484
+       ]
+      },
+      "threshold": 0.3774,
+      "vs_student": {
+       "coverage_difference": -0.002,
+       "coverage_difference95": [
+        -0.018,
+        0.012
+       ],
+       "error_difference95": [
+        -0.037,
+        0.0049
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 55,
+       "denominator": 200,
+       "share": 0.275,
+       "wilson95": [
+        0.2178,
+        0.3407
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 3,
+       "denominator": 55,
+       "share": 0.0545,
+       "wilson95": [
+        0.0187,
+        0.1485
+       ]
+      },
+      "threshold": 0.3774,
+      "vs_student": {
+       "coverage_difference": -0.03,
+       "coverage_difference95": [
+        -0.095,
+        0.035
+       ],
+       "error_difference95": [
+        -0.4049,
+        -0.1859
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 263,
+       "denominator": 700,
+       "share": 0.3757,
+       "wilson95": [
+        0.3406,
+        0.4122
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 7,
+       "denominator": 263,
+       "share": 0.0266,
+       "wilson95": [
+        0.013,
+        0.0539
+       ]
+      },
+      "threshold": 0.3774,
+      "vs_student": {
+       "coverage_difference": -0.01,
+       "coverage_difference95": [
+        -0.0314,
+        0.0114
+       ],
+       "error_difference95": [
+        -0.1097,
+        -0.0455
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    },
+    "10pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 222,
+       "denominator": 500,
+       "share": 0.444,
+       "wilson95": [
+        0.401,
+        0.4878
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 13,
+       "denominator": 222,
+       "share": 0.0586,
+       "wilson95": [
+        0.0345,
+        0.0976
+       ]
+      },
+      "threshold": 0.18000000000000005,
+      "vs_student": {
+       "coverage_difference": 0.016,
+       "coverage_difference95": [
+        0.002,
+        0.032
+       ],
+       "error_difference95": [
+        -0.0087,
+        0.0525
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 87,
+       "denominator": 200,
+       "share": 0.435,
+       "wilson95": [
+        0.3682,
+        0.5043
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 30,
+       "denominator": 87,
+       "share": 0.3448,
+       "wilson95": [
+        0.2534,
+        0.4494
+       ]
+      },
+      "threshold": 0.18000000000000005,
+      "vs_student": {
+       "coverage_difference": 0.07,
+       "coverage_difference95": [
+        0.015,
+        0.13
+       ],
+       "error_difference95": [
+        -0.1247,
+        0.0436
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 309,
+       "denominator": 700,
+       "share": 0.4414,
+       "wilson95": [
+        0.4051,
+        0.4784
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 43,
+       "denominator": 309,
+       "share": 0.1392,
+       "wilson95": [
+        0.105,
+        0.1822
+       ]
+      },
+      "threshold": 0.18000000000000005,
+      "vs_student": {
+       "coverage_difference": 0.0314,
+       "coverage_difference95": [
+        0.0114,
+        0.0514
+       ],
+       "error_difference95": [
+        -0.0193,
+        0.0475
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    }
+   },
+   "student+jev": {
+    "aurc": {
+     "test_nemotron": 0.2185,
+     "test_haiku": 0.3591,
+     "test_pooled": 0.2529
+    },
+    "aurc_difference_vs_student": {
+     "test_nemotron": {
+      "difference": -0.0027,
+      "paired_bootstrap95": [
+       -0.0056,
+       -0.0006
+      ]
+     },
+     "test_haiku": {
+      "difference": -0.1464,
+      "paired_bootstrap95": [
+       -0.206,
+       -0.0952
+      ]
+     },
+     "test_pooled": {
+      "difference": -0.0159,
+      "paired_bootstrap95": [
+       -0.0221,
+       -0.0101
+      ]
+     }
+    },
+    "5pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 211,
+       "denominator": 500,
+       "share": 0.422,
+       "wilson95": [
+        0.3795,
+        0.4657
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 4,
+       "denominator": 211,
+       "share": 0.019,
+       "wilson95": [
+        0.0074,
+        0.0477
+       ]
+      },
+      "threshold": -0.586942826357614,
+      "vs_student": {
+       "coverage_difference": 0.004,
+       "coverage_difference95": [
+        -0.008,
+        0.016
+       ],
+       "error_difference95": [
+        -0.033,
+        -0.0003
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 65,
+       "denominator": 200,
+       "share": 0.325,
+       "wilson95": [
+        0.2639,
+        0.3927
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 8,
+       "denominator": 65,
+       "share": 0.1231,
+       "wilson95": [
+        0.0637,
+        0.2245
+       ]
+      },
+      "threshold": -0.586942826357614,
+      "vs_student": {
+       "coverage_difference": 0.02,
+       "coverage_difference95": [
+        -0.035,
+        0.075
+       ],
+       "error_difference95": [
+        -0.3194,
+        -0.1354
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 276,
+       "denominator": 700,
+       "share": 0.3943,
+       "wilson95": [
+        0.3588,
+        0.431
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 12,
+       "denominator": 276,
+       "share": 0.0435,
+       "wilson95": [
+        0.025,
+        0.0744
+       ]
+      },
+      "threshold": -0.586942826357614,
+      "vs_student": {
+       "coverage_difference": 0.0086,
+       "coverage_difference95": [
+        -0.0086,
+        0.0271
+       ],
+       "error_difference95": [
+        -0.0902,
+        -0.0349
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    },
+    "10pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 223,
+       "denominator": 500,
+       "share": 0.446,
+       "wilson95": [
+        0.403,
+        0.4898
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 14,
+       "denominator": 223,
+       "share": 0.0628,
+       "wilson95": [
+        0.0378,
+        0.1026
+       ]
+      },
+      "threshold": -3.0535151084855277,
+      "vs_student": {
+       "coverage_difference": 0.018,
+       "coverage_difference95": [
+        0.004,
+        0.032
+       ],
+       "error_difference95": [
+        -0.0005,
+        0.0529
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 92,
+       "denominator": 200,
+       "share": 0.46,
+       "wilson95": [
+        0.3923,
+        0.5292
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 34,
+       "denominator": 92,
+       "share": 0.3696,
+       "wilson95": [
+        0.278,
+        0.4716
+       ]
+      },
+      "threshold": -3.0535151084855277,
+      "vs_student": {
+       "coverage_difference": 0.095,
+       "coverage_difference95": [
+        0.05,
+        0.145
+       ],
+       "error_difference95": [
+        -0.079,
+        0.0518
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 315,
+       "denominator": 700,
+       "share": 0.45,
+       "wilson95": [
+        0.4135,
+        0.487
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 48,
+       "denominator": 315,
+       "share": 0.1524,
+       "wilson95": [
+        0.1169,
+        0.1962
+       ]
+      },
+      "threshold": -3.0535151084855277,
+      "vs_student": {
+       "coverage_difference": 0.04,
+       "coverage_difference95": [
+        0.0229,
+        0.0571
+       ],
+       "error_difference95": [
+        0.0031,
+        0.0528
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    }
+   },
+   "_reference": {
+    "test_nemotron": {
+     "notes": 500,
+     "exact_match": {
+      "numerator": 209,
+      "denominator": 500,
+      "share": 0.418,
+      "wilson95": [
+       0.3756,
+       0.4617
+      ]
+     },
+     "aurc_random_order": 0.582,
+     "aurc_best_possible_order": 0.218
+    },
+    "test_haiku": {
+     "notes": 200,
+     "exact_match": {
+      "numerator": 58,
+      "denominator": 200,
+      "share": 0.29,
+      "wilson95": [
+       0.2315,
+       0.3564
+      ]
+     },
+     "aurc_random_order": 0.71,
+     "aurc_best_possible_order": 0.3528
+    },
+    "test_pooled": {
+     "notes": 700,
+     "exact_match": {
+      "numerator": 267,
+      "denominator": 700,
+      "share": 0.3814,
+      "wilson95": [
+       0.3462,
+       0.418
+      ]
+     },
+     "aurc_random_order": 0.6186,
+     "aurc_best_possible_order": 0.2514
+    }
+   }
+  },
+  "decisions_subset": {
+   "student": {
+    "aurc": {
+     "test_nemotron": 0.2081,
+     "test_haiku": 0.3997,
+     "test_pooled": 0.2297
+    },
+    "5pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 33,
+       "denominator": 73,
+       "share": 0.4521,
+       "wilson95": [
+        0.3431,
+        0.5658
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 33,
+       "share": 0.0606,
+       "wilson95": [
+        0.0168,
+        0.1961
+       ]
+      },
+      "threshold": -0.015700866506940955,
+      "vs_student@subset": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        0.0,
+        0.0
+       ],
+       "error_difference95": [
+        0.0,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 8,
+       "denominator": 20,
+       "share": 0.4,
+       "wilson95": [
+        0.2188,
+        0.6134
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 8,
+       "share": 0.25,
+       "wilson95": [
+        0.0715,
+        0.5907
+       ]
+      },
+      "threshold": -0.015700866506940955,
+      "vs_student@subset": {
+       "coverage_difference": -0.05,
+       "coverage_difference95": [
+        -0.15,
+        0.0
+       ],
+       "error_difference95": [
+        0.0,
+        0.1364
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 41,
+       "denominator": 93,
+       "share": 0.4409,
+       "wilson95": [
+        0.3443,
+        0.5421
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 4,
+       "denominator": 41,
+       "share": 0.0976,
+       "wilson95": [
+        0.0386,
+        0.2255
+       ]
+      },
+      "threshold": -0.015700866506940955,
+      "vs_student@subset": {
+       "coverage_difference": -0.0108,
+       "coverage_difference95": [
+        -0.0323,
+        0.0
+       ],
+       "error_difference95": [
+        0.0,
+        0.0097
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    },
+    "10pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 34,
+       "denominator": 73,
+       "share": 0.4658,
+       "wilson95": [
+        0.3559,
+        0.579
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 34,
+       "share": 0.0588,
+       "wilson95": [
+        0.0163,
+        0.1909
+       ]
+      },
+      "threshold": -0.02117185944514373,
+      "vs_student@subset": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        0.0,
+        0.0
+       ],
+       "error_difference95": [
+        0.0,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 10,
+       "denominator": 20,
+       "share": 0.5,
+       "wilson95": [
+        0.2993,
+        0.7007
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 3,
+       "denominator": 10,
+       "share": 0.3,
+       "wilson95": [
+        0.1078,
+        0.6032
+       ]
+      },
+      "threshold": -0.02117185944514373,
+      "vs_student@subset": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        0.0,
+        0.0
+       ],
+       "error_difference95": [
+        0.0,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 44,
+       "denominator": 93,
+       "share": 0.4731,
+       "wilson95": [
+        0.3747,
+        0.5736
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 5,
+       "denominator": 44,
+       "share": 0.1136,
+       "wilson95": [
+        0.0495,
+        0.2398
+       ]
+      },
+      "threshold": -0.02117185944514373,
+      "vs_student@subset": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        0.0,
+        0.0
+       ],
+       "error_difference95": [
+        0.0,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    }
+   },
+   "jev": {
+    "aurc": {
+     "test_nemotron": 0.2103,
+     "test_haiku": 0.3054,
+     "test_pooled": 0.2259
+    },
+    "aurc_difference_vs_student": {
+     "test_nemotron": {
+      "difference": 0.0021,
+      "paired_bootstrap95": [
+       -0.0106,
+       0.0186
+      ]
+     },
+     "test_haiku": {
+      "difference": -0.0942,
+      "paired_bootstrap95": [
+       -0.2538,
+       0.0
+      ]
+     },
+     "test_pooled": {
+      "difference": -0.0038,
+      "paired_bootstrap95": [
+       -0.0202,
+       0.0113
+      ]
+     }
+    },
+    "5pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 32,
+       "denominator": 73,
+       "share": 0.4384,
+       "wilson95": [
+        0.3305,
+        0.5524
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 1,
+       "denominator": 32,
+       "share": 0.0312,
+       "wilson95": [
+        0.0055,
+        0.1574
+       ]
+      },
+      "threshold": 0.3774,
+      "vs_student": {
+       "coverage_difference": -0.0137,
+       "coverage_difference95": [
+        -0.0685,
+        0.0274
+       ],
+       "error_difference95": [
+        -0.1,
+        0.0022
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.0137,
+       "coverage_difference95": [
+        -0.0685,
+        0.0274
+       ],
+       "error_difference95": [
+        -0.1,
+        0.0022
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 6,
+       "denominator": 20,
+       "share": 0.3,
+       "wilson95": [
+        0.1455,
+        0.519
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 0,
+       "denominator": 6,
+       "share": 0.0,
+       "wilson95": [
+        0.0,
+        0.3903
+       ]
+      },
+      "threshold": 0.3774,
+      "vs_student": {
+       "coverage_difference": -0.1,
+       "coverage_difference95": [
+        -0.3,
+        0.1
+       ],
+       "error_difference95": [
+        -0.6,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 1
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.15,
+       "coverage_difference95": [
+        -0.3,
+        0.0
+       ],
+       "error_difference95": [
+        -0.5556,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 1
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 38,
+       "denominator": 93,
+       "share": 0.4086,
+       "wilson95": [
+        0.3143,
+        0.5102
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 1,
+       "denominator": 38,
+       "share": 0.0263,
+       "wilson95": [
+        0.0047,
+        0.1349
+       ]
+      },
+      "threshold": 0.3774,
+      "vs_student": {
+       "coverage_difference": -0.0323,
+       "coverage_difference95": [
+        -0.086,
+        0.0215
+       ],
+       "error_difference95": [
+        -0.1613,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.043,
+       "coverage_difference95": [
+        -0.0968,
+        0.0
+       ],
+       "error_difference95": [
+        -0.1562,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    },
+    "10pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 34,
+       "denominator": 73,
+       "share": 0.4658,
+       "wilson95": [
+        0.3559,
+        0.579
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 34,
+       "share": 0.0588,
+       "wilson95": [
+        0.0163,
+        0.1909
+       ]
+      },
+      "threshold": 0.18000000000000005,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.0411,
+        0.0411
+       ],
+       "error_difference95": [
+        -0.0811,
+        0.073
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.0411,
+        0.0411
+       ],
+       "error_difference95": [
+        -0.0811,
+        0.073
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 10,
+       "denominator": 20,
+       "share": 0.5,
+       "wilson95": [
+        0.2993,
+        0.7007
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 3,
+       "denominator": 10,
+       "share": 0.3,
+       "wilson95": [
+        0.1078,
+        0.6032
+       ]
+      },
+      "threshold": 0.18000000000000005,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.15,
+        0.15
+       ],
+       "error_difference95": [
+        -0.2143,
+        0.2077
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.15,
+        0.15
+       ],
+       "error_difference95": [
+        -0.2143,
+        0.2077
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 44,
+       "denominator": 93,
+       "share": 0.4731,
+       "wilson95": [
+        0.3747,
+        0.5736
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 5,
+       "denominator": 44,
+       "share": 0.1136,
+       "wilson95": [
+        0.0495,
+        0.2398
+       ]
+      },
+      "threshold": 0.18000000000000005,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.043,
+        0.043
+       ],
+       "error_difference95": [
+        -0.0818,
+        0.0818
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.043,
+        0.043
+       ],
+       "error_difference95": [
+        -0.0818,
+        0.0818
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    }
+   },
+   "student+jev": {
+    "aurc": {
+     "test_nemotron": 0.2048,
+     "test_haiku": 0.3138,
+     "test_pooled": 0.2216
+    },
+    "aurc_difference_vs_student": {
+     "test_nemotron": {
+      "difference": -0.0033,
+      "paired_bootstrap95": [
+       -0.0135,
+       0.0011
+      ]
+     },
+     "test_haiku": {
+      "difference": -0.0859,
+      "paired_bootstrap95": [
+       -0.2379,
+       0.0
+      ]
+     },
+     "test_pooled": {
+      "difference": -0.0081,
+      "paired_bootstrap95": [
+       -0.0218,
+       0.0
+      ]
+     }
+    },
+    "5pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 33,
+       "denominator": 73,
+       "share": 0.4521,
+       "wilson95": [
+        0.3431,
+        0.5658
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 1,
+       "denominator": 33,
+       "share": 0.0303,
+       "wilson95": [
+        0.0054,
+        0.1532
+       ]
+      },
+      "threshold": -0.586942826357614,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.0411,
+        0.0411
+       ],
+       "error_difference95": [
+        -0.1,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.0411,
+        0.0411
+       ],
+       "error_difference95": [
+        -0.1,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 8,
+       "denominator": 20,
+       "share": 0.4,
+       "wilson95": [
+        0.2188,
+        0.6134
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 1,
+       "denominator": 8,
+       "share": 0.125,
+       "wilson95": [
+        0.0224,
+        0.4709
+       ]
+      },
+      "threshold": -0.586942826357614,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.15,
+        0.15
+       ],
+       "error_difference95": [
+        -0.3889,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.05,
+       "coverage_difference95": [
+        -0.15,
+        0.0
+       ],
+       "error_difference95": [
+        -0.3333,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 41,
+       "denominator": 93,
+       "share": 0.4409,
+       "wilson95": [
+        0.3443,
+        0.5421
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 41,
+       "share": 0.0488,
+       "wilson95": [
+        0.0135,
+        0.1614
+       ]
+      },
+      "threshold": -0.586942826357614,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.043,
+        0.043
+       ],
+       "error_difference95": [
+        -0.125,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.0108,
+       "coverage_difference95": [
+        -0.0538,
+        0.0215
+       ],
+       "error_difference95": [
+        -0.12,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    },
+    "10pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 35,
+       "denominator": 73,
+       "share": 0.4795,
+       "wilson95": [
+        0.3688,
+        0.5922
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 3,
+       "denominator": 35,
+       "share": 0.0857,
+       "wilson95": [
+        0.0296,
+        0.2238
+       ]
+      },
+      "threshold": -3.0535151084855277,
+      "vs_student": {
+       "coverage_difference": 0.0137,
+       "coverage_difference95": [
+        0.0,
+        0.0411
+       ],
+       "error_difference95": [
+        0.0,
+        0.0864
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": 0.0137,
+       "coverage_difference95": [
+        0.0,
+        0.0411
+       ],
+       "error_difference95": [
+        0.0,
+        0.0864
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 9,
+       "denominator": 20,
+       "share": 0.45,
+       "wilson95": [
+        0.2582,
+        0.6579
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 9,
+       "share": 0.2222,
+       "wilson95": [
+        0.0632,
+        0.5474
+       ]
+      },
+      "threshold": -3.0535151084855277,
+      "vs_student": {
+       "coverage_difference": -0.05,
+       "coverage_difference95": [
+        -0.15,
+        0.0
+       ],
+       "error_difference95": [
+        -0.2667,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.05,
+       "coverage_difference95": [
+        -0.15,
+        0.0
+       ],
+       "error_difference95": [
+        -0.2667,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 44,
+       "denominator": 93,
+       "share": 0.4731,
+       "wilson95": [
+        0.3747,
+        0.5736
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 5,
+       "denominator": 44,
+       "share": 0.1136,
+       "wilson95": [
+        0.0495,
+        0.2398
+       ]
+      },
+      "threshold": -3.0535151084855277,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.0323,
+        0.0323
+       ],
+       "error_difference95": [
+        -0.0549,
+        0.0576
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.0323,
+        0.0323
+       ],
+       "error_difference95": [
+        -0.0549,
+        0.0576
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    }
+   },
+   "student@subset": {
+    "aurc": {
+     "test_nemotron": 0.2081,
+     "test_haiku": 0.3997,
+     "test_pooled": 0.2297
+    },
+    "aurc_difference_vs_student": {
+     "test_nemotron": {
+      "difference": 0.0,
+      "paired_bootstrap95": [
+       0.0,
+       0.0
+      ]
+     },
+     "test_haiku": {
+      "difference": 0.0,
+      "paired_bootstrap95": [
+       0.0,
+       0.0
+      ]
+     },
+     "test_pooled": {
+      "difference": 0.0,
+      "paired_bootstrap95": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "5pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 33,
+       "denominator": 73,
+       "share": 0.4521,
+       "wilson95": [
+        0.3431,
+        0.5658
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 33,
+       "share": 0.0606,
+       "wilson95": [
+        0.0168,
+        0.1961
+       ]
+      },
+      "threshold": -0.01720507137739334,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        0.0,
+        0.0
+       ],
+       "error_difference95": [
+        0.0,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 9,
+       "denominator": 20,
+       "share": 0.45,
+       "wilson95": [
+        0.2582,
+        0.6579
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 9,
+       "share": 0.2222,
+       "wilson95": [
+        0.0632,
+        0.5474
+       ]
+      },
+      "threshold": -0.01720507137739334,
+      "vs_student": {
+       "coverage_difference": 0.05,
+       "coverage_difference95": [
+        0.0,
+        0.15
+       ],
+       "error_difference95": [
+        -0.1364,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 42,
+       "denominator": 93,
+       "share": 0.4516,
+       "wilson95": [
+        0.3544,
+        0.5527
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 4,
+       "denominator": 42,
+       "share": 0.0952,
+       "wilson95": [
+        0.0377,
+        0.2207
+       ]
+      },
+      "threshold": -0.01720507137739334,
+      "vs_student": {
+       "coverage_difference": 0.0108,
+       "coverage_difference95": [
+        0.0,
+        0.0323
+       ],
+       "error_difference95": [
+        -0.0098,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    },
+    "10pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 34,
+       "denominator": 73,
+       "share": 0.4658,
+       "wilson95": [
+        0.3559,
+        0.579
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 34,
+       "share": 0.0588,
+       "wilson95": [
+        0.0163,
+        0.1909
+       ]
+      },
+      "threshold": -0.019443466657774112,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        0.0,
+        0.0
+       ],
+       "error_difference95": [
+        0.0,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 10,
+       "denominator": 20,
+       "share": 0.5,
+       "wilson95": [
+        0.2993,
+        0.7007
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 3,
+       "denominator": 10,
+       "share": 0.3,
+       "wilson95": [
+        0.1078,
+        0.6032
+       ]
+      },
+      "threshold": -0.019443466657774112,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        0.0,
+        0.0
+       ],
+       "error_difference95": [
+        0.0,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 44,
+       "denominator": 93,
+       "share": 0.4731,
+       "wilson95": [
+        0.3747,
+        0.5736
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 5,
+       "denominator": 44,
+       "share": 0.1136,
+       "wilson95": [
+        0.0495,
+        0.2398
+       ]
+      },
+      "threshold": -0.019443466657774112,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        0.0,
+        0.0
+       ],
+       "error_difference95": [
+        0.0,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    }
+   },
+   "decisions": {
+    "aurc": {
+     "test_nemotron": 0.2383,
+     "test_haiku": 0.3899,
+     "test_pooled": 0.2647
+    },
+    "aurc_difference_vs_student": {
+     "test_nemotron": {
+      "difference": 0.0302,
+      "paired_bootstrap95": [
+       0.003,
+       0.0671
+      ]
+     },
+     "test_haiku": {
+      "difference": -0.0098,
+      "paired_bootstrap95": [
+       -0.1972,
+       0.159
+      ]
+     },
+     "test_pooled": {
+      "difference": 0.0349,
+      "paired_bootstrap95": [
+       0.0063,
+       0.0725
+      ]
+     }
+    },
+    "5pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 22,
+       "denominator": 73,
+       "share": 0.3014,
+       "wilson95": [
+        0.2082,
+        0.4144
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 1,
+       "denominator": 22,
+       "share": 0.0455,
+       "wilson95": [
+        0.0081,
+        0.218
+       ]
+      },
+      "threshold": 0.52,
+      "vs_student": {
+       "coverage_difference": -0.1507,
+       "coverage_difference95": [
+        -0.2466,
+        -0.0685
+       ],
+       "error_difference95": [
+        -0.0938,
+        0.0395
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.1507,
+       "coverage_difference95": [
+        -0.2466,
+        -0.0685
+       ],
+       "error_difference95": [
+        -0.0938,
+        0.0395
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 1,
+       "denominator": 20,
+       "share": 0.05,
+       "wilson95": [
+        0.0089,
+        0.2361
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 0,
+       "denominator": 1,
+       "share": 0.0,
+       "wilson95": [
+        0.0,
+        0.7935
+       ]
+      },
+      "threshold": 0.52,
+      "vs_student": {
+       "coverage_difference": -0.35,
+       "coverage_difference95": [
+        -0.55,
+        -0.15
+       ],
+       "error_difference95": [
+        -0.5556,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 726
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.4,
+       "coverage_difference95": [
+        -0.65,
+        -0.2
+       ],
+       "error_difference95": [
+        -0.5,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 726
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 23,
+       "denominator": 93,
+       "share": 0.2473,
+       "wilson95": [
+        0.1708,
+        0.3438
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 1,
+       "denominator": 23,
+       "share": 0.0435,
+       "wilson95": [
+        0.0077,
+        0.2099
+       ]
+      },
+      "threshold": 0.52,
+      "vs_student": {
+       "coverage_difference": -0.1935,
+       "coverage_difference95": [
+        -0.2796,
+        -0.1075
+       ],
+       "error_difference95": [
+        -0.147,
+        0.0233
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.2043,
+       "coverage_difference95": [
+        -0.2903,
+        -0.1183
+       ],
+       "error_difference95": [
+        -0.1459,
+        0.0253
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    },
+    "10pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 29,
+       "denominator": 73,
+       "share": 0.3973,
+       "wilson95": [
+        0.2929,
+        0.5119
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 3,
+       "denominator": 29,
+       "share": 0.1034,
+       "wilson95": [
+        0.0358,
+        0.2639
+       ]
+      },
+      "threshold": 0.28709999999999997,
+      "vs_student": {
+       "coverage_difference": -0.0685,
+       "coverage_difference95": [
+        -0.1507,
+        0.0137
+       ],
+       "error_difference95": [
+        -0.0588,
+        0.1517
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.0685,
+       "coverage_difference95": [
+        -0.1507,
+        0.0137
+       ],
+       "error_difference95": [
+        -0.0588,
+        0.1517
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 3,
+       "denominator": 20,
+       "share": 0.15,
+       "wilson95": [
+        0.0524,
+        0.3604
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 0,
+       "denominator": 3,
+       "share": 0.0,
+       "wilson95": [
+        0.0,
+        0.5615
+       ]
+      },
+      "threshold": 0.28709999999999997,
+      "vs_student": {
+       "coverage_difference": -0.35,
+       "coverage_difference95": [
+        -0.55,
+        -0.15
+       ],
+       "error_difference95": [
+        -0.6,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 78
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.35,
+       "coverage_difference95": [
+        -0.55,
+        -0.15
+       ],
+       "error_difference95": [
+        -0.6,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 78
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 32,
+       "denominator": 93,
+       "share": 0.3441,
+       "wilson95": [
+        0.2555,
+        0.4451
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 3,
+       "denominator": 32,
+       "share": 0.0938,
+       "wilson95": [
+        0.0324,
+        0.2422
+       ]
+      },
+      "threshold": 0.28709999999999997,
+      "vs_student": {
+       "coverage_difference": -0.129,
+       "coverage_difference95": [
+        -0.2043,
+        -0.0538
+       ],
+       "error_difference95": [
+        -0.1318,
+        0.0948
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.129,
+       "coverage_difference95": [
+        -0.2043,
+        -0.0538
+       ],
+       "error_difference95": [
+        -0.1318,
+        0.0948
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    }
+   },
+   "student+jev+decisions": {
+    "aurc": {
+     "test_nemotron": 0.2053,
+     "test_haiku": 0.3054,
+     "test_pooled": 0.2223
+    },
+    "aurc_difference_vs_student": {
+     "test_nemotron": {
+      "difference": -0.0028,
+      "paired_bootstrap95": [
+       -0.0128,
+       0.0025
+      ]
+     },
+     "test_haiku": {
+      "difference": -0.0942,
+      "paired_bootstrap95": [
+       -0.2538,
+       0.0
+      ]
+     },
+     "test_pooled": {
+      "difference": -0.0074,
+      "paired_bootstrap95": [
+       -0.0218,
+       0.0014
+      ]
+     }
+    },
+    "5pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 31,
+       "denominator": 73,
+       "share": 0.4247,
+       "wilson95": [
+        0.3178,
+        0.539
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 1,
+       "denominator": 31,
+       "share": 0.0323,
+       "wilson95": [
+        0.0057,
+        0.1619
+       ]
+      },
+      "threshold": 0.9658780195127,
+      "vs_student": {
+       "coverage_difference": -0.0274,
+       "coverage_difference95": [
+        -0.0685,
+        0.0
+       ],
+       "error_difference95": [
+        -0.0968,
+        0.0035
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.0274,
+       "coverage_difference95": [
+        -0.0685,
+        0.0
+       ],
+       "error_difference95": [
+        -0.0968,
+        0.0035
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 2,
+       "denominator": 20,
+       "share": 0.1,
+       "wilson95": [
+        0.0279,
+        0.301
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 0,
+       "denominator": 2,
+       "share": 0.0,
+       "wilson95": [
+        0.0,
+        0.6576
+       ]
+      },
+      "threshold": 0.9658780195127,
+      "vs_student": {
+       "coverage_difference": -0.3,
+       "coverage_difference95": [
+        -0.55,
+        -0.05
+       ],
+       "error_difference95": [
+        -0.6,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 246
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.35,
+       "coverage_difference95": [
+        -0.55,
+        -0.15
+       ],
+       "error_difference95": [
+        -0.5,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 246
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 33,
+       "denominator": 93,
+       "share": 0.3548,
+       "wilson95": [
+        0.2651,
+        0.4561
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 1,
+       "denominator": 33,
+       "share": 0.0303,
+       "wilson95": [
+        0.0054,
+        0.1532
+       ]
+      },
+      "threshold": 0.9658780195127,
+      "vs_student": {
+       "coverage_difference": -0.086,
+       "coverage_difference95": [
+        -0.1505,
+        -0.0323
+       ],
+       "error_difference95": [
+        -0.1538,
+        0.0027
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.0968,
+       "coverage_difference95": [
+        -0.1613,
+        -0.043
+       ],
+       "error_difference95": [
+        -0.1522,
+        0.0034
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    },
+    "10pct": {
+     "test_nemotron": {
+      "coverage": {
+       "numerator": 34,
+       "denominator": 73,
+       "share": 0.4658,
+       "wilson95": [
+        0.3559,
+        0.579
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 34,
+       "share": 0.0588,
+       "wilson95": [
+        0.0163,
+        0.1909
+       ]
+      },
+      "threshold": -2.5903128042020884,
+      "vs_student": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.0411,
+        0.0411
+       ],
+       "error_difference95": [
+        -0.0811,
+        0.073
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": 0.0,
+       "coverage_difference95": [
+        -0.0411,
+        0.0411
+       ],
+       "error_difference95": [
+        -0.0811,
+        0.073
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_haiku": {
+      "coverage": {
+       "numerator": 9,
+       "denominator": 20,
+       "share": 0.45,
+       "wilson95": [
+        0.2582,
+        0.6579
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 2,
+       "denominator": 9,
+       "share": 0.2222,
+       "wilson95": [
+        0.0632,
+        0.5474
+       ]
+      },
+      "threshold": -2.5903128042020884,
+      "vs_student": {
+       "coverage_difference": -0.05,
+       "coverage_difference95": [
+        -0.15,
+        0.0
+       ],
+       "error_difference95": [
+        -0.2667,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.05,
+       "coverage_difference95": [
+        -0.15,
+        0.0
+       ],
+       "error_difference95": [
+        -0.2667,
+        0.0
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     },
+     "test_pooled": {
+      "coverage": {
+       "numerator": 43,
+       "denominator": 93,
+       "share": 0.4624,
+       "wilson95": [
+        0.3645,
+        0.5632
+       ]
+      },
+      "error_among_accepted": {
+       "numerator": 4,
+       "denominator": 43,
+       "share": 0.093,
+       "wilson95": [
+        0.0368,
+        0.216
+       ]
+      },
+      "threshold": -2.5903128042020884,
+      "vs_student": {
+       "coverage_difference": -0.0108,
+       "coverage_difference95": [
+        -0.043,
+        0.0215
+       ],
+       "error_difference95": [
+        -0.0881,
+        0.0476
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      },
+      "vs_student@subset": {
+       "coverage_difference": -0.0108,
+       "coverage_difference95": [
+        -0.043,
+        0.0215
+       ],
+       "error_difference95": [
+        -0.0881,
+        0.0476
+       ],
+       "resamples": 2000,
+       "resamples_without_error_difference": 0
+      }
+     }
+    }
+   },
+   "_reference": {
+    "test_nemotron": {
+     "notes": 73,
+     "exact_match": {
+      "numerator": 32,
+      "denominator": 73,
+      "share": 0.4384,
+      "wilson95": [
+       0.3305,
+       0.5524
+      ]
+     },
+     "aurc_random_order": 0.5616,
+     "aurc_best_possible_order": 0.2039
+    },
+    "test_haiku": {
+     "notes": 20,
+     "exact_match": {
+      "numerator": 7,
+      "denominator": 20,
+      "share": 0.35,
+      "wilson95": [
+       0.1812,
+       0.5671
+      ]
+     },
+     "aurc_random_order": 0.65,
+     "aurc_best_possible_order": 0.2983
+    },
+    "test_pooled": {
+     "notes": 93,
+     "exact_match": {
+      "numerator": 39,
+      "denominator": 93,
+      "share": 0.4194,
+      "wilson95": [
+       0.3242,
+       0.5209
+      ]
+     },
+     "aurc_random_order": 0.5806,
+     "aurc_best_possible_order": 0.2193
+    }
+   }
+  }
+ },
+ "pipeline_bootstrap": {
+  "resamples": 2000,
+  "seed": "20261114|pipeline",
+  "by_signal": {
+   "student": {
+    "5pct": {
+     "test_error_among_accepted95": [
+      0.0423,
+      0.1481
+     ],
+     "resamples_with_no_threshold": 0
+    },
+    "10pct": {
+     "test_error_among_accepted95": [
+      0.0881,
+      0.2013
+     ],
+     "resamples_with_no_threshold": 0
+    }
+   },
+   "jev": {
+    "5pct": {
+     "test_error_among_accepted95": [
+      0.0078,
+      0.1272
+     ],
+     "resamples_with_no_threshold": 7,
+     "coverage_difference_vs_student95": [
+      -0.0486,
+      0.0686
+     ],
+     "mean_coverage_difference": 0.0066,
+     "error_difference_vs_student95": [
+      -0.1082,
+      0.015
+     ],
+     "resamples_with_error_difference": 1993
+    },
+    "10pct": {
+     "test_error_among_accepted95": [
+      0.0376,
+      0.2205
+     ],
+     "resamples_with_no_threshold": 0,
+     "coverage_difference_vs_student95": [
+      -0.0243,
+      0.0671
+     ],
+     "mean_coverage_difference": 0.025,
+     "error_difference_vs_student95": [
+      -0.0846,
+      0.0706
+     ],
+     "resamples_with_error_difference": 2000
+    }
+   },
+   "student+jev": {
+    "5pct": {
+     "test_error_among_accepted95": [
+      0.0,
+      0.1376
+     ],
+     "resamples_with_no_threshold": 0,
+     "coverage_difference_vs_student95": [
+      -0.0443,
+      0.0729
+     ],
+     "mean_coverage_difference": 0.0171,
+     "error_difference_vs_student95": [
+      -0.1033,
+      0.0122
+     ],
+     "resamples_with_error_difference": 2000
+    },
+    "10pct": {
+     "test_error_among_accepted95": [
+      0.0592,
+      0.2305
+     ],
+     "resamples_with_no_threshold": 0,
+     "coverage_difference_vs_student95": [
+      -0.0086,
+      0.06
+     ],
+     "mean_coverage_difference": 0.0252,
+     "error_difference_vs_student95": [
+      -0.0618,
+      0.0605
+     ],
+     "resamples_with_error_difference": 2000
+    }
+   }
+  },
+  "note": "validation and test resampled together; logistic fit and thresholds re-chosen each time; pooled test; a resample without a feasible threshold counts as coverage 0 and has no error"
+ },
+ "judges": {
+  "jev": {
+   "asked": 1007,
+   "answered": 1007,
+   "missing": 0,
+   "errors": 0,
+   "error_kinds": [],
+   "route_disagrees_with_student": 10,
+   "question_set": [
+    "v2"
+   ],
+   "cost": {
+    "distinct_requests": 1007,
+    "paid_in_this_step": 1007,
+    "tokens_counted": 1367355,
+    "output_tokens": 124609,
+    "tokens_per_note": 1357.85,
+    "tokens_per_1000_notes": 1357850,
+    "usd_per_1000_notes": 0.057,
+    "price": "USD 0.042 per million tokens (input + output), owner's price in scribe/judges/core.py",
+    "latency_s_p50": 0.198,
+    "latency_s_p95": 0.355,
+    "latency_note": "wall time of single requests while up to 12 were in flight; nearest-rank percentiles"
+   }
+  },
+  "decisions": {
+   "asked": 186,
+   "answered": 186,
+   "missing": 0,
+   "errors": 0,
+   "error_kinds": [],
+   "route_disagrees_with_student": 2,
+   "question_set": [
+    "v1"
+   ],
+   "cost": {
+    "distinct_requests": 186,
+    "paid_in_this_step": 186,
+    "tokens_counted": 245314,
+    "output_tokens": 0,
+    "tokens_per_note": 1318.8925,
+    "tokens_per_1000_notes": 1318892,
+    "usd_per_1000_notes": 0.1319,
+    "price": "USD 0.10 per million input tokens, output not charged: the Decisions guide list rate as read by an earlier step (scribe/judges/RESULTS.md); not a bill",
+    "latency_s_p50": 0.254,
+    "latency_s_p95": 0.735,
+    "latency_note": "wall time of single requests while up to 8 were in flight; nearest-rank percentiles"
+   }
+  }
+ },
+ "ledgers": {
+  "before": {
+   "openai": {
+    "requests": 690,
+    "tokens": 1038484,
+    "input_tokens": 1038484,
+    "output_tokens": 0,
+    "reserved_tokens": 3000,
+    "failed_attempts": 1,
+    "updated": "2026-11-14T18:52:16+00:00"
+   },
+   "typesafe": {
+    "requests": 2737,
+    "tokens": 4084483,
+    "input_tokens": 3706234,
+    "output_tokens": 378249,
+    "reserved_tokens": 0,
+    "failed_attempts": 0,
+    "updated": "2026-11-14T18:51:02+00:00",
+    "cost_usd": 0.17154828600000002,
+    "cost_usd_counting_reservations": 0.17154828600000002
+   },
+   "openai_committed": 1041484,
+   "typesafe_committed_usd": 0.17154828600000002
+  },
+  "after": {
+   "openai": {
+    "requests": 876,
+    "tokens": 1283798,
+    "input_tokens": 1283798,
+    "output_tokens": 0,
+    "reserved_tokens": 3000,
+    "failed_attempts": 1,
+    "updated": "2026-11-14T19:39:35+00:00"
+   },
+   "typesafe": {
+    "requests": 3744,
+    "tokens": 5451838,
+    "input_tokens": 4948980,
+    "output_tokens": 502858,
+    "reserved_tokens": 0,
+    "failed_attempts": 0,
+    "updated": "2026-11-14T19:39:18+00:00",
+    "cost_usd": 0.22897719600000002,
+    "cost_usd_counting_reservations": 0.22897719600000002
+   }
+  },
+  "this_step": {
+   "openai_tokens_ledger_difference": 245314,
+   "openai_committed_difference": 245314,
+   "typesafe_tokens_ledger_difference": 1367355,
+   "typesafe_usd_ledger_difference": 0.0574,
+   "note": "ledger differences include any other process that used the same shared ledgers during this step",
+   "decisions_usd_list_rate_this_step": 0.0245
+  },
+  "caps": {
+   "openai_tokens": 300000,
+   "typesafe_usd": 1.0,
+   "limits_passed": {
+    "max_tokens_openai": 1341484,
+    "max_usd_typesafe": 1.171548,
+    "meaning": "run.py limits are cumulative ledger limits; these equal the committed amount before this step plus 300000 OpenAI tokens and USD 1.00 TypeSafe"
+   }
+  }
+ },
+ "verdict": {
+  "lines": [
+   "5% target, all 700 test notes: adding Jev did not let measurably more notes skip review: every coverage difference is within noise. Skip review: student confidence alone 270/700 (38.6%), Jev alone 263/700 (37.6%), student + Jev 276/700 (39.4%). Coverage difference vs the student: Jev -1.0 points (test bootstrap 95% -3.1 to +1.1 points; with threshold re-choice -4.9 to +6.9 points), student + Jev +0.9 points (-0.9 to +2.7 points; -4.4 to +7.3 points).",
+   "5% target, error among the notes that skipped review (pooled test): student 28/270 (10.4%), Jev 7/263 (2.7%), student + Jev 12/276 (4.3%). Difference vs the student, Jev: -11.0 to -4.5 points on these test notes (lower, outside noise), -10.8 to +1.5 points with threshold re-choice (within noise); student + Jev: -9.0 to -3.5 points (lower, outside noise), -10.3 to +1.2 points (within noise). The observed pooled test error was at or below the target for: Jev alone, student + Jev (logistic); above it for: student confidence alone. Haiku-written test notes: student 21/61 (34.4%), Jev 3/55 (5.5%), student + Jev 8/65 (12.3%) wrong among skipped; Nemotron-written: 7/209 (3.4%), 4/208 (1.9%), 4/211 (1.9%).",
+   "10% target, all 700 test notes: adding Jev let more notes skip review on these test notes (outside test-sampling noise), but the gain is within noise once the thresholds are re-chosen on resampled validation notes. Skip review: student confidence alone 287/700 (41.0%), Jev alone 309/700 (44.1%), student + Jev 315/700 (45.0%). Coverage difference vs the student: Jev +3.1 points (test bootstrap 95% +1.1 to +5.1 points; with threshold re-choice -2.4 to +6.7 points), student + Jev +4.0 points (+2.3 to +5.7 points; -0.9 to +6.0 points).",
+   "10% target, error among the notes that skipped review (pooled test): student 36/287 (12.5%), Jev 43/309 (13.9%), student + Jev 48/315 (15.2%). Difference vs the student, Jev: -1.9 to +4.8 points on these test notes (within noise), -8.5 to +7.1 points with threshold re-choice (within noise); student + Jev: +0.3 to +5.3 points (higher, outside noise), -6.2 to +6.0 points (within noise). The observed pooled test error was at or below the target for: none; above it for: student confidence alone, Jev alone, student + Jev (logistic). Haiku-written test notes: student 28/73 (38.4%), Jev 30/87 (34.5%), student + Jev 34/92 (37.0%) wrong among skipped; Nemotron-written: 8/214 (3.7%), 13/222 (5.9%), 14/223 (6.3%).",
+   "Ranking over all coverage levels (area under the risk-coverage curve, pooled test, lower is better): student 0.2689, Jev 0.2545 (difference -0.0144, paired bootstrap 95% -0.0210 to -0.0083), student + Jev 0.2529 (-0.0159; -0.0221 to -0.0101); random order 0.6186, best possible order 0.2514.",
+   "Decisions, on the 93 hash-chosen test notes of the subset (thresholds from 93 validation notes): at 5% Decisions alone 23/93 (24.7%) vs student 41/93 (44.1%) (difference -28.0 to -10.8 points), three-way 33/93 (35.5%) vs student + Jev 41/93 (44.1%); at 10% Decisions alone 32/93 (34.4%) vs student 44/93 (47.3%) (difference -20.4 to -5.4 points), three-way 43/93 (46.2%) vs student + Jev 44/93 (47.3%). AURC there: student 0.2297, Decisions 0.2647, student + Jev 0.2216, three-way 0.2223.",
+   "jev: 1007/1007 notes answered, 0 errors, USD 0.057 per 1,000 notes (1357.85 tokens per note), latency p50 0.198 s, p95 0.355 s.",
+   "decisions: 186/186 notes answered, 0 errors, USD 0.1319 per 1,000 notes (1318.8925 tokens per note), latency p50 0.254 s, p95 0.735 s."
+  ],
+  "computed_by": "scribe/v3/cascade.py verdict() from the numbers in this file"
+ }
+}

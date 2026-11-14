@@ -1,0 +1,115 @@
+{
+ "schemaVersion": 1,
+ "generated_utc": "2026-11-14T16:53:48Z",
+ "note": "Raw files and the clean table are kept in data/genomics/raw/ (git-ignored). Research use only; not for clinical decisions.",
+ "sources": {
+  "findlay2018_table": {
+   "description": "Findlay et al. 2018 Supplementary Table 1 (BRCA1 SGE function scores)",
+   "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-018-0461-z/MediaObjects/41586_2018_461_MOESM3_ESM.xlsx",
+   "sha256_expected": "e9aa4186b8a5de91d61059d03f8dac1e5573d1e2802f50a6581c3053d22b923a",
+   "citation": "Findlay GM et al. Nature 2018;562:217-222. doi:10.1038/s41586-018-0461-z",
+   "file": "data/genomics/raw/41586_2018_461_MOESM3_ESM.xlsx",
+   "http_status": "cached",
+   "bytes": 2306341,
+   "sha256": "e9aa4186b8a5de91d61059d03f8dac1e5573d1e2802f50a6581c3053d22b923a",
+   "sha256_matches_expected": true
+  },
+  "reference_grch37_chr17": {
+   "description": "GRCh37.p13 chromosome 17 (NC_000017.10), the file used by the ArcInstitute/evo2 BRCA1 notebook",
+   "url": "https://raw.githubusercontent.com/ArcInstitute/evo2/main/notebooks/brca1/GRCh37.p13_chr17.fna.gz",
+   "sha256_expected": "d50b4616790d7352c5025bcf9070a4de4f76bab41c6d2dcd504382c67c5534fb",
+   "file": "data/genomics/raw/GRCh37.p13_chr17.fna.gz",
+   "http_status": "cached",
+   "bytes": 23195609,
+   "sha256": "d50b4616790d7352c5025bcf9070a4de4f76bab41c6d2dcd504382c67c5534fb",
+   "sha256_matches_expected": true,
+   "fasta_header": "NC_000017.10 Homo sapiens chromosome 17, GRCh37.p13 Primary Assembly",
+   "pin": "The URL points at the main branch; the file is pinned by sha256_expected, which the fetch script checks. A commit hash was not recorded (GitHub API rate limit at integration time).",
+   "licence": "not recorded; the Evo 2 repository is Apache-2.0, the sequence is the public GRCh37.p13 assembly (NCBI)"
+  }
+ },
+ "variant_keys": {
+  "file": "data/genomics/raw/variants-keys.csv",
+  "sha256": "b28bfb92d6fb91f503aea0e834590936c57c80dbe0d8ab9994c9e2d094a68972",
+  "columns": [
+   "chrom",
+   "pos",
+   "ref",
+   "alt"
+  ]
+ },
+ "clean_table": {
+  "file": "data/genomics/raw/brca1-findlay2018-snvs.csv",
+  "sha256": "f40f63ec638e1fbfe2cf3d7077cdccb45a51c72962a9ded6e793a171f7090439",
+  "coordinates": "GRCh37/hg19, 1-based, plus-strand alleles",
+  "rows_in_table": 3893,
+  "kept_snvs": 3893,
+  "dropped_not_snv": 0,
+  "dropped_no_score": 0,
+  "reference_matches": 3893,
+  "reference_mismatches": 0,
+  "n_sheets": 1,
+  "n_columns_in_header": 62,
+  "unique_positions": 1326,
+  "pos_min": 41197722,
+  "pos_max": 41276135,
+  "func_class_counts": {
+   "FUNC": 2821,
+   "LOF": 823,
+   "INT": 249
+  },
+  "consequence_counts": {
+   "Missense": 2086,
+   "Synonymous": 544,
+   "Intronic": 489,
+   "Splice region": 446,
+   "Canonical splice": 143,
+   "Nonsense": 138,
+   "5' UTR": 47
+  },
+  "clinvar_simple_counts": {
+   "absent": 3140,
+   "Uncertain significance": 256,
+   "Pathogenic": 169,
+   "Likely benign": 144,
+   "Conflicting interpretations of pathogenicity": 122,
+   "Likely pathogenic": 40,
+   "Benign": 22
+  },
+  "reference_length": 81195210,
+  "n_with_cadd_score": 3893,
+  "n_with_phylop_mammalian": 3893
+ },
+ "published_values": {
+  "note": "Other people's numbers, read at source; not reproduced here.",
+  "arc_notebook": {
+   "url": "https://raw.githubusercontent.com/ArcInstitute/evo2/main/notebooks/brca1/brca1_zero_shot_vep.ipynb",
+   "retrieved_utc": "2026-11-14T18:12:00Z",
+   "sha256_of_file_read": "198851506df75f63f5b1fad9cd79c5e767b29aef66ac428e66894b151b7adadd",
+   "model": "evo2_1b_base",
+   "window_bp": 8192,
+   "auroc": 0.73,
+   "printed_line": "Zero-shot prediction AUROC: 0.73",
+   "definition": "loss-of-function against functional and intermediate merged"
+  },
+  "bionemo_framework_docs": {
+   "url": "https://docs.nvidia.com/bionemo-framework/latest/models/evo2/",
+   "retrieved_utc": "2026-11-14T18:11:00Z",
+   "read_how": "page fetched and its zero-shot BRCA1 table read by an automated page reader; values match the worker's and the reviewer's reading",
+   "rows": [
+    {
+     "model": "Arc Evo 2 1B",
+     "auroc": 0.73
+    },
+    {
+     "model": "BioNeMo Evo 2 1B",
+     "auroc": 0.76
+    },
+    {
+     "model": "BioNeMo Evo 2 7B",
+     "auroc": 0.87
+    }
+   ]
+  }
+ }
+}

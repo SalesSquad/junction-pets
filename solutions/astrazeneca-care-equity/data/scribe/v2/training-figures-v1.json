@@ -1,0 +1,616 @@
+{
+ "schema": "scribe-training-figures-v1",
+ "synthetic": true,
+ "not_for_clinical_use": true,
+ "generated_utc": "2026-11-14T20:23:03Z",
+ "generated_by": "scribe/v2/training_figures.py",
+ "inputs_sha256": {
+  "data/scribe/v2/ablation-v1.json": "fb36ce80f3db041910a4dbc1a7ce125ae9e584b3904ed9f64d716be941ea55f2",
+  "data/scribe/v3/student/v2-selected/result.json": "8b6a43264af7bda179182d6cf5bd3ac5dc255af253da8287207059b05ed10fdd",
+  "data/scribe/v3/student/S-1b-lora-r16/result.json": "c05ec427549ede850ada9b6e4bc6225f2812785b256322ff11bd14401b169fe8",
+  "data/scribe/v3/student/V3-270m-nemotron/result.json": "32ff271157409750326736802878d9b1f0ed147ac2d511c84aadf16f84e91c09",
+  "data/scribe/v3/student/V3-270m-all/result.json": "9e8c6cb47575254004534e10d5afece86dc20cb8ce27e08a81f387ad267052f6",
+  "data/scribe/v3/student/C-270m-all-v2data/result.json": "b959b55adcd2f68bb9ef7b34f6002fc37b6d889ee4b3b7456a2708139c7f2a1b",
+  "data/scribe/v2/ablation-runs/A-270m-full-finetune-7d4b9047c4f5/result.json": "e7625cc12c2c4dbc3bc9a24d357753d9acd6cdd188865eb717e51e00b41a79ef",
+  "data/scribe/v2/ablation-runs/v1-recipe-270m-60677a6fc706/result.json": "e50667a7282c192f47ed2c1a9347f5a6e51f754939137d2fcb80877e49707ece"
+ },
+ "validation_pairs": {
+  "n_validation_notes": 310,
+  "writers": {
+   "claude-haiku-5-5": 60,
+   "nemotron-3.5-super-vl": 250
+  },
+  "pairs": [
+   {
+    "first": "S-1b-lora-r16",
+    "second": "A-270m-lora-r16 (reference)",
+    "all": {
+     "n": 310,
+     "only_first_correct": 17,
+     "only_second_correct": 4,
+     "first_exact": 0.4032258064516129,
+     "second_exact": 0.36129032258064514,
+     "exact_mcnemar_p": 0.007197380065917969,
+     "holm_adjusted_p_over_all_pairs": 0.06477642059326172
+    },
+    "claude-haiku-5-5": {
+     "n": 60,
+     "only_first_correct": 6,
+     "only_second_correct": 2,
+     "first_exact": 0.21666666666666667,
+     "second_exact": 0.15,
+     "exact_mcnemar_p": 0.2890625
+    },
+    "nemotron-3.5-super-vl": {
+     "n": 250,
+     "only_first_correct": 11,
+     "only_second_correct": 2,
+     "first_exact": 0.448,
+     "second_exact": 0.412,
+     "exact_mcnemar_p": 0.0224609375
+    }
+   },
+   {
+    "first": "V3-270m-nemotron",
+    "second": "A-270m-lora-r16 (reference)",
+    "all": {
+     "n": 310,
+     "only_first_correct": 16,
+     "only_second_correct": 4,
+     "first_exact": 0.4,
+     "second_exact": 0.36129032258064514,
+     "exact_mcnemar_p": 0.01181793212890625,
+     "holm_adjusted_p_over_all_pairs": 0.09454345703125
+    },
+    "claude-haiku-5-5": {
+     "n": 60,
+     "only_first_correct": 11,
+     "only_second_correct": 2,
+     "first_exact": 0.3,
+     "second_exact": 0.15,
+     "exact_mcnemar_p": 0.0224609375
+    },
+    "nemotron-3.5-super-vl": {
+     "n": 250,
+     "only_first_correct": 5,
+     "only_second_correct": 2,
+     "first_exact": 0.424,
+     "second_exact": 0.412,
+     "exact_mcnemar_p": 0.453125
+    }
+   },
+   {
+    "first": "V3-270m-all",
+    "second": "A-270m-lora-r16 (reference)",
+    "all": {
+     "n": 310,
+     "only_first_correct": 20,
+     "only_second_correct": 7,
+     "first_exact": 0.4032258064516129,
+     "second_exact": 0.36129032258064514,
+     "exact_mcnemar_p": 0.0191572904586792,
+     "holm_adjusted_p_over_all_pairs": 0.1341010332107544
+    },
+    "claude-haiku-5-5": {
+     "n": 60,
+     "only_first_correct": 15,
+     "only_second_correct": 0,
+     "first_exact": 0.4,
+     "second_exact": 0.15,
+     "exact_mcnemar_p": 6.103515625e-05
+    },
+    "nemotron-3.5-super-vl": {
+     "n": 250,
+     "only_first_correct": 5,
+     "only_second_correct": 7,
+     "first_exact": 0.404,
+     "second_exact": 0.412,
+     "exact_mcnemar_p": 0.7744140625
+    }
+   },
+   {
+    "first": "C-270m-all-v2data",
+    "second": "A-270m-lora-r16 (reference)",
+    "all": {
+     "n": 310,
+     "only_first_correct": 24,
+     "only_second_correct": 2,
+     "first_exact": 0.432258064516129,
+     "second_exact": 0.36129032258064514,
+     "exact_mcnemar_p": 1.049041748046875e-05,
+     "holm_adjusted_p_over_all_pairs": 0.0001049041748046875
+    },
+    "claude-haiku-5-5": {
+     "n": 60,
+     "only_first_correct": 18,
+     "only_second_correct": 1,
+     "first_exact": 0.43333333333333335,
+     "second_exact": 0.15,
+     "exact_mcnemar_p": 7.62939453125e-05
+    },
+    "nemotron-3.5-super-vl": {
+     "n": 250,
+     "only_first_correct": 6,
+     "only_second_correct": 1,
+     "first_exact": 0.432,
+     "second_exact": 0.412,
+     "exact_mcnemar_p": 0.125
+    }
+   },
+   {
+    "first": "V3-270m-nemotron",
+    "second": "S-1b-lora-r16",
+    "all": {
+     "n": 310,
+     "only_first_correct": 11,
+     "only_second_correct": 12,
+     "first_exact": 0.4,
+     "second_exact": 0.4032258064516129,
+     "exact_mcnemar_p": 1.0,
+     "holm_adjusted_p_over_all_pairs": 1.0
+    },
+    "claude-haiku-5-5": {
+     "n": 60,
+     "only_first_correct": 9,
+     "only_second_correct": 4,
+     "first_exact": 0.3,
+     "second_exact": 0.21666666666666667,
+     "exact_mcnemar_p": 0.266845703125
+    },
+    "nemotron-3.5-super-vl": {
+     "n": 250,
+     "only_first_correct": 2,
+     "only_second_correct": 8,
+     "first_exact": 0.424,
+     "second_exact": 0.448,
+     "exact_mcnemar_p": 0.109375
+    }
+   },
+   {
+    "first": "V3-270m-all",
+    "second": "S-1b-lora-r16",
+    "all": {
+     "n": 310,
+     "only_first_correct": 15,
+     "only_second_correct": 15,
+     "first_exact": 0.4032258064516129,
+     "second_exact": 0.4032258064516129,
+     "exact_mcnemar_p": 1.0,
+     "holm_adjusted_p_over_all_pairs": 1.0
+    },
+    "claude-haiku-5-5": {
+     "n": 60,
+     "only_first_correct": 12,
+     "only_second_correct": 1,
+     "first_exact": 0.4,
+     "second_exact": 0.21666666666666667,
+     "exact_mcnemar_p": 0.00341796875
+    },
+    "nemotron-3.5-super-vl": {
+     "n": 250,
+     "only_first_correct": 3,
+     "only_second_correct": 14,
+     "first_exact": 0.404,
+     "second_exact": 0.448,
+     "exact_mcnemar_p": 0.012725830078125
+    }
+   },
+   {
+    "first": "C-270m-all-v2data",
+    "second": "S-1b-lora-r16",
+    "all": {
+     "n": 310,
+     "only_first_correct": 17,
+     "only_second_correct": 8,
+     "first_exact": 0.432258064516129,
+     "second_exact": 0.4032258064516129,
+     "exact_mcnemar_p": 0.10775214433670044,
+     "holm_adjusted_p_over_all_pairs": 0.4656982421875
+    },
+    "claude-haiku-5-5": {
+     "n": 60,
+     "only_first_correct": 14,
+     "only_second_correct": 1,
+     "first_exact": 0.43333333333333335,
+     "second_exact": 0.21666666666666667,
+     "exact_mcnemar_p": 0.0009765625
+    },
+    "nemotron-3.5-super-vl": {
+     "n": 250,
+     "only_first_correct": 3,
+     "only_second_correct": 7,
+     "first_exact": 0.432,
+     "second_exact": 0.448,
+     "exact_mcnemar_p": 0.34375
+    }
+   },
+   {
+    "first": "V3-270m-all",
+    "second": "V3-270m-nemotron",
+    "all": {
+     "n": 310,
+     "only_first_correct": 8,
+     "only_second_correct": 7,
+     "first_exact": 0.4032258064516129,
+     "second_exact": 0.4,
+     "exact_mcnemar_p": 1.0,
+     "holm_adjusted_p_over_all_pairs": 1.0
+    },
+    "claude-haiku-5-5": {
+     "n": 60,
+     "only_first_correct": 7,
+     "only_second_correct": 1,
+     "first_exact": 0.4,
+     "second_exact": 0.3,
+     "exact_mcnemar_p": 0.0703125
+    },
+    "nemotron-3.5-super-vl": {
+     "n": 250,
+     "only_first_correct": 1,
+     "only_second_correct": 6,
+     "first_exact": 0.404,
+     "second_exact": 0.424,
+     "exact_mcnemar_p": 0.125
+    }
+   },
+   {
+    "first": "C-270m-all-v2data",
+    "second": "V3-270m-nemotron",
+    "all": {
+     "n": 310,
+     "only_first_correct": 15,
+     "only_second_correct": 5,
+     "first_exact": 0.432258064516129,
+     "second_exact": 0.4,
+     "exact_mcnemar_p": 0.04138946533203125,
+     "holm_adjusted_p_over_all_pairs": 0.2483367919921875
+    },
+    "claude-haiku-5-5": {
+     "n": 60,
+     "only_first_correct": 10,
+     "only_second_correct": 2,
+     "first_exact": 0.43333333333333335,
+     "second_exact": 0.3,
+     "exact_mcnemar_p": 0.03857421875
+    },
+    "nemotron-3.5-super-vl": {
+     "n": 250,
+     "only_first_correct": 5,
+     "only_second_correct": 3,
+     "first_exact": 0.432,
+     "second_exact": 0.424,
+     "exact_mcnemar_p": 0.7265625
+    }
+   },
+   {
+    "first": "C-270m-all-v2data",
+    "second": "V3-270m-all",
+    "all": {
+     "n": 310,
+     "only_first_correct": 16,
+     "only_second_correct": 7,
+     "first_exact": 0.432258064516129,
+     "second_exact": 0.4032258064516129,
+     "exact_mcnemar_p": 0.0931396484375,
+     "holm_adjusted_p_over_all_pairs": 0.4656982421875
+    },
+    "claude-haiku-5-5": {
+     "n": 60,
+     "only_first_correct": 6,
+     "only_second_correct": 4,
+     "first_exact": 0.43333333333333335,
+     "second_exact": 0.4,
+     "exact_mcnemar_p": 0.75390625
+    },
+    "nemotron-3.5-super-vl": {
+     "n": 250,
+     "only_first_correct": 10,
+     "only_second_correct": 3,
+     "first_exact": 0.432,
+     "second_exact": 0.404,
+     "exact_mcnemar_p": 0.09228515625
+    }
+   }
+  ],
+  "validation_exact_match": {
+   "A-270m-lora-r16 (reference)": {
+    "k": 112,
+    "n": 310,
+    "value": 0.36129032258064514,
+    "wilson95": [
+     0.3098147568028864,
+     0.416161536057981
+    ]
+   },
+   "S-1b-lora-r16": {
+    "k": 125,
+    "n": 310,
+    "value": 0.4032258064516129,
+    "wilson95": [
+     0.35012587380613364,
+     0.45869479563168086
+    ]
+   },
+   "V3-270m-nemotron": {
+    "k": 124,
+    "n": 310,
+    "value": 0.4,
+    "wilson95": [
+     0.34701028448811405,
+     0.4554377405976277
+    ]
+   },
+   "V3-270m-all": {
+    "k": 125,
+    "n": 310,
+    "value": 0.4032258064516129,
+    "wilson95": [
+     0.35012587380613364,
+     0.45869479563168086
+    ]
+   },
+   "C-270m-all-v2data": {
+    "k": 134,
+    "n": 310,
+    "value": 0.432258064516129,
+    "wilson95": [
+     0.37827346492464153,
+     0.48790100368182865
+    ]
+   }
+  },
+  "note": "exact McNemar p-values per pair, and a Holm adjustment over all pairs of the 'all' rows; these validation comparisons were not pre-registered and are given to show which differences are within noise"
+ },
+ "serving_parity": {
+  "notes_file": "serve/smoke/heldout-v2-100.jsonl",
+  "notes_sha256": "67484fa6050b571ff0e826b63aaf417c6fc7eb3e3658859419723c482145a697",
+  "in_process_source": "data/scribe/v2/ablation-v1.json test.systems.selected (unconstrained greedy, Transformers)",
+  "exact_rule": "served canonical answer equal to target_json (key order ignored)",
+  "by_split": {
+   "test_nemotron": 50,
+   "test_haiku": 50
+  },
+  "in_process_exact": 22,
+  "structured_outputs": {
+   "file": "serve/smoke/smoke-guided-results.jsonl",
+   "served_exact": 22,
+   "agreement": {
+    "both_exact": 22,
+    "both_wrong": 78,
+    "only_in_process_exact": 0,
+    "only_served_exact": 0
+   },
+   "same_verdict_on_every_note": true,
+   "compare_offline": {
+    "command": "python serve/smoke/tools/compare_offline.py serve/smoke/heldout-v2-100.jsonl serve/smoke/smoke-guided-results.jsonl data/scribe/v2/ablation-runs/evaluations/A-270m-lora-r16--test_nemotron+test_haiku--off.json structured_outputs",
+    "same_prediction": 68,
+    "same_raw_text": 68,
+    "n": 100,
+    "agreement_same_outcome": 1.0,
+    "by_split": {
+     "test_nemotron": {
+      "n": 50,
+      "same_prediction": 38,
+      "served_exact": 19,
+      "offline_exact": 19,
+      "served_invalid": 0,
+      "offline_invalid": 1
+     },
+     "test_haiku": {
+      "n": 50,
+      "same_prediction": 30,
+      "served_exact": 3,
+      "offline_exact": 3,
+      "served_invalid": 0,
+      "offline_invalid": 5
+     }
+    },
+    "offline_max_new_tokens": [
+     134
+    ],
+    "served_max_tokens": 384
+   }
+  },
+  "plain": {
+   "file": "serve/smoke/smoke-plain-results.jsonl",
+   "served_exact": 22,
+   "agreement": {
+    "both_exact": 22,
+    "both_wrong": 78,
+    "only_in_process_exact": 0,
+    "only_served_exact": 0
+   },
+   "same_verdict_on_every_note": true,
+   "compare_offline": {
+    "command": "python serve/smoke/tools/compare_offline.py serve/smoke/heldout-v2-100.jsonl serve/smoke/smoke-plain-results.jsonl data/scribe/v2/ablation-runs/evaluations/A-270m-lora-r16--test_nemotron+test_haiku--off.json plain",
+    "same_prediction": 70,
+    "same_raw_text": 70,
+    "n": 100,
+    "agreement_same_outcome": 1.0,
+    "by_split": {
+     "test_nemotron": {
+      "n": 50,
+      "same_prediction": 36,
+      "served_exact": 19,
+      "offline_exact": 19,
+      "served_invalid": 1,
+      "offline_invalid": 1
+     },
+     "test_haiku": {
+      "n": 50,
+      "same_prediction": 34,
+      "served_exact": 3,
+      "offline_exact": 3,
+      "served_invalid": 1,
+      "offline_invalid": 5
+     }
+    },
+    "offline_max_new_tokens": [
+     134
+    ],
+    "served_max_tokens": 384
+   }
+  }
+ },
+ "epochs": {
+  "A-270m-lora-r16 (reference)": {
+   "train_rows": 1716,
+   "steps": 324,
+   "effective_batch": 16,
+   "examples_drawn": 5184,
+   "epochs": 3.020979020979021
+  },
+  "S-1b-lora-r16": {
+   "train_rows": 1716,
+   "steps": 324,
+   "effective_batch": 16,
+   "examples_drawn": 5184,
+   "epochs": 3.020979020979021
+  },
+  "V3-270m-nemotron": {
+   "train_rows": 3222,
+   "steps": 324,
+   "effective_batch": 16,
+   "examples_drawn": 5184,
+   "epochs": 1.6089385474860336
+  },
+  "V3-270m-all": {
+   "train_rows": 3860,
+   "steps": 324,
+   "effective_batch": 16,
+   "examples_drawn": 5184,
+   "epochs": 1.3430051813471502
+  },
+  "C-270m-all-v2data": {
+   "train_rows": 2354,
+   "steps": 324,
+   "effective_batch": 16,
+   "examples_drawn": 5184,
+   "epochs": 2.202209005947324
+  }
+ },
+ "gpu": {
+  "runs": {
+   "ablation A-270m-lora-r16": {
+    "train_seconds": 96.00699389900001,
+    "total_seconds": 213.61581389399998,
+    "peak_gpu_memory_gib": 15.536918640136719,
+    "source": "data/scribe/v2/ablation-v1.json"
+   },
+   "ablation A-270m-full-finetune": {
+    "train_seconds": 198.85278021199974,
+    "total_seconds": 283.7379325940001,
+    "peak_gpu_memory_gib": 22.093942165374756,
+    "source": "data/scribe/v2/ablation-v1.json"
+   },
+   "ablation v1-recipe-270m": {
+    "train_seconds": 769.8251435479997,
+    "total_seconds": 896.0183111650003,
+    "peak_gpu_memory_gib": 1.268284797668457,
+    "source": "data/scribe/v2/ablation-v1.json"
+   },
+   "post-ablation S-1b-lora-r16": {
+    "train_seconds": 254.13201313700029,
+    "total_seconds": 443.8711512050004,
+    "peak_gpu_memory_gib": 39.83346700668335,
+    "source": "data/scribe/v3/student/S-1b-lora-r16/result.json"
+   },
+   "post-ablation V3-270m-nemotron": {
+    "train_seconds": 353.0613893620002,
+    "total_seconds": 488.5540992489987,
+    "peak_gpu_memory_gib": 24.04442548751831,
+    "source": "data/scribe/v3/student/V3-270m-nemotron/result.json"
+   },
+   "post-ablation V3-270m-all": {
+    "train_seconds": 274.7453779560001,
+    "total_seconds": 434.4692359800001,
+    "peak_gpu_memory_gib": 24.531880378723145,
+    "source": "data/scribe/v3/student/V3-270m-all/result.json"
+   },
+   "post-ablation C-270m-all-v2data": {
+    "train_seconds": 175.544476262,
+    "total_seconds": 310.9889491210006,
+    "peak_gpu_memory_gib": 14.803108215332031,
+    "source": "data/scribe/v3/student/C-270m-all-v2data/result.json"
+   }
+  },
+  "sum_train_seconds": 2122.168174376,
+  "sum_total_seconds": 3071.255493208,
+  "not_included": [
+   "test evaluations (logged in gpu-logs/ as start and exit times only)",
+   "three Gemma 3 4B attempts that produced no result (gpu-logs/s4b*.log, queue3.log)",
+   "the vLLM smoke test (serve/smoke/)",
+   "the Evo 2 genomics scoring on the same machine"
+  ],
+  "ablation_budget": {
+   "minutes": 35.0,
+   "elapsed_seconds": 2076.9278722400004,
+   "started_utc": "2026-11-14T18:23:49Z",
+   "finished_utc": "2026-11-14T18:58:26Z"
+  },
+  "planner_estimate_vs_measured_1b": {
+   "planned_estimate_seconds": 792.1440631709086,
+   "estimate_basis": "extrapolated from 270m by parameter count",
+   "reserve_seconds_if_selected": 5447.98636771171,
+   "seconds_left_after_reserve": -3570.2734942447096,
+   "measured_train_seconds": 254.13201313700029,
+   "measured_total_seconds": 443.8711512050004,
+   "measured_source": "data/scribe/v3/student/S-1b-lora-r16/result.json"
+  },
+  "gap_between_recorded_gpu_jobs": {
+   "previous_job_end_utc": "2026-11-14T17:27:31Z",
+   "previous_job_source": "data/genomics/brca1-evo2-v1.json (Evo 2 scoring stopped by itself at its time budget)",
+   "next_job_start_utc": "2026-11-14T18:23:27Z",
+   "next_job_source": "data/scribe/v2/gpu-runs/v2-ablation.jsonl, first line (v2_gpu_setup)",
+   "minutes": 55.93333333333333,
+   "note": "no run log in runs/ or data/ records a GPU step on the machine between these two times; the cause is not recorded in the repository"
+  }
+ },
+ "machine_cost": {
+  "machine": "az-equity-a100-20261114",
+  "instance_type": "1A100.22V",
+  "spot": false,
+  "price_per_hour_usd_listed": 2.386,
+  "price_source": "runs/v2-ops.jsonl step verda_readonly_shape_check",
+  "created_utc": "2026-11-14T16:56:35.049Z",
+  "created_source": "runs/v2-ops.jsonl step verda_readonly_shape_check",
+  "deleted_utc_minute_precision": "2026-11-14T19:27:00Z",
+  "deleted_source": "data/scribe/v3/student/RUNS.md (no JSON record of the delete)",
+  "hours": 2.506930833333333,
+  "list_price_times_hours_usd": 5.981536968333333,
+  "limit": "list price times wall time; the Verda invoice was not read, and the price may exclude or include the OS volume"
+ },
+ "api_spend": {
+  "typesafe_usd": {
+   "v1_dataset": 0.287565516,
+   "v2_dataset": 0.05925628800000001,
+   "v3_judges_and_gate": 0.22897719600000002
+  },
+  "typesafe_usd_total": 0.5757990000000001,
+  "typesafe_sources": [
+   "data/scribe/dataset-stats.json typesafe_cost_usd",
+   "runs/v2-data.jsonl last verify_notes ledger_cost_usd + no_event_gate_positive_control",
+   "data/scribe/v3/judges/usage-typesafe.json cost_usd"
+  ],
+  "openai_decisions": {
+   "tokens": 1283798,
+   "requests": 876,
+   "usd_at_list_rate_0.10_per_million_input": 0.12837980000000002,
+   "source": "data/scribe/v3/judges/usage-openai.json; rate from scribe/TEACHING.md section 8"
+  },
+  "haiku_recorded_usd": {
+   "v1_independent_test_notes": 0.070736,
+   "v2_writer_pilot_reported": 0.049846
+  },
+  "not_recorded": [
+   "Nemotron teacher on Verda: 4,500 requests (round 1) and 4,042 (round 2), no price read",
+   "Haiku writing of the 1,198 version-2 notes beyond the pilot",
+   "Haiku audit of round 2 (data/scribe/v3/audit)",
+   "the first GPU machine az-equity-gpu-20261114 (price and lifetime not in the repository)"
+  ],
+  "teacher_requests": {
+   "round_1": 4500,
+   "round_2": 4042
+  }
+ }
+}
