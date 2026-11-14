@@ -9,6 +9,7 @@ import json
 import numpy as np
 
 import offline_study as s
+import vision_probe as v
 
 
 class SplitAndMetrics(unittest.TestCase):
@@ -94,6 +95,36 @@ class MetadataGuard(unittest.TestCase):
                 with patch.object(s, "INFO_SHA256", hashlib.sha256(edited).hexdigest()):
                     with self.assertRaisesRegex(ValueError, "joint order"):
                         s.dataset_preflight(root)
+
+
+class VisionHelpers(unittest.TestCase):
+    def test_episode_uniform_frame_selection(self):
+        ep = np.repeat(np.arange(20), 30)
+        frame = np.tile(np.arange(30), 20)
+        chosen = v.balanced_indices(ep, frame, 3, 8)
+        self.assertEqual(len(chosen), 160)
+        self.assertEqual(set(np.unique(ep[chosen])), set(range(20)))
+        self.assertTrue(np.all(frame[chosen] % 3 == 0))
+        with self.assertRaises(ValueError):
+            v.balanced_indices(ep, frame, 6, 8)
+
+    def test_dual_ridge_on_frozen_embedding_shape(self):
+        rng = np.random.default_rng(23)
+        x = rng.normal(size=(200, 9)).astype(np.float32)
+        y = np.concatenate([x, x, x, x[:, :1]], axis=1)
+        # Grouped metrics require 28-dimensional outputs; the helper itself is generic.
+        fitted = v.dual_ridge_fit(x[:150], y[:150], 0.0001)
+        forecast = v.dual_ridge_predict(fitted, x[150:])
+        self.assertEqual(forecast.shape, y[150:].shape)
+        self.assertLess(float(np.abs(forecast - y[150:]).mean()), 0.002)
+
+    def test_corrupt_resume_cache_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            np.savez_compressed(root / "embeddings.partial.npz",
+                                rows=np.array([1, 2]), embeddings=np.zeros((2, 12)))
+            with self.assertRaisesRegex(ValueError, "mismatched"):
+                v.recover_progress(root, np.array([1, 2, 3]))
 
 
 if __name__ == "__main__":
