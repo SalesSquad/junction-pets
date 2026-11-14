@@ -19,8 +19,9 @@ state, read GitHub's current main HEAD and PRs, then follow
    the relevant service contract. Do not load every company's private context.
 4. Check the current PR/path owner before taking a write scope. Use an isolated
    task branch; preserve existing work and the root integrator's shared paths.
-5. Record source SHA, work ID, owned paths, checks and next action in the PR.
-   Distinguish authored, synthetic, model-observed and real host/device evidence.
+5. For ordinary development, note branch/commit, changed scope and next action.
+   Checks or independent review are optional unless concrete risk or real
+   qualification requires them. Never conflate synthetic and actual host evidence.
 
 ## Research now available directly in main
 
@@ -97,7 +98,8 @@ checkout, copy credentials, or silently treat another branch's code as main.
 Independent company work may proceed only after current ownership and source are
 checked; cross-package integration remains serialized through its owner.
 
-Use the repository's declared checks for the paths changed. A README count is
+Use a relevant focused check only if the changed behavior poses a real risk;
+ordinary docs/company-agent development needs no testing cycle. A README count is
 historical evidence bound to its recorded source, not a fresh test run. Publish
 owned changes on a task branch, bind independent review to the final bytes, and
 carry any missing live provider/device/host gate as a concrete next action.
