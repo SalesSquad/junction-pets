@@ -18,7 +18,8 @@ legal. The frozen candidate instead detects an **earlier** public-mask event:
    (lateral) is **still legal**, and public goal distance is over 35 mm, route
    to exact immutable V8 hierarchical policy for at most 12 options.
 3. On public-mask forward reopening (or after 12 options), reset to a freshly
-   instantiated original V5 controller. Allow at most 2 rescue rounds/episode.
+   instantiated original V5 controller and actually execute at least one V5
+   decision before a second rescue. Allow at most 2 rescue rounds/episode.
 4. Every action must still be a Python `int` in `[0,6]` and legal in the
    original mask. Malformed input, unreviewed checkpoint or illegal output
    **raises**: no hidden simulator state, oracle, illegal-action correction or
@@ -48,7 +49,9 @@ physics are untouched.
 receipt, independent qualification, original 640 paired trial rows and the
 full 29,923 raw transition actions. This is not self-attestation via a
 newly created manifest. V8 runner, trainer, checkpoint and trainer receipt are
-also bound to exact SHA256 in `hybrid_policy.py` at inference initialization.
+   also bound to exact SHA256 in `hybrid_policy.py` at inference initialization.
+   The V8 trainer is executed from reviewed bytes under a unique module name:
+   a conflicting cached generic Python `run` import causes a hard failure.
 
 ### Frozen policy-diagnostic readout on original 513000 TRAIN worlds
 
