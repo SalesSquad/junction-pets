@@ -52,8 +52,33 @@ python train_nonlinear.py \
 
 ## Results and limits
 
-Implementation is prepared; no R7 fit has completed at this source checkpoint.
-Actual results will be published as numeric aggregates and immutable hashes.
+All four actual fits completed on source commit
+`58663aeb5bbdd879e18b1f544aed8f1f97bef907`, within a 30.52-second outer run.
+Each trained 150 boosting iterations and reduced weighted training loss.
+No candidate improved frozen R4, so R4 remains selected.
+
+| Model | Dev exact rank1 | MRR |
+|---|---:|---:|
+| Frozen R4 | 466/727 (64.10%) | 0.743285 |
+| 15 leaves, L2=1 | 449/727 (61.76%) | 0.731708 |
+| 15 leaves, L2=10 | 455/727 (62.59%) | 0.735589 |
+| 31 leaves, L2=1 | 449/727 (61.76%) | 0.731071 |
+| 31 leaves, L2=10 | 452/727 (62.17%) | 0.733032 |
+
+`results/report.json` preserves all four actual candidates, paired changes,
+runtime versions, thread counts and source/input hashes. `results/model-summary.json`
+separates the best trained HGB model from the selected frozen R4 model.
+`results/verification.json` binds the actual 404000 prediction rows, 20200
+query-metric rows and exact serialization/prediction parity. Original report
+bytes are preserved. The fixed four-candidate search was not expanded after
+seeing development results.
+
+The independent source review and small admission/ranking checks preceded
+execution. No unchanged R6 suite or additional model fit was repeated merely
+to publish these results. This experiment shows that these four nonlinear
+configurations did not improve the present six-feature ranking task; it does
+not prove that no other model can improve it.
+
 Raw candidate rows, truth, query-level predictions and serialized joblib
 models remain on the authorized execution host. A joblib artifact must only
 be loaded when its trusted source and recorded hash have been verified.
