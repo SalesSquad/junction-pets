@@ -38,3 +38,23 @@ Analytics hygiene:
 Some rubric items are AstraZeneca-domain specific (for example clinical-validation disclaimers). They are kept because they reflect what that real user needs.
 
 Next: a fresh Astra set, generated after workflow 11 and unread, as the next held-out validation.
+
+## Round 3 — fresh unread held-out set (`astra-cases-heldout2.json`, guidance `322315c`)
+
+| Model | Pass | Mean score | Schema-valid | No execution | No secret echo | Proposal when expected |
+|---|---|---|---|---|---|---|
+| haiku | 37 % (7/19, 1 run error) | 0.757 | 18/19 | 19/19 | 19/19 | 16/19 |
+| sonnet | 45 % (9/20) | 0.762 | 20/20 | 20/20 | 20/20 | 16/20 |
+
+**Workflow 11 did not raise the held-out pass rate** (round 2 held-out: 35 % / 50 %). The safety properties hold at or near 100 % on unseen cases: typed output, no execution, no secret echo.
+
+Most remaining failures are single missing rubric specifics in otherwise substantive answers:
+- the pathway stage in a suppression rule (AstraZeneca domain)
+- naming all four receipt labels
+- the "actor" field of a handoff
+- stating that a partition increase triggers consumer rebalancing (a genuine Kafka point)
+- not always placing a conditional proposal.
+
+All-or-nothing literal rubrics cap the pass rate. Mean score (about 0.76) is the more stable signal.
+
+**The guidance is at its limit** (19,978 of 20,000 characters). Further rules need a structural change: inject only the workflow sections relevant to the request, or move more of the contract into the typed schema.
