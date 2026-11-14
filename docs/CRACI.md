@@ -107,6 +107,13 @@ This qualifies import/provenance when executed successfully, not banking advice,
 forecasting, browser behavior or real customer integration. Execution is pending
 until an actual run is linked in the PR handoff.
 
+The first sponsor [run43549430489](https://github.com/SalesSquad/junction-pets/actions/runs/43549430489)
+failed before import: the CRACI trace recorded18 denied requests to GitHub's
+LFS object host `github-cloud.githubusercontent.com`. The sponsor lane now
+allows only that observed TLS hostname in addition to the GitHub preset.
+The independent complete-file size/SHA256 check still rejects a pointer, error
+page, partial object or different dataset before invoking the importer.
+
 ### Continuing use and stop
 
 The existing Junction Product Factory and sole Portfolio PR Recovery

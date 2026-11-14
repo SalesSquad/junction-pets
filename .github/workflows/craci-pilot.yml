@@ -197,6 +197,10 @@ jobs:
           network: |
             default: deny
             presets: [github]
+            connections:
+              - tls:
+                  serverNamePatterns: [github-cloud.githubusercontent.com]
+                  ports: [443]
       - name: Enforce the credit window and immutable input
         env:
           SOURCE_SHA: ${{ inputs.source_sha }}
