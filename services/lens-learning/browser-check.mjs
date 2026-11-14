@@ -28,7 +28,7 @@ try {
   const click = async (action) => { await button(action).click(); await ready(); };
   const advice = async (action) => page.waitForFunction((expected) =>
     document.querySelector('#learningAdviceTitle').dataset.learningRecommendation === expected, action);
-  const saved = async () => page.evaluate(() => JSON.parse(localStorage.getItem('chibi-lens.learning.synthetic.v1')));
+  const saved = async () => page.evaluate(() => JSON.parse(localStorage.getItem('chibi-lens.learning.synthetic.camera-packing.v1')));
   const confirm = async () => {
     await page.locator('#primaryAction').click();
     await page.locator('#confirmCheckbox').check();
@@ -40,7 +40,7 @@ try {
   await click('consent');
   await page.locator('#learningStyle').selectOption('detailed');
   await click('teach');
-  await click('approve');
+  await click('approve-memory');
   await advice('explain');
   checks.push('explicit-teach-and-approve');
 
@@ -56,7 +56,7 @@ try {
   await page.locator('#learningStyle').selectOption('quiet');
   await click('teach'); await advice('stay_silent');
   await page.locator('.learning-more > summary').click();
-  await page.locator('#learningTemplate').selectOption('travel-kit');
+  await page.locator('#learningTemplate').selectOption('camera-bag-travel');
   await click('next-episode'); await advice('stay_silent');
   assert.equal((await page.locator('#countBadge').innerText()).replace(/\s/g, ''), '0/3');
   await page.reload(); await button('consent').waitFor(); await advice('stay_silent');
@@ -81,8 +81,10 @@ try {
 
   await click('forget-all');
   await page.reload(); await button('consent').waitFor();
+  const forgotten = await saved();
+  assert.equal(forgotten.memories.length + forgotten.outcomes.length + forgotten.reminders.length, 0);
   await click('consent'); await advice('one_step');
-  assert.equal(await page.locator('#learningMemories').innerText().then((text) => /Approved|Confirmed|Detailed help|Quiet/.test(text)), false);
+  assert.equal((await saved()).memories.length, 0);
   checks.push('forget-survives-reload-and-restarts-without-preference');
   assert.deepEqual(errors, []);
   const source = {};
