@@ -45,6 +45,28 @@ CREATE TABLE ledger_outbox (
   created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
   delivered_at timestamptz
 );
+-- The outbox event is the durable seal for a posted ledger batch. Only a
+-- one-way delivery timestamp may change; deleting/repointing an event must
+-- never reopen a committed batch for additional entries.
+CREATE FUNCTION guard_outbox_seal() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF TG_OP IN ('DELETE','TRUNCATE') THEN
+    RAISE EXCEPTION 'IMMUTABLE_OUTBOX_SEAL' USING ERRCODE='23514';
+  END IF;
+  IF NEW.event_id IS DISTINCT FROM OLD.event_id OR
+     NEW.batch_id IS DISTINCT FROM OLD.batch_id OR
+     NEW.event_kind IS DISTINCT FROM OLD.event_kind OR
+     NEW.payload IS DISTINCT FROM OLD.payload OR
+     NEW.created_at IS DISTINCT FROM OLD.created_at OR
+     (OLD.delivered_at IS NOT NULL AND NEW.delivered_at IS DISTINCT FROM OLD.delivered_at) THEN
+    RAISE EXCEPTION 'IMMUTABLE_OUTBOX_SEAL' USING ERRCODE='23514';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER outbox_seal_write_guard BEFORE UPDATE OR DELETE ON ledger_outbox
+FOR EACH ROW EXECUTE FUNCTION guard_outbox_seal();
+CREATE TRIGGER outbox_seal_truncate_guard BEFORE TRUNCATE ON ledger_outbox
+FOR EACH STATEMENT EXECUTE FUNCTION guard_outbox_seal();
 CREATE FUNCTION assert_balanced_batch() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE n bigint; total bigint;
 BEGIN
@@ -78,3 +100,7 @@ CREATE TRIGGER entries_append_only BEFORE UPDATE OR DELETE ON ledger_entries
 FOR EACH ROW EXECUTE FUNCTION forbid_ledger_rewrite();
 CREATE TRIGGER batches_append_only BEFORE UPDATE OR DELETE ON ledger_batches
 FOR EACH ROW EXECUTE FUNCTION forbid_ledger_rewrite();
+CREATE TRIGGER entries_no_truncate BEFORE TRUNCATE ON ledger_entries
+FOR EACH STATEMENT EXECUTE FUNCTION forbid_ledger_rewrite();
+CREATE TRIGGER batches_no_truncate BEFORE TRUNCATE ON ledger_batches
+FOR EACH STATEMENT EXECUTE FUNCTION forbid_ledger_rewrite();
