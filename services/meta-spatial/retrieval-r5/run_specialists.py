@@ -3,6 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import argparse
+import copy
 import hashlib
 import itertools
 import json
@@ -44,13 +45,19 @@ def constrained_format(lane):
     schema = output["json_schema"]["schema"]
     permutations = [list(p) for p in itertools.permutations(("c01", "c02", "c03"))]
     schema["properties"]["ranking"]["enum"] = permutations
-    schema["anyOf"] = [{"properties": {
-        "identifiability": {"enum": ["insufficient"]}, "proposed_candidate": {"type": "null"}}}]
+    # Each alternative repeats the complete object contract. A partial-properties
+    # union produced a ranking-only response on the observed vLLM deployment.
+    abstention = copy.deepcopy(schema)
+    abstention["properties"]["identifiability"] = {"type": "string", "enum": ["insufficient"]}
+    abstention["properties"]["proposed_candidate"] = {"type": "null"}
+    alternatives = [abstention]
     for alias in ("c01", "c02", "c03"):
-        schema["anyOf"].append({"properties": {
-            "identifiability": {"enum": ["distinguishable"]},
-            "proposed_candidate": {"enum": [alias]},
-            "ranking": {"enum": [p for p in permutations if p[0] == alias]}}})
+        identified = copy.deepcopy(schema)
+        identified["properties"]["identifiability"] = {"type": "string", "enum": ["distinguishable"]}
+        identified["properties"]["proposed_candidate"] = {"type": "string", "enum": [alias]}
+        identified["properties"]["ranking"]["enum"] = [p for p in permutations if p[0] == alias]
+        alternatives.append(identified)
+    output["json_schema"]["schema"] = {"anyOf": alternatives}
     return output
 
 
