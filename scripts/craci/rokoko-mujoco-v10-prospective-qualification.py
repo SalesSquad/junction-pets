@@ -4,8 +4,8 @@
 The producer runs 800 actual episodes.  A successful job proves data
 completeness, not superiority, safety certification, an unlocked test result,
 or permission to promote/deploy V10.  Keep the original 20 MiB per-file and
-63 MiB total CRACI collector caps: package both complete original traces via
-the separately reviewed V7 lossless evidence packer after qualification.
+63 MiB total CRACI collector caps: package both complete private originals
+directly into bounded ZIP parts with the new source-reviewed V10 packer.
 """
 from __future__ import annotations
 
@@ -229,6 +229,80 @@ def verify_readout(training, readout):
             "V10_INDEPENDENT_PAIRED_WIN_LOSS_NOT_FROM_ORIGINAL_TRIALS")
 
 
+def replay_clear_goal_successes(evidence_dir, training, env_factory,
+                                policy_factory, world_signature, near):
+    """Physically re-execute *all* claimed clear-corridor safe goal successes.
+
+    The original V7 replayer already covers every near success / significant
+    near lateral movement. This disjoint independent replay closes its clear-
+    goal gap without changing V7's frozen selection logic or verifier.
+    """
+    selected = {(r["seed"], r["strategy"]): r for r in training["trials"]
+                if not r["observed_corridor"] and r["success"] and
+                not r["unsafe"] and not r["abstained"]}
+    seen = set()
+    env = env_factory()
+    with gzip.open(evidence_dir / "full_transitions.jsonl.gz", "rt",
+                   encoding="utf8") as stream:
+        for line in stream:
+            doc = json.loads(line)
+            key = (doc["seed"], doc["strategy"])
+            if key not in selected:
+                continue
+            require(key not in seen, "V10_CLEAR_GOAL_DUPLICATE_OR_UNKNOWN_TRACE")
+            row = selected[key]
+            observation = env.reset(seed=doc["seed"], ood=False)
+            require(world_signature(env) == row["world_hash"] and
+                    near(observation, doc["transitions"][0]["observation"]),
+                    "V10_CLEAR_GOAL_PHYSICS_WORLD_SOURCE_CHANGED")
+            controller = policy_factory(doc["strategy"])()
+            last_info = None
+            max_dwell = 0
+            for idx, event in enumerate(doc["transitions"]):
+                require(near(observation, event["observation"]),
+                        "V10_CLEAR_GOAL_TRUE_PHYSICS_BEFORE_OBSERVATION_CHANGED")
+                original_mask = env.mask(observation)
+                require([int(x) for x in original_mask] == event["mask"] and
+                        int(original_mask[event["action"]]) == 1,
+                        "V10_CLEAR_GOAL_ORIGINAL_SEVEN_MASK_VIOLATED")
+                proposed = controller(observation.copy(), original_mask.copy())
+                require(type(proposed) is int and proposed == event["action"],
+                        "V10_CLEAR_GOAL_FROZEN_POLICY_ACTION_NOT_REPRODUCED")
+                observation, reward, done, info = env.step(proposed)
+                max_dwell = max(max_dwell, int(env.dwell))
+                require(near(observation, event["next_observation"]) and
+                        abs(float(reward) - float(event["reward"])) <= 1e-5 and
+                        bool(done) == event["done"] and
+                        int(info["cost"]) == event["cost"] and
+                        int(info["contacts"]) == event["contacts_cumulative"] and
+                        bool(info["success"]) == event["success_info"] and
+                        max_dwell == event["dwell_ticks_cumulative"] and
+                        int(env.dwell) == event["dwell_ticks_current"] and
+                        (not done or idx == len(doc["transitions"]) - 1),
+                        "V10_CLEAR_GOAL_TRUE_PHYSICS_TRANSITION_DIVERGED")
+                last_info = info
+            require(last_info is not None and bool(env.done) and
+                    bool(last_info["success"]) and not bool(last_info["unsafe"]) and
+                    not bool(last_info["abstained"]) and
+                    int(env.dwell) >= 250 and int(env.contacts) > 0 and
+                    int(env.steps) == row["option_steps"] and
+                    int(env.physics_steps) == row["physics_steps"] and
+                    int(last_info["contacts"]) == row["contacts"] and
+                    abs(float(last_info["error"]) - row["final_error"]) < 1e-5,
+                    "V10_CLEAR_GOAL_FROZEN_MUJOCO_TERMINAL_DWELL_NOT_REPRODUCED")
+            seen.add(key)
+    require(seen == set(selected), "V10_CLEAR_GOAL_POSITIVE_PHYSICS_REPLAY_INCOMPLETE")
+    sorted_keys = sorted([list(key) for key in seen])
+    key_sha = hashlib.sha256(json.dumps(sorted_keys, sort_keys=True,
+                                       separators=(",", ":")).encode()).hexdigest()
+    return {"schema": "junction.rokoko.mujoco-v10-clear-goal-replay.v1",
+            "claimed_safe_clear_goal_trajectories": len(selected),
+            "replayed_safe_clear_goal_trajectories": len(seen),
+            "verified_clear_goal_trial_keys_sha256": key_sha,
+            "claim_verified": True, "dev_cal_test_ood_opened": False,
+            "model_promotion_authorized": False}
+
+
 def main():
     source_root = Path(os.environ["CRACI_SOURCE_ROOT"]).resolve(strict=True)
     harness_root = Path(os.environ["CRACI_HARNESS_ROOT"]).resolve(strict=True)
@@ -313,6 +387,14 @@ def main():
             replay["verified_near_corridor_success_worlds"] ==
             check["worlds_safe_corridor_success"],
             "V10_INDEPENDENT_TRUE_PHYSICS_POSITIVE_POLICY_REPLAY_FAILED")
+    clear_replay = replay_clear_goal_successes(
+        output, training, lambda: MovingContactEnv(max_options=60),
+        independent_factory, signature, replayer.near)
+    require(clear_replay["claim_verified"] is True and
+            clear_replay["replayed_safe_clear_goal_trajectories"] ==
+            sum(readout["strategies"][name]["safe_goals_clear"]
+                for name in EXPECTED_STRATEGIES),
+            "V10_INDEPENDENT_CLEAR_CORRIDOR_GOAL_POLICY_REPLAY_FAILED")
     candidate_unsafe = readout["strategies"]["v10_loss_informed"]["unsafe"]
     # Even an unsafe trial must remain in the immutable evidence.  It is an
     # explicit science STOP, never a reason to suppress/retry inconvenient
@@ -321,6 +403,7 @@ def main():
                  decision="valid_source_bound_five_way_train_only_evidence",
                  independent_full_trace_public_mask_replay=True,
                  independent_true_physics_positive_replay=replay,
+                 independent_true_physics_clear_goal_replay=clear_replay,
                  experiment_complete=True, producer_exit_code=result.returncode,
                  independentHoldout=False, model_improvement_verified=False,
                  candidate_unsafe_trials=candidate_unsafe,
@@ -330,6 +413,9 @@ def main():
                  science_warning="Physical-goal delta is TRAIN-only and needs separate review")
     with (output / "independent-positive-replay.json").open("x", encoding="utf8") as file:
         json.dump(replay, file, indent=2, sort_keys=True)
+        file.write("\n")
+    with (output / "independent-clear-goal-replay.json").open("x", encoding="utf8") as file:
+        json.dump(clear_replay, file, indent=2, sort_keys=True)
         file.write("\n")
     with (output / "independent-qualification.json").open("x", encoding="utf8") as file:
         json.dump(check, file, indent=2, sort_keys=True)
@@ -348,6 +434,8 @@ def main():
                       "trials": check["trials"],
                       "option_transitions": check["actual_real_option_transitions"],
                       "policy_replayed_positive": replay["fully_replayed_positive_train_trials"],
+                      "policy_replayed_clear_goal":
+                      clear_replay["replayed_safe_clear_goal_trajectories"],
                       "losslessly_packed_originals": packed["source_count"],
                       "collector_published_bytes": packed["collector_bytes"],
                       "unsafe_v10_near": readout["strategies"]["v10_loss_informed"]["unsafe"],
