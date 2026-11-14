@@ -33,7 +33,7 @@ export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
-  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta',
+  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta', 'lens-r3-methods',
 ]);
 
 function choose(value, choices, label) {
@@ -107,6 +107,15 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override && override !== harnessSha) throw new Error('Real RGB numeric features must use exact source/harness SHA');
     for (const profile of ['all','color','spatial','gradient']) {
       add(`lens-real-${profile}`, harnessSha, {profile});
+    }
+  } else if (workload === 'lens-r3-methods') {
+    if (when.getTime() >= Date.parse(WINDOW_END) - 31 * 60 * 1000) throw new Error('Lens R3 31-minute admission cutoff reached');
+    if (override && override !== harnessSha) throw new Error('Lens R3 requires pinned immutable harness');
+    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining'], 'R3 lane slice');
+    const methods = ['risk-upper', 'metadata-shield', 'hard-negative'];
+    for (const [index, method] of methods.entries()) {
+      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
+      add(`lens-r3-${index}-${method}`, harnessSha, {method, iteration: index + 1});
     }
   } else {
     if (workload === 'sbank-sponsor' && !override) throw new Error('sbank-sponsor requires source_sha');
