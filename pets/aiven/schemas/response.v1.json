@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://salessquad.github.io/junction-pets/aiven/response.v1.json",
+  "title": "Aiven companion typed response v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["answer", "facts", "assumptions", "action_proposals", "executed_actions", "next_check"],
+  "properties": {
+    "answer": { "type": "string", "minLength": 1, "description": "The user-facing answer, in the user's language." },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["claim", "source_url"],
+        "properties": { "claim": { "type": "string" }, "source_url": { "type": ["string", "null"], "description": "Official https URL supporting the claim, or null if unsupported." } }
+      }
+    },
+    "assumptions": { "type": "array", "items": { "type": "string" } },
+    "action_proposals": {
+      "type": "array",
+      "description": "Changes the user asked for. Never executed by the companion; each becomes a Chibi pending action that a human approves or declines.",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["operation", "target", "parameters", "reason", "risk", "reversible"],
+        "properties": {
+          "operation": { "type": "string", "enum": ["service_update_plan", "service_create", "service_delete", "service_power", "topic_create", "topic_update", "consumer_group_reset_offsets", "integration_create", "credential_rotate", "other"] },
+          "target": { "type": "string", "minLength": 1 },
+          "parameters": { "type": "object" },
+          "reason": { "type": "string", "minLength": 1 },
+          "risk": { "type": "string", "enum": ["low", "medium", "high"] },
+          "reversible": { "type": "boolean" }
+        }
+      }
+    },
+    "executed_actions": { "type": "array", "maxItems": 0, "description": "Always empty: the companion executes nothing." },
+    "next_check": { "type": "string", "minLength": 1 }
+  }
+}
