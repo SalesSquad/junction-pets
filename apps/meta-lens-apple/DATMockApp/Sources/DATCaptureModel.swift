@@ -24,7 +24,7 @@ final class DATCaptureModel: ObservableObject {
     private(set) var sdkDiagnostics = ""
     private var epoch = CaptureEpoch()
     private var mock: (any MockGlasses)?
-    private var selector: SpecificDeviceSelector?
+    private var selector: AutoDeviceSelector?
     private var session: DeviceSession?
     private var camera: Camera?
     private var listeners: [any AnyListenerToken] = []
@@ -75,6 +75,7 @@ final class DATCaptureModel: ObservableObject {
         watchdog = Task { [weak self] in
             try? await Task.sleep(for: .seconds(20))
             guard !Task.isCancelled, let self, self.epoch.accepts(generation), self.frameCount == 0 else { return }
+            self.recordSDKDiagnostics(stage: "watchdog-no-frames")
             self.stop(reason: "No SDK frames received — use the manual path")
         }
         startup = Task { [weak self] in
@@ -103,12 +104,16 @@ final class DATCaptureModel: ObservableObject {
                 guard wearables.devices.contains(mock.deviceIdentifier) else {
                     throw DeviceSessionError.noEligibleDevice
                 }
-                let selector = SpecificDeviceSelector(device: mock.deviceIdentifier)
+                let ownedMockID = mock.deviceIdentifier
+                let selector = AutoDeviceSelector(wearables: wearables, filter: {
+                    $0.identifier == ownedMockID
+                })
                 self.selector = selector
                 // The selector resolves eligibility asynchronously after discovery.
                 // Subscribe before checking it so session.start() sees the exact mock.
                 let selectedDevices = selector.activeDeviceStream()
                 self.status = "Waiting for selected Meta test glasses"
+                self.recordSDKDiagnostics(stage: "before-selector-wait")
                 if selector.activeDevice != mock.deviceIdentifier {
                     for await selectedDevice in selectedDevices {
                         guard self.epoch.accepts(generation), !Task.isCancelled else { return }
