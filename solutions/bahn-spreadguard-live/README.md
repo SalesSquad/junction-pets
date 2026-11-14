@@ -58,15 +58,36 @@ moving clock. It **never** calls `advance` for a final.
   never infer genuine rank from the synthetic sensitivity harness.
 - `discovery_experiment.py` is a **separate opt-in, high-risk experiment**, not
   the default/final system. It bids 132% of list with an economic floor at 135%
-  of reference fee and starts driver offers at 100% of reference. A first real
-  practice world gained much more revenue, but only 92% on-time; never use it
-  for `--board` or `--final` before at least five independent official practice
-  worlds clear the 90% gate. Its companion `test_discovery_experiment.py` checks
-  the sponsor SDK action shape, not real-world qualification.
+  of reference fee and starts driver offers at 100% of reference. All five
+  independent official unranked level-8 practice seeds passed the 90% on-time
+  gate (92.0%, 92.0%, 95.9%, 94.9%, 99.0%), with positive margins. This does
+  **not** prove future-world reliability or authorize a ranked/final submission.
+  `test_discovery_experiment.py` checks the sponsor SDK action shape.
+- `uber_market_experiment.py` is an additional **unqualified, opt-in research
+  hypothesis** inspired by Uber's documented batched matching, supply-demand
+  pricing and opportunity cost. The Spread SDK does not permit direct driver
+  assignment. This experiment instead couples regional demand/available
+  driver capacity to quotes and driver fee ramps, reserves virtual capacity
+  across concurrent requests, observes right-censored unbooked posting age,
+  and penalizes late-completion debt. It also matches open gig demands to
+  candidate available drivers on the directed road graph **virtually** to
+  avoid assigning one driver's planned capacity to multiple zones. It cannot
+  actually assign a driver; the SDK still performs matching.
+  Its `test_uber_market_experiment.py` and `offline_market_sweep.py` are
+  synthetic contract/structural checks only. The offline sweep covers balanced
+  demand, regional backlog, driver shortage, and missing roster data without
+  inventing win/late labels. In the deterministic shortage fixture it quoted
+  55.8% vs Discovery's 64.0% of synthetic requests, trading quote volume for
+  stronger up-front delivery-risk controls. These numbers **cannot** predict
+  the official game score. **Do not use on `--board` or `--final`**
+  without its own separate official qualification.
 - Delegate correct post/withdraw/repost/rate-limit behavior to the official
   starter, adding optional manual-licence/plates constraints from dealer notes.
 
-This is **runnable API integration**, not a claim of >90% real qualification.
+The default `dispatch.py` has one real official practice qualification. The
+`discovery_experiment.py` has five independently seeded qualifying official
+**unranked** practice results. The Uber-inspired variant has zero official
+practice results; never conflate their evidence.
 The `One Man Raid` team was registered on 2026-11-14; its token stays exclusively
 in the owner's Mac Keychain and must never enter this repository. Official
 practice is being qualified independently of this draft PR. Algorithm parameters
