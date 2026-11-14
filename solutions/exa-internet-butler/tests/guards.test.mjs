@@ -23,3 +23,6 @@ test('adapter contracts use exactly Search then Contents; fake transport is not 
 });
 test('undated or mismatched Contents fails closed; no replay fallback',async()=>{for(const row of [{url:'https://exa.ai/docs',text:'No date'},{url:'https://slush.org/other',text:'wrong result',publishedDate:'2026-11-13'}]){let n=0;await assert.rejects(retrieveExa('q',{consent:true,apiKey:'test',fetchImpl:async()=>new Response(JSON.stringify({results:++n===1?[{url:'https://exa.ai/docs'}]:[row]}))}),/date missing or inconsistent/);}});
 test('oversized provider response aborts bounded retrieval',async()=>{await assert.rejects(retrieveExa('q',{consent:true,apiKey:'test',fetchImpl:async()=>new Response('x'.repeat(256001))}),/exceeds limit/);});
+test('duplicate search URLs and oversized source text fail instead of silently deduplicating or truncating',async()=>{
+ for(const duplicate of [true,false]){let n=0;await assert.rejects(retrieveExa('q',{consent:true,apiKey:'test',fetchImpl:async()=>new Response(JSON.stringify({results:++n===1?(duplicate?[{url:'https://exa.ai/docs'},{url:'https://exa.ai/docs'}]:[{url:'https://exa.ai/docs'}]):[{url:'https://exa.ai/docs',text:'x'.repeat(4001),publishedDate:'2026-11-13'}]}))}),duplicate?/Duplicate/:/inconsistent/);}
+});

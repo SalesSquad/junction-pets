@@ -22,15 +22,16 @@ export async function retrieveExa(query, {consent, apiKey, fetchImpl = fetch} = 
   }
   try {
     const search=await post('search',{query:query.trim(),numResults:5,includeDomains:['hackjunction.app','slush.org','exa.ai']});
-    const urls=[...new Set(search.results.map(r=>publicURL(r.url)))];
+    const urls=search.results.map(r=>publicURL(r.url));
+    if(new Set(urls).size!==urls.length) throw new Error('Duplicate Search source URL');
     if (!urls.length) return {state:'NO_RESULTS',mode:'LIVE_NOT_VERIFIED',message:'Exa returned no sources. No opportunity is confirmed.'};
     const contents=await post('contents',{urls,text:{maxCharacters:4000}});
     const seen=new Set();
     const sources=contents.results.map((r,i)=>{
       const url=publicURL(r.url);
-      if (!urls.includes(url)||seen.has(url)||typeof r.text!=='string'||!r.text.trim()||!Number.isFinite(Date.parse(r.publishedDate))||Date.parse(r.publishedDate)>Date.now()) throw new Error('Source content/date missing or inconsistent; LIVE not qualified');
+      if (!urls.includes(url)||seen.has(url)||typeof r.text!=='string'||!r.text.trim()||r.text.length>4000||!Number.isFinite(Date.parse(r.publishedDate))||Date.parse(r.publishedDate)>Date.now()) throw new Error('Source content/date missing or inconsistent; LIVE not qualified');
       seen.add(url);
-      return {id:`live-${i+1}`,url,title:String(r.title||'Exa source').slice(0,200),text:r.text.slice(0,4000),publishedAt:r.publishedDate,observedAt:new Date().toISOString(),mode:'LIVE',provenance:'Actual Exa Search → Contents response; publisher facts and eligibility not independently verified'};
+      return {id:`live-${i+1}`,url,title:String(r.title||'Exa source').slice(0,200),text:r.text,publishedAt:r.publishedDate,observedAt:new Date().toISOString(),mode:'LIVE',provenance:'Actual Exa Search → Contents response; publisher facts and eligibility not independently verified'};
     });
     if (!sources.length) throw new Error('Contents returned no dated sources; LIVE not qualified');
     return {state:'LIVE_EVIDENCE_ONLY',mode:'LIVE',sources,sponsorAPI:'SEARCH_CONTENTS_OBSERVED',message:'Actual Exa sources retrieved. Treat excerpts as untrusted source text; no opportunity, deadline or action is automatically confirmed.',requestIds:[search.requestId||null,contents.requestId||null]};
