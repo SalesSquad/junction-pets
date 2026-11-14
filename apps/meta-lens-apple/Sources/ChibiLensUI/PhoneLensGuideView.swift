@@ -1,7 +1,9 @@
 #if os(iOS) && canImport(ARKit)
 import ARKit
 import ChibiLensCore
+import SceneKit
 import SwiftUI
+import UIKit
 
 /// Embed in an iOS app with NSCameraUsageDescription. Merely presenting this
 /// screen never starts capture. Notebook state is scoped to this view's lifetime.
@@ -175,7 +177,7 @@ public struct PhoneLensGuideView: View {
         return view
     }
     func updateUIView(_ view: ARSCNView, context: Context) { model.capture.attachPreview(view) }
-    final class Coordinator: NSObject {
+    @MainActor final class Coordinator: NSObject {
         let model: LensGuideModel
         init(model: LensGuideModel) { self.model = model }
         @objc func tap(_ gesture: UITapGestureRecognizer) {

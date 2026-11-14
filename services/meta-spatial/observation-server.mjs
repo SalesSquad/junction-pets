@@ -7,6 +7,7 @@ import { runTaskObservation } from '../nemotron-vl/task-observation.mjs';
 import { createObservationGate } from './observation-contract.mjs';
 import { demoObservation, syntheticObservationTransport } from './observation-demo.mjs';
 import { FIXTURE } from '../../apps/meta-resume-web/fixture.mjs';
+import { serveGuide } from './guide-server.mjs';
 
 const webRoot=fileURLToPath(new URL('../../apps/meta-resume-web/',import.meta.url));
 const modes={synthetic:'nvidia-hosted',hosted:'nvidia-hosted',local:'nemotron-local-nvfp4'};
@@ -36,6 +37,7 @@ export function createObservationServer({mode='synthetic',apiKey='',maxCalls=20}
       request.headers['sec-fetch-site']==='cross-site')return json(response,403,{error:{code:'ORIGIN_REJECTED'}});
     const path=request.url?.split('?')[0];
     try {
+      if(await serveGuide(request,response))return;
       if(request.method==='GET' && path==='/api/config')return json(response,200,{mode,csrfToken,privateHostConnected:false});
       if(request.method==='GET' && path==='/api/demo-observation')return json(response,200,demoObservation());
       if(request.method==='POST' && path==='/api/observe') {

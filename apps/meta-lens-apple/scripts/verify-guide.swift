@@ -2,7 +2,7 @@ import Foundation
 
 /// Focused portable state-machine checks. Compile with GuideSession.swift.
 /// These synthetic values are not ARKit, camera, rendering or identity evidence.
-@main enum GuideBoundaryChecks {
+@main @MainActor enum GuideBoundaryChecks {
     static let now: Int64 = 1_800_000_000_000
     static let a = String(repeating: "a", count: 64)
     static let b = String(repeating: "b", count: 64)

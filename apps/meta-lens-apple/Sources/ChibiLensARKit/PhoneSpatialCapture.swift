@@ -6,6 +6,7 @@ import CoreImage
 import Foundation
 import ImageIO
 import SceneKit
+import simd
 import UIKit
 import UniformTypeIdentifiers
 
@@ -154,19 +155,39 @@ public final class PhoneSpatialCapture {
         let distance = simd_length(SIMD3(position.x-camera.x, position.y-camera.y, position.z-camera.z))
         guard distance.isFinite, distance >= 0.1, distance <= 5 else { throw PhoneSpatialObservation.ValidationError.invalidPose }
         try validateCurrent(observation)
+        let marker = SurfaceMarker(id: UUID().uuidString, worldID: observation.worldID,
+            measuredAtARSeconds: frame.timestamp,
+            cameraToWorld: Self.matrixValues(frame.camera.transform),
+            surfaceToWorld: Self.matrixValues(result.worldTransform))
+        try showRememberedMarker(marker)
+        return marker
+    }
+
+    /// Re-show a user's remembered point only in the original live phone world.
+    /// A historical surface estimate is never re-localized by string identity.
+    public func showRememberedMarker(_ marker: SurfaceMarker) throws {
+        guard marker.worldID == worldID, epoch.isActive, lifetime?.delegate.isTracking == true,
+              UIApplication.shared.applicationState == .active,
+              AVCaptureDevice.authorizationStatus(for: .video) == .authorized,
+              let view = preview, let session = lifetime?.session, view.session === session,
+              let current = session.currentFrame, current.timestamp >= marker.measuredAtARSeconds,
+              marker.surfaceToWorld.count == 16, marker.surfaceToWorld.allSatisfy(\.isFinite) else {
+            throw PhoneSpatialObservation.ValidationError.staleWorld
+        }
         clearMarkers()
         let node = SCNNode(geometry: SCNSphere(radius: 0.018))
         node.name = "chibi-guide-surface"
         node.geometry?.firstMaterial?.diffuse.contents = UIColor.systemMint
         node.geometry?.firstMaterial?.lightingModel = .constant
-        node.simdTransform = result.worldTransform
+        let m = marker.surfaceToWorld.map(Float.init)
+        node.simdTransform = simd_float4x4(columns: (
+            SIMD4(m[0],m[1],m[2],m[3]), SIMD4(m[4],m[5],m[6],m[7]),
+            SIMD4(m[8],m[9],m[10],m[11]), SIMD4(m[12],m[13],m[14],m[15])))
         view.scene.rootNode.addChildNode(node)
-        func array(_ matrix: simd_float4x4) -> [Double] {
-            (0..<4).flatMap { column in (0..<4).map { row in Double(matrix[column][row]) } }
-        }
-        return SurfaceMarker(id: UUID().uuidString, worldID: observation.worldID,
-            measuredAtARSeconds: frame.timestamp, cameraToWorld: array(frame.camera.transform),
-            surfaceToWorld: array(result.worldTransform))
+    }
+
+    private static func matrixValues(_ matrix: simd_float4x4) -> [Double] {
+        (0..<4).flatMap { column in (0..<4).map { row in Double(matrix[column][row]) } }
     }
 
     /// Consume asynchronous work through the live owner, not a saved CaptureGate.

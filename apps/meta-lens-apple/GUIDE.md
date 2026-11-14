@@ -16,14 +16,18 @@ does not change signing, entitlements, Meta pairing or the existing DATMockApp.
 5. Select a remembered item and choose **Pack these items**. Each packing action
    needs a new request/frame and user confirmation. Pause/resume keeps confirmed
    progress; a newly started packing task clears the old task's completion marks.
-6. After capture, tap a surface in the live viewport to place one temporary
-   marker. ARKit handles the viewport orientation through `raycastQuery`.
+6. After capture, tap a surface in the live viewport to place a marker, then
+   confirm the item/place. Selecting that memory can show its historical point
+   again in this same live phone world. ARKit handles viewport orientation
+   through `raycastQuery`; one selected marker is rendered at a time.
 
 The marker uses an estimated horizontal/vertical surface within 0.1–5 metres.
 It records its own measurement timestamp and transform; it is not a location
 in the older review JPEG, proof of object identity, or a glasses coordinate.
-Tracking loss, session interruption, camera stop, expiry, forget, and task
-changes retire the request and marker. There is no LiDAR prerequisite and no
+Tracking loss, session interruption and camera stop retire the world and all
+remembered surface points. Expiry, forget and task changes clear the pending
+point and visible marker; a confirmed point can only be recalled in its
+original still-live world and is labelled historical. There is no LiDAR prerequisite and no
 depth/mesh reconstruction. World maps are not persisted or shared.
 
 ## Data and integration

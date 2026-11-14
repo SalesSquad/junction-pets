@@ -32,6 +32,8 @@ public final class LensGuideModel {
     @ObservationIgnored private var acceptedObservation: PhoneSpatialObservation?
     @ObservationIgnored private var captureAfterAR: Double?
     @ObservationIgnored private var presented = false
+    @ObservationIgnored private var pendingSurface: PhoneSpatialCapture.SurfaceMarker?
+    @ObservationIgnored private var rememberedSurfaces: [String: PhoneSpatialCapture.SurfaceMarker] = [:]
 
     public init() {
         capture.onObservation = { [weak self] value in self?.receive(value) }
@@ -39,6 +41,7 @@ public final class LensGuideModel {
             guard let self else { return }
             self.captureState = state
             if state == .stopped {
+                self.rememberedSurfaces.removeAll()
                 self.cancelRequest()
                 if reason != "stopped" { self.status = "Camera stopped. Start again when ready." }
             } else if state == .tracking { self.status = "Camera ready. Ask for a view of your item." }
@@ -95,6 +98,9 @@ public final class LensGuideModel {
         cancelRequest()
         selectedTarget = memory.id; name = memory.name; place = memory.place
         status = "Last confirmed at \(memory.place). Take a new look before confirming."
+        if let point = rememberedSurfaces[memory.id], (try? capture.showRememberedMarker(point)) != nil {
+            markerLabel = "Remembered surface estimate · not the item's current location"
+        }
     }
     public func teachAnother() {
         cancelRequest(); selectedTarget = nil; name = ""; place = ""
@@ -161,17 +167,28 @@ public final class LensGuideModel {
     public func confirm(userChecked: Bool) {
         do {
             let requestID = try validateAccepted()
+            var remembered: PhoneSpatialCapture.SurfaceMarker?
             if phase == .packing { try notebook.confirmPacked(requestID: requestID, userConfirmed: userChecked, nowMs: nowMs) }
-            else { _ = try notebook.confirmMemory(requestID: requestID, name: name, place: place, userConfirmed: userChecked, nowMs: nowMs) }
+            else {
+                let memory = try notebook.confirmMemory(requestID: requestID, name: name, place: place, userConfirmed: userChecked, nowMs: nowMs)
+                remembered = pendingSurface
+                rememberedSurfaces[memory.id] = remembered
+            }
             cancelRequest(); synchronize()
+            if let point = remembered, (try? capture.showRememberedMarker(point)) != nil {
+                markerLabel = "Remembered surface estimate · not the item's current location"
+            }
             status = "Confirmed by you. This is history, not a live location."
         } catch { status = "Check the item and a fresh image before confirming." }
     }
     public func markSurface(at point: CGPoint, in view: ARSCNView) {
+        pendingSurface = nil
+        markerLabel = nil
+        capture.clearMarkers()
         do {
             _ = try validateAccepted()
             guard let frame = acceptedObservation else { return }
-            _ = try capture.placeMarker(at: point, in: view, for: frame)
+            pendingSurface = try capture.placeMarker(at: point, in: view, for: frame)
             markerLabel = "Phone surface estimate · expires with this AR session"
         } catch { markerLabel = nil; status = "No usable surface here. Try a nearby visible surface." }
     }
@@ -184,6 +201,7 @@ public final class LensGuideModel {
         catch { status = "Start the camera before resuming." }
     }
     public func forget(_ id: String? = nil) {
+        if let id { rememberedSurfaces.removeValue(forKey: id) } else { rememberedSurfaces.removeAll() }
         notebook.forget(id: id); cancelRequest(); selectedTarget = nil; name = ""; place = ""
         synchronize(); status = "Forgotten. Pending views and surface markers were cleared."
     }
@@ -191,6 +209,7 @@ public final class LensGuideModel {
         requestExpiry?.cancel(); requestExpiry = nil
         notebook.cancelObservation()
         acceptedObservation = nil; reviewedImage = nil; captureAfterAR = nil
+        pendingSurface = nil
         requestID = nil; reviewedFrameSHA256 = nil
         hasRequest = false; waitingForFrame = false; markerLabel = nil
         capture.clearMarkers()
