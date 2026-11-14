@@ -125,9 +125,11 @@ class V6Contracts(unittest.TestCase):
 
     def test_optimizer_evaluates_six_real_candidate_stubs(self):
         def fake_episode(_,seed,weights):
+            observed=observation(obstacle_y=.065).tolist()
             return dict(seed=seed,success=False,unsafe=False,abstained=False,
                         total_reward=weights["side_budget"]*.01,
-                        transitions=[dict(reward=1)],
+                        transitions=[dict(reward=1,observation=observed,
+                                          next_observation=observed)],
                         side_action_trace=["APPROACH_LEFT"])
         with patch.object(run,"training_episode",side_effect=fake_episode) as called:
             result=run.learn(object(),2,time.monotonic()+5)
@@ -136,6 +138,21 @@ class V6Contracts(unittest.TestCase):
         self.assertEqual(result["seeds"],[511000,511001])
         self.assertEqual(result["selected"]["objective"],
                          max(e["objective"] for e in result["experiments"]))
+
+    def test_training_only_corridor_bonus_prioritizes_real_corridor_wins(self):
+        def row(y, success, unsafe=False):
+            start=observation(obstacle_y=y).tolist()
+            finish=start.copy()
+            finish[1] = -.02
+            return dict(success=success,unsafe=unsafe,abstained=False,
+                        total_reward=1.,transitions=[dict(observation=start,
+                                                           next_observation=finish)])
+        clear=run.score_training([row(.15,True)])
+        corridor=run.score_training([row(.065,True)])
+        unsafe=run.score_training([row(.065,True,True)])
+        self.assertGreater(corridor["objective"],clear["objective"])
+        self.assertLess(unsafe["objective"],clear["objective"])
+        self.assertEqual(corridor["train_observed_corridor_wins"],1)
 
     def test_curriculum_uses_training_traces_only(self):
         rows=[dict(success=False,unsafe=False,abstained=True,
