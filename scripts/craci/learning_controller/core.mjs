@@ -51,9 +51,13 @@ function validateSource({training, manifest, qualification, replay, readout, rec
     SHA40.test(pins.sourceSha) && SHA40.test(pins.harnessSha), 'INVALID_PIN_SET');
   insist(receipt.binding?.sourceSha === pins.sourceSha && receipt.binding?.harnessSha === pins.harnessSha &&
     receipt.binding?.runId === pins.receiptRunId &&
+    typeof receipt.evidenceUrl === 'string' &&
+    receipt.evidenceUrl.startsWith(`https://github.com/SalesSquad/junction-pets/actions/runs/${pins.githubRun}/`) &&
+    pins.receiptRunId.startsWith(`craci.${pins.githubRun}.`) &&
     receipt.jobStatus === 'success' && receipt.evidenceLevel === 'source-reported' &&
     receipt.command?.exitCode === 0 && receipt.command?.state === 'completed' &&
     receipt.command?.output?.stdout?.truncated === false &&
+    receipt.command?.output?.stderr?.truncated === false &&
     receipt.provenance?.after?.source?.verified === true && receipt.provenance?.after?.harness?.verified === true,
   'SOURCE_RECEIPT_UNQUALIFIED');
   insist(manifest.executed_head === pins.sourceSha && manifest.file_sha256?.['training.json'] === pins.sha256.training &&
@@ -104,7 +108,9 @@ function checkTrace(training, gz, pins) {
       insist(Number.isInteger(t.action) && t.action >= 0 && t.action < 7 &&
         Array.isArray(t.mask) && t.mask.length === 7 && t.mask.every(v => v === 0 || v === 1) &&
         t.mask[t.action] === 1 && Array.isArray(t.observation) && t.observation.length === 18 &&
-        t.observation.every(v => typeof v === 'number' && Number.isFinite(v)),
+        t.observation.every(v => typeof v === 'number' && Number.isFinite(v)) &&
+        Array.isArray(t.next_observation) && t.next_observation.length === 18 &&
+        t.next_observation.every(v => typeof v === 'number' && Number.isFinite(v)),
       'PUBLIC_ACTION_MASK_CONTRACT_VIOLATION');
     }
     count += entry.transitions.length;
@@ -113,6 +119,52 @@ function checkTrace(training, gz, pins) {
   insist(summary.size === 0 && count === training.actual_transition_count && count === pins.expectedTransitions,
     'RAW_TRANSITION_COUNT_MISMATCH');
   return {episodes:lines.length,optionTransitions:count,allSevenActionMasksLegal:true,publicObservations18D:true};
+}
+
+/** Independent reconstruction of initial PUBLIC observed-world selection. */
+export function verifyObservedSelection(training, contract) {
+  insist(plain(contract) && Number.isInteger(contract.firstSeed) && contract.firstSeed>=0 &&
+    Number.isInteger(contract.scanLimit) && contract.scanLimit>0 && contract.scanLimit<=4096 &&
+    Number.isInteger(contract.nearTarget) && contract.nearTarget>0 &&
+    Number.isInteger(contract.clearTarget) && contract.clearTarget>0 &&
+    Number.isFinite(contract.nearAbsThreshold) && contract.nearAbsThreshold>0 &&
+    contract.nearAbsThreshold<1, 'UNPINNED_PUBLIC_WORLD_SELECTION');
+  const scan=list(training.selection_scan,'WORLD_SCAN');
+  const cohort=list(training.cohort,'COHORT');
+  insist(scan.length<=contract.scanLimit && scan.length>=contract.nearTarget+contract.clearTarget &&
+    training.train_first_seed===contract.firstSeed &&
+    training.selection_max_seeds===contract.scanLimit &&
+    training.selected_near_count===contract.nearTarget &&
+    training.selected_clear_count===contract.clearTarget,
+  'WORLD_SELECTION_CONTRACT_CONTRADICTION');
+  const near=[],clear=[];
+  for(let i=0;i<scan.length;i++){
+    const s=scan[i];
+    insist(s.seed===contract.firstSeed+i && SHA64.test(s.world_hash||'') &&
+      Number.isFinite(s.initial_observed_obstacle_y) &&
+      s.initial_observed_obstacle_y>=-1 && s.initial_observed_obstacle_y<=1,
+      'WORLD_SCAN_UNTRUSTED_ORDER_OR_OBSERVATION');
+    const isNear=Math.abs(s.initial_observed_obstacle_y)<contract.nearAbsThreshold;
+    if(isNear && near.length<contract.nearTarget)near.push(s);
+    else if(!isNear && clear.length<contract.clearTarget)clear.push(s);
+    if(near.length===contract.nearTarget && clear.length===contract.clearTarget){
+      insist(i===scan.length-1,'WORLD_SCAN_CONTINUED_AFTER_COHORT_COMPLETE');break;
+    }
+  }
+  insist(near.length===contract.nearTarget && clear.length===contract.clearTarget,
+    'INCOMPLETE_WORLD_COHORT');
+  const expected=[...near,...clear].sort((a,b)=>a.seed-b.seed);
+  insist(expected.length===cohort.length && new Set(cohort.map(w=>w.seed)).size===cohort.length &&
+    expected.every((w,i)=>{
+      const x=cohort[i];return x.seed===w.seed && x.world_hash===w.world_hash &&
+        x.initial_observed_obstacle_y===w.initial_observed_obstacle_y &&
+        x.observed_corridor===(Math.abs(w.initial_observed_obstacle_y)<contract.nearAbsThreshold);
+    }), 'SELECTED_COHORT_NOT_DERIVED_FROM_PUBLIC_SCAN');
+  insist(JSON.stringify(near.map(w=>w.seed))===JSON.stringify(training.near_seeds) &&
+    JSON.stringify(clear.map(w=>w.seed))===JSON.stringify(training.clear_seeds),
+    'WORLD_GROUPS_NOT_DERIVED_FROM_OBSERVATIONS');
+  return {scannedWorlds:scan.length,selectedNearWorlds:near.length,
+    selectedClearWorlds:clear.length,selectionFromPublicInitialObservation:true};
 }
 
 /** Pin exact bytes first; external reviewers must still inspect original work. */
@@ -132,22 +184,27 @@ export async function loadQualifiedEvidence(paths, pins) {
 export function analyzePairedTraining(training, readout, {
   candidate='v8_hierarchical', baseline='frozen_v5',
   protectedControls=['frozen_v5','frozen_v6'],
-  readoutKeys={lost:'lost_frozen_v5_v6_safe_near_goal_seeds',novel:'novel_v8_safe_near_goal_seeds',unsafe:'v8_new_unsafe_vs_all_three_baselines_near_seeds'}
+  unsafeReferenceStrategies=['frozen_v5','frozen_v6','repeat_left'],
+  readoutKeys={lost:'lost_frozen_v5_v6_safe_near_goal_seeds',novel:'novel_v8_safe_near_goal_seeds',unsafe:'v8_new_unsafe_vs_all_three_baselines_near_seeds'},
+  selectionContract
 }={}) {
   insist(plain(training) && Array.isArray(training.trials) && Array.isArray(training.near_seeds) &&
     Array.isArray(training.clear_seeds) && Array.isArray(training.strategies), 'INVALID_TRAINING_MATRIX');
+  verifyObservedSelection(training,selectionContract);
   const near = new Set(training.near_seeds), clear = new Set(training.clear_seeds);
   insist(near.size === training.near_seeds.length && clear.size === training.clear_seeds.length &&
     [...near].every(s=>!clear.has(s)) && near.size+clear.size === training.cohort.length,
   'COHORT_PARTITION_INVALID');
   const arms = [...training.strategies];
   insist(new Set(arms).size===arms.length && arms.includes(candidate) && arms.includes(baseline) &&
-    protectedControls.every(s=>arms.includes(s)), 'MISSING_PAIRED_ARMS');
+    protectedControls.every(s=>arms.includes(s)) &&
+    unsafeReferenceStrategies.every(s=>arms.includes(s)), 'MISSING_PAIRED_ARMS');
   const rows = new Map();const perStrategy = Object.fromEntries(arms.map(s=>[s,{worlds:0,goals:0,nearGoals:0,clearGoals:0,unsafe:0,nearReopenAfterAnySide:0,nearReopenAfterLateral25:0,nearLateral25:0,nearDwell:0}]));
   for(const trial of training.trials){
     insist(arms.includes(trial.strategy) && (near.has(trial.seed)||clear.has(trial.seed)) &&
       bool(trial.success) && bool(trial.unsafe) && plain(trial.stage_funnel) &&
-      SHA64.test(trial.world_hash||'') && Number.isInteger(trial.full_transition_count),
+      SHA64.test(trial.world_hash||'') && Number.isInteger(trial.full_transition_count) &&
+      Number.isInteger(trial.forward_reopened_after_side) && trial.forward_reopened_after_side>=0,
       'INVALID_TRIAL_ROW');
     const key=`${trial.seed}:${trial.strategy}`;insist(!rows.has(key),'DUPLICATE_TRIAL_ROW');rows.set(key,trial);
     const m=perStrategy[trial.strategy], isNear=near.has(trial.seed);
@@ -180,19 +237,22 @@ export function analyzePairedTraining(training, readout, {
   const candidateNearNovelVsFrozen=[...near].filter(seed=>safe(seed,candidate) &&
     !protectedControls.some(c=>safe(seed,c)));
   const unionNearLost=frozenUnionNear.filter(seed=>!safe(seed,candidate));
+  const unsafeReadoutWorlds=training.cohort.filter(w=>near.has(w.seed) &&
+    rows.get(`${w.seed}:${candidate}`).unsafe &&
+    unsafeReferenceStrategies.every(c=>!rows.get(`${w.seed}:${c}`).unsafe)).map(w=>w.seed);
   const extraUnsafe=training.cohort.filter(w=>rows.get(`${w.seed}:${candidate}`).unsafe &&
-    protectedControls.every(c=>!rows.get(`${w.seed}:${c}`).unsafe)).map(w=>w.seed);
+    !rows.get(`${w.seed}:${baseline}`).unsafe).map(w=>w.seed);
   insist(['lost','novel','unsafe'].every(k=>typeof readoutKeys[k]==='string'&&readoutKeys[k].length<=100),
     'UNDECLARED_READOUT_FIELDS');
   insist(JSON.stringify([...unionNearLost].sort((a,b)=>a-b))===
     JSON.stringify(list(readout[readoutKeys.lost],'READOUT_LOSS').slice().sort((a,b)=>a-b)) &&
     JSON.stringify(candidateNearNovelVsFrozen.slice().sort((a,b)=>a-b))===
     JSON.stringify(list(readout[readoutKeys.novel],'READOUT_NOVEL').slice().sort((a,b)=>a-b)) &&
-    JSON.stringify(extraUnsafe.slice().sort((a,b)=>a-b))===
+    JSON.stringify(unsafeReadoutWorlds.slice().sort((a,b)=>a-b))===
     JSON.stringify(list(readout[readoutKeys.unsafe],'READOUT_UNSAFE').slice().sort((a,b)=>a-b)),
   'PAIRED_READOUT_DISAGREES_WITH_RAW');
   const candidateGoalRegressed=lostFromBaseline.length>0;
-  const safeRegression=extraUnsafe.length>0 || perStrategy[candidate].unsafe>perStrategy[baseline].unsafe;
+  const safeRegression=extraUnsafe.length>0 || perStrategy[candidate].unsafe>0;
   const newGoalGain=novelVsBaseline.length>0;
   const verdict=safeRegression?'NO_GO_NEW_UNSAFE':candidateGoalRegressed?'NO_GO_LOST_FROZEN_GOALS':
     !newGoalGain?'NO_GO_NO_GOAL_GAIN':'REVIEW_ONLY_TRAIN_GAIN';
@@ -203,7 +263,8 @@ export function analyzePairedTraining(training, readout, {
       preservedBaselineGoalSeeds:preservedBaseline,lostBaselineGoalSeeds:lostFromBaseline,
       novelGoalSeedsVsBaseline:novelVsBaseline,nearLostFrozenUnionSeeds:unionNearLost,
       nearNovelGoalSeedsVsFrozen:candidateNearNovelVsFrozen,
-      newlyUnsafeWorldSeeds:extraUnsafe},
+      newlyUnsafeWorldSeeds:extraUnsafe,
+      unsafeWithAllReadoutControlsSafeSeeds:unsafeReadoutWorlds},
     scienceVerdict:verdict,
     modelPromotionAuthorized:false,
     qualificationScope:'REAL_PAIRED_TRAIN_ONLY_NOT_DEV_TEST_OR_DEPLOYMENT'
@@ -242,6 +303,11 @@ export function recommendNextCycle(verified, observation, {candidateCommit,candi
         noClaimsAboutFutureWorldClassification:true},
       pairedStrategies:['frozen_v5','frozen_v6','repeat_left','v8_hierarchical','v10_candidate'],
       maxEpisodesIfWorldTargetsMet:800,
+      rawCapturePreflight:{summaryCaptureLimitBytes:19*1024*1024,
+        nextActualSummaryBytes:'unknown_until_generated',
+        mustUseReviewedLosslessChunkingIfOverLimit:true,
+        mustVerifyExactRawEpisodeCountAndTransitionTotalsAfterReassembly:true,
+        noSilentTruncationOrLossyFiltering:true},
       mustPreserveExactWorldPairing:true,
       prereqs:['independent code review','source-pinned CRACI workflow','fresh provider credit meter','owner-approved admission under active window'],
       noHeldoutDevTestOod:true,
@@ -258,14 +324,17 @@ export async function compileCycle(paths,pins, options) {
   const verified=await loadQualifiedEvidence(paths,pins);
   const observation=analyzePairedTraining(verified.training,verified.readout,{
     candidate:pins.candidateStrategy,baseline:pins.baselineStrategy,
-    protectedControls:pins.protectedControls,readoutKeys:pins.readoutKeys});
+    protectedControls:pins.protectedControls,unsafeReferenceStrategies:pins.unsafeReferenceStrategies,
+    readoutKeys:pins.readoutKeys,selectionContract:pins.selectionContract});
   const next=recommendNextCycle(verified,observation,options);
   return {
     schema:'junction.craci.learning-controller.v1.evidence-cycle',workId:'J26-CRACI-SELF-IMPROVING-LOOP-20261114',
     input:{githubRun:pins.githubRun,sourceSha:pins.sourceSha,harnessSha:pins.harnessSha,
       rawSha256:{...verified.immutableSha256},datasetSha256:verified.training.dataset_sha256,
       sourceReportedReceiptRunId:pins.receiptRunId},
-    originalEvidenceRecheck:{...verified.trace,sourceReceiptState:'success-but-source-reported',
+    originalEvidenceRecheck:{...verified.trace,
+      ...verifyObservedSelection(verified.training,pins.selectionContract),
+      sourceReceiptState:'success-but-source-reported',
       independentQualification:'TRAIN-only positive replay, no held-out certification'},
     observation,next,
     activationState:'ADVISORY_NO_DISPATCH_NO_MODEL_PROMOTION',
