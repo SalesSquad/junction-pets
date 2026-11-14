@@ -1,0 +1,67 @@
+{
+  "allOriginalActionMasksRequired": true,
+  "devCalTestOodOpened": false,
+  "dispatchAuthorized": false,
+  "followupAll512ScanSeedsSha256": "39c8adb4b9731db631a79aed7135e799d1c14670fa5fc78f38659930ac5f8939",
+  "followupExpectedRealMuJoCoEpisodes": 320,
+  "followupFreshCohort": {
+    "clear": 32,
+    "initialPublicOnly": true,
+    "near": 128
+  },
+  "followupIfPositiveNewTrainSeedRangeInclusive": [
+    518512,
+    519023
+  ],
+  "followupPairedArms": [
+    "frozen_v5",
+    "one_preregistered_v12_nonexploratory_candidate"
+  ],
+  "frozenModelSha256": "82cfa42ba2240aff6d00ec3e2b15c06d78386d3c0682986a23e478977f2dbf9e",
+  "fullRawAndIndependentNearClearPositivePhysicsReplayRequired": true,
+  "hardStopIfAnyNewUnsafeOrLostV5PhysicalGoal": true,
+  "hardStopIfZeroNovel250TickSafeGoalsInPilot": true,
+  "modelPromotionAuthorized": false,
+  "pilotAll512ScanSeedsSha256": "ed5072512b2258ab6337915b82b3b3f9349d53894d3c12b23a5be93a734abd7a",
+  "pilotCohort": {
+    "clear": 8,
+    "near": 40,
+    "publicObservedObstacleYAbsNearLt": 0.122,
+    "selectionMayNotUseOutcomes": true
+  },
+  "pilotExpectedRealMuJoCoEpisodes": 144,
+  "pilotPairedArms": [
+    "frozen_v5",
+    "v12_phase_dwell_supported_actions",
+    "v12_right_side_action4_exploration_train_only"
+  ],
+  "pilotRequiresAll512PublicInitialWorldScans": true,
+  "pilotTrainSeedRangeInclusive": [
+    518000,
+    518511
+  ],
+  "primaryPhysicalGoal": "original contact + object distance to goal <.02 m for >=250 real MuJoCo ticks, zero unsafe",
+  "rightSideAction4ExplorationOnly": {
+    "distinctObservedWorlds": 1,
+    "modelSupported": false,
+    "neverPromoteExploratoryArm": true,
+    "requireIndependentSafeMuJoCoBeforeAnyModelTraining": true,
+    "sourceActualExecuted": 3,
+    "sourceLegalOpportunities": 48800
+  },
+  "schema": "junction.rokoko.v12.fresh-train-action4-support-curriculum.v1",
+  "sourceEvidence": {
+    "v10": {
+      "fullTransitionsSha256": "739c30a13ecacdecd404774fc9dadd887944f32df5cef14cfd2758a639460419",
+      "harnessSha": "a64e6fcc73a1d47485fe052990e31c9d9e45100f",
+      "sourceSha": "9cc583d3f0f24484b79c1929ba875c7a3b667806",
+      "trainingSha256": "103091f37e1b7d46937ea002845dda05f08391f4580f0aa7c181722d78b118af"
+    },
+    "v11": {
+      "fullTransitionsSha256": "0a38081a43426ee4774d09d22886202aaf56d59f6b925a0a75cb2f2da14c848b",
+      "harnessSha": "b1938bee9dbca482f645b5dde3359de38e6c125e",
+      "sourceSha": "ab6df4054ef6ed350b479469590a48046a0c0a68",
+      "trainingSha256": "c3b3b399344fa18eff7a303cf27e2a510ab9eb74111a6216df1ec11a906579df"
+    }
+  }
+}
