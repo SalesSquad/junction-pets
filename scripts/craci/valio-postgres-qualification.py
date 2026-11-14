@@ -39,7 +39,11 @@ def main():
     data, socket = scratch / "data", scratch / "socket"
     socket.mkdir(mode=0o700)
     # Local peer-like trust is restricted to this private mode-0700 socket.
-    pg_env = {k: v for k, v in env.items() if not k.startswith("PG")}
+    # Product source is a separate pinned checkout, but it must not inherit
+    # workflow/provider/session credentials from the runner environment.
+    allowed = {"PATH", "HOME", "USER", "LOGNAME", "LANG", "LC_ALL",
+               "LC_CTYPE", "TMPDIR", "TZ", "RUNNER_TEMP", "CI"}
+    pg_env = {k: v for k, v in env.items() if k in allowed}
     user, database, port = getpass.getuser(), "valio_j26_lab", "54329"
     started = False
     try:
@@ -69,10 +73,16 @@ def main():
                 timeout=timeout,
             )
             if completed.returncode:
+                # Even a synthetic test failure must not echo its connection
+                # URI or private socket location into a public CI log.
+                def tail(value):
+                    return (value[-2500:]
+                        .replace(pg_env["VALIO_TEST_DATABASE_URL"], "[LOCAL_PG_URL]")
+                        .replace(str(socket), "[PRIVATE_SOCKET]"))
                 print(json.dumps({"phase": name, "result": "failed",
                     "returnCode": completed.returncode,
-                    "stdoutTail": completed.stdout[-2500:],
-                    "stderrTail": completed.stderr[-2500:]}))
+                    "stdoutTail": tail(completed.stdout),
+                    "stderrTail": tail(completed.stderr)}))
                 raise SystemExit(completed.returncode)
             if name == "multi-process-crash":
                 result = json.loads(completed.stdout)
