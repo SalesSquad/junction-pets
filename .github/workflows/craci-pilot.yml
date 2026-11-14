@@ -3493,20 +3493,6 @@ jobs:
       if: ${{ matrix.profile == 'network' }}
       working-directory: source
       run: npm ci --ignore-scripts --no-audit --no-fund
-    - name: Expect neutral external egress to be denied
-      if: ${{ matrix.profile == 'network' }}
-      shell: bash
-      run: |
-        set -euo pipefail
-        set +e
-        curl --silent --show-error --head --max-time 8 https://example.com -o /dev/null
-        rc=$?
-        set -e
-        printf '{"probe":"https://example.com","exitCode":%s,"claim":"Transport failed; CRACI provider trace needed to attribute policy enforcement"}\n' "$rc" > "$CRACI_RECEIPT_DIR/artifacts/egress-probe.json"
-        if [ "$rc" -eq 0 ]; then
-          echo 'Unexpected egress success under deny-by-default policy'
-          exit 1
-        fi
     - name: Four profiles of fault-injection hooks and real isolated probes
       id: qualification
       shell: bash
@@ -3524,6 +3510,22 @@ jobs:
             node --test "$CRACI_HARNESS_ROOT/scripts/craci/chaos-tests.test.mjs"
           fi
         '
+    - name: Probe neutral external HTTP with curl fail-on-HTTP-error
+      if: ${{ matrix.profile == 'network' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        set +e
+        http_code=$(curl --fail --silent --show-error --head --max-time 8 \
+          --write-out '%{http_code}' https://example.com -o /dev/null)
+        rc=$?
+        set -e
+        [[ "$http_code" =~ ^[0-9]{3}$ ]]
+        printf '{"probe":"https://example.com","exitCode":%s,"httpStatus":"%s","claim":"HTTP or transport failure observed; CRACI provider trace required for policy attribution"}\n' "$rc" "$http_code" > "$CRACI_RECEIPT_DIR/artifacts/egress-probe.json"
+        if [ "$rc" -eq 0 ]; then
+          echo 'Unexpected successful HTTP response under deny-by-default CRACI policy'
+          exit 1
+        fi
     - id: receipt
       name: Finalize source-bound receipt, including on assertion failure
       if: ${{ always() }}

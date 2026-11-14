@@ -181,6 +181,7 @@ export async function chaosCampaign({seed, cases, profile}) {
     rejectedControl:0, baselineMissedInjected:0, baselineRejectedControl:0,
     pairs:0, distinctPairs:0};
   const seenPairs = new Set(), observedRejects = new Set(), firstFailures = {};
+  const corpusHash = createHash('sha256');
   for (let i=0; i<cases; i++) {
     const primary = i%8 === 0 ? BENIGN[Math.floor(i/8)%BENIGN.length] : pool[i%pool.length];
     const faults = [primary];
@@ -193,6 +194,10 @@ export async function chaosCampaign({seed, cases, profile}) {
       }
     }
     const expected = oracle(faults), result = evaluate(faults);
+    // Hash every generated case and observed hook result, not just totals.
+    // This is replay evidence, not a cryptographic signature of CRACI runtime.
+    corpusHash.update(JSON.stringify({i,faults,expected,accepted:result.accepted,
+      failures:result.failures})+'\n');
     for (const name of faults) counts[name]++;
     if (expected) {
       if (result.accepted) outcomes.acceptedControl++;
@@ -213,7 +218,7 @@ export async function chaosCampaign({seed, cases, profile}) {
   assert.equal(outcomes.detectedInjected+outcomes.acceptedControl,cases);
   for (const fault of pool) assert(observedRejects.has(fault),`Uncovered fault: ${fault}`);
   assert(outcomes.distinctPairs > 0,'Combinatorial coverage missing');
-  const corpus = sha(`${seed}:${cases}:${profile}:${JSON.stringify(counts)}:${JSON.stringify(outcomes)}`);
+  const corpus = corpusHash.digest('hex');
   return {schemaVersion:1,workId:'CRACI-CHAOS-20261114',profile,seed,cases,
     claim:'Synthetic failure-hook evaluation, not production or CRACI enforcement qualification',
     sourceCommit:process.env.CRACI_SOURCE_SHA||null,

@@ -2,7 +2,7 @@
 /** Real, bounded fault probes on an EPHEMERAL CRACI runner only. */
 import {strict as assert} from 'node:assert';
 import {createHash} from 'node:crypto';
-import {spawnSync} from 'node:child_process';
+import {spawn, spawnSync} from 'node:child_process';
 import {createServer} from 'node:http';
 import {mkdtemp, mkdir, readFile, rename, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -58,6 +58,34 @@ async function localNetworkProbe() {
   }
 }
 
+async function curlHttpErrorProbe() {
+  const server = createServer((req,res) => {
+    res.writeHead(req.url === '/blocked' ? 403 : 200);
+    res.end('disposable-http-fixture');
+  });
+  try {
+    await new Promise((done,reject) => {server.once('error',reject);server.listen(0,'127.0.0.1',done);});
+    const request = path => new Promise((done,reject) => {
+      let output = '';
+      const child=spawn('curl',['--fail','--silent','--show-error','--head','--max-time','3',
+        '--noproxy','127.0.0.1','--write-out','%{http_code}',
+        `http://127.0.0.1:${server.address().port}${path}`,'-o','/dev/null']);
+      child.stdout.on('data',part=>{output+=part.toString();});
+      child.on('error',reject);
+      child.on('close',code=>done({code,status:output.trim()}));
+    });
+    const blocked=await request('/blocked'),allowed=await request('/allowed');
+    assert.equal(blocked.code,22,'HTTP 403 must not count as a successful egress');
+    assert.equal(blocked.status,'403');
+    assert.equal(allowed.code,0);
+    assert.equal(allowed.status,'200');
+    return {blockedHttpStatus:403,curlExitFor403:22,controlHttpStatus:200,curlExitFor200:0};
+  } finally {
+    server.closeAllConnections();
+    await new Promise(done=>server.close(done));
+  }
+}
+
 export async function runProbes(config) {
   const root = resolve(process.env.RUNNER_TEMP || tmpdir());
   const sandbox = await mkdtemp(join(root,'craci-chaos-'));
@@ -93,6 +121,7 @@ export async function runProbes(config) {
       return {malformedDependencyGraphRejected:true,externalNetwork:false};
     },tests);
     await executeProbe('local-tcp-reset-jitter-and-recovery',localNetworkProbe,tests);
+    await executeProbe('http-403-curl-fail-and-200-control',curlHttpErrorProbe,tests);
     await executeProbe('child-process-exit-timeout-recovery',async()=>{
       const failed=spawnSync(process.execPath,['-e','process.exit(71)'],{timeout:2000});
       assert.equal(failed.status,71);

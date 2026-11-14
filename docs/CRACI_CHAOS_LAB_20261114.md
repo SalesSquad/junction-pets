@@ -17,16 +17,17 @@ There are six fault-hook boundaries in `scripts/craci/chaos-lab.mjs`:
 
 In the **synthetic** test loop, 20 adversarial faults plus four benign controls are combined into four boundary-focused profiles. Each 25,000-case CRACI cell includes cross-profile pairwise combinations, deterministic seed/replay, negative controls and a deliberately weak comparator. The independent fixture oracle checks injected fault labels against the modeled hook verdict, and reports missed injections, rejected benign controls, pair coverage and unverified cost. A zero miss count here is **not** proof of real-world malware prevention.
 
-Separately, `scripts/craci/chaos-probes.mjs` performs six **real isolated runner tests**:
+Separately, `scripts/craci/chaos-probes.mjs` performs seven **real isolated runner tests**:
 
 - `npm ci --ignore-scripts --offline` prevents a benign fixture `postinstall`; control fixture confirms the script otherwise executes.
 - An inconsistent package manifest/lockfile is rejected by npm offline.
 - A loopback-only HTTP server injects TCP reset and timeout; a clean request then succeeds.
+- A local HTTP fixture returns 403 then 200; `curl --fail` must return exit 22 then 0, preventing false egress classifications.
 - Child process exits with code 71; a hung child is timed out; next child succeeds. Never kill the runner host.
 - Atomically committed local receipt detects a truncated payload and accepts its restored digest.
 - 32 concurrent file-create attempts produce one winner, and unknown dispatch ACK is treated as non-retriable.
 
-The workflow's network-profile cell additionally performs an **actual CRACI runner** `npm ci --ignore-scripts` with CRACI `default: deny`, `presets: [github, npm]`, and a neutral `example.com` transport-denial probe. A failed `curl` only proves transport failed; **CRACI's provider network trace/SBOM must be inspected separately** to attribute enforcement. Neither npm script execution nor any hostile package is allowed in the real checkout.
+The workflow's network-profile cell additionally performs an **actual CRACI runner** `npm ci --ignore-scripts` with CRACI `default: deny`, `presets: [github, npm]`, and a neutral `example.com` HTTP-denial probe. The probe records both the `curl --fail` exit code and HTTP status; **CRACI's provider network trace/SBOM must be inspected separately** to attribute enforcement. Neither npm script execution nor any hostile package is allowed in the real checkout.
 
 ## Campaign and safeguards
 
@@ -42,9 +43,13 @@ The workflow's network-profile cell additionally performs an **actual CRACI runn
 Local scratch preflight (Node v24.22.1) on 14 Nov 2026:
 
 - `node --test craci/chaos-tests.test.mjs`: **7/7 pass**.
-- `node craci/chaos-probes.mjs --output /tmp/craci-chaos-probes-check-20261114.json`: **6/6 pass**, real local fixtures.
+- `node craci/chaos-probes.mjs --output /tmp/craci-chaos-probes-r2-20261114.json`: **7/7 pass**, real local fixtures (R2).
 - Four `chaosCampaign({seed:12345,cases:20000,profile})` calls: **80,000 synthetic cases**, no modeled unsafe misses or benign-control false positives. These runs are not yet CRACI/cloud receipts.
 
 For cloud qualification: dispatch existing `.github/workflows/craci-pilot.yml` with `workload=chaos-lab`, explicit `epoch`, `source_sha=<exact chaos-lab task HEAD>` and `ref=codex/craci-chaos-lab-20261114`, only while the hard-stop guard can pass. Verify 4/4 CRACI jobs, source pins, 4 artifact receipts and real test evidence; report any CRACI billing uncertainty. Later waves must use a unique epoch and source, check the shared capacity, consume an explicit reservation, and stop at the same campaign cutoff. Retain failed runs; never greenwash or turn a failed probe into a synthetic pass.
+
+### First hosted failure and R2 repair
+
+First hosted execution at source `35f06369b158a4d67b81ee0180fb8ec4cf1407b7`, [GitHub run 43614218249](https://github.com/SalesSquad/junction-pets/actions/runs/43614218249): provenance, control and evidence cells passed; **network cell failed before its qualification**. The example.com `curl` probe omitted `--fail`, so an HTTP 403/407 would incorrectly yield exit code zero and look like a policy escape. No network allowlist was changed. R2 adds `--fail`, records the HTTP status, moves the probe after the qualification so all model/fixture evidence survives a failed policy check, and adds the 403/200 local positive-control probe. Retain run 43614218249 as a genuine failed receipt; R2 must be independently requalified on a new source SHA.
 
 External patterns: [GitHub workflow concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency), [GitHub artifact checksums](https://docs.github.com/en/actions/tutorials/store-and-share-data), [CRACI network policy](https://docs.craci.com/guides/setup-action-network/), and [Shopify Toxiproxy](https://github.com/Shopify/toxiproxy) informed the design. This task uses dependency-free local network fixtures, not a deployed Toxiproxy or Chaos Mesh service.
