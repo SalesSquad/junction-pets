@@ -2,9 +2,9 @@
 
 **Päiväys:** 14.11.2026  
 **Työ:** junction.meta.resume-plan.20261114  
-**Tila:** arkkitehtuuri- ja toteutusehdotus; dokumentaatiotoimitus. Työpaketit eivät ole käynnistettyjä töitä.  
+**Tila:** alkuperäinen arkkitehtuurisuunnitelma; toteutus on nyt käynnistetty käyttäjän jatkopyynnöstä. Nykyinen tavoite, työnjako ja toteutuneet lähdeslicet ovat [Chibi Continuity -toteutussuunnitelmassa](CHIBI_CONTINUITY_EXECUTION_20261114.md).  
 **Tarkistettu main:** 98d5a524d61e431ca36acd62b268ede343fc7fe2. Aiemman koodiauditoinnin a33f525171b6424d39dfc4c889b63e0fc5cb459e jälkeen Meta-ydin ei ole muuttunut; välissä ovat dokumentaatio ja CRACI-kampanjan integrointi.  
-**Omistettu muutos:** tämä uusi dokumentti. Nykyiset arkkitehtuurirajat ja julkaisuvaltuudet säilyvät päätöksenteon lähtökohtina.
+**Omistettu muutos:** suunnitelma ja sen myöhempi toteutuksen käynnistysliite PR104:ssä. Nykyiset arkkitehtuurirajat ja julkaisuvaltuudet säilyvät päätöksenteon lähtökohtina.
 
 ## 1. Päätös, jota ehdotan
 
@@ -430,7 +430,7 @@ Tarkastetun Metan WebMCP-skillin mukaan pinta on **document.modelContext**, avus
 
 ## 20. Toimitus, rajat ja lähteet
 
-Tämä työ toimittaa suunnitelman sekä dokumentaation oman task-haaran ja luonnos-PR:n. Se ei käynnistä toteutustöitä, malliajoja, palvelimia tai automaatioita. Toteutuksen merge, julkaisu, tuotantomuutos ja uusi kulutus kulkevat nykyisen omistajan valtuuksien kautta.
+Alkuperäinen työ toimitti suunnitelman PR104:ään. Käyttäjän myöhempi käynnistyspyyntö laajensi työn toteutukseen: [uusi ohjaava suunnitelma](CHIBI_CONTINUITY_EXECUTION_20261114.md) ja [lähdekohtainen työtilanne](meta-execution/execution.json) kertovat todelliset käynnistetyt työt, lähteet ja esteet. Tämän dokumentin aiemmat ehdotukset eivät sellaisinaan ole valmiita ominaisuuksia. Integrointi, julkaisu, tuotantomuutos ja uusi kulutus noudattavat nykyisiä valtuuksia.
 
 Kannettavat kokeet ohjataan olemassa olevaan, toteutushetkellä varmennettuun pilviympäristöön. Apple SDK -työt tehdään varmennetulla Macilla tai jo määritetyssä Xcode Cloudissa. Nykyinen CRACI-krediittipoikkeus on aikarajallinen: 15.11.2026 klo 17 UTC / 19 Helsinki. Sitä ei oleteta kuuden viikon budjetiksi tai luvaksi käyttää uusia palveluita. [S13]
 
