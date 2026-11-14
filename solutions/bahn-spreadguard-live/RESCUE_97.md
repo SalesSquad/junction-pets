@@ -37,12 +37,19 @@ secrets into Git or test logs. The runner defaults to the opt-in `full`
 strategy; `SPREAD_RESCUE_MODE=fees` compares fee rescue only and
 `SPREAD_RESCUE_MODE=discovery` preserves the baseline quote policy. The
 default `SPREAD_RESCUE_CURVE=offer_first` avoids the earlier uneconomic
-immediate fee ramp; `rush` is an experimental ablation.
+immediate fee ramp; `rush` is an experimental ablation. **The
+experimental `full` rescue default failed official-world qualification;
+do not use this runner for the competition.** The highest-margin
+validated experimental runner is instead `admission_experiment.py` with
+`SPREAD_ADMISSION_PRICE_PCT=139` and
+`SPREAD_ADMISSION_EXTRA_SLACK=240`.
 
-**Do not run `--board` or `--final` as an incidental smoke test.** As of
-this checkpoint, all 8/8 official unranked practice worlds had been
-consumed. No additional official world was executed or claimed by this
-work. Before any authorized ranked/final run, refresh the source checkout,
+**Do not run `--board` or `--final` as an incidental smoke test.** The
+sponsor's limit is **eight concurrently unfinished practice worlds**, not
+eight practice worlds for the lifetime of the team. Ended worlds free a
+slot. The original setup checks above did not start a world; subsequent
+official-world tests are recorded below. Before any authorized ranked/final
+run, refresh the source checkout,
 confirm challenge clock/state and credentials, and explicitly choose the
 entrypoint/mode. The sponsor may charge scarce ranking/final attempts.
 
@@ -78,8 +85,9 @@ capacity and delays are hypothetical. It does not model all bidder behavior.
 The full policy improves on-time service in these *invented worlds* but
 reduces gross margin significantly. It does **not** establish ≥97% in real
 competition, nor superiority against Discovery on the real scoring objective.
-The real five-world Discovery baseline was 92.0%, 92.0%, 95.9%, 94.9%,
-99.0% on-time; that baseline remains the safer proven candidate. The
+An earlier real five-world Discovery baseline was 92.0%, 92.0%, 95.9%,
+94.9%, 99.0% on-time; it is a different sample from the matched, pinned
+five-world experiment below. The
 separately tested Uber-style market policy underperformed Discovery in its
 holdout and was not promoted.
 
@@ -89,15 +97,54 @@ An actual Claude Fable 5.2 read-only review of the controller identified
 over-broadcasting, fee-margin erosion, invitation quota uncertainty,
 restarts and unnecessary premiums as material risks. The offer-first
 strategy, narrower risk criteria, restart fail-close and bounded invitations
-were changes driven by that review. These changes have been targeted-tested
-but **not** official-world-qualified.
+were changes driven by that review. Subsequent official-world A/B showed
+that neither the `full` rescue nor the `fees`-only variant improved service
+on the same seed: the `full` variant had lower gross margin. **Do not
+promote the rescue strategy.**
 
-Promote only if a permitted, genuinely out-of-sample world has ≥97% on-time,
+## Official matched-seed results, 14 November 2026
+
+Five unranked level-8 Discovery worlds with the pinned official SDK produced
+**1,394 on-time of 1,465 won orders (95.1536%)** and **€30,149.14** gross
+margin. The independent `admission_experiment.py` candidate with
+`SPREAD_ADMISSION_PRICE_PCT=132` and `SPREAD_ADMISSION_EXTRA_SLACK=240`
+produced **1,355 on-time of 1,407 won orders (96.3042%)** and
+**€30,121.90** gross margin on those same seeds. This is **+1.1506
+percentage points** on-time and **−€27.24 (−0.09%)** margin. Two of five
+admission worlds exceeded 97%; aggregate 97% was **not** achieved.
+
+| Seed suffix | Discovery on-time | Admission on-time | Discovery margin | Admission margin |
+| --- | ---: | ---: | ---: | ---: |
+| `01` | 96.58% | 97.42% | €6,771.29 | €6,772.59 |
+| `02` | 92.12% | 93.59% | €4,827.80 | €5,071.06 |
+| `03` | 95.13% | 94.77% | €6,114.93 | €5,742.60 |
+| `04` | 93.85% | 96.79% | €5,149.64 | €5,206.09 |
+| `05` | 97.88% | 98.93% | €7,285.48 | €7,329.56 |
+
+The seeds were `bahn-proof-20261114-01` through `-05`. The exact sponsor
+world IDs, `score()` output, comparison variants and code SHA are in
+[`OFFICIAL_ABLATION_20261114.md`](OFFICIAL_ABLATION_20261114.md).
+Five more *blind* paired seeds `bahn-blind-20261114-06` through `-10`
+validated the 139% +240-minute margin candidate: **+11.50% gross margin**
+over Discovery, 5/5 sponsor-eligible. Across all ten seeds it gained
+**+€8,054.08 (+14.02%)**, maintaining eligibility in 10/10 worlds;
+overall service was 95.76%, below the internal 97% target.
+Each world was ended and
+marked `ranked: true` by the scoring API; these were **practice worlds,
+not leaderboard attempts**. A per-order comparison of seed `01` found 16
+baseline order IDs absent and five new order IDs in the admission run;
+only one of those 16 missing orders was approximately late from reveal.
+This warns against interpreting the 97.42% as a calibrated risk model.
+
+Promote the **driver-rescue policy** only if a permitted, genuinely
+out-of-sample world has ≥97% on-time,
 keeps sponsor eligibility in every scenario, and the actual gross margin
 outperforms (or meets an explicitly accepted tradeoff versus) Discovery.
 Log exact repository SHA, official SDK version, seed/world identifier,
 driver/quote outcomes, margin and run type in an access-controlled receipt.
-Otherwise preserve Discovery as the production/competition default.
+Otherwise preserve the proven margin candidate or Discovery as appropriate
+for the sponsor's **margin-first, ≥90%-on-time** scoring objective. Neither
+was run in the final.
 
 Reference: official [Spread rules](https://spread.bahnexpress.com/kit/RULES.md),
 [handbook](https://spread.bahnexpress.com/kit/HANDBOOK.md), and
