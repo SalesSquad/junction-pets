@@ -125,3 +125,118 @@ server connection or driver was supplied. **NOT_RUN_LIVE_DB**; mock SQL binding
 checks are not MariaDB qualification. Browser rendering is not verified.
 
 After the final focused additions: `node --test solutions/mariadb-wikipedia-time/tests/intake.test.mjs` passed 9/9. The earlier core+intake command passed 21/21 before those additions. `node --check` passed for `studio/app.js` and `src/db-cli.mjs`; `git diff --check` passed. No live provider, browser or SQL verdict is inferred.
+
+## M4: offline, release-pinned M Parquet intake
+
+Work `J26-PF-MARIADB-M4-20261115`, M307; changes are based on PR197 HEAD
+`8d85d66009f865f096a8d3b9a4c5a267f2b4198d`, left uncommitted for the coordinator.
+Existing M3 results and `M3_SOURCE_HASHES.sha256` remain historical evidence;
+the README additions here do not retroactively update that hash record.
+
+Supply a **local** `versions-01.parquet` … `versions-16.parquet` and the exact
+`SHA256SUMS` asset from the official [m-2026-10 release](https://github.com/MariaDB/mariadb-wikipedia-datasets/releases/tag/m-2026-10).
+There is no automatic download. The manifest bytes must hash to
+`7d59a6a28b10f996be3c36fc4d82f5faa97624f8fca7a37cbf5d70e4bb809f68`,
+observed in the official [release asset metadata](https://github.com/MariaDB/mariadb-wikipedia-datasets/releases/expanded_assets/m-2026-10)
+on 15 November 2026. Caller-generated checksums cannot establish official origin.
+The shard basename and streaming SHA-256 must match an entry in that pinned
+manifest before Parquet decoding. These pins verify a local copy against the
+observed release metadata; they do not authenticate a live Wikipedia provider.
+
+```sh
+# If PyArrow is absent, optionally create an isolated product-local environment:
+python3 -m venv solutions/mariadb-wikipedia-time/.venv-m
+solutions/mariadb-wikipedia-time/.venv-m/bin/python -m pip install pyarrow==26.0.1
+# Activate only if using this optional environment; no global install is needed.
+. solutions/mariadb-wikipedia-time/.venv-m/bin/activate
+
+python3 solutions/mariadb-wikipedia-time/scripts/import-parquet-m.py --parquet /local/versions-01.parquet --sha256sums /local/SHA256SUMS --page 155 --out /tmp/m-replay.json
+node solutions/mariadb-wikipedia-time/src/cli.mjs --data /tmp/m-replay.json --page 155 --at 2026-01-02T00:00:00Z --compare 2026-01-01T00:00:00Z
+
+# Alternative Node bridge: import and immediately query; choose a NEW output path.
+node solutions/mariadb-wikipedia-time/src/parquet-m.mjs --parquet /local/versions-01.parquet --sha256sums /local/SHA256SUMS --page 155 --out /tmp/m-replay-other.json --at 2026-01-02T00:00:00Z --compare 2026-01-01T00:00:00Z
+```
+
+The paths and page/date values above are operator-selected examples, not a claim
+that page 155 is present in shard 01. Both import CLIs require all four explicit
+flags, reject existing outputs (including symlinks), and never overwrite. Missing
+PyArrow fails closed with `DEPENDENCY_UNAVAILABLE`; no dependency auto-install.
+The Node bridge uses `python3` from the operator's PATH without a shell.
+
+Intake scans the five required columns in batches of eight, filters one declared
+positive uint32 page ID, and retains **all matching versions in that one shard**
+only if there are 1–50. It rejects a 51st match rather than silently truncating.
+No whole-table `read_table`, sorting of corrupt input, cross-shard completeness
+claim or inferred pre-window history. UTC timestamp types, nonempty bounded
+text/title, positive uint32 revision IDs, uniqueness, and strictly increasing
+revision timestamps are checked; timestamp ties and reversed history fail closed.
+Bounds: 128 KiB UTF-8 per revision and 2 MiB total text; manifest 16 KiB.
+The shard is hashed again after scanning to detect changes during decoding.
+Batching bounds retained rows; Parquet decoding still needs memory for the
+format's compressed pages/dictionaries. Only use the admitted official shard.
+
+Output is a `LICENSED_REPLAY` accepted by existing `chronicle.loadDataset()`.
+Each record preserves its title, revision UTC and canonical Finnish Wikipedia
+`oldid` URL. `intake` records the release, both input hashes, scope and attribution.
+Chronicle's existing replay loader deliberately returns
+`LOCAL_HASH_ONLY_UNVERIFIED` and does not elevate saved metadata to authenticated
+provider evidence; the bridge returns intake metadata alongside its answer.
+The existing studio/API-snapshot DB adapter is **not** extended by this intake.
+`verified_live_source:false`, `OFFLINE_DETERMINISTIC` and
+`NO_MARIADB_CONNECTION` remain truthful. Revert candidates remain tentative.
+
+**Attribution and rights:** Finnish Wikipedia contributors; credit each revision
+and the linked page history. Wikipedia text in this dataset is
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), including applicable
+attribution and ShareAlike duties. The upstream loader code/documentation is MIT;
+that distinct code licence does not relicense the Wikipedia text. This importer
+is independently implemented from the documented schema; no upstream loader
+code or Wikipedia text is bundled. Preserve the release's README/attribution
+alongside the original download and any distributed replay. Official schema and
+rights: [dataset README](https://github.com/MariaDB/mariadb-wikipedia-datasets#readme).
+
+Targeted check:
+
+```sh
+node --test solutions/mariadb-wikipedia-time/tests/parquet-m.test.mjs
+```
+
+Local result: Node v26.13.0 / Python with PyArrow 26.0.1: **3/3 Node tests pass**,
+including **4/4 nested Python tests**. Generated tiny Parquet inputs are explicitly
+**SYNTHETIC**, not official M data. They cover wrong/valid digest, pinned-manifest
+refusal, exact as-of answer, lexical comparison, tentative revert, deterministic
+output, page filtering, duplicate/order/tie/size/count/schema rejection, and no
+overwrite. When Python/PyArrow is missing, the integration test is explicitly
+skipped while pure Node checksum-parser/pin-refusal tests still run.
+The initial run exposed Parquet's seconds-to-milliseconds timestamp conversion;
+the adapter now admits UTC Parquet timestamp units while requiring whole-second
+values. The repaired focused run passed; no M3 historical result was changed.
+
+**Source-author checkpoint:** the initial code worker read the official manifest
+and schema and tested synthetic Parquet only; it did not import the official shard.
+**Coordinator's later public-data replay (15 Nov 2026):** downloaded
+`versions-06.parquet` (9,621,134 bytes, 35,834 rows) and official
+`SHA256SUMS` into an MBP task-local lab; SHA256SUMS digest matched the
+GitHub release asset `7d59a6a28b10f996be3c36fc4d82f5faa97624f8fca7a37cbf5d70e4bb809f68`
+and the shard passed the published per-file checksum. Using that unchanged M4
+CLI, page `212820` produced **5 licensed historical revisions**, and a
+2026-11-14 as-of query resolved revision `20651356`. The task-local
+JSON replay SHA256 was
+`e630e7e3e2a456175ebc7749b832976d03e64ca4418925719a97f1782eebb1ea`.
+This is a real public offline dataset slice, **not** an authenticated live
+Wikipedia response, complete history, independent Wikipedia fact verification,
+or a real MariaDB service. No 315 MB full-dataset download, provider inference,
+persistent daemon, DB deployment or CRACI run was started. Existing CRACI run43644159235 remains **CANCELLED**, not passing.
+Knowledge OS context/evidence tools were unavailable in the runtime catalog
+(`registry_identity_unverifiable`, not routed); no saved reference was treated
+as source proof. Coordinator still owns final review, commit and push to PR197.
+
+Coordinator note: authenticated GitHub PR197 readback matched the assigned HEAD.
+The connector's `main` commit readback returned
+`a2d73f70b6e302866e262535fb026fcbfa4c2f4c`, differing from the assignment's
+`73669fee92f24fa2acf28d4b683b851e0fa39a1b`; no rebase/merge was attempted.
+Reconcile the actual integration base at coordinator handoff. Final checks:
+17/17 combined core+M4 Node tests passed, including four nested Python tests;
+subsequent affected M4 run passed 3/3 after added boundary/dependency cases.
+`git diff --check` passed. The accepted 50-row boundary and absent-PyArrow refusal
+are tested with synthetic inputs. The product-local `.venv-m/` is ignored.
