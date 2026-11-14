@@ -42,7 +42,7 @@ Actual sample path inside sponsor archive: `data/swiss_dwellings/site1102_bldg22
 
 Source SHA-256: `4070c5f19eb921bc08e2f5a23e957086f76abcca03fafbb8b62ca30c8a60b58d`.
 
-Attribution: **Swiss Dwellings v3.0.0** (Matthias Standfest, Michael Franzen, Yvonne Schröder, Luis Gonzalez Medina, Yarilo Villanueva Hernandez, Jan Hendrik Buck, Yen-Ling Tan, Milena Niedzwiecka, Rachele Colmegna / Archilyse AG); [doi:10.5281/zenodo.7788422](https://doi.org/10.5281/zenodo.7788422), **CC BY 4.0**. The actual DXF was rendered as a derivative by the Stoa/Junction dataset producers, who do not imply Archilyse endorsement. Non-commercial Junction usage only; do not re-export sponsor drawings without verifying per-source licences. Source questions are from the official preview, not generated claims.
+Attribution: **Swiss Dwellings v3.0.0** (Matthias Standfest, Michael Franzen, Yvonne Schröder, Luis Gonzalez Medina, Yarilo Villanueva Hernandez, Jan Hendrik Buck, Yen-Ling Tan, Milena Niedzwiecka, Rachele Colmegna / Archilyse AG); [doi:10.5281/zenodo.7788422](https://doi.org/10.5281/zenodo.7788422), **CC BY 4.0**. The actual DXF was rendered as a derivative by the Stoa/Junction dataset producers, who do not imply Archilyse endorsement. Non-commercial Junction usage only; do not re-export sponsor drawings without verifying per-source licences. Source questions are from the official preview, not generated claims. The Swiss `UNIT_OUTLINE` geometries omit the DXF `closed` flag but explicitly repeat their first vertices as final vertices; the engine recognizes these complete rings while refusing genuinely open paths.
 
 ## Sponsor rubric
 

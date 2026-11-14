@@ -71,9 +71,16 @@ export function answerDrawing(drawing, question) {
 
   if (countIntent.test(q)) {
     if (/\b(apartments?|residential units?|appartamenti|wohnungen|unit[aà] abitative)\b/i.test(q)) {
-      const units = entities.filter(e => e.layer === 'UNIT_OUTLINE' && e.type === 'LWPOLYLINE' && e.points.length >= 3);
+      const units = entities.filter(e => e.layer === 'UNIT_OUTLINE');
       if (!units.length) return abstain('No distinct unit-outline entities are available; text labels alone are insufficient.', drawing);
-      return answer(String(units.length), `${units.length} separate UNIT_OUTLINE geometries occur in this drawing. These outlines are individually highlighted; they are not inferred from unrelated doors or wall strokes.`, drawing, units.map(e => evidence(e, 'Source apartment/unit outline')), { type: 'count', value: units.length, unit: 'apartments' });
+      const validRing = e => {
+        if (e.type !== 'LWPOLYLINE' || !Array.isArray(e.points) || e.points.length < 3) return false;
+        const first = e.points[0], last = e.points[e.points.length - 1];
+        const endpointsClose = Math.hypot(first.x - last.x, first.y - last.y) <= 1e-6;
+        return (e.closed || endpointsClose) && polygonArea(e.points) > 1e-8;
+      };
+      if (!units.every(validRing)) return abstain('At least one UNIT_OUTLINE is not a provably closed, positive-area region; apartment count is unsafe.', drawing);
+      return answer(String(units.length), `${units.length} separate, closed, positive-area UNIT_OUTLINE source geometries occur in this drawing. Each ring is highlighted; no apartment is inferred from open strokes.`, drawing, units.map(e => evidence(e, 'Closed source apartment/unit ring')), { type: 'count', value: units.length, unit: 'apartments' });
     }
     if (/\b(doors?|windows?|walls?|stairs?|columns?|fixtures?|beams?)\b/i.test(q)) {
       return abstain('This source contains primitives, not independently validated instances of that object class.', drawing);

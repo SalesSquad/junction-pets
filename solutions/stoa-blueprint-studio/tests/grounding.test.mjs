@@ -34,6 +34,25 @@ test('counts distinct unit outlines, not raw wall/door segments', () => {
   assert.equal(answer('How many apartments?').answer, '2');
   assert.equal(answer('How many apartments?').evidence.length, 2);
 });
+test('abstains on genuinely open unit paths even when they have three vertices', () => {
+  const opened = structuredClone(demo);
+  opened.entities.find(e => e.layer === 'UNIT_OUTLINE').points.pop();
+  opened.entities.find(e => e.layer === 'UNIT_OUTLINE').closed = false;
+  const r = answer('How many apartments?', opened);
+  assert.equal(r.status, 'abstained');
+  assert.equal(r.evidence.length, 0);
+});
+test('recognizes explicit endpoint-closed unit rings when DXF closed flag is missing', () => {
+  const endpointsClosed = structuredClone(demo);
+  for (const e of endpointsClosed.entities.filter(e => e.layer === 'UNIT_OUTLINE')) {
+    e.closed = false;
+    e.points.push({ ...e.points[0] });
+  }
+  const r = answer('How many apartments?', endpointsClosed);
+  assert.equal(r.status, 'supported');
+  assert.equal(r.answer, '2');
+  assert.equal(r.evidence.length, 2);
+});
 test('absent room, ambiguous room name and unhandled classes fail closed', () => {
   for (const q of ['What is the area of room Z-999?', 'What is the area of Stanza?',
     'How many doors are there?', 'What color is the roof?', 'How many windows?',
