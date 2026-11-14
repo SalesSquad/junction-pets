@@ -14,6 +14,7 @@ import hashlib
 import importlib.util
 import math
 from pathlib import Path
+import sys
 from typing import Callable
 
 import numpy as np
@@ -103,6 +104,7 @@ class ConservativeHybrid:
         self.rescue_options = 0
         self.total_options = 0
         self.rescue_sides = 0
+        self.must_call_v5_after_rescue = False
 
     def _checked_call(self, controller, observation, legal):
         return checked_action(controller(observation.copy(), legal.copy()), legal)
@@ -119,6 +121,7 @@ class ConservativeHybrid:
         self.rescue_active = False
         self.rescue = None
         self.rescue_options = 0
+        self.must_call_v5_after_rescue = True
         # Don't let V5's internal memory include an action we never executed.
         self.baseline = self.baseline_factory()
         if not callable(self.baseline):
@@ -153,6 +156,11 @@ class ConservativeHybrid:
             else:
                 return self._rescue_action(obs, legal)
 
+        if self.must_call_v5_after_rescue:
+            # A budgeted rescue must return control to V5 for an *executed*
+            # decision, not immediately chain into another V8 round.
+            self.must_call_v5_after_rescue = False
+            return self._checked_call(self.baseline, obs, legal)
         if (self.rescue_rounds < MAX_RESCUE_ROUNDS and
                 self._eligible_preemptive_rescue(obs, legal)):
             self._start_rescue()
@@ -160,11 +168,12 @@ class ConservativeHybrid:
         return self._checked_call(self.baseline, obs, legal)
 
 
-def frozen_factories(weights_path: Path, receipt_path: Path):
-    """Bind exact original V8 source/checkpoint; return per-episode factories.
+def verified_original_bundle(weights_path: Path, receipt_path: Path):
+    """Bind actually executed original V8 trainer, runner and checkpoint bytes.
 
     The V8 runner itself independently binds immutable V5/V7 physics and the
-    4-stage weights. No optional injected policy factory is accepted here.
+    4-stage weights. A generic prior `sys.modules['run']` from a different
+    version must never become the trainer while nominal file pins look green.
     """
     runner = V8 / "rollout_train.py"
     trainer = V8 / "run.py"
@@ -176,18 +185,41 @@ def frozen_factories(weights_path: Path, receipt_path: Path):
     for path, sha in expected:
         if not path.is_file() or path.is_symlink() or sha256_file(path) != sha:
             raise HybridContractError("HYBRID_UNREVIEWED_V8_SOURCE_OR_CHECKPOINT")
+    cached_run = sys.modules.get("run")
+    if cached_run is not None:
+        cached_path = getattr(cached_run, "__file__", None)
+        if cached_path is None or Path(cached_path).resolve() != trainer.resolve():
+            raise HybridContractError("HYBRID_GENERIC_RUN_IMPORT_COLLISION")
+
+    # Load verified bytes under an unambiguous name. Original V8's runner
+    # imports a generic `run`; explicitly rebind it to this independent module
+    # before invoking *any* policy/model verifier or factory.
+    trainer_spec = importlib.util.spec_from_file_location(
+        "v10_hybrid_original_v8_pinned_trainer", trainer)
+    if trainer_spec is None or trainer_spec.loader is None:
+        raise HybridContractError("HYBRID_V8_TRAINER_IMPORT_FAILED")
+    verified_trainer = importlib.util.module_from_spec(trainer_spec)
+    trainer_spec.loader.exec_module(verified_trainer)
     spec = importlib.util.spec_from_file_location("v10_hybrid_original_v8", runner)
     if spec is None or spec.loader is None:
         raise HybridContractError("HYBRID_V8_RUNNER_IMPORT_FAILED")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    module.v8 = verified_trainer
     # Explicitly reverify model and receipt against historically fitted HEAD.
     weights, _, canonical_sha = module.verify_frozen_model(
         weights_path, receipt_path, V8_CANONICAL_MODEL_SHA256)
     if canonical_sha != V8_CANONICAL_MODEL_SHA256:
         raise HybridContractError("HYBRID_FROZEN_V8_MODEL_MISMATCH")
-    return (module.policy_factory("frozen_v5", weights),
+    return (module, weights,
+            module.policy_factory("frozen_v5", weights),
             module.policy_factory("v8_hierarchical", weights))
+
+
+def frozen_factories(weights_path: Path, receipt_path: Path):
+    """Return original frozen V5/V8 per-episode policy factories, never fakes."""
+    _, _, v5, v8 = verified_original_bundle(weights_path, receipt_path)
+    return v5, v8
 
 
 def policy_factory(mode: str, weights_path: Path, receipt_path: Path):
