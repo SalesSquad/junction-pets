@@ -2989,7 +2989,7 @@ jobs:
 
   rokoko-rl-ablations:
     if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-rl-ablations' }}
-    name: Rokoko fresh-world policy ablations / learner seed ${{ matrix.learner_seed }} / 1000+400
+    name: Rokoko fresh-world policy ablations / learner seed ${{ matrix.learner_seed }} / 1000+500
     runs-on: craci
     timeout-minutes: 30
     concurrency:
