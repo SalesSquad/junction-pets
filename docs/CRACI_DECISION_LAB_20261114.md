@@ -112,9 +112,11 @@ environment, never from repository files or emitted JSON. The adapter uses
 hardcoded HTTPS origin, GET only, fixed query selectors, no redirects, bounded
 timeout and response length, and no raw URL/log/body output. A network trace
 must match **GitHub job ID, run ID, repo, attempt (if provided), and harness
-commit SHA**; otherwise its status is `unknown`. A valid provider-served
-CycloneDX document proves at most an observed inventory response for the
-requested job, **not completeness**. HTTP errors, missing token, unavailable
+commit SHA**; otherwise its status is `unknown`. CycloneDX itself does not
+carry a GitHub source SHA: its status stays `unknown` unless the companion
+network trace verifies the exact job/run/harness tuple. Provider-served
+CycloneDX then proves at most a job inventory response, **not completeness**.
+HTTP errors, missing token, unavailable
 endpoint or mismatched source all fail closed. The API does not supply a
 cryptographically signed attestation in these responses: the output keeps
 `providerAttestationVerified:false`.
@@ -148,5 +150,6 @@ different host. The CLI does not contact CRACI when the token is absent.
 
 **Tests:** `node --test scripts/craci/adaptive-proof.test.mjs` covers source
 replay, budget/cutoff, old green/failure dedupe, chain corruption, missing
-provider token, valid mocked API, source/run mismatch and HTTP 403. Passing
+provider token, valid mocked API, source/run mismatch, unbound SBOM rejection
+and HTTP 403. Passing
 tests are **synthetic**; live CRACI provider readback is not claimed.
