@@ -38,10 +38,29 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
     if (['product-browser', 'sbank-sponsor'].includes(workload)) input.source_sha = candidate;
     if (['portfolio-browser', 'new-products-browser'].includes(workload)) input.product = 'all';
     const plan = resolvePlan(input, context);
-    assert.ok(plan.jobCount >= 1 && plan.jobCount <= 12);
+    const cap = workload === 'meta-r-hardshift-2x' ? 24 : 12;
+    if (workload === 'meta-r-hardshift-2x') assert.equal(plan.jobCount, 24);
+    assert.ok(plan.jobCount >= 1 && plan.jobCount <= cap);
     assert.ok(plan.maxParallel >= 1 && plan.maxParallel <= 8);
     assert.equal(new Set(plan.matrix.include.map(row => row.cell)).size, plan.matrix.include.length);
     for (const row of plan.matrix.include) assert.match(row.source_sha, /^[a-f0-9]{40}$/);
   }
   assert.throws(() => resolvePlan({workload: 'meta-browser', browser: 'firefox'}, context), /Chromium/);
+});
+test('eight fresh real-image R/metadata lanes are unique and fail closed', () => {
+  const all = resolvePlan({workload:'lens-r8-meta', lane_slice:'all'}, context);
+  const pilot = resolvePlan({workload:'lens-r8-meta', lane_slice:'pilot'}, context);
+  const remainder = resolvePlan({workload:'lens-r8-meta', lane_slice:'remaining'}, context);
+  assert.equal(all.jobCount,8);
+  assert.equal(all.maxParallel,8);
+  assert.equal(pilot.jobCount,1);
+  assert.equal(remainder.jobCount,7);
+  assert.deepEqual([...pilot.matrix.include,...remainder.matrix.include].map(r=>r.cell),
+                   all.matrix.include.map(r=>r.cell));
+  assert.equal(new Set(all.matrix.include.map(r=>r.arm)).size,8);
+  assert.ok(all.matrix.include.every(r=>r.source_sha === context.harnessSha));
+  assert.throws(()=>resolvePlan({workload:'lens-r8-meta', source_sha:candidate},context),
+    /pinned immutable harness/);
+  assert.throws(()=>resolvePlan({workload:'lens-r8-meta', lane_slice:'unsupported'},context),
+    /Unsupported R8 lane slice/);
 });
