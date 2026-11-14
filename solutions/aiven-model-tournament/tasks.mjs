@@ -1,7 +1,7 @@
 // Objective Aiven tasks with code-computed ground truth. Each generator takes a
 // seeded RNG and returns { id, prompt, score(answerJson) -> 0..1, detail }.
 // No LLM judge: answers are scored only against values computed here.
-export function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32); }
+export function rng(seed) { let s = Math.imul(seed >>> 0, 2654435761) ^ 0x9e3779b9; for (let i = 0; i < 4; i++) s = (s * 1664525 + 1013904223) >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32); }
 const int = (r, a, b) => a + Math.floor(r() * (b - a + 1));
 const pick = (r, xs) => xs[Math.floor(r() * xs.length)];
 const JSON_TAIL = '\nEnd your answer with one ```json code block that matches the requested fields exactly.';
@@ -9,10 +9,14 @@ const near = (a, b, tol) => typeof a === 'number' && Math.abs(a - b) <= tol;
 
 export const TASKS = {
   consumerGroup(r) {
-    const P = int(r, 3, 8), C = int(r, P - 1, P + 4);
-    const lags = Array.from({ length: P }, () => int(r, 0, 400));
-    const hot = int(r, 0, P - 1); lags[hot] = int(r, 20000, 90000);
-    const truth = { idle_consumers: Math.max(0, C - P), hot_partition: hot, adding_consumers_helps: C < P };
+    const P = int(r, 3, 8); let C = int(r, P - 1, P + 4);
+    // Either one hot partition (more consumers cannot help: one partition is read by
+    // one consumer) or evenly high lag (more consumers help only while C < P).
+    const skewed = r() < 0.5;
+    if (!skewed) C = P - int(r, 1, 2); // even lag with spare partitions: adding consumers helps
+    const lags = Array.from({ length: P }, () => skewed ? int(r, 0, 400) : int(r, 18000, 22000));
+    const hot = int(r, 0, P - 1); lags[hot] = skewed ? int(r, 20000, 90000) : 23000 + int(r, 0, 500);
+    const truth = { idle_consumers: Math.max(0, C - P), hot_partition: hot, adding_consumers_helps: !skewed && C < P };
     return { truth, prompt: `Aiven for Apache Kafka, consumer group "billing" on topic "orders" with ${P} partitions and ${C} active consumers. Current lag per partition: ${lags.map((l, i) => `p${i}=${l}`).join(', ')}.
 Return JSON {"idle_consumers": number, "hot_partition": number (index), "adding_consumers_helps": boolean}.` + JSON_TAIL,
       score: a => (a.idle_consumers === truth.idle_consumers) / 3 + (a.hot_partition === truth.hot_partition) / 3 + (a.adding_consumers_helps === truth.adding_consumers_helps) / 3 };
@@ -66,6 +70,14 @@ Return JSON {"manifest_yaml": string, "token_should_be_rotated": boolean}.` + JS
     return { truth: want, prompt: `An app ${text}. Nothing else is required. Choose the minimal set of Aiven service types from: pg, kafka, opensearch, valkey, clickhouse, mysql, grafana.
 Return JSON {"services": [service types]}.` + JSON_TAIL,
       score: a => { const got = new Set(a.services ?? []); const inter = want.filter(x => got.has(x)).length; const uni = new Set([...want, ...got]).size; return uni ? inter / uni : 0; } };
+  },
+  capacityPlan(r) {
+    const peak = int(r, 4, 40) * 1000, perConsumer = pick(r, [800, 1200, 1500, 2500]), sizeKb = pick(r, [1, 2, 4, 8]), hours = pick(r, [24, 72, 168]), rf = 3;
+    const partitions = Math.ceil(peak / perConsumer);
+    const storageGb = +(peak * 0.4 * sizeKb * 1024 * 3600 * hours * rf / 1e9).toFixed(1); // average = 40 % of peak
+    return { truth: { partitions, storage_gb: storageGb }, prompt: `Size a Kafka topic for agent events. Peak ${peak} messages/s, average load is 40 % of peak, message size ${sizeKb} KiB (1 KiB = 1024 bytes), one consumer handles ${perConsumer} messages/s, retention ${hours} h, replication factor ${rf}. Partitions must let one consumer group keep up at peak with one consumer per partition. Storage is average throughput × retention × replication, in GB = 10^9 bytes.
+Return JSON {"partitions": integer, "storage_gb": number rounded to 1 decimal}.` + JSON_TAIL,
+      score: a => (a.partitions === partitions) / 2 + near(a.storage_gb, storageGb, Math.max(0.15, storageGb * 0.01)) / 2 };
   },
   priceHonesty(r) {
     const plan = pick(r, ['startup-4', 'business-8']), cloud = pick(r, ['google-europe-west3', 'aws-eu-north-1']);
