@@ -150,7 +150,8 @@ class V6Contracts(unittest.TestCase):
         self.assertFalse(t["curriculum_next"]["auto_dispatch"])
 
     def test_gate_prohibits_any_v5_success_regression(self):
-        worlds=[dict(learned_v5={"success":True,"unsafe":False},
+        worlds=[dict(constant={"success":False,"unsafe":False},
+                     learned_v5={"success":True,"unsafe":False},
                      learned_v6={"success":False,"unsafe":False})]
         s={"learned_v6":dict(delta_success_percentage_points=10,
                               paired_bootstrap95_pp=[1,20],
@@ -162,7 +163,8 @@ class V6Contracts(unittest.TestCase):
         self.assertEqual(gate["lost_v5_successes"],1)
 
     def test_gate_preserves_unsafe_and_paired_ci(self):
-        worlds=[dict(learned_v5={"success":False,"unsafe":False},
+        worlds=[dict(constant={"success":False,"unsafe":False},
+                     learned_v5={"success":False,"unsafe":False},
                      learned_v6={"success":True,"unsafe":True})]
         s={"learned_v6":dict(delta_success_percentage_points=10,
                               paired_bootstrap95_pp=[1,20],
@@ -173,6 +175,39 @@ class V6Contracts(unittest.TestCase):
         self.assertFalse(gate["scientifically_qualifies"])
         self.assertFalse(gate["no_unsafe_regression_vs_v5"])
         self.assertEqual(gate["observed_corridor_new_wins"],1)
+
+    def test_gate_demands_five_genuinely_new_wins_against_both(self):
+        worlds=[dict(constant={"success":False,"unsafe":False},
+                     learned_v5={"success":False,"unsafe":False},
+                     learned_v6={"success":True,"unsafe":False}) for _ in range(5)]
+        s={"learned_v6":dict(delta_success_percentage_points=100.,
+                              paired_bootstrap95_pp=[100.,100.],
+                              candidate_success=5,constant_success=0,
+                              candidate_unsafe=0,constant_unsafe=0),
+           "learned_v5":dict(candidate_success=0)}
+        result=run.scientific_gate(worlds,s,[dict(observed_corridor=True)]*5)
+        self.assertTrue(result["scientifically_qualifies"])
+        self.assertEqual(result["genuinely_new_wins_vs_both"],5)
+        self.assertTrue(result["no_new_unsafe_worlds"])
+
+    def test_gate_refuses_unsafe_swap_even_when_aggregate_equal(self):
+        worlds=[
+            dict(constant={"success":False,"unsafe":True},
+                 learned_v5={"success":False,"unsafe":False},
+                 learned_v6={"success":True,"unsafe":False}),
+            dict(constant={"success":False,"unsafe":False},
+                 learned_v5={"success":False,"unsafe":False},
+                 learned_v6={"success":True,"unsafe":True}),
+        ]
+        s={"learned_v6":dict(delta_success_percentage_points=100.,
+                              paired_bootstrap95_pp=[100.,100.],
+                              candidate_success=2,constant_success=0,
+                              candidate_unsafe=1,constant_unsafe=1),
+           "learned_v5":dict(candidate_success=0)}
+        result=run.scientific_gate(worlds,s,[dict(observed_corridor=True)]*2)
+        self.assertFalse(result["no_new_unsafe_worlds"])
+        self.assertEqual(result["new_unsafe_vs_constant"],1)
+        self.assertFalse(result["scientifically_qualifies"])
 
     def test_hash_uses_exact_sorted_compact_json(self):
         self.assertEqual(run.digest({"a":1,"b":2}),run.digest({"b":2,"a":1}))
