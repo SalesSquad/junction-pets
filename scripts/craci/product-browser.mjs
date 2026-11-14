@@ -44,6 +44,9 @@ async function clickedPost(page, selector, path) {
     status: response.status(),
     body: await response.json(),
     payload: response.request().postDataJSON(),
+    // In-memory synthetic capability for an independent, same-buyer replay probe.
+    // Never include this authorization header in the logged test receipt.
+    authorization: response.request().headers().authorization ?? null,
   };
 }
 
@@ -212,7 +215,7 @@ async function valioMissionSmoke(page, base) {
   return { missionPlanning: 'passed', fixedQuote: 'passed', unsignedOrderBlocked: 'passed', missionOverflow };
 }
 
-async function valioSmoke(page, base) {
+async function valioSmoke(page, base, { frontier = false } = {}) {
   const initial = (await getJson(page, base, '/api/catalog')).products;
   const amounts = products =>
     Object.fromEntries(products.map(p => [p.sku, p.unitsAvailable]));
@@ -250,9 +253,20 @@ async function valioSmoke(page, base) {
   await textIs(page, '#policy-title', 'Simulation committed · no purchase');
   assert.equal(await page.locator('#order').isDisabled(), true);
 
-  // The UI disables its commit button. Replay its actual HTTP payload directly.
+  // Frontier V3 requires the synthetic buyer capability on every write.
+  // Prove an anonymous replay is refused, then replay the exact original
+  // payload with the SAME buyer capability (not a fresh authorization).
+  if (frontier) {
+    const unboundReplay = await page.request.post(base + '/api/orders', {
+      data: committed.payload,
+    });
+    assert.equal(unboundReplay.status(), 403);
+    assert.equal((await unboundReplay.json()).error.code, 'BUYER_CAPABILITY_REQUIRED');
+    assert.match(committed.authorization ?? '', /^Bearer [0-9a-f-]{36}$/i);
+  }
   const replayResponse = await page.request.post(base + '/api/orders', {
     data: committed.payload,
+    ...(frontier ? { headers: { Authorization: committed.authorization } } : {}),
   });
   assert.equal(replayResponse.status(), 201);
   const replay = (await replayResponse.json()).order;
@@ -365,7 +379,7 @@ async function main() {
               'Legacy Valio source must expose the classic request form at /');
           }
         }
-        const coverage = await cfg.run(page, base);
+        const coverage = await cfg.run(page, base, { frontier: Boolean(mission) });
         if (mission) coverage.mission = mission;
         const overflow = await page.evaluate(() =>
           Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) - window.innerWidth,
