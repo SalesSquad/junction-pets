@@ -1,0 +1,102 @@
+{
+ "id": "6efe15cfcbb208ac14bfe79e8e33fbd6645cab04e9806c54162fc79c31966267",
+ "curriculum": "no_event",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas soitti julkiseen perusterveydenhuoltoon ja kertoi voivansa hyvin. Kilpirauhasen vajaatoiminta todettiin ja tyroksiinihoito aloitettiin 15 viikkoa sitten. Seuraava kontrollikäynti on suunniteltu 27. elokuuta 2025, mutta se ei ole vielä toteutunut. Potilas pärjää kotona ja toimintakyky on hyvä. Hoito-ohjeista on neuvottu, ja potilas osaa ottaa yhteyttä, jos oireet muuttuvat.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:48 outside 60-140"
+    ],
+    "words": 48,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 794,
+      "total_tokens": 927,
+      "completion_tokens": 133,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.75
+    }
+   ],
+   "repair_request": [
+    "The note has 48 words. Write 80 to 110 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas otti yhteyttä julkiseen perusterveydenhuoltoon puhelimitse ja kertoi voivansa tällä hetkellä melko hyvin. Kilpirauhasen vajaatoiminta todettiin ja tyroksiinihoito aloitettiin 15 viikkoa sitten, mikä on hyväntahtoinen syy eikä liity syöpäpolkuun. Seuraava kontrollikäynti on suunniteltu 27. elokuuta 2025, mutta käynti ei ole vielä toteutunut. Potilas pärjää kotona itsenäisesti, ja toimintakyky on säilynyt hyvänä. Lääkehoidosta ja oireiden seurannasta on annettu neuvontaa, ja potilas tietää, milloin on syytä olla yhteydessä terveydenhuoltoon.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 67,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "extra_event",
+      "expected": null,
+      "got": {
+       "type": "FIRST_CONTACT",
+       "date": "2025-03-24",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PUBLIC_PRIMARY",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-03-24",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1007,
+      "total_tokens": 1199,
+      "completion_tokens": 192,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.04
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 780,
+      "total_tokens": 818,
+      "completion_tokens": 38,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.51
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:59+00:00"
+}

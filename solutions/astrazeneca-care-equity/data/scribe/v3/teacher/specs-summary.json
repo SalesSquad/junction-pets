@@ -1,0 +1,70 @@
+{
+  "target": {
+    "hard_standard": 480,
+    "careful": 400,
+    "no_event": 240,
+    "long_multi_visit": 240,
+    "terse": 240
+  },
+  "built": {
+    "hard_standard": 480,
+    "careful": 400,
+    "no_event": 240,
+    "long_multi_visit": 240,
+    "terse": 240
+  },
+  "specifications": 1600,
+  "v2_dataset_ids": 5654,
+  "dropped_by_final_collision_filter": 0,
+  "seeds": {
+    "hard_standard": 23261114,
+    "careful": 24261114,
+    "no_event": 24361114,
+    "cancer_history": 24461114,
+    "long_multi_visit": 24561114,
+    "terse": 24661114,
+    "order": 24761114
+  },
+  "builders": {
+    "hard_standard": {
+      "indices_drawn": 28956,
+      "skipped": {
+        "not_in_curriculum": 28476
+      }
+    },
+    "careful": {
+      "attempts": 422,
+      "rejected": {
+        "month_overlaps_next_event": 8,
+        "chronology_not_strict": 11,
+        "ground_truth_already_used": 3
+      }
+    },
+    "no_event": {
+      "lookalike": {
+        "attempts": 120,
+        "rejected": {}
+      },
+      "cancer_history": {
+        "attempts": 128,
+        "rejected": {
+          "outside_season": 8
+        }
+      }
+    },
+    "long_multi_visit": {
+      "attempts": 553,
+      "rejected": {
+        "chronology_not_strict": 172,
+        "duplicate_expression": 56,
+        "month_overlaps_next_event": 85
+      }
+    },
+    "terse": {
+      "indices_drawn": 243,
+      "skipped": {
+        "id_already_used": 3
+      }
+    }
+  }
+}

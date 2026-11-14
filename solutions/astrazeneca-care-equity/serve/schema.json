@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SAMA pathway scribe output",
+  "description": "What the pathway scribe returns for one Finnish clinical-style note. Two formats share one envelope. 'absolute': the model writes ISO dates itself (the dataset-v1 target). 'expression': the model copies the date wording from the note and serve/client.py does the calendar arithmetic. Send one of the two sub-schemas under $defs to the server for guided decoding; do not send this whole document. Research artefact trained on synthetic text only; not for clinical use.",
+  "x-sama": {
+    "schemaVersion": "pathway-scribe-output-v1",
+    "enumSource": "scribe/sample.py ROUTES, TYPES, MONTHS (serve/tests/test_schema.py fails if they drift)",
+    "formats": {
+      "absolute": "#/$defs/absolute",
+      "expression": "#/$defs/expression"
+    },
+    "guidedDecodingNotes": [
+      "Keywords used: type, properties, required, additionalProperties:false, enum, pattern, items, maxItems. None of them is on the reject list of has_xgrammar_unsupported_json_features in vLLM v0.29.0.",
+      "pattern is never combined with minLength or maxLength: vLLM v0.29.0 rejects that combination for the xgrammar backend because xgrammar drops the length bound silently.",
+      "Patterns use only literals, character classes, alternation, plain groups and bounded repetition, so they mean the same in Python re and in Rust-style regex engines.",
+      "Property order equals the key order of the training targets (entry_route, events; type, date, precision).",
+      "A pattern cannot check the calendar (31.2. passes) or that MONTH precision uses day 01. serve/client.py checks those after decoding and sends failures to human review."
+    ]
+  },
+  "anyOf": [
+    { "$ref": "#/$defs/absolute" },
+    { "$ref": "#/$defs/expression" }
+  ],
+  "$defs": {
+    "absolute": {
+      "title": "pathway_scribe_absolute",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry_route", "events"],
+      "properties": {
+        "entry_route": {
+          "enum": ["PUBLIC_PRIMARY", "OCCUPATIONAL", "PRIVATE", "EMERGENCY", "SCREENING"]
+        },
+        "events": {
+          "type": "array",
+          "maxItems": 9,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "date", "precision"],
+            "properties": {
+              "type": {
+                "enum": [
+                  "SYMPTOM_ONSET_REPORTED",
+                  "FIRST_CONTACT",
+                  "PHYSICIAN_ASSESSMENT",
+                  "REFERRAL_SENT",
+                  "REFERRAL_RECEIVED",
+                  "SPECIALIST_VISIT",
+                  "DIAGNOSIS",
+                  "MDT_DECISION",
+                  "TREATMENT_START"
+                ]
+              },
+              "date": {
+                "type": "string",
+                "pattern": "^(19|20)[0-9]{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"
+              },
+              "precision": {
+                "enum": ["DAY", "MONTH"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "expression": {
+      "title": "pathway_scribe_expression",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry_route", "events"],
+      "properties": {
+        "entry_route": {
+          "enum": ["PUBLIC_PRIMARY", "OCCUPATIONAL", "PRIVATE", "EMERGENCY", "SCREENING"]
+        },
+        "events": {
+          "type": "array",
+          "maxItems": 9,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "expression"],
+            "properties": {
+              "type": {
+                "enum": [
+                  "SYMPTOM_ONSET_REPORTED",
+                  "FIRST_CONTACT",
+                  "PHYSICIAN_ASSESSMENT",
+                  "REFERRAL_SENT",
+                  "REFERRAL_RECEIVED",
+                  "SPECIALIST_VISIT",
+                  "DIAGNOSIS",
+                  "MDT_DECISION",
+                  "TREATMENT_START"
+                ]
+              },
+              "expression": {
+                "type": "string",
+                "pattern": "^((0?[1-9]|[12][0-9]|3[01])\\.(0?[1-9]|1[0-2])\\.((19|20)[0-9]{2})?|(0?[1-9]|[12][0-9]|3[01])\\. (tammi|helmi|maalis|huhti|touko|kesä|heinä|elo|syys|loka|marras|joulu)kuuta (19|20)[0-9]{2}|(tammi|helmi|maalis|huhti|touko|kesä|heinä|elo|syys|loka|marras|joulu)kuussa (19|20)[0-9]{2}|[1-9][0-9]{0,3} (päivää|viikkoa) sitten)$"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,201 @@
+{
+ "id": "2f956cf87810df2eece1efe41dac3cd65ef3a5a1d00a9c6b90096e331628bd6e",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on hakeutunut yksityisen terveydenhuoltoon. Yksityisen lääkäriaseman yleislääkäri tutki ja arvioi potilasta 50 viikkoa sitten ja lähetti lähetteen erikoissairaanhoitoon 45 viikkoa sitten. Potilas kävi erikoislääkärin vastaanotolla tammikuussa 2025. Moniammatillinen tiimi teki hoitopäätöksen 8.5. Potilaan syntymäaika on 28.2.1968, ja hän on käynyt aiemmassa syöpään liittymättömässä rokotuskäynnissä 8.2.2023. Potilas voi tällä hetkellä hyvin, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Potilaalle on annettu yleistä neuvontaa ja tukea.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 65,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-08-03",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-07-22",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "REFERRAL_SENT",
+       "date": "2024-09-07",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "REFERRAL_SENT",
+       "date": "2024-08-19",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-07-22",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2024-08-19",
+       "precision": "DAY"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2025-01-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-05-08",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 886,
+      "total_tokens": 1102,
+      "completion_tokens": 216,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.39
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 804,
+      "total_tokens": 926,
+      "completion_tokens": 122,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.04
+    }
+   ],
+   "repair_request": [
+    "An independent reader dated 'lääkärin arvio' to 2024-07-22 (DAY) instead of '50 viikkoa sitten' (= 2024-08-03, DAY). Put that date string directly with that fact and no other date near it.",
+    "An independent reader dated 'lähetteen lähettäminen' to 2024-08-19 (DAY) instead of '45 viikkoa sitten' (= 2024-09-07, DAY). Put that date string directly with that fact and no other date near it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas on hakeutunut yksityisen terveydenhuoltoon. Yksityisen lääkäriaseman yleislääkäri tutki ja arvioi potilasta 50 viikkoa sitten. Lähettävä lääkäri lähetti lähetteen erikoissairaanhoitoon 45 viikkoa sitten. Potilas kävi erikoislääkärin vastaanotolla tammikuussa 2025. Moniammatillinen tiimi teki hoitopäätöksen 8.5. Potilaan syntymäaika on 28.2.1968, ja hän on käynyt aiemmassa syöpään liittymättömässä rokotuskäynnissä 8.2.2023. Potilas voi tällä hetkellä hyvin, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Potilaalle on annettu yleistä neuvontaa ja tukea.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 66,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-08-03",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-07-22",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "REFERRAL_SENT",
+       "date": "2024-09-07",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "REFERRAL_SENT",
+       "date": "2024-08-19",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-07-22",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2024-08-19",
+       "precision": "DAY"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2025-01-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-05-08",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1303,
+      "total_tokens": 1528,
+      "completion_tokens": 225,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.22
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 813,
+      "total_tokens": 935,
+      "completion_tokens": 122,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.73
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:35:00+00:00"
+}

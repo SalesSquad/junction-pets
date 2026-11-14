@@ -162,8 +162,10 @@ export function regionFacts(analysis) {
   });
 }
 
-// Public route, first contact to treatment: mean 207 - 72 = 135 days (Kuitunen 2026). With the
-// log-sd implied by that paper's mean/median ratio (0.96) the median is 135 / exp(0.96^2 / 2) = 85 days.
+// Public route, first contact to treatment: mean 207 - 72 = 135 days (Kuitunen 2026). The log-sd
+// 0.96 is a modelling choice, close to the 0.99 that the paper's public-route mean/median ratio
+// (207/127) implies for the whole pathway; it is not derived from the paper. With it the median
+// is 135 / exp(0.96^2 / 2) = 85 days.
 export const PUBLIC_WORKUP = { median: 85, sigma: 0.96, stallAfterDays: 90 };
 const STALLED = tailDaysBeyond(PUBLIC_WORKUP.stallAfterDays, PUBLIC_WORKUP.median, PUBLIC_WORKUP.sigma);
 

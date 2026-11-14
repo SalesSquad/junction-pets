@@ -1,0 +1,81 @@
+{
+ "schema": "scribe-v2-posthoc-checks-v1",
+ "synthetic": true,
+ "not_for_clinical_use": true,
+ "generated_utc": "2026-11-14T20:19:22Z",
+ "generated_by": "scribe/v2/posthoc_checks.py",
+ "ablation_sha256": "fb36ce80f3db041910a4dbc1a7ce125ae9e584b3904ed9f64d716be941ea55f2",
+ "decoding_check_audit": {
+  "unconstrained_arm": {
+   "decoder": "scribe/v2/train.py in-process generation after training",
+   "records": "data/scribe/v3/student/v2-selected/val-records.json",
+   "max_new_tokens": 134
+  },
+  "constrained_arm": {
+   "decoder": "scribe/v2/evaluate.py, one call per validation split",
+   "file": "data/scribe/v2/ablation-runs/evaluations/A-270m-lora-r16--val_nemotron+val_haiku--auto.json",
+   "max_new_tokens_by_split": {
+    "val_nemotron": 320,
+    "val_haiku": 320
+   }
+  },
+  "n": 310,
+  "raw_identical": 276,
+  "raw_differ": 34,
+  "raw_differ_although_unconstrained_answer_was_valid_strict_json": 32,
+  "unconstrained_unparsable": 2,
+  "max_notes_the_constraint_could_change": 2,
+  "max_notes_note": "with greedy decoding the constraint only alters an answer that the unconstrained model would make invalid; every other difference comes from the decoder, batching or token cap",
+  "differing_notes_correct_unconstrained": 0,
+  "differing_notes_correct_constrained": 0,
+  "unparsable_unconstrained_correct_under_constraint": 0,
+  "discordant": {
+   "only_constrained_correct": 0,
+   "only_unconstrained_correct": 0
+  }
+ },
+ "v1_overlap": {
+  "v1_scored_ids": 246,
+  "source": "data/scribe/eval-v1.json",
+  "systems": {
+   "selected": {
+    "test_nemotron_n": 500,
+    "scored_by_v1": {
+     "k": 90,
+     "n": 200,
+     "wilson95": [
+      0.3826406840224836,
+      0.5192438486152432
+     ]
+    },
+    "never_scored_before": {
+     "k": 120,
+     "n": 300,
+     "wilson95": [
+      0.3461651905860969,
+      0.4563634036588123
+     ]
+    }
+   },
+   "v1_recipe": {
+    "test_nemotron_n": 500,
+    "scored_by_v1": {
+     "k": 90,
+     "n": 200,
+     "wilson95": [
+      0.3826406840224836,
+      0.5192438486152432
+     ]
+    },
+    "never_scored_before": {
+     "k": 120,
+     "n": 300,
+     "wilson95": [
+      0.3461651905860969,
+      0.4563634036588123
+     ]
+    }
+   }
+  }
+ }
+}

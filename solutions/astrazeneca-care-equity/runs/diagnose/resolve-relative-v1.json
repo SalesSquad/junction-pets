@@ -1,0 +1,2521 @@
+{
+ "schema": "scribe-relative-resolver-v1",
+ "synthetic": true,
+ "rule": "Lever (a) measured, not assumed: a code post-processor that re-resolves relative dates.",
+ "results": {
+  "v2-selected": {
+   "val": {
+    "n": 310,
+    "before": {
+     "k": 112,
+     "n": 310,
+     "value": 0.3613,
+     "wilson95": [
+      0.3098,
+      0.4162
+     ]
+    },
+    "after": {
+     "k": 251,
+     "n": 310,
+     "value": 0.8097,
+     "wilson95": [
+      0.7623,
+      0.8495
+     ]
+    },
+    "helped": 139,
+    "hurt": 0
+   },
+   "test_nemotron": {
+    "n": 500,
+    "before": {
+     "k": 210,
+     "n": 500,
+     "value": 0.42,
+     "wilson95": [
+      0.3775,
+      0.4637
+     ]
+    },
+    "after": {
+     "k": 477,
+     "n": 500,
+     "value": 0.954,
+     "wilson95": [
+      0.9319,
+      0.9692
+     ]
+    },
+    "helped": 267,
+    "hurt": 0
+   },
+   "test_haiku": {
+    "n": 200,
+    "before": {
+     "k": 26,
+     "n": 200,
+     "value": 0.13,
+     "wilson95": [
+      0.0903,
+      0.1837
+     ]
+    },
+    "after": {
+     "k": 45,
+     "n": 200,
+     "value": 0.225,
+     "wilson95": [
+      0.1726,
+      0.2877
+     ]
+    },
+    "helped": 19,
+    "hurt": 0
+   },
+   "test_pooled": {
+    "n": 700,
+    "before": {
+     "k": 236,
+     "n": 700,
+     "value": 0.3371,
+     "wilson95": [
+      0.3031,
+      0.373
+     ]
+    },
+    "after": {
+     "k": 522,
+     "n": 700,
+     "value": 0.7457,
+     "wilson95": [
+      0.7122,
+      0.7766
+     ]
+    },
+    "helped": 286,
+    "hurt": 0
+   },
+   "residual_after_resolver_test": {
+    "exact": {
+     "k": 522,
+     "n": 700,
+     "value": 0.7457,
+     "wilson95": [
+      0.7122,
+      0.7766
+     ]
+    },
+    "wrong": 178,
+    "category_notes_multilabel": {
+     "extra_event": {
+      "k": 88,
+      "n": 178,
+      "value": 0.4944,
+      "wilson95": [
+       0.4218,
+       0.5672
+      ]
+     },
+     "wrong_type": {
+      "k": 55,
+      "n": 178,
+      "value": 0.309,
+      "wilson95": [
+       0.2457,
+       0.3803
+      ]
+     },
+     "route_wrong": {
+      "k": 39,
+      "n": 178,
+      "value": 0.2191,
+      "wilson95": [
+       0.1646,
+       0.2854
+      ]
+     },
+     "type_ok_date_wrong": {
+      "k": 36,
+      "n": 178,
+      "value": 0.2022,
+      "wilson95": [
+       0.1498,
+       0.2673
+      ]
+     },
+     "missing_event": {
+      "k": 21,
+      "n": 178,
+      "value": 0.118,
+      "wilson95": [
+       0.0785,
+       0.1736
+      ]
+     },
+     "parse_failure": {
+      "k": 12,
+      "n": 178,
+      "value": 0.0674,
+      "wilson95": [
+       0.039,
+       0.1141
+      ]
+     },
+     "type_and_date_wrong": {
+      "k": 6,
+      "n": 178,
+      "value": 0.0337,
+      "wilson95": [
+       0.0155,
+       0.0716
+      ]
+     }
+    },
+    "sole_cause_notes": {
+     "extra_event": 37,
+     "wrong_type": 33,
+     "route_wrong": 14,
+     "parse_failure": 12,
+     "missing_event": 8,
+     "type_ok_date_wrong": 6,
+     "type_and_date_wrong": 5
+    },
+    "multi_cause_notes": 63,
+    "type_confusions": {
+     "REFERRAL_RECEIVED->REFERRAL_SENT": 17,
+     "REFERRAL_SENT->REFERRAL_RECEIVED": 8,
+     "SPECIALIST_VISIT->PHYSICIAN_ASSESSMENT": 7,
+     "SYMPTOM_ONSET_REPORTED->FIRST_CONTACT": 6,
+     "SPECIALIST_VISIT->REFERRAL_RECEIVED": 6,
+     "PHYSICIAN_ASSESSMENT->SPECIALIST_VISIT": 3,
+     "REFERRAL_RECEIVED->FIRST_CONTACT": 2,
+     "REFERRAL_SENT->FIRST_CONTACT": 2,
+     "TREATMENT_START->SYMPTOM_ONSET_REPORTED": 1,
+     "PHYSICIAN_ASSESSMENT->FIRST_CONTACT": 1,
+     "MDT_DECISION->SPECIALIST_VISIT": 1,
+     "TREATMENT_START->REFERRAL_SENT": 1
+    },
+    "extra_event_why": {
+     "other": 39,
+     "distractor:ordinary": 32,
+     "duplicate_of_gold_date": 28,
+     "after_note_date": 10,
+     "distractor:earlier": 1
+    },
+    "extra_event_types": {
+     "PHYSICIAN_ASSESSMENT": 28,
+     "FIRST_CONTACT": 20,
+     "SPECIALIST_VISIT": 18,
+     "REFERRAL_RECEIVED": 16,
+     "TREATMENT_START": 16,
+     "REFERRAL_SENT": 11,
+     "SYMPTOM_ONSET_REPORTED": 1
+    },
+    "missing_by_type": {
+     "SYMPTOM_ONSET_REPORTED": 6,
+     "SPECIALIST_VISIT": 4,
+     "DIAGNOSIS": 3,
+     "TREATMENT_START": 3,
+     "REFERRAL_RECEIVED": 3,
+     "REFERRAL_SENT": 2,
+     "PHYSICIAN_ASSESSMENT": 2,
+     "MDT_DECISION": 1
+    },
+    "missing_by_form": {
+     "numeric": 3,
+     "month": 5,
+     "no_year": 1,
+     "weeks": 8,
+     "long": 4,
+     "days": 3
+    },
+    "by_writer": {
+     "haiku": {
+      "k": 45,
+      "n": 200,
+      "value": 0.225,
+      "wilson95": [
+       0.1726,
+       0.2877
+      ]
+     },
+     "nemotron": {
+      "k": 477,
+      "n": 500,
+      "value": 0.954,
+      "wilson95": [
+       0.9319,
+       0.9692
+      ]
+     }
+    },
+    "by_kind": {
+     "haiku:careful": {
+      "k": 2,
+      "n": 20,
+      "value": 0.1,
+      "wilson95": [
+       0.0279,
+       0.301
+      ]
+     },
+     "haiku:no_event": {
+      "k": 0,
+      "n": 33,
+      "value": 0.0,
+      "wilson95": [
+       0,
+       0.1043
+      ]
+     },
+     "haiku:standard": {
+      "k": 43,
+      "n": 147,
+      "value": 0.2925,
+      "wilson95": [
+       0.225,
+       0.3706
+      ]
+     },
+     "nemotron:standard": {
+      "k": 477,
+      "n": 500,
+      "value": 0.954,
+      "wilson95": [
+       0.9319,
+       0.9692
+      ]
+     }
+    },
+    "by_n_gold": {
+     "0": {
+      "k": 0,
+      "n": 33,
+      "value": 0.0,
+      "wilson95": [
+       0,
+       0.1043
+      ]
+     },
+     "1": {
+      "k": 148,
+      "n": 175,
+      "value": 0.8457,
+      "wilson95": [
+       0.7848,
+       0.8917
+      ]
+     },
+     "2": {
+      "k": 125,
+      "n": 165,
+      "value": 0.7576,
+      "wilson95": [
+       0.6868,
+       0.8166
+      ]
+     },
+     "3": {
+      "k": 117,
+      "n": 155,
+      "value": 0.7548,
+      "wilson95": [
+       0.6815,
+       0.8159
+      ]
+     },
+     "4": {
+      "k": 132,
+      "n": 172,
+      "value": 0.7674,
+      "wilson95": [
+       0.6989,
+       0.8243
+      ]
+     }
+    },
+    "date_wrong_by_form": {
+     "weeks": 15,
+     "numeric": 8,
+     "no_year": 7,
+     "days": 6,
+     "long": 6,
+     "month": 3
+    },
+    "route_confusions": {
+     "PRIVATE->SCREENING": 13,
+     "PUBLIC_PRIMARY->SCREENING": 7,
+     "OCCUPATIONAL->SCREENING": 5,
+     "PUBLIC_PRIMARY->OCCUPATIONAL": 4,
+     "PRIVATE->OCCUPATIONAL": 3,
+     "SCREENING->EMERGENCY": 2,
+     "PUBLIC_PRIMARY->EMERGENCY": 2,
+     "EMERGENCY->SCREENING": 2,
+     "SCREENING->OCCUPATIONAL": 1
+    },
+    "parse_failure_sub": {
+     "json_syntax": 1,
+     "truncated_no_stop": 9,
+     "schema_or_route_enum": 2
+    },
+    "no_event_notes": {
+     "n": 33,
+     "exact": 0,
+     "extra_why": {
+      "distractor:ordinary": 32,
+      "after_note_date": 3,
+      "other": 12,
+      "distractor:earlier": 1
+     },
+     "extra_types": {
+      "FIRST_CONTACT": 17,
+      "REFERRAL_RECEIVED": 5,
+      "TREATMENT_START": 8,
+      "PHYSICIAN_ASSESSMENT": 8,
+      "SPECIALIST_VISIT": 9,
+      "REFERRAL_SENT": 1
+     }
+    }
+   },
+   "intervals_after_resolver_test": {
+    "all": {
+     "pairs_day_precision": 1131,
+     "found_both_endpoints": {
+      "k": 989,
+      "n": 1131,
+      "value": 0.8744,
+      "wilson95": [
+       0.8539,
+       0.8925
+      ]
+     },
+     "exact_interval": {
+      "k": 933,
+      "n": 989,
+      "value": 0.9434,
+      "wilson95": [
+       0.9272,
+       0.9561
+      ]
+     },
+     "mean_err": -0.48,
+     "median_err": 0,
+     "sd_err": 28.68,
+     "mean_abs_err": 4.8,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 933,
+      "91-364": 17,
+      ">=365": 3,
+      "8-31": 7,
+      "32-90": 19,
+      "1-3": 5,
+      "4-7": 5
+     },
+     "negative_pred_span": 8,
+     "both_endpoints_wrong": 8,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": -0.057
+    },
+    "nemotron": {
+     "pairs_day_precision": 857,
+     "found_both_endpoints": {
+      "k": 838,
+      "n": 857,
+      "value": 0.9778,
+      "wilson95": [
+       0.9656,
+       0.9858
+      ]
+     },
+     "exact_interval": {
+      "k": 827,
+      "n": 838,
+      "value": 0.9869,
+      "wilson95": [
+       0.9766,
+       0.9927
+      ]
+     },
+     "mean_err": -1.28,
+     "median_err": 0,
+     "sd_err": 24.55,
+     "mean_abs_err": 2.28,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 827,
+      "91-364": 6,
+      ">=365": 3,
+      "8-31": 2
+     },
+     "negative_pred_span": 4,
+     "both_endpoints_wrong": 0,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": -0.0
+    },
+    "haiku": {
+     "pairs_day_precision": 274,
+     "found_both_endpoints": {
+      "k": 151,
+      "n": 274,
+      "value": 0.5511,
+      "wilson95": [
+       0.4919,
+       0.6089
+      ]
+     },
+     "exact_interval": {
+      "k": 106,
+      "n": 151,
+      "value": 0.702,
+      "wilson95": [
+       0.6248,
+       0.7692
+      ]
+     },
+     "mean_err": 3.94,
+     "median_err": 0,
+     "sd_err": 45.05,
+     "mean_abs_err": 18.8,
+     "quantiles": {
+      "0.05": -69,
+      "0.1": -1,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 46,
+      "0.95": 73
+     },
+     "abs_size": {
+      "32-90": 19,
+      "0": 106,
+      "1-3": 5,
+      "91-364": 11,
+      "4-7": 5,
+      "8-31": 5
+     },
+     "negative_pred_span": 4,
+     "both_endpoints_wrong": 8,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": -0.164
+    }
+   }
+  },
+  "V3-270m-nemotron": {
+   "val": {
+    "n": 310,
+    "before": {
+     "k": 124,
+     "n": 310,
+     "value": 0.4,
+     "wilson95": [
+      0.347,
+      0.4554
+     ]
+    },
+    "after": {
+     "k": 269,
+     "n": 310,
+     "value": 0.8677,
+     "wilson95": [
+      0.8255,
+      0.901
+     ]
+    },
+    "helped": 145,
+    "hurt": 0
+   },
+   "test_nemotron": {
+    "n": 500,
+    "before": {
+     "k": 209,
+     "n": 500,
+     "value": 0.418,
+     "wilson95": [
+      0.3756,
+      0.4617
+     ]
+    },
+    "after": {
+     "k": 471,
+     "n": 500,
+     "value": 0.942,
+     "wilson95": [
+      0.9179,
+      0.9593
+     ]
+    },
+    "helped": 262,
+    "hurt": 0
+   },
+   "test_haiku": {
+    "n": 200,
+    "before": {
+     "k": 58,
+     "n": 200,
+     "value": 0.29,
+     "wilson95": [
+      0.2315,
+      0.3564
+     ]
+    },
+    "after": {
+     "k": 93,
+     "n": 200,
+     "value": 0.465,
+     "wilson95": [
+      0.3972,
+      0.5341
+     ]
+    },
+    "helped": 35,
+    "hurt": 0
+   },
+   "test_pooled": {
+    "n": 700,
+    "before": {
+     "k": 267,
+     "n": 700,
+     "value": 0.3814,
+     "wilson95": [
+      0.3462,
+      0.418
+     ]
+    },
+    "after": {
+     "k": 564,
+     "n": 700,
+     "value": 0.8057,
+     "wilson95": [
+      0.7748,
+      0.8333
+     ]
+    },
+    "helped": 297,
+    "hurt": 0
+   },
+   "residual_after_resolver_test": {
+    "exact": {
+     "k": 564,
+     "n": 700,
+     "value": 0.8057,
+     "wilson95": [
+      0.7748,
+      0.8333
+     ]
+    },
+    "wrong": 136,
+    "category_notes_multilabel": {
+     "missing_event": {
+      "k": 67,
+      "n": 136,
+      "value": 0.4926,
+      "wilson95": [
+       0.41,
+       0.5757
+      ]
+     },
+     "wrong_type": {
+      "k": 31,
+      "n": 136,
+      "value": 0.2279,
+      "wilson95": [
+       0.1655,
+       0.3053
+      ]
+     },
+     "extra_event": {
+      "k": 24,
+      "n": 136,
+      "value": 0.1765,
+      "wilson95": [
+       0.1216,
+       0.2492
+      ]
+     },
+     "type_ok_date_wrong": {
+      "k": 22,
+      "n": 136,
+      "value": 0.1618,
+      "wilson95": [
+       0.1093,
+       0.2328
+      ]
+     },
+     "route_wrong": {
+      "k": 7,
+      "n": 136,
+      "value": 0.0515,
+      "wilson95": [
+       0.0252,
+       0.1024
+      ]
+     },
+     "type_and_date_wrong": {
+      "k": 2,
+      "n": 136,
+      "value": 0.0147,
+      "wilson95": [
+       0.004,
+       0.052
+      ]
+     },
+     "parse_failure": {
+      "k": 1,
+      "n": 136,
+      "value": 0.0074,
+      "wilson95": [
+       0.0013,
+       0.0405
+      ]
+     }
+    },
+    "sole_cause_notes": {
+     "missing_event": 57,
+     "wrong_type": 28,
+     "extra_event": 17,
+     "type_ok_date_wrong": 10,
+     "route_wrong": 6,
+     "type_and_date_wrong": 2,
+     "parse_failure": 1
+    },
+    "multi_cause_notes": 15,
+    "type_confusions": {
+     "REFERRAL_SENT->REFERRAL_RECEIVED": 13,
+     "REFERRAL_RECEIVED->REFERRAL_SENT": 4,
+     "SPECIALIST_VISIT->PHYSICIAN_ASSESSMENT": 4,
+     "SPECIALIST_VISIT->REFERRAL_RECEIVED": 4,
+     "FIRST_CONTACT->SYMPTOM_ONSET_REPORTED": 1,
+     "MDT_DECISION->FIRST_CONTACT": 1,
+     "FIRST_CONTACT->TREATMENT_START": 1,
+     "TREATMENT_START->SYMPTOM_ONSET_REPORTED": 1,
+     "MDT_DECISION->SPECIALIST_VISIT": 1,
+     "REFERRAL_SENT->FIRST_CONTACT": 1,
+     "DIAGNOSIS->FIRST_CONTACT": 1,
+     "SPECIALIST_VISIT->FIRST_CONTACT": 1
+    },
+    "extra_event_why": {
+     "distractor:ordinary": 10,
+     "duplicate_of_gold_date": 8,
+     "other": 7,
+     "distractor:earlier": 1
+    },
+    "extra_event_types": {
+     "FIRST_CONTACT": 7,
+     "REFERRAL_RECEIVED": 5,
+     "SPECIALIST_VISIT": 5,
+     "TREATMENT_START": 5,
+     "PHYSICIAN_ASSESSMENT": 3,
+     "SYMPTOM_ONSET_REPORTED": 1
+    },
+    "missing_by_type": {
+     "SPECIALIST_VISIT": 15,
+     "PHYSICIAN_ASSESSMENT": 13,
+     "TREATMENT_START": 13,
+     "DIAGNOSIS": 12,
+     "REFERRAL_SENT": 10,
+     "FIRST_CONTACT": 7,
+     "SYMPTOM_ONSET_REPORTED": 7,
+     "REFERRAL_RECEIVED": 6,
+     "MDT_DECISION": 5
+    },
+    "missing_by_form": {
+     "weeks": 16,
+     "numeric": 26,
+     "days": 15,
+     "month": 12,
+     "no_year": 9,
+     "long": 10
+    },
+    "by_writer": {
+     "haiku": {
+      "k": 93,
+      "n": 200,
+      "value": 0.465,
+      "wilson95": [
+       0.3972,
+       0.5341
+      ]
+     },
+     "nemotron": {
+      "k": 471,
+      "n": 500,
+      "value": 0.942,
+      "wilson95": [
+       0.9179,
+       0.9593
+      ]
+     }
+    },
+    "by_kind": {
+     "haiku:careful": {
+      "k": 12,
+      "n": 20,
+      "value": 0.6,
+      "wilson95": [
+       0.3866,
+       0.7812
+      ]
+     },
+     "haiku:no_event": {
+      "k": 21,
+      "n": 33,
+      "value": 0.6364,
+      "wilson95": [
+       0.4662,
+       0.7781
+      ]
+     },
+     "haiku:standard": {
+      "k": 60,
+      "n": 147,
+      "value": 0.4082,
+      "wilson95": [
+       0.332,
+       0.489
+      ]
+     },
+     "nemotron:standard": {
+      "k": 471,
+      "n": 500,
+      "value": 0.942,
+      "wilson95": [
+       0.9179,
+       0.9593
+      ]
+     }
+    },
+    "by_n_gold": {
+     "0": {
+      "k": 21,
+      "n": 33,
+      "value": 0.6364,
+      "wilson95": [
+       0.4662,
+       0.7781
+      ]
+     },
+     "1": {
+      "k": 138,
+      "n": 175,
+      "value": 0.7886,
+      "wilson95": [
+       0.7222,
+       0.8425
+      ]
+     },
+     "2": {
+      "k": 134,
+      "n": 165,
+      "value": 0.8121,
+      "wilson95": [
+       0.7457,
+       0.8644
+      ]
+     },
+     "3": {
+      "k": 132,
+      "n": 155,
+      "value": 0.8516,
+      "wilson95": [
+       0.7872,
+       0.899
+      ]
+     },
+     "4": {
+      "k": 139,
+      "n": 172,
+      "value": 0.8081,
+      "wilson95": [
+       0.7428,
+       0.86
+      ]
+     }
+    },
+    "date_wrong_by_form": {
+     "no_year": 7,
+     "numeric": 7,
+     "weeks": 7,
+     "days": 6,
+     "long": 3,
+     "month": 2
+    },
+    "route_confusions": {
+     "SCREENING->OCCUPATIONAL": 2,
+     "SCREENING->EMERGENCY": 1,
+     "OCCUPATIONAL->PUBLIC_PRIMARY": 1,
+     "PUBLIC_PRIMARY->SCREENING": 1,
+     "PUBLIC_PRIMARY->OCCUPATIONAL": 1,
+     "SCREENING->PUBLIC_PRIMARY": 1
+    },
+    "parse_failure_sub": {
+     "invalid_date": 1
+    },
+    "no_event_notes": {
+     "n": 33,
+     "exact": 21,
+     "extra_why": {
+      "distractor:ordinary": 10,
+      "other": 2,
+      "distractor:earlier": 1
+     },
+     "extra_types": {
+      "FIRST_CONTACT": 6,
+      "SPECIALIST_VISIT": 3,
+      "TREATMENT_START": 1,
+      "SYMPTOM_ONSET_REPORTED": 1,
+      "REFERRAL_RECEIVED": 1,
+      "PHYSICIAN_ASSESSMENT": 1
+     }
+    }
+   },
+   "intervals_after_resolver_test": {
+    "all": {
+     "pairs_day_precision": 1131,
+     "found_both_endpoints": {
+      "k": 1023,
+      "n": 1131,
+      "value": 0.9045,
+      "wilson95": [
+       0.886,
+       0.9203
+      ]
+     },
+     "exact_interval": {
+      "k": 985,
+      "n": 1023,
+      "value": 0.9629,
+      "wilson95": [
+       0.9494,
+       0.9728
+      ]
+     },
+     "mean_err": -2.32,
+     "median_err": 0,
+     "sd_err": 37.01,
+     "mean_abs_err": 4.53,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 985,
+      "91-364": 7,
+      ">=365": 5,
+      "1-3": 3,
+      "32-90": 13,
+      "8-31": 10
+     },
+     "negative_pred_span": 8,
+     "both_endpoints_wrong": 12,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": -0.006
+    },
+    "nemotron": {
+     "pairs_day_precision": 857,
+     "found_both_endpoints": {
+      "k": 830,
+      "n": 857,
+      "value": 0.9685,
+      "wilson95": [
+       0.9545,
+       0.9783
+      ]
+     },
+     "exact_interval": {
+      "k": 815,
+      "n": 830,
+      "value": 0.9819,
+      "wilson95": [
+       0.9704,
+       0.989
+      ]
+     },
+     "mean_err": -2.26,
+     "median_err": 0,
+     "sd_err": 28.94,
+     "mean_abs_err": 2.78,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 815,
+      "91-364": 2,
+      ">=365": 4,
+      "1-3": 2,
+      "32-90": 6,
+      "8-31": 1
+     },
+     "negative_pred_span": 5,
+     "both_endpoints_wrong": 7,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": 0.273
+    },
+    "haiku": {
+     "pairs_day_precision": 274,
+     "found_both_endpoints": {
+      "k": 193,
+      "n": 274,
+      "value": 0.7044,
+      "wilson95": [
+       0.6478,
+       0.7553
+      ]
+     },
+     "exact_interval": {
+      "k": 170,
+      "n": 193,
+      "value": 0.8808,
+      "wilson95": [
+       0.8275,
+       0.9193
+      ]
+     },
+     "mean_err": -2.57,
+     "median_err": 0,
+     "sd_err": 60.61,
+     "mean_abs_err": 12.09,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 25
+     },
+     "abs_size": {
+      "0": 170,
+      "91-364": 5,
+      "1-3": 1,
+      "8-31": 9,
+      "32-90": 7,
+      ">=365": 1
+     },
+     "negative_pred_span": 3,
+     "both_endpoints_wrong": 5,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": -0.317
+    }
+   }
+  },
+  "V3-270m-all": {
+   "val": {
+    "n": 310,
+    "before": {
+     "k": 125,
+     "n": 310,
+     "value": 0.4032,
+     "wilson95": [
+      0.3501,
+      0.4587
+     ]
+    },
+    "after": {
+     "k": 277,
+     "n": 310,
+     "value": 0.8935,
+     "wilson95": [
+      0.8543,
+      0.9232
+     ]
+    },
+    "helped": 152,
+    "hurt": 0
+   },
+   "test_nemotron": {
+    "n": 500,
+    "before": {
+     "k": 197,
+     "n": 500,
+     "value": 0.394,
+     "wilson95": [
+      0.3521,
+      0.4375
+     ]
+    },
+    "after": {
+     "k": 465,
+     "n": 500,
+     "value": 0.93,
+     "wilson95": [
+      0.9042,
+      0.9492
+     ]
+    },
+    "helped": 268,
+    "hurt": 0
+   },
+   "test_haiku": {
+    "n": 200,
+    "before": {
+     "k": 80,
+     "n": 200,
+     "value": 0.4,
+     "wilson95": [
+      0.3346,
+      0.4692
+     ]
+    },
+    "after": {
+     "k": 148,
+     "n": 200,
+     "value": 0.74,
+     "wilson95": [
+      0.6751,
+      0.7959
+     ]
+    },
+    "helped": 68,
+    "hurt": 0
+   },
+   "test_pooled": {
+    "n": 700,
+    "before": {
+     "k": 277,
+     "n": 700,
+     "value": 0.3957,
+     "wilson95": [
+      0.3602,
+      0.4324
+     ]
+    },
+    "after": {
+     "k": 613,
+     "n": 700,
+     "value": 0.8757,
+     "wilson95": [
+      0.8492,
+      0.8981
+     ]
+    },
+    "helped": 336,
+    "hurt": 0
+   },
+   "residual_after_resolver_test": {
+    "exact": {
+     "k": 613,
+     "n": 700,
+     "value": 0.8757,
+     "wilson95": [
+      0.8492,
+      0.8981
+     ]
+    },
+    "wrong": 87,
+    "category_notes_multilabel": {
+     "missing_event": {
+      "k": 37,
+      "n": 87,
+      "value": 0.4253,
+      "wilson95": [
+       0.3267,
+       0.5302
+      ]
+     },
+     "extra_event": {
+      "k": 26,
+      "n": 87,
+      "value": 0.2989,
+      "wilson95": [
+       0.2128,
+       0.4019
+      ]
+     },
+     "type_ok_date_wrong": {
+      "k": 14,
+      "n": 87,
+      "value": 0.1609,
+      "wilson95": [
+       0.0983,
+       0.2522
+      ]
+     },
+     "wrong_type": {
+      "k": 12,
+      "n": 87,
+      "value": 0.1379,
+      "wilson95": [
+       0.0807,
+       0.2258
+      ]
+     },
+     "parse_failure": {
+      "k": 2,
+      "n": 87,
+      "value": 0.023,
+      "wilson95": [
+       0.0063,
+       0.08
+      ]
+     },
+     "precision_only": {
+      "k": 1,
+      "n": 87,
+      "value": 0.0115,
+      "wilson95": [
+       0.002,
+       0.0623
+      ]
+     },
+     "type_and_date_wrong": {
+      "k": 1,
+      "n": 87,
+      "value": 0.0115,
+      "wilson95": [
+       0.002,
+       0.0623
+      ]
+     },
+     "route_wrong": {
+      "k": 1,
+      "n": 87,
+      "value": 0.0115,
+      "wilson95": [
+       0.002,
+       0.0623
+      ]
+     }
+    },
+    "sole_cause_notes": {
+     "missing_event": 34,
+     "extra_event": 22,
+     "wrong_type": 11,
+     "type_ok_date_wrong": 9,
+     "parse_failure": 2,
+     "precision_only": 1,
+     "type_and_date_wrong": 1,
+     "route_wrong": 1
+    },
+    "multi_cause_notes": 6,
+    "type_confusions": {
+     "REFERRAL_RECEIVED->REFERRAL_SENT": 6,
+     "FIRST_CONTACT->SYMPTOM_ONSET_REPORTED": 1,
+     "TREATMENT_START->SYMPTOM_ONSET_REPORTED": 1,
+     "FIRST_CONTACT->TREATMENT_START": 1,
+     "REFERRAL_SENT->REFERRAL_RECEIVED": 1,
+     "MDT_DECISION->SPECIALIST_VISIT": 1,
+     "DIAGNOSIS->FIRST_CONTACT": 1,
+     "SPECIALIST_VISIT->FIRST_CONTACT": 1
+    },
+    "extra_event_why": {
+     "distractor:ordinary": 16,
+     "other": 6,
+     "duplicate_of_gold_date": 3,
+     "distractor:future": 1,
+     "distractor:earlier": 1
+    },
+    "extra_event_types": {
+     "SPECIALIST_VISIT": 10,
+     "FIRST_CONTACT": 5,
+     "TREATMENT_START": 5,
+     "REFERRAL_RECEIVED": 4,
+     "SYMPTOM_ONSET_REPORTED": 2,
+     "PHYSICIAN_ASSESSMENT": 1
+    },
+    "missing_by_type": {
+     "DIAGNOSIS": 7,
+     "PHYSICIAN_ASSESSMENT": 7,
+     "TREATMENT_START": 6,
+     "FIRST_CONTACT": 5,
+     "REFERRAL_RECEIVED": 4,
+     "SYMPTOM_ONSET_REPORTED": 3,
+     "MDT_DECISION": 2,
+     "REFERRAL_SENT": 2,
+     "SPECIALIST_VISIT": 1
+    },
+    "missing_by_form": {
+     "month": 10,
+     "numeric": 16,
+     "no_year": 4,
+     "long": 3,
+     "weeks": 2,
+     "days": 2
+    },
+    "by_writer": {
+     "haiku": {
+      "k": 148,
+      "n": 200,
+      "value": 0.74,
+      "wilson95": [
+       0.6751,
+       0.7959
+      ]
+     },
+     "nemotron": {
+      "k": 465,
+      "n": 500,
+      "value": 0.93,
+      "wilson95": [
+       0.9042,
+       0.9492
+      ]
+     }
+    },
+    "by_kind": {
+     "haiku:careful": {
+      "k": 18,
+      "n": 20,
+      "value": 0.9,
+      "wilson95": [
+       0.699,
+       0.9721
+      ]
+     },
+     "haiku:no_event": {
+      "k": 15,
+      "n": 33,
+      "value": 0.4545,
+      "wilson95": [
+       0.2984,
+       0.6201
+      ]
+     },
+     "haiku:standard": {
+      "k": 115,
+      "n": 147,
+      "value": 0.7823,
+      "wilson95": [
+       0.7089,
+       0.8414
+      ]
+     },
+     "nemotron:standard": {
+      "k": 465,
+      "n": 500,
+      "value": 0.93,
+      "wilson95": [
+       0.9042,
+       0.9492
+      ]
+     }
+    },
+    "by_n_gold": {
+     "0": {
+      "k": 15,
+      "n": 33,
+      "value": 0.4545,
+      "wilson95": [
+       0.2984,
+       0.6201
+      ]
+     },
+     "1": {
+      "k": 145,
+      "n": 175,
+      "value": 0.8286,
+      "wilson95": [
+       0.7658,
+       0.8772
+      ]
+     },
+     "2": {
+      "k": 155,
+      "n": 165,
+      "value": 0.9394,
+      "wilson95": [
+       0.892,
+       0.9668
+      ]
+     },
+     "3": {
+      "k": 141,
+      "n": 155,
+      "value": 0.9097,
+      "wilson95": [
+       0.8541,
+       0.9454
+      ]
+     },
+     "4": {
+      "k": 157,
+      "n": 172,
+      "value": 0.9128,
+      "wilson95": [
+       0.8611,
+       0.9464
+      ]
+     }
+    },
+    "date_wrong_by_form": {
+     "no_year": 8,
+     "weeks": 3,
+     "days": 2,
+     "numeric": 2,
+     "long": 1
+    },
+    "route_confusions": {
+     "OCCUPATIONAL->PUBLIC_PRIMARY": 1
+    },
+    "parse_failure_sub": {
+     "invalid_date": 1,
+     "json_syntax": 1
+    },
+    "no_event_notes": {
+     "n": 33,
+     "exact": 15,
+     "extra_why": {
+      "distractor:ordinary": 16,
+      "other": 1,
+      "distractor:future": 1,
+      "distractor:earlier": 1
+     },
+     "extra_types": {
+      "SPECIALIST_VISIT": 7,
+      "FIRST_CONTACT": 4,
+      "SYMPTOM_ONSET_REPORTED": 1,
+      "TREATMENT_START": 4,
+      "REFERRAL_RECEIVED": 2,
+      "PHYSICIAN_ASSESSMENT": 1
+     }
+    }
+   },
+   "intervals_after_resolver_test": {
+    "all": {
+     "pairs_day_precision": 1131,
+     "found_both_endpoints": {
+      "k": 1098,
+      "n": 1131,
+      "value": 0.9708,
+      "wilson95": [
+       0.9593,
+       0.9791
+      ]
+     },
+     "exact_interval": {
+      "k": 1068,
+      "n": 1098,
+      "value": 0.9727,
+      "wilson95": [
+       0.9613,
+       0.9808
+      ]
+     },
+     "mean_err": -2.15,
+     "median_err": 0,
+     "sd_err": 38.52,
+     "mean_abs_err": 4.79,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 1068,
+      "91-364": 11,
+      "32-90": 7,
+      ">=365": 7,
+      "1-3": 2,
+      "8-31": 3
+     },
+     "negative_pred_span": 9,
+     "both_endpoints_wrong": 2,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": -0.134
+    },
+    "nemotron": {
+     "pairs_day_precision": 857,
+     "found_both_endpoints": {
+      "k": 834,
+      "n": 857,
+      "value": 0.9732,
+      "wilson95": [
+       0.9601,
+       0.9821
+      ]
+     },
+     "exact_interval": {
+      "k": 821,
+      "n": 834,
+      "value": 0.9844,
+      "wilson95": [
+       0.9735,
+       0.9909
+      ]
+     },
+     "mean_err": -0.9,
+     "median_err": 0,
+     "sd_err": 30.28,
+     "mean_abs_err": 3.05,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 821,
+      "91-364": 5,
+      "32-90": 1,
+      ">=365": 5,
+      "1-3": 2
+     },
+     "negative_pred_span": 4,
+     "both_endpoints_wrong": 0,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": -0.004
+    },
+    "haiku": {
+     "pairs_day_precision": 274,
+     "found_both_endpoints": {
+      "k": 264,
+      "n": 274,
+      "value": 0.9635,
+      "wilson95": [
+       0.9341,
+       0.9801
+      ]
+     },
+     "exact_interval": {
+      "k": 247,
+      "n": 264,
+      "value": 0.9356,
+      "wilson95": [
+       0.8993,
+       0.9594
+      ]
+     },
+     "mean_err": -6.09,
+     "median_err": 0,
+     "sd_err": 57.12,
+     "mean_abs_err": 10.28,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 247,
+      ">=365": 2,
+      "91-364": 6,
+      "32-90": 6,
+      "8-31": 3
+     },
+     "negative_pred_span": 5,
+     "both_endpoints_wrong": 2,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": -0.282
+    }
+   }
+  },
+  "C-270m-all-v2data": {
+   "val": {
+    "n": 310,
+    "before": {
+     "k": 134,
+     "n": 310,
+     "value": 0.4323,
+     "wilson95": [
+      0.3783,
+      0.4879
+     ]
+    },
+    "after": {
+     "k": 289,
+     "n": 310,
+     "value": 0.9323,
+     "wilson95": [
+      0.8987,
+      0.9553
+     ]
+    },
+    "helped": 155,
+    "hurt": 0
+   },
+   "test_nemotron": {
+    "n": 500,
+    "before": {
+     "k": 210,
+     "n": 500,
+     "value": 0.42,
+     "wilson95": [
+      0.3775,
+      0.4637
+     ]
+    },
+    "after": {
+     "k": 481,
+     "n": 500,
+     "value": 0.962,
+     "wilson95": [
+      0.9414,
+      0.9755
+     ]
+    },
+    "helped": 271,
+    "hurt": 0
+   },
+   "test_haiku": {
+    "n": 200,
+    "before": {
+     "k": 95,
+     "n": 200,
+     "value": 0.475,
+     "wilson95": [
+      0.4069,
+      0.544
+     ]
+    },
+    "after": {
+     "k": 170,
+     "n": 200,
+     "value": 0.85,
+     "wilson95": [
+      0.7939,
+      0.8929
+     ]
+    },
+    "helped": 75,
+    "hurt": 0
+   },
+   "test_pooled": {
+    "n": 700,
+    "before": {
+     "k": 305,
+     "n": 700,
+     "value": 0.4357,
+     "wilson95": [
+      0.3994,
+      0.4727
+     ]
+    },
+    "after": {
+     "k": 651,
+     "n": 700,
+     "value": 0.93,
+     "wilson95": [
+      0.9087,
+      0.9466
+     ]
+    },
+    "helped": 346,
+    "hurt": 0
+   },
+   "residual_after_resolver_test": {
+    "exact": {
+     "k": 651,
+     "n": 700,
+     "value": 0.93,
+     "wilson95": [
+      0.9087,
+      0.9466
+     ]
+    },
+    "wrong": 49,
+    "category_notes_multilabel": {
+     "missing_event": {
+      "k": 19,
+      "n": 49,
+      "value": 0.3878,
+      "wilson95": [
+       0.2643,
+       0.5275
+      ]
+     },
+     "extra_event": {
+      "k": 16,
+      "n": 49,
+      "value": 0.3265,
+      "wilson95": [
+       0.2121,
+       0.4662
+      ]
+     },
+     "wrong_type": {
+      "k": 9,
+      "n": 49,
+      "value": 0.1837,
+      "wilson95": [
+       0.0998,
+       0.3136
+      ]
+     },
+     "type_ok_date_wrong": {
+      "k": 6,
+      "n": 49,
+      "value": 0.1224,
+      "wilson95": [
+       0.0573,
+       0.2424
+      ]
+     },
+     "parse_failure": {
+      "k": 2,
+      "n": 49,
+      "value": 0.0408,
+      "wilson95": [
+       0.0113,
+       0.1371
+      ]
+     },
+     "type_and_date_wrong": {
+      "k": 1,
+      "n": 49,
+      "value": 0.0204,
+      "wilson95": [
+       0.0036,
+       0.1069
+      ]
+     },
+     "route_wrong": {
+      "k": 1,
+      "n": 49,
+      "value": 0.0204,
+      "wilson95": [
+       0.0036,
+       0.1069
+      ]
+     }
+    },
+    "sole_cause_notes": {
+     "missing_event": 18,
+     "extra_event": 13,
+     "wrong_type": 8,
+     "type_ok_date_wrong": 3,
+     "parse_failure": 2,
+     "type_and_date_wrong": 1
+    },
+    "multi_cause_notes": 4,
+    "type_confusions": {
+     "REFERRAL_RECEIVED->REFERRAL_SENT": 4,
+     "REFERRAL_RECEIVED->FIRST_CONTACT": 1,
+     "FIRST_CONTACT->TREATMENT_START": 1,
+     "TREATMENT_START->FIRST_CONTACT": 1,
+     "MDT_DECISION->FIRST_CONTACT": 1,
+     "DIAGNOSIS->FIRST_CONTACT": 1,
+     "SPECIALIST_VISIT->FIRST_CONTACT": 1
+    },
+    "extra_event_why": {
+     "distractor:ordinary": 12,
+     "duplicate_of_gold_date": 2,
+     "distractor:vaccination": 1,
+     "other": 1
+    },
+    "extra_event_types": {
+     "FIRST_CONTACT": 10,
+     "REFERRAL_SENT": 2,
+     "SYMPTOM_ONSET_REPORTED": 1,
+     "SPECIALIST_VISIT": 1,
+     "TREATMENT_START": 1,
+     "PHYSICIAN_ASSESSMENT": 1
+    },
+    "missing_by_type": {
+     "DIAGNOSIS": 6,
+     "REFERRAL_RECEIVED": 5,
+     "TREATMENT_START": 4,
+     "MDT_DECISION": 3,
+     "PHYSICIAN_ASSESSMENT": 3,
+     "SPECIALIST_VISIT": 2
+    },
+    "missing_by_form": {
+     "numeric": 5,
+     "long": 2,
+     "month": 7,
+     "no_year": 4,
+     "weeks": 2,
+     "days": 3
+    },
+    "by_writer": {
+     "haiku": {
+      "k": 170,
+      "n": 200,
+      "value": 0.85,
+      "wilson95": [
+       0.7939,
+       0.8929
+      ]
+     },
+     "nemotron": {
+      "k": 481,
+      "n": 500,
+      "value": 0.962,
+      "wilson95": [
+       0.9414,
+       0.9755
+      ]
+     }
+    },
+    "by_kind": {
+     "haiku:careful": {
+      "k": 17,
+      "n": 20,
+      "value": 0.85,
+      "wilson95": [
+       0.6396,
+       0.9476
+      ]
+     },
+     "haiku:no_event": {
+      "k": 21,
+      "n": 33,
+      "value": 0.6364,
+      "wilson95": [
+       0.4662,
+       0.7781
+      ]
+     },
+     "haiku:standard": {
+      "k": 132,
+      "n": 147,
+      "value": 0.898,
+      "wilson95": [
+       0.8385,
+       0.9372
+      ]
+     },
+     "nemotron:standard": {
+      "k": 481,
+      "n": 500,
+      "value": 0.962,
+      "wilson95": [
+       0.9414,
+       0.9755
+      ]
+     }
+    },
+    "by_n_gold": {
+     "0": {
+      "k": 21,
+      "n": 33,
+      "value": 0.6364,
+      "wilson95": [
+       0.4662,
+       0.7781
+      ]
+     },
+     "1": {
+      "k": 168,
+      "n": 175,
+      "value": 0.96,
+      "wilson95": [
+       0.9197,
+       0.9805
+      ]
+     },
+     "2": {
+      "k": 155,
+      "n": 165,
+      "value": 0.9394,
+      "wilson95": [
+       0.892,
+       0.9668
+      ]
+     },
+     "3": {
+      "k": 143,
+      "n": 155,
+      "value": 0.9226,
+      "wilson95": [
+       0.8696,
+       0.9552
+      ]
+     },
+     "4": {
+      "k": 164,
+      "n": 172,
+      "value": 0.9535,
+      "wilson95": [
+       0.9109,
+       0.9762
+      ]
+     }
+    },
+    "date_wrong_by_form": {
+     "no_year": 2,
+     "numeric": 1,
+     "days": 1,
+     "weeks": 1,
+     "month": 1
+    },
+    "route_confusions": {
+     "PUBLIC_PRIMARY->OCCUPATIONAL": 1
+    },
+    "parse_failure_sub": {
+     "json_syntax": 1,
+     "schema_or_route_enum": 1
+    },
+    "no_event_notes": {
+     "n": 33,
+     "exact": 21,
+     "extra_why": {
+      "distractor:ordinary": 12
+     },
+     "extra_types": {
+      "SYMPTOM_ONSET_REPORTED": 1,
+      "SPECIALIST_VISIT": 1,
+      "FIRST_CONTACT": 6,
+      "REFERRAL_SENT": 2,
+      "TREATMENT_START": 1,
+      "PHYSICIAN_ASSESSMENT": 1
+     }
+    }
+   },
+   "intervals_after_resolver_test": {
+    "all": {
+     "pairs_day_precision": 1131,
+     "found_both_endpoints": {
+      "k": 1095,
+      "n": 1131,
+      "value": 0.9682,
+      "wilson95": [
+       0.9562,
+       0.9769
+      ]
+     },
+     "exact_interval": {
+      "k": 1085,
+      "n": 1095,
+      "value": 0.9909,
+      "wilson95": [
+       0.9833,
+       0.995
+      ]
+     },
+     "mean_err": -1.33,
+     "median_err": 0,
+     "sd_err": 27.79,
+     "mean_abs_err": 2.39,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 1085,
+      ">=365": 6,
+      "91-364": 2,
+      "32-90": 2
+     },
+     "negative_pred_span": 7,
+     "both_endpoints_wrong": 0,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": 0.001
+    },
+    "nemotron": {
+     "pairs_day_precision": 857,
+     "found_both_endpoints": {
+      "k": 839,
+      "n": 857,
+      "value": 0.979,
+      "wilson95": [
+       0.967,
+       0.9867
+      ]
+     },
+     "exact_interval": {
+      "k": 831,
+      "n": 839,
+      "value": 0.9905,
+      "wilson95": [
+       0.9813,
+       0.9952
+      ]
+     },
+     "mean_err": -1.74,
+     "median_err": 0,
+     "sd_err": 31.44,
+     "mean_abs_err": 2.9,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 831,
+      ">=365": 6,
+      "91-364": 2
+     },
+     "negative_pred_span": 6,
+     "both_endpoints_wrong": 0,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": 0.002
+    },
+    "haiku": {
+     "pairs_day_precision": 274,
+     "found_both_endpoints": {
+      "k": 256,
+      "n": 274,
+      "value": 0.9343,
+      "wilson95": [
+       0.8986,
+       0.958
+      ]
+     },
+     "exact_interval": {
+      "k": 254,
+      "n": 256,
+      "value": 0.9922,
+      "wilson95": [
+       0.972,
+       0.9979
+      ]
+     },
+     "mean_err": 0.0,
+     "median_err": 0,
+     "sd_err": 7.97,
+     "mean_abs_err": 0.7,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 254,
+      "32-90": 2
+     },
+     "negative_pred_span": 1,
+     "both_endpoints_wrong": 0,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": -0.004
+    }
+   }
+  },
+  "S-1b-lora-r16": {
+   "val": {
+    "n": 310,
+    "before": {
+     "k": 125,
+     "n": 310,
+     "value": 0.4032,
+     "wilson95": [
+      0.3501,
+      0.4587
+     ]
+    },
+    "after": {
+     "k": 274,
+     "n": 310,
+     "value": 0.8839,
+     "wilson95": [
+      0.8434,
+      0.9149
+     ]
+    },
+    "helped": 149,
+    "hurt": 0
+   },
+   "test_nemotron": {
+    "n": 500,
+    "before": {
+     "k": 216,
+     "n": 500,
+     "value": 0.432,
+     "wilson95": [
+      0.3893,
+      0.4758
+     ]
+    },
+    "after": {
+     "k": 487,
+     "n": 500,
+     "value": 0.974,
+     "wilson95": [
+      0.956,
+      0.9847
+     ]
+    },
+    "helped": 271,
+    "hurt": 0
+   },
+   "test_haiku": {
+    "n": 200,
+    "before": {
+     "k": 54,
+     "n": 200,
+     "value": 0.27,
+     "wilson95": [
+      0.2132,
+      0.3354
+     ]
+    },
+    "after": {
+     "k": 99,
+     "n": 200,
+     "value": 0.495,
+     "wilson95": [
+      0.4265,
+      0.5637
+     ]
+    },
+    "helped": 45,
+    "hurt": 0
+   },
+   "test_pooled": {
+    "n": 700,
+    "before": {
+     "k": 270,
+     "n": 700,
+     "value": 0.3857,
+     "wilson95": [
+      0.3504,
+      0.4223
+     ]
+    },
+    "after": {
+     "k": 586,
+     "n": 700,
+     "value": 0.8371,
+     "wilson95": [
+      0.808,
+      0.8626
+     ]
+    },
+    "helped": 316,
+    "hurt": 0
+   },
+   "residual_after_resolver_test": {
+    "exact": {
+     "k": 586,
+     "n": 700,
+     "value": 0.8371,
+     "wilson95": [
+      0.808,
+      0.8626
+     ]
+    },
+    "wrong": 114,
+    "category_notes_multilabel": {
+     "extra_event": {
+      "k": 61,
+      "n": 114,
+      "value": 0.5351,
+      "wilson95": [
+       0.4439,
+       0.624
+      ]
+     },
+     "wrong_type": {
+      "k": 25,
+      "n": 114,
+      "value": 0.2193,
+      "wilson95": [
+       0.1532,
+       0.3037
+      ]
+     },
+     "type_ok_date_wrong": {
+      "k": 23,
+      "n": 114,
+      "value": 0.2018,
+      "wilson95": [
+       0.1384,
+       0.2846
+      ]
+     },
+     "route_wrong": {
+      "k": 18,
+      "n": 114,
+      "value": 0.1579,
+      "wilson95": [
+       0.1023,
+       0.2358
+      ]
+     },
+     "parse_failure": {
+      "k": 16,
+      "n": 114,
+      "value": 0.1404,
+      "wilson95": [
+       0.0883,
+       0.2159
+      ]
+     },
+     "missing_event": {
+      "k": 8,
+      "n": 114,
+      "value": 0.0702,
+      "wilson95": [
+       0.036,
+       0.1324
+      ]
+     }
+    },
+    "sole_cause_notes": {
+     "extra_event": 36,
+     "wrong_type": 21,
+     "parse_failure": 16,
+     "route_wrong": 9,
+     "type_ok_date_wrong": 2,
+     "missing_event": 1
+    },
+    "multi_cause_notes": 29,
+    "type_confusions": {
+     "REFERRAL_RECEIVED->REFERRAL_SENT": 7,
+     "SPECIALIST_VISIT->PHYSICIAN_ASSESSMENT": 6,
+     "SPECIALIST_VISIT->REFERRAL_RECEIVED": 4,
+     "SPECIALIST_VISIT->REFERRAL_SENT": 3,
+     "TREATMENT_START->MDT_DECISION": 2,
+     "REFERRAL_RECEIVED->FIRST_CONTACT": 1,
+     "SYMPTOM_ONSET_REPORTED->FIRST_CONTACT": 1,
+     "PHYSICIAN_ASSESSMENT->FIRST_CONTACT": 1
+    },
+    "extra_event_why": {
+     "distractor:ordinary": 32,
+     "duplicate_of_gold_date": 23,
+     "other": 13,
+     "distractor:earlier": 1,
+     "distractor:future_specialist": 1
+    },
+    "extra_event_types": {
+     "FIRST_CONTACT": 21,
+     "REFERRAL_SENT": 17,
+     "SPECIALIST_VISIT": 9,
+     "REFERRAL_RECEIVED": 8,
+     "PHYSICIAN_ASSESSMENT": 6,
+     "SYMPTOM_ONSET_REPORTED": 4,
+     "TREATMENT_START": 4,
+     "DIAGNOSIS": 1
+    },
+    "missing_by_type": {
+     "REFERRAL_RECEIVED": 3,
+     "PHYSICIAN_ASSESSMENT": 2,
+     "SYMPTOM_ONSET_REPORTED": 1,
+     "SPECIALIST_VISIT": 1,
+     "MDT_DECISION": 1
+    },
+    "missing_by_form": {
+     "numeric": 2,
+     "no_year": 2,
+     "long": 1,
+     "month": 1,
+     "weeks": 1,
+     "days": 1
+    },
+    "by_writer": {
+     "haiku": {
+      "k": 99,
+      "n": 200,
+      "value": 0.495,
+      "wilson95": [
+       0.4265,
+       0.5637
+      ]
+     },
+     "nemotron": {
+      "k": 487,
+      "n": 500,
+      "value": 0.974,
+      "wilson95": [
+       0.956,
+       0.9847
+      ]
+     }
+    },
+    "by_kind": {
+     "haiku:careful": {
+      "k": 10,
+      "n": 20,
+      "value": 0.5,
+      "wilson95": [
+       0.2993,
+       0.7007
+      ]
+     },
+     "haiku:no_event": {
+      "k": 0,
+      "n": 33,
+      "value": 0.0,
+      "wilson95": [
+       0,
+       0.1043
+      ]
+     },
+     "haiku:standard": {
+      "k": 89,
+      "n": 147,
+      "value": 0.6054,
+      "wilson95": [
+       0.5247,
+       0.6808
+      ]
+     },
+     "nemotron:standard": {
+      "k": 487,
+      "n": 500,
+      "value": 0.974,
+      "wilson95": [
+       0.956,
+       0.9847
+      ]
+     }
+    },
+    "by_n_gold": {
+     "0": {
+      "k": 0,
+      "n": 33,
+      "value": 0.0,
+      "wilson95": [
+       0,
+       0.1043
+      ]
+     },
+     "1": {
+      "k": 161,
+      "n": 175,
+      "value": 0.92,
+      "wilson95": [
+       0.8702,
+       0.9517
+      ]
+     },
+     "2": {
+      "k": 143,
+      "n": 165,
+      "value": 0.8667,
+      "wilson95": [
+       0.8064,
+       0.9103
+      ]
+     },
+     "3": {
+      "k": 135,
+      "n": 155,
+      "value": 0.871,
+      "wilson95": [
+       0.8091,
+       0.9149
+      ]
+     },
+     "4": {
+      "k": 147,
+      "n": 172,
+      "value": 0.8547,
+      "wilson95": [
+       0.7942,
+       0.8996
+      ]
+     }
+    },
+    "date_wrong_by_form": {
+     "weeks": 11,
+     "days": 9,
+     "long": 3,
+     "no_year": 2,
+     "numeric": 2,
+     "month": 1
+    },
+    "route_confusions": {
+     "SCREENING->OCCUPATIONAL": 8,
+     "PUBLIC_PRIMARY->OCCUPATIONAL": 5,
+     "PUBLIC_PRIMARY->SCREENING": 2,
+     "SCREENING->PRIVATE": 1,
+     "OCCUPATIONAL->SCREENING": 1,
+     "EMERGENCY->PRIVATE": 1
+    },
+    "parse_failure_sub": {
+     "json_syntax": 1,
+     "schema_or_route_enum": 5,
+     "truncated_no_stop": 9,
+     "invalid_date": 1
+    },
+    "no_event_notes": {
+     "n": 33,
+     "exact": 0,
+     "extra_why": {
+      "distractor:ordinary": 32,
+      "distractor:earlier": 1,
+      "other": 3
+     },
+     "extra_types": {
+      "FIRST_CONTACT": 17,
+      "REFERRAL_SENT": 6,
+      "DIAGNOSIS": 1,
+      "SPECIALIST_VISIT": 2,
+      "SYMPTOM_ONSET_REPORTED": 2,
+      "PHYSICIAN_ASSESSMENT": 1,
+      "TREATMENT_START": 4,
+      "REFERRAL_RECEIVED": 3
+     }
+    }
+   },
+   "intervals_after_resolver_test": {
+    "all": {
+     "pairs_day_precision": 1131,
+     "found_both_endpoints": {
+      "k": 1035,
+      "n": 1131,
+      "value": 0.9151,
+      "wilson95": [
+       0.8974,
+       0.93
+      ]
+     },
+     "exact_interval": {
+      "k": 1013,
+      "n": 1035,
+      "value": 0.9787,
+      "wilson95": [
+       0.968,
+       0.9859
+      ]
+     },
+     "mean_err": 0.62,
+     "median_err": 0,
+     "sd_err": 18.34,
+     "mean_abs_err": 1.75,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 1013,
+      "32-90": 14,
+      ">=365": 2,
+      "8-31": 3,
+      "1-3": 1,
+      "91-364": 2
+     },
+     "negative_pred_span": 1,
+     "both_endpoints_wrong": 5,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": 0.082
+    },
+    "nemotron": {
+     "pairs_day_precision": 857,
+     "found_both_endpoints": {
+      "k": 844,
+      "n": 857,
+      "value": 0.9848,
+      "wilson95": [
+       0.9742,
+       0.9911
+      ]
+     },
+     "exact_interval": {
+      "k": 840,
+      "n": 844,
+      "value": 0.9953,
+      "wilson95": [
+       0.9879,
+       0.9982
+      ]
+     },
+     "mean_err": 0.73,
+     "median_err": 0,
+     "sd_err": 18.02,
+     "mean_abs_err": 1.0,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 0
+     },
+     "abs_size": {
+      "0": 840,
+      "32-90": 1,
+      ">=365": 2,
+      "8-31": 1
+     },
+     "negative_pred_span": 1,
+     "both_endpoints_wrong": 0,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": null
+    },
+    "haiku": {
+     "pairs_day_precision": 274,
+     "found_both_endpoints": {
+      "k": 191,
+      "n": 274,
+      "value": 0.6971,
+      "wilson95": [
+       0.6403,
+       0.7485
+      ]
+     },
+     "exact_interval": {
+      "k": 173,
+      "n": 191,
+      "value": 0.9058,
+      "wilson95": [
+       0.856,
+       0.9396
+      ]
+     },
+     "mean_err": 0.12,
+     "median_err": 0,
+     "sd_err": 19.76,
+     "mean_abs_err": 5.07,
+     "quantiles": {
+      "0.05": 0,
+      "0.1": 0,
+      "0.25": 0,
+      "0.5": 0,
+      "0.75": 0,
+      "0.9": 0,
+      "0.95": 2
+     },
+     "abs_size": {
+      "0": 173,
+      "1-3": 1,
+      "32-90": 13,
+      "8-31": 2,
+      "91-364": 2
+     },
+     "negative_pred_span": 0,
+     "both_endpoints_wrong": 5,
+     "both_wrong_same_error": 0,
+     "endpoint_error_corr": 0.287
+    }
+   }
+  }
+ }
+}

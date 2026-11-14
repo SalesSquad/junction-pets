@@ -1,0 +1,177 @@
+[
+ {
+  "severity": "high",
+  "file": "genomics/README.md",
+  "problem": "The Evo 2 scores were produced on a GPU host the task did not name, access to it was later refused by the permission system, and the end state of that host is unverified. The worker disclosed this, but the result file carries no marker that its host is unapproved, and the README only says the scores \"should be treated accordingly\" without saying what that means.",
+  "evidence": "genomics/README.md lines 102-108; runs/genomics.jsonl step replacement_gpu_box_found (\"not named in the task text\", found through a known_hosts entry) and step gpu_access_denied at 17:24:30Z (\"end of the remote process not confirmed\"); data/genomics/brca1-evo2-v1.json runtime.host = az-equity-a100-20261114, ts_utc_end null, complete false. The venv and 13 GB of weights are reported as left in /root/genomics on that box. The collected numbers themselves reproduce: I recomputed AUROC 0.8299 (105 LOF, 295 FUNC) from data/genomics/evo2-scores.csv.",
+  "fix": "Owner decision before this result is shown anywhere: confirm whether az-equity-a100-20261114 is an approved project box. Until then add an explicit field to the JSON (for example host_authorisation: \"not named in task; owner decision pending\") and a line under the README result heading. Replace \"treated accordingly\" with the concrete consequence (withdraw the 423 scores and rerun on an approved box). An authorised person should confirm the scoring process ended and either collect the larger score file or remove /root/genomics there."
+ },
+ {
+  "severity": "medium",
+  "file": "genomics/README.md",
+  "problem": "The headline \"Strongest level reached: pathogenic moderate\" is carried mostly by nonsense and canonical-splice variants, where a computational criterion is not the relevant evidence. No strength is shown for missense variants, although the README's own limits say missense is the class that matters. The table headers also say \"pathogenic\" for what is a ratio against assay classes; the proxy caveat only comes after the tables.",
+  "evidence": "Reviewer recomputation from data/genomics/evo2-scores.csv joined to data/genomics/raw/brca1-findlay2018-snvs.csv: at s >= 0.009486 there are 37 LOF, 3 FUNC and 1 INT (41, matching the JSON). Of the 37 LOF, 17 are canonical splice, 8 nonsense, 9 missense, 3 splice region; all 3 FUNC are missense. Missense only: 9 of 57 LOF and 3 of 147 FUNC exceed the threshold. Missense AUROC in the JSON is 0.683 (0.593 to 0.768). README lines 48-61 and line 217.",
+  "fix": "In genomics/analyse.py compute the likelihood-ratio table and strength for missense variants alone and report \"not established\" if the bins are too small. Print the consequence mix of the variants above each threshold. Change the headline sentence to say the moderate level is reached on the all-consequence mix and is not shown for missense. Rename the column headers to \"LOF direction (assay class, proxy)\" and \"functional direction\"."
+ },
+ {
+  "severity": "medium",
+  "file": "genomics/README.md",
+  "problem": "The comparison table sets Evo 2 on 423 variants beside CADD and phyloP on all 3,893, and the ClinVar cross-check shows Evo 2's 0.930 with no baseline and no breakdown. The README says the rows cover different sets, but the like-for-like numbers are missing and they change the reading.",
+  "evidence": "Reviewer recomputation on the same 423 variants (105 LOF, 295 FUNC): CADD 0.826, phyloP 0.816, Evo 2 0.830. Missense only (57 LOF, 147 FUNC): CADD 0.754, phyloP 0.724, Evo 2 0.683. ClinVar subset of 50 variants: CADD 0.932, phyloP 0.845, Evo 2 0.930. That subset is 34 pathogenic or likely pathogenic (20 canonical splice, 8 nonsense, 4 missense, 2 splice region) against 16 benign or likely benign (13 synonymous, 2 intronic, 1 missense), so it mostly separates truncating from silent changes. README lines 40-46 and 63-65; the JSON holds baselines only for all 3,893 variants.",
+  "fix": "Add same-sample baseline rows with intervals to analyse.py and the README table. In the ClinVar paragraph give CADD and phyloP on the same 50 variants and the consequence mix. State plainly that on this sample Evo 2 at 4,096 bp is level with CADD overall and below it on missense."
+ },
+ {
+  "severity": "medium",
+  "file": "genomics/README.md",
+  "problem": "The title and opening paragraph tie the model's score to treatment selection. They state without a source that BRCA status decides PARP-inhibitor eligibility and present the module as a step towards a \"reproducible reading\" of a variant. That implies a diagnostic role the results do not support. The title \"same variant, same answer\" is also contradicted by the module's own sensitivity check.",
+  "evidence": "README line 1 and line 5. Line 69: the same 423 variants give AUROC 0.792 at 2,048 bp and 0.830 at 4,096 bp, Spearman 0.873 between the two scores, so the answer for a variant depends on a run setting. Limits line 218 says the score does not classify any variant, but that is 200 lines below the framing.",
+  "fix": "Retitle to something like \"Genomics: an open model on a public BRCA1 functional-assay benchmark (research only)\". Replace the opening with: what the benchmark is, that variant classification is done by accredited laboratories under ACMG/AMP, and that nothing here can be used to classify a variant or to decide eligibility for any treatment. Remove the PARP sentence or cite a guideline for it."
+ },
+ {
+  "severity": "medium",
+  "file": "DATA_COLLECTION.md",
+  "problem": "Section 4 still reads as the plan and does not report what happened. Several of its statements are contradicted by the project's own evidence, and the introduction says a Gemma model \"can fill\" the log. The failures are reported in scribe/RESULTS.md but not in this top-level document.",
+  "evidence": "Line 6 (\"can fill it\"), line 181 (\"from the simulator\", \"Labels are exact by construction\"), line 184 (\"keeps the pair only if the note really states z and nothing more\"), lines 190-193 (confident extractions skip human review; feed error back into the design study). Against that: data/scribe/dataset-v1/CARD.md reports 43 of 60 accepted notes disagreeing under a stricter pass (noise proxy 0.717, estimated e 0.828, c 0.521, f 0.087). scribe/sample.py is a separate sampler and imports nothing from eventlog. scribe/RESULTS.md: the Gemma 3 4B run did not happen; the 1B fallback reaches 41.0% note-level exact match (n=200) and 0.0% on the 110 notes with a relative date; the measured error was not fed back. I recomputed those figures from data/scribe/eval-v1.json and test.parquet and they match. The 24% coverage at the 1% limit is 48 notes with no error, which is compatible with a true error rate up to about 7% (Wilson upper bound for 0 of 48, my calculation).",
+  "fix": "Add a dated status paragraph to section 4 with those results and a link to scribe/RESULTS.md. Reword: ground truth comes from scribe/sample.py; labels are exact for the sampled tuple, but whether the note states them is unverified (audit warning); \"can fill\" becomes \"might, after validation on real text\". Say every extraction needs human confirmation until a threshold is validated on real, human-labelled notes. State that the Gemma terms apply."
+ },
+ {
+  "severity": "medium",
+  "file": "data/scribe/dataset-v1/CARD.md",
+  "problem": "The scribe training and test ground truth breaks the pathway order that DATA_COLLECTION.md section 1 now defines, in about one episode in eight. The card says the event types come from DATA_COLLECTION.md and that events are ordered. scribe/sample.py still uses the old order with SPECIALIST_VISIT before DIAGNOSIS and MDT_DECISION.",
+  "evidence": "Reviewer recomputation over the three Parquet files: 313 of 2,466 accepted episodes contain a reversed pair under the documented order (211 of 1,716 train, 42 of 250 val, 60 of 500 test), plus 5 of the 46 Haiku notes. All are SPECIALIST_VISIT dated before DIAGNOSIS (176 pairs) or before MDT_DECISION (174 pairs); under the sampler's own order there are 0. Example: test id 3761f9ae... has SPECIALIST_VISIT 2024-01-11 and MDT_DECISION 2024-09-01. scribe/sample.py lines 21-31 against eventlog/schema.py.",
+  "fix": "Make scribe/sample.py import the order from eventlog/schema.py and add a unit test that sampled tuples pass eventlog/validate.py. Regenerate, or drop the 313 episodes and the 5 Haiku notes and re-evaluate. Until then add one line to CARD.md and scribe/RESULTS.md stating the count and that the validator would flag these episodes."
+ },
+ {
+  "severity": "medium",
+  "file": "DATA_COLLECTION.md",
+  "problem": "The simulator does not reproduce the cohort statistic that the document uses to justify its spread parameter, and the value 0.96 is not derived anywhere. The document computes 0.99 from the whole pathway's mean and median, then assigns 0.96 to each single step. Because the steps are independent, the summed intervals come out much less spread than the cohort, so the per-interval sample sizes may be too small. The 0.6 split that places DIAGNOSIS is also an unsourced constant that sets the diagnostic and treatment columns, and it is not listed among the assumptions.",
+  "evidence": "Lines 62-64 and 94-96. Reviewer simulation of the same step model (2,000,000 draws, public-route means 72, 22, 53, 57, 3, log-SD 0.96 per step): symptom-to-treatment mean 206.9 days, median 174.1, log-SD 0.548. The cited cohort has mean 207 and median 127 (data/evidence/literature-v1.json), which gives 0.99. With s = 0.9885 the formula gives 1,918 / 524 / 253 / 106 instead of 1,809 / 495 / 239 / 100 (my calculation). src/recommend.mjs line 166 says 0.96 is implied by the paper's mean/median ratio, which contradicts the 0.99 computed here. eventlog/simulate.py line 29: DIAGNOSIS_FRACTION = .6.",
+  "fix": "Say in section 2 that the simulator matches the published means but not the published median (174 against 127 days on the public route) and that real intervals may be more spread. Either calibrate so the total matches (correlated steps or a larger step SD) or add a sensitivity column. State where 0.96 comes from or call it a choice. Add the 0.6 split and the uniform MDT placement to the listed assumptions. Correct the comment in src/recommend.mjs."
+ },
+ {
+  "severity": "medium",
+  "file": "DATA_COLLECTION.md",
+  "problem": "The \"Consequence\" paragraph makes statements about real Finnish counties (quarterly reporting for large counties, rolling twelve months for small ones) with no county case counts behind them. Several figures in the document have no source: \"a few hundred thousand rows nationally\", \"tens of cases a year\", and the claim that Finnish secure analysis environments support Parquet natively. eventlog/README.md says the national case count comes from this document, but the document never states it.",
+  "evidence": "Lines 55-58 and 131-136. eventlog/simulate.py line 98 uses national_cases=37000, labelled an assumption. Reviewer calculation with that assumption and the 2025 populations in data/snapshot/public-v1.json: cases per quarter range from 50 to 1,136 per county; 5 of 23 counties reach the 513 needed for a 20% slowdown in a quarter and none reaches 1,874 for 10%; over twelve months 3 counties stay below 473 (202, 442 and 453 cases) and 6 reach 1,874.",
+  "fix": "Add a county table (assumed annual cases, smallest slowdown detectable per quarter and per year) generated by eventlog/audit.py, and rewrite the paragraph to name the effect size each cadence can detect. State the 37,000 figure with a source or as an assumption. Cite or remove the Parquet-environment sentence and the lung-cancer figure. Give the DOI for Kuitunen 2026 here, as data/evidence/literature-v1.json already does."
+ },
+ {
+  "severity": "low",
+  "file": "DATA_COLLECTION.md",
+  "problem": "The single pathway order is written as a property of every episode (\"Within an episode every event is on or after the one before it\"). That is a simulator convention. As a specification for real data it would mark legitimate pathways as violations, for example a first specialist visit before the diagnosis is confirmed, an emergency presentation diagnosed before any referral, or a screening case with no symptom onset.",
+  "evidence": "Lines 28-39. The order was chosen to match one cohort's milestones (line 36-37) and DIAGNOSIS is placed by a fixed 0.6 fraction in the simulator. The validator counts every reversed pair (line 39).",
+  "fix": "State that the order is the simulator's convention and that for real data a reversed pair is a flag for review, not an error. List the exceptions to confirm with clinicians before the validator is used on real records."
+ },
+ {
+  "severity": "low",
+  "file": "scribe/RESULTS.md",
+  "problem": "Provenance is incomplete for several external inputs. The verifier is called through a floating alias and its resolved version is recorded nowhere. The teacher model has an id only. The Gemma base is given by repository name; its revision is only in the JSON, there is no weight hash, and \"Gemma terms apply\" has no link. Published Evo 2 values are typed into the README renderer with no URL or date. Two downloads are not pinned.",
+  "evidence": "scribe/generate.py line 108 and all 7,194 verifier_call lines in runs/scribe.jsonl say jev-latest. data/scribe/models.json holds only \"nemotron-3.5-super-vl\". scribe/RESULTS.md lines 15 and 51 give no revision; data/scribe/eval-v1.json meta.base_model_snapshot is 60444cd9.... I opened the model card: licence tag gemma, converted from google/gemma-3-1b-it. Google's prohibited-use policy for Gemma, which I also opened, restricts automated decisions in healthcare, which bears on letting extractions skip human review. genomics/render_readme.py lines 50-51 hold 0.73, 0.76 and 0.87 as literals; I opened the Arc notebook and the BioNeMo documentation and the values match. genomics/remote_setup.sh calls snapshot_download without a revision, and the reference URL in data/genomics/sources.json points at the main branch with no licence recorded.",
+  "fix": "Record in the dataset card that the verifier was jev-latest as resolved on 2026-11-14 and that the exact version was not captured; pin a version next time. Add endpoint host and terms for the teacher. In RESULTS.md print the Gemma snapshot, the upstream repository, a weight sha256 and the two terms URLs, and note the adapter is subject to them. Move the published values with URL and retrieval date into data/genomics/sources.json and render from there. Pin the Evo 2 revision and a commit for the reference file."
+ },
+ {
+  "severity": "low",
+  "file": "data/scribe/manifest.json",
+  "problem": "The scribe manifest and README are stale and now state things that are false. The manifest says training and evaluation were not executed and lists hashes for two scripts that have since been edited. The README says this machine never downloads Gemma and does not mention the MLX fallback.",
+  "evidence": "manifest.json: \"training_executed\": false, \"evaluation_executed\": false. I recomputed all listed hashes: scribe/evaluate.py and scribe/train_lora.py no longer match. scribe/README.md: \"This machine never downloads Gemma.\" runs/train.jsonl step local_fallback_setup records the download of mlx-community/gemma-3-1b-it-bf16 (2,603,791,060 bytes) into scribe/artifacts/hf-cache.",
+  "fix": "Regenerate the manifest after the edits, or write a second manifest for the evaluation stage and mark the first as covering dataset build only. Update scribe/README.md with the fallback path, the RESULTS.md link and the corrected Gemma sentence."
+ },
+ {
+  "severity": "low",
+  "file": "scribe/results_md.py",
+  "problem": "scribe/RESULTS.md states that no figure in it is typed by hand, but some are literals in the renderer and in the metadata builder. The files that back the training and cost figures are git-ignored, so the evidence would not travel with the repository.",
+  "evidence": "scribe/results_md.py lines 135, 139, 156-157 hold \"35 minutes\", \"3.5 minutes\", \"16 GB\", \"6,000 tokens\" and the call counts as text. scribe/artifacts/build_meta.py types in the framework versions, the snapshot hash, the GPU set-up string (8.1 GB) and the outage times. The typed values agree with runs/train.jsonl. train.log, loss-curve.json, haiku-writer/calls.json and eval-meta.json sit under scribe/artifacts/, which .gitignore excludes. The computed figures are sound: I recomputed the Haiku costs from calls.json (0.045947 and 0.024789) and the adapter sha256.",
+  "fix": "Change the header sentence to \"metrics come from eval-v1.json; run circumstances come from runs/train.jsonl\". Copy train.log, loss-curve.json, calls.json and eval-meta.json to data/scribe/ and read them from there."
+ },
+ {
+  "severity": "low",
+  "file": "data/genomics/brca1-evo2-v1.json",
+  "problem": "Three small inconsistencies in the genomics result. The README prints two different intervals for the same AUROC. The JSON's deviation note gives a wrong reason for the window. The interim AUROC values that drove the window choice appear only in the run log.",
+  "evidence": "genomics/README.md line 18: 0.830 (0.781 to 0.879); line 69: 0.830 (0.776 to 0.878), same variants, different bootstrap. method.deviations_from_notebook says larger windows \"did not fit the time limit\", but 8,192 bp failed on the 16 GiB allocator cap and data/genomics/evo2-window-choice.json shows 4,096 bp itself projected at 1,919 s against a 960 s budget. runs/genomics.jsonl step score_w2048_sample records the interim comparison on 240 variants as 0.865 against 0.797; the README says only \"higher\".",
+  "fix": "Use one interval for the main AUROC, or label the second as coming from a separate bootstrap. Correct the deviation text to \"8,192 bp exceeded the memory cap; 4,096 bp did not fit the time budget, so the run is partial\". Print the two interim values in the README limit about the window choice."
+ },
+ {
+  "severity": "low",
+  "file": "runs/train.jsonl",
+  "problem": "Run-log timestamps are the time of logging, not of execution, so the order of events cannot be read from them. The committed logs also contain the public addresses of root-login GPU hosts, and the dataset card lists a computed cost under \"Measured\".",
+  "evidence": "runs/train.jsonl has four lines stamped 17:02:12Z and four stamped 17:26:53Z; local_fallback_setup and local_train_aborted are stamped 17:02:12Z although training started at 16:59:20Z (scribe/artifacts/adapter-v1/train-start.txt). runs/genomics.jsonl has four lines at 17:26:15Z and a closeout line with an empty command. Both logs contain 86.38.238.27 and one contains 95.133.254.130. CARD.md typesafe_cost_usd 0.287565516 equals 6,846,798 tokens times the $0.042 per million that scribe/README.md calls the owner's price.",
+  "fix": "Add started_utc and ended_utc to each log line from the artefacts that hold them. Replace host addresses with host names if the repository is shared. In the card rename the cost field to computed from tokens at a stated price, with the price source."
+ },
+ {
+  "severity": "info",
+  "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity",
+  "problem": "Reviewer note: what was checked and came back clean, and one deviation of my own. During the review I ran one read-only `git status --porcelain` by mistake, against the no-git instruction. Its output was discarded and nothing was changed.",
+  "evidence": "Secrets: pattern scan for dc_, nvapi-, hf_, sk-, bearer tokens and private keys found nothing, and an exact-value search for both configured keys over 4,989 files found 0 occurrences (virtualenvs, node_modules, the model cache and files over 200 MB excluded; values never printed). Numbers: every figure in eventlog/RESULTS.md and DATA_COLLECTION.md sections 2-3 matches design-study-v1.json, and I recomputed the sample-size table and the 385. The Parquet sample re-validated at 0 reversed pairs in 20,000 episodes, all rows synthetic. scribe/RESULTS.md metrics recomputed from the predictions (82 of 200 exact, route 98.5%, 0 of 110 relative, 82 of 90 absolute, Haiku 21 of 46, coverage 48 and 68 notes). The dataset card equals dataset-stats.json. Genomics AUROCs recomputed; the 423 variants are spread over all 13 exons. Hashes in sources.json, execution-receipt.json and the adapter verified. Genomics (22) and scribe (14) unit tests pass; the eventlog tests were read from tests-output.txt, not rerun. Synthetic and research-only labels are present in all eight files. No repository file was written, no verda command was run and the GPU box was not contacted.",
+  "fix": "No action needed on these items."
+ },
+ {
+  "severity": "high",
+  "file": "eventlog/design_study.py",
+  "problem": "Repeated quarterly looks are not part of the multiple-comparison family. The early-warning study tests every quarter on a rolling four-quarter window with the single-look Bonferroni threshold (0.05/69), so the 5% family-wise rate holds for one look only. DATA_COLLECTION.md section 2 presents a = 0.05/69 as the multiplicity handling and proposes quarterly reporting.",
+  "evidence": "design_study.py:302-323 loops q = 0..11 and calls evaluate() with the default critical(comparisons=69) (detect.py:36). Reviewer simulation with the project's own pathways/log_spans/moments/test_moments (23 counties x 250 episodes a quarter, day precision, no slowdown anywhere, each county against the rest of the country, 1000 replications): at least one false flag somewhere in 12 looks in 0.335 of replications (Wilson 0.306 to 0.365); in looks 5 to 12 alone 0.235; mean for a single look 0.042. The stored early_warning rows already show one-county pre-onset false-alarm rates of 0.003 to 0.012 over 4 looks against a single-look nominal of 0.0022. Script and output: /private/tmp/claude-501/-Users-mikaelervamaa-Library-Application-Support-Claude-scratch-workspaces-5d672b86-628a-4541-8274-071bf0a9e008-6b216046-ec1a-4b9a-9976-dd851f37ac44-scratch-2026-11-14-099cd6/0881be11-baf2-48a2-9868-60cfd5b0055a/scratchpad/review-stats/null_sim_c.py and null_sim_c.json (a first attempt was lost when the process was killed under memory pressure; it was rerun alone).",
+  "fix": "Count looks in the family: either critical(comparisons=69*L) for a planned horizon of L looks (upper bound), or a sequential boundary (group-sequential or CUSUM) calibrated with this same simulation so that the false-alarm probability over the horizon is 5%. Recompute quarters-to-detection at that boundary, report the family-wise false-alarm rate per horizon next to it, and state in DATA_COLLECTION.md that 0.05/69 covers one look of one stratum (not quarterly repeats, not cancer-site strata)."
+ },
+ {
+  "severity": "high",
+  "file": "genomics/analyse.py",
+  "problem": "The headline 'pathogenic: moderate' evidence strength for Evo 2 does not hold for missense variants, the class a computational criterion applies to. It is produced by canonical splice and nonsense variants in the top score bins, and most of the overall AUROC is available from the consequence category alone.",
+  "evidence": "At the 'moderate' threshold (s >= 0.00949) there are 41 variants: 37 loss-of-function (17 canonical splice, 8 nonsense, 3 splice region, 9 missense), 3 functional (all missense), 1 intermediate. Missense only (57 loss-of-function, 147 functional): 9 against 3 above the threshold, likelihood ratio 6.93 with a one-sided 95% log-Wald lower bound of 2.56 (moderate needs 4.33 or 5.79). Running the module's own analyse() on the 222 scored missense variants gives strongest reached supporting / none with 20 bins (top bin 8 against 3, lower bound 2.55), supporting (Tavtigian) and none (Pejaver) with 10 bins, none with 5 bins. A lookup with no model (loss-of-function rate of the variant's consequence class, cross-fitted by position) reaches AUROC 0.790 on the same 400 labelled variants and 0.758 on the full table, against 0.830 for Evo 2; Evo 2 on missense is 0.683. Scripts: review-stats/gen1.py and gen2.py in the scratchpad named above.",
+  "fix": "Compute the likelihood-ratio table and the strength reached within missense and make that the headline evidence result; report per-consequence tables for the rest. Add the consequence-only predictor as a baseline row in the comparison table. Reword the summary: on this sample the score reaches at most supporting evidence for missense variants, and the all-variant 'moderate' reflects splice and nonsense variants that other criteria already cover."
+ },
+ {
+  "severity": "medium",
+  "file": "genomics/analyse.py",
+  "problem": "The one-sided bootstrap bound on the per-bin likelihood ratio is not valid in sparse bins, and the evidence strength reached changes with the number of bins. The strength thresholds themselves (Tavtigian 2018, Pejaver 2022) are coded correctly; the bound that is compared with them is not.",
+  "evidence": "local_likelihood_ratios (analyse.py:147-162) resamples the observed classes with fixed edges; a bin with no functional variant can never receive one, so its 'lower bound' is set by the +0.5 constant (analyse.py:141-144). Same data, same code, different --lr-bins: 40 bins gives Tavtigian 'strong' (top bin 10 loss-of-function against 0 functional, reported lower bound 30.7), 20 bins 'moderate', 5 bins Pejaver 'supporting'. Exact conservative bounds (Clopper-Pearson on each class share at 2.5%): 3.75 for the 10-against-0 bin; 6.01 for bin 20 (module 14.58) and 4.32 for bin 19 (module 9.00) of the reported 20-bin table; log-Wald bounds 9.12 and 6.93. Bin 19 therefore sits at or below the moderate target (4.33 Tavtigian, 5.79 Pejaver) under the exact bound.",
+  "fix": "Replace the percentile bootstrap by an exact or score interval for a ratio of two proportions (Koopman or Miettinen-Nurminen; the Clopper-Pearson pair as a conservative fallback), require a minimum count of each class per bin or use Pejaver's sliding window with a minimum count, fix the bin count before looking at results, and report the 10 / 20 / 40 bin sensitivity in the result file."
+ },
+ {
+  "severity": "medium",
+  "file": "eventlog/detect.py",
+  "problem": "The detector's realised false-positive rate exceeds the Bonferroni level for small counties and, much more, when dates are month-precision. The study reports only one family-wise null (23 counties x 250, day precision: 0.058 / 0.043, which I reproduced exactly), so the inflation is not visible in RESULTS.md, and the unit test for the null cannot detect it.",
+  "evidence": "test_moments (detect.py:33-36) compares a Wald statistic with a county-estimated variance against a normal quantile at z = 3.38. Stored null_by_cell in design-study-v1.json, D3 with half the dates month-precision: 44 false flags in 10 cells x 1000 replications (n = 100 cells: 0.007 and 0.010) against a nominal 0.0022 per county. Reviewer simulation with the project's functions, one county against a 2,000,000-episode reference, any of the three tests: day precision n = 50: 0.0040 (1.8 x nominal), n = 100: 0.0027 (1.2 x), n = 250: 0.0023; month share 0.5 n = 50: 0.0159 (7.3 x), n = 100: 0.0083 (3.8 x), n = 250: 0.0039 (1.8 x), n = 1000: 0.0026 (200,000 / 200,000 / 100,000 / 40,000 replications). Family-wise with month share 0.5: 0.076 (23 x 250), 0.096 (population-proportional counties, 9,250 cases, sizes 50 to 1,136; Wilson 0.086 to 0.107), 0.062 (37,000 cases); the same layouts at day precision give 0.047, 0.045 and 0.049. tests/test_eventlog.py:165-169 accepts any single-county null rate below 0.08. Outputs: review-stats/null_sim.log and null_sim_d.json in the scratchpad named above.",
+  "fix": "Use Welch t quantiles (or a permutation null) instead of NORM.inv_cdf for the county test; do not run this Wald test on intervals with a month-precision endpoint (test day-precision pairs only, or fit an interval-censored model); set a minimum number of complete day-precision episodes for testing. Extend familywise_null to month share 0.5 and to population-proportional county sizes and report those rates next to 0.058. Tighten test_empirical_null to a bound near the nominal rate with enough replications to resolve it."
+ },
+ {
+  "severity": "medium",
+  "file": "genomics/analyse.py",
+  "problem": "The bootstrap intervals treat variants as independent although the sample was drawn by position and the two or three variants at a position share one reference window and usually one class. The reported interval for the headline AUROC is too narrow. The limits text says so in words, but the narrow interval is the one reported.",
+  "evidence": "stratified_bootstrap (analyse.py:78-85) resamples single variants. The 423 variants sit on 144 positions (136 with three variants); within-position score correlation is 0.71 and in 102 of 143 multi-variant positions all variants have the same class. Resampling positions instead (4,000 resamples) gives 0.752 to 0.897 for the AUROC against the reported 0.781 to 0.879 (46% wider), and 0.570 to 0.787 for missense against 0.593 to 0.768. The point estimate reproduces exactly (0.8298950766747377, also by brute force).",
+  "fix": "Resample positions (all variants of a drawn position together) in stratified_bootstrap, with_interval and the likelihood-ratio bounds, and regenerate the result file and README."
+ },
+ {
+  "severity": "medium",
+  "file": "scribe/metrics.py",
+  "problem": "The risk-coverage figures ('24.0% of notes at <=1% error', '34.0% at <=5%', and 43.5% / 47.8% for the Haiku notes) are chosen and evaluated on the same notes, and the samples are too small to support a 1% limit. RESULTS.md words them as the share of notes that can skip review.",
+  "evidence": "risk_coverage (metrics.py:91-119) takes the largest coverage whose in-sample risk is under the limit. All stored metrics recompute exactly from the predictions in eval-v1.json. Test set: 48 of 200 admitted with 0 errors, Wilson upper bound 7.4% (exact one-sided 6.1%); Haiku notes: 20 of 46 with 0 errors, upper bound 16.1%. Out of sample the thresholds do not hold: the Haiku '<=1%' threshold (-0.002291) applied to the 200 test notes admits 80 with 6 errors (7.5%, Wilson 3.5% to 15.4%); the test threshold (-0.000438) applied to the Haiku notes admits 11 of 46. None of the 110 test notes with a relative date is admitted, so the score is mostly separating notes with and without relative dates.",
+  "fix": "Fix the threshold on the 250 validation notes (not used for gradient steps), then report coverage and error on the test notes at that threshold with an exact one-sided upper bound; evaluate all 500 test notes. State that a <=1% claim at 95% confidence needs at least 299 admitted notes without an error, and replace the 'can skip review' wording by the observed count and its upper bound."
+ },
+ {
+  "severity": "low",
+  "file": "eventlog/power.py",
+  "problem": "The sample-size table uses a one-sample formula (reference treated as infinite), while the detector compares each county with the rest of the country in the same period. The statement that the table is 'accurate to about one percentage point of power' (DATA_COLLECTION.md:112) was checked only against a 50,000,000-episode reference.",
+  "evidence": "sample_size (power.py:17-19) has no reference term; sample_size_check uses the calibration sample as reference (design_study.py:114, 126). With the project's analytic_power and a comparator of 37,000 - n episodes, power at the tabulated n for a 10% slowdown is 0.771 (primary care, n = 1,728), 0.768 (diagnostic, n = 1,874) and 0.779 (treatment, n = 1,267) instead of 0.80; the n that restores 0.80 is 1,817, 1,980 and 1,314 (+5.2%, +5.7%, +3.7%). For the 20% row against one quarter (9,250 cases) power is 0.766 to 0.778.",
+  "fix": "Use the two-sample form n(N - n)/N >= s^2 (z + z_power)^2 / (ln r)^2 with N the national count of the period, or keep the table for an infinite reference and print the correction beside it; add a sample-size check cell with a rest-of-country comparator."
+ },
+ {
+  "severity": "low",
+  "file": "genomics/analyse.py",
+  "problem": "Cross-fitting keeps folds apart by variant but not by position: variants that share a position and a reference window are split between the training and the held-out fold.",
+  "evidence": "stratified_folds (analyse.py:235-242) assigns folds per variant within class. Of 138 positions with more than one labelled variant, 130 have variants in different folds. The effect on the two-parameter calibration is small: Brier 0.1233 as reported, 0.1251 with folds assigned by position, 0.1228 fitted in sample.",
+  "fix": "Assign folds by position (grouped, stratified on the position's majority class) and report that Brier score."
+ },
+ {
+  "severity": "low",
+  "file": "genomics/README.md",
+  "problem": "The comparison with CADD is not like for like, and the interval of the main AUROC ignores that the window was chosen after an interim look. Neither changes the worker's conclusion, but the paired figures are the ones that support it.",
+  "evidence": "The table sets Evo 2 on 423 variants beside CADD on 3,893. On the same 423 variants CADD has AUROC 0.826 against 0.830 for Evo 2: difference 0.004, position-cluster bootstrap interval -0.091 to 0.097; missense only -0.070 (-0.202 to 0.057); CADD on the same sample still reaches moderate in both directions. Window: 4,096 bp against 2,048 bp on the same 423 variants differs by 0.038 (cluster interval 0.001 to 0.080), and 4,096 bp was kept because it looked better at 240 variants, so 0.830 is the larger of two estimates.",
+  "fix": "Report baselines on the scored sample with paired differences and their intervals; fix the window before scoring, or report both windows as equal results without calling one the main one."
+ },
+ {
+  "severity": "low",
+  "file": "scribe/build_dataset.py",
+  "problem": "No identifier, target or note text crosses the train, validation and test splits, but two small defects remain: de-duplication keeps the first cached row for an id whatever its status, and the split hash includes the entry route, so identical event lists can land in different splits.",
+  "evidence": "build_dataset.py:80-85 keeps the first row per id. Of 20 duplicate ids, 6 have a rejected first row and an accepted later one: the accepted note is dropped and the id is filed under rejected; in 6 more a second accepted note is dropped. sample.py:146-149 hashes route plus events: 7 of 500 test notes (3 of the 200 evaluated, all three scored correct) have exactly the event list of a training note with another route, all single-event notes. Largest five-word-shingle overlap between any test or validation note and a training note is 0.18.",
+  "fix": "When ids collide keep the accepted row (or key the cache on id plus note date); derive the split bucket from the event list alone so that a tuple differing only in route stays in one split."
+ }
+]

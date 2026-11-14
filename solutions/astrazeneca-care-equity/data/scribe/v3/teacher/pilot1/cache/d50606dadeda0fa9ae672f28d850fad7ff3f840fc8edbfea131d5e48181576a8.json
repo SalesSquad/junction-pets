@@ -1,0 +1,97 @@
+{
+ "id": "d50606dadeda0fa9ae672f28d850fad7ff3f840fc8edbfea131d5e48181576a8",
+ "curriculum": "careful",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Työterveyshoitaja vastasi potilaan ensimmäiseen yhteydenottoon 15.2.2025. Työterveyslääkäri tutki ja arvioi potilaan 5.3.2025. Potilas kertoo voivansa hyvin ja selviytyvän arjesta kotona. Keskusteltiin yleisesti terveydestä ja hyvinvoinnista. Potilas on toimintakykyinen ja pystyy hoitamaan tavanomaiset päivittäiset toimet itsenäisesti.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:35 outside 60-140"
+    ],
+    "words": 35,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 895,
+      "total_tokens": 1019,
+      "completion_tokens": 124,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.81
+    }
+   ],
+   "repair_request": [
+    "The note has 35 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Työterveyshoitaja vastasi potilaan ensimmäiseen yhteydenottoon 15.2.2025. Työterveyslääkäri tutki ja arvioi potilaan 5.3.2025. Potilas kertoo voivansa tällä hetkellä melko hyvin. Hän selviytyy arjesta kotona ja pystyy hoitamaan tavanomaiset päivittäiset toimet itsenäisesti. Liikkuminen sujuu ongelmitta. Potilas nukkuu hyvin ja ruokahalu on normaali. Keskusteltiin yleisesti terveydestä, hyvinvoinnista ja elintavoista. Potilas on tyytyväinen saamaansa ohjaukseen ja neuvontaan. Hän pystyy jatkamaan työntekoa ja harrastuksiaan. Potilas osaa hakeutua hoitoon tarvittaessa. Yleinen terveysneuvonta annettiin. Potilaan toimintakyky on hyvä.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 71,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-02-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-03-05",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1099,
+      "total_tokens": 1329,
+      "completion_tokens": 230,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.01
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 818,
+      "total_tokens": 887,
+      "completion_tokens": 69,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.69
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:52+00:00"
+}

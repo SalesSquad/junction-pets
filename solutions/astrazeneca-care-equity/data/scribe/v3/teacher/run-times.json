@@ -1,0 +1,100 @@
+[
+ {
+  "ts": "2026-11-14T18:35:04+00:00",
+  "command": "protocol.py run --limit 40 --deadline 18:44",
+  "specifications": 40,
+  "outcome": {
+   "completed": 40,
+   "cancelled_at_hard_stop": 0
+  },
+  "teacher_requests_this_run": 118,
+  "teacher_requests_ledger": 118,
+  "cap": 5500,
+  "requests_by_kind": {
+   "write": 40,
+   "readback": 44,
+   "repair": 34
+  },
+  "request_errors": {},
+  "wall_seconds": 15.1
+ },
+ {
+  "ts": "2026-11-14T18:36:32+00:00",
+  "command": "protocol.py run --limit 40 --deadline 18:48",
+  "specifications": 40,
+  "outcome": {
+   "error:ModuleNotFoundError": 37,
+   "completed": 3,
+   "cancelled_at_hard_stop": 0
+  },
+  "teacher_requests_this_run": 83,
+  "teacher_requests_ledger": 201,
+  "cap": 5500,
+  "requests_by_kind": {
+   "write": 40,
+   "readback": 41,
+   "repair": 2
+  },
+  "request_errors": {},
+  "wall_seconds": 8.2
+ },
+ {
+  "ts": "2026-11-14T18:37:03+00:00",
+  "command": "protocol.py run --limit 40 --deadline 18:48",
+  "specifications": 40,
+  "outcome": {
+   "cached": 3,
+   "completed": 37,
+   "cancelled_at_hard_stop": 0
+  },
+  "teacher_requests_this_run": 82,
+  "teacher_requests_ledger": 283,
+  "cap": 5500,
+  "requests_by_kind": {
+   "write": 37,
+   "readback": 41,
+   "repair": 4
+  },
+  "request_errors": {},
+  "wall_seconds": 6.7
+ },
+ {
+  "ts": "2026-11-14T18:41:51+00:00",
+  "command": "protocol.py run --deadline 19:00",
+  "specifications": 1600,
+  "outcome": {
+   "cached": 40,
+   "completed": 1560,
+   "cancelled_at_hard_stop": 0
+  },
+  "teacher_requests_this_run": 3551,
+  "teacher_requests_ledger": 3834,
+  "cap": 5500,
+  "requests_by_kind": {
+   "write": 1560,
+   "readback": 1712,
+   "repair": 279
+  },
+  "request_errors": {},
+  "wall_seconds": 268.8
+ },
+ {
+  "ts": "2026-11-14T18:44:59+00:00",
+  "command": "protocol.py regen-long",
+  "specifications": 90,
+  "outcome": {
+   "completed": 90,
+   "cancelled_at_hard_stop": 0
+  },
+  "teacher_requests_this_run": 208,
+  "teacher_requests_ledger": 4042,
+  "cap": 5500,
+  "requests_by_kind": {
+   "write": 90,
+   "readback": 96,
+   "repair": 22
+  },
+  "request_errors": {},
+  "wall_seconds": 27.1
+ }
+]

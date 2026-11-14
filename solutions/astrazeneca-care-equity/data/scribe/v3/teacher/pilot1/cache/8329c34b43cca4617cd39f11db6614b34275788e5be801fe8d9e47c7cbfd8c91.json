@@ -1,0 +1,92 @@
+{
+ "id": "8329c34b43cca4617cd39f11db6614b34275788e5be801fe8d9e47c7cbfd8c91",
+ "curriculum": "careful",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas saapui terveyskeskuksen vastaanotolle julkisen perusterveydenhuollon kautta ja terveyskeskuslääkäri tutki ja arvioi hänet 15.10.2024. Aiempi syöpään liittymätön rokotuskäynti oli 11.8.2023. Potilaalla ei ole vielä ollut erikoislääkärin vastaanottoa. Potilas voi tällä hetkellä kohtuullisesti, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Potilaalle on annettu yleistä neuvontaa ja tukea.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:46 outside 60-140"
+    ],
+    "words": 46,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 855,
+      "total_tokens": 1003,
+      "completion_tokens": 148,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.04
+    }
+   ],
+   "repair_request": [
+    "The note has 46 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas saapui terveyskeskuksen vastaanotolle julkisen perusterveydenhuollon kautta, ja terveyskeskuslääkäri tutki ja arvioi hänet 15.10.2024. Aiempi syöpään liittymätön rokotuskäynti oli 11.8.2023. Potilaalla ei ole vielä ollut erikoislääkärin vastaanottoa. Potilas voi tällä hetkellä kohtuullisesti, toimintakyky on säilynyt ja kotona pärjääminen sujuu hyvin. Potilaalle on annettu yleistä neuvontaa ja tukea. Potilas kertoo nukkuvansa melko hyvin ja syövänsä tavallisesti. Liikkuminen sujuu omassa kodissa ilman apuvälineitä. Potilas on yhteydessä omaisiin ja osallistuu arkisiin askareisiin. Seuranta jatkuu tarvittaessa terveyskeskuksessa. Potilas ymmärtää annetut ohjeet ja tietää, miten toimia tarvittaessa.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 82,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "PUBLIC_PRIMARY",
+     "events": [
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-10-15",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1083,
+      "total_tokens": 1328,
+      "completion_tokens": 245,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 2.05
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 833,
+      "total_tokens": 876,
+      "completion_tokens": 43,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.28
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:35:01+00:00"
+}

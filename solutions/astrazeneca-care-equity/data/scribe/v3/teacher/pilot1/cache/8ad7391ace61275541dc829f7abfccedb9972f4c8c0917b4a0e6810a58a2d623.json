@@ -1,0 +1,68 @@
+{
+ "id": "8ad7391ace61275541dc829f7abfccedb9972f4c8c0917b4a0e6810a58a2d623",
+ "curriculum": "no_event",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Työterveyshuollon käynnillä potilas kertoo tuntevansa itsensä hyväksi ja selviytyvänsä hyvin kotona. Koronarokotteen tehosteannos on annettu 13.11.2025. Seuraava rokoteannos on suunniteltu 11. toukokuuta 2026, mutta se ei ole vielä toteutunut. Anamneesissa on aiemmin hoidettu munuaissyöpä, joka on nyt ohi. Potilaalle annettiin yleistä neuvontaa ja ohjausta.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:44 outside 60-140"
+    ],
+    "words": 44,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 883,
+      "total_tokens": 1015,
+      "completion_tokens": 132,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.81
+    }
+   ],
+   "repair_request": [
+    "The note has 44 words. Write 80 to 110 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Työterveyshuollon käynnillä potilas kertoo tuntevansa itsensä hyväksi ja selviytyvänsä hyvin kotona arjessaan. Hänellä on hyvä toimintakyky ja mieliala on vakaa. Koronarokotteen tehosteannos on annettu 13.11.2025. Seuraava rokoteannos on suunniteltu 11. toukokuuta 2026, mutta se ei ole vielä toteutunut. Anamneesissa on aiemmin hoidettu munuaissyöpä, joka on nyt ohi. Potilaalle annettiin yleistä neuvontaa ja ohjausta jatkosta.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:54 outside 60-140"
+    ],
+    "words": 54,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1095,
+      "total_tokens": 1250,
+      "completion_tokens": 155,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.25
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:52+00:00"
+}

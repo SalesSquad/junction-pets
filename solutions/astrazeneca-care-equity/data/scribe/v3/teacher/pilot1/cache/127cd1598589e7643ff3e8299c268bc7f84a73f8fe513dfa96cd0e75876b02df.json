@@ -1,0 +1,201 @@
+{
+ "id": "127cd1598589e7643ff3e8299c268bc7f84a73f8fe513dfa96cd0e75876b02df",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on hakeutunut yksityiseen terveydenhuoltoon. Oireet alkoivat 50 viikkoa sitten. Ensimmäinen yhteydenotto terveydenhuoltoon tapahtui 13. syyskuuta 2023, jolloin asiointi hoitettiin yksityisen lääkäriaseman ajanvarauksen kautta ilman lääkärin tutkimusta. Lähetys erikoissairaanhoitoon lähetettiin 175 päivää sitten. Moniammatillinen hoitopäätös tehtiin helmikuussa 2024. Seuraava kontrollikäynti on suunniteltu 30.6.2024, mutta se ei ole vielä toteutunut. Aiempi rokotuskäynti, joka ei liitty syöpään, oli 3.7.2022. Potilas voi tällä hetkellä hyvin, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Neuvontaa on annettu yleisesti.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 73,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-04-29",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-04-17",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "REFERRAL_SENT",
+       "date": "2023-10-21",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "REFERRAL_SENT",
+       "date": "2023-10-20",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-04-17",
+       "precision": "DAY"
+      },
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-09-13",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2023-10-20",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2024-02-01",
+       "precision": "MONTH"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 905,
+      "total_tokens": 1144,
+      "completion_tokens": 239,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.97
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 826,
+      "total_tokens": 944,
+      "completion_tokens": 118,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 2.18
+    }
+   ],
+   "repair_request": [
+    "An independent reader dated 'oireiden alku' to 2023-04-17 (DAY) instead of '50 viikkoa sitten' (= 2023-04-29, DAY). Put that date string directly with that fact and no other date near it.",
+    "An independent reader dated 'lähetteen lähettäminen' to 2023-10-20 (DAY) instead of '175 päivää sitten' (= 2023-10-21, DAY). Put that date string directly with that fact and no other date near it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas on hakeutunut yksityiseen terveydenhuoltoon. Oireet alkoivat 50 viikkoa sitten. Ensimmäinen yhteydenotto terveydenhuoltoon tapahtui 13. syyskuuta 2023, jolloin asiointi hoitettiin yksityisen lääkäriaseman ajanvarauksen kautta ilman lääkärin tutkimusta. Lähetys erikoissairaanhoitoon lähetettiin 175 päivää sitten. Moniammatillinen hoitopäätös tehtiin helmikuussa 2024. Seuraava kontrollikäynti on suunniteltu 30.6.2024, mutta se ei ole vielä toteutunut. Aiempi rokotuskäynti, joka ei liitty syöpään, oli 3.7.2022. Potilas voi tällä hetkellä hyvin, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Neuvontaa on annettu yleisesti.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 73,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-04-29",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-04-15",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "REFERRAL_SENT",
+       "date": "2023-10-21",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "REFERRAL_SENT",
+       "date": "2023-10-20",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-04-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-09-13",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2023-10-20",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2024-02-01",
+       "precision": "MONTH"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1340,
+      "total_tokens": 1578,
+      "completion_tokens": 238,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.04
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 826,
+      "total_tokens": 944,
+      "completion_tokens": 118,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.9
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:54+00:00"
+}

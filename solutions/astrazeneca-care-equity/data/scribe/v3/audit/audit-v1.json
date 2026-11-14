@@ -1,0 +1,1348 @@
+{
+ "schemaVersion": "scribe-audit-v1",
+ "generated": "2026-11-14T19:11:59+00:00",
+ "synthetic": true,
+ "audit_dir": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v3/audit",
+ "definitions": {
+  "wrong_label": "scored notes with at least one wrong_date, wrong_type or not_stated verdict, or an unlisted event",
+  "ambiguity_only": "scored notes without a wrong label and with at least one ambiguous verdict",
+  "scored": "every claimed event has one kept verdict and the unlisted-event answer is kept",
+  "discarded": "a verdict whose quote is not an exact substring of its note, or that needs a quote and has none, is dropped",
+  "route_not_ok": "route_ok == false; reported separately, not part of wrong_label",
+  "clean_strict": "no wrong label, no unlisted event, no ambiguous verdict, and route_ok not false (the headline for a clean note)",
+  "wrong_label_or_route_not_ok": "the headline problem share: wrong label or the note does not support the claimed route",
+  "interval": "Wilson score interval, 95%"
+ },
+ "input": {
+  "items_in_key": 240,
+  "items_answered": 240,
+  "items_missing": 0,
+  "files": {
+   "slice-01.json": {
+    "valid_json_array": true,
+    "items": 30,
+    "items_used": 30
+   },
+   "slice-02.json": {
+    "valid_json_array": true,
+    "items": 30,
+    "items_used": 30
+   },
+   "slice-03.json": {
+    "valid_json_array": true,
+    "items": 30,
+    "items_used": 30
+   },
+   "slice-04.json": {
+    "valid_json_array": true,
+    "items": 30,
+    "items_used": 30
+   },
+   "slice-05.json": {
+    "valid_json_array": true,
+    "items": 30,
+    "items_used": 30
+   },
+   "slice-06.json": {
+    "valid_json_array": true,
+    "items": 30,
+    "items_used": 30
+   },
+   "slice-07.json": {
+    "valid_json_array": true,
+    "items": 30,
+    "items_used": 30
+   },
+   "slice-08.json": {
+    "valid_json_array": true,
+    "items": 30,
+    "items_used": 30
+   }
+  },
+  "invalid_files": 0,
+  "items_with_unknown_audit_id": 0,
+  "duplicate_items": 0
+ },
+ "verdicts": {
+  "total": 1153,
+  "discarded": 0,
+  "discarded_quote_not_in_note": 0,
+  "discarded_quote_missing": 0,
+  "discarded_invalid_verdict": 0,
+  "discarded_bad_index": 0
+ },
+ "by_status": {
+  "accepted": {
+   "notes_in_sample": 160,
+   "notes_scored": 160,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 2,
+    "denominator": 160,
+    "share": 0.0125,
+    "wilson95": [
+     0.0034,
+     0.0444
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 1,
+    "denominator": 160,
+    "share": 0.0063,
+    "wilson95": [
+     0.0011,
+     0.0345
+    ]
+   },
+   "clean": {
+    "numerator": 157,
+    "denominator": 160,
+    "share": 0.9812,
+    "wilson95": [
+     0.9463,
+     0.9936
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 4,
+    "denominator": 160,
+    "share": 0.025,
+    "wilson95": [
+     0.0098,
+     0.0625
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 6,
+    "denominator": 160,
+    "share": 0.0375,
+    "wilson95": [
+     0.0173,
+     0.0794
+    ]
+   },
+   "clean_strict": {
+    "numerator": 153,
+    "denominator": 160,
+    "share": 0.9563,
+    "wilson95": [
+     0.9125,
+     0.9786
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 2,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 1
+   }
+  },
+  "rejected": {
+   "notes_in_sample": 80,
+   "notes_scored": 80,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 2,
+    "denominator": 80,
+    "share": 0.025,
+    "wilson95": [
+     0.0069,
+     0.0866
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 5,
+    "denominator": 80,
+    "share": 0.0625,
+    "wilson95": [
+     0.027,
+     0.1381
+    ]
+   },
+   "clean": {
+    "numerator": 73,
+    "denominator": 80,
+    "share": 0.9125,
+    "wilson95": [
+     0.8302,
+     0.957
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 6,
+    "denominator": 80,
+    "share": 0.075,
+    "wilson95": [
+     0.0348,
+     0.1541
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 8,
+    "denominator": 80,
+    "share": 0.1,
+    "wilson95": [
+     0.0515,
+     0.1851
+    ]
+   },
+   "clean_strict": {
+    "numerator": 68,
+    "denominator": 80,
+    "share": 0.85,
+    "wilson95": [
+     0.7559,
+     0.9121
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 2,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 5
+   }
+  }
+ },
+ "by_readback": {
+  "consistent": {
+   "notes_in_sample": 216,
+   "notes_scored": 216,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 4,
+    "denominator": 216,
+    "share": 0.0185,
+    "wilson95": [
+     0.0072,
+     0.0466
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 5,
+    "denominator": 216,
+    "share": 0.0231,
+    "wilson95": [
+     0.0099,
+     0.053
+    ]
+   },
+   "clean": {
+    "numerator": 207,
+    "denominator": 216,
+    "share": 0.9583,
+    "wilson95": [
+     0.9227,
+     0.9779
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 4,
+    "denominator": 216,
+    "share": 0.0185,
+    "wilson95": [
+     0.0072,
+     0.0466
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 8,
+    "denominator": 216,
+    "share": 0.037,
+    "wilson95": [
+     0.0189,
+     0.0714
+    ]
+   },
+   "clean_strict": {
+    "numerator": 203,
+    "denominator": 216,
+    "share": 0.9398,
+    "wilson95": [
+     0.8998,
+     0.9645
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 4,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 5
+   }
+  },
+  "inconsistent": {
+   "notes_in_sample": 24,
+   "notes_scored": 24,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 0,
+    "denominator": 24,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.138
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 1,
+    "denominator": 24,
+    "share": 0.0417,
+    "wilson95": [
+     0.0074,
+     0.2024
+    ]
+   },
+   "clean": {
+    "numerator": 23,
+    "denominator": 24,
+    "share": 0.9583,
+    "wilson95": [
+     0.7976,
+     0.9926
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 6,
+    "denominator": 24,
+    "share": 0.25,
+    "wilson95": [
+     0.12,
+     0.449
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 6,
+    "denominator": 24,
+    "share": 0.25,
+    "wilson95": [
+     0.12,
+     0.449
+    ]
+   },
+   "clean_strict": {
+    "numerator": 18,
+    "denominator": 24,
+    "share": 0.75,
+    "wilson95": [
+     0.551,
+     0.88
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 0,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 1
+   }
+  }
+ },
+ "by_status_and_readback": {
+  "accepted/consistent": {
+   "notes_in_sample": 149,
+   "notes_scored": 149,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 2,
+    "denominator": 149,
+    "share": 0.0134,
+    "wilson95": [
+     0.0037,
+     0.0476
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 1,
+    "denominator": 149,
+    "share": 0.0067,
+    "wilson95": [
+     0.0012,
+     0.037
+    ]
+   },
+   "clean": {
+    "numerator": 146,
+    "denominator": 149,
+    "share": 0.9799,
+    "wilson95": [
+     0.9425,
+     0.9931
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 3,
+    "denominator": 149,
+    "share": 0.0201,
+    "wilson95": [
+     0.0069,
+     0.0575
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 5,
+    "denominator": 149,
+    "share": 0.0336,
+    "wilson95": [
+     0.0144,
+     0.0761
+    ]
+   },
+   "clean_strict": {
+    "numerator": 143,
+    "denominator": 149,
+    "share": 0.9597,
+    "wilson95": [
+     0.9149,
+     0.9814
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 2,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 1
+   }
+  },
+  "accepted/inconsistent": {
+   "notes_in_sample": 11,
+   "notes_scored": 11,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 0,
+    "denominator": 11,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.2588
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 0,
+    "denominator": 11,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.2588
+    ]
+   },
+   "clean": {
+    "numerator": 11,
+    "denominator": 11,
+    "share": 1.0,
+    "wilson95": [
+     0.7412,
+     1.0
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 1,
+    "denominator": 11,
+    "share": 0.0909,
+    "wilson95": [
+     0.0162,
+     0.3774
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 1,
+    "denominator": 11,
+    "share": 0.0909,
+    "wilson95": [
+     0.0162,
+     0.3774
+    ]
+   },
+   "clean_strict": {
+    "numerator": 10,
+    "denominator": 11,
+    "share": 0.9091,
+    "wilson95": [
+     0.6226,
+     0.9838
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 0,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 0
+   }
+  },
+  "rejected/consistent": {
+   "notes_in_sample": 67,
+   "notes_scored": 67,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 2,
+    "denominator": 67,
+    "share": 0.0299,
+    "wilson95": [
+     0.0082,
+     0.1025
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 4,
+    "denominator": 67,
+    "share": 0.0597,
+    "wilson95": [
+     0.0235,
+     0.1437
+    ]
+   },
+   "clean": {
+    "numerator": 61,
+    "denominator": 67,
+    "share": 0.9104,
+    "wilson95": [
+     0.8181,
+     0.9583
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 1,
+    "denominator": 67,
+    "share": 0.0149,
+    "wilson95": [
+     0.0026,
+     0.0798
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 3,
+    "denominator": 67,
+    "share": 0.0448,
+    "wilson95": [
+     0.0153,
+     0.1236
+    ]
+   },
+   "clean_strict": {
+    "numerator": 60,
+    "denominator": 67,
+    "share": 0.8955,
+    "wilson95": [
+     0.7997,
+     0.9485
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 2,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 4
+   }
+  },
+  "rejected/inconsistent": {
+   "notes_in_sample": 13,
+   "notes_scored": 13,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 0,
+    "denominator": 13,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.2281
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 1,
+    "denominator": 13,
+    "share": 0.0769,
+    "wilson95": [
+     0.0137,
+     0.3331
+    ]
+   },
+   "clean": {
+    "numerator": 12,
+    "denominator": 13,
+    "share": 0.9231,
+    "wilson95": [
+     0.6669,
+     0.9863
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 5,
+    "denominator": 13,
+    "share": 0.3846,
+    "wilson95": [
+     0.1771,
+     0.6448
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 5,
+    "denominator": 13,
+    "share": 0.3846,
+    "wilson95": [
+     0.1771,
+     0.6448
+    ]
+   },
+   "clean_strict": {
+    "numerator": 8,
+    "denominator": 13,
+    "share": 0.6154,
+    "wilson95": [
+     0.3552,
+     0.8229
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 0,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 1
+   }
+  }
+ },
+ "by_status_and_curriculum": {
+  "accepted/careful": {
+   "notes_in_sample": 36,
+   "notes_scored": 36,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 0,
+    "denominator": 36,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.0964
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 0,
+    "denominator": 36,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.0964
+    ]
+   },
+   "clean": {
+    "numerator": 36,
+    "denominator": 36,
+    "share": 1.0,
+    "wilson95": [
+     0.9036,
+     1.0
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 0,
+    "denominator": 36,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.0964
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 0,
+    "denominator": 36,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.0964
+    ]
+   },
+   "clean_strict": {
+    "numerator": 36,
+    "denominator": 36,
+    "share": 1.0,
+    "wilson95": [
+     0.9036,
+     1.0
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 0,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 0
+   }
+  },
+  "accepted/hard_standard": {
+   "notes_in_sample": 47,
+   "notes_scored": 47,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 0,
+    "denominator": 47,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.0756
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 1,
+    "denominator": 47,
+    "share": 0.0213,
+    "wilson95": [
+     0.0038,
+     0.1111
+    ]
+   },
+   "clean": {
+    "numerator": 46,
+    "denominator": 47,
+    "share": 0.9787,
+    "wilson95": [
+     0.8889,
+     0.9962
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 1,
+    "denominator": 47,
+    "share": 0.0213,
+    "wilson95": [
+     0.0038,
+     0.1111
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 1,
+    "denominator": 47,
+    "share": 0.0213,
+    "wilson95": [
+     0.0038,
+     0.1111
+    ]
+   },
+   "clean_strict": {
+    "numerator": 45,
+    "denominator": 47,
+    "share": 0.9574,
+    "wilson95": [
+     0.8575,
+     0.9883
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 0,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 1
+   }
+  },
+  "accepted/long_multi_visit": {
+   "notes_in_sample": 25,
+   "notes_scored": 25,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 2,
+    "denominator": 25,
+    "share": 0.08,
+    "wilson95": [
+     0.0222,
+     0.2497
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 0,
+    "denominator": 25,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.1332
+    ]
+   },
+   "clean": {
+    "numerator": 23,
+    "denominator": 25,
+    "share": 0.92,
+    "wilson95": [
+     0.7503,
+     0.9778
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 0,
+    "denominator": 25,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.1332
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 2,
+    "denominator": 25,
+    "share": 0.08,
+    "wilson95": [
+     0.0222,
+     0.2497
+    ]
+   },
+   "clean_strict": {
+    "numerator": 23,
+    "denominator": 25,
+    "share": 0.92,
+    "wilson95": [
+     0.7503,
+     0.9778
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 2,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 0
+   }
+  },
+  "accepted/no_event": {
+   "notes_in_sample": 24,
+   "notes_scored": 24,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 0,
+    "denominator": 24,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.138
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 0,
+    "denominator": 24,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.138
+    ]
+   },
+   "clean": {
+    "numerator": 24,
+    "denominator": 24,
+    "share": 1.0,
+    "wilson95": [
+     0.862,
+     1.0
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 0,
+    "denominator": 24,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.138
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 0,
+    "denominator": 24,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.138
+    ]
+   },
+   "clean_strict": {
+    "numerator": 24,
+    "denominator": 24,
+    "share": 1.0,
+    "wilson95": [
+     0.862,
+     1.0
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 0,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 0
+   }
+  },
+  "accepted/terse": {
+   "notes_in_sample": 28,
+   "notes_scored": 28,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 0,
+    "denominator": 28,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.1206
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 0,
+    "denominator": 28,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.1206
+    ]
+   },
+   "clean": {
+    "numerator": 28,
+    "denominator": 28,
+    "share": 1.0,
+    "wilson95": [
+     0.8794,
+     1.0
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 3,
+    "denominator": 28,
+    "share": 0.1071,
+    "wilson95": [
+     0.0371,
+     0.272
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 3,
+    "denominator": 28,
+    "share": 0.1071,
+    "wilson95": [
+     0.0371,
+     0.272
+    ]
+   },
+   "clean_strict": {
+    "numerator": 25,
+    "denominator": 28,
+    "share": 0.8929,
+    "wilson95": [
+     0.728,
+     0.9629
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 0,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 0
+   }
+  },
+  "rejected/careful": {
+   "notes_in_sample": 17,
+   "notes_scored": 17,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 0,
+    "denominator": 17,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.1843
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 0,
+    "denominator": 17,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.1843
+    ]
+   },
+   "clean": {
+    "numerator": 17,
+    "denominator": 17,
+    "share": 1.0,
+    "wilson95": [
+     0.8157,
+     1.0
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 3,
+    "denominator": 17,
+    "share": 0.1765,
+    "wilson95": [
+     0.0619,
+     0.4103
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 3,
+    "denominator": 17,
+    "share": 0.1765,
+    "wilson95": [
+     0.0619,
+     0.4103
+    ]
+   },
+   "clean_strict": {
+    "numerator": 14,
+    "denominator": 17,
+    "share": 0.8235,
+    "wilson95": [
+     0.5897,
+     0.9381
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 0,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 0
+   }
+  },
+  "rejected/hard_standard": {
+   "notes_in_sample": 11,
+   "notes_scored": 11,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 0,
+    "denominator": 11,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.2588
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 1,
+    "denominator": 11,
+    "share": 0.0909,
+    "wilson95": [
+     0.0162,
+     0.3774
+    ]
+   },
+   "clean": {
+    "numerator": 10,
+    "denominator": 11,
+    "share": 0.9091,
+    "wilson95": [
+     0.6226,
+     0.9838
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 3,
+    "denominator": 11,
+    "share": 0.2727,
+    "wilson95": [
+     0.0975,
+     0.5656
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 3,
+    "denominator": 11,
+    "share": 0.2727,
+    "wilson95": [
+     0.0975,
+     0.5656
+    ]
+   },
+   "clean_strict": {
+    "numerator": 8,
+    "denominator": 11,
+    "share": 0.7273,
+    "wilson95": [
+     0.4344,
+     0.9025
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 0,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 1
+   }
+  },
+  "rejected/long_multi_visit": {
+   "notes_in_sample": 34,
+   "notes_scored": 34,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 1,
+    "denominator": 34,
+    "share": 0.0294,
+    "wilson95": [
+     0.0052,
+     0.1492
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 2,
+    "denominator": 34,
+    "share": 0.0588,
+    "wilson95": [
+     0.0163,
+     0.1909
+    ]
+   },
+   "clean": {
+    "numerator": 31,
+    "denominator": 34,
+    "share": 0.9118,
+    "wilson95": [
+     0.7704,
+     0.9695
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 0,
+    "denominator": 34,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.1015
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 1,
+    "denominator": 34,
+    "share": 0.0294,
+    "wilson95": [
+     0.0052,
+     0.1492
+    ]
+   },
+   "clean_strict": {
+    "numerator": 31,
+    "denominator": 34,
+    "share": 0.9118,
+    "wilson95": [
+     0.7704,
+     0.9695
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 1,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 2
+   }
+  },
+  "rejected/no_event": {
+   "notes_in_sample": 2,
+   "notes_scored": 2,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 0,
+    "denominator": 2,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.6576
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 0,
+    "denominator": 2,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.6576
+    ]
+   },
+   "clean": {
+    "numerator": 2,
+    "denominator": 2,
+    "share": 1.0,
+    "wilson95": [
+     0.3424,
+     1.0
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 0,
+    "denominator": 2,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.6576
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 0,
+    "denominator": 2,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.6576
+    ]
+   },
+   "clean_strict": {
+    "numerator": 2,
+    "denominator": 2,
+    "share": 1.0,
+    "wilson95": [
+     0.3424,
+     1.0
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 0,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 0
+   }
+  },
+  "rejected/terse": {
+   "notes_in_sample": 16,
+   "notes_scored": 16,
+   "notes_not_scored": 0,
+   "wrong_label": {
+    "numerator": 1,
+    "denominator": 16,
+    "share": 0.0625,
+    "wilson95": [
+     0.0111,
+     0.2833
+    ]
+   },
+   "ambiguity_only": {
+    "numerator": 2,
+    "denominator": 16,
+    "share": 0.125,
+    "wilson95": [
+     0.035,
+     0.3602
+    ]
+   },
+   "clean": {
+    "numerator": 13,
+    "denominator": 16,
+    "share": 0.8125,
+    "wilson95": [
+     0.5699,
+     0.9341
+    ]
+   },
+   "route_not_ok": {
+    "numerator": 0,
+    "denominator": 16,
+    "share": 0.0,
+    "wilson95": [
+     0.0,
+     0.1936
+    ]
+   },
+   "wrong_label_or_route_not_ok": {
+    "numerator": 1,
+    "denominator": 16,
+    "share": 0.0625,
+    "wilson95": [
+     0.0111,
+     0.2833
+    ]
+   },
+   "clean_strict": {
+    "numerator": 13,
+    "denominator": 16,
+    "share": 0.8125,
+    "wilson95": [
+     0.5699,
+     0.9341
+    ]
+   },
+   "notes_with_at_least_one": {
+    "wrong_date": 0,
+    "wrong_type": 1,
+    "not_stated": 0,
+    "unlisted_event": 0,
+    "ambiguous": 2
+   }
+  }
+ },
+ "pooled_unweighted": {
+  "notes_in_sample": 240,
+  "notes_scored": 240,
+  "notes_not_scored": 0,
+  "wrong_label": {
+   "numerator": 4,
+   "denominator": 240,
+   "share": 0.0167,
+   "wilson95": [
+    0.0065,
+    0.0421
+   ]
+  },
+  "ambiguity_only": {
+   "numerator": 6,
+   "denominator": 240,
+   "share": 0.025,
+   "wilson95": [
+    0.0115,
+    0.0535
+   ]
+  },
+  "clean": {
+   "numerator": 230,
+   "denominator": 240,
+   "share": 0.9583,
+   "wilson95": [
+    0.925,
+    0.9772
+   ]
+  },
+  "route_not_ok": {
+   "numerator": 10,
+   "denominator": 240,
+   "share": 0.0417,
+   "wilson95": [
+    0.0228,
+    0.075
+   ]
+  },
+  "wrong_label_or_route_not_ok": {
+   "numerator": 14,
+   "denominator": 240,
+   "share": 0.0583,
+   "wilson95": [
+    0.0351,
+    0.0955
+   ]
+  },
+  "clean_strict": {
+   "numerator": 221,
+   "denominator": 240,
+   "share": 0.9208,
+   "wilson95": [
+    0.8797,
+    0.9487
+   ]
+  },
+  "notes_with_at_least_one": {
+   "wrong_date": 0,
+   "wrong_type": 4,
+   "not_stated": 0,
+   "unlisted_event": 0,
+   "ambiguous": 6
+  }
+ },
+ "sampling": {
+  "note": "the two statuses were sampled at very different rates, so pooled_unweighted is NOT a rate for the round-2 dataset; quote by_status",
+  "accepted": {
+   "sampled": 160,
+   "available": 1506
+  },
+  "rejected": {
+   "sampled": 80,
+   "available": 83
+  }
+ },
+ "auditor_note": "the auditors were language-model readers (Claude Haiku) who saw the claimed labels, not humans"
+}

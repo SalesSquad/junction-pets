@@ -1,0 +1,74 @@
+{
+ "id": "c12a16bd0f87dc4f4d43ae4e4eb079eba97548c56898bcb93bdcc5c674e49fbb",
+ "curriculum": "careful",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Loppulausunnon ote: potilas on tullut syöpäpolulle yksityisen terveydenhuollon kautta. Lähettävä lääkäri lähetti lähetteen erikoissairaanhoitoon 120 päivää sitten. Lähete saapui erikoissairaanhoitoon ja kirjattiin saapuneeksi 116 päivää sitten. Tuleva kontrolliaika on 10. huhtikuuta 2025. Potilaan syntymäaika on 15.10.1960. Potilas voi tällä hetkellä hyvin, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Ohjeistuksesta on selvinnyt ja potilas on motivoitunut hoitosuunnitelman noudattamisessa.\n\nWord count: 84. I need to add a bit more neutral undated content to reach 85-120.\n\nLet me recount:\n1. Loppulausunnon\n2. ote:\n3. potilas\n4. on\n5. tullut\n6. syöpäpolulle\n7. yksityisen\n8. terveydenhuollon\n9. kautta.\n10. Lähettävä\n11. lääkäri\n12. lähetti\n13. lähetteen\n14. erikoissairaanhoitoon\n15. 120\n16. päivää\n17. sitten.\n18. Lähete\n19. saapui\n20. erikoissairaanhoitoon\n21. ja\n22. kirjattiin\n23. saapuneeksi\n24. 116\n25. päivää\n26. sitten.\n27. Tuleva\n28. kontrolliaika\n29. on\n30. 10.\n31. huhtikuuta\n32. 2025.\n33. Potilaan\n34. syntymäaika\n35. on\n36. 15.10.1960.\n37. Potilas\n38. voi\n39. tällä\n40. hetkellä\n41. hyvin,\n42. toimintakyky\n43. on\n44. säilynyt\n45. ja\n46. kotona\n47. pärjääminen\n48. sujuu.\n49. Ohjeistuksesta\n50. on\n51. selvinnyt\n52. ja\n53. potilas\n54. on\n55. motivoitunut\n56. hoitosuunnitelman\n57. noudattamisessa.\n\nThat's 57 words. I need 85-120. Let me add more neutral content.\n\nLet me write a longer",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "undeclared_date:31. huhtikuuta",
+     "undeclared_date:2025",
+     "words:207 outside 60-140"
+    ],
+    "words": 207,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 959,
+      "total_tokens": 1609,
+      "completion_tokens": 650,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 2.16
+    }
+   ],
+   "repair_request": [
+    "'31. huhtikuuta' looks like a date or time reference that is not in the specification. Remove it (no other date, year, month, relative time or digit).",
+    "'2025' looks like a date or time reference that is not in the specification. Remove it (no other date, year, month, relative time or digit).",
+    "The note has 207 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Loppulausunnon ote: potilas on tullut syöpäpolulle yksityisen terveydenhuollon kautta. Lähettävä lääkäri lähetti lähetteen erikoissairaanhoitoon 120 päivää sitten. Lähete saapui erikoissairaanhoitoon ja kirjattiin saapuneeksi 116 päivää sitten. Tuleva kontrolliaika on 10. huhtikuuta 2025. Potilaan syntymäaika on 15.10.1960. Potilas voi tällä hetkellä hyvin, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Ohjeistuksesta on selvinnyt ja potilas on motivoitunut hoitosuunnitelman noudattamisessa.\n\nWord count check:\n1. Loppulausunnon\n2. ote:\n3. potilas\n4. on\n5. tullut\n6. syöpäpolulle\n7. yksityisen\n8. terveydenhuollon\n9. kautta.\n10. Lähettävä\n11. lääkäri\n12. lähetti\n13. lähetteen\n14. erikoissairaanhoitoon\n15. 120\n16. päivää\n17. sitten.\n18. Lähete\n19. saapui\n20. erikoissairaanhoitoon\n21. ja\n22. kirjattiin\n23. saapuneeksi\n24. 116\n25. päivää\n26. sitten.\n27. Tuleva\n28. kontrolliaika\n29. on\n30. 10.\n31. huhtikuuta\n32. 2025.\n33. Potilaan\n34. syntymäaika\n35. on\n36. 15.10.1960.\n37. Potilas\n38. voi\n39. tällä\n40. hetkellä\n41. hyvin,\n42. toimintakyky\n43. on\n44. säilynyt\n45. ja\n46. kotona\n47. pärjääminen\n48. sujuu.\n49. Ohjeistuksesta\n50. on\n51. selvinnyt\n52. ja\n53. potilas\n54. on\n55. motivoitunut\n56. hoitosuunnitelman\n57. noudattamisessa.\n\nThat's 57 words. I need 85-120. Let me add more neutral undated content.\n\nLet me write a longer version with more neutral content about how the patient feels, functional ability, coping at home, general counselling.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "undeclared_date:31. huhtikuuta",
+     "undeclared_date:2025",
+     "words:209 outside 60-140"
+    ],
+    "words": 209,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1766,
+      "total_tokens": 2412,
+      "completion_tokens": 646,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 2.04
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:53+00:00"
+}
