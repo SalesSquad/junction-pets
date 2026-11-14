@@ -34,12 +34,23 @@ def read_manifest(data_root:Path):
     record=json.loads(raw)
     if (record.get("schema")!="chibi.lens.hb.domain-detector-data.v1" or
         record.get("source")!="PUBLIC_BOP_HOMEBREWEDDB_CC0" or
+        record.get("sourceUrl") !=
+          "https://huggingface.co/datasets/bop-benchmark/hb/resolve/main/hb_val_primesense.zip" or
+        record.get("sourceArchivePointerSHA256") !=
+          "8dd87de6eed1067063081bd4aed3d32a9f0bb6e00887bde78b941eaefc6fec0f" or
+        record.get("sourceArchiveSizeBytes") != 2354714266 or
+        record.get("officialLicense") != "CC0-1.0" or
+        record.get("sourceFrameCounts") !=
+          {"train":80,"calibration":30,"sealed":30} or
         record.get("sceneSplits")!=EXPECTED_SPLITS or
         record.get("sealedSceneGTRead") is not False or
+        record.get("gtOnlyTrainAndCalibration") is not True or
+        record.get("knownInstanceClassesNotUsedForDetector") is not True or
+        record.get("allVisibleObjectsSingleObjectnessClass") is not True or
         record.get("rawImagesLocalOnly") is not True or
         record.get("familyMediaUsed") is not False or
         record.get("privateOCRUsed") is not False):
-        raise ValueError("Public source/scene partition or consent boundary failed")
+        raise ValueError("Public archive/license/scene partition or consent boundary failed")
     rows=record["samples"]
     if len(rows)!=140 or len({r["file"] for r in rows})!=140:
         raise ValueError("Source frame count or uniqueness violated")

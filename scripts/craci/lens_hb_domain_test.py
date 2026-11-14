@@ -34,8 +34,16 @@ def fake_manifest(root):
     manifest={
       "schema":"chibi.lens.hb.domain-detector-data.v1",
       "source":"PUBLIC_BOP_HOMEBREWEDDB_CC0",
+      "sourceUrl":"https://huggingface.co/datasets/bop-benchmark/hb/resolve/main/hb_val_primesense.zip",
+      "sourceArchivePointerSHA256":"8dd87de6eed1067063081bd4aed3d32a9f0bb6e00887bde78b941eaefc6fec0f",
+      "sourceArchiveSizeBytes":2354714266,
+      "officialLicense":"CC0-1.0",
+      "sourceFrameCounts":{"train":80,"calibration":30,"sealed":30},
       "sceneSplits":{"train":[5,9],"calibration":[10],"sealed":[12]},
       "sealedSceneGTRead":False,
+      "gtOnlyTrainAndCalibration":True,
+      "knownInstanceClassesNotUsedForDetector":True,
+      "allVisibleObjectsSingleObjectnessClass":True,
       "rawImagesLocalOnly":True,
       "familyMediaUsed":False,"privateOCRUsed":False,
       "samples":rows,
@@ -91,6 +99,24 @@ class Provenance(unittest.TestCase):
             with patch.object(trainer,"file_sha256",return_value="0"*64):
                 with self.assertRaisesRegex(ValueError,"Source-frame digest"):
                     trainer.read_manifest(root)
+
+    def test_unreviewed_public_archive_identity_is_rejected(self):
+        for field,value in (
+            ("sourceUrl","https://example.com/hb_val_primesense.zip"),
+            ("sourceArchivePointerSHA256","0"*64),
+            ("sourceArchiveSizeBytes",999),
+            ("officialLicense","unknown"),
+            ("gtOnlyTrainAndCalibration",False),
+        ):
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as scratch:
+                    root=Path(scratch)
+                    data=fake_manifest(root)
+                    data[field]=value
+                    (root/"manifest.json").write_text(json.dumps(data))
+                    with patch.object(trainer,"file_sha256",return_value="0"*64):
+                        with self.assertRaisesRegex(ValueError,"Public archive"):
+                            trainer.read_manifest(root)
 
     def test_model_evaluation_is_real_one_to_one_box_matching(self):
         row={"scene":5,"frame":0,
