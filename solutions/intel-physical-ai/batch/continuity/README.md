@@ -53,3 +53,23 @@ targeted tests PASS**, live local software demo PASS, 18 fixed synthetic
 comparisons **144 → 0** cross-batch software bowl outputs. This is **not**
 physical safety validation. The host must still provide trusted durable CAS,
 identity, operator proof, hardware E-stop and calibrated real sensors.
+
+
+### Final reviewer follow-up: accessor validation
+
+The read-only follow-up on `19b7177797938b72bd7667ed25f1842e55a96ba4`
+confirmed the original P1 async-latch bypass and P2 sparse-array bypass fixed,
+then reproduced another P2: an enumerable getter returning different values
+across validation and `JSON.stringify` could store `NaN` as `null`.
+The final implementation now **materializes only own enumerable data
+property descriptors once** into a detached JSON value, rejecting accessors,
+sparse arrays, nonfinite values, exotic prototypes and excessive input size.
+The new getter-negative regression passed without invoking the getter. An
+in-process malicious Proxy and forged provider callback cannot be made secure
+without a trusted host boundary; these remain unsupported, not production
+qualifications.
+
+**Final affected-path evidence:** 16/16 targeted Node tests, local synthetic
+demo and 18-case M4→M5 cohort passed after this correction; fake same-batch
+and across-batch outputs are not real physical sorting outcomes. External
+durable CAS and actual hardware stop remain mandatory.

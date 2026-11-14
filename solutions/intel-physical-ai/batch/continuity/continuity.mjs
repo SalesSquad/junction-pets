@@ -10,35 +10,56 @@ const copy=x=>structuredClone(x);
 // Trust-boundary data must be dense, acyclic, plain JSON. In particular,
 // JSON.stringify/canonical must NEVER collapse [undefined] into [].
 function checkedJsonClone(input) {
+  // Materialize only data properties, exactly once, before any await. A getter
+  // may return one value to validation and a different value to JSON.stringify,
+  // so never serialize or reread caller-owned property values after checking.
   const visiting=new WeakSet();
-  const visit=(value,depth)=>{
-    if(depth>64)reject('NON_JSON_VALUE');
-    if(value===null||typeof value==='boolean'||typeof value==='string')return;
-    if(typeof value==='number'&&Number.isFinite(value))return;
+  let nodesLeft=100000,charsLeft=8*1024*1024;
+  const spend=n=>{
+    charsLeft-=n;
+    if(charsLeft<0)reject('NON_JSON_VALUE');
+  };
+  const normalize=(value,depth)=>{
+    if(--nodesLeft<0||depth>64)reject('NON_JSON_VALUE');
+    if(typeof value==='string'){spend(value.length);return value;}
+    if(value===null||typeof value==='boolean')return value;
+    if(typeof value==='number'&&Number.isFinite(value))return value;
     if(typeof value!=='object'||visiting.has(value))reject('NON_JSON_VALUE');
     visiting.add(value);
+    let result;
     if(Array.isArray(value)){
-      if(value.length>100000||Object.keys(value).length!==value.length)
+      const keys=Reflect.ownKeys(value);
+      if(value.length>100000||keys.length!==value.length+1)
         reject('NON_JSON_ARRAY');
+      result=[];
       for(let i=0;i<value.length;i++){
-        if(!Object.prototype.hasOwnProperty.call(value,i))reject('NON_JSON_ARRAY');
-        visit(value[i],depth+1);
+        const d=Object.getOwnPropertyDescriptor(value,String(i));
+        if(!d||!d.enumerable||!Object.hasOwn(d,'value'))
+          reject('NON_JSON_ARRAY');
+        result.push(normalize(d.value,depth+1));
       }
     }else{
       if(![Object.prototype,null].includes(Object.getPrototypeOf(value)))
         reject('NON_JSON_VALUE');
-      for(const key of Reflect.ownKeys(value)){
-        if(typeof key!=='string'||['__proto__','constructor','prototype'].includes(key)||
-           !Object.prototype.propertyIsEnumerable.call(value,key))
+      result={};
+      const keys=Reflect.ownKeys(value);
+      if(keys.length>2048)reject('NON_JSON_VALUE');
+      for(const key of keys){
+        if(typeof key!=='string'||['__proto__','constructor','prototype'].includes(key))
           reject('NON_JSON_VALUE');
-        visit(value[key],depth+1);
+        const d=Object.getOwnPropertyDescriptor(value,key);
+        if(!d||!d.enumerable||!Object.hasOwn(d,'value'))
+          reject('NON_JSON_VALUE');
+        spend(key.length);
+        result[key]=normalize(d.value,depth+1);
       }
     }
     visiting.delete(value);
+    return result;
   };
-  visit(input,0);
-  return JSON.parse(JSON.stringify(input));
+  return normalize(input,0);
 }
+
 const freeze=x=>{
   if(x&&typeof x==='object'){for(const v of Object.values(x))freeze(v);Object.freeze(x);}
   return x;

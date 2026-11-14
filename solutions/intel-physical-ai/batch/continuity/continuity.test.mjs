@@ -266,3 +266,34 @@ test('regression: sparse and non-JSON item IDs are rejected; holes cannot forge 
   delete badLedger.state.usedItemIds[0];
   await assert.rejects(()=>verifyLedger(badLedger));
 });
+
+test('regression: getter cannot mutate JSON data between validation and canonicalization',async()=>{
+  const state=await genesis();
+  const bad=run(state,'getter',healthy(60));
+  let reads=0;
+  Object.defineProperty(bad.batchRequest,'metadata',{
+    enumerable:true,configurable:true,
+    get(){reads++;return reads===1?0:NaN;}
+  });
+  const refused=await dispatch(state,bad,{authorize:permit});
+  assert.equal(refused.status,'DENIED');
+  assert.equal(refused.reason,'INVALID_REQUEST');
+  assert.equal(refused.state.root,state.root);
+  assert.equal(reads,0,'Accessor must not be invoked at the trust boundary');
+
+  const nonJsonSnapshot=structuredClone(state);
+  Object.defineProperty(nonJsonSnapshot,'unhashed',{
+    enumerable:true,configurable:true,
+    get(){return 0;}
+  });
+  await assert.rejects(()=>verifyLedger(nonJsonSnapshot),/NON_JSON_VALUE/);
+
+  const itemAccessor=run(state,'itemgetter',healthy(61));
+  let itemReads=0;
+  Object.defineProperty(itemAccessor.itemIds,'0',{
+    enumerable:true,configurable:true,
+    get(){itemReads++;return 'item-fraud';}
+  });
+  assert.equal((await dispatch(state,itemAccessor,{authorize:permit})).status,'DENIED');
+  assert.equal(itemReads,0);
+});
