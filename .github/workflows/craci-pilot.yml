@@ -34,6 +34,7 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - lens-r3-methods
         - lens-hb-vision
         - lens-hb-scene8-ood
+        - lens-hb-six-feedback
       lane_slice:
         description: R8 only; pilot first, then seven unique remaining arms
         type: choice
@@ -43,6 +44,18 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - pilot
         - remaining
         - selection-repair
+      learning_fold:
+        description: HB six-feedback all six distinct dev folds, or one specific failed fold
+        type: choice
+        default: all
+        options:
+        - all
+        - '0'
+        - '1'
+        - '2'
+        - '3'
+        - '4'
+        - '5'
       source_sha:
         description: Full product SHA; overrides historical baseline. Tieto uses sponsor_revision.
         type: string
@@ -2786,6 +2799,129 @@ jobs:
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
       with:
         name: craci-hb-scene8-ood-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+
+  lens-hb-six-feedback:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'lens-hb-six-feedback' }}
+    needs: plan
+    name: "HB public numeric six-stage feedback / dev fold ${{ matrix.fold }} / CPU 4"
+    runs-on: craci
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    permissions:
+      contents: read
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: lens-hb-six-feedback
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_FOLD: ${{ matrix.fold }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure bounded CRACI without private network or model API
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, ubuntu]
+    - name: Enforce original promotional credit deadline and explicit fold
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1260
+        test "$CRACI_SOURCE_SHA" = "$CRACI_HARNESS_SHA"
+        case "$CRACI_FOLD" in 0|1|2|3|4|5);; *) exit 2;; esac
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+    - name: Checkout immutable source-bound CRACI harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Checkout exact approved public train-cal numerical fixture
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Use pinned Node for source-bound execution and receipts
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install only Ubuntu R nnet/jsonlite; validate train-only experiment syntax
+      shell: bash
+      run: |
+        set -euo pipefail
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -s "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo DEBIAN_FRONTEND=noninteractive apt-get \
+          -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- \
+          install -qq -y --no-install-recommends r-base-core r-cran-nnet r-cran-jsonlite
+        Rscript -e 'stopifnot(requireNamespace("nnet"),requireNamespace("jsonlite"))'
+        Rscript -e 'invisible(parse(file=file.path(Sys.getenv("CRACI_HARNESS_ROOT"),"scripts/craci/lens_hb_six_feedback.R")));cat("HB_SIX_R_PARSE_OK\n")'
+        test "$(git -C "$CRACI_SOURCE_ROOT" rev-parse HEAD)" = "$CRACI_SOURCE_SHA"
+        test "$(git -C "$CRACI_HARNESS_ROOT" rev-parse HEAD)" = "$CRACI_HARNESS_SHA"
+    - name: Run six sequential adaptive model corrections on heldout dev frame folds
+      id: qualification
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash -euo pipefail -c '
+          src="$CRACI_SOURCE_ROOT/fixtures/lens-hb-six-dev-20261114"
+          output="$RUNNER_TEMP/hb-six-fold-$CRACI_FOLD"
+          test ! -e "$output"
+          Rscript "$CRACI_HARNESS_ROOT/scripts/craci/lens_hb_six_feedback.R" \
+            "$src/public-hb-train-cal-only.csv" \
+            "$src/admission.json" \
+            "$CRACI_FOLD" "$output" "$CRACI_SOURCE_SHA"
+          test -s "$output/training-report.json"
+          test -s "$output/trained-models.rds"
+          dest="$CRACI_RECEIPT_DIR/artifacts/hb-six"
+          mkdir -p "$dest"
+          cp "$output/training-report.json" "$dest/training-report.json"
+          (cd "$output" && python3 -m zipfile -c "$dest/model-evidence.zip" training-report.json trained-models.rds)
+          python3 -m zipfile -t "$dest/model-evidence.zip"
+          test -s "$dest/model-evidence.zip"
+        '
+    - id: receipt
+      name: Finalize exact-source and scientific-negative receipts
+      if: ${{ always() }}
+      shell: bash
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          mkdir -p "$CRACI_RECEIPT_DIR/upload"
+          printf '%s\n' '{"schemaVersion":1,"status":"incomplete","reason":"Pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+          printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+    - name: Archive only source-bound public model weights, reports and receipts
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-hb-six-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
         path: ${{ runner.temp }}/craci-evidence/upload/
         if-no-files-found: error
         retention-days: 7
