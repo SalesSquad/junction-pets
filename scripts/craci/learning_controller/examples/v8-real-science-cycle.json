@@ -22,6 +22,10 @@
     "optionTransitions": 29923,
     "allSevenActionMasksLegal": true,
     "publicObservations18D": true,
+    "scannedWorlds": 365,
+    "selectedNearWorlds": 128,
+    "selectedClearWorlds": 32,
+    "selectionFromPublicInitialObservation": true,
     "sourceReceiptState": "success-but-source-reported",
     "independentQualification": "TRAIN-only positive replay, no held-out certification"
   },
@@ -126,7 +130,8 @@
         513306
       ],
       "nearNovelGoalSeedsVsFrozen": [],
-      "newlyUnsafeWorldSeeds": []
+      "newlyUnsafeWorldSeeds": [],
+      "unsafeWithAllReadoutControlsSafeSeeds": []
     },
     "scienceVerdict": "NO_GO_LOST_FROZEN_GOALS",
     "modelPromotionAuthorized": false,
@@ -188,6 +193,13 @@
         "v10_candidate"
       ],
       "maxEpisodesIfWorldTargetsMet": 800,
+      "rawCapturePreflight": {
+        "summaryCaptureLimitBytes": 19922944,
+        "nextActualSummaryBytes": "unknown_until_generated",
+        "mustUseReviewedLosslessChunkingIfOverLimit": true,
+        "mustVerifyExactRawEpisodeCountAndTransitionTotalsAfterReassembly": true,
+        "noSilentTruncationOrLossyFiltering": true
+      },
       "mustPreserveExactWorldPairing": true,
       "prereqs": [
         "independent code review",
