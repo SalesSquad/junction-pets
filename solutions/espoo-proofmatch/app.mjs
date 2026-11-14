@@ -49,7 +49,25 @@ function renderDetail(match) {
     <form class="schedule" id="proposal-form"><fieldset><legend>Employer simulation · propose a conversation</legend><p class="small">15 minutes · fictional 15 Nov 2026 · UTC (Helsinki +2 hours). Pending and accepted proposals hold time in this tab only.</p>
     ${existing ? `<p class="notice">${existing.status.toUpperCase()} proposal already exists for this role and candidate. Use the separate party controls in the meeting notebook.</p><a href="#meetings-heading">Review proposal status and actions</a>` : slots.length ? `<label for="slot" class="slot-label">Shared available time</label><select id="slot" name="slot" required>${slots.map(s => `<option value="${escape(s.start)}">${escape(format(s))}</option>`).join('')}</select><button class="primary" type="submit">Simulate employer: Propose 15-minute meeting</button>` : '<p class="notice">No shared free time for this role. Try another conversation or cancel a held proposal. This does not remove the candidate.</p>'}
     <p id="form-error" role="alert" hidden></p><p class="small">SIMULATED: one demo person can act as either party. Proposing does not accept for the candidate or establish real consent. No invitation is sent.</p></fieldset></form>`;
-  $('#detail').querySelectorAll('.evidence-link').forEach(link => link.addEventListener('click', () => { const card = document.getElementById(link.hash.slice(1)); card.open = true; card.querySelector('summary').focus(); }));
+  $('#detail').querySelectorAll('.evidence-link').forEach(link => {
+    link.addEventListener('click', event => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey ||
+          event.shiftKey || event.altKey) return;
+      const card = document.getElementById(link.hash.slice(1));
+      const summary = card?.querySelector('summary');
+      if (!summary) return;
+
+      // Native fragment navigation would move focus away from the summary.
+      // Preserve the source URL while making the opened disclosure operable.
+      event.preventDefault();
+      card.open = true;
+      if (location.hash !== link.hash) {
+        history.pushState(history.state, '', link.hash);
+      }
+      summary.focus();
+      card.scrollIntoView({ block: 'nearest' });
+    });
+  });
   $('#proposal-form').addEventListener('submit', event => {
     event.preventDefault();
     try {
