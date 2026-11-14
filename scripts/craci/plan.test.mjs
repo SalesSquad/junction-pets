@@ -38,7 +38,7 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
     if (['product-browser', 'sbank-sponsor'].includes(workload)) input.source_sha = candidate;
     if (['portfolio-browser', 'new-products-browser'].includes(workload)) input.product = 'all';
     const plan = resolvePlan(input, context);
-    assert.ok(plan.jobCount >= 1 && plan.jobCount <= 12);
+    assert.ok(plan.jobCount >= 1 && plan.jobCount <= (workload === 'meta-r-hardshift-2x' ? 24 : 12));
     assert.ok(plan.maxParallel >= 1 && plan.maxParallel <= 8);
     assert.equal(new Set(plan.matrix.include.map(row => row.cell)).size, plan.matrix.include.length);
     for (const row of plan.matrix.include) assert.match(row.source_sha, /^[a-f0-9]{40}$/);
@@ -57,4 +57,38 @@ test('R training cohort maps to the exact physics source, never an implicit bran
     () => resolvePlan({workload: 'rokoko-r-tournament', source_sha: candidate}, context),
     /pinned simulator SHA/
   );
+});
+
+test('Meta trained model tournament gets eight distinct immutable cohorts', () => {
+  const meta = '634f1e0e6cb2de46bcf0a783532d46c23f513d11';
+  const matrix = resolvePlan({workload: 'meta-r-tournament', source_sha: meta}, context);
+  assert.equal(matrix.jobCount, 8);
+  assert.equal(matrix.maxParallel, 8);
+  assert.deepEqual(matrix.matrix.include.map(row => row.cohort), [0,1,2,3,4,5,6,7]);
+  assert.ok(matrix.matrix.include.every(row => row.source_sha === meta));
+  assert.throws(() => resolvePlan({workload: 'meta-r-tournament', source_sha: candidate}, context), /pinned Meta/);
+});
+
+test('shift-calibrated Meta R robustness study has twelve independent CPU cohorts', () => {
+  const meta = '634f1e0e6cb2de46bcf0a783532d46c23f513d11';
+  const robust = resolvePlan({workload: 'meta-r-robust', source_sha: meta}, context);
+  assert.equal(robust.jobCount, 12);
+  assert.equal(robust.maxParallel, 8);
+  assert.deepEqual(robust.matrix.include.map(row => row.cohort),
+                   Array.from({length:12},(_,i)=>i));
+  assert.equal(new Set(robust.matrix.include.map(row=>row.cell)).size,12);
+  assert.ok(robust.matrix.include.every(row=>row.source_sha===meta));
+  assert.throws(()=>resolvePlan({workload:'meta-r-robust',source_sha:candidate},context),
+                /pinned Meta/);
+});
+
+test('Meta hardshift doubles independent cohort volume with source pins and limited parallelism', () => {
+  const meta = '634f1e0e6cb2de46bcf0a783532d46c23f513d11';
+  const plan = resolvePlan({workload:'meta-r-hardshift-2x',source_sha:meta},context);
+  assert.equal(plan.jobCount,24);
+  assert.equal(plan.maxParallel,6);
+  assert.deepEqual(plan.matrix.include.map(row=>row.cohort),Array.from({length:24},(_,i)=>i));
+  assert.equal(new Set(plan.matrix.include.map(row=>row.cell)).size,24);
+  assert.ok(plan.matrix.include.every(row=>row.source_sha===meta));
+  assert.throws(()=>resolvePlan({workload:'meta-r-hardshift-2x',source_sha:candidate},context),/pinned Meta/);
 });
