@@ -2,6 +2,8 @@
 
 **Status:** Google-issued participant account received; **no API key creation, sign-in, quota probe or live agent credential provisioning is verified**. This page is a nonsecret access runbook, not a usable credential or provider grant.
 
+**Important separate identity:** the owner also has a **personal Google AI Studio** Gemini API key named `Junction-2026-Gemini-Agent-Mesh`; its tested use is routed through the MBP's Keychain and [SalesSquad/agents PR #120](https://github.com/SalesSquad/agents/pull/120) / `docs/gemini-junction.md`. That personal key **does not** verify a key, quota or login for the temporary `gcplab.me` event account below. Do not combine either provider's entitlements or distribute either credential.
+
 ## Organizer source and validity
 
 - On **14 Nov 2026, 01:54 EET**, Erno Kurki (`elv@google.com`) sent the owner's Junction mailbox a personal message titled **Google Junction Accounts**. The message provides an assigned **temporary Google identity and password**, **not an API key**. Keep the actual credentials only in the owner-authorized private channel or approved host secret store.
