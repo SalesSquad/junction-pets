@@ -112,3 +112,21 @@ Strict supported subset: UTF-8 Nginx combined, numeric IPv4/IPv6 clients, litera
 Policy `traffic-review-1`: fixed UTC five-minute windows; candidate requires both ≥10 authenticated-route 401/403 events from ≥3 aliases and ≥5 HTTP 429 responses. Volume (≥30 events / ≥3 aliases) is contextual, and ≥5 5xx is operational, neither escalates alone. Alias count is not people count. Two co-occurring response families are not statistically independent evidence of malicious intent. Shared proxies, load tests and ordinary mistakes can satisfy the rule; boundary splitting and evasion can miss activity. There is no bot/attack classification, automatic ban or identity verdict. Counts, denominators, exact IDs, UTC timestamps, provenance, rule version and analyst disposition are exported; original client identifiers are not.
 
 Real labels, field precision/FPR, live Hostinger deployment/provider integration and coupon activation remain **UNKNOWN / NOT VERIFIED**. No efficacy numbers are inferred from the authored examples. Existing M3 policy and OOD corpus are untouched. Next dependency: licensed labelled traffic with an agreed evaluation protocol, followed by separately authorized Hostinger deployment.
+
+### Rolling traffic replay (M5)
+
+The traffic view now shows deterministic rolling review episodes below the
+unchanged fixed UTC window comparator. The same thresholds apply: at least ten
+login-route 401/403 responses across at least three aliases, plus five HTTP 429
+responses. Replay evaluates `(end − five minutes, end]` at each distinct event
+timestamp, sorting once and maintaining a sliding window (O(n log n), max 5,000
+events). Overlapping positive intervals merge; episode start/end describe their
+union, which may last longer than five minutes. Evidence IDs include every
+sanitized event in that union, once, in timestamp/input-order tie order.
+
+`node traffic/cli.mjs traffic/synthetic.txt` prints the existing JSON report with
+an additive `rolling.episodes` field containing interval bounds, alias counts,
+evidence IDs and benign explanations. User imports remain
+`USER_SUPPLIED_UNVERIFIED_LOG`; replay is not tuned or qualified on real labels.
+Only human review is supported. Authorized load testing and shared reverse
+proxies remain plausible explanations. No raw IP is added to exports.
