@@ -48,7 +48,7 @@ export const WORKLOADS = Object.freeze([
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
   'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab',
-  'rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos',
+  'rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos',
 ]);
 
 function choose(value, choices, label) {
@@ -94,7 +94,7 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override) throw new Error('Tieto uses sponsor_revision pins; source_sha is unsupported for this workload');
     const revisions = revision === 'all' ? ['base', '2283', '2234', '2129', '2297'] : revision === 'heads' ? ['2283', '2234', '2129', '2297'] : [revision];
     for (const rev of revisions) add(`tieto-${rev}-${toolchain}`, SPONSOR_PINS[rev], {revision: rev, source_repository: 'te-industry-tech-office/junction26-messagepack-csharp'});
-  } else if (['rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos'].includes(workload)) {
+  } else if (['rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos'].includes(workload)) {
     // New portable product qualifications have no stale fallback pin; the caller
     // must provide the exact reviewed task commit before CRACI reserves capacity.
     if (!override) throw new Error(`${workload} requires an explicit source_sha`);

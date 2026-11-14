@@ -59,3 +59,17 @@ test('V8 prospective workload admits exactly one reviewed source and stops at cr
   assert.throws(() => resolvePlan({workload, source_sha: candidate}, {
     ...context, now: '2026-11-15T17:00:00Z'}), /deadline/);
 });
+
+test('V11 fresh real MuJoCo 800-episode workload requires one exact reviewed source', () => {
+  const workload = 'rokoko-mujoco-v11-prospective';
+  assert.ok(WORKLOADS.includes(workload));
+  assert.throws(() => resolvePlan({workload}, context), /requires an explicit source_sha/);
+  const admitted = resolvePlan({workload, source_sha: candidate}, context);
+  assert.equal(admitted.jobCount, 1);
+  assert.equal(admitted.maxParallel, 1);
+  assert.deepEqual(admitted.matrix.include.map(x => x.source_sha), [candidate]);
+  assert.deepEqual(admitted.matrix.include.map(x => x.qualification), ['product-source']);
+  assert.throws(() => resolvePlan({workload, source_sha: candidate}, {
+    ...context, now: '2026-11-15T17:00:00Z'
+  }), /deadline/);
+});
