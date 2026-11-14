@@ -43,6 +43,7 @@ TRAIN_LAST_SEED = 5_290_999         # Train-only namespace, never a holdout
 DEV_FIRST_SEED = 129_170           # Fresh, not v4 exposed dev129030..169
 DEV_LAST_SEED = 129_319            # Reserved for this single candidate cohort
 NEXT_TRAIN_SEED = 5_291_000        # Only future train, not validation/test
+V4_SOURCE_SHA = "5be248192d6eb09d54068d5509784644d763006f"
 MAX_OPTIONS = 60
 SHA = "0123456789abcdef"
 MAX_TRAIN_EPISODES = 64
@@ -78,8 +79,8 @@ def source_identity(require_git, expected_head):
         raise ValueError("TRACKED_SOURCE_OVERLAY_REFUSED")
     if subprocess.run(
         ["git", "-C", root, "merge-base", "--is-ancestor",
-         v4.V3_SHA, head], capture_output=True, timeout=15).returncode:
-        raise ValueError("IMMUTABLE_PHYSICS_ANCESTOR_MISSING")
+         V4_SOURCE_SHA, head], capture_output=True, timeout=15).returncode:
+        raise ValueError("IMMUTABLE_V4_SOURCE_ANCESTOR_MISSING")
     return head
 
 
