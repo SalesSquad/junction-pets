@@ -132,3 +132,122 @@ Future runs should be recorded from **actual immutable receipts**, with unknown
 fields left unknown rather than inventing a digest. For full scientific
 comparison, first freeze genuine independent samples and a policy before new
 runs, then emit comparable `model-evaluation` envelopes for both baselines.
+
+## Event-ready private inbox (EXPERIMENT-AUTO-20261114)
+
+`inbox.mjs` is a source-agnostic **one-shot importer**, not an automatic scheduler.
+Meta, Verda and Apple producers can publish the same envelope format after any
+job exit (including failed jobs). Nothing here installs a daemon, LaunchAgent,
+provider connection, GPU workload or new resource. Wire the one-shot invocation
+into an **existing authorized owner workflow** after its producer finishes; that
+workflow must handle the exit code and deliver sanitized registry changes through
+its existing writer/integrator. This code is **not auto-scheduled** and never
+pushes Git. Existing producers may continue using `cli.mjs record-run` directly.
+
+Use a private inbox owned by the executing UID with directory mode `0700`.
+Keep it and receipts **outside the checkout**. Pass explicitly approved canonical,
+symlink-free paths, including ancestors (`/private/tmp`, not macOS `/tmp`).
+`--receipts-root` is mandatory authority to read that private tree, never inferred
+from the envelope, environment or evidence URL. `--root` is also explicit: for
+normal use select this repository's `ops/experiments`. It must already exist.
+
+An envelope has exactly these fields (the run is the complete registry contract;
+replace the illustrative digests, source and timestamp with actual values):
+
+```json
+{
+  "schemaVersion": 1,
+  "run": {
+    "schemaVersion": 1,
+    "runId": "apple.check-20261114-001",
+    "projectId": "apple",
+    "taskId": "apple.typecheck",
+    "kind": "apple-check",
+    "capturedAt": "2026-11-14T12:00:00Z",
+    "status": "succeeded",
+    "source": {
+      "repository": "SalesSquad/junction-pets",
+      "commit": "6e0bfe058f9e8ba1779b641ffdaeb39a9366a332"
+    },
+    "evidence": {
+      "level": "local-receipt-unverified",
+      "ref": "ops/experiments/README.md",
+      "receiptSha256": "<actual SHA-256 of receipt bytes>"
+    },
+    "dataset": null,
+    "evaluation": null,
+    "artifact": null,
+    "metrics": [],
+    "limitations": ["Local receipt; no provider or device attestation"],
+    "policySha256": null
+  },
+  "receipt": {
+    "path": "apple.check-20261114-001.json",
+    "sha256": "<same actual SHA-256>",
+    "runId": "apple.check-20261114-001"
+  }
+}
+```
+
+The private receipt must be a UTF-8 JSON object with matching top-level `runId`,
+for example `{"runId":"apple.check-20261114-001","exitCode":0}`.
+It can contain a signed statement, but **no signature/provider verification is
+performed**: the entire original receipt's byte hash must match both declarations.
+A changed signed statement therefore fails; this is integrity, not authenticity.
+Do not put private local paths, raw data or secrets into the run's free-text
+fields or evidence reference: only the `run` object is persisted, unchanged.
+Schema validation cannot detect secrets hidden in otherwise legal strings.
+
+Producer hook pattern: construct a complete sanitized `run` from the actual job
+result, hash the finalized receipt bytes, then publish `{schemaVersion:1, run,
+receipt:{path,sha256,runId}}` privately. Use mode `0600`, a unique stable filename,
+and atomic same-directory publication (e.g. create an exclusive non-`.json`
+temporary file, close it, hard-link to a new `.json` name, then remove the temp).
+Do not overwrite an existing envelope or alter a receipt after publication.
+Never embed raw receipts/models/video/images into the envelope or copy them into
+Git. No emitter helper is needed to keep existing producer formats usable.
+
+```sh
+node services/experiment-registry/inbox.mjs \
+  --inbox /approved/canonical/private/inbox \
+  --receipts-root /approved/canonical/private/receipts \
+  --root /canonical/checkout/ops/experiments --limit 100 --dry-run
+# Same invocation without --dry-run persists only sanitized run metadata.
+node --test services/experiment-registry/inbox.test.mjs
+```
+
+Defaults: at most 100 `.json` envelopes per invocation (configurable 1–1000),
+lexical filename order; refuse the whole batch when more envelopes than --limit are present (prevents silent starvation), at most 10,000 total directory entries (larger inboxes
+fail closed), 256 KiB per envelope/registry prerequisite and 4 MiB per receipt.
+Original envelopes are **always retained**, even on failure. Replays are
+idempotent; existing conflicting run IDs fail. An owner workflow can archive
+already handled envelopes outside the active inbox to advance subsequent bounded
+batches; this importer never moves or deletes them. Files without `.json` are
+ignored. Directory enumeration is bounded and refuses excess rather than
+silently selecting an arbitrary subset.
+
+Output contains aggregate `created/existing/failed/validated` counts and indexed
+item results in scan order, without private filenames, paths, input strings or
+exception details. Dry runs check schema, hashes, prerequisites and existing
+conflicts without creating directories or records. Exit **1** means any failure
+or missing authority; exit **2** means a valid model run is `not-compared` (even
+if recorded or dry-run validated); exit **0** means non-model evidence ingestion
+only. No comparison is inferred or run here. Use the existing explicit compare
+CLI with baseline and preregistered policy separately. A missing/mismatched/future
+policy prevents `recordRun()` entirely. No ingestion result grants model,
+provider, release or effects approval.
+
+Security limits: JSON uses native `JSON.parse`: duplicate keys have last-key-wins
+semantics, including escaped key spellings; there is no duplicate-key detection.
+Producers must emit ordinary `JSON.stringify` objects without duplicate keys.
+Both envelope and receipt are byte-bounded before parsing; malformed UTF-8/JSON
+fails. Files must be regular, never symlinks, with every ancestor checked by
+`lstat`; opens use `O_NOFOLLOW`, and inode/device/mode/size/mtime/ctime are checked
+before and after reading and again before persistence. These checks detect
+observed changes, but portable Node path APIs do not supply an `openat` directory
+capability: **they cannot defeat a hostile same-UID writer swapping and restoring
+ancestor directories between checks**. Use an owner-controlled, quiescent private
+receipt tree and a single registry writer; this is not a sandbox against a
+malicious local owner. Hashes bind supplied bytes, not execution truth or trusted
+wall-clock time. Private receipt content is parsed only for identity and never
+written or printed by the importer.
