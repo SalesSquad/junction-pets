@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163f36">
+  <meta name="description" content="ProofMatch: a synthetic, offline recruitment-event demo that puts evidence before polished bios.">
+  <title>ProofMatch — Make room for real potential</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to matches</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="ProofMatch home"><span class="brand-mark" aria-hidden="true">p<span>m</span></span>ProofMatch<span class="edition">EVENT EDITION / 01</span></a>
+    <span class="badge">SYNTHETIC DEMO DATA</span>
+  </header>
+  <div class="shell">
+    <aside class="rail" aria-label="Demo overview">
+      <p class="eyebrow">THE MEETING BEFORE THE CV</p>
+      <h1>Less polish.<br>More possibility.</h1>
+      <p class="intro">Find a useful first conversation through what someone has done, and what you can explore together.</p>
+      <ol class="journey"><li><span>01</span> Choose the need</li><li><span>02</span> Follow the evidence</li><li><span>03</span> Draft an introduction</li></ol>
+      <div class="rail-note"><span class="small-symbol" aria-hidden="true">↗</span><p>A meeting suggestion.<br><strong>No automatic rejections.</strong></p></div>
+      <p class="small">Fictional people. Fictional employers. Self-provided evidence, never externally verified. No city data or partner endorsement.</p>
+      <p id="offline" class="small">Works without internet through the local Node server.</p>
+    </aside>
+    <main id="main" tabindex="-1">
+      <section class="role-section" aria-labelledby="role-heading">
+        <div class="section-top"><p class="eyebrow">01 / THE OPPORTUNITY</p><span class="small">15 NOV 2026 · DEMO EVENT</span></div>
+        <h2 id="role-heading">What do you need help with?</h2>
+        <label for="role" class="sr-only">Choose an employer role</label>
+        <select id="role"></select>
+        <p id="role-summary" class="muted"></p>
+        <div id="role-skills" class="chips" aria-label="Required skills and weights"></div>
+      </section>
+      <div class="section-top match-heading"><div><p class="eyebrow">02 / CONVERSATION SHORTLIST</p><h2>Potential, with a paper trail.</h2></div><span id="count" class="small"></span></div>
+      <p class="muted explanation">Scores describe supplied evidence for this role, not a person’s ability or hiring suitability. Unknown means “ask”, never “reject”.</p>
+      <div class="workspace">
+        <section aria-label="Ranked candidates"><div id="candidates" class="candidate-list"></div></section>
+        <section id="detail" class="detail" aria-label="Selected candidate evidence"></section>
+      </div>
+      <section class="baseline" aria-labelledby="baseline-heading">
+        <div class="section-top"><div><p class="eyebrow">THE SANITY CHECK</p><h2 id="baseline-heading">Would a shinier résumé win?</h2></div><span class="badge light">FIXED SYNTHETIC CASES</span></div>
+        <p class="muted">Devon’s deliberately polished bio repeats every keyword. Mira and Jules supply concrete, plain-language work samples. Compare both approaches against labels fixed in the fixture.</p>
+        <div id="baseline"></div>
+        <details><summary>How the score works, and where it falls short</summary><p>For each required skill, take the strongest eligible card: artifact 0.90, walkthrough 0.70, statement 0.20. A concrete non-empty outcome adds 0.10 (maximum 1.00). Cards older than 180 days receive ×0.80; future-dated cards are ignored. Multiply each skill’s support by its share of the role’s weights, sum, then round to one decimal out of 100. Ties sort by stable candidate ID. Bios, names, availability and personal characteristics do not affect this score.</p><p>Source form and outcomes are self-declared heuristics. They do not prove authenticity, originality, proficiency or who wrote the material. A fabricated artifact could fool this demo. No AI-text detection is performed. Lack of evidence may reflect unequal access to portfolios; keep an open conversation and offer another way to demonstrate skills.</p><p>The keyword baseline counts exact skill-ID tokens in the bio. This tiny, intentionally adversarial dataset is an explanation exercise, not an independent study or evidence of fair or effective hiring.</p></details>
+      </section>
+      <section id="drafts" class="drafts" aria-labelledby="drafts-heading"><p class="eyebrow">03 / YOUR LOCAL NOTEBOOK</p><div class="section-top"><h2 id="drafts-heading" tabindex="-1">Introduction drafts</h2><button id="reset" class="text-button" type="button">Reset demo</button></div><div id="draft-list"></div></section>
+      <footer>Built for a better first conversation. Inspired by <a href="https://hackjunction.app/participate/45/challenges/319" rel="noreferrer">Junction 2026 · Rethinking Recruitment</a>.<br>No external messages, accounts, analytics or APIs. Drafts stay in this tab’s memory and disappear on reload.</footer>
+    </main>
+  </div>
+  <p id="status" class="sr-only" role="status" aria-live="polite"></p>
+  <noscript><p class="noscript">Enable JavaScript to explore the matching demo. No internet connection is required when served locally.</p></noscript>
+</body>
+</html>
