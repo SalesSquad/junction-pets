@@ -46,6 +46,13 @@ def main() -> int:
         "results": [], "provenance_passed": False,
         "interpretation": "descriptive paired contrast only, no model promotion",
     }
+    # Fail early on module namespace/import or model digest problems using ONLY
+    # development seeds; frozen lockboxes are still unopened at this point.
+    subprocess.run(
+        [sys.executable, str(runner), "--v2-root", str(source), "--td-root", str(td),
+         "--split", "dev", "--episodes", "8", "--output", str(output / "prelock-dev.json")],
+        check=True, cwd=str(experiment), env={**os.environ, "PYTHONHASHSEED": "0"},
+    )
     for split, generator, first, count in SPLITS:
         destination = output / (split + ".json")
         try:
