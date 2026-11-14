@@ -1,0 +1,222 @@
+[
+  {
+    "schema": 1,
+    "version": "inspect-cell/1.0.0",
+    "evidence": "SYNTHETIC",
+    "actuation": false,
+    "inference": false,
+    "fixtureId": "clear-01",
+    "inputDigest": "e279bb5d875dc529d8116a6ca407d0b70e9148adfd6ad90f97ff92e0bf380a98",
+    "steps": [
+      {
+        "sequence": 1,
+        "version": "inspect-cell/1.0.0",
+        "producer": "offline-rule-gate/1",
+        "command": {
+          "id": "step-1",
+          "type": "gate",
+          "at": 100
+        },
+        "state": {
+          "phase": "gated",
+          "now": 100,
+          "candidate": "good",
+          "bowl": null,
+          "reason": "Conservative synthetic interval clears gate",
+          "reinspections": 0
+        },
+        "previous": "e279bb5d875dc529d8116a6ca407d0b70e9148adfd6ad90f97ff92e0bf380a98",
+        "hash": "9ca64be4376e11403b5f71958b792ce8c06f624ae46345676c31050bc58a652e"
+      },
+      {
+        "sequence": 2,
+        "version": "inspect-cell/1.0.0",
+        "producer": "offline-rule-gate/1",
+        "command": {
+          "id": "step-2",
+          "type": "route",
+          "at": 200
+        },
+        "state": {
+          "phase": "routed",
+          "now": 200,
+          "candidate": "good",
+          "bowl": "good",
+          "reason": "Non-actuating bowl simulation complete",
+          "reinspections": 0
+        },
+        "previous": "9ca64be4376e11403b5f71958b792ce8c06f624ae46345676c31050bc58a652e",
+        "hash": "f46a03bae1cefb92ea309cbe273b9a9b3bdda22f781f959f9d0cf2c83d337f1c"
+      }
+    ],
+    "final": {
+      "phase": "routed",
+      "now": 200,
+      "candidate": "good",
+      "bowl": "good",
+      "reason": "Non-actuating bowl simulation complete",
+      "reinspections": 0
+    },
+    "root": "f46a03bae1cefb92ea309cbe273b9a9b3bdda22f781f959f9d0cf2c83d337f1c"
+  },
+  {
+    "schema": 1,
+    "version": "inspect-cell/1.0.0",
+    "evidence": "SYNTHETIC",
+    "actuation": false,
+    "inference": false,
+    "fixtureId": "scratch-02",
+    "inputDigest": "f2b6ee60b87e11f7411e5edda6c3c8b651374c9d9f12c2cc96bd775c76fbce7b",
+    "steps": [
+      {
+        "sequence": 1,
+        "version": "inspect-cell/1.0.0",
+        "producer": "offline-rule-gate/1",
+        "command": {
+          "id": "step-1",
+          "type": "gate",
+          "at": 100
+        },
+        "state": {
+          "phase": "gated",
+          "now": 100,
+          "candidate": "defect",
+          "bowl": null,
+          "reason": "Conservative synthetic interval clears gate",
+          "reinspections": 0
+        },
+        "previous": "f2b6ee60b87e11f7411e5edda6c3c8b651374c9d9f12c2cc96bd775c76fbce7b",
+        "hash": "6eb1701243eb37ff964080df5e0a0ee57fd5e1b5cabdbc8d45b2a902f557788a"
+      },
+      {
+        "sequence": 2,
+        "version": "inspect-cell/1.0.0",
+        "producer": "offline-rule-gate/1",
+        "command": {
+          "id": "step-2",
+          "type": "route",
+          "at": 200
+        },
+        "state": {
+          "phase": "routed",
+          "now": 200,
+          "candidate": "defect",
+          "bowl": "defect",
+          "reason": "Non-actuating bowl simulation complete",
+          "reinspections": 0
+        },
+        "previous": "6eb1701243eb37ff964080df5e0a0ee57fd5e1b5cabdbc8d45b2a902f557788a",
+        "hash": "fafbe5fe5a8e26aa2089ba39f2c221f912288fc1468bebb504beb53ae91043db"
+      }
+    ],
+    "final": {
+      "phase": "routed",
+      "now": 200,
+      "candidate": "defect",
+      "bowl": "defect",
+      "reason": "Non-actuating bowl simulation complete",
+      "reinspections": 0
+    },
+    "root": "fafbe5fe5a8e26aa2089ba39f2c221f912288fc1468bebb504beb53ae91043db"
+  },
+  {
+    "schema": 1,
+    "version": "inspect-cell/1.0.0",
+    "evidence": "SYNTHETIC",
+    "actuation": false,
+    "inference": false,
+    "fixtureId": "ambiguous-03",
+    "inputDigest": "00211dca8157bf247d21631a00a64f41fbd2dc5df8f575ae2ec1ef13a3fd53ce",
+    "steps": [
+      {
+        "sequence": 1,
+        "version": "inspect-cell/1.0.0",
+        "producer": "offline-rule-gate/1",
+        "command": {
+          "id": "step-1",
+          "type": "gate",
+          "at": 100
+        },
+        "state": {
+          "phase": "uncertain",
+          "now": 100,
+          "candidate": null,
+          "bowl": null,
+          "reason": "Interval touches threshold: reinspection or manual review required",
+          "reinspections": 0
+        },
+        "previous": "00211dca8157bf247d21631a00a64f41fbd2dc5df8f575ae2ec1ef13a3fd53ce",
+        "hash": "3ff0ee7f2038fb33a5f77a8ecb0bc7b40cbc7799f93f22b68009415e4024c257"
+      },
+      {
+        "sequence": 2,
+        "version": "inspect-cell/1.0.0",
+        "producer": "offline-rule-gate/1",
+        "command": {
+          "id": "step-2",
+          "type": "reinspect",
+          "at": 200
+        },
+        "state": {
+          "phase": "review",
+          "now": 200,
+          "candidate": null,
+          "bowl": null,
+          "reason": "Same synthetic capture replayed; uncertainty unchanged. Manual review required",
+          "reinspections": 1
+        },
+        "previous": "3ff0ee7f2038fb33a5f77a8ecb0bc7b40cbc7799f93f22b68009415e4024c257",
+        "hash": "0c07615905742a5e9c8fb83f57995c44ba6d70b823486313d7e375efb067c461"
+      },
+      {
+        "sequence": 3,
+        "version": "inspect-cell/1.0.0",
+        "producer": "offline-rule-gate/1",
+        "command": {
+          "id": "step-3",
+          "type": "review",
+          "at": 300
+        },
+        "state": {
+          "phase": "gated",
+          "now": 300,
+          "candidate": "hold",
+          "bowl": null,
+          "reason": "Operator acknowledged uncertainty: hold only",
+          "reinspections": 1
+        },
+        "previous": "0c07615905742a5e9c8fb83f57995c44ba6d70b823486313d7e375efb067c461",
+        "hash": "f6d24296cb506f843707fd0777736c96ceaed20bc7f198f7b1f9093cbb7253ed"
+      },
+      {
+        "sequence": 4,
+        "version": "inspect-cell/1.0.0",
+        "producer": "offline-rule-gate/1",
+        "command": {
+          "id": "step-4",
+          "type": "route",
+          "at": 400
+        },
+        "state": {
+          "phase": "routed",
+          "now": 400,
+          "candidate": "hold",
+          "bowl": "hold",
+          "reason": "Non-actuating bowl simulation complete",
+          "reinspections": 1
+        },
+        "previous": "f6d24296cb506f843707fd0777736c96ceaed20bc7f198f7b1f9093cbb7253ed",
+        "hash": "7bf630c54675b7a2c1fad22f2636ed77423e7dc117e6ccc3ef30add510f011b2"
+      }
+    ],
+    "final": {
+      "phase": "routed",
+      "now": 400,
+      "candidate": "hold",
+      "bowl": "hold",
+      "reason": "Non-actuating bowl simulation complete",
+      "reinspections": 1
+    },
+    "root": "7bf630c54675b7a2c1fad22f2636ed77423e7dc117e6ccc3ef30add510f011b2"
+  }
+]

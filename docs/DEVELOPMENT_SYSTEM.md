@@ -38,12 +38,14 @@ The already existing [package contract](../catalog-contract.md), [Chibi adapter]
 
 ## Daily agent loop
 
+The root `AGENTS.md` lightweight rule governs this loop: ordinary code, docs and features need no required tests, repeat reviews, separate QA worker or per-commit CI receipt. Retain actual project safeguards and merge/release authority.
+
 1. **Discover.** Read repository `AGENTS.md`, this file, `catalog-contract.md`, and the assigned pet's four files. Record the exact upstream commit and check the current PRs.
 2. **Claim.** Use the work registry's atomic claim/lease rules. Stop if another active writer owns the same pet or exact files. Expired lease is eligible for reassignment only after checking surviving work, branches and receipts.
 3. **Develop.** Use an isolated cloud workspace based on a published, authorized environment. Limit changes to the assigned pet or an explicitly disjoint shared module. Do not move private Chibi code into this repository or between cloud providers.
-4. **Verify.** Run repository validation, Node tests and catalog build. Where a model is actually invoked, run the pet's behavioral evals and record the model/version, exact input, evaluator method and outcomes. Merely **defining** six cases per pet is not an executed model evaluation.
-5. **Publish evidence, not claims.** Commit to a task-owned branch, open/update a draft PR, capture its current HEAD and matching CI proof. Receipts for older commits must show stale, not green.
-6. **Handoff.** Report work ID, paths, source SHA, branch/PR, checks with links/log IDs, exact blocker and one actionable next step. Release the lease. Do not push direct to main or merge/deploy without authorization.
+4. **Check when useful.** For a concrete bug or material credentials, company/source provenance, tenant consent or privileged-integration risk, choose one targeted check or reviewer. Full suites are optional milestone evidence. For model qualification, run the pet's actual behavioral evals and record the model/version, exact input, evaluator method and outcomes. Merely **defining** six cases per pet is not an executed model evaluation.
+5. **Publish evidence, not claims.** Commit to a task-owned branch, open/update a draft PR and capture its current HEAD. Include check/review evidence when performed; keep receipts bound to the source actually checked, never label a newer untested HEAD green.
+6. **Handoff.** For routine changes, record the commit, changed paths, risks and next action in the PR. For consequential or qualification work, also report work ID, source SHA, actual checks with links/log IDs and any blocker/owner. Release the lease. Do not push direct to main or merge/deploy without authorization.
 
 ## Cloud environment provisioning
 

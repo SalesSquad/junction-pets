@@ -1,5 +1,31 @@
 # AGENTS.md — Junction monorepo contributor contract
 
+> **Owner's CRACI exception (14 Nov 2026):** Use the existing CRACI connection
+> and `.github/workflows/craci-pilot.yml` for useful Junction portable/browser
+> qualification within the current credit window, ending conservatively at
+> **15 Nov 2026 17:00 UTC**. This fresh explicit request supersedes the default
+> Actions opt-out only for this repository. At most EUR1,000 of existing credit;
+> no cash top-up, new provider or GitHub-hosted fallback. Preserve the exception
+> during global Actions cleanup. Read [docs/CRACI.md](docs/CRACI.md) for actual
+> runs, fixed workloads, exact-source admission and scheduled shutdown. Do not
+> repeat unchanged passing suites merely to consume credit.
+
+> **Owner's broader CRACI campaign (14 Nov 2026):** The owner explicitly
+> requested extensive whole-portfolio testing using the same existing credit.
+> Use the fixed source-pinned lanes and actual results in
+> [docs/CRACI_PORTFOLIO_20261114.md](docs/CRACI_PORTFOLIO_20261114.md).
+> New matrices support up to eight concurrent cells; the coordinator may admit
+> up to 64 distinct useful jobs per campaign within the existing EUR1,000 limit,
+> reserving worst-case queued/running cost first. This supersedes the former
+> three-job campaign limit, not provider quotas or product ownership. Test
+> newly runnable products, held-out cases and real local integrations; preserve
+> failed evidence and do not repeat unchanged green tuples. Ten main products
+> were still research/helper-only after Exa PR94 arrived: do not label them E2E
+> qualified. Existing Product Factory continues development and Portfolio PR
+> Recovery remains the sole integrator. No top-up, external provider inference,
+> production load, private-IP export or blocked Harbor retry is authorized.
+> The existing 15 Nov 2026 19:00 Helsinki stop remains in effect.
+
 > **Owner's lightweight development rule (14 Nov 2026):** Ordinary code,
 > docs and features proceed to task-owned PRs **without required tests,
 > repeat reviews, separate QA workers or per-commit CI receipts**. Full suites
@@ -24,7 +50,7 @@ Begin at [`START_HERE.md`](START_HERE.md) and [`docs/AGENT_SOURCE_INDEX.json`](d
 
 ## Challenge evidence entrypoint
 
-Before company work, read that company's `pets/<company>/CHALLENGE_RESEARCH.md` and the [source routing index](ops/challenge-source-routing-20261113.json). They bind supplied recordings, fresh official main/technical briefs, Discord observations and Fable critique. Official brief clauses outrank rough ASR and earlier proposed helpers. Research or a planned proof is not an executed model workflow.
+Before company work, read [current shared sources](docs/challenge-research/CURRENT_SOURCES.md) and select the assigned agent's `partnerEvidenceKey` in [docs/AGENT_SOURCE_INDEX.json](docs/AGENT_SOURCE_INDEX.json). Read its latest sponsor clarification and owned briefs before older summaries. Then read that company's `pets/<company>/CHALLENGE_RESEARCH.md` and the [source routing index](ops/challenge-source-routing-20261113.json). They bind supplied recordings, fresh official main/technical briefs, Discord observations and Fable critique. Official brief clauses outrank rough ASR and earlier proposed helpers. Research or a planned proof is not an executed model workflow.
 
 ## Meta source discovery
 
@@ -88,3 +114,5 @@ next_action: <one executable step with an owner>
 ```
 
 Keep the task record and documentation in GitHub so a different future worker can resume **without the original chat or machine**. At handoff: inspect new PR/branch state, resolve conflicts, classify infra-vs-source failures, repair owned code and re-verify the final SHA; carry unresolved work with an explicit new owner. Never report a permanently running agent, provisioned Cloud environment, published plugin on Chibi or production recipient just because its manifest, README, draft PR or synthetic green test exists.
+
+

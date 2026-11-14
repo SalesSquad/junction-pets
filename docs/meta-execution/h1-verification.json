@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "workId": "META-EXEC-20261114/H1",
+  "repository": "SalesSquad/chibi",
+  "baseCommit": "a39f7d3957c16cc2db8a8af4fbd4bd8184dd4aea",
+  "sourceCommit": "a17785fd34ad9ab4a177fae2365b44c8d09ee15d",
+  "prUrl": "https://github.com/SalesSquad/chibi/pull/122",
+  "command": "cargo test -p chibi-domain --locked --test meta_resume",
+  "executor": "Existing authorized MacBook Pro, Rust/cargo 1.98.1; current cloud lacks Rust toolchain/package helper",
+  "environment": {
+    "offline": true,
+    "buildJobs": 1,
+    "incremental": false,
+    "target": "task-isolated"
+  },
+  "startedAtUtc": "2026-11-14T06:22:55Z",
+  "completedAtUtc": "2026-11-14T06:23:34Z",
+  "exitCode": 0,
+  "result": "pass",
+  "testsPassed": 3,
+  "testsFailed": 0,
+  "compileSeconds": 35.5,
+  "tests": [
+    "three_step_job_resumes_with_a_proposal_and_requires_fresh_user_confirmation",
+    "receipts_bind_original_command_and_revision_without_replaying_revoked_proposals",
+    "correction_clears_dependent_proposal_and_transport_keeps_observation_out_of_command"
+  ],
+  "sourceSha256": {
+    "crates/chibi-domain/src/meta_resume.rs": "c90c7c62e0615568ba6780f74c23e79fab8f68ccaca4ddce41fe3c2dae754635",
+    "crates/chibi-domain/tests/meta_resume.rs": "c26e3ea2f3e01e9653c5f5b67b41408d03875ae9874a13473652058c35e0224e"
+  },
+  "receiptId": "h1-meta-resume-a17785fd-test-20261114",
+  "preservedLogSha256": {
+    "receipt.json": "eee48f7f066599dfe723e9f9b5fec63cdd1753fccf448fff9eea00858f93704b",
+    "stdout.log": "532a4b750ba396bbc5db19ead0cc0249f57288d52dfcc9f8cccdeccf8d1b93ba",
+    "stderr.log": "a968d872c57599f7b7aadb100f50095c958946eabfcd4b74ea504b4f9a49488d"
+  },
+  "cleanup": "Post-run exact HEAD and clean worktree verified; task-owned tmux and clean preserved worktree/build output removed; durable command receipt/logs retained on executor. No force removal or unrelated cleanup.",
+  "limits": [
+    "No full-suite claim",
+    "No persistent store or active host API",
+    "No model/provider, browser, simulator or physical device pass"
+  ]
+}
