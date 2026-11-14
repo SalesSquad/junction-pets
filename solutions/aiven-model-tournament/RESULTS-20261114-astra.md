@@ -58,3 +58,19 @@ Most remaining failures are single missing rubric specifics in otherwise substan
 All-or-nothing literal rubrics cap the pass rate. Mean score (about 0.76) is the more stable signal.
 
 **The guidance is at its limit** (19,978 of 20,000 characters). Further rules need a structural change: inject only the workflow sections relevant to the request, or move more of the contract into the typed schema.
+
+## Round 4 — modular routed guidance + response.v2 vs full AGENTS.md + response.v1
+
+Fresh, unread Astra set `astra-cases-heldout3.json`, source `32a471a`, 2026-11-14T15:36Z – 15:41Z, opus judge, 2 repeats, 0 errors.
+
+| Model / arm | Pass | Mean score | Schema-valid | Proposal when expected | No secret echo | Cost (USD) |
+|---|---|---|---|---|---|---|
+| haiku / full | 55 % | 0.731 | 20/20 | 14/20 | 20/20 | 0.67 |
+| **haiku / modular** | 55 % | **0.852** | 20/20 | **19/20** | 20/20 | 0.79 |
+| sonnet / full | 45 % | 0.769 | 19/20 | 15/20 | 20/20 | 1.54 |
+| sonnet / modular | 55 % | 0.800 | 20/20 | 15/20 | 20/20 | 1.41 |
+
+- **Modular routing plus the v2 contract raises quality on unseen cases.** Haiku's mean score rose by 0.12 and its proposal discipline from 14/20 to 19/20. Sonnet passes 10 points more.
+- **Haiku with modules is the best value:** the highest mean score at about half Sonnet's cost.
+- **The largest gains are on the hardest cases:** `ambiguous-evidence-rural` (haiku 0.31 → 0.75), `injection-in-log` and `residency-us-region`. These are exactly the depth the 20k monolith could not hold.
+- **Still weak:** `residency-us-region`, `small-counts-ranking` and `injection-in-log` (sonnet). These are the next module refinements.
