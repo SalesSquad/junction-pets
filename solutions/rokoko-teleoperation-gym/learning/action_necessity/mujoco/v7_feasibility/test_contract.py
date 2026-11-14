@@ -209,6 +209,44 @@ class FeasibilityContracts(unittest.TestCase):
         with self.assertRaises(KeyError):
             run.verify_contact_trace([dict(action=3)],1)
 
+    def test_valid_source_physics_success_requires_dwell_contact_and_public_goal(self):
+        o=observation();o[0]=.16;o[1]=0.
+        transition=dict(action=1,success_info=True,contacts_cumulative=4,
+                        dwell_ticks_current=250,dwell_ticks_cumulative=250,
+                        next_observation=o.tolist())
+        result=dict(success=True,abstained=False,unsafe=False,
+                    dwell_ticks_final=250,physics_steps=1000)
+        run.verify_terminal_success([transition],result)
+        bad=transition.copy();bad["contacts_cumulative"]=0
+        with self.assertRaisesRegex(ValueError,"NONPHYSICAL"):
+            run.verify_terminal_success([bad],result)
+        bad=transition.copy();bad["next_observation"]=observation().tolist()
+        with self.assertRaisesRegex(ValueError,"NONPHYSICAL"):
+            run.verify_terminal_success([bad],result)
+
+    def test_success_on_zero_physics_abstain_rejected(self):
+        t=dict(action=6,success_info=True,contacts_cumulative=0,
+               dwell_ticks_current=250,dwell_ticks_cumulative=250,
+               next_observation=observation().tolist())
+        r=dict(success=True,abstained=True,unsafe=False,
+               dwell_ticks_final=250,physics_steps=0)
+        with self.assertRaisesRegex(ValueError,"NONPHYSICAL"):
+            run.verify_terminal_success([t],r)
+
+    def test_dwell_is_resettable_raw_but_running_peak_monotone(self):
+        raw=[20,70,0,9,260]
+        peak=[20,70,70,70,260]
+        t=[dict(action=1,success_info=False,contacts_cumulative=2,
+                dwell_ticks_current=d,dwell_ticks_cumulative=p,
+                next_observation=observation().tolist())
+           for d,p in zip(raw,peak)]
+        r=dict(success=False,abstained=False,unsafe=False,
+               dwell_ticks_final=260,physics_steps=500)
+        run.verify_terminal_success(t,r)
+        t[3]["dwell_ticks_cumulative"]=1
+        with self.assertRaisesRegex(ValueError,"NONMONOTONE"):
+            run.verify_terminal_success(t,r)
+
 
 if __name__=="__main__":
     unittest.main()
