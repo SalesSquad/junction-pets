@@ -308,3 +308,8 @@ network guidance, GitHub event/concurrency rules and npm audit were checked for
 this automatic-CI change on 14 November. Account credit, App installation, runner
 pickup, SBOM completeness and vulnerability outcomes require live evidence.
 
+
+
+## Expanded portfolio campaign
+
+The owner subsequently requested much broader use of the same credits. See [CRACI_PORTFOLIO_20261114.md](CRACI_PORTFOLIO_20261114.md) and [its exact run receipts](craci/portfolio-20261114.json) for the expanded fixed lanes, source-pinned browser coverage, 880,008 independent arithmetic checks, real PostgreSQL, Meta seed study and official Tieto compiler compatibility results. The earlier evidence above remains historical and unchanged; the portfolio campaign supersedes the earlier three-job admission limit while retaining the credit ceiling and shutdown.

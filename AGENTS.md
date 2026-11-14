@@ -10,6 +10,22 @@
 > runs, fixed workloads, exact-source admission and scheduled shutdown. Do not
 > repeat unchanged passing suites merely to consume credit.
 
+> **Owner's broader CRACI campaign (14 Nov 2026):** The owner explicitly
+> requested extensive whole-portfolio testing using the same existing credit.
+> Use the fixed source-pinned lanes and actual results in
+> [docs/CRACI_PORTFOLIO_20261114.md](docs/CRACI_PORTFOLIO_20261114.md).
+> New matrices support up to eight concurrent cells; the coordinator may admit
+> up to 64 distinct useful jobs per campaign within the existing EUR1,000 limit,
+> reserving worst-case queued/running cost first. This supersedes the former
+> three-job campaign limit, not provider quotas or product ownership. Test
+> newly runnable products, held-out cases and real local integrations; preserve
+> failed evidence and do not repeat unchanged green tuples. Ten main products
+> were still research/helper-only after Exa PR94 arrived: do not label them E2E
+> qualified. Existing Product Factory continues development and Portfolio PR
+> Recovery remains the sole integrator. No top-up, external provider inference,
+> production load, private-IP export or blocked Harbor retry is authorized.
+> The existing 15 Nov 2026 19:00 Helsinki stop remains in effect.
+
 > **Owner's lightweight development rule (14 Nov 2026):** Ordinary code,
 > docs and features proceed to task-owned PRs **without required tests,
 > repeat reviews, separate QA workers or per-commit CI receipts**. Full suites
