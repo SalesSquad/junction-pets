@@ -121,7 +121,11 @@ if (scenario === 'refusal') {
     const paymentDecision = process.argv.find((x) => x.startsWith('--payment-decision='))?.split('=')[1];
     if (paymentDecision) {
       assert.ok(['approve', 'reject'].includes(paymentDecision), 'Only an explicit fictional payment choice is supported.');
-      await call(`/api/orders/${order.id}/payment-approval`, { buyerId: policy.buyerId, decision: paymentDecision });
+      const proposal = await call(`/api/orders/${order.id}/payment`);
+      assert.equal(proposal.proposal.amountCents, order.totalCents);
+      assert.equal(proposal.proposal.allocations.reduce((sum, x) => sum + x.amountCents, 0), order.totalCents);
+      await call(`/api/orders/${order.id}/payment-approval`, { buyerId: policy.buyerId, decision: paymentDecision,
+        proposalDigest: proposal.proposal.digest });
       if (paymentDecision === 'approve') {
         const instruction = { buyerId: policy.buyerId, idempotencyKey: randomUUID() };
         const paid = await call(`/api/orders/${order.id}/settlement`, instruction);
