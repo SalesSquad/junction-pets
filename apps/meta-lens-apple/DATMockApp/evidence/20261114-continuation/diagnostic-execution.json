@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "commandId": "lens-dat-state-20261114-03",
+  "startedAt": "2026-11-14T12:58:48.857843+00:00",
+  "originalHead": "b98256562beaa4b701c3de150035f7bebeedc75a",
+  "dirtyBefore": "",
+  "selector": "ChibiDATMockTests/DATIntegrationTests/testRealSDKVideoFramesOCRRevocationAndDisconnect",
+  "physicalDevice": false,
+  "result": "BLOCKED_OR_FAILED",
+  "phases": [
+    {
+      "name": "generate-project",
+      "argv": [
+        "python3",
+        "/Users/mikaelervamaa/Developer/junction-meta-dat-mock-native-20261114/apps/meta-lens-apple/DATMockApp/scripts/generate_project.py",
+        "--sdk-path",
+        "/Users/mikaelervamaa/Developer/meta-dat-sdk-1.0.1-junction-20261114"
+      ],
+      "startedAt": "2026-11-14T12:58:50.113032+00:00",
+      "timeoutSeconds": 30,
+      "exitCode": 0,
+      "stoppedReason": null,
+      "elapsedSeconds": 1.1,
+      "completedAt": "2026-11-14T12:58:51.213491+00:00",
+      "logSha256": "ce55742326f02e85892204f929d3e1c36f7aea63009bd294bdeaf6c9784ad5f6"
+    },
+    {
+      "name": "build",
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild",
+        "build-for-testing",
+        "-project",
+        "/Users/mikaelervamaa/Developer/junction-meta-dat-mock-native-20261114/apps/meta-lens-apple/DATMockApp/.generated/ChibiDATMock.xcodeproj",
+        "-scheme",
+        "ChibiDATMock",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphonesimulator",
+        "-destination",
+        "generic/platform=iOS Simulator",
+        "-derivedDataPath",
+        "/Users/mikaelervamaa/Developer/junction-meta-dat-proof-20261114-v2/DerivedData",
+        "-disableAutomaticPackageResolution",
+        "-onlyUsePackageVersionsFromResolvedFile",
+        "-jobs",
+        "1"
+      ],
+      "startedAt": "2026-11-14T12:58:51.214467+00:00",
+      "timeoutSeconds": 300,
+      "exitCode": 0,
+      "stoppedReason": null,
+      "elapsedSeconds": 27.067,
+      "completedAt": "2026-11-14T12:59:18.281728+00:00",
+      "logSha256": "4aa3759b3378846b31462e19738d8be4742ab625eaa5f57f4f1b8d3068fe5229"
+    },
+    {
+      "name": "boot",
+      "argv": [
+        "/usr/bin/xcrun",
+        "simctl",
+        "boot",
+        "9A920E85-4CB0-4E9D-8FC5-4308D5349F10"
+      ],
+      "startedAt": "2026-11-14T12:59:18.911006+00:00",
+      "timeoutSeconds": 30,
+      "exitCode": 0,
+      "stoppedReason": null,
+      "elapsedSeconds": 1.099,
+      "completedAt": "2026-11-14T12:59:20.009991+00:00",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "bootstatus",
+      "argv": [
+        "/usr/bin/xcrun",
+        "simctl",
+        "bootstatus",
+        "9A920E85-4CB0-4E9D-8FC5-4308D5349F10",
+        "-b"
+      ],
+      "startedAt": "2026-11-14T12:59:20.011049+00:00",
+      "timeoutSeconds": 180,
+      "exitCode": 0,
+      "stoppedReason": null,
+      "elapsedSeconds": 26.765,
+      "completedAt": "2026-11-14T12:59:46.776173+00:00",
+      "logSha256": "055d58d92c1c8c98e35ea177617de3ade85c05d190aa086257e413e4b3f73234"
+    },
+    {
+      "name": "xctest",
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild",
+        "test-without-building",
+        "-xctestrun",
+        "/Users/mikaelervamaa/Developer/junction-meta-dat-proof-20261114-v2/DerivedData/Build/Products/ChibiDATMock_iphonesimulator27.2-arm64-x86_64.xctestrun",
+        "-destination",
+        "platform=iOS Simulator,id=9A920E85-4CB0-4E9D-8FC5-4308D5349F10",
+        "-only-testing:ChibiDATMockTests/DATIntegrationTests/testRealSDKVideoFramesOCRRevocationAndDisconnect",
+        "-parallel-testing-enabled",
+        "NO",
+        "-jobs",
+        "1",
+        "-resultBundlePath",
+        "/Users/mikaelervamaa/Developer/meta-dat-state-diagnostic-20261114/Integration.xcresult"
+      ],
+      "startedAt": "2026-11-14T12:59:46.781397+00:00",
+      "timeoutSeconds": 240,
+      "exitCode": 65,
+      "stoppedReason": null,
+      "elapsedSeconds": 174.56,
+      "completedAt": "2026-11-14T13:02:41.341747+00:00",
+      "logSha256": "79e596467a5e5f77a845afc775b6a3a4617fe3c55c05021fce9b385b1bb75189"
+    }
+  ],
+  "cleanup": {
+    "shutdownExit": 0,
+    "deleteExit": 0,
+    "ownedSimulatorAbsent": true
+  },
+  "initialFreeGiB": 30.412,
+  "xcode": "Xcode 27.2\nBuild version 27B52",
+  "preservedOriginalPatchSha256": "777a2aebb79715c89beb0b1f5a51cd0eb9ca830722557fb3cc08f3a860e042ac",
+  "sourceHead": "b98256562beaa4b701c3de150035f7bebeedc75a",
+  "branch": "codex/meta-dat-accept-20261114",
+  "sourceFilesSha256": {
+    "apps/meta-lens-apple/DATMockApp/README.md": "e18c956045d2cd691f2b69de867bfc951b154f5fd0bf55b49ed8552f1e5ed5c4",
+    "apps/meta-lens-apple/DATMockApp/.gitignore": "2e559d4458399631f6ef2f32b25ee4c90b316019cfb72e454d7dcb15165223b3",
+    "apps/meta-lens-apple/DATMockApp/VERIFICATION.json": "61438708e39833a68f47a64be5e618cf402ce387d6f33e0a272626dc285ddd98",
+    "apps/meta-lens-apple/DATMockApp/Info.plist": "ecd87a2de11729300a6c61cbea2a85f984af245095d42a67931ed5526626390e",
+    "apps/meta-lens-apple/DATMockApp/Resources/charger-label.mp4": "37586605e337086e3fc35867ede03c6f48e863bfea2e239bce0890a5be25d8ec",
+    "apps/meta-lens-apple/DATMockApp/Tests/DATIntegrationTests.swift": "7d08dc9e0ebda93ad5f8b2e1bb434d5612a00e437422669742757ea41cb6e479",
+    "apps/meta-lens-apple/DATMockApp/scripts/generate_project.py": "7edef2645b2aae526c17658622b567cfc2c6fe108645942341560468889002a1",
+    "apps/meta-lens-apple/DATMockApp/scripts/generate_video.py": "3ed906bd15c078fab9189afe6d9f2c14b44c90d0758e1e65eb47165537b649bc",
+    "apps/meta-lens-apple/DATMockApp/Sources/DATCaptureModel.swift": "c039a8a7d4cf650178c56a08e9047585e4a63739d504c57b91b76d2965c68433",
+    "apps/meta-lens-apple/DATMockApp/Sources/ChibiDATMockApp.swift": "6374568b2d7c1fde66debb9fa99ce4ccd133221f88f4c491a1138d559595dc10",
+    "apps/meta-lens-apple/DATMockApp/evidence/20261114-continuation/sdk-diagnosis-review.json": "d0042ee3e868a2eaf80f9270e4324bcee26d206fa6b7e0c535173fc7f68eb20a",
+    "apps/meta-lens-apple/DATMockApp/evidence/20261114-continuation/first-xctest.log": "ed512544828cef5ec4f7f37d2524d43629ddab36a59fbe803638db9b4a502299",
+    "apps/meta-lens-apple/DATMockApp/evidence/20261114-continuation/first-execution.json": "631cc67979cb86e7dcb32096a262b7e9a5297f2e166e5d9f894332c0999354b3",
+    "apps/meta-lens-apple/DATMockApp/evidence/20261114-continuation/selector-execution.json": "7ed86d6cd12cab5a19b0dc9c034971404731b782d85493a9655b6e4085a5b02a",
+    "apps/meta-lens-apple/DATMockApp/evidence/20261114-continuation/selector-xctest.log": "d1bf14f39df19cb6e58e25af4b2237fcc5684e5dcc966183179d173c18bf618b"
+  },
+  "productsSha256": {
+    "ChibiDATMock_iphonesimulator27.2-arm64-x86_64.xctestrun": "95c16c1944e7d764aca1db458e1f1c15999f088f44868fb5d054c2f2c3740aff",
+    "Debug-iphonesimulator/ChibiDATMock.app/ChibiDATMock": "63af6ccc3525cb1adf31bee526849f8ddecb8e62c83d79af97e2aee61d978f3c",
+    "Debug-iphonesimulator/ChibiDATMock.app/ChibiDATMock.debug.dylib": "968ca18d5c40addb1e5319ed4cd2fa4f418d204793cf95ff0640e89017e7311e",
+    "Debug-iphonesimulator/ChibiDATMock.app/PlugIns/ChibiDATMockTests.xctest/ChibiDATMockTests": "bb50e558265761175a2430b215b8cbfaca16b960478e7675fca839c2146f1aab",
+    "Debug-iphonesimulator/ChibiDATMock.app/Info.plist": "464ae29e3064bef176daddfe83bbda0cee6bb117e571c2ddd38eebbaaf7aa64a"
+  },
+  "simulatorUdid": "9A920E85-4CB0-4E9D-8FC5-4308D5349F10",
+  "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-2",
+  "errorType": "RuntimeError",
+  "error": "xctest failed",
+  "dirtyAfter": "",
+  "headAfter": "b98256562beaa4b701c3de150035f7bebeedc75a",
+  "completedAt": "2026-11-14T13:02:44.989669+00:00",
+  "finalFreeGiB": 27.358
+}

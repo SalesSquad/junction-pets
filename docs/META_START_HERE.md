@@ -21,6 +21,15 @@ source-only runtime kernel and these research records. Confirm current GitHub ma
 | Source hashes, checks and review repairs | [Validation record](evidence/meta-scan-validation-20261113.json) |
 | Existing Meta subject companion | [Meta package](../pets/meta/) |
 
+## Native SDK development
+
+[Apple source port](../apps/meta-lens-apple/README.md) and
+[official DAT mock-video harness](../apps/meta-lens-apple/DATMockApp/README.md)
+provide separate Mac replay and iOS SDK development paths. The latter uses
+Meta SDK 1.0.1, a synthetic HEVC video and local Vision OCR; it does not grant
+Chibi host authority or claim real glasses. Check the open implementation PR
+for the latest source and native verification before resuming.
+
 ## Official resources confirmed in Discord
 
 Meta staff posted these in [Junction #meta](https://discord.com/channels/1268184974784336004/1570753500630220820).

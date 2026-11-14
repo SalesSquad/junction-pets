@@ -17,6 +17,18 @@ frame contains two visual lookalikes; the system **declines to verify** until an
 authenticated host confirms a unique ID. Revoking capture leaves a text-based
 fallback. This is an honest synthetic replay, not a recording from Meta glasses.
 
+## Official Meta SDK mock-video app
+
+The separate [DATMockApp](DATMockApp/README.md) links pinned official Meta DAT
+1.0.1 and implements a mock-video, local Vision OCR and revocation path.
+The actual app/test build and unchanged mock-SDK frame/OCR/revocation/disconnect
+acceptance pass at `57959db`. The case also covers SDK permission loss and
+explicit restart. Physical glasses and production capture remain unqualified.
+See the [harness verification record](DATMockApp/VERIFICATION.json) for the
+preserved runs and exact scope. The macOS replay package below remains
+SDK-independent; its qualification section does not describe this separate
+DATMockApp acceptance.
+
 ## Run from the package directory
 
 ```sh
