@@ -30,7 +30,9 @@ def make_fixture(root: Path):
             obs = [0.] * 18
             obs[7] = y
             event = dict(observation=obs, mask=[1] * 7, action=6, reward=-.01,
-                         cost=0, done=True, next_observation=list(obs))
+                         cost=0, done=True, next_observation=list(obs),
+                         contacts_cumulative=0, success_info=False,
+                         dwell_ticks_cumulative=0)
             seq = [event]
             row = dict(seed=seed, world_hash=wh, initial_observed_obstacle_y=y,
                        observed_corridor=offset < 128, strategy=name,
@@ -146,6 +148,66 @@ class FeasibilityContracts(unittest.TestCase):
         t["trials"][0]["observed_corridor"] = False
         with self.assertRaisesRegex(AssertionError, "FORGED_OBSERVED_CORRIDOR_LABEL"):
             self.verify(t)
+
+    def test_forged_positive_lateral_progress_is_not_mechanism_evidence(self):
+        t = copy.deepcopy(self.base_training)
+        t["trials"][0]["lateral_displacement"] = .04
+        with self.assertRaisesRegex(AssertionError, "FORGED_OBSTACLE_AWAY_LATERAL_DISPLACEMENT"):
+            self.verify(t)
+
+    def test_toward_obstacle_movement_is_not_away_displacement(self):
+        t = copy.deepcopy(self.base_training)
+        full = copy.deepcopy(self.base_full)
+        # Public obstacle is above the object; moving up must be negative.
+        seq = []
+        for i in range(60):
+            obs = [0.] * 18
+            obs[7] = .08
+            obs[1] = 0. if i == 0 else .03
+            after = list(obs)
+            after[1] = .03
+            seq.append(dict(observation=obs, next_observation=after,
+                            mask=[1] * 7, action=3, cost=0, reward=0.,
+                            done=i == 59, contacts_cumulative=0,
+                            success_info=False, dwell_ticks_cumulative=0))
+        full[0]["transitions"] = seq
+        t["trials"][0].update(
+            transitions=[seq[i] for i in q.sparse_indices(60)],
+            sparse_transition_indices=q.sparse_indices(60),
+            full_transition_count=60, full_transition_sha256=q.canonical_sha(seq),
+            physics_steps=6000, option_steps=60, abstained=False,
+            lateral_displacement=-.03, total_reward=0.)
+        t["actual_transition_count"] += 59
+        result = self.verify(t, full)
+        self.assertEqual(result["worlds_safe_lateral_displacement_ge_25mm"], 0)
+
+    def test_no_physics_abstain_cannot_move_object(self):
+        t = copy.deepcopy(self.base_training)
+        full = copy.deepcopy(self.base_full)
+        full[0]["transitions"][0]["next_observation"][1] = .03
+        t["trials"][0]["transitions"][0]["next_observation"][1] = .03
+        t["trials"][0]["lateral_displacement"] = -.03
+        t["trials"][0]["full_transition_sha256"] = q.canonical_sha(full[0]["transitions"])
+        with self.assertRaisesRegex(AssertionError, "ZERO_PHYSICS_CANNOT_MOVE"):
+            self.verify(t, full)
+
+    def test_forged_contacts_are_not_physical_progress(self):
+        t = copy.deepcopy(self.base_training)
+        t["trials"][0]["contacts"] = 999
+        with self.assertRaisesRegex(AssertionError, "FORGED_CONTACT_COUNT_NOT_BOUND"):
+            self.verify(t)
+
+    def test_goal_success_cannot_be_claimed_without_dwell_and_contact(self):
+        t = copy.deepcopy(self.base_training)
+        full = copy.deepcopy(self.base_full)
+        row = t["trials"][0]
+        event = full[0]["transitions"][0]
+        event.update(action=0, success_info=True)
+        row.update(physics_steps=100, success=True, abstained=False,
+                   full_transition_sha256=q.canonical_sha(full[0]["transitions"]),
+                   transitions=copy.deepcopy(full[0]["transitions"]))
+        with self.assertRaisesRegex(AssertionError, "UNPHYSICAL_DWELL_OR_CONTACT_SUCCESS"):
+            self.verify(t, full)
 
     def test_no_dev_or_heldout_artifacts_allowed(self):
         (self.root / "dev.json").write_text("{}", encoding="utf8")
