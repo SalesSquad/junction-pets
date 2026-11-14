@@ -20,7 +20,7 @@ import sys
 PRODUCT = Path(
     "solutions/rokoko-teleoperation-gym/learning/action_necessity/mujoco/v5_learning"
 )
-TRAIN_FIRST = 5_290_000
+TRAIN_FIRST = 510_000  # Frozen ContactEnv.reset permits 120000 <= seed < 520000
 TRAIN_COUNT = 48
 DEV_FIRST = 129_170
 DEV_COUNT = 80
@@ -67,6 +67,9 @@ def finite_vector(x, length: int) -> bool:
 
 def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> dict:
     """Contract assertions independent of the producer's claimed verdict."""
+    require(429_199 < TRAIN_FIRST and 120_000 <= TRAIN_FIRST and
+            TRAIN_FIRST + TRAIN_COUNT <= 520_000,
+            "TRAIN_SEEDS_OUTSIDE_FROZEN_MUJOCO_ENV_ADMISSIBLE_RANGE")
     require(SOURCE_SHA.fullmatch(source) is not None, "INVALID_EXACT_SOURCE_SHA")
     require(training.get("executed_head") == source, "TRAIN_SOURCE_MISMATCH")
     require(dev.get("executed_head") == source, "DEV_SOURCE_MISMATCH")
@@ -233,7 +236,7 @@ def verify_dev_receipt(training: dict, model: dict, dev: dict, source: str) -> d
         },
         "next_learning_round": {
             "suggested_failure_class": failure_priority,
-            "new_train_only_seed_start": 5_291_000,
+            "new_train_only_seed_start": 511_000,
             "new_fresh_dev_seed_start": 129_250,
             "previous_dev_seeds_exposed": True,
             "requires_new_source_and_weight_hashes": True,
@@ -271,6 +274,16 @@ def main() -> int:
     module = src / PRODUCT
     subprocess.run([str(python), "-m", "unittest", "discover", "-v", "-s", str(module),
                     "-p", "test_contract.py"], cwd=src, check=True)
+    # This inexpensive *real* MuJoCo smoke catches an invalid world band in
+    # the inherited ContactEnv before allocating any six-candidate training.
+    subprocess.run([
+        str(python), "-c",
+        "import sys;sys.path.insert(0,sys.argv[1]);"
+        "from physics import MovingContactEnv;"
+        f"o=MovingContactEnv(max_options=60).reset(seed={TRAIN_FIRST},ood=False);"
+        "assert len(o)==18, 'TRAIN_SEED_PHYSICS_OBSERVATION_ABI_MISMATCH'",
+        str(src / PRODUCT.parent),
+    ], cwd=src, check=True)
     process = subprocess.run([
         str(python), str(module / "run.py"), "--mode", "train-dev",
         "--require-git", "--expected-head", requested,
