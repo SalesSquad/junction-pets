@@ -19,6 +19,7 @@ const models = arg('models', 'haiku,sonnet,opus').split(',');
 const suites = arg('suites', 'dev,heldout').split(',');
 const repeats = Number(arg('repeats', '2'));
 const judgeModel = arg('judge', 'sonnet');
+const arms = arg('arms', 'pet').split(',');
 const concurrency = Number(arg('concurrency', '4'));
 const execute = process.argv.includes('--execute');
 const sha = s => createHash('sha256').update(s).digest('hex');
@@ -26,6 +27,7 @@ const read = p => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
 
 const pack = (await loadPackages(root)).find(p => p.pet.id === 'junction.aiven');
 const system = companyContext(pack);
+const systems = { pet: system, compact: readFileSync(new URL('../../pets/aiven/AGENTS.compact.md', import.meta.url), 'utf8'), bare: 'You are a helpful assistant.' };
 const cases = [];
 if (suites.includes('dev')) {
   cases.push(...pack.evals.cases.map(c => ({ ...c, suite: 'roster' })));
@@ -70,45 +72,45 @@ function deterministic(c, text) {
 }
 
 async function one(job) {
-  const { model, c, rep } = job;
-  const a = await claude(model, c.prompt, system);
-  if (a.error) return { model, case: c.id, suite: c.suite, rep, error: a.error };
+  const { model, c, rep, arm } = job;
+  const a = await claude(model, c.prompt, systems[arm]);
+  if (a.error) return { model, arm, case: c.id, suite: c.suite, rep, error: a.error };
   let j, g = null;
   for (let attempt = 0; attempt < 2 && !g; attempt++) { // a judge formatting slip is a measurement error, not a model failure
     j = await claude(judgeModel, judgePrompt(c, a.text));
     try { g = JSON.parse((j.text ?? '').replace(/^```json\s*|```\s*$/g, '').trim()); } catch {}
   }
-  if (!g) return { model, case: c.id, suite: c.suite, rep, error: 'judge output unparseable' };
+  if (!g) return { model, arm, case: c.id, suite: c.suite, rep, error: 'judge output unparseable' };
   const det = deterministic(c, a.text);
   const inc = g?.include?.filter(Boolean).length ?? 0, viol = (g?.violations?.filter(Boolean).length ?? 0) + det.forbidden;
   const score = g ? Math.max(0, (inc - det.missing) / c.mustInclude.length - 0.5 * viol) : 0;
   const pass = !!g && inc === c.mustInclude.length && viol === 0 && det.ok;
-  return { model, served: a.served, case: c.id, suite: c.suite, rep, pass, score: +score.toFixed(3), includeHits: inc, includeTotal: c.mustInclude.length, violations: viol, deterministic: det, answerSha256: sha(a.text), answerChars: a.text.length, costUsd: +(a.cost + (j.cost ?? 0)).toFixed(4), judgeNote: g?.note ?? 'judge output unparseable', _raw: { answer: a.text, judge: j.text } };
+  return { model, arm, served: a.served, case: c.id, suite: c.suite, rep, pass, score: +score.toFixed(3), includeHits: inc, includeTotal: c.mustInclude.length, violations: viol, deterministic: det, answerSha256: sha(a.text), answerChars: a.text.length, costUsd: +(a.cost + (j.cost ?? 0)).toFixed(4), judgeNote: g?.note ?? 'judge output unparseable', _raw: { answer: a.text, judge: j.text } };
 }
 
 for (const c of cases) for (const r of [...(c.checks?.mustMatch ?? []), ...(c.checks?.mustNotMatch ?? [])]) rx(r); // fail fast on a bad pattern
-const jobs = models.flatMap(model => cases.flatMap(c => Array.from({ length: repeats }, (_, rep) => ({ model, c, rep }))));
-if (!execute) { console.log(JSON.stringify({ dryRun: true, cases: cases.length, models, repeats, judgeModel, calls: jobs.length * 2, systemChars: [...system].length }, null, 2)); process.exit(0); }
+const jobs = models.flatMap(model => arms.flatMap(arm => cases.flatMap(c => Array.from({ length: repeats }, (_, rep) => ({ model, arm, c, rep })))));
+if (!execute) { console.log(JSON.stringify({ dryRun: true, cases: cases.length, models, arms, repeats, judgeModel, calls: jobs.length * 2, systemChars: [...system].length }, null, 2)); process.exit(0); }
 
 const started = new Date().toISOString(), results = [];
 let next = 0;
 await Promise.all(Array.from({ length: concurrency }, async () => {
-  while (next < jobs.length) { const r = await one(jobs[next++]); results.push(r); console.error(`${r.model} ${r.case}#${r.rep} ${r.error ?? (r.pass ? 'PASS' : 'FAIL ' + r.score)}`); }
+  while (next < jobs.length) { const r = await one(jobs[next++]); results.push(r); console.error(`${r.model}/${r.arm} ${r.case}#${r.rep} ${r.error ?? (r.pass ? 'PASS' : 'FAIL ' + r.score)}`); }
 }));
 const summary = {};
-for (const m of models) for (const s of ['roster', 'stack', 'heldout']) {
-  const r = results.filter(x => x.model === m && x.suite === s && !x.error);
+for (const m of models) for (const arm of arms) for (const s of ['roster', 'stack', 'heldout']) {
+  const r = results.filter(x => x.model === m && x.arm === arm && x.suite === s && !x.error);
   if (!r.length) continue;
   const byCase = Object.values(Object.groupBy(r, x => x.case));
-  summary[`${m}/${s}`] = {
+  summary[`${m}/${arm}/${s}`] = {
     runs: r.length, passRate: +(r.filter(x => x.pass).length / r.length).toFixed(3),
     meanScore: +(r.reduce((a, x) => a + x.score, 0) / r.length).toFixed(3),
     consistency: +(byCase.filter(g => g.every(x => x.pass === g[0].pass)).length / byCase.length).toFixed(3),
     costUsd: +r.reduce((a, x) => a + x.costUsd, 0).toFixed(3),
-    errors: results.filter(x => x.model === m && x.suite === s && x.error).length
+    errors: results.filter(x => x.model === m && x.arm === arm && x.suite === s && x.error).length
   };
 }
 const out = { petId: pack.pet.id, petVersion: pack.pet.version, systemSha256: sha(system), judgeModel, repeats, startedAt: started, finishedAt: new Date().toISOString(), summary, results: results.map(({ _raw, ...r }) => r) };
 mkdirSync(new URL('../../dist/evals/', import.meta.url), { recursive: true });
-writeFileSync(new URL(`../../dist/evals/aiven-tournament-${Date.now()}.json`, import.meta.url), JSON.stringify({ ...out, raw: results.map(r => ({ model: r.model, case: r.case, rep: r.rep, ...(r._raw ?? {}) })) }, null, 2));
+writeFileSync(new URL(`../../dist/evals/aiven-tournament-${Date.now()}.json`, import.meta.url), JSON.stringify({ ...out, raw: results.map(r => ({ model: r.model, arm: r.arm, case: r.case, rep: r.rep, ...(r._raw ?? {}) })) }, null, 2));
 console.log(JSON.stringify(out, null, 2));
