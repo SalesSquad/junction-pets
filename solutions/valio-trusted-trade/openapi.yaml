@@ -1124,7 +1124,7 @@
         }
       ],
       "post": {
-        "summary": "Explicit NEW fictional human click required before simulated money transfer",
+        "summary": "New fictional human click bound to server-owned supplier payout proposal digest; signed portfolio trade required",
         "security": [
           {
             "demoCapability": []
@@ -1139,7 +1139,8 @@
                 "additionalProperties": false,
                 "required": [
                   "buyerId",
-                  "decision"
+                  "decision",
+                  "proposalDigest"
                 ],
                 "properties": {
                   "buyerId": {
@@ -1150,6 +1151,9 @@
                       "approve",
                       "reject"
                     ]
+                  },
+                  "proposalDigest": {
+                    "type": "string"
                   }
                 }
               }
@@ -1407,7 +1411,7 @@
         ],
         "properties": {
           "version": {
-            "const": "kattely.procurement.quote.v1"
+            "const": "kattely.procurement.quote.v2"
           },
           "quote_id": {
             "type": "string"
@@ -1441,7 +1445,8 @@
                 "quantity",
                 "unit",
                 "unit_price_cents",
-                "stock_version"
+                "stock_version",
+                "supplier_id"
               ],
               "properties": {
                 "sku": {
@@ -1461,6 +1466,9 @@
                 "stock_version": {
                   "type": "integer",
                   "minimum": 1
+                },
+                "supplier_id": {
+                  "type": "string"
                 }
               }
             }
@@ -1596,6 +1604,15 @@
           },
           "idempotentReplay": {
             "type": "boolean"
+          },
+          "paymentEligible": {
+            "type": "boolean"
+          },
+          "verifiedQuoteBodyDigest": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -1647,11 +1664,62 @@
       "SyntheticPayment": {
         "type": "object",
         "required": [
+          "proposal",
           "approval",
           "transfer",
           "wallet"
         ],
         "properties": {
+          "proposal": {
+            "type": "object",
+            "required": [
+              "orderId",
+              "amountCents",
+              "allocations",
+              "digest"
+            ],
+            "properties": {
+              "orderId": {
+                "type": "string"
+              },
+              "amountCents": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "digest": {
+                "type": "string"
+              },
+              "signedQuoteBodyDigest": {
+                "type": "string"
+              },
+              "currency": {
+                "const": "EUR"
+              },
+              "rail": {
+                "const": "IN_MEMORY_NO_BANK_OR_PSP"
+              },
+              "allocations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "supplierId",
+                    "amountCents"
+                  ],
+                  "properties": {
+                    "supplierId": {
+                      "type": "string"
+                    },
+                    "amountCents": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
           "approval": {
             "type": [
               "object",
