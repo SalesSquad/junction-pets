@@ -70,7 +70,12 @@ products = add("products", "PBXGroup", children=[app_ref, test_ref], name="Produ
 group = add("root-group", "PBXGroup", children=sources + tests + [video, products], sourceTree="<group>")
 common = {"SDKROOT": "iphoneos", "IPHONEOS_DEPLOYMENT_TARGET": "17.2", "SWIFT_VERSION": "6.0",
           "SWIFT_STRICT_CONCURRENCY": "complete", "TARGETED_DEVICE_FAMILY": "1,2",
-          "CODE_SIGNING_ALLOWED": "NO", "DEBUG_INFORMATION_FORMAT": "dwarf", "SWIFT_OPTIMIZATION_LEVEL": "-Onone",
+          # SDK bootstrap resolves the app keychain access group. Use a local
+          # ad-hoc identity on Simulator; device signing remains disabled.
+          "CODE_SIGNING_ALLOWED": "NO",
+          "CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]": "YES",
+          "CODE_SIGN_IDENTITY[sdk=iphonesimulator*]": "-",
+          "DEBUG_INFORMATION_FORMAT": "dwarf", "SWIFT_OPTIMIZATION_LEVEL": "-Onone",
           "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "DEBUG", "ENABLE_TESTABILITY": "YES",
           "CLANG_ENABLE_MODULES": "YES", "SUPPORTED_PLATFORMS": "iphoneos iphonesimulator"}
 app = add("app", "PBXNativeTarget", name="ChibiDATMock", productName="ChibiDATMock",
