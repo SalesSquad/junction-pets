@@ -28,6 +28,7 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - rokoko-heldout
         - arduino-proof-48
         - valio-settlement-browser
+        - bahn-offline-sweep
       source_sha:
         description: Full product SHA; overrides historical baseline. Tieto uses sponsor_revision.
         type: string
@@ -2240,4 +2241,117 @@ jobs:
       CRACI_CELL: ${{ matrix.cell }}
       CRACI_NEXT_OWNER: Portfolio PR Recovery
       CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+
+  bahn-offline-sweep:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'bahn-offline-sweep' }}
+    name: BAHN / 10000 new paired seeds / shard ${{ matrix.seed_shard }}
+    runs-on: craci
+    timeout-minutes: 15
+    concurrency:
+      group: craci-bahn-offline-${{ matrix.seed_shard }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_SHARD_INDEX: ${{ matrix.seed_shard }}
+      CRACI_WORKLOAD: bahn-offline-sweep
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure isolated CRACI BAHN offline calibration
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, ubuntu]
+    - name: Enforce credit cutoff before package downloads
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install signed Ubuntu base R for cluster bootstrap
+      run: |
+        set -euo pipefail
+        # The runner's unrelated Microsoft apt feed is blocked (HTTP 403).
+        # Install only from Ubuntu's signed OS repos, covered by the ubuntu network preset.
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -f "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends r-base-core
+        Rscript --version
+    - name: Audit 10000 paired seeds and R cluster uncertainty
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$CRACI_HARNESS_ROOT/scripts/craci/run-bahn-offline.sh"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
 
