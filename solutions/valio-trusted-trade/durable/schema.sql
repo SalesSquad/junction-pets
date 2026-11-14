@@ -59,6 +59,17 @@ END $$;
 CREATE CONSTRAINT TRIGGER ledger_batch_balanced
 AFTER INSERT ON ledger_batches DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW EXECUTE FUNCTION assert_balanced_batch();
+-- A batch becomes sealed when its atomic outbox receipt is written. No later
+-- transaction may append entries without re-running the balance constraint.
+CREATE FUNCTION reject_sealed_batch_append() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM ledger_outbox WHERE batch_id = NEW.batch_id) THEN
+    RAISE EXCEPTION 'SEALED_LEDGER_BATCH %',NEW.batch_id USING ERRCODE='23514';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER entries_no_append_after_outbox BEFORE INSERT ON ledger_entries
+FOR EACH ROW EXECUTE FUNCTION reject_sealed_batch_append();
 CREATE FUNCTION forbid_ledger_rewrite() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   RAISE EXCEPTION 'IMMUTABLE_LEDGER_ROWS' USING ERRCODE='23514';
