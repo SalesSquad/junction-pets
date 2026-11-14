@@ -22,6 +22,11 @@ CHUNK_BYTES = 6 * 1024 * 1024
 MAX_FILE_BYTES = 20 * 1024 * 1024
 MAX_COLLECTOR_BYTES = 63 * 1024 * 1024
 SCHEMA = "junction.rokoko.mujoco-v7-evidence-parts.v1"
+V8_SCHEMA = "junction.rokoko.mujoco-v8-evidence-parts.v1"
+ARTIFACT_SCHEMAS = {
+    "rokoko-mujoco-v7-feasibility": SCHEMA,
+    "rokoko-mujoco-v8-prospective": V8_SCHEMA,
+}
 
 
 def require(condition, reason):
@@ -44,7 +49,7 @@ def safe_root(folder: Path):
 
 
 def verify_parts(folder: Path, report: dict):
-    require(report.get("schema") == SCHEMA, "EVIDENCE_PACK_SCHEMA")
+    require(report.get("schema") in ARTIFACT_SCHEMAS.values(), "EVIDENCE_PACK_SCHEMA")
     # The part report is not an authority unto itself. Bind restored bytes to
     # the independently qualified producer manifest, preventing re-hashed ZIP
     # and re-hashed part-report substitutions after publication.
@@ -114,9 +119,11 @@ def restore_parts(archive_folder: Path, output_folder: Path):
 
 
 def package_evidence(evidence_root: Path, staging_root: Path,
-                     chunk_bytes: int = CHUNK_BYTES):
+                     chunk_bytes: int = CHUNK_BYTES,
+                     artifact_name: str = "rokoko-mujoco-v7-feasibility"):
     root = safe_root(evidence_root)
-    artifacts = safe_root(root / "artifacts" / "rokoko-mujoco-v7-feasibility")
+    require(artifact_name in ARTIFACT_SCHEMAS, "EVIDENCE_PACK_UNKNOWN_ARTIFACT")
+    artifacts = safe_root(root / "artifacts" / artifact_name)
     staging_root = staging_root.absolute()
     require(staging_root != root and not staging_root.is_relative_to(root),
             "PRIVATE_STAGING_MUST_BE_OUTSIDE_RECEIPT")
@@ -143,7 +150,7 @@ def package_evidence(evidence_root: Path, staging_root: Path,
             MAX_COLLECTOR_BYTES, "EVIDENCE_PACK_EXCEEDS_COLLECTOR_CAP")
     require(not staging_root.exists(), "PRIVATE_STAGING_EXISTS")
     staging_root.mkdir(mode=0o700, parents=True)
-    report = {"schema": SCHEMA, "original_manifest_sha256":
+    report = {"schema": ARTIFACT_SCHEMAS[artifact_name], "original_manifest_sha256":
               sha_file(artifacts / "manifest.json"),
               "exact_source_sha": manifest["executed_head"], "sources": []}
     for filename, path, original_bytes, checksum in inputs:
@@ -189,11 +196,14 @@ def main():
     parser.add_argument("--evidence-root", required=True, type=Path)
     parser.add_argument("--private-staging", type=Path)
     parser.add_argument("--restore-output", type=Path)
+    parser.add_argument("--artifact-name", choices=tuple(ARTIFACT_SCHEMAS),
+                        default="rokoko-mujoco-v7-feasibility")
     args = parser.parse_args()
     if args.mode == "pack":
         require(args.private_staging is not None and args.restore_output is None,
                 "EVIDENCE_PACK_REQUIRED_STAGING")
-        report = package_evidence(args.evidence_root, args.private_staging)
+        report = package_evidence(args.evidence_root, args.private_staging,
+                                  artifact_name=args.artifact_name)
     else:
         require(args.restore_output is not None and args.private_staging is None,
                 "EVIDENCE_RESTORE_REQUIRED_OUTPUT")
