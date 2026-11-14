@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-const publicFiles = new Map([['/', 'index.html'], ...['index.html', 'styles.css', 'app.mjs', 'matcher.mjs', 'data.mjs', 'benchmark.mjs', 'sw.js'].map(file => [`/${file}`, file])]);
+const publicFiles = new Map([['/', 'index.html'], ...['index.html', 'styles.css', 'app.mjs', 'matcher.mjs', 'data.mjs', 'benchmark.mjs', 'skill-graph.mjs', 'event-meetings.mjs', 'demo-validation.mjs', 'sw.js'].map(file => [`/${file}`, file])]);
 const mime = { html: 'text/html; charset=utf-8', css: 'text/css; charset=utf-8', mjs: 'text/javascript; charset=utf-8', js: 'text/javascript; charset=utf-8' };
 const port = Number(process.env.PORT ?? 4173);
 if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('PORT must be an integer from 0 to 65535.');

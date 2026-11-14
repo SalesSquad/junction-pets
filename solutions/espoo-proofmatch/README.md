@@ -1,94 +1,95 @@
-# ProofMatch
+# ProofMatch W2 · private conversation demo
 
-**Less polish. More possibility.** A runnable English-first recruitment-event
-workspace for employers, talent and event facilitators: choose a role, inspect
-evidence, explore uncertainty, and draft a conversation at a shared time.
+Choose a fictional event role, inspect exact and transferable skill evidence,
+ask about unknowns, and simulate a separate proposal and response for a
+**15-minute conversation on fictional 15 November 2026**. All five candidates
+remain visible and selectable in fixture order, including Ren without a
+portfolio or stated role preference. No person score or aptitude ranking appears.
 
-**SYNTHETIC / OFFLINE_DETERMINISTIC.** Four fictional candidates and two fictional
-employers. No live city data, verified portfolios, partner endorsement or AI-text
-detection. All source cards are authored fictional excerpts, not real artifacts.
-`demo:` references identify these local fixtures; they do not resolve externally.
+**PRIVATE / SYNTHETIC / OFFLINE_DETERMINISTIC / SIMULATED.** This version adapts
+pre-existing PRIVATE Workbase IP. It is **not automatically cleared for competition
+submission**; read [WORKBASE_REUSE.md](WORKBASE_REUSE.md). No real participants,
+verified portfolios, production system or municipal endorsement is represented.
 
-## Run locally
+## Run
 
-Node 22+; no install, dependencies, build step or internet required. From repo root:
+Node 22+; no dependencies, install, build, API or internet needed. From repo root:
 
 ```sh
 node solutions/espoo-proofmatch/serve.mjs
 ```
 
-Open **http://127.0.0.1:4173**. Optional `PORT=4180` changes the port. Ctrl-C stops
-the loopback-only, product-file-allowlisted server. All assets are local. A service
-worker caches the app shell for subsequent offline reloads on the same origin;
-the first visit needs the local server. Keeping the local server running also
-works without internet. Clearing browser site data removes the cache. Drafts
-are in tab memory only and disappear on reload; they are never cached or sent.
+Open `http://127.0.0.1:4173`; optional `PORT=4180` changes the port. Ctrl-C stops
+the loopback-only, read-only, file-allowlisted server. A first visit requires the
+server. The service worker caches named shell assets for subsequent offline
+reloads on the same origin; offline reload is not yet browser-verified for v2.
+Keeping the local server running works without internet. Proposals live only in
+tab memory and vanish on reload/reset; the cache never stores meeting records.
 
-## Three-minute demo
+## Demo path
 
-1. Choose **Build a repair-service prototype**. Mira leads at **94/100**. Open
-   `M-01` and `M-02` through the skill links to inspect local source descriptions,
-   issuer/ref/date, source type and explicit lack of external verification.
-2. Select **Devon**. A polished, deliberately keyword-stuffed bio wins the
-   keyword baseline but its general résumé statement earns only **20/100**
-   evidence support. It is claim-only, not branded fraudulent or rejected.
-3. Select **Ren**. All required skills are **UNKNOWN** and no slot intersects.
-   The UI asks for a conversation or another way to supply evidence.
-4. Switch to **Host a community co-design session**. Jules leads at **96/100**;
-   role-specific evidence changes the order. Mira’s facilitation/research skills
-   are unknown. All candidates remain visible.
-5. Choose a shared UTC slot, check **both separate demo consent fields** and
-   create an intro **DRAFT**. These are simulated assertions from one demo user,
-   never authenticated mutual consent. Nothing is sent or booked. Review the
-   draft in the notebook; the same pair cannot create another. Other pairs
-   sharing a candidate or employer cannot hold an overlapping slot in this tab.
-   Reset clears all demo drafts and holds. Reload also clears them.
+1. Choose **Build a repair-service prototype**. Inspect Mira's exact supplied
+   labels and source cards. “Exact” does not establish proficiency; artifacts,
+   walkthroughs and statements are explicitly self-declared, fictional material.
+2. Select **Ari**. Inspect **TypeScript → JavaScript**: the direct seed edge is
+   0.85, so related requirement credit is 0.6 × 0.85 = 0.51. This is partial
+   discussion support, not an exact match or a probability. Preferred
+   documentation evidence is separate from required skills.
+3. Select **Ren**. No portfolio and unknown interest remain visible; offer a
+   conversation or shared exercise. Ren's authored availability has no common
+   time with either role. Lack of time does not remove the candidate.
+4. Change the event role. Candidate-declared topic interest, other stated
+   interests and unknown preference are explained without filtering anyone.
+   Inspect structured reasons/cautions or use the human-authored questions.
+5. Select Mira and the repair role. Choose a shared UTC time and use
+   **Simulate employer: Propose 15-minute meeting**. The notebook shows
+   **SIMULATED · PENDING**; no candidate acceptance is implied.
+6. In the separate **Simulate candidate · Mira** controls, choose **Accept** or
+   **Decline**. Either intended party can **Cancel** a pending or accepted
+   proposal. Pending/accepted hold time across roles for both parties;
+   declined/cancelled release it and permit a new proposal. An active pair
+   cannot receive a duplicate proposal, even at another time.
 
-## Focused checks and measurable baseline
+One demo operator can switch parties. These controls are neither authentication
+nor real mutual consent. No Workbase application, invitation, message, calendar
+event or real reservation is created. Two tabs do not coordinate.
+
+## Focused checks
 
 ```sh
-node --test solutions/espoo-proofmatch/matcher.test.mjs
-node solutions/espoo-proofmatch/benchmark.mjs
+node --test solutions/espoo-proofmatch/skill-graph.test.mjs solutions/espoo-proofmatch/event-meetings.test.mjs solutions/espoo-proofmatch/matcher.test.mjs
+node --check solutions/espoo-proofmatch/app.mjs
+node --check solutions/espoo-proofmatch/skill-graph.mjs
+node --check solutions/espoo-proofmatch/event-meetings.mjs
 ```
 
-One Node built-in test file covers adversarial padding, absent evidence, input
-validation, exact boolean demo consent, availability intersections, cross-role
-conflicts, duplicate pairs, immutable inputs and deterministic scoring.
-The benchmark prints expected/observed IDs, correctness, evidence scores and
-keyword hit counts. Labels are fixed in `data.mjs`, not generated by the matcher.
+Current local result: **39 passed, 0 failed** (21 new checks plus the preserved
+18 matcher tests). All 12 local JS files also passed `node --check`. Exact scope,
+executor and unavailable HTTP/browser checks are recorded in `PROGRESS.md`.
 
-| Fixed case | Prelabelled relevant top result | Evidence-first | Keyword-only |
-| --- | --- | --- | --- |
-| Repair prototype | Mira | Mira, 94/100 — correct | Devon, 9 hits — miss |
-| Community co-design | Jules | Jules, 96/100 — correct | Devon, 9 hits — miss |
+The unchanged v1 `matcher.mjs` and its 18 tests remain compatibility fixtures;
+the UI uses the new `skill-graph.mjs` and `event-meetings.mjs`. V1 scheduling is
+not used by v2. The collapsed legacy benchmark shows **only 2 illustrative
+cases**, intentionally authored and non-independent: legacy evidence heuristic
+2/2 fixed labels versus keyword-only 0/2. It does not qualify v2 matching,
+interest, scheduling, fairness, authenticity or hiring effectiveness. Run it with
+`node solutions/espoo-proofmatch/benchmark.mjs`.
 
-**Top-1 correctness: evidence 2/2 vs keyword 0/2.** Two intentionally designed,
-non-independent cases illustrate resistance to bio padding. This is not an
-accuracy, fairness, authenticity or hiring-validity study. Data quality and
-self-declared source types remain manipulable. No live/model outcomes claimed.
+## Source and limits
 
-Scoring uses per-role positive weights and the best eligible evidence card per
-skill; cards never stack. Artifact 0.90, walkthrough 0.70, statement 0.20;
-non-empty reported outcome adds 0.10 up to 1.00; age >180 days multiplies by 0.80.
-Future-dated cards are ignored. Weighted support is rounded to one decimal out
-of 100; ID breaks ties. Fixed observation date: 2026-11-14. Missing evidence
-contributes zero observed support but means **unknown ability**, not failure.
-Only declared skill IDs, source form, outcome presence and age affect scoring.
-The app never reads protected characteristics. No automatic rejection exists.
+This private W2 slice starts at ProofMatch PR86 source
+`92d3f48efe94c9547a77963371f49102bee4fb61`; Workbase reuse is pinned to
+`4c5ce6e2edb41b83360dd7d0227da9ded06a566b`. The W2 implementation is delivered on a separate private task branch. No deployment, public release or Junction submission is made.
 
-## Source and scope
+Challenge context is the repository's dated
+`pets/city-of-espoo/CHALLENGE_RESEARCH.md` and official brief snapshot. No fresh
+organizer confirmation, live city data or endorsement is claimed. This version
+contains pre-existing private IP and cannot be described as wholly event-created.
+`solution.json` retains its original base/stage metadata; `stage: idea` and
+capability status `planned` are declarations, not runtime or release evidence.
 
-Challenge: [City of Espoo — Rethinking Recruitment](https://hackjunction.app/participate/45/challenges/319).
-The challenge asks how events can connect talent and employers as AI-written
-applications and AI-assisted recruitment become common. Background is the
-pinned repository’s `pets/city-of-espoo/CHALLENGE_RESEARCH.md` and
-`docs/challenge-research/official-briefs.md`, City of Espoo section. Live official
-page refresh was unavailable in this executor; no current organizer confirmation
-is claimed. This slice was created at the event, one of 19 flagship products
-(coordinator Issue #80), separately from the existing company companion.
-
-Base: `bb1f50908e05ada32e947abff86ac5e31e82e22d`.
-`solution.json` adopts the coordinator-supplied PR #64 product-local shape;
-shared tooling is not changed. `stage: idea` is a declaration, not a live status
-or qualification claim. Capability status remains `planned`; no companion tool
-or private Chibi host executes. See `ARCHITECTURE.md` and `PROGRESS.md` for limits.
+Availability, interests and portfolios are fictional. Relation weights and source
+forms are heuristics, not validated evidence of aptitude. No protected-attribute
+inference, automated hiring/rejection, model, external provider or real event
+participant path exists. See `ARCHITECTURE.md` for boundaries and missing
+production controls.
