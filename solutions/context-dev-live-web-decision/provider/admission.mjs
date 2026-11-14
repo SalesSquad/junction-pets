@@ -30,5 +30,5 @@ export async function review({sources,consent,client,asOf,responseFormat,context
  const winner=candidates.filter(c=>c.eligible).sort((a,b)=>a.totalCents-b.totalCents||a.id.localeCompare(b.id))[0]?.id??null;
  const memo={mode:replay?'SYNTHETIC_PROVIDER_REPLAY':'HOST_INJECTED_UNVERIFIED',asOf,context,policy:POLICY,candidates,evidence,winner,authenticity:'Host assertions only; hashes do not authenticate provider execution.'};
  return {status:winner?'HUMAN_REVIEW':'REFUSE',winner,actionAuthorized:false,memo,memoHash:await digest(memo)};
- }catch(e){return reject('REFUSE',e.message);}
+ }catch(e){const known=new Set(['invalid-host-config','unsafe-target','bounded-response-required','noncanonical-record','source-metadata','failed-or-partial','stale-time','unknown-data-or-provenance','unsafe-total','timeout']);return reject('REFUSE',known.has(e?.message)?e.message:'CLIENT_FAILURE');}
 }

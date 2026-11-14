@@ -11,3 +11,5 @@ The return string is a compact JSON.stringify host-normalized record, NOT an ass
 All outputs are HUMAN_REVIEW, REFUSE or UNQUALIFIED with actionAuthorized:false. Source-linked SHA-256 memo hashes establish reproducibility only; host assertions can be forged by a malicious host/client. They do not establish provider authenticity, signed receipts or purchase permission. Non-replay mode also remains HOST_INJECTED_UNVERIFIED. Shipping/tax values must describe this fixed 40-unit order.
 
 Remaining qualification blocker: verified Context account/API execution against actual public supplier sites with rights, transport public-address enforcement and genuine provider request/final-URL/cache metadata. T44 genuine endpoint execution and M332 live decision impact remain unqualified; maturity is not 4. No credentials, outbound requests, purchases, daemon or deployment are included.
+
+Unexpected injected-client exception text is never returned; only fixed local reason codes are visible, and other failures become CLIENT_FAILURE. Host diagnostics belong in separately redacted privileged logs.
