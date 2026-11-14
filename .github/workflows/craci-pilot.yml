@@ -53,6 +53,7 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - rokoko-mujoco-v7-feasibility
         - rokoko-mujoco-v8-prospective
         - rokoko-mujoco-v10-prospective
+        - rokoko-mujoco-v10-hybrid-prospective
         - rokoko-shared-tournament
         - rokoko-shared-preflight
         - valio-wal-chaos
@@ -4701,6 +4702,105 @@ jobs:
       env:
         CRACI_JOB_STATUS: ${{ job.status }}
         CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome == 'success' && 'success' || 'failure' }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          echo 'Pinned CRACI harness absent; cannot certify result' >&2
+          exit 1
+        fi
+    - name: Retain evidence whether science succeeds or fails
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v10-hybrid-prospective:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v10-hybrid-prospective' }}
+    name: Rokoko REAL MuJoCo pre-terminal V5/V8 hybrid vs placebo on fresh TRAIN worlds
+    runs-on: craci
+    timeout-minutes: 55
+    concurrency:
+      group: craci-rokoko-mujoco-v10-hybrid-prospective-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v10-hybrid-prospective
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU MuJoCo physics for prospective TRAIN-only comparison
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Stop before credit expiry and demand an exact reviewed source
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 4200
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install exact original MuJoCo and NumPy wheels
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+    - name: Run V5/V8 hybrid plus byte-identical V5 placebo on identical fresh TRAIN worlds
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- "$RUNNER_TEMP/mujoco-venv/bin/python" "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v10-hybrid-prospective-qualification.py"
+    - name: Preserve entire independently qualified V10 hybrid raw option stream in collector-safe ZIP parts
+      id: packaging
+      run: |
+        set -euo pipefail
+        python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v10-hybrid-retain-evidence.py" --mode pack --harness-root "$CRACI_HARNESS_ROOT" --evidence-root "$RUNNER_TEMP/craci-evidence" --private-staging "$RUNNER_TEMP/craci-hybrid-private-original"
+        python3 -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v10_hybrid_prospective_qualification.py'
+    - id: receipt
+      name: Finalize exact source-bound V10 hybrid TRAIN-only CRACI receipt
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome == 'success' && steps.packaging.outcome == 'success' && 'success' || 'failure' }}
       run: |
         set -euo pipefail
         export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
