@@ -16,10 +16,11 @@
     "receiptSha256": "3dadd442aefb2b5be66793f64c5bc35102da72cafebba6688bfa1517bdd34cca"
   },
   "dataset": {
-    "sha256": "ac101715484383b1b5add91eeaac5e8f1f532de7a476aca1e53393c5686469c1",
+    "sha256": "739c30a13ecacdecd404774fc9dadd887944f32df5cef14cfd2758a639460419",
     "split": "train",
     "sampleCount": 800,
-    "origin": "synthetic"
+    "origin": "synthetic",
+    "sampleSetSha256": "ac101715484383b1b5add91eeaac5e8f1f532de7a476aca1e53393c5686469c1"
   },
   "evaluation": {
     "kind": "train-only-prospective-physics",
@@ -153,12 +154,12 @@
   ],
   "limitations": [
     "Hosted CRACI run 43649224059 succeeded at immutable harness a64e6fcc73a1d47485fe052990e31c9d9e45100f and source 9cc583d3f0f24484b79c1929ba875c7a3b667806; source-reported provenance, not provider attestation.",
-    "Original GitHub artifact ZIP SHA256 c9bd2ae587d16111213ae7f3e142976d39575850605c312d66cc63ce5e125ccb; original full training.json 103091f37e1b7d46937ea002845dda05f08391f4580f0aa7c181722d78b118af and full_transitions.jsonl.gz 739c30a13ecacdecd404774fc9dadd887944f32df5cef14cfd2758a639460419 restored byte-exact.",
-    "Independent source-bound audit re-counted 800/800 MuJoCo 3.3.7 TRAIN episodes, 160 disjoint fresh worlds over five frozen policies, 38,569 18D public-observation/7-action-mask option events, hashes and every paired goal; hosted replay proof recorded 286 positive and 67 clear goals. No local fresh physics re-execution.",
+    "Original ZIP SHA256 c9bd2ae587d16111213ae7f3e142976d39575850605c312d66cc63ce5e125ccb; training.json SHA256 103091f37e1b7d46937ea002845dda05f08391f4580f0aa7c181722d78b118af; full_transitions.jsonl.gz SHA256 739c30a13ecacdecd404774fc9dadd887944f32df5cef14cfd2758a639460419.",
+    "Independent audit checked 800 MuJoCo 3.3.7 TRAIN episodes, 160 fresh paired worlds, 38,569 public 18D observations and 7-action mask option events. Hosted replays: 286 positive and 67 clear goals; no local fresh physics rerun.",
     "V10 candidate achieved 26/160 safe goals versus frozen V5 37/160; near 10/128 vs 12/128 and clear 16/32 vs 25/32, 0 novel V10 goals and 11 V5 baseline successes lost (2 near, 9 clear), all arms 0 unsafe. THIS IS NEGATIVE MODEL SCIENCE, NO IMPROVEMENT VERIFIED.",
     "The qualifier's mechanism_positive=true/worlds_safe_corridor_success=12 describes a union across strategies already explained by frozen V5, NOT novel V10 progress.",
     "V10 oversteers laterally: 5,380 option-3 events versus frozen V5 941; all 11 lost worlds reached goal under V5 in 29–42 options but V10 exhausted 60, reinforcing 250-tick dwell as goal instead of forward reopening proxy.",
-    "No independent sealed holdout, dev/cal/test/OOD world, physical robot safety attestation, model promotion, merge/release or verified monetary cost. Original unsigned run evidence is retained within GitHub artifact; SHA-bound small proof files committed alongside this registry entry."
+    "No sealed holdout, dev/cal/test/OOD, real robot safety attestation, model promotion, merge/release, provider attestation or verified monetary cost. Original artifact remains on GitHub; seven proof files are SHA-bound to its contents."
   ],
   "policySha256": null
 }
