@@ -8,6 +8,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Chibi Resume — user confirmation required · local demo</title>
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./learning-panel.css">
   <script type="module" src="./app.mjs"></script>
 </head>
 <body>
@@ -17,6 +18,7 @@
       <a href="./" class="brand" aria-label="Chibi Resume home"><span class="brand-symbol" aria-hidden="true">✳</span> chibi<span class="brand-divider">/</span><span class="brand-product">resume</span></a>
       <nav aria-label="Companion capabilities" class="capability-nav">
         <span class="nav-active" aria-current="page">Resume</span>
+        <a href="#learningPanel">Learn</a>
         <button type="button" disabled title="Future capability: consensual task handover">Relay <span>Later</span></button>
         <button type="button" disabled title="Future capability: notice meaningful changes">Familiar <span>Later</span></button>
       </nav>
@@ -92,7 +94,9 @@
 
       <section class="scenario-strip" aria-labelledby="scenario-title"><div class="scenario-heading"><span class="eyebrow" id="scenario-title">TRY THE WHOLE MOMENT</span><p>About a minute. No setup.</p></div><ol><li id="chapter1"><span>01</span><div><strong>Pack two essentials</strong><small>Confirm camera + microphone</small></div></li><li id="chapter2"><span>02</span><div><strong>Get interrupted</strong><small>Your progress stays put</small></div></li><li id="chapter3"><span>03</span><div><strong>Look again</strong><small>A similar charger isn't yours</small></div></li><li id="chapter4"><span>04</span><div><strong>Finish with certainty</strong><small>You check. You confirm.</small></div></li></ol></section>
 
-      <footer class="page-footer"><span>CHIBI · CONTINUITY FOR REAL LIFE</span><p>Resume now. <span>Relay and Familiar are future capabilities.</span></p><a href="./README.md">Prototype notes ↗</a></footer>
+      <section id="learningPanel" aria-label="Lens learning"></section>
+
+      <footer class="page-footer"><span>CHIBI · CONTINUITY FOR REAL LIFE</span><p>Resume and learn. <span>Relay and Familiar are future capabilities.</span></p><a href="./README.md">Prototype notes ↗</a></footer>
     </main>
   </div>
 
@@ -101,3 +105,4 @@
   <noscript><p class="no-script">This local interactive demo needs JavaScript. No camera or account is required.</p></noscript>
 </body>
 </html>
+

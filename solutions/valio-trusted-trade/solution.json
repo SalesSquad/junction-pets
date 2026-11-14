@@ -5,8 +5,27 @@
   "objective": "Turn a professional kitchen's purchasing need into a fixed-price, stock-checked, policy-controlled quote and an auditable, idempotent buyer-approved simulated order; expose a vendor-neutral HTTP interchange model for eventual Valio Aimo connection.",
   "baseCommit": "bb1f50908e05ada32e947abff86ac5e31e82e22d",
   "challengeSlugs": ["valio-aimo"],
-  "agentIds": ["junction.valio-aimo"],
+  "agentIds": ["junction.valio-aimo", "junction.aiven", "junction.afterquery"],
   "stage": "building",
   "ownedPaths": ["solutions/valio-trusted-trade/"],
-  "capabilityUses": []
+  "capabilityUses": [
+    {
+      "agentId": "junction.valio-aimo",
+      "capabilityId": "challenge-design",
+      "purpose": "Scope a synthetic professional-kitchen purchasing request and verification goals; never authorize a supplier action.",
+      "status": "planned"
+    },
+    {
+      "agentId": "junction.aiven",
+      "capabilityId": "integration-design",
+      "purpose": "Review the invented quote and audit data flow, idempotency and source provenance; no Aiven service is called.",
+      "status": "planned"
+    },
+    {
+      "agentId": "junction.afterquery",
+      "capabilityId": "failure-review",
+      "purpose": "Inspect synthetic refusal and replay traces for prompt-injection, stale-price and duplicate-order failure modes; no model evaluation is executed.",
+      "status": "planned"
+    }
+  ]
 }

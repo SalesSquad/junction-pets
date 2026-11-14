@@ -1,0 +1,138 @@
+{
+  "schema": "lens.learning-simulation-report/v1",
+  "evidenceMode": "SYNTHETIC",
+  "source": {
+    "baseCommit": "9e1915827fabff9836dac217ab69727e514acc49",
+    "files": {
+      "apps/meta-resume-web/learning-core.mjs": "af20a9e4c3720f8263b8726aeeb3b6aa79fd8f3ffb0204ee9d6fd7e29e312be4",
+      "apps/meta-resume-web/state.mjs": "06870e53760a2986430b57299dadc4ce8983c986757cf894b483d1d94c4c1b0d",
+      "apps/meta-resume-web/fixture.mjs": "94a701e6e4e6ca100d9717e22d638d925349c1e23b3063a7cedad078d6c45c03",
+      "services/lens-learning/simulate.mjs": "ca36608f47e98bcf3bae9437466edfdd204db9ec67d21b6904a95cf37b586e2b"
+    }
+  },
+  "evaluatedCases": 8,
+  "checks": [
+    {
+      "name": "model-cannot-confirm-memory-or-performance",
+      "result": "pass"
+    },
+    {
+      "name": "scope-isolation-and-closed-save-schema",
+      "result": "pass"
+    },
+    {
+      "name": "tuple-identities-restore-with-colons",
+      "result": "pass"
+    },
+    {
+      "name": "feedback-cannot-refer-to-an-old-task-or-reset",
+      "result": "pass"
+    },
+    {
+      "name": "exact-idempotency-and-concurrent-revision",
+      "result": "pass"
+    },
+    {
+      "name": "late-decision-cannot-survive-revoke-forget-or-task-change",
+      "result": "pass"
+    },
+    {
+      "name": "expired-decision-and-silence-policy",
+      "result": "pass"
+    },
+    {
+      "name": "repeated-template-does-not-inflate-independent-diversity",
+      "result": "pass"
+    },
+    {
+      "name": "recent-assisted-practice-restores-help",
+      "result": "pass"
+    },
+    {
+      "name": "reminder-feedback-and-minimal-handoff",
+      "result": "pass"
+    },
+    {
+      "name": "original-resume-progress-stays-user-owned",
+      "result": "pass"
+    }
+  ],
+  "passed": 11,
+  "providerCalls": 0,
+  "physicalDeviceVerified": false,
+  "privateHostVerified": false,
+  "cases": [
+    {
+      "id": "unconfirmed-visual-guess",
+      "action": "one_step",
+      "activeMemories": 0,
+      "independentTemplates": 0,
+      "assistedAttempts": 0,
+      "masteryVerified": false,
+      "taskCompletionAuthorized": false
+    },
+    {
+      "id": "confirmed-preference",
+      "action": "explain",
+      "activeMemories": 1,
+      "independentTemplates": 0,
+      "assistedAttempts": 0,
+      "masteryVerified": false,
+      "taskCompletionAuthorized": false
+    },
+    {
+      "id": "correction-next-episode",
+      "action": "stay_silent",
+      "activeMemories": 1,
+      "independentTemplates": 0,
+      "assistedAttempts": 0,
+      "masteryVerified": false,
+      "taskCompletionAuthorized": false
+    },
+    {
+      "id": "assisted-is-not-mastery",
+      "action": "explain",
+      "activeMemories": 0,
+      "independentTemplates": 0,
+      "assistedAttempts": 3,
+      "masteryVerified": false,
+      "taskCompletionAuthorized": false
+    },
+    {
+      "id": "independent-diverse-practice",
+      "action": "one_step",
+      "activeMemories": 0,
+      "independentTemplates": 3,
+      "assistedAttempts": 0,
+      "masteryVerified": false,
+      "taskCompletionAuthorized": false
+    },
+    {
+      "id": "revoked-consent",
+      "action": "stay_silent",
+      "activeMemories": 1,
+      "independentTemplates": 0,
+      "assistedAttempts": 0,
+      "masteryVerified": false,
+      "taskCompletionAuthorized": false
+    },
+    {
+      "id": "forget-derived-state",
+      "action": "ask_one_question",
+      "activeMemories": 0,
+      "independentTemplates": 0,
+      "assistedAttempts": 0,
+      "masteryVerified": false,
+      "taskCompletionAuthorized": false
+    },
+    {
+      "id": "changed-goal-invalidates-decision",
+      "action": "explain",
+      "activeMemories": 1,
+      "independentTemplates": 0,
+      "assistedAttempts": 0,
+      "masteryVerified": false,
+      "taskCompletionAuthorized": false
+    }
+  ]
+}
