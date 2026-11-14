@@ -3508,6 +3508,7 @@ jobs:
           fi
           if [ "$CHAOS_PROFILE" = "evidence" ]; then
             node --test "$CRACI_HARNESS_ROOT/scripts/craci/chaos-tests.test.mjs"
+            python3 "$CRACI_HARNESS_ROOT/scripts/craci/chaos-controller-test.py"
           fi
         '
     - name: Probe neutral external HTTP with curl fail-on-HTTP-error

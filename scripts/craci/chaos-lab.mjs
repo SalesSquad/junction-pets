@@ -20,7 +20,8 @@ const PROFILES = Object.freeze({
   provenance: ['source-drift', 'lock-drift', 'cache-poison', 'receipt-swap', 'artifact-tamper'],
   network: ['network-reset', 'unexpected-egress', 'lifecycle-fired', 'process-exit', 'process-hang'],
   control: ['duplicate-dispatch', 'unknown-ack', 'budget-overrun', 'deadline-crossed', 'credit-closed'],
-  evidence: ['receipt-truncate', 'unverified-claim', 'secret-leak', 'artifact-missing', 'false-success'],
+  evidence: ['receipt-truncate', 'receipt-json-corrupt', 'receipt-byte-drift',
+    'unverified-claim', 'secret-leak', 'artifact-missing', 'false-success'],
 });
 const BENIGN = ['clean', 'network-jitter-under-budget', 'artifact-list-reorder', 'verified-replay'];
 const FAULTS = Object.values(PROFILES).flat();
@@ -91,8 +92,10 @@ function inject(world, fault) {
     'deadline-crossed': ['before-admit', () => { world.now = STOP - 10 * 60000; }],
     'credit-closed': ['before-admit', () => { world.creditsOpen = false; }],
     'receipt-truncate': ['after-receipt', () => { world.receiptBytes = world.receiptBytes.slice(0, 30); world.artifactBytes = world.receiptBytes; }],
+    'receipt-json-corrupt': ['after-receipt', () => { world.receiptBytes = '{not-json'; world.receiptDigest = sha(world.receiptBytes); world.artifactBytes = world.receiptBytes; }],
+    'receipt-byte-drift': ['after-receipt', () => { world.receiptBytes += ' '; }],
     'unverified-claim': ['after-receipt', () => { world.receipt.sourceVerified = false; world.receiptBytes = JSON.stringify(world.receipt); world.receiptDigest = sha(world.receiptBytes); world.artifactBytes = world.receiptBytes; }],
-    'secret-leak': ['after-receipt', () => { world.receiptBytes += world.localSecret; world.artifactBytes = world.receiptBytes; }],
+    'secret-leak': ['after-receipt', () => { world.receipt.debug = world.localSecret; world.receiptBytes = JSON.stringify(world.receipt); world.receiptDigest = sha(world.receiptBytes); world.artifactBytes = world.receiptBytes; }],
     'artifact-missing': ['after-artifact', () => { world.artifactExists = false; }],
     'false-success': ['after-receipt', () => { world.receipt.stageOutcome = 'failure'; world.receiptBytes = JSON.stringify(world.receipt); world.receiptDigest = sha(world.receiptBytes); world.artifactBytes = world.receiptBytes; }],
     clean: ['before-admit', () => {}],
@@ -105,11 +108,17 @@ function inject(world, fault) {
   return {hook, apply};
 }
 
-function inspect(world) {
+function inspect(world, {disabledGate = null, injections = []} = {}) {
   // Order is intentional: no work should begin after the admission hook rejects.
   const failures = [];
-  const check = (condition, code) => { if (!condition) failures.push(code); };
-  const hook = (name, run) => { world.hookTrace.push(name); run(); };
+  const check = (condition, code) => { if (code !== disabledGate && !condition) failures.push(code); };
+  const hook = (name, run) => {
+    // Apply only faults whose scheduled hook is reached. An earlier rejection
+    // prevents later stages from executing (unlike a pre-mutated world).
+    for (const injection of injections) if (injection.hook === name) injection.apply();
+    world.hookTrace.push(name);
+    run();
+  };
   hook('before-admit', () => {
     check(world.creditsOpen, 'CREDIT_CLOSED');
     check(world.now + world.jobBudgetMs < STOP, 'DEADLINE_GUARD');
@@ -138,7 +147,7 @@ function inspect(world) {
   hook('after-receipt', () => {
     check(sha(world.receiptBytes) === world.receiptDigest, 'RECEIPT_DIGEST');
     let receipt;
-    try { receipt = JSON.parse(world.receiptBytes); } catch { failures.push('RECEIPT_PARSE'); }
+    try { receipt = JSON.parse(world.receiptBytes); } catch { check(false,'RECEIPT_PARSE'); }
     if (receipt) {
       check(receipt.sourceCommit === world.expectedCommit, 'RECEIPT_SOURCE');
       check(receipt.result === 'pass' && receipt.sourceVerified === true &&
@@ -166,11 +175,35 @@ function oracle(faults) { return faults.every(f => BENIGN.includes(f)); }
 function evaluate(faults) {
   const specimen = pristine();
   const patches = faults.map(f => ({fault:f, ...inject(specimen,f)}));
-  // No skipped mutation: apply faults at their prescribed execution stage.
-  const stages = ['before-admit', 'after-checkout', 'after-install', 'after-execute', 'after-receipt', 'after-artifact'];
-  for (const stage of stages) for (const patch of patches) if (patch.hook === stage) patch.apply();
-  const failures = inspect(specimen);
+  const failures = inspect(specimen,{injections:patches});
   return {accepted:failures.length === 0, baselineAccepted:flawedBaseline(specimen), failures};
+}
+
+/** Mutation testing: if a single protection is deleted, a matching probe MUST fail green. */
+export function mutationAudit() {
+  const critical = Object.entries({
+    CREDIT_CLOSED:'credit-closed', DEADLINE_GUARD:'deadline-crossed',
+    BUDGET_GUARD:'budget-overrun', DISPATCH_AMBIGUOUS:'duplicate-dispatch',
+    SOURCE_PIN:'source-drift', LOCK_PIN:'lock-drift',
+    CACHE_PROVENANCE:'cache-poison', LIFECYCLE_EXECUTED:'lifecycle-fired',
+    UNEXPECTED_EGRESS:'unexpected-egress', NETWORK_RESET:'network-reset',
+    PROCESS_FAILED:'process-exit', PROCESS_TIMEOUT:'process-hang',
+    RECEIPT_DIGEST:'receipt-byte-drift', RECEIPT_PARSE:'receipt-json-corrupt',
+    RECEIPT_SOURCE:'receipt-swap', RECEIPT_CLAIM:'unverified-claim',
+    SECRET_MARKER:'secret-leak', ARTIFACT_MISSING:'artifact-missing',
+    ARTIFACT_DIGEST:'artifact-tamper',
+  });
+  const findings = critical.map(([disabledGate, fault]) => {
+    const clean = pristine(), weak = pristine();
+    const normal = inspect(clean,{injections:[inject(clean,fault)]});
+    const mutated = inspect(weak,{disabledGate,injections:[inject(weak,fault)]});
+    return {disabledGate,fault,
+      detectedByNormal:normal.length > 0,
+      killed:normal.length > 0 && mutated.length === 0};
+  });
+  const killed = findings.filter(f=>f.killed).length;
+  return {total:findings.length,killed,score:killed/findings.length,
+    surviving:findings.filter(f=>!f.killed)};
 }
 
 export async function chaosCampaign({seed, cases, profile}) {
@@ -218,12 +251,15 @@ export async function chaosCampaign({seed, cases, profile}) {
   assert.equal(outcomes.detectedInjected+outcomes.acceptedControl,cases);
   for (const fault of pool) assert(observedRejects.has(fault),`Uncovered fault: ${fault}`);
   assert(outcomes.distinctPairs > 0,'Combinatorial coverage missing');
+  const mutations = mutationAudit();
+  assert.equal(mutations.killed,mutations.total,'At least one deleted protection survived');
   const corpus = corpusHash.digest('hex');
   return {schemaVersion:1,workId:'CRACI-CHAOS-20261114',profile,seed,cases,
     claim:'Synthetic failure-hook evaluation, not production or CRACI enforcement qualification',
     sourceCommit:process.env.CRACI_SOURCE_SHA||null,
     actualCostEur:null,deterministicCorpusDigestSha256:corpus,
-    metrics:{...outcomes,zeroMissUpper95IfZero:outcomes.detectedInjected?
+    metrics:{...outcomes,mutationKills:mutations.killed,mutationTotal:mutations.total,
+      zeroMissUpper95IfZero:outcomes.detectedInjected?
       Number((3/outcomes.detectedInjected).toFixed(7)):null},
     faults:counts, counterexamples:firstFailures,
     bounds:['No real secrets, malware, production traffic, runner crashes or destructive resource load',

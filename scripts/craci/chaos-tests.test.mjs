@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import {strict as assert} from 'node:assert';
-import {chaosCampaign} from './chaos-lab.mjs';
+import {chaosCampaign, mutationAudit} from './chaos-lab.mjs';
 
 for (const [index,profile] of ['provenance','network','control','evidence'].entries()) {
   test(`${profile}: fail-closed metamorphic oracle and source-bound digest`,async()=>{
@@ -31,4 +31,11 @@ test('changed seed changes pairwise corpus without rewriting prior evidence',asy
 
 test('unknown fault profile refuses to run',async()=>{
   await assert.rejects(chaosCampaign({seed:1,cases:900,profile:'unknown'}),/Unknown chaos profile/);
+});
+
+test('every one of 19 deleted synthetic safety gates is caught',()=>{
+  const audit=mutationAudit();
+  assert.equal(audit.killed,19);
+  assert.equal(audit.total,19);
+  assert.deepEqual(audit.surviving,[]);
 });
