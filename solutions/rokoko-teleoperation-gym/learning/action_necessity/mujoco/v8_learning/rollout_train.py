@@ -132,6 +132,16 @@ def validate_historical_trainer_source(checkout):
         capture_output=True, timeout=15)
     v8.require(original_unchanged.returncode == 0,
                "V8_PROSPECTIVE_HISTORICAL_TRAINER_BYTES_CHANGED")
+    original_physics_contracts = [
+        "solutions/rokoko-teleoperation-gym/learning/action_necessity/mujoco/" + name
+        for name in ("physics.py", "moving_scene.xml", "v7_feasibility/run.py",
+                     "v5_learning/run.py", "v5_learning/policy.py",
+                     "v6_learning/run.py", "v6_learning/corridor_policy.py")]
+    unchanged_physics = subprocess.run(
+        ["git", "-C", root, "diff", "--quiet", v8.V7_SOURCE_SHA, "HEAD", "--",
+         *original_physics_contracts], capture_output=True, timeout=15)
+    v8.require(unchanged_physics.returncode == 0,
+               "V8_PROSPECTIVE_ORIGINAL_PHYSICS_OR_BASELINE_DRIFT")
 
 
 def select_train_worlds(env, signature):
@@ -427,6 +437,23 @@ def policy_factory(name, frozen_weights, *, frozen_v7=None):
                 path, path.with_name("training-receipt.json"), FROZEN_WEIGHTS_SHA256)
         else:
             weights = np.asarray(frozen_weights, dtype=np.float64)
+            # Independent replayer may pass a previously loaded NumPy matrix.
+            # Reconstruct the exact ORIGINAL frozen trainer metadata and
+            # enforce canonical digest, preventing replacement by arbitrary
+            # in-memory weights even when the main CLI already checked files.
+            if weights.shape == (4, 41, 7) and np.all(np.isfinite(weights)):
+                frozen = {"schema": v8.SCHEMA + ".weights",
+                          "source_head": TRAINER_HEAD,
+                          "v7_source_head": v8.V7_SOURCE_SHA,
+                          "v7_training_sha256": v8.V7_PINNED_FILES["training.json"],
+                          "v7_full_transitions_sha256":
+                          v8.V7_PINNED_FILES["full_transitions.jsonl.gz"],
+                          "model_type": "four-stage masked-observation linear softmax",
+                          "feature_count": 41, "stages": 4, "actions": 7,
+                          "seed": v8.RANDOM_SEED,
+                          "weights": np.round(weights, 12).tolist()}
+                v8.require(v8.digest(frozen) == FROZEN_WEIGHTS_SHA256,
+                           "V8_INDEPENDENT_REPLAY_UNREVIEWED_IN_MEMORY_MODEL")
         v8.require(weights.shape == (4, 41, 7) and np.all(np.isfinite(weights)),
                    "V8_INDEPENDENT_REPLAY_MODEL_WEIGHTS_INVALID")
         return lambda: v8.HierarchicalPolicy(weights.copy())
@@ -436,6 +463,25 @@ def policy_factory(name, frozen_weights, *, frozen_v7=None):
             _CACHED_V7_SOURCE, _ = import_v7_and_physics()
         frozen_v7 = _CACHED_V7_SOURCE
     return frozen_v7.policy_factory(name)
+
+
+def build_source_bound_manifest(output, head, frozen_sha, training, trial_count):
+    """Exact V7 raw-file manifest contract; auxiliary readout stays separate."""
+    raw = output / "full_transitions.jsonl.gz"
+    summary = output / "training.json"
+    readout = output / "paired-readout.json"
+    v8.require(all(x.is_file() for x in (raw, summary, readout)),
+               "V8_EXACT_RAW_AND_SUMMARY_FILES_REQUIRED")
+    return {"schema": SCHEMA + ".manifest", "executed_head": head,
+            "produced_at": datetime.now(timezone.utc).isoformat(),
+            "immutable_source_v7_head": v8.V7_SOURCE_SHA,
+            "frozen_weights_sha256": frozen_sha,
+            "historical_frozen_trainer_head": TRAINER_HEAD,
+            "file_sha256": {x.name: sha_file(x) for x in (raw, summary)},
+            "source_sha256": training["source_sha256"],
+            "auxiliary_file_sha256": {readout.name: sha_file(readout)},
+            "actual_trials": trial_count, "train_only": True,
+            "dev_cal_test_ood_opened": False, "promotion_authorized": False}
 
 
 def main(argv=None):
@@ -488,7 +534,8 @@ def main(argv=None):
             v8.require(row["world_hash"] == definition["world_hash"],
                        "V8_PROSPECTIVE_STRATEGY_WORLD_HASH_DRIFT")
             row.update(observed_corridor=definition["observed_corridor"],
-                       initial_observed_obstacle_y=definition["initial_observed_obstacle_y"])
+                       initial_observed_obstacle_y=definition["initial_observed_obstacle_y"],
+                       allocation_phase="all_four_paired_prospective_train")
             trials.append(row)
             stream.write(v8.canonical_bytes({"seed": row["seed"],
                                              "strategy": strategy,
@@ -531,18 +578,7 @@ def main(argv=None):
     v8.write_new(output / "paired-readout.json", readout)
     v8.require((output / "paired-readout.json").stat().st_size <= MAX_CAPTURED_JSON_BYTES,
                "V8_READOUT_EXCEEDS_CRACI_CAPTURE_LIMIT")
-    manifest = {"schema": SCHEMA + ".manifest", "executed_head": head,
-                "produced_at": datetime.now(timezone.utc).isoformat(),
-                "immutable_source_v7_head": v8.V7_SOURCE_SHA,
-                "frozen_weights_sha256": frozen_sha,
-                "historical_frozen_trainer_head": TRAINER_HEAD,
-                "file_sha256": {p.name: sha_file(p) for p in
-                                (raw_path, output / "training.json", output / "paired-readout.json")},
-                "source_sha256": training["source_sha256"],
-                "auxiliary_file_sha256": {"paired-readout.json": sha_file(
-                    output / "paired-readout.json")},
-                "actual_trials": len(trials), "train_only": True,
-                "dev_cal_test_ood_opened": False, "promotion_authorized": False}
+    manifest = build_source_bound_manifest(output, head, frozen_sha, training, len(trials))
     v8.write_new(output / "manifest.json", manifest)
     print(json.dumps({"executed_head": head, "train_only_real_trials": len(trials),
                       "model_weights_sha256": frozen_sha,
