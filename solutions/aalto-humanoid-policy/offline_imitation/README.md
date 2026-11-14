@@ -7,6 +7,7 @@ Work `VERDA-AALTO-ROKOKO-20261114`; this builds on [M320 baseline PR #121](https
 - Sponsor dataset: [`zupermiez/g1_pick_cube`](https://huggingface.co/datasets/zupermiez/g1_pick_cube) at revision `04046a85586feb5727f991adee3367176015cab0`.
 - Verified public `meta/info.json` SHA-256: `cc93b965d0a4d975e43749f1f408c693774d7da90d132924740ba0a494c98c70`.
 - Verified public `README.md` SHA-256: `43b571d3b957bde4b3b307a3d2ac732c9ba6f5e906b6a49a5b8eac6b68efd8b0`.
+- Verified public `data/chunk-000/file-000.parquet` SHA-256: `49a03ab14237467f27b5656d78103b8a716062e21e106c0f5650c566be25ded3` (3,533,626 bytes); enforced before parsing. Newer `hf-xet` cache clients symlink the snapshot to the shared `hub/blobs` directory; older clients use repository-local `blobs`.
 - Exactly 20 episodes / 11,720 frames / 30 fps; `observation.state` and `action` are float32[28] with matching ordered joint names. Three AV1 camera streams are available, but this baseline **does not decode or download** them.
 - Pinned sponsor runner source: `zupermiez/aaltonomous-humanoid@36daf5b44dad46b8f448a5124ded7faa9947be1e`.
 
@@ -14,7 +15,7 @@ The sponsor explicitly describes much of the data as **suboptimal**. Its public 
 
 ## Actual CPU baseline run (no GPU needed)
 
-Use an isolated venv and a scratch volume **outside iCloud and the repository**. No video download is required. The installed Hugging Face Hub client resolves the exact pinned revision; the study verifies metadata/card bytes and hashes every Parquet shard, but those local hashes are not a signature.
+Use an isolated venv and a scratch volume **outside iCloud and the repository**. No video download is required. The installed Hugging Face Hub client resolves the exact pinned revision; the study verifies metadata/card bytes and **rejects Parquet content that differs from the exact pinned SHA-256**, but local hashes are not a signature.
 
 ```bash
 python3 -m pip install numpy pyarrow huggingface-hub
