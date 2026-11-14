@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -79,9 +80,11 @@ class SourceAndSafety(unittest.TestCase):
                 v10.policy_factory(fake)
 
     def test_actual_checkpoint_if_checked_into_repo(self):
-        path = ROOT / "checkpoints" / "candidate-weights.json"
+        path = Path(os.environ.get(
+            "J26_V10_TEST_PINNED_CHECKPOINT",
+            str(ROOT / "checkpoints" / "candidate-weights.json")))
         if not path.is_file():
-            self.skipTest("the generated model is uploaded in GitHub PR, absent in scratch")
+            self.skipTest("GitHub-committed checkpoint absent from current scratch mirror")
         factory = v10.policy_factory(path)
         mask = np.array([0, 0, 0, 0, 1, 0, 0], dtype=int)
         self.assertEqual(factory()(obs(), mask), 4)
