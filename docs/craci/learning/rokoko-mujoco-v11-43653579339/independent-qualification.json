@@ -1,0 +1,83 @@
+{
+  "actual_real_option_transitions": 34992,
+  "all_512_real_initial_worlds_replayed": true,
+  "candidate_unsafe_trials": 0,
+  "dataset_sha256": "7e70ec97aa0a5f14ed1d3291652e8a951aae4f6a4e2fa93e6e45fe81a6f63c92",
+  "decision": "valid_source_bound_five_way_train_only_evidence",
+  "dev_cal_test_ood_opened": false,
+  "dispatch_authorized": false,
+  "exact_source_sha": "ab6df4054ef6ed350b479469590a48046a0c0a68",
+  "experiment_complete": true,
+  "full_transition_archive_sha256": "0a38081a43426ee4774d09d22886202aaf56d59f6b925a0a75cb2f2da14c848b",
+  "independentHoldout": false,
+  "independent_all_512_initial_public_replay": {
+    "count": 512,
+    "independent_exact_real_mujoco_start_replay": true,
+    "public_start_lines_sha256": "3a2ab93dcee9fcfbed926434c1e37eeb12fb79bce7a4d5bed983885c47e86c4e"
+  },
+  "independent_five_way_forward_reopen_worlds": {
+    "frozen_v5": 60,
+    "frozen_v6": 94,
+    "frozen_v8": 109,
+    "v10_loss_informed": 109,
+    "v11_goal_preserving": 108
+  },
+  "independent_full_trace_public_mask_replay": true,
+  "independent_true_physics_clear_goal_replay": {
+    "claim_verified": true,
+    "claimed_safe_clear_goal_trajectories": 42,
+    "dev_cal_test_ood_opened": false,
+    "model_promotion_authorized": false,
+    "replayed_safe_clear_goal_trajectories": 42,
+    "schema": "junction.rokoko.mujoco-v11-clear-goal-replay.v1",
+    "verified_clear_goal_trial_keys_sha256": "a46cfe8c24112ba2187148a56be998c288e4a444d6de7049c2bc3642c277d404"
+  },
+  "independent_true_physics_positive_replay": {
+    "claim_verified": true,
+    "fully_replayed_positive_train_trials": 189,
+    "model_promotion_authorized": false,
+    "no_dev_cal_test_ood": true,
+    "positive_trial_keys_sha256": "987da85b4e45a3ed068de0ad141708abedb889cd4172061a132bfcf8bf52bc1c",
+    "schema": "junction.rokoko.mujoco-v7-positive-replay.v1",
+    "selection_scan_replayed": 333,
+    "verified_near_corridor_success_worlds": 6,
+    "verified_obstacle_away_displacement_worlds": 74
+  },
+  "limits": "Real MuJoCo train-only probe; no test qualification or physical robot safety certificate",
+  "lost_v5_goal_seed_ids": [],
+  "mechanism_positive": true,
+  "model_improvement_verified": false,
+  "next_experiment_advisory": {
+    "new_dev_seed_start": 129330,
+    "new_train_seed_start": 513000,
+    "next_step": "new_source_holdout_after_independent_review",
+    "note": "No discovery among tested strategies is not an impossibility theorem"
+  },
+  "novel_v11_safe_goal_seed_ids": [],
+  "original_three_files_sha256": {
+    "full_transitions.jsonl.gz": "0a38081a43426ee4774d09d22886202aaf56d59f6b925a0a75cb2f2da14c848b",
+    "paired-readout.json": "cd50f5def18bba6741145d27e1f07652f6d6c366a0609a04e0a060612f817e4d",
+    "training.json": "c3b3b399344fa18eff7a303cf27e2a510ab9eb74111a6216df1ec11a906579df"
+  },
+  "plan_sha256": "3b4fc425c5f9af4ab2e28b2afcaeae62543ba08a3064406c4150b84c4d57f494",
+  "producer_exit_code": 0,
+  "promotion_authorized": false,
+  "schema": "junction.rokoko.v11-prospective.craci.train.v1",
+  "science_gate": "STOP_UNSAFE_LOST_OR_ZERO_NOVEL",
+  "science_warning": "Physical-goal delta is TRAIN-only and needs separate review",
+  "selected_clear_worlds": 32,
+  "selected_near_worlds": 128,
+  "source_gate_sha256": "b115fc329b50f2557e8c6074734990dbcf6d1c5046516fbbda6158c5c513eaa8",
+  "source_only_precheck": "source-integrity.json",
+  "strategies": {
+    "frozen_v5": 160,
+    "frozen_v6": 160,
+    "frozen_v8": 160,
+    "v10_loss_informed": 160,
+    "v11_goal_preserving": 160
+  },
+  "train_only_seed_start": 517000,
+  "trials": 800,
+  "worlds_safe_corridor_success": 6,
+  "worlds_safe_lateral_displacement_ge_25mm": 74
+}
