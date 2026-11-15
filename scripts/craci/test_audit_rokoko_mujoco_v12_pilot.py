@@ -42,6 +42,20 @@ def scans():
                         observation=obs,mask=a.public_mask(obs)))
     return out
 
+def synthetic_public_trajectory_source():
+    all_scans=scans()
+    selected=a.derive_public_cohort(all_scans)
+    trials=[]
+    for r in selected:
+        for arm in a.ARMS:
+            trials.append(dict(seed=r["seed"],strategy=arm,
+                               world_hash=r["world_hash"],
+                               full_transition_sha256=a.sha(a.canonical([r["seed"],arm]))))
+    return dict(executed_head=a.SOURCE,model_sha256=a.MODEL,plan_sha256=a.PLAN,
+                all_512_public_initial_scans=all_scans,
+                cohort=[dict(seed=r["seed"],world_hash=r["world_hash"]) for r in selected],
+                trials=trials)
+
 class OriginalV12AuditContract(unittest.TestCase):
     def test_exact_frozen_source_and_artifact_identity(self):
         self.assertEqual(a.SOURCE,"78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f")
@@ -164,6 +178,38 @@ class OriginalV12AuditContract(unittest.TestCase):
     def test_summary_canonical_hash_order_deterministic(self):
         self.assertEqual(a.sha(a.canonical({"a":1,"b":2})),
                          a.sha(a.canonical({"b":2,"a":1})))
+
+    def test_public_trajectory_manifest_is_exact_hash_only_48_by_3(self):
+        source=synthetic_public_trajectory_source()
+        index=a.build_public_trajectory_index(source)
+        self.assertEqual(index["schema"],a.TRACE_SCHEMA)
+        self.assertEqual((len(index["worlds"]),len(index["trajectories"])),(48,144))
+        self.assertFalse(index["contains_original_18d_observations"])
+        self.assertEqual(set(index["worlds"][0]),{"seed","world_hash"})
+        self.assertEqual(set(index["trajectories"][0]),
+                         {"seed","strategy","full_transition_sha256"})
+
+    def test_duplicate_public_trace_pair_rejected(self):
+        source=synthetic_public_trajectory_source()
+        source["trials"][1]=source["trials"][0]
+        with self.assertRaisesRegex(AssertionError,"TRAJECTORY_INDEX_TRIAL"):
+            a.build_public_trajectory_index(source)
+
+    def test_changed_public_trace_world_hash_rejected(self):
+        source=synthetic_public_trajectory_source()
+        source["cohort"][0]["world_hash"]="forged-world"
+        with self.assertRaisesRegex(AssertionError,"TRAJECTORY_INDEX_COHORT"):
+            a.build_public_trajectory_index(source)
+
+    def test_public_trace_canonical_file_bytes_reject_drift(self):
+        index=a.build_public_trajectory_index(synthetic_public_trajectory_source())
+        with tempfile.TemporaryDirectory() as tmp:
+            target=Path(tmp)/"trace-index.json"
+            target.write_bytes(a.canonical(index)+b"\n")
+            a.check_public_trajectory_index(target,index)
+            target.write_bytes(target.read_bytes()+b" ")
+            with self.assertRaisesRegex(AssertionError,"PUBLIC_TRAJECTORY_INDEX"):
+                a.check_public_trajectory_index(target,index)
 
 if __name__=="__main__":
     unittest.main()
