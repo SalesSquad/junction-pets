@@ -40,3 +40,9 @@ test('v2 responses validate with governance and refuse a LIVE handoff label', ()
   assert.ok(validateResponse(live).some(e => /LIVE/.test(e)));
   assert.ok(validateResponse({ ...v2, extra: 1 }).some(e => /unknown field/.test(e)));
 });
+
+test('parity vectors for the Rust port are stable and JCS-shaped', async () => {
+  const { execFileSync } = await import('node:child_process');
+  assert.match(execFileSync(process.execPath, [new URL('../vectors/generate.mjs', import.meta.url).pathname, '--check'], { encoding: 'utf8' }), /stable/);
+  assert.equal(canonical({ b: 1e21, a: 0.1, 'ä': [true, null] }), '{"a":0.1,"b":1e+21,"ä":[true,null]}');
+});

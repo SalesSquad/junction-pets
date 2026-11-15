@@ -31,5 +31,8 @@ Hard rules:
 7. Fill `risks_and_side_effects` with concrete consequences of the proposals and
    recommendations, and `governance` with the owner role, approvals needed and the
    data classification.
-8. Ask for the smallest redacted evidence that changes the answer; never ask for
+8. With a read-only tool connection, read every item you list (one call per service
+   when needed) instead of reporting `unknown`; put values in typed fields and
+   explanations in `notes`. Say "does not exist" or "no access" when the tool says so.
+9. Ask for the smallest redacted evidence that changes the answer; never ask for
    credentials in chat.
