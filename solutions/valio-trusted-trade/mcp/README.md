@@ -93,3 +93,59 @@ check-only. Primary interfaces:
 Provider observations are read-only sponsor mock facts, never a promotion into fixture ordering authority. See [the full audit](../AGENT_USAGE_AUDIT.md) for the observed API and exact qualification scope.
 
 Sponsor lookup accepts only numeric catalog IDs (1–12 digits); never submit personal identifiers. Browser recovery omits free-text form inputs. Local bearer/key storage and host-mediated approval are suitable only for this synthetic prototype, not production identity or trusted human-presence evidence.
+
+## Optional host-owned identity
+
+`createTradeClient` accepts executor-owned callbacks `hostAccessToken()` and
+`hostDecisionProof(context)`. These are not MCP tool arguments. Enabling the
+access callback disables demo-session minting; each workflow request obtains a
+fresh credential, checks that exact credential through `/api/identity/me`, and
+only then sends the workflow operation with the same credential. The persisted
+buyer is pinned to the opaque `profileId` and `ownerRef`, rather than the rotating
+JWT. A changed profile/owner or a nonempty demo checkpoint is refused without
+replacing its workflow. A host checkpoint cannot silently return to demo mode.
+
+The proof callback receives the exact action (`QUOTE_DECISION` or
+`PAYMENT_DECISION`), requested decision, buyer, profile/owner references, run,
+quote, source snapshot, total and canonical quote-body digest; a payment also
+includes its order and payment-proposal digest. A trusted host must independently
+obtain the human decision and sign the server's required short-lived proof.
+A role, access token or synthetic MCP form is not that proof. If the callback is
+missing or refuses, the tool returns `HOST_DECISION_REQUIRED`; it does not approve
+anything. `review_purchase` asks the host for an approval proof; the host may
+refuse that request, and rejection can be recorded through the host's exact
+HTTP decision flow. This adapter does not invent a host login or human-presence
+claim.
+
+Only decision/payment-approval requests carry `X-Buyer-Decision-Proof`. The
+server verifies issuer, audience, signature, scope, human grant, expiry and nonce
+atomically with the domain decision. The MCP client continues independently
+checking its original need, quote/body and budget exception. It records its
+accepted caller scope only after the server accepts the decision. A lost-ACK
+retry uses the same command; its proof is cached only in process memory for the
+short retry window, never in SQLite. After restart the trusted host must provide
+its original still-valid keyed proof or direct the caller to inspect status;
+there is no generic approval token.
+
+For an already approved local host integration, the CLI also accepts
+`VALIO_HOST_ACCESS_TOKEN_FILE` and optional `VALIO_HOST_DECISION_PROOF_FILE`.
+These paths belong to the executor configuration and must name existing,
+owner-held, private (0600), regular non-symlink files of at most 16 KiB. Files are
+read afresh; a missing/unsafe file or malformed credential fails closed. A proof
+file must contain the host-signed proof for the current exact decision, including
+all server-required scope and reviewer-grant claims. Do not pass these paths,
+JWTs or proofs through model arguments, commit them, or use the proof file as a
+standing consent grant. No real issuer, principal mapping or provider permission
+is established by setting an environment variable.
+
+Focused check (after `npm --prefix mcp ci --ignore-scripts`):
+
+```sh
+node mcp/checks/host-identity.mjs
+```
+
+This uses an injected fake host transport plus an official SDK stdio call. It
+checks no demo minting, credential refresh, owner/profile pinning, lost-decision
+ACK recovery, strict model-input refusal and absence of host credentials in
+persisted state/tool output. Cryptographic issuer qualification and server
+consent policy are separate checks; this test makes no real identity claim.

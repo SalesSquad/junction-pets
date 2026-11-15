@@ -4,7 +4,7 @@ import { serveStdio } from '@modelcontextprotocol/server/stdio';
 import * as z from 'zod/v4';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BridgeError, createTradeClient } from './trade-client.mjs';
+import { BridgeError, createTradeClient, privateHostCredentialFile } from './trade-client.mjs';
 
 const identifier = z.string().regex(/^[A-Za-z0-9_-]{1,100}$/);
 const commandKey = z.string().regex(/^[A-Za-z0-9_-]{10,80}$/);
@@ -54,7 +54,9 @@ export function createBridgeServer(client, requestContext = { era: 'modern' }) {
     const code = typeof error?.code === 'string' && /^[A-Z0-9_]{1,80}$/.test(error.code) ? error.code : 'BRIDGE_REFUSED';
     const structuredContent = { mode: 'SYNTHETIC', lifetime: client.lifetime, ok: false, data: {},
       error: { code, retryable: error?.retryable === true,
-        nextActions: code === 'INTEGRATION_NOT_CONFIGURED' ?
+        nextActions: code === 'HOST_DECISION_REQUIRED' ?
+          ['A trusted host must obtain and sign this exact human decision outside model arguments. A synthetic MCP form or approval role is insufficient.'] :
+          code === 'INTEGRATION_NOT_CONFIGURED' ?
           ['An operator must configure the server-side sponsor mock integration. Never submit a vendor key, customer ID or URL to this tool.'] :
           toolName === 'lookup_valio_mock' ? [error?.retryable ?
             'Retry lookup_valio_mock with the same narrowed product IDs and date after the server delay.' :
@@ -169,6 +171,10 @@ export function createBridgeServer(client, requestContext = { era: 'modern' }) {
     'Request an actual host interaction for the displayed synthetic quote only. Model arguments cannot grant approval or raise a future budget. No real approver identity is claimed.',
     hints(false, true), async ({ runId, commandKey: key }, ctx) => {
       const context = await client.reviewContext(runId);
+      if ((client.hostAuthenticated && context.q.status === 'AWAITING_HUMAN_APPROVAL') ||
+          (context.q.status === 'APPROVED' && !context.callerScopeAccepted)) {
+        return result(compact(await client.decide(runId, key, 'approve', context.binding)));
+      }
       if (['APPROVED', 'AUTO_COMMIT_ELIGIBLE', 'REJECTED', 'SIMULATED_COMMITTED', 'SIMULATED_CANCELLED'].includes(context.q.status)) {
         return result(compact(context.full));
       }
@@ -193,6 +199,7 @@ export function createBridgeServer(client, requestContext = { era: 'modern' }) {
     hints(false, true), async ({ runId, commandKey: key }, ctx) => {
       const context = await client.paymentContext(runId);
       if (context.pay.transfer) return result(compact(await client.status(runId)));
+      if (client.hostAuthenticated) return result(compact(await client.settle(runId, key, context.binding, context.pay.proposal.digest)));
       const challenge = client.challenge(key, 'payment', runId, context.binding, context.message,
         { proposalDigest: context.pay.proposal.digest });
       const decision = await confirm(ctx, challenge, key);
@@ -205,8 +212,13 @@ export function createBridgeServer(client, requestContext = { era: 'modern' }) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
+    const hostFile = process.env.VALIO_HOST_ACCESS_TOKEN_FILE;
+    const proofFile = process.env.VALIO_HOST_DECISION_PROOF_FILE;
+    if (proofFile !== undefined && hostFile === undefined) throw new BridgeError('HOST_PROVIDER_CONFIG_INVALID');
     const client = await createTradeClient({ baseUrl: process.env.SUPPLIER_URL ?? 'http://127.0.0.1:4177',
-      stateFile: process.env.VALIO_AGENT_STATE_FILE });
+      stateFile: process.env.VALIO_AGENT_STATE_FILE,
+      ...(hostFile === undefined ? {} : { hostAccessToken: privateHostCredentialFile(hostFile) }),
+      ...(proofFile === undefined ? {} : { hostDecisionProof: privateHostCredentialFile(proofFile) }) });
     const handle = serveStdio(context => createBridgeServer(client, context),
       { onerror: () => process.stderr.write('Synthetic MCP protocol operation refused.\n') });
     const close = () => { client.close(); void handle.close(); };

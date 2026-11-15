@@ -274,6 +274,16 @@ successSchema('/api/suppliers/valio-mock/observe','post',{type:'object',required
   mode:{const:'SPONSOR_MOCK_READ_ONLY'},requiresTradeCoreValidation:{const:true},provenance:{type:'object'},
   availability:{type:'object'},prices:{type:'object'},classifications:{type:'array',items:{type:'object'}},cache:{type:'object'},
 }});
+openapi.paths['/api/identity/configuration']={get:operation('Inspect identity mode only; this makes no authentication or provider probe')};
+openapi.paths['/api/identity/me']={get:operation('Read the current host-verified actor and operator grant; no raw claims are exposed',null,'200',true)};
+openapi.paths['/api/identity/decision-context']={get:{...operation('Read exact owned terms for a separate host decision; this is not consent',null,'200',true),parameters:[
+  {name:'quoteId',in:'query',required:true,schema:{type:'string'}},{name:'action',in:'query',required:true,schema:{enum:['QUOTE_DECISION','PAYMENT_DECISION']}},{name:'orderId',in:'query',required:false,schema:{type:'string'}}]}};
+openapi.paths['/api/integrations/valio-order']={get:operation('Inspect dated order-connection evidence and missing integration material; never enables sending')};
+openapi.paths['/api/orders/{id}/supplier-handoff']={parameters:[parameter('id')],get:operation('Read the owning committed synthetic receipt as an INTERNAL NON-SENDABLE handoff; not a vendor request',null,'200',true)};
+for (const [path,item] of Object.entries(openapi.paths)) if(item.post && /\/(approval|decision|payment-approval)$/.test(path)) item.post.parameters=[...(item.post.parameters??[]),{
+  name:'X-Buyer-Decision-Proof',in:'header',required:false,schema:{type:'string',maxLength:16384},
+  description:'REQUIRED in host-authenticated mode: a private-host signed buyer-decision+jwt for the exact quote/source/amount/action/decision and single-use jti; separate payment proposal binding. Never a model argument. Synthetic mode alone uses demo buttons.'
+}];
 const ids=new Set();
 for (const [path,item] of Object.entries(openapi.paths)) for (const method of ['get','post']) if(item[method]) {
   const op=item[method];

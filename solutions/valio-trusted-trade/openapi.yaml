@@ -2718,8 +2718,17 @@
             }
           }
         },
-        "operationId": "post_api_reviews_id_decision",
         "parameters": [
+          {
+            "name": "X-Buyer-Decision-Proof",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 16384
+            },
+            "description": "REQUIRED in host-authenticated mode: a private-host signed buyer-decision+jwt for the exact quote/source/amount/action/decision and single-use jti; separate payment proposal binding. Never a model argument. Synthetic mode alone uses demo buttons."
+          },
           {
             "name": "Idempotency-Key",
             "in": "header",
@@ -2730,7 +2739,8 @@
             },
             "description": "Retry the exact input under the same key; original result/expiry is preserved. Changed input conflicts. Creation replay never grants new approval."
           }
-        ]
+        ],
+        "operationId": "post_api_reviews_id_decision"
       }
     },
     "/api/plans": {
@@ -3596,8 +3606,17 @@
             }
           }
         },
-        "operationId": "post_api_quotes_id_approval",
         "parameters": [
+          {
+            "name": "X-Buyer-Decision-Proof",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 16384
+            },
+            "description": "REQUIRED in host-authenticated mode: a private-host signed buyer-decision+jwt for the exact quote/source/amount/action/decision and single-use jti; separate payment proposal binding. Never a model argument. Synthetic mode alone uses demo buttons."
+          },
           {
             "name": "Idempotency-Key",
             "in": "header",
@@ -3608,7 +3627,8 @@
             },
             "description": "Retry the exact input under the same key; original result/expiry is preserved. Changed input conflicts. Creation replay never grants new approval."
           }
-        ]
+        ],
+        "operationId": "post_api_quotes_id_approval"
       }
     },
     "/api/quotes/{id}/body": {
@@ -4961,8 +4981,17 @@
             }
           }
         },
-        "operationId": "post_api_orders_id_payment_approval",
         "parameters": [
+          {
+            "name": "X-Buyer-Decision-Proof",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 16384
+            },
+            "description": "REQUIRED in host-authenticated mode: a private-host signed buyer-decision+jwt for the exact quote/source/amount/action/decision and single-use jti; separate payment proposal binding. Never a model argument. Synthetic mode alone uses demo buttons."
+          },
           {
             "name": "Idempotency-Key",
             "in": "header",
@@ -4973,7 +5002,8 @@
             },
             "description": "Retry the exact input under the same key; original result/expiry is preserved. Changed input conflicts. Creation replay never grants new approval."
           }
-        ]
+        ],
+        "operationId": "post_api_orders_id_payment_approval"
       }
     },
     "/api/orders/{id}/settlement": {
@@ -6510,8 +6540,17 @@
             }
           }
         },
-        "operationId": "post_api_agent_runs_id_decision",
         "parameters": [
+          {
+            "name": "X-Buyer-Decision-Proof",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 16384
+            },
+            "description": "REQUIRED in host-authenticated mode: a private-host signed buyer-decision+jwt for the exact quote/source/amount/action/decision and single-use jti; separate payment proposal binding. Never a model argument. Synthetic mode alone uses demo buttons."
+          },
           {
             "name": "Idempotency-Key",
             "in": "header",
@@ -6522,7 +6561,8 @@
             },
             "description": "Retry the exact input under the same key; original result/expiry is preserved. Changed input conflicts. Creation replay never grants new approval."
           }
-        ]
+        ],
+        "operationId": "post_api_agent_runs_id_decision"
       }
     },
     "/api/agent/runs/{id}/commit": {
@@ -7384,6 +7424,665 @@
             "description": "Retry the exact input under the same key; original result/expiry is preserved. Changed input conflicts. Creation replay never grants new approval."
           }
         ]
+      }
+    },
+    "/api/identity/configuration": {
+      "get": {
+        "summary": "Inspect identity mode only; this makes no authentication or provider probe",
+        "responses": {
+          "200": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_api_identity_configuration"
+      }
+    },
+    "/api/identity/me": {
+      "get": {
+        "summary": "Read the current host-verified actor and operator grant; no raw claims are exposed",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_api_identity_me"
+      }
+    },
+    "/api/identity/decision-context": {
+      "get": {
+        "summary": "Read exact owned terms for a separate host decision; this is not consent",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "quoteId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "QUOTE_DECISION",
+                "PAYMENT_DECISION"
+              ]
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "operationId": "get_api_identity_decision_context"
+      }
+    },
+    "/api/integrations/valio-order": {
+      "get": {
+        "summary": "Inspect dated order-connection evidence and missing integration material; never enables sending",
+        "responses": {
+          "200": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_api_integrations_valio_order"
+      }
+    },
+    "/api/orders/{id}/supplier-handoff": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Read the owning committed synthetic receipt as an INTERNAL NON-SENDABLE handoff; not a vendor request",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synthetic result only"
+          },
+          "400": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Typed refusal; follow error.recovery and never invent new buying authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_api_orders_id_supplier_handoff"
       }
     }
   },

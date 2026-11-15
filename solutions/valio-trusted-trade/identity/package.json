@@ -1,0 +1,18 @@
+{
+  "name": "valio-host-identity-verifier",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Optional public-key JWT verifier for externally owned buyer identity and consent",
+  "engines": {
+    "node": ">=22.16"
+  },
+  "scripts": {
+    "check": "node checks/verifier.mjs",
+    "check:http": "node checks/http.mjs",
+    "check:mcp": "node checks/mcp.mjs"
+  },
+  "dependencies": {
+    "jose": "6.2.17"
+  }
+}

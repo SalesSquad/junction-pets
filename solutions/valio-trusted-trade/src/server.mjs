@@ -12,6 +12,10 @@ import { createFixtureCatalogSearch, RetrievalFault } from './catalog-retrieval.
 import { createAgentApi } from './agent-api.mjs';
 import { createHttpContext, createTradeRuntime } from './trade-runtime.mjs';
 import { createValioMockPort, isValioProductId } from './valio-mock-port.mjs';
+import { bindIdentityProfile } from './buyer-identity.mjs';
+import { loadBuyerIdentity } from './identity-config.mjs';
+import { valioOrderConnectionStatus, createValioOrderHandoff } from './valio-order-connection.mjs';
+import { digest } from './trust-envelope.mjs';
 import { StateStoreError } from './local-state-store.mjs';
 import { catalogPage, auditPage, onlyQuery, recoveryFor } from './api-navigation.mjs';
 
@@ -30,6 +34,7 @@ const publicFiles = Object.freeze({
 
 const hash = value => createHash('sha256').update(value).digest('hex');
 const bearerKey = request => {
+  if (request.identity) return request.identity.ownerRef;
   const raw = request.headers.authorization?.match(/^Bearer ([A-Za-z0-9_-]{10,128})$/)?.[1];
   return raw ? hash(raw) : null;
 };
@@ -72,12 +77,13 @@ const headers = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosnif
   'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'" };
 
 export function createTradeHttpServer(initialService = createTradeService(), {
-  runtime = null, catalogSearch, valioMockPort = null, imageUploadTimeoutMs = 5000, jsonUploadTimeoutMs = 5000,
+  runtime = null, catalogSearch, valioMockPort = null, identity = null, imageUploadTimeoutMs = 5000, jsonUploadTimeoutMs = 5000,
   afterCommitBeforeRespond,
 } = {}) {
   for (const timeout of [imageUploadTimeoutMs, jsonUploadTimeoutMs]) {
     if (!Number.isSafeInteger(timeout) || timeout < 1 || timeout > 30000) throw new TypeError('Invalid upload deadline');
   }
+  if (identity && !runtime) throw new TradeError('HOST_PERSISTENCE_REQUIRED', 'Host identity and single-use decisions require the persistent runtime.', 503);
   const service = runtime?.service ?? initialService;
   const context = runtime?.context ?? createHttpContext();
   const { sessions, quoteOwners, planOwners, orderOwners, reviewOwners, requestReplay } = context;
@@ -86,16 +92,45 @@ export function createTradeHttpServer(initialService = createTradeService(), {
   const requireSession = session => {
     if (!session || !sessions.has(session)) throw new TradeError('BUYER_CAPABILITY_REQUIRED', 'Resume the original synthetic session or explicitly create a new workflow session.', 403);
   };
+  execute(true, () => bindIdentityProfile(context, service, identity));
+  const identityAuthorize = (request, url, fingerprint) => identity && !identity.isPublic(url.pathname) && url.pathname.startsWith('/api/') ?
+    identity.authorize({ identity: request.identity, method: request.method, path: url.pathname, payload: request.demoPayload ?? {}, context, service, commandFingerprint: fingerprint }) : null;
   const search = catalogSearch ?? createFixtureCatalogSearch(() => execute(false, () => service.catalog()));
   const agent = createAgentApi({ service, trust, context });
   let ocrRunning = false;
   const send = (status, body) => ({ status, body });
   const dispatch = (request, url) => {
+    if (request.method === 'GET' && url.pathname === '/api/identity/configuration') return send(200, identity?.describe() ?? { mode: 'SYNTHETIC', anonymousSessionMinting: true, commerce: 'SYNTHETIC' });
+    if (request.method === 'GET' && url.pathname === '/api/identity/me') return send(200, identity ? identity.me(request.identity) : { mode: 'SYNTHETIC_NOT_AUTHENTICATED', commerce: 'SYNTHETIC' });
+    if (request.method === 'GET' && url.pathname === '/api/integrations/valio-order') return send(200, valioOrderConnectionStatus());
+    const handoff = url.pathname.match(/^\/api\/orders\/([^/]+)\/supplier-handoff$/);
+    if (request.method === 'GET' && handoff) {
+      const owner = bearerKey(request); requireSession(owner);
+      if (orderOwners.get(handoff[1]) !== owner) throw new TradeError('BUYER_MISMATCH', 'Supplier handoff belongs to the original workflow.', 403);
+      const order = service.order(handoff[1]), quote = service.quote(order.quoteId);
+      return send(200, createValioOrderHandoff({ quote, order, body: unsignedQuoteBody(quote) }));
+    }
+    if (request.method === 'GET' && url.pathname === '/api/identity/decision-context') {
+      if (!identity) throw new TradeError('HOST_IDENTITY_REQUIRED', 'Exact host decision context requires authenticated mode.', 403);
+      onlyQuery(url.searchParams, ['quoteId','action','orderId']);
+      const quote = service.quote(url.searchParams.get('quoteId'));
+      if (quoteOwners.get(quote.id) !== bearerKey(request)) throw new TradeError('BUYER_MISMATCH', 'Decision context is outside this scope.', 403);
+      const action = url.searchParams.get('action');
+      if (!['QUOTE_DECISION','PAYMENT_DECISION'].includes(action)) throw new TradeError('INVALID_REQUEST', 'Select a quote or payment decision.');
+      let payment = {};
+      if (action === 'QUOTE_DECISION') service.assertQuoteFresh(quote.id);
+      else {
+        const orderId = url.searchParams.get('orderId');
+        if (quote.orderId !== orderId || orderOwners.get(orderId) !== bearerKey(request)) throw new TradeError('BUYER_MISMATCH', 'Payment must belong to the exact owned quote/order.', 403);
+        payment = { orderId, paymentProposalDigest: service.payment(orderId, quote.buyerId).proposal.digest };
+      }
+      return send(200, { profileId: identity.profileId, buyerId: quote.buyerId, ownerRef: bearerKey(request), action, quoteId: quote.id, snapshotId: quote.snapshotId, totalCents: quote.totalCents, quoteBodyDigest: digest(unsignedQuoteBody(quote)), expiresAtMs: quote.expiresAtMs, ...payment, authority: 'CONTEXT_ONLY_NOT_CONSENT' });
+    }
     if (request.method === 'GET' && url.pathname === '/.well-known/trusted-trade') return send(200, metadata);
     if (request.method === 'GET' && url.pathname === '/.well-known/trusted-trade/jwks.json') return send(200, trust.publicKeys());
     if (request.method === 'GET' && url.pathname === '/openapi.json') return send(200, openapi);
     if (request.method === 'GET' && url.pathname === '/api/integrations/status') return send(200, {
-      mode: 'SYNTHETIC_WORKFLOWS', storage: runtime?.storage ?? 'EPHEMERAL_MEMORY',
+      mode: 'SYNTHETIC_WORKFLOWS', identity: identity?.describe() ?? { mode: 'SYNTHETIC' }, valioOrder: valioOrderConnectionStatus(), storage: runtime?.storage ?? 'EPHEMERAL_MEMORY',
       valioMock: { configured: Boolean(valioMockPort), authenticated: 'NOT_PROBED_BY_STATUS', schema: 'https://junction26.valioaimo.fi/openapi.json', scope: 'SPONSOR_MOCK_READ_ONLY', orderEndpoint: false },
       purchasingSource: 'INVENTED_FIXTURE_ONLY', catalogSearch: catalogSearch ? 'INJECTED_ADVISORY_ADAPTER' : 'FIXTURE_LEXICAL_NO_EMBEDDINGS',
     });
@@ -314,9 +349,19 @@ export function createTradeHttpServer(initialService = createTradeService(), {
         if (!response.destroyed) { response.writeHead(200, { ...headers, 'Content-Type': type }); response.end(body); }
         return;
       }
+      if (identity && url.pathname.startsWith('/api/') && !identity.isPublic(url.pathname)) {
+        request.identity = await identity.authenticate(request);
+        if (request.method === 'GET') execute(false, () => { identityAuthorize(request, url); });
+        // Stable owner scope, never a raw host bearer or subject, enters the domain.
+        if (!execute(false, () => sessions.get(request.identity.ownerRef) === request.identity.buyerId)) execute(true, () => {
+          if (!sessions.has(request.identity.ownerRef) && sessions.size >= 512) throw new TradeError('SESSION_CAPACITY', 'The local owner scope bound is full.', 429);
+          sessions.set(request.identity.ownerRef, request.identity.buyerId);
+        });
+      }
       if (request.method === 'POST' && url.pathname === '/api/scan/ocr') {
         const session = bearerKey(request);
         execute(false, () => requireSession(session));
+        execute(false, () => identityAuthorize(request, url));
         const mediaType = request.headers['content-type'];
         if (!['image/jpeg', 'image/png'].includes(mediaType)) throw new TradeError('INVALID_IMAGE', 'Upload a PNG or JPEG only.');
         const buffer = await readBytes(request, { maxBytes: 1500000, timeoutMs: imageUploadTimeoutMs, label: 'Image upload' });
@@ -325,6 +370,7 @@ export function createTradeHttpServer(initialService = createTradeService(), {
         ocrRunning = true;
         try {
           const observation = await recognizeImage(buffer, mediaType);
+          execute(false, () => identityAuthorize(request, url));
           writeReply(send(200, { ...observation, mode: 'LOCAL_TESSERACT_OCR_UNTRUSTED', persistence: 'IMAGE_NOT_STORED', requiresHumanConfirmation: true }));
           return;
         } finally { ocrRunning = false; }
@@ -337,6 +383,7 @@ export function createTradeHttpServer(initialService = createTradeService(), {
         if (!Number.isSafeInteger(limit) || limit < 1 || limit > 10) throw new TradeError('INVALID_SEARCH_LIMIT', 'Search limit must be1–10.');
         const result = await search.search({ query: url.searchParams.get('q'),
           buyerId: execute(false, () => sessions.get(session)), limit });
+        execute(false, () => identityAuthorize(request, url));
         writeReply(send(200, result)); return;
       }
       if (request.method === 'POST' && url.pathname !== '/api/demo/session') execute(false, () => requireSession(bearerKey(request)));
@@ -352,10 +399,15 @@ export function createTradeHttpServer(initialService = createTradeService(), {
           throw new TradeError('INVALID_SPONSOR_REQUEST', 'Use narrowed product IDs and a valid date; never send credentials or customer overrides.');
         }
         if (!valioMockPort) throw new TradeError('INTEGRATION_NOT_CONFIGURED', 'The read-only mock adapter needs an operator-managed server credential; local purchasing continues in explicit fixture mode.', 503);
+        execute(false, () => identityAuthorize(request, url));
         const observed = await valioMockPort.observe(input);
+        execute(false, () => identityAuthorize(request, url));
         writeReply(send(200, observed)); return;
       }
       const reply = execute(request.method === 'POST', () => {
+        const commandFingerprint = hash(canonicalInput({ owner: bearerKey(request), path: url.pathname + url.search, body: request.demoPayload, key: request.headers['idempotency-key'] ?? null }));
+        const authorization = identityAuthorize(request, url, commandFingerprint);
+        if (identity && request.method === 'POST' && !/^[A-Za-z0-9_-]{10,80}$/.test(request.headers['idempotency-key'] ?? '')) throw new TradeError('IDEMPOTENCY_KEY_REQUIRED', 'Host writes require a stable exact command key.');
         const key = request.method === 'POST' ? request.headers['idempotency-key'] : undefined;
         let replayKey, fingerprint;
         if (key !== undefined) {
@@ -374,6 +426,7 @@ export function createTradeHttpServer(initialService = createTradeService(), {
         }
         const outcome = dispatch(request, url);
         if (Buffer.byteLength(JSON.stringify(outcome.body)) > 2097152) throw new TradeError('RESPONSE_TOO_LARGE', 'Use bounded pages instead of full history.', 413);
+        if (identity && outcome.status < 400 && request.method === 'POST') identity.record(context, service, authorization);
         if (replayKey && outcome.status < 400) requestReplay.set(replayKey, { fingerprint, reply: structuredClone(outcome) });
         return outcome;
       });
@@ -402,7 +455,8 @@ export function createTradeHttpServer(initialService = createTradeService(), {
 
 export function createPersistentTradeServer(options) {
   const runtime = createTradeRuntime(options);
-  return createTradeHttpServer(undefined, { ...options, runtime });
+  try { return createTradeHttpServer(undefined, { ...options, runtime }); }
+  catch (error) { runtime.close(); throw error; }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -410,6 +464,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (!Number.isSafeInteger(port) || port < 0 || port > 65535) throw new Error('Invalid PORT');
   const stateFile = process.env.VALIO_STATE_FILE ?? resolve(currentDir, '../.runtime/state.sqlite');
   const valioMockPort = process.env.VALIO_MOCK_API_KEY ? createValioMockPort({ customer: 'junction-agent-audit', apiKey: () => process.env.VALIO_MOCK_API_KEY }) : null;
-  const server = process.env.VALIO_EPHEMERAL === '1' ? createTradeHttpServer(undefined, { valioMockPort }) : createPersistentTradeServer({ stateFile, valioMockPort });
+  const identity = process.env.VALIO_IDENTITY_CONFIG ? await loadBuyerIdentity(process.env.VALIO_IDENTITY_CONFIG) : null;
+  const server = process.env.VALIO_EPHEMERAL === '1' ? createTradeHttpServer(undefined, { valioMockPort, identity }) : createPersistentTradeServer({ stateFile, valioMockPort, identity });
   server.listen(port, '127.0.0.1', () => process.stdout.write('Trusted Trade local SYNTHETIC executor at http://127.0.0.1:' + server.address().port + '/\n'));
 }
