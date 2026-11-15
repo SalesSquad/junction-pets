@@ -83,8 +83,8 @@ class Producer:
     def run_real_episode(self, env, seed, arm, factory, sig, deadline, source):
         obs = env.reset(seed, False).tolist()
         self.calls.append((seed, arm))
-        success = len(self.calls) != self.fail_at
         unsafe = len(self.calls) == self.unsafe_at
+        success = len(self.calls) != self.fail_at and not unsafe
         action = 4 if arm in h.ARMS[2:] else 0
         t = dict(observation=obs, next_observation=obs, mask=[1]*7, action=action,
                  reward=1., cost=int(unsafe), done=True, contacts_cumulative=1,
@@ -92,14 +92,15 @@ class Producer:
                  dwell_ticks_cumulative=251 if success else 0)
         row = dict(seed=seed, strategy=arm, world_hash=sig(env), success=success,
                    unsafe=unsafe, abstained=False, contacts=1, final_error=.01,
-                   physics_steps=100, full_transition_count=1, option_steps=1,
+                   dwell_ticks_final=251 if success else 0, physics_steps=100, full_transition_count=1, option_steps=1,
                    full_transition_sha256=h.digest([t]), transitions=[t])
         return row, [t]
 
 
 class HarnessTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(prefix='v13-synthetic-', dir='/private/tmp')
+        self.tmp = tempfile.TemporaryDirectory(prefix='v13-synthetic-',
+                                               dir='/private/tmp' if Path('/private/tmp').is_dir() else None)
         self.root = Path(self.tmp.name)
         self.private = self.root / 'private'
         self.scans = h.scan_real_public_starts(FakeEnv(), signature)
@@ -107,6 +108,21 @@ class HarnessTests(unittest.TestCase):
         self.survey = dict(selected_first40_near8_clear=[
             dict(seed=r['seed'], world_hash=r['world_hash'], near=r['observed_corridor'])
             for r in self.cohort])
+
+    def test_science_requires_novel_burst_not_control_gain(self):
+        def trial(arm, win, unsafe=False):
+            return {'seed': 42, 'strategy': arm, 'success': win, 'unsafe': unsafe,
+                    'abstained': False, 'contacts': 1,
+                    'final_error': .01 if win else .1,
+                    'terminal_dwell_ticks': 250 if win else 0}
+        rows = {(42, arm): trial(arm, arm == h.ARMS[1]) for arm in h.ARMS}
+        self.assertTrue(h.independent_science_gate(rows, 1).startswith('STOP'))
+        rows[(42, h.ARMS[2])] = trial(h.ARMS[2], True)
+        self.assertEqual(h.independent_science_gate(rows, 1),
+                         'TRAIN_ONLY_SCIENCE_HYPOTHESIS_REQUIRES_NEW_REVIEW')
+        self.assertTrue(h.independent_science_gate(rows, 0).startswith('STOP'))
+        rows[(42, h.ARMS[3])] = trial(h.ARMS[3], False, unsafe=True)
+        self.assertTrue(h.independent_science_gate(rows, 1).startswith('STOP'))
 
     def tearDown(self):
         self.tmp.cleanup()
