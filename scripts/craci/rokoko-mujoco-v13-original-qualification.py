@@ -275,6 +275,59 @@ def safe_goal(row):
                 row.get("terminal_dwell_ticks", 0) >= 250)
 
 
+
+def validate_returned_episode(row, trace, world, arm, scan):
+    """Reject invalid producer terminal evidence before selecting next episode."""
+    # Fail on NaN/Infinity or unsupported JSON values anywhere in evidence.
+    canonical({"row": row, "transitions": trace})
+    require(type(row) is dict and type(trace) is list and len(trace) > 0 and
+            row.get("seed") == world["seed"] and row.get("strategy") == arm and
+            row.get("world_hash") == world["world_hash"] and
+            near(trace[0]["observation"], scan[world["seed"] - FIRST]["observation"]),
+            "V13_PAIRED_ACTUAL_REAL_PUBLIC_WORLD_SOURCE_CHANGED")
+    require(all(type(row.get(k)) is bool for k in ("success", "unsafe", "abstained")) and
+            all(type(row.get(k)) is int and row[k] >= 0 for k in
+                ("contacts", "dwell_ticks_final", "option_steps", "full_transition_count")) and
+            type(row.get("final_error")) in (int, float) and np.isfinite(row["final_error"]) and
+            row["final_error"] >= 0 and
+            row["option_steps"] == row["full_transition_count"] == len(trace) and
+            row.get("full_transition_sha256") == digest(trace),
+            "V13_INVALID_TERMINAL_ROW")
+    last = trace[-1]
+    require(type(last) is dict and last.get("done") is True and
+            type(last.get("dwell_ticks_current")) is int and
+            last["dwell_ticks_current"] == row["dwell_ticks_final"] and
+            type(last.get("contacts_cumulative")) is int and
+            last["contacts_cumulative"] == row["contacts"] and
+            type(last.get("success_info")) is bool and
+            last["success_info"] == row["success"],
+            "V13_TERMINAL_TRACE_ROW_MISMATCH")
+    physical = (row["contacts"] > 0 and row["dwell_ticks_final"] >= 250 and
+                row["final_error"] < .02 and not row["unsafe"] and not row["abstained"])
+    require(row["success"] == physical, "V13_CONTRADICTORY_TRUE_GOAL")
+    require(all(type(t) is dict and type(t.get("mask")) is list and len(t["mask"]) == 7 and
+                all(type(bit) is int and bit in (0, 1) for bit in t["mask"]) and
+                type(t.get("action")) is int and 0 <= t["action"] < 7 and
+                t["mask"][t["action"]] == 1 and
+                type(t.get("cost")) is int and t["cost"] >= 0 for t in trace),
+            "V13_ORIGINAL_ILLEGAL_ACTION_STOP")
+    require(not any(t["cost"] > 0 for t in trace) or row["unsafe"],
+            "V13_UNSAFE_FLAG_COST_CONTRADICTION")
+
+
+def save_quarantine(private, seed, arm, row, trace):
+    """Retain the rejected producer result including non-finite float spellings."""
+    value = {"schema": SCHEMA + ".quarantine", "expected_seed": seed,
+             "expected_strategy": arm, "returned_row": row, "returned_trace": trace}
+    # No canonical JSON: NaN and Infinity must remain observable on rejection.
+    # This is forensic data only and is never accepted as a scientific trial.
+    with (private / "quarantine.json").open("x", encoding="utf8") as out:
+        json.dump(value, out, sort_keys=True, allow_nan=True, default=repr)
+        out.write("\n")
+        out.flush()
+        os.fsync(out.fileno())
+
+
 def stop_after(row, baseline):
     if row["unsafe"]:
         return "OBSERVED_UNSAFE_ACTUAL_MUJOCO_COST"
@@ -331,21 +384,19 @@ def run_pilot_originals(source_root, private, model, plan, policy, protocol,
                     except TimeoutError:
                         stop_reason = "TIME_BUDGET_EXCEEDED_DURING_EPISODE"
                         break
-                    # Persist the returned raw episode even if validation below fails.
+                    try:
+                        validate_returned_episode(row, trace, world, arm, scan)
+                    except Exception:
+                        save_quarantine(private, world["seed"], arm, row, trace)
+                        raise
+                    # Only fully validated source rows enter the canonical trial stream.
+                    row.update(terminal_dwell_ticks=trace[-1]["dwell_ticks_current"],
+                               observed_corridor=world["observed_corridor"],
+                               initial_observed_obstacle_y=world["initial_public_obstacle_y"])
                     trials.append(row)
                     gz.write(canonical({"seed": world["seed"], "strategy": arm,
                                         "transitions": trace}).decode() + "\n")
                     gz.flush()
-                    require(row["seed"] == world["seed"] and row["strategy"] == arm and
-                            row["world_hash"] == world["world_hash"] and
-                            near(trace[0]["observation"], scan[world["seed"] - FIRST]["observation"]),
-                            "V13_PAIRED_ACTUAL_REAL_PUBLIC_WORLD_SOURCE_CHANGED")
-                    row.update(terminal_dwell_ticks=trace[-1]["dwell_ticks_current"],
-                               observed_corridor=world["observed_corridor"],
-                               initial_observed_obstacle_y=world["initial_public_obstacle_y"])
-                    require(all(len(t["mask"]) == 7 and type(t["action"]) is int and
-                                0 <= t["action"] < 7 and t["mask"][t["action"]] == 1
-                                for t in trace), "V13_ORIGINAL_ILLEGAL_ACTION_STOP")
                     if arm == ARMS[0]:
                         baseline = row
                     stop_reason = stop_after(row, baseline)
@@ -393,7 +444,8 @@ def run_pilot_originals(source_root, private, model, plan, policy, protocol,
             "plan_sha256": PLAN_SHA, "preflight_sha256": PREFLIGHT_SHA, "training_only": True,
             "raw_sha256": {
                 name: sha(private / name)
-                for name in ("partial_training.json", "full_transitions.jsonl.gz")},
+                for name in (("partial_training.json", "full_transitions.jsonl.gz") +
+                             (("quarantine.json",) if (private / "quarantine.json").exists() else ()))},
             "promotion_authorized": False, "dev_cal_test_ood_opened": False})
         return {"complete": False, "reason": stop_reason,
                 "completed_episodes": len(trials)}
