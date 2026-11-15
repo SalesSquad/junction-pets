@@ -17,9 +17,13 @@ test('registry loads, every service exists and every company keeps a pet', async
 test('only some pets have extra special capabilities; "all" reaches every pet', async () => {
   const registry=await loadSpecialCapabilities(root);
   const ids=slug=>specialCapabilitiesFor(registry,slug).map(c=>c.id);
-  assert.deepEqual(ids('nvidia').sort(),['drawing-evidence','visual-observation','voice']);
-  assert.deepEqual(ids('stoa').sort(),['drawing-evidence','voice']);
-  assert.deepEqual(ids('hostinger'),['voice']);
+  const forAll=registry.capabilities.filter(c=>c.pets==='all').map(c=>c.id);
+  // Shared with every pet: voice plus the Aiven platform capabilities (services/aiven-platform).
+  assert.deepEqual(forAll.sort(),['aiven-read-only-inspection','answer-check-repair','challenger-evaluation','replayable-event-log','typed-decision-proposals','voice']);
+  assert.deepEqual(ids('nvidia').sort(),[...forAll,'drawing-evidence','visual-observation'].sort());
+  assert.deepEqual(ids('stoa').sort(),[...forAll,'drawing-evidence'].sort());
+  assert.deepEqual(ids('hostinger').sort(),[...forAll].sort());
+  assert.ok(registry.capabilities.filter(c=>c.service==='services/aiven-platform').every(c=>c.pets==='all'));
   assert.ok(!('pets' in specialCapabilitiesFor(registry,'meta')[0]),'pet list stays out of per-pet projection');
 });
 

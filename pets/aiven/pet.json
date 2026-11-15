@@ -20,7 +20,7 @@
     {
       "id": "service-map",
       "title": "Map a workload to Aiven services",
-      "description": "Relate transactional, streaming, search, cache, analytics and model-routing needs to specific Aiven services and documentation, with the constraint that decides each choice.",
+      "description": "Relate transactional, streaming, search, cache, analytics and model-routing needs to specific Aiven services and documentation, with the constraint that decides each choice, and plan them as code (Aiven Operator for Kubernetes or Terraform, one project per environment).",
       "kind": "planning",
       "inputs": [
         "application, data and agent requirements"
@@ -40,6 +40,19 @@
       ],
       "outputs": [
         "topic, key and connector design with a duplicate-and-disconnect test plan"
+      ],
+      "requiresConnection": false
+    },
+    {
+      "id": "integration-design",
+      "title": "Review an integration design",
+      "description": "Review a proposed data flow for ownership, idempotency, ordering, replay, schema evolution and source provenance, and return findings plus human-approved change proposals; used by other companions' solutions (for example Valio Trusted Trade).",
+      "kind": "analysis",
+      "inputs": [
+        "data-flow or integration design"
+      ],
+      "outputs": [
+        "integration findings and proposed changes"
       ],
       "requiresConnection": false
     },
@@ -92,19 +105,6 @@
       ],
       "outputs": [
         "analytics schema, ingestion path and metric definitions"
-      ],
-      "requiresConnection": false
-    },
-    {
-      "id": "platform-as-code",
-      "title": "Plan Aiven infrastructure as code",
-      "description": "Plan declaring Aiven services with the Aiven Operator for Kubernetes or Terraform, per-environment projects and cross-region replication, so the stack is reviewable and reproducible.",
-      "kind": "planning",
-      "inputs": [
-        "environments, regions and ownership model"
-      ],
-      "outputs": [
-        "resource layout, promotion flow and review checklist"
       ],
       "requiresConnection": false
     },

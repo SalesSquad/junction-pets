@@ -14,7 +14,7 @@ This is an independently created companion, not an official or endorsed Aiven re
 - **Plan model evaluation through AI gateway:** the same cases on several models, then the cheapest model that passes the quality gate.
 - **Design search, memory and caching:** OpenSearch, pgvector and Valkey with provenance and invalidation rules.
 - **Plan usage metering:** Kafka to ClickHouse for metered usage and dashboards.
-- **Plan infrastructure as code:** Aiven Operator for Kubernetes or Terraform, per-environment projects.
+- **Review an integration design:** ownership, idempotency, ordering, replay, schema evolution and provenance, with proposed changes.
 - **Inspect a connected project read-only:** only with a host-granted read-only Aiven MCP connection; never changes anything.
 
 ## Start a conversation

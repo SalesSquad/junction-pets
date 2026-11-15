@@ -88,7 +88,6 @@ test('Aiven stack capabilities stay source-bound, read-only and honest about ava
     'model-route-evaluation': 'https://aiven.io/docs/products/ai-gateway/use-sdks',
     'search-and-memory': 'https://aiven.io/docs/products/opensearch',
     'usage-analytics': 'https://aiven.io/docs/products/clickhouse',
-    'platform-as-code': 'https://aiven.io/docs/tools/kubernetes',
     'live-stack-inspection': 'https://aiven.io/docs/tools/mcp-server'
   };
   for (const [id, url] of Object.entries(stack)) {
@@ -99,6 +98,7 @@ test('Aiven stack capabilities stay source-bound, read-only and honest about ava
     assert.ok(pack.instructions.includes(url), `instructions must cite ${url}`);
   }
   assert.ok(pack.pet.sources.length <= 12);
+  assert.ok(pack.pet.capabilities.some(c => c.id === 'integration-design'), 'kept for solutions that bind it (valio-trusted-trade)');
   assert.match(pack.instructions, /account manager/);
   assert.match(pack.instructions, /early availability/);
   assert.match(pack.instructions, /Never create, update, delete or power services/);
