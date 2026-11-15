@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "aiven-model-tournament",
+  "title": "Aiven companion evaluation",
+  "objective": "Measure the Aiven companion with code-scored tasks, challenger-written cases, calibrated rubrics, two judges and live read-only tools.",
+  "baseCommit": "0ef075a147e021d387f94fd8e1f5f843e89bb59d",
+  "challengeSlugs": [
+    "aiven"
+  ],
+  "agentIds": [
+    "junction.aiven"
+  ],
+  "stage": "building",
+  "ownedPaths": [
+    "solutions/aiven-model-tournament/"
+  ],
+  "capabilityUses": [
+    {
+      "agentId": "junction.aiven",
+      "capabilityId": "live-stack-inspection",
+      "purpose": "Score read-only Aiven observations against the Aiven API.",
+      "status": "planned"
+    },
+    {
+      "agentId": "junction.aiven",
+      "capabilityId": "model-route-evaluation",
+      "purpose": "Compare models on the same cases and choose the cheapest that passes the gate.",
+      "status": "planned"
+    }
+  ]
+}

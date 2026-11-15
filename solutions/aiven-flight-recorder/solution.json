@@ -1,18 +1,25 @@
 {
   "schemaVersion": 1,
   "id": "aiven-flight-recorder",
-  "title": "Aiven flight recorder \u2014 measured event-recorder demo",
-  "objective": "Run the same 200-action agent twice, once without and once with an Aiven PostgreSQL outbox, Kafka log and idempotent consumer, and measure what the flight recorder recovers after crashes and replays.",
-  "baseCommit": "4f56b644e5ffac3420295000316ea198243b22c2",
+  "title": "Aiven flight recorder",
+  "objective": "Measure one agent run with and without a replayable Aiven event log under duplicates, a consumer crash and full replay.",
+  "baseCommit": "0ef075a147e021d387f94fd8e1f5f843e89bb59d",
   "challengeSlugs": [
     "aiven"
   ],
   "agentIds": [
     "junction.aiven"
   ],
-  "stage": "building",
+  "stage": "demo",
   "ownedPaths": [
     "solutions/aiven-flight-recorder/"
   ],
-  "capabilityUses": []
+  "capabilityUses": [
+    {
+      "agentId": "junction.aiven",
+      "capabilityId": "event-flight-recorder",
+      "purpose": "Design and measure the outbox, Kafka and idempotent-consumer pipeline.",
+      "status": "planned"
+    }
+  ]
 }
