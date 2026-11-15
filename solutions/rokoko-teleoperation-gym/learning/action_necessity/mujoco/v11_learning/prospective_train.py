@@ -15,13 +15,35 @@ import importlib.util
 import json
 from pathlib import Path
 import subprocess
+import sys
 import time
-
-import policy
-
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
+
+
+def load_v11_policy_with_unique_module_identity():
+    """Never reserve Python's generic `policy` name used by frozen V5.
+
+    V6 -> V5 imports `from policy import BOUNDS...` during actual V7 physics
+    initialization. Importing this V11 `policy.py` as a top-level module would
+    populate sys.modules['policy'] and irreversibly redirect that frozen V5
+    import to the wrong file, crashing before a single MuJoCo option executes.
+    """
+    source = HERE / "policy.py"
+    spec = importlib.util.spec_from_file_location(
+        "rokoko_v11_frozen_goal_rescue_policy", source)
+    if spec is None or spec.loader is None:
+        raise ImportError("V11_UNAMBIGUOUS_PRODUCT_POLICY_MODULE_REQUIRED")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+# Keep the public `policy` variable for the existing qualification API, while
+# leaving sys.modules['policy'] unoccupied for the original V5 policy module.
+policy = load_v11_policy_with_unique_module_identity()
+
 ORIGINAL_V10 = ROOT / "v10_prospective" / "run.py"
 ORIGINAL_V10_BLOB = "64dc947d5dbf09e305a6034c4c5d146f14db820b"
 SOURCE_V10_HEAD = "9cc583d3f0f24484b79c1929ba875c7a3b667806"
@@ -160,7 +182,18 @@ def main(argv=None):
             "V11_FROZEN_ORIGINAL_MODEL_SHA_DRIFT")
     v8weights,_,_=v8.verify_frozen_model(paths[1],paths[2],v8.FROZEN_WEIGHTS_SHA256)
     v10factory=original.v10.policy_factory(paths[0])
+    # Source-bound runtime imports must never silently bind V11's product
+    # policy to original V5's legacy `from policy` import.
+    v5_policy_file=(ROOT/"v5_learning"/"policy.py").resolve()
+    cached_v5_policy=sys.modules.get("policy")
+    require(cached_v5_policy is None or
+            Path(getattr(cached_v5_policy,"__file__","")).resolve()==v5_policy_file,
+            "V11_GENERIC_POLICY_MODULE_ALREADY_POISONED")
     v7,Env=v8.import_v7_and_physics()
+    original_v5_policy=sys.modules.get("policy")
+    require(original_v5_policy is not None and
+            Path(getattr(original_v5_policy,"__file__","")).resolve()==v5_policy_file,
+            "V11_ORIGINAL_V5_POLICY_MODULE_IDENTITY_DRIFT")
     signature=v7.v6.v5.v4.v3.v2.v1._world_signature
     env=Env(max_options=v8.MAX_OPTIONS)
     full_scan=[]

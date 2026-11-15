@@ -3,6 +3,8 @@
 from pathlib import Path
 import hashlib
 import json
+import subprocess
+import sys
 import unittest
 
 import learn_gate
@@ -109,6 +111,29 @@ class TestFrozenV11SourceOnly(unittest.TestCase):
         plan = prospective_train.load_plan()
         self.assertEqual(plan["trainSeedRangeInclusive"],[517000,517511])
         self.assertEqual(plan["candidateModelGateSha256"],policy.GATE_SHA256)
+
+    def test_original_v5_generic_policy_import_cannot_be_poisoned_by_v11(self):
+        """Actual process import order: product V11 first, legacy V5 later."""
+        script="""
+import sys, tempfile
+from pathlib import Path
+sys.path.insert(0, %r)
+import prospective_train
+assert 'policy' not in sys.modules, 'V11_STOLE_LEGACY_GENERIC_POLICY_NAME'
+assert prospective_train.policy.__name__ == 'rokoko_v11_frozen_goal_rescue_policy'
+with tempfile.TemporaryDirectory() as temporary:
+    legacy=Path(temporary)/'policy.py'
+    legacy.write_text('BOUNDS = (0,1)\\nDEFAULT = 0\\n')
+    sys.path.insert(0, temporary)
+    from policy import BOUNDS, DEFAULT
+    assert BOUNDS == (0,1) and DEFAULT == 0
+    assert Path(sys.modules['policy'].__file__).resolve() == legacy.resolve()
+print('V11_PRODUCT_AND_V5_LEGACY_POLICY_NAMES_ISOLATED')
+""" % str(HERE)
+        result=subprocess.run([sys.executable,"-c",script],capture_output=True,
+                              text=True,timeout=15)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertIn("V11_PRODUCT_AND_V5_LEGACY_POLICY_NAMES_ISOLATED",result.stdout)
 
     def test_exact512_initial_public_world_scan_128_near_32_clear(self):
         scan=[{"seed":517000+i,"world_hash":f"synthetic-{i}",
