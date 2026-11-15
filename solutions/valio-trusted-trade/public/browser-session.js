@@ -56,6 +56,11 @@ export function browserSession(variant) {
 }
 
 export async function restoredBearer(cache, buyerId) {
+  const configuration = await fetch('/api/identity/configuration', { redirect: 'error', signal: AbortSignal.timeout(7000) });
+  if (!configuration.ok) throw Error('Identity mode cannot be checked; existing recovery data was preserved.');
+  const identity = await configuration.json();
+  if (identity.mode === 'HOST_AUTHENTICATED') throw Error('Identity connection required: open this workflow through the configured private host. Local demo sign-in and model approvals are disabled; no external credential is accepted in this page.');
+  if (identity.mode !== 'SYNTHETIC') throw Error('Unknown identity mode; recovery was preserved without creating a session.');
   const saved = await cache.load();
   if (saved) {
     const response = await fetch('/api/demo/session', { headers: { Authorization: 'Bearer ' + saved.token },

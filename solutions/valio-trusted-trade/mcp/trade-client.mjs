@@ -2,6 +2,8 @@
 import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, randomUUID, verify } from 'node:crypto';
 import { canonical, digest, makeDemoMandatePayload, signDemoEnvelope } from '../src/trust-envelope.mjs';
 import { verifyBuyerTerms, verifyBuyerBody } from '../src/buyer-terms.mjs';
+import { constants, closeSync, fstatSync, lstatSync, openSync, readSync, realpathSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 const BUYER = 'helsinki-hotel-demo';
 const clone = value => structuredClone(value);
@@ -20,7 +22,34 @@ function put(state, name, key, value) {
 const safeId = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(value);
 const validPairs = value => Array.isArray(value) && value.length <= 1000 && value.every(e => Array.isArray(e) && e.length === 2 && typeof e[0] === 'string') && new Set(value.map(e => e[0])).size === value.length;
 
-export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', stateFile, fetchImpl = fetch, timeoutMs = 6000 } = {}) {
+/** Executor-only provider; never accept this path from a model tool argument. */
+export function privateHostCredentialFile(path) {
+  if (typeof path !== 'string' || !path || path.length > 4096) fail('HOST_PROVIDER_CONFIG_INVALID');
+  const file = resolve(path);
+  return async () => {
+    let descriptor;
+    try {
+      const expected = lstatSync(file);
+      if (expected.isSymbolicLink() || realpathSync(file) !== file) fail('HOST_CREDENTIAL_UNAVAILABLE');
+      descriptor = openSync(file, constants.O_RDONLY | constants.O_NOFOLLOW);
+      const stat = fstatSync(descriptor);
+      if (!stat.isFile() || stat.nlink !== 1 || stat.size < 1 || stat.size > 16384 || stat.ino !== expected.ino || stat.dev !== expected.dev ||
+          (stat.mode & 0o077) || (process.getuid && stat.uid !== process.getuid())) fail('HOST_CREDENTIAL_UNAVAILABLE');
+      const bytes = Buffer.alloc(16385);
+      const length = readSync(descriptor, bytes, 0, bytes.length, 0);
+      if (length > 16384) fail('HOST_CREDENTIAL_UNAVAILABLE');
+      const value = new TextDecoder('utf-8', { fatal: true }).decode(bytes.subarray(0, length)).trim();
+      if (!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value)) fail('HOST_CREDENTIAL_UNAVAILABLE');
+      return value;
+    } catch { fail('HOST_CREDENTIAL_UNAVAILABLE'); } finally { if (descriptor !== undefined) closeSync(descriptor); }
+  };
+}
+
+export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', stateFile, fetchImpl = fetch, timeoutMs = 6000,
+  hostAccessToken, hostDecisionProof } = {}) {
+  const hostAuthenticated = hostAccessToken !== undefined;
+  if ((hostAuthenticated && typeof hostAccessToken !== 'function') ||
+      (hostDecisionProof !== undefined && (typeof hostDecisionProof !== 'function' || !hostAuthenticated))) fail('HOST_PROVIDER_CONFIG_INVALID');
   let base;
   try { base = new URL(baseUrl); } catch { fail('LOCAL_URL_REQUIRED'); }
   if (base.protocol !== 'http:' || !['127.0.0.1', 'localhost', '[::1]'].includes(base.hostname) ||
@@ -32,6 +61,7 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
     const pair = generateKeyPairSync('ed25519');
     const jwk = pair.publicKey.export({ format: 'jwk' });
     return { kind: 'synthetic-mcp-buyer', version: 1, baseUrl: base.origin, token: null,
+      authMode: hostAuthenticated ? 'HOST' : 'DEMO', authBinding: null,
       privateKey: pair.privateKey.export({ format: 'der', type: 'pkcs8' }).toString('base64'),
       publicJwk: { kty: jwk.kty, crv: jwk.crv, x: jwk.x }, kid: null,
       runs: [], commands: [], challenges: [] };
@@ -42,6 +72,16 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
         !(state.token === null || typeof state.token === 'string' && /^[0-9a-f-]{36}$/.test(state.token)) ||
         typeof state.privateKey !== 'string' || state.privateKey.length > 1000 ||
         state.publicJwk?.kty !== 'OKP' || state.publicJwk?.crv !== 'Ed25519' || typeof state.publicJwk.x !== 'string') fail('CLIENT_STATE_INVALID');
+    const mode = state.authMode ?? 'DEMO';
+    if (!['DEMO', 'HOST'].includes(mode) || (mode === 'HOST' && !hostAuthenticated) ||
+        (state.authBinding !== undefined && state.authBinding !== null &&
+          (!safeId(state.authBinding.profileId) || !safeId(state.authBinding.ownerRef)))) fail('CLIENT_IDENTITY_SCOPE_MISMATCH');
+    if (hostAuthenticated && mode === 'DEMO' && (state.token || state.kid ||
+        state.runs.length || state.commands.length || state.challenges.length)) fail('CLIENT_IDENTITY_SCOPE_MISMATCH');
+    if (!hostAuthenticated && state.authBinding) fail('CLIENT_IDENTITY_SCOPE_MISMATCH');
+    if (hostAuthenticated && state.token !== null) fail('CLIENT_IDENTITY_SCOPE_MISMATCH');
+    state.authMode = hostAuthenticated ? 'HOST' : 'DEMO';
+    state.authBinding ??= null;
     try {
       const key = createPrivateKey({ key: Buffer.from(state.privateKey, 'base64'), format: 'der', type: 'pkcs8' });
       if (key.asymmetricKeyType !== 'ed25519' || createPublicKey(key).export({ format: 'jwk' }).x !== state.publicJwk.x) fail('CLIENT_STATE_INVALID');
@@ -58,9 +98,26 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
     if (store) return store.transaction(true, row => { const state = validate(row.value); return { value: fn(state), state }; }).value;
     return fn(memory);
   };
-  const request = async (path, body, commandKey, authenticated = true) => {
+  const hostProofs = new Map(); // Credential material is process-local, never checkpointed.
+  const hostToken = value => {
+    if (typeof value !== 'string' || value.length > 16384 || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value)) fail('HOST_CREDENTIAL_UNAVAILABLE');
+    return value;
+  };
+  const bindIdentity = identity => {
+    if (identity.mode !== 'HOST_AUTHENTICATED' || identity.commerce !== 'SYNTHETIC' || identity.buyerId !== BUYER ||
+        !safeId(identity.ownerRef) || !safeId(identity.profileId) || !safeId(identity.actorRef) ||
+        !['HUMAN', 'AGENT'].includes(identity.principalType) || !Array.isArray(identity.actions) ||
+        !Number.isSafeInteger(identity.grantRevision)) fail('HOST_IDENTITY_INVALID');
+    const binding = { profileId: identity.profileId, ownerRef: identity.ownerRef };
+    const prior = read().authBinding;
+    if (prior && fingerprint(prior) !== fingerprint(binding)) fail('CLIENT_IDENTITY_SCOPE_MISMATCH');
+    if (!prior) update(state => { state.authBinding = binding; });
+  };
+  const request = async (path, body, commandKey, authenticated = true, decisionProof) => {
     const url = new URL(path, base);
     if (url.origin !== base.origin) fail('CROSS_ORIGIN_REFUSED');
+    if (hostAuthenticated && path === '/api/demo/session') fail('HOST_DEMO_SESSION_FORBIDDEN');
+    if (decisionProof && !(/\/decision$|\/payment-approval$/.test(url.pathname))) fail('HOST_PROOF_SCOPE_INVALID');
     const controller = new AbortController();
     let rejectDeadline;
     const deadline = new Promise((_, reject) => { rejectDeadline = reject; });
@@ -68,14 +125,14 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
     const bounded = operation => Promise.race([operation, deadline]);
     const timer = setTimeout(() => { controller.abort(); rejectDeadline(new BridgeError('HTTP_DEADLINE', true)); }, timeoutMs);
     let reader;
-    try {
-      const token = authenticated ? await bounded(session()) : null;
-      const response = await bounded(fetchImpl(url, { method: body === undefined ? 'GET' : 'POST',
+    const fetchJson = async (target, token, payload, key, proof) => {
+      const response = await bounded(fetchImpl(target, { method: payload === undefined ? 'GET' : 'POST',
         redirect: 'error', signal: controller.signal, headers: { Accept: 'application/json',
-          ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+          ...(payload === undefined ? {} : { 'Content-Type': 'application/json' }),
           ...(token ? { Authorization: 'Bearer ' + token } : {}),
-          ...(commandKey ? { 'Idempotency-Key': commandKey } : {}) },
-        body: body === undefined ? undefined : JSON.stringify(body) }));
+          ...(key ? { 'Idempotency-Key': key } : {}),
+          ...(proof ? { 'X-Buyer-Decision-Proof': proof } : {}) },
+        body: payload === undefined ? undefined : JSON.stringify(payload) }));
       if (!/^application\/json(?:\s*;|$)/i.test(response.headers.get('content-type') ?? '')) fail('INVALID_HTTP_RESPONSE');
       if (Number(response.headers.get('content-length') ?? 0) > 524288 || !response.body) fail('HTTP_RESPONSE_TOO_LARGE');
       reader = response.body.getReader();
@@ -95,12 +152,25 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
           [408, 429, 503, 504].includes(response.status) || data.error?.details?.retryable === true);
       }
       return data;
+    };
+    try {
+      const token = hostAuthenticated ? hostToken(await bounded(Promise.resolve().then(hostAccessToken))) :
+        authenticated ? await bounded(session()) : null;
+      if (hostAuthenticated) {
+        // Check the exact credential used for this request before any workflow effect.
+        // A refreshed credential from another owner cannot redirect persisted intent.
+        const identity = await fetchJson(new URL('/api/identity/me', base), token);
+        bindIdentity(identity);
+        if (url.pathname === '/api/identity/me' && body === undefined) return identity;
+      }
+      return await fetchJson(url, token, body, commandKey, decisionProof);
     } catch (error) {
       if (error instanceof BridgeError) throw error;
       fail(controller.signal.aborted ? 'HTTP_DEADLINE' : 'HTTP_UNAVAILABLE', true);
     } finally { clearTimeout(timer); controller.abort(); reader?.cancel().catch(() => {}); }
   };
   const session = async () => {
+    if (hostAuthenticated) return null;
     const existing = read().token; if (existing) return existing;
     const result = await request('/api/demo/session', { buyerId: BUYER }, null, false);
     if (typeof result.token !== 'string' || !/^[0-9a-f-]{36}$/.test(result.token) || result.buyerId !== BUYER ||
@@ -153,11 +223,48 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
         createPublicKey({ key: jwk, format: 'jwk' }), Buffer.from(envelope.signature, 'base64url'))) fail('PROOF_REFUSED');
     } catch { fail('PROOF_REFUSED'); }
   };
+  const decisionEvidence = async (commandKey, context) => {
+    if (!hostAuthenticated || typeof hostDecisionProof !== 'function') fail('HOST_DECISION_REQUIRED');
+    context = { ...context, buyerId: BUYER, ...read().authBinding };
+    const cacheKey = fingerprint([commandKey, context]);
+    const now = Date.now();
+    for (const [key, entry] of hostProofs) if (entry.until <= now) hostProofs.delete(key);
+    const existing = hostProofs.get(cacheKey);
+    if (existing) return { proof: existing.proof, decision: existing.decision, cacheKey };
+    if (hostProofs.size >= 1000) fail('CLIENT_STATE_CAPACITY');
+    let timer;
+    try {
+      const supplied = await Promise.race([Promise.resolve().then(() => hostDecisionProof(clone(context))),
+        new Promise((_, reject) => { timer = setTimeout(() => reject(new BridgeError('HOST_DECISION_REQUIRED')), timeoutMs); })]);
+      const object = supplied && typeof supplied === 'object' && !Array.isArray(supplied);
+      if (object && (Object.keys(supplied).some(key => !['proof', 'decision'].includes(key)) ||
+          !['approve', 'reject'].includes(supplied.decision))) fail('HOST_DECISION_REQUIRED');
+      const proof = hostToken(object ? supplied.proof : supplied);
+      let decision = object ? supplied.decision : null;
+      let until = now + 300000;
+      // Selection/cache minimization only: this decode never verifies identity or grants consent.
+      // The server must verify the signature and bind this exact decision and scope.
+      try {
+        const payload = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.from(proof.split('.')[1], 'base64url')));
+        if (!object && ['approve', 'reject'].includes(payload?.decision)) decision = payload.decision;
+        if (Number.isSafeInteger(payload?.exp) && payload.exp >= 0 && payload.exp <= Math.floor(Number.MAX_SAFE_INTEGER / 1000)) {
+          until = Math.min(until, payload.exp * 1000); // Unverified metadata may shorten retention, never extend it.
+        }
+      } catch { /* A raw proof without an explicit decision is refused below. */ }
+      if (!['approve', 'reject'].includes(decision)) fail('HOST_DECISION_REQUIRED');
+      if (until > Date.now()) hostProofs.set(cacheKey, { proof, decision, until });
+      return { proof, decision, cacheKey };
+    } catch { fail('HOST_DECISION_REQUIRED'); } finally { clearTimeout(timer); }
+  };
+  if (hostAuthenticated) {
+    try { await request('/api/identity/me', undefined, null, false); }
+    catch (error) { store?.close(); throw error; }
+  }
   return Object.freeze({
-    lifetime,
+    lifetime, hostAuthenticated,
     async search(query, limit) { return request('/api/products/search?q=' + encodeURIComponent(query) + '&limit=' + limit); },
     async lookupValioMock(input) {
-      try { return await request('/api/suppliers/valio-mock/observe', input); }
+      try { return await request('/api/suppliers/valio-mock/observe', input, hostAuthenticated ? phaseKey(fingerprint(input), 'mock-observation') : undefined); }
       catch (error) { if (error.code === 'INTEGRATION_NOT_CONFIGURED') error.retryable = false; throw error; }
     },
     async prepare(args) {
@@ -179,11 +286,10 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
     status,
     async reviewContext(id) {
       const full = await status(id, true); const checked = terms(full);
-      if (['APPROVED', 'AUTO_COMMIT_ELIGIBLE'].includes(checked.q.status)) {
-        if (checked.q.totalCents > checked.saved.budgetCents &&
-            checked.saved.acceptedScope?.binding !== checked.binding) fail('CALLER_APPROVAL_MISSING');
-      }
-      return { ...checked, full };
+      // Reading an approved quote grants nothing. A missing caller scope is
+      // reconciled through the original keyed decision; decide still requires
+      // its prior local authorization or a fresh exact host-signed proof.
+      return { ...checked, full, callerScopeAccepted: checked.q.totalCents <= checked.saved.budgetCents || checked.saved.acceptedScope?.binding === checked.binding };
     },
     challenge(commandKey, kind, id, binding, message, extra = {}) {
       command(commandKey, kind, { id, binding });
@@ -213,14 +319,27 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
       const full = await status(id, true), checked = terms(full);
       if (checked.binding !== binding) fail('STALE_CONFIRMATION');
       if (!['approve', 'reject'].includes(decision)) fail('INVALID_DECISION');
-      const authorization = entries(read(), 'challenges').get(commandKey)?.authorization;
-      if (authorization?.decision !== decision) fail('HUMAN_APPROVAL_REQUIRED');
-      if (decision === 'approve') update(state => {
+      let evidence;
+      if (hostAuthenticated) {
+        command(commandKey, 'review', { id, binding, decision });
+        const exported = await request('/api/quotes/' + encodeURIComponent(checked.q.id) + '/body');
+        try { verifyBuyerBody(exported.body, checked.q); } catch { fail('BUYER_BODY_REFUSED'); }
+        evidence = await decisionEvidence(commandKey, { action: 'QUOTE_DECISION', decision, runId: id,
+          quoteId: checked.q.id, snapshotId: checked.q.snapshotId, totalCents: checked.q.totalCents,
+          quoteBodyDigest: digest(exported.body) });
+      } else {
+        const authorization = entries(read(), 'challenges').get(commandKey)?.authorization;
+        if (authorization?.decision !== decision) fail('HUMAN_APPROVAL_REQUIRED');
+      }
+      const actualDecision = evidence?.decision ?? decision;
+      const accepted = await request('/api/agent/runs/' + encodeURIComponent(id) + '/decision',
+        { buyerId: BUYER, decision: actualDecision, quoteId: checked.q.id, snapshotId: checked.q.snapshotId }, phaseKey(commandKey, 'decision'), true, evidence?.proof);
+      if (evidence) hostProofs.delete(evidence.cacheKey); // Successful ACK: do not retain raw proof.
+      if (actualDecision === 'approve') update(state => {
         const saved = entries(state, 'runs').get(id);
         put(state, 'runs', id, { ...saved, acceptedScope: { binding, quoteId: checked.q.id, budgetCents: checked.ceiling } });
       });
-      return request('/api/agent/runs/' + encodeURIComponent(id) + '/decision',
-        { buyerId: BUYER, decision, quoteId: checked.q.id, snapshotId: checked.q.snapshotId }, phaseKey(commandKey, 'decision'));
+      return accepted;
     },
     async commit(id, commandKey) {
       command(commandKey, 'commit', { id });
@@ -294,14 +413,24 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
       const context = await this.paymentContext(id);
       if (context.binding !== binding || context.pay.proposal.digest !== proposalDigest) fail('STALE_CONFIRMATION');
       if (context.pay.transfer) return status(id);
-      if (entries(read(), 'challenges').get(commandKey)?.authorization?.decision !== 'approve') fail('HUMAN_APPROVAL_REQUIRED');
+      let evidence;
       const orderId = context.full.run.orderId;
+      if (hostAuthenticated) {
+        command(commandKey, 'payment', { id, binding, proposalDigest });
+        const q = context.full.quote;
+        evidence = await decisionEvidence(commandKey, { action: 'PAYMENT_DECISION', decision: 'approve', runId: id,
+          quoteId: q.id, snapshotId: q.snapshotId, totalCents: q.totalCents,
+          quoteBodyDigest: context.pay.proposal.signedQuoteBodyDigest, orderId, paymentProposalDigest: proposalDigest });
+      } else if (entries(read(), 'challenges').get(commandKey)?.authorization?.decision !== 'approve') fail('HUMAN_APPROVAL_REQUIRED');
+      const actualDecision = evidence?.decision ?? 'approve';
       await request('/api/orders/' + encodeURIComponent(orderId) + '/payment-approval',
-        { buyerId: BUYER, decision: 'approve', proposalDigest }, phaseKey(commandKey, 'payment-approval'));
+        { buyerId: BUYER, decision: actualDecision, proposalDigest }, phaseKey(commandKey, 'payment-approval'), true, evidence?.proof);
+      if (evidence) hostProofs.delete(evidence.cacheKey);
+      if (actualDecision !== 'approve') return { ...await status(id), paymentApproval: 'REJECTED' };
       await request('/api/orders/' + encodeURIComponent(orderId) + '/settlement',
         { buyerId: BUYER, idempotencyKey: phaseKey(commandKey, 'transfer') }, phaseKey(commandKey, 'payment'));
       return status(id);
     },
-    close() { store?.close(); },
+    close() { hostProofs.clear(); store?.close(); },
   });
 }

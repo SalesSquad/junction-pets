@@ -571,5 +571,6 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     auditVerify: () => verifyAuditChain(audit),
     recordVerifiedHandshake,
     recordRefusal: (code, path) => record('HTTP_REFUSED', { reason: code, path }),
+    recordIdentityAuthorization: (authorization) => record('HOST_IDENTITY_AUTHORIZED_SYNTHETIC_ACTION', structuredClone(authorization)),
   });
 }

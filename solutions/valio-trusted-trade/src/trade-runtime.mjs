@@ -4,7 +4,7 @@ import { createDemoTrustRegistry } from './trust-envelope.mjs';
 import { openLocalStateStore, StateStoreError } from './local-state-store.mjs';
 
 export const HTTP_MAPS = Object.freeze(['sessions', 'quoteOwners', 'planOwners', 'orderOwners',
-  'reviewOwners', 'requestReplay', 'agentRuns']);
+  'reviewOwners', 'requestReplay', 'agentRuns', 'identityState']);
 export const createHttpContext = () => Object.fromEntries(HTTP_MAPS.map(name => [name, new Map()]));
 const invalid = () => { throw new StateStoreError('STATE_CORRUPT', 'Runtime checkpoint is incomplete or incompatible; no fixture reset was performed.'); };
 
@@ -16,9 +16,11 @@ export function createTradeRuntime({ stateFile, clock = () => Date.now(),
   const hydrate = value => {
     if (value) {
       if (value.kind !== 'local-trade-runtime' || value.version !== 1 || !value.core || !value.trust ||
-          !value.http || Object.keys(value.http).length !== HTTP_MAPS.length) invalid();
+          !value.http || ![HTTP_MAPS.length, HTTP_MAPS.length - 1].includes(Object.keys(value.http).length) ||
+          Object.keys(value.http).some(name => !HTTP_MAPS.includes(name)) ||
+          HTTP_MAPS.filter(name => name !== 'identityState').some(name => !Object.hasOwn(value.http, name))) invalid();
       for (const name of HTTP_MAPS) {
-        const entries = value.http[name];
+        const entries = name === 'identityState' && !Object.hasOwn(value.http, name) ? [] : value.http[name];
         if (!Array.isArray(entries) || entries.length > 20000 ||
             entries.some(pair => !Array.isArray(pair) || pair.length !== 2 || typeof pair[0] !== 'string' || pair[0].length > 1024) ||
             new Set(entries.map(pair => pair[0])).size !== entries.length) invalid();
