@@ -1,0 +1,82 @@
+{
+  "devCalTestOodOpened": false,
+  "frozenGoalsProtectedOnlyByObservedTriggerNoninterference": true,
+  "futurePhysicsVerified": false,
+  "gate": {
+    "kind": "blocked_or_abstain_side",
+    "min_distance": 0.035,
+    "min_streak": 1,
+    "obstacle_limit": 0.1
+  },
+  "modelPromotionAuthorized": false,
+  "model_type": "bounded-public-abstain-rescue-controller",
+  "safety": {
+    "exactSevenActionMaskRequired": true,
+    "fallbackToLegalV5OnRescueStop": true,
+    "inferenceInputs": [
+      "public18D_observation",
+      "sevenBitLegalMask",
+      "localPreviousOptions"
+    ],
+    "maxRescueOptionsPerRound": 8,
+    "maxRescueRounds": 1,
+    "neverContinueRescueInsidePublicGoalZone": true,
+    "returnToFrozenV5WhenForwardLegal": true
+  },
+  "schema": "junction.rokoko.v11.goal-preserving-abstain-gate.v1",
+  "source": {
+    "fullTransitionsSha256": "739c30a13ecacdecd404774fc9dadd887944f32df5cef14cfd2758a639460419",
+    "githubRun": 43649224059,
+    "harnessSha": "a64e6fcc73a1d47485fe052990e31c9d9e45100f",
+    "independentClearGoalReplaySha256": "e78ef0771371659cc98c10a55c9a33f65e7c3480c9f6b57cd527bd806cad6f26",
+    "independentQualificationSha256": "1678dca9b573c7c6fbacbc4f1eedab916914d324977f87dbf0dc9c3c9001b3d0",
+    "receiptRunId": "craci.43649224059.1.49e1693ab133a3e9",
+    "repository": "SalesSquad/junction-pets",
+    "sourceEvidence": "source-reported plus independent full TRAIN-only replay",
+    "sourceSha": "9cc583d3f0f24484b79c1929ba875c7a3b667806",
+    "trainingSha256": "103091f37e1b7d46937ea002845dda05f08391f4580f0aa7c181722d78b118af"
+  },
+  "training": {
+    "actualMuJoCoEpisodes": 800,
+    "coveredV10ReopenFit": 80,
+    "coveredV10ReopenHeld": 22,
+    "firedOnV5SuccessFit": 0,
+    "firedOnV5SuccessHeld": 0,
+    "fitTrainWorlds": 125,
+    "frozenV5Wins": 37,
+    "heldTrainWorlds": 35,
+    "originalRealOptionTransitions": 38569,
+    "sourceObservedMotorBudgetFitHeld": {
+      "cap": 8,
+      "fit": {
+        "count": 81,
+        "max": 18,
+        "withinCap": 79
+      },
+      "held": {
+        "count": 22,
+        "max": 7,
+        "withinCap": 22
+      },
+      "physicalGoalPerformanceMeasured": false,
+      "selectionRule": "minimum options covering >=97% FIT observed V10 blocked-side-to-forward-reopen windows, supported by HELD TRAIN"
+    },
+    "v10LostV5Goals": 11,
+    "v10LostV5Seeds": [
+      515006,
+      515015,
+      515022,
+      515031,
+      515032,
+      515035,
+      515040,
+      515046,
+      515048,
+      515155,
+      515218
+    ],
+    "v10NovelVsV5": 0,
+    "v10Wins": 26,
+    "worlds": 160
+  }
+}
