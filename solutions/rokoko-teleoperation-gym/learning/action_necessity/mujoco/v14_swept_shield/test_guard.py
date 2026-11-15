@@ -65,6 +65,51 @@ class SweptShieldCandidateTests(unittest.TestCase):
         self.assertIn("pusher_option_path_within_predictive_swept_obstacle_tube",
                       decision.action_risks[2].causes)
 
+    def test_public_object_outside_original_safe_xy_cannot_pass_distant_map(self):
+        obs = public_frame(obj=(.4, 0.), mapped=(.09, .15))
+        result = decide(obs, [1] * 7, 2)
+        self.assertTrue(result.would_veto_requested)
+        self.assertFalse(result.public_scene_plausible)
+        self.assertIn("public_object_outside_source_safe_xy_plus_sensor_slack",
+                      result.action_risks[2].causes)
+        self.assertEqual(result.shadow_fallback_action, ABSTAIN)
+
+    def test_public_pusher_outside_original_safe_xy_and_inside_mismatch(self):
+        obs = public_frame(pusher=(-.25, 0.), mapped=(.09, .15), inside=1)
+        result = decide(obs, [1] * 7, 2)
+        self.assertTrue(result.would_veto_requested)
+        self.assertIn("public_pusher_outside_source_safe_xy",
+                      result.action_risks[2].causes)
+        self.assertIn("public_inside_flag_pusher_xy_inconsistent",
+                      result.action_risks[2].causes)
+
+    def test_corrupt_finite_obstacle_map_outside_source_scene_fails_closed(self):
+        obs = public_frame(mapped=(.6, .6))
+        result = decide(obs, [1] * 7, 2)
+        self.assertTrue(result.would_veto_requested)
+        self.assertFalse(result.public_scene_plausible)
+        self.assertIn("mapped_obstacle_outside_source_scene_envelope",
+                      result.action_risks[2].causes)
+
+    def test_corrupted_public_goal_or_previous_scene_fails_closed(self):
+        obs = public_frame()
+        obs[16] = -.5
+        self.assertIn("public_goal_does_not_match_source_goal",
+                      decide(obs, [1] * 7, 2).public_scene_reasons)
+        prior = public_frame(obj=(.4, 0.), clock=.08)
+        result = decide(public_frame(clock=.1), [1] * 7, 2,
+                        previous_public18d=prior)
+        self.assertTrue(result.would_veto_requested)
+        self.assertIn("previous_public_scene_implausible", result.public_scene_reasons)
+
+    def test_previous_public_low_quality_map_is_not_trusted(self):
+        prior = public_frame(quality=.4, clock=.08)
+        current = public_frame(clock=.1)
+        result = decide(current, [1] * 7, 2, previous_public18d=prior)
+        self.assertTrue(result.would_veto_requested)
+        self.assertIn("previous_public_obstacle_map_stale_or_low_quality",
+                      result.public_scene_reasons)
+
     def test_low_quality_stale_held_or_deadman_each_veto(self):
         for kwargs in ({"quality": .4}, {"age": .12}, {"held": 1}, {"live": 0},
                        {"inside": 0}):
@@ -171,6 +216,28 @@ class SweptShieldCandidateTests(unittest.TestCase):
         self.assertEqual(result.baseline_action_unchanged, ABSTAIN)
         self.assertIsNone(result.experimental_action_advisory_only)
         self.assertTrue(result.risk.would_veto_requested)
+
+    def test_implausible_scene_never_unlocks_research_motor_advice(self):
+        for obs in (public_frame(obj=(.4, 0.)),
+                    public_frame(pusher=(-.25, 0.), inside=1),
+                    public_frame(mapped=(.6, .6))):
+            with self.subTest(obs=obs[:8]):
+                result = propose_one_fork(obs, [1] * 7, ABSTAIN,
+                                          opt_in=True, experimental_action=2)
+                self.assertEqual(result.baseline_action_unchanged, ABSTAIN)
+                self.assertIsNone(result.experimental_action_advisory_only)
+                self.assertIsNone(result.risk)
+                self.assertFalse(result.public_scene_plausible)
+                self.assertEqual(result.disposition,
+                                 "BASELINE_REFERENCE_ONLY_PUBLIC_SCENE_IMPLAUSIBLE_NO_COMMAND")
+
+    def test_default_baseline_is_reference_only_when_public_scene_corrupt(self):
+        result = propose_one_fork(public_frame(mapped=(.6, .6)), [1] * 7, 2)
+        self.assertEqual(result.baseline_action_unchanged, 2)
+        self.assertIsNone(result.experimental_action_advisory_only)
+        self.assertFalse(result.public_scene_plausible)
+        self.assertIn("NO_COMMAND", result.disposition)
+        self.assertFalse(result.external_execution_authorized)
 
     def test_public_deadman_or_hold_excludes_research_fork(self):
         for kwargs in ({"live": 0}, {"held": 1}):

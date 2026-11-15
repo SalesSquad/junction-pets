@@ -71,7 +71,12 @@ counterfactual motor only at the V13 source-defined PUBLIC
 `live=True`, `held=False`, and some motor option in the **original** mask is
 legal. It never reads V5 success labels, seeds, private mover state or future
 observations. If no public trigger, no opt-in, or the candidate vetoes, there
-is no experimental proposal and V5 stays unchanged. A future external host
+is no experimental proposal and V5 stays unchanged. Even when grossly
+implausible but finite public scene input is passed in default mode, the
+original baseline action is returned only as a **reference** with an explicit
+`NO_COMMAND` disposition; it is not an actuator instruction. The
+`per_world_max_candidate_forks=1` field is **metadata only**: this stateless
+source library cannot enforce a world-level budget. A future external host
 would have to independently enforce a one-fork-per-world budget, fresh public
 original-mask admission and authorization; **none exists here**. No motor
 command is ever executed by this package. Invalid inputs raise `ValueError`:
@@ -99,6 +104,23 @@ From the source `moving_scene.xml` and `physics.py`:
 | Sensor confidence margin | 3σ | Heuristic quantile, not a deterministic bound |
 | Object motion / pusher tracking slacks | 0.020 / 0.005 m | Candidate **assumptions**, NOT proven dynamics bounds |
 
+The P1 public-scene plausibility preflight also checks finite observations
+against **original** physical object/pusher XY limits (`x=-0.2..0.3m`,
+`|y|≤0.2m`) before treating a distant mapped obstacle as benign. The visible
+object has a deliberately wider 6σ (`±0.009m`) observation slack; the measured
+pusher is exact in the public source. If the public `inside=True` bit disagrees
+with measured pusher position beyond a `0.010m` sampling-lag allowance, it
+vetoes. The moving-obstacle source has fixed X `0.09m`, randomized local Y in
+`[-0.065,0.15]m`, and motion amplitude ≤`0.045m` across TRAIN/OOD; combined
+with a *heuristic* 6σ map-noise slack the plausible mapped scene envelope is
+`x∈[0.060,0.120]m`, `y∈[-0.140,0.225]m`. Public goal must match the original
+`(0.16,0.0)m` up to float32 tolerance. Grossly implausible but finite current
+or prior public geometry (or a low-quality/stale previous mapped frame) now yields an explicit `SHADOW_VETO_NOT_EXECUTED`
+reason even when all seven original mask bits say legal. Missing/nonfinite/
+malformed input raises `ValueError` (no command). Gaussian tails are unbounded,
+so these are **plausibility filters, not robot safety certificates**, and
+public XY cannot reveal the true Z/impulse/contact hazard mechanisms.
+
 For each of the six motor options, compute its approximate original desired
 pusher target from the **current public** object/pusher coordinates and public
 goal, then test both object-to-obstacle and pusher-path-to-obstacle separation
@@ -125,9 +147,10 @@ Run from this folder on a normal Python 3.10+ stdlib runtime:
 python3 -m unittest -v test_guard
 ```
 
-The tests are deterministic synthetic input checks: original-mask monotonicity,
+The **25** tests are deterministic synthetic input checks: original-mask monotonicity,
 deadman/held/stale veto, benign current geometry, moving hazard geometry,
-pusher path risk, conservative OOD constants, history uncertainty, no automatic
+pusher path risk, corrupt object/pusher/map and `inside`-bit consistency,
+conservative OOD constants, history uncertainty, no automatic
 lateral/retreat motor substitution, deterministic provenance, invalid-input
 fail-closed. They do **not** import or run MuJoCo, replay any V13 seed, read
 private artifact data, spend CRACI/Verda credits, train or estimate efficacy.
@@ -150,7 +173,7 @@ python3 shadow.py --artifact /path/to/existing/verified-v12-artifact.zip
 | Original seen TRAIN arm | Shadow motor vetoes | Original winning V5 worlds whose trace would be interrupted |
 | --- | ---: | ---: |
 | Frozen V5 baseline | **513 / 821** motor options | **12 / 12** |
-| V12 phase/dwell | 727 / 1,047 | 12 / 12 (same frozen winning paths) |
+| V12 phase/dwell | 728 / 1,047 | 12 / 12 (same frozen winning paths) |
 | RIGHT4 exploration | 449 / 761 | 12 / 12 (same frozen winning paths) |
 
 On V5's 12 originally successful trajectories a hypothetical **unconditional**

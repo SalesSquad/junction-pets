@@ -45,6 +45,24 @@ class Assumptions:
     pusher_tracking_allowance_m: float = 0.005  # hypothesis, NOT a proven bound
     max_public_age_seconds: float = 0.1
     min_public_quality: float = 0.8
+    # Original MovingContactEnv.step's TRUE object/pusher XY limits. Public
+    # object is noisy, so only a wider *plausibility* envelope can be checked.
+    source_body_x_min_m: float = -0.2
+    source_body_x_max_m: float = 0.3
+    source_body_abs_y_max_m: float = 0.2
+    source_inside_pusher_x_min_m: float = -0.19
+    source_inside_pusher_x_max_m: float = 0.29
+    source_inside_pusher_abs_y_max_m: float = 0.19
+    public_inside_sensor_lag_allowance_m: float = 0.01
+    # Original mocap x is fixed at .09; original randomized geom-local Y
+    # spans -.065..+.15 across TRAIN and OOD, with moving amplitude ≤.045.
+    source_mover_x_m: float = 0.09
+    source_obstacle_local_y_min_m: float = -0.065
+    source_obstacle_local_y_max_m: float = 0.15
+    public_plausibility_sigma_multiple: float = 6.0
+    source_public_goal_x_m: float = 0.16
+    source_public_goal_y_m: float = 0.0
+    public_goal_float_tolerance_m: float = 0.0001
 
     @property
     def max_obstacle_speed_mps(self) -> float:
@@ -110,6 +128,8 @@ class Decision:
     suggested_motor_actions: tuple[int, ...]
     observed_obstacle_displacement_m: float | None
     history_consistent: bool
+    public_scene_plausible: bool
+    public_scene_reasons: tuple[str, ...]
     max_obstacle_speed_mps: float
     global_max_amplitude_m: float
     global_max_frequency_hz: float
@@ -148,6 +168,8 @@ class OneForkProposal:
     experimental_action_advisory_only: int | None
     disposition: str
     risk: Decision | None
+    public_scene_plausible: bool
+    public_scene_reasons: tuple[str, ...]
     experimental_original_physics_qualified: bool = False
     external_execution_authorized: bool = False
     per_world_max_candidate_forks: int = 1
@@ -228,6 +250,42 @@ def _history_status(current, previous, bounds: Assumptions):
     return displacement, consistent
 
 
+def _scene_reasons(obs: tuple[float, ...], bounds: Assumptions) -> tuple[str, ...]:
+    """Flag grossly implausible finite PUBLIC readings before risk distances.
+
+    These are source-derived approximate envelopes, not upper bounds on
+    Gaussian noise tails or a substitute for the *actual* original physics
+    unsafe predicate. A grossly corrupt distant map cannot create a false
+    shadow PASS simply by making every distance large.
+    """
+    reasons = []
+    ox, oy, px, py, mx, my = obs[0], obs[1], obs[2], obs[3], obs[6], obs[7]
+    obj_margin = bounds.public_plausibility_sigma_multiple * bounds.visible_object_sigma_m
+    if not (bounds.source_body_x_min_m - obj_margin <= ox <=
+            bounds.source_body_x_max_m + obj_margin and
+            abs(oy) <= bounds.source_body_abs_y_max_m + obj_margin):
+        reasons.append("public_object_outside_source_safe_xy_plus_sensor_slack")
+    if not (bounds.source_body_x_min_m <= px <= bounds.source_body_x_max_m and
+            abs(py) <= bounds.source_body_abs_y_max_m):
+        reasons.append("public_pusher_outside_source_safe_xy")
+    inside_lag = bounds.public_inside_sensor_lag_allowance_m
+    if obs[11] and not (bounds.source_inside_pusher_x_min_m - inside_lag <= px <=
+                       bounds.source_inside_pusher_x_max_m + inside_lag and
+                       abs(py) <= bounds.source_inside_pusher_abs_y_max_m + inside_lag):
+        reasons.append("public_inside_flag_pusher_xy_inconsistent")
+    map_noise = bounds.public_plausibility_sigma_multiple * bounds.mapped_obstacle_sigma_m
+    if not (abs(mx - bounds.source_mover_x_m) <= map_noise and
+            bounds.source_obstacle_local_y_min_m - bounds.max_mover_amplitude_m - map_noise
+            <= my <= bounds.source_obstacle_local_y_max_m +
+            bounds.max_mover_amplitude_m + map_noise):
+        reasons.append("mapped_obstacle_outside_source_scene_envelope")
+    if (abs(obs[16] - bounds.source_public_goal_x_m) > bounds.public_goal_float_tolerance_m
+            or abs(obs[17] - bounds.source_public_goal_y_m) >
+            bounds.public_goal_float_tolerance_m):
+        reasons.append("public_goal_does_not_match_source_goal")
+    return tuple(reasons)
+
+
 def decide(
     public18d: Sequence[float],
     original_mask7: Sequence[int],
@@ -253,6 +311,12 @@ def decide(
     assumptions = _V14_ASSUMPTIONS
 
     displacement, history_ok = _history_status(obs, previous, assumptions)
+    scene_reasons = _scene_reasons(obs, assumptions)
+    if previous is not None and _scene_reasons(previous, assumptions):
+        scene_reasons += ("previous_public_scene_implausible",)
+    if previous is not None and (previous[8] > assumptions.max_public_age_seconds or
+                                 previous[9] < assumptions.min_public_quality):
+        scene_reasons += ("previous_public_obstacle_map_stale_or_low_quality",)
     healthy = (bool(obs[10]) and bool(obs[11]) and not bool(obs[15])
                and obs[8] <= assumptions.max_public_age_seconds
                and obs[9] >= assumptions.min_public_quality)
@@ -277,6 +341,7 @@ def decide(
             reasons.append("public_deadman_quality_age_or_hold_unhealthy")
         if not history_ok:
             reasons.append("previous_public_obstacle_map_inconsistent")
+        reasons.extend(scene_reasons)
         if obj_margin <= 0:
             reasons.append("object_within_predictive_swept_obstacle_tube")
         if pusher_margin <= 0:
@@ -306,6 +371,8 @@ def decide(
         suggested_motor_actions=suggestions,
         observed_obstacle_displacement_m=displacement,
         history_consistent=history_ok,
+        public_scene_plausible=not bool(scene_reasons),
+        public_scene_reasons=scene_reasons,
         max_obstacle_speed_mps=assumptions.max_obstacle_speed_mps,
         global_max_amplitude_m=assumptions.max_mover_amplitude_m,
         global_max_frequency_hz=assumptions.max_mover_frequency_hz,
@@ -343,15 +410,25 @@ def propose_one_fork(
     if not opt_in and experimental_action is not None:
         raise ValueError("experimental_action: cannot propose without opt-in")
     # Validate previous public input also when no research is enabled.
+    previous = None
     if previous_public18d is not None:
-        _public18d(previous_public18d, "previous_public18d")
+        previous = _public18d(previous_public18d, "previous_public18d")
+    scene_reasons = _scene_reasons(obs, _V14_ASSUMPTIONS)
+    if previous is not None and _scene_reasons(previous, _V14_ASSUMPTIONS):
+        scene_reasons += ("previous_public_scene_implausible",)
+    if previous is not None and (previous[8] > _V14_ASSUMPTIONS.max_public_age_seconds or
+                                 previous[9] < _V14_ASSUMPTIONS.min_public_quality):
+        scene_reasons += ("previous_public_obstacle_map_stale_or_low_quality",)
     trigger = bool(baseline_action == ABSTAIN and obs[10] == 1 and obs[15] == 0
                    and any(mask[:6]))
-    status = "BASELINE_V5_UNCHANGED_NO_RESEARCH"
+    status = ("BASELINE_REFERENCE_ONLY_PUBLIC_SCENE_IMPLAUSIBLE_NO_COMMAND"
+              if scene_reasons else "BASELINE_V5_UNCHANGED_NO_RESEARCH")
     proposed = None
     risk = None
     if opt_in:
-        if not trigger:
+        if scene_reasons:
+            status = "BASELINE_REFERENCE_ONLY_PUBLIC_SCENE_IMPLAUSIBLE_NO_COMMAND"
+        elif not trigger:
             status = "BASELINE_V5_UNCHANGED_PUBLIC_TRIGGER_ABSENT"
         elif experimental_action is None:
             status = "BASELINE_V5_UNCHANGED_NO_EXPERIMENT_ACTION"
@@ -372,6 +449,8 @@ def propose_one_fork(
         experimental_action_advisory_only=proposed,
         disposition=status,
         risk=risk,
+        public_scene_plausible=not bool(scene_reasons),
+        public_scene_reasons=scene_reasons,
     )
 
 
