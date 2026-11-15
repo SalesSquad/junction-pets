@@ -1,12 +1,13 @@
-# V13 source-only original MuJoCo harness
+# V13 original MuJoCo research harness
 
 
-Main-branch source-only port: the qualifier, burst retainer, tests, public
-survey fixture and V7 trace validator are preserved here without adding a
-workflow or planner route. The work record below describes the original
-research branch, not a current dispatch or qualification. The legacy V13
-workflow admission mismatch must be resolved and reviewed separately
-before any future run; no model promotion is authorized.
+The main branch contains the qualifier, burst retainer, tests, public survey
+fixture, V7 trace validator and a manual-only, source-pinned workflow route.
+The route remains disabled until the existing credit window and the separate
+source-review variable are both open; neither variable proves the actual
+account balance or physical safety. The work record below describes the
+original research branch, not a current dispatch or qualification. No model
+promotion is authorized.
 WorkID: `J26-CRACI-V13-SUSTAINED-RIGHT-HARNESS-20261115`.
 Harness parent: `72653f5f6ac1ec46fa63128da11957ebe0c5cff9`.
 Local task branch: `codex/craci-v13-novel-train-20261115`.
@@ -40,14 +41,13 @@ copied or modified by this harness branch.
 - `scripts/craci/test_rokoko_mujoco_v13_harness.py`
 - This README.
 
-All V12 scripts, evidence, shared workflow and `plan.yml` remain unchanged.
-The standalone V13 retention validator does not invoke the V12 144-row packer.
+The V13 retention validator does not invoke the V12 144-row packer.
 It imports only the new harness for V13 seed/order/trace validation.
 The replay reuses the unchanged V7 transition/sparse-row validator, never its
 old dataset-level counts. Historical V10 and original V8 source are loaded from
 the separately pinned product checkout.
 
-## Execution interface for later integrator wiring
+## Execution interface
 
 Manual-only Python CLI: `--stage full|original|qualify`, default `full`.
 No dispatch function or retry loop exists. There is no raw shell command
@@ -64,9 +64,9 @@ Required caller variables (configuration only; no secret-store access):
 | `CRACI_HARNESS_ROOT`, `CRACI_HARNESS_SHA` | Clean full harness HEAD containing the actually invoked script; branch names need not match product |
 | `CRACI_RECEIPT_DIR` | Existing private receipt root; collector subdirectory must be new |
 | `RUNNER_TEMP` | Existing private temporary root with `mujoco-venv/bin/python` |
-| `CRACI_WORKLOAD` | Exactly `rokoko-mujoco-v13-original` |
+| `CRACI_WORKLOAD` | Exactly `rokoko-mujoco-v13-pilot` |
 | `CRACI_CREDIT_WINDOW_OPEN` | Exactly `true` |
-| `CRACI_CREDIT_REMAINING_SECONDS` | At least 3600 |
+| `CRACI_CREDIT_REMAINING_SECONDS` | At least 7200 for originals/full, 3600 for qualification |
 | `CRACI_MANUAL_SOURCE_REVIEWED` | Exactly `true`, supplied by coordinator only after review |
 | `CRACI_V13_PLAN_PATH` | Exact plan path within the V13 product directory |
 | `CRACI_V13_PLAN_SHA256` | Explicit SHA, equal to reviewed harness plan pin; never inferred from bytes |
@@ -74,11 +74,14 @@ Required caller variables (configuration only; no secret-store access):
 
 The actual running interpreter and named venv must use NumPy 2.3.4 and MuJoCo
 3.3.7; merely checking another interpreter is insufficient. Admission requires
-at least 60 minutes before `2026-11-15T17:00:00Z`. No credentials or personal
+at least 120 minutes before `2026-11-15T17:00:00Z` for originals/full, and
+60 minutes for qualification. The workflow enforces a 60-minute job timeout.
+No credentials or personal
 records are read. Source receipts do not attest a provider bill. The coordinator
 owns aggregate credit accounting and duplicate source/cohort/seed admission
 across hosts; this standalone harness does not create a distributed ledger.
-No workflow or planner is wired in this change.
+The main workflow and planner pin this study's exact product source and leave
+the manual source-review flag unset by default. No run follows automatically.
 
 Frozen inputs:
 
