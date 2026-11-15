@@ -39,14 +39,31 @@ Key engineering findings:
 - Nemotron's hidden reasoning can consume the whole output budget (16k+ tokens) on a
   multi-question drawing and return nothing. `chat_template_kwargs.enable_thinking=false`
   removes it; with reasoning on, asking for answers only (no point lists) stays bounded.
-- Batching all questions of a drawing into one reasoning call is both more accurate and
-  ~3.5× cheaper than one call per question.
+- Batching all questions of a drawing into one reasoning call costs about a third of the tokens
+  of one call per question; on held-out drawings its accuracy is on par, not better (see Results).
 - The model mixes 0..1, 0..1000 and pixel coordinates; `normalizeCoords` maps all three.
 - Finnish architectural plans tag openings with decimetre sizes: `9x21/O` (≈2.1 m high) is a
   door, `13x12` a window. Vision OCR reads them, including vertical tags (0°/90°/270° passes,
   2×2 tiles). Many preview PNGs are too small or untagged, so rules only answer when they
   found positive evidence.
 
-## Results
+## Results (cubicasa5k, English questions, Nemotron 3.5 Super VL on Verda)
 
-See the PR description for the measured table (exact source SHA, split, model, tokens).
+| Strategy | Split | Questions | Correct | Tokens / question |
+| --- | --- | ---: | ---: | ---: |
+| `per-question` (baseline) | dev, 8 drawings | 72 | 45.8 % | 5,516 |
+| `per-drawing` (reasoning off) | dev, 8 | 72 | 29.2 % | 252 |
+| `per-drawing-answers` | dev, 8 | 72 | 69.4 % | 1,563 |
+| `per-drawing-answers` | dev, 40 | 358 | 63.7 % | 1,502 |
+| `per-drawing-answers` + 2048 px upscale | dev, 40 | 358 | 62.3 % | 1,749 |
+| `cascade` (OCR rules first) | dev, 40 | 358 | 60.9 % | 1,677 |
+| `ocr-rules` (no model; symbol questions unanswered) | dev, 40 | 358 | 24.3 % | 0 |
+| `per-drawing-answers` | **test, 40** | 351 | **63.2 %** | 1,593 |
+| `per-drawing-answers` | test, 16-drawing subset | 141 | 56.0 % | ≈1,600 |
+| `per-question` (baseline) | test, same 16 | 141 | 61.0 % | 5,168 |
+
+The dev-8 gain did not hold on held-out drawings: accuracy is on par with (on 16 drawings,
+slightly below) the per-question baseline, at about a third of the tokens. Weakest classes on
+dev-40: windows 6/40 and doors 5/31 (dense symbols undercounted); strongest: balconies 9/9,
+storeys 38/40, bathrooms 16/18, kitchens 25/28. Next step for symbols: a small detector trained on
+public CubiCasa5K annotations, excluding every image that appears in the Stoa dataset.

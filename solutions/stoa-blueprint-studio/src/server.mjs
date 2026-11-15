@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { parseDxf, DXF_LIMITS } from './dxf.mjs';
-import { answerDrawing } from './grounding.mjs';
+import { answerDrawingV2 as answerDrawing } from './quantities.mjs';
 import { makeDemo } from './demo.mjs';
 
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
