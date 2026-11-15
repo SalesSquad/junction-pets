@@ -1,0 +1,72 @@
+{
+  "authorized_base_sha": "242a16c2267b5b8ee9a64877c570fe617f4d9b1a",
+  "claim": {
+    "comment": "https://github.com/SalesSquad/junction-pets/issues/80#issuecomment-6883867909",
+    "reason": "gh API failed: DNS/network unavailable",
+    "status": "NOT_VERIFIED_OR_POSTED"
+  },
+  "cpu_diagnostic": {
+    "all_sensor_replay_accepted": false,
+    "artifact_directory": "/Users/mikaelmini/Operations/mac-mini/junction/m8-physics-work-20261114/cpu-diagnostic-23-31-v4",
+    "camera_present": false,
+    "commands_after_latch": 0,
+    "episodes": 18,
+    "frame70_fault_behavior_independently_qualified": false,
+    "frames": 3240,
+    "global_latched_from_frame_zero": true,
+    "max_drift_from_first_latched_frame_rad": 0.0692156379499353,
+    "result": "COMPLETED_WITH_SENSOR_REPLAY_REFUSED",
+    "run_metadata_sha256": "b908ed2f5856a7a3bdbf622a84556e8c6553960eeb8882b2909c90565e451aa2",
+    "seeds": [
+      23,
+      31
+    ],
+    "source": {
+      "files_sha256": {
+        "LICENSE.model.txt": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "README.md": "060cd0357900fb43aeb24b3c12480623cb01cd75e226eb5738cc173924fd696b",
+        "bridge.py": "b2e71bacfe91c8ccc49b39a049cae23a6e6ba4e2ef84aa2b985ecd988214f8f0",
+        "historical.json": "cce7d7606a85cde6a293572756876127915c3cadbac7c7dee0a484bd73b5b359",
+        "model-pin.json": "cda751f82f9a5e0d0ae6db9c5e1ff811a70cd03abb1117768c59f29eeed3c2e9",
+        "motion.py": "6a3cdd578220a1e4c7c09846a7fcfb41ceed3fc212edf27782aa83b4fb774f7e",
+        "requirements.txt": "321ff0d829bbf5e1ae08e01c18e802fa926fb050b220edbdaddf5518b7b9a02f",
+        "run.py": "0bde5cbe6cef1eb0d3243d7d43850036dd0beab19f95ee9a55dee83a557f98c0",
+        "test_bridge.py": "9a3727326060e5aabba2547b86b0d3153616652aa7675ee1f655c3442746d2f1"
+      },
+      "git_head": "242a16c2267b5b8ee9a64877c570fe617f4d9b1a"
+    },
+    "summary_sha256": "fed40d2a37578d338a711c7f8ecaaa1bae175d3f5dd5b375d46ec0cf26631b86"
+  },
+  "history": "historical.json reuses prior [7,11,19] results; not rerun",
+  "model_pin_sha256": "cda751f82f9a5e0d0ae6db9c5e1ff811a70cd03abb1117768c59f29eeed3c2e9",
+  "native_rendered_qualification": {
+    "completed_rendered_episodes": 0,
+    "error": "mujoco.cgl.cgl.CGLError: invalid CoreGraphics connection",
+    "failed_log": "run-23-31-v1.log",
+    "log_sha256": "1ba8d818b7e17160e72f48eb3921f52447ff6294ffdd7111ccf3b2d2e0d84939",
+    "result": "BLOCKED"
+  },
+  "operations_directory": "/Users/mikaelmini/Operations/mac-mini/junction/m8-physics-work-20261114",
+  "owned_paths": [
+    "solutions/intel-physical-ai/sim/**"
+  ],
+  "recorded_at_utc": "2026-11-14T20:50:59.299093+00:00",
+  "remaining_gate": "Authorized native graphics context; then execute default required-capture nine scenarios x [23,31] and verify every saved frame. No hardware/provider qualification.",
+  "source_modules_sha256": {
+    "bridge.py": "b2e71bacfe91c8ccc49b39a049cae23a6e6ba4e2ef84aa2b985ecd988214f8f0",
+    "motion.py": "6a3cdd578220a1e4c7c09846a7fcfb41ceed3fc212edf27782aa83b4fb774f7e",
+    "run.py": "0bde5cbe6cef1eb0d3243d7d43850036dd0beab19f95ee9a55dee83a557f98c0",
+    "test_bridge.py": "9a3727326060e5aabba2547b86b0d3153616652aa7675ee1f655c3442746d2f1"
+  },
+  "targeted_tests": {
+    "command": "python -m unittest discover -s solutions/intel-physical-ai/sim -p test_*.py -v",
+    "historical_camera": "/Users/mikaelmini/Operations/mac-mini/junction/so101-mujoco-physics-20261114/runs/frames-camera_missing-7-gate/f0000.ppm",
+    "historical_camera_sha256": "80574fcbe3f5b1222feb63340185f5f286206e4a4b960b3bd47a035ac33d9c09",
+    "log": "/Users/mikaelmini/Operations/mac-mini/junction/m8-physics-work-20261114/tests-final.log",
+    "log_sha256": "fe095f063b79389832c63825353c77bd26340e706a2e0880fe1b28d29dddf126",
+    "positive_replay_fixture": "Repeats one genuine historical image; not new captures or command execution.",
+    "result": "PASS",
+    "tests": 17
+  },
+  "work_id": "J26-INTEL-M330-M8"
+}
