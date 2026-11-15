@@ -8,7 +8,10 @@ them. All notes are SYNTHETIC; the planner saw only public aggregate data.
 Before submitting: the NVIDIA minimum asks for Nemotron "in the working solution". On the page,
 Nemotron's output appears as stored results only: the cached planner drafts (`web/planner.mjs`,
 `data/planner/plans-v1.json`) and its stored second-reader answers, which decide pre-fill in the scribe
-demo (`web/serve.mjs`, `serve/demo/engine.py` `apply_second_reader`). The page calls no hosted model.
+demo (`web/serve.mjs`, `serve/demo/engine.py` `apply_second_reader`). It can also call Nemotron live:
+the "Ask Nemotron live (second reader)" button under Note 4 sends the SYNTHETIC note to the hosted
+endpoint (`POST /api/scribe/second`; test run 2.7 s on note 4, `runs/nemotron-live-demo.jsonl`). Without
+endpoint settings it shows the stored answer and says why.
 
 ---
 
@@ -18,10 +21,16 @@ demo (`web/serve.mjs`, `serve/demo/engine.py` `apply_second_reader`). The page c
 OpenAI-compatible endpoint hosted by Verda for Junction, at temperature 0, with tool calling and
 `enable_thinking`.
 
+**Headline result.** Our chosen pairing is Gemma 3 1B with Nemotron as second reader: a note is
+pre-filled for one-click confirmation only when both agree. Measured offline on SYNTHETIC notes, it
+pre-fills 684 of 700 test notes with 4 wrong (post hoc: the test set was read in earlier work) and 220
+of 308 frozen stress notes with 3 wrong (`data/scribe/v4/eval/results-v1.json`, cascade, chosen C +
+agreement). Gemma 3 1B alone would have 85 of the 308 stress notes wrong. A person confirms every event.
+
 **What it does in SAMA.** SAMA measures Finland's cancer pathway clock and turns it into action, so
 that the pathway is the same wherever people live, whoever they are and however they enter care.
-Nemotron's work is on the page in two places, both as stored results (the page itself calls no hosted model),
-and it also wrote training data:
+Nemotron's work is on the page in two places, as stored results plus one live button (the "Ask Nemotron
+live" button is the only place the page calls a hosted model), and it also wrote training data:
 1. **County planner (cached drafts on the page).** For each of Finland's 23 areas it drafts an action plan by calling four SAMA
    tools (county brief, budget portfolio, evidence, national roadmap measure). Each action names an
    owner, an indicator and the roadmap measure it serves, plus one line on what the evidence does not
@@ -29,11 +38,12 @@ and it also wrote training data:
    same run, then a TypeSafe faithfulness check; failed sentences are dropped, never repaired. A
    planner decides; the plans are labelled drafts.
 2. **Second reader (stored answers).** It read the SYNTHETIC Finnish validation and test notes offline,
-   after our small Gemma scribe. In the scribe demo on the page, a note is pre-filled for one-click
-   confirmation only when Gemma's answer and Nemotron's stored answer for the same note agree exactly:
-   15 of the 20 demo notes, 0 of them wrong; the 2 demo notes Gemma gets wrong need editing because the
-   readers disagree. Free text and the 3 notes rewritten by code have no Nemotron answer, so they need
-   editing. A person confirms every event either way.
+   after our small Gemma scribe, and the page can ask it live. In the scribe demo on the page, a note is
+   pre-filled for one-click confirmation only when Gemma's answer and Nemotron's answer for the same
+   note agree exactly. With the stored answers and the 270M product adapter: 15 of the 20 demo notes, 0
+   of them wrong; the 2 demo notes that adapter gets wrong need editing because the readers disagree.
+   Free text and the 3 notes rewritten by code have no stored Nemotron answer, so they need editing.
+   A person confirms every event either way.
 3. **Teacher.** It wrote 1,716 of the 2,354 SYNTHETIC notes that trained the selected Gemma scribe (and
    3,222 of 3,860 in the larger v3 set, whose adapter was not selected).
 
@@ -41,11 +51,11 @@ and it also wrote training data:
 need a plan they can check, and clinicians need fewer corrections. The planner wrote a plan for
 23 of 23 areas; 255 of 299 sentences survived the checks, and 0 kept sentences carry a number that
 is not in a tool output. Measured offline on 700 SYNTHETIC test notes (read in earlier work, so post
-hoc), the two-reader rule with the product's Gemma 3 270M adapter (`C-270m-all-v2data`) pre-fills 651
-notes with 4 wrong among them (0.6%) and marks 49 as needing editing; before tonight our best rule
-pre-filled 263 notes with 7 errors. The validation-chosen pairing (the larger Gemma 3 1B expression
-reader `C-1b-expr-aug`, not in the demo) pre-fills 684/700 with 4 wrong (post hoc) and 220 of 308 fresh
-stress notes with 3 wrong.
+hoc), the chosen pairing (Gemma 3 1B expression reader `C-1b-expr-aug` plus Nemotron) pre-fills 684
+notes with 4 wrong among them (0.6%) and marks 16 as needing editing, and on 308 fresh stress notes
+pre-fills 220 with 3 wrong. Before tonight our best rule pre-filled 263 notes with 7 errors. The
+earlier pairing, with the 270M product adapter (`C-270m-all-v2data`, the one in the laptop demo),
+pre-filled 651 of 700 with 4 wrong.
 
 **How we improved its outputs.**
 - *Planner.* Prompt v1 kept 164/299 sentences, with 0 of 69 indicator lines surviving. Prompt v2
@@ -79,10 +89,11 @@ enable_thinking. What it does: SAMA measures Finland's cancer pathway clock and 
 action. Nemotron drafts each area's action plan by calling SAMA's own tools: 23 of 23 plans, 255 of
 299 sentences kept after a code number check and a faithfulness check, 0 kept numbers outside the
 tool outputs; it refused 9 of 10 off-limits requests (a county guard added post hoc stops the 10th).
-As a second reader after our Gemma scribe (stored answers; the page calls no hosted model), the
-scribe demo pre-fills a note only when both agree: 15 of 20 demo notes, 0 wrong; offline with the
-product's 270M adapter, 651/700 SYNTHETIC test notes (4 wrong, post hoc); the rest need editing; a
-person confirms every event. How we improved it: field-format prompt 164/299 to 255/299
+As a second reader after our Gemma scribe (stored answers, plus a live "Ask Nemotron" button), a note
+is pre-filled only when both agree. Chosen pairing, Gemma 3 1B + Nemotron, offline on SYNTHETIC notes:
+684/700 test notes pre-filled, 4 wrong (post hoc), and 220/308 frozen stress notes, 3 wrong; the rest
+need editing; a person confirms every event. The laptop demo uses the 270M adapter: 15 of 20 demo
+notes, 0 wrong. How we improved it: field-format prompt 164/299 to 255/299
 kept sentences; copying dates and computing them in code 192/310 to 282/310; enable_thinking
 304/310 (98.1%). Image input tested, not good enough yet. All notes SYNTHETIC.
 
@@ -154,8 +165,21 @@ concurrency 8. Source: `data/scribe/nemotron/reader-v1.json` (`test`).
 
 ### Two-reader agreement with Gemma (rule fixed in advance, no threshold)
 
-Gemma reader here: the product adapter `C-270m-all-v2data` (Gemma 3 270M) + code resolver. The test
-set had been read in earlier work, so the test column is post hoc.
+Chosen pairing: Gemma 3 1B expression reader (`C-1b-expr-aug`) + Nemotron. The test set had been read
+in earlier work, so test figures are post hoc. Source: `data/scribe/v4/eval/results-v1.json`.
+
+| | Test (700) | Frozen stress (308) |
+| --- | --- | --- |
+| Gemma 3 1B alone, exact | 684 | 223 |
+| Nemotron alone, exact | 690 | 280 |
+| Pre-filled (both agree), chosen C + agreement | 684 | 220 |
+| Wrong among pre-filled | 4 | 3 |
+| Needs editing | 16 | 88 |
+
+Nemotron wrote the stress notes, so its stress figures are optimistic.
+
+**The earlier pairing, with the 270M product adapter.** Gemma reader: `C-270m-all-v2data` (Gemma 3 270M)
++ code resolver, the adapter in the laptop demo. Kept here only as the earlier result.
 
 | | Validation | Test |
 | --- | --- | --- |
@@ -170,9 +194,19 @@ set had been read in earlier work, so the test column is post hoc.
 Haiku-written test notes: 169/200 pre-filled, 0 wrong. Baseline before tonight: 263/700 in the
 "no edit needed" group with 7 errors (TypeSafe Jev scores at a 5% error target). Measured offline
 on stored outputs. The scribe demo applies the same rule to Nemotron's stored answers for its 20
-SYNTHETIC notes (15 pre-filled, 0 wrong; `data/scribe/demo/demo-outputs.json` `two_reader`); the page
-calls no hosted model.
+SYNTHETIC notes (15 pre-filled, 0 wrong; `data/scribe/demo/demo-outputs.json` `two_reader`). "15 of 20
+pre-filled" and "18 of 20 exact" are different measures. The "Ask Nemotron live" button calls the hosted
+endpoint for the selected note (note 4 in 2.7 s, `runs/nemotron-live-demo.jsonl`); every other path
+uses stored answers.
 Source: `data/scribe/nemotron/cascade-agreement-v1.json`.
+
+### How Nemotron improved the outputs: local-only comparison (post hoc)
+
+Stored outputs, scored after the stress results were seen (`data/scribe/v4/eval/local-pairs-posthoc-v1.json`).
+If the second reader is a local Gemma 3 270M with the frozen lexicon resolver instead of Nemotron, the
+pair with Gemma 3 1B pre-fills 92 of 308 stress notes, 6 wrong. With Nemotron it is 220 of 308, 3
+wrong. On the 700 test notes the local pair pre-fills 669, 7 wrong. Nemotron wrote the stress notes, so
+the stress gain is optimistic; even so, the local-only pair leaves most unseen phrasings to the person.
 
 ### Teacher (SYNTHETIC training data)
 

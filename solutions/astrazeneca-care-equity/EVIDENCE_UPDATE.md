@@ -1,5 +1,7 @@
 # SAMA: an accountable next step, with explicit evidence limits
 
+> Working notes from the hackathon night; README.md and submission/ are the current versions.
+
 Work ID: `junction.astrazeneca.evidence-evaluation-20261115`.
 Initial authenticated source: `6d2efadb22678c259dfaf6817b43c883974a9eab`.
 Integration base: `0d7923213860287f1c10c188c3a9af8c39941739`; all SAMA and

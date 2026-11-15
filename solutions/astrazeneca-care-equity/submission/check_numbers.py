@@ -29,7 +29,8 @@ import pyarrow.parquet as pq
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SUB = os.path.join(ROOT, "submission")
 DOCS = ["DECK.md", "VIDEO_SCRIPT.md", "NVIDIA_FORM.md", "GEMMA_WRITEUP.md", "VERDA_DISCORD.md",
-        "PATH_TO_SCALE.md", "ZERO_EURO_2027.md", "PATHWAY_CLOCK.md", "EXPORT_CHECKLIST.md"]
+        "PATH_TO_SCALE.md", "ZERO_EURO_2027.md", "PATHWAY_CLOCK.md", "EXPORT_CHECKLIST.md",
+        "../README.md", "QA.md", "DEMO_SCRIPT.md"]  # README.md lives one folder up (SUB/..)
 BANNED = ["auto-confirmed", "auto confirmed", "skips review", "skip review", "clinically accurate",
           "works on real notes", "hospital-grade", "hospital grade"]
 # Retired wording: numbers and phrases BIG_PICTURE.md (revision 2) found wrong.
@@ -95,7 +96,7 @@ def same(name, got, want):
 
 
 ALL = DOCS
-DECK, VIDEO, NV, GEM, VERDA, PTS, ZERO, CLOCK, EXP = DOCS
+DECK, VIDEO, NV, GEM, VERDA, PTS, ZERO, CLOCK, EXP = DOCS[:9]
 
 # --- external facts re-opened tonight (submission/evidence-v2.json) ----------------------------
 ev = {x["id"]: x for x in J("submission/evidence-v2.json")["rows"]}
