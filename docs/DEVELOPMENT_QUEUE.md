@@ -21,6 +21,21 @@ from the ledger. Read the [exact reader contract](DEVELOPER_CONTINUITY.md) befor
 treating a match as evidence: it proves local company-scope agreement only,
 not remote freshness, current full-suite success, live workers or provider access.
 
+## Current ownership: G1 Moves and CRACI
+
+| Lane | Logical owner | Work and evidence |
+| --- | --- | --- |
+| Rokoko | `junction-dev-rokoko` | [G1 Moves offline motion research](../solutions/rokoko-teleoperation-gym/learning/G1_MOVES.md), including the completed CRACI training result and retargeting follow-up. |
+| CRACI | `junction-dev-craci` | Its own [build-provenance and supply-chain challenge](CRACI.md#independent-craci-challenge-lane), including SBOM and advisory evidence. CRACI also supplied the G1 compute; that does not transfer ownership of the motion work. |
+
+The two entries in `ops/development-progress.json` are independent,
+proposed-not-started continuations; they are not running workers or leases.
+The prior G1 experiment remains complete historical evidence, not an active
+training job. At source `d9a6ff7700ff0ca41580acc193691b2e2f658c5d` on 15
+November, the local scope check reported all 34 historical company digests,
+including these two, as stale. The old evidence and digests are retained; the
+lane routing here is not a source-matched or active-worker claim.
+
 ## Resume one lane
 
 1. Resolve current authenticated GitHub main, the recorded source PR and any

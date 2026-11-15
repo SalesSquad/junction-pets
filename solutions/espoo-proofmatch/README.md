@@ -1,5 +1,7 @@
 # ProofMatch W2 · private conversation demo
 
+**Public bilingual ESCO glossary extension (15 Nov):** This private development demo can optionally display six real EU skill terms and source URIs without affecting candidate ranking, self-declared evidence or scheduling. The data was retrieved once from the official European Commission API, pinned as an offline bundle; see [ESCO README](esco/README.md). This is **not** an Espoo or candidate integration, a proficiency claim, or competition-submission clearance.
+
 Choose a fictional event role, inspect exact and transferable skill evidence,
 ask about unknowns, and simulate a separate proposal and response for a
 **15-minute conversation on fictional 15 November 2026**. All five candidates

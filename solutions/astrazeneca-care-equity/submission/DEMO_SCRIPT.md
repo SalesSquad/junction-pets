@@ -15,6 +15,9 @@ the two outcomes, nothing else.
 1. Start the product on a free port with the live model switched off (the stored outputs are the
    demo):
    `SAMA_SCRIBE_LIVE=0 PORT=4191 node web/serve.mjs`, then open `http://127.0.0.1:4191/`.
+   For the jury, open `http://127.0.0.1:4191/?jury` instead: the same page with only the sections of
+   the click path below (about 18 screens instead of 47 at 1440 px); "Open the full report" at the top
+   goes back to everything.
    Check `http://127.0.0.1:4191/api/health` answers `{"status":"OK"}`.
 2. **Use a server started after 01:30 UTC on 15 November.** Since then `web/serve.mjs` reloads
    `data/scribe/demo/demo-notes.json`, `demo-outputs.json` and the stored Nemotron answers whenever
@@ -46,7 +49,7 @@ the two outcomes, nothing else.
 
 ## The 2-minute click path
 
-About 250 spoken words (counted from the "Say" column; 2.3 words a second leaves about 10 seconds for clicks). Each step: what to click, what to say, which number to point at, and the
+About 250 spoken words (257 counted from the "Say" column; 2.3 words a second leaves about 10 seconds for clicks). Each step: what to click, what to say, which number to point at, and the
 file that number comes from.
 
 | Time | Click | Say | Point at | Source |
@@ -55,7 +58,7 @@ file that number comes from.
 | 0:15 | Nav "Start here" (Satakunta is selected). | "Start with one county, one next step. Satakunta's cancer mortality ratio is 1.10: an outcome difference, not a cause. Its specialist referrals wait over 21 days more often than nationally, 3 against 1.3 percent. So, first 30 days: name a pathway lead, agree the timestamps, publish a baseline; review at 90 days. A proposal for people to decide." | The card "Standardised, timed cancer pathways with a fast-track referral": 01 observed outcome, 02 pathway question, then "Proposed first 30 days". | `src/decisions.mjs` `buildDecisionBrief(app, 'HVA06')` on `web/data/app.json` (`analysis.mortality.all_cancers` HVA06 shrunk 1.097, 1.063-1.132; `referral_handled_over_21d` 3 vs 1.33, 2023-2025) |
 | 0:40 | Nav "Close the loop". | "Then the follow-up becomes a nurse's list. Synthetic Satakunta replay: 120 open loops, 16 overdue. A nurse confirms every item." | The four tiles (120, 16), then the three SYNTHETIC rows. | `data/safetynet/safetynet-v1.json` (`counties` HVA06: `open_loops` 120, `overdue` 16, imaging `overdue` 10, referral `overdue` 6) |
 | 0:55 | Nav "Comparability gate". | "A county is compared only when it can see itself. NVIDIA FLARE computed each county's clock where its synthetic data live, 253 of 253 cells matching. With the model's own dates, 15 of 23 counties are not comparable; when Gemma reads and code counts, 1." | "The model's own dates: 15 of 23" and "Gemma reads, code counts: 1 of 23". | `data/flare/gate-v1.json` (`summary.raw`, `summary.resolver`, `flare.equivalence`: 253 of 253) |
-| 1:15 | Nav "Gemma demo". Note 4 opens by default and its stored output loads by itself. | "Gemma reads the note on this laptop and copies '25 viikkoa sitten'; code computes the date. Nemotron reads it too; they agree, so it is pre-filled for one-click confirmation, and a person confirms. On 308 frozen stress notes Gemma alone gets 85 wrong; with the second reader, 3." | Row "MDT decision": 9.9.2023 with 8.10.2023 struck out; the box "Pre-filled for one-click confirmation". | `data/scribe/demo/demo-outputs.json` (`results.demo-04`); `data/scribe/v4/eval/results-v1.json` (`sets.stress.systems.C` 223 of 308; `cascade.configurations` C + agreement, stress 220 pre-filled, 3 wrong) |
+| 1:15 | Nav "Gemma demo". Note 4 opens by default and its stored output loads by itself. | "A small Gemma, 270 million parameters, reads the note on this laptop and copies '25 viikkoa sitten'; code computes the date. Nemotron reads it too; they agree, so it is pre-filled for one-click confirmation, and a person confirms. The larger one-billion Gemma, alone, gets 85 of 308 stress notes wrong; paired with Nemotron, 3." | Row "MDT decision": 9.9.2023 with 8.10.2023 struck out; the box "Pre-filled for one-click confirmation". | `data/scribe/demo/demo-outputs.json` (`results.demo-04`); `data/scribe/v4/eval/results-v1.json` (`sets.stress.systems.C` is Gemma 3 1B, 223 of 308 exact, so 85 wrong; the laptop demo runs Gemma 3 270M, `C-270m-all-v2data`; `cascade.configurations` C + agreement, stress 220 pre-filled, 3 wrong) |
 | 1:40 | Nav "Nemotron county plan" (Satakunta is the default). | "Nemotron drafts each county's plan through SAMA's tools; code checks every number. Our ask: a 2027 pilot in Satakunta, owned by the county. Gemma runs locally; the second reader runs inside the county, or a person does that step." | The plan's footer line "Across 23 counties: 255 of 299 drafted sentences kept". | `data/planner/plans-v1.json` (`summary`: `keptSentences` 255, `sentences` 299); `data/roadmap/mapping-v1.json` (`pilotCard`) |
 
 At 1:15, if the NVIDIA jury is present and step 7 was used, click "Ask Nemotron live (second reader)"

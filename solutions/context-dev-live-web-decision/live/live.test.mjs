@@ -6,6 +6,7 @@ import {scrapeSource,MAX_BYTES} from './context-client.mjs';
 import {createLiveService} from './service.mjs';
 import {createServer} from '../server.mjs';
 
+const noNews=async()=>{throw Error('PROVIDER_FAILED');};
 const stamp='2026-11-15T02:00:00.000Z',now=Date.parse(stamp);
 function body(id,price='109.00'){
   const source=SOURCES.find(s=>s.id===id);
@@ -69,14 +70,14 @@ test('provider failures, bounded bodies, malformed JSON and timeout never return
 });
 test('single-flight refresh, cooldown and credit exhaustion prevent duplicate repeated calls',async()=>{
   let release,calls=0;const gate=new Promise(r=>release=r);let clock=now;
-  const service=createLiveService({apiKey:'test',captureFile:'/nonexistent-supplypulse-test',now:()=>clock,scrape:async id=>{calls++;await gate;return capture(id,'109');}});
+  const service=createLiveService({apiKey:'test',captureFile:'/nonexistent-supplypulse-test',news:noNews,now:()=>clock,scrape:async id=>{calls++;await gate;return capture(id,'109');}});
   const running=service.refresh();await assert.rejects(service.refresh(),{message:'REFRESH_BUSY'});release();await running;
   assert.equal(calls,2);await assert.rejects(service.refresh(),{message:'REFRESH_COOLDOWN'});clock+=10_000;await service.refresh();assert.equal(calls,4);
-  let spent=0;const exhausted=createLiveService({apiKey:'test',captureFile:'/nonexistent-supplypulse-test',now:()=>clock,scrape:async()=>{spent++;throw Error('PROVIDER_CREDITS_EXHAUSTED');}});
+  let spent=0;const exhausted=createLiveService({apiKey:'test',captureFile:'/nonexistent-supplypulse-test',news:noNews,now:()=>clock,scrape:async()=>{spent++;throw Error('PROVIDER_CREDITS_EXHAUSTED');}});
   assert.equal((await exhausted.refresh()).status,'REFUSE');await assert.rejects(exhausted.refresh(),{message:'PROVIDER_CREDITS_EXHAUSTED'});assert.equal(spent,2);
 });
 test('HTTP browser flow refuses foreign origins, URL injection and GET refresh; successful two-source response',async()=>{
-  let calls=0;const service=createLiveService({apiKey:'synthetic-secret',captureFile:'/nonexistent-supplypulse-test',now:()=>now,scrape:async id=>{calls++;return capture(id,id==='gigantti'?'109':'110');}});
+  let calls=0;const service=createLiveService({apiKey:'synthetic-secret',captureFile:'/nonexistent-supplypulse-test',news:noNews,now:()=>now,scrape:async id=>{calls++;return capture(id,id==='gigantti'?'109':'110');}});
   const server=createServer({liveService:service});await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
   const base='http://127.0.0.1:'+server.address().port;
   try {

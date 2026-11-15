@@ -1,5 +1,53 @@
 # STOA / ATLAS — Grounded Blueprint Intelligence
 
+## Current reliability revision (15 Nov 2026)
+
+The active HTTP engine now requires closed, unambiguous room boundaries and one matching area
+annotation within 2%, including every contributing room in an aggregate. Open/curved boundaries,
+conflicting or missing annotations, incomplete IFC totals, unsupported room-scoped counts and
+missing fixture evidence abstain. A supported zero is not inferred from a missing fixture layer.
+
+**The accuracy tables below describe the earlier engine, not this stricter revision.** Its answer
+coverage and accuracy have not been remeasured on the licensed dataset. Do not reuse those figures
+as current qualification. No sponsor files were downloaded or model calls made for this revision.
+
+The local app now imports **DXF (6 MiB)** and **IFC STEP (16 MiB)**. IFC citations open original
+entity/property/quantity records and SI unit definitions; they do **not** imply a projected floor
+plan or spatial highlighting. IFC questions use exact quoted storey/room names. For example:
+
+- `How many doors are there on 'Ground'?`
+- `What is the net floor area of the room 'Room (101)' on 'Ground'?`
+- `What is the property 'FireRating' of entity #22?` (literal stored scalar, no inferred units)
+
+DXF HATCH support is limited to **one explicitly closed, straight polyline boundary**, retaining
+native HATCH citations. Holes, curved boundaries and edge-defined HATCH paths reject import rather
+than reporting a wrong area. Curved LWPOLYLINE boundaries cannot establish areas.
+
+Citation-box scoring is now available offline: `node benchmark/regions.mjs <regions.json>`.
+See [region evaluation](benchmark/REGIONS.md) and the prioritized [next capabilities](IMPROVEMENTS.md).
+This supplies a scorer, **not measured sponsor citation IoU**.
+
+## For judges (60-second summary)
+
+**What it does.** Ask a natural-language question about a construction drawing and get an exact answer plus clickable, highlighted source geometry (polygons, text, entities) on the real drawing. When the evidence is insufficient, it abstains instead of guessing.
+
+**Sponsor rubric (25% each).**
+- Accuracy: deterministic DXF and IFC parsers; areas are accepted only when annotation and polygon geometry agree within 2%.
+- Highlighted evidence: every answer returns entity IDs and source coordinates; click a citation to highlight it on the drawing.
+- Creativity: proof-first answer cards, local ingest, zoom, and adversarial abstention in one interactive surface.
+- Inference cost: the DXF and IFC routes use zero model calls. The model is used only for sheet context and raster plans.
+
+**Headline numbers** (official preview questions, self-made held-out split; table below):
+- DXF: 96.4% on the held-out test split (1,278 questions), 98.0% on dev, at zero model cost.
+- IFC: 97.7% on the preview, 97.2% on 14 held-out models, at zero model cost.
+- Construction sheets, PDF text layer plus Nemotron: 85.9% at about 16,700 tokens/question.
+
+**Weak routes, stated plainly.** Raster PNG plans reach 63.2%, screenshot OCR about 22%, and image-only sheets 23.4%. The DXF route covers 2,358 of the 7,990 preview questions, and the split is our own because the sponsor's final protocol is unpublished.
+
+**Demo (2 minutes).** `npm start`, open http://127.0.0.1:4315, then ask `How many rooms labelled Stanza?` and `How many doors are there?` (it refuses). Next run `node scripts/fetch-sponsor-sample.mjs /tmp/stoa-verified-sponsor-sample.dxf`, use **Import DXF / IFC**, and ask `How many rooms labelled Stanza?` (9), `What is the area of room 5.02?` (15.84 m²) and the door and window counts (21 and 13).
+
+**Why next year's models will not obsolete it.** Exact answers come from deterministic geometry and vector routes that a better model cannot improve on. A model is called only where the source has no vector data, so stronger models raise the weak routes while the strong ones stay exact and free.
+
 **Junction 2026 · Stoa #335 · Make Blueprints Talk**
 
 A runnable, private-by-default blueprint question studio. Answers become clickable marks on actual **source geometry**. The first vertical slice accepts ASCII DXF technical drawings, measures named room areas only when annotation and polygon geometry agree within 2%, counts named rooms and explicit unit-outline entities, and **abstains** when evidence is insufficient.
@@ -26,7 +74,7 @@ STOA_SPONSOR_DXF=/tmp/stoa-verified-sponsor-sample.dxf npm test
 npm start
 ```
 
-Then use **Import real DXF** in the UI to select the downloaded sample and ask:
+Then use **Import DXF / IFC** in the UI to select the downloaded sample and ask:
 
 | Question | Result from actual sponsor DXF | Exact evidence |
 | --- | ---: | --- |
@@ -42,7 +90,7 @@ Then use **Import real DXF** in the UI to select the downloaded sample and ask:
 
 Actual sample path inside sponsor archive: `data/swiss_dwellings/site1102_bldg2242_floor10281.dxf`.
 
-## Measured on official preview questions (15 Nov 2026)
+## Historical measurements before the reliability revision (15 Nov 2026)
 
 Self-made held-out split (salted SHA-256 of drawing path; the sponsor's final protocol is unpublished).
 All tuning on development drawings; the test split was run once per method. Scoring per the
@@ -91,9 +139,9 @@ Attribution: **Swiss Dwellings v3.0.0** (Matthias Standfest, Michael Franzen, Yv
 
 ## Non-goals and honest limitations
 
-- Supports **ASCII DXF** `LWPOLYLINE`, `LINE`, `TEXT`, `MTEXT`, `ARC`, `CIRCLE` ingestion. Door, window and fixture counts rely on the measured layer conventions documented in `src/quantities.mjs`; drawings that break them abstain. No DWG decoder, IFC/3D or HATCH surface extraction yet; raster plans go through the separate, model-based `raster/` evaluation.
+- Supports **ASCII DXF** `LWPOLYLINE`, `LINE`, `TEXT`, `MTEXT`, `ARC`, `CIRCLE` ingestion. Door, window and fixture counts rely on the measured layer conventions documented in `src/quantities.mjs`; drawings that break them abstain. No DWG decoder. Single-loop straight HATCH regions are supported; complex HATCH is rejected. IFC models are available in the app through `src/ifc-qa.mjs`; raster plans remain a separate model-based `raster/` evaluation.
 - A real sponsored drawing is ingested without persisting raw bytes; only the extracted geometry is kept in this process for at most 30 minutes (3 imports maximum). No deployment or external data transfer by this app. A malicious client could forge an on-screen drawing's import content; production needs signed storage/provenance.
-- This is **one measured source proof**, not a benchmark of all 7,990 preview questions or the ~120,000 questions in the full corpus. Avoid broad sponsor accuracy claims until a held-out sample, geometry citations, and licensing controls are reviewed.
+- Measured results cover the routes in the table above on a self-made split, not all 7,990 preview questions or the ~120,000 questions in the full corpus. The sponsor's final protocol is unpublished, so treat the figures as our own held-out measurements.
 - Unit-outline counts are only accepted from explicit `UNIT_OUTLINE` layer primitives; they must be manually confirmed if a different drawing convention uses other layers.
 
 ## Focused verification

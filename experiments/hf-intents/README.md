@@ -106,3 +106,20 @@ gh workflow run craci-hf-intents.yml --repo SalesSquad/junction-pets --ref main
 Dispatch once after the reviewed source is merged. Existing flag/absolute
 cutoffs remain in effect. Actual run and release URLs, runner names, source,
 focused control-check results and review disposition belong in the delivery PR.
+
+## Verified private dataset transport
+
+The first direct-HF preflight (run43674479863) returned HTTP403 before creating
+any campaign lease or starting training. The already-held, publicly licensed
+HF files are now copied byte-for-byte into the separate private prerelease
+`hf-intents-data-20261115`. They remain the exact original publisher SHA-256,
+size, license and source revision recorded in the manifest; this is a transport
+cache, not a new dataset or an execution receipt.
+
+Each raw file is a content-addressed asset `sha256-<publisher-file-digest>`.
+The controller checks private repository visibility, fixed cache tag, unique
+asset name, declared size, publisher digest and actual downloaded bytes before
+using it. It fails closed on missing/mismatched data and does not retry the
+blocked raw-HF path. Training still retrieves only train/validation; the official
+test is reserved for initialization archival and final evaluation. No gated HF
+access, new account, credential grant or paid storage service is introduced.

@@ -1,0 +1,474 @@
+{
+ "schema": "junction.pet-voice.scene/v2",
+ "runId": "scene-demo-crash-0312-text-v2f-20261115",
+ "scene": "demo-crash-0312",
+ "audio": false,
+ "finishedAt": "2026-11-15T08:18:07Z",
+ "source": {
+  "repository": "SalesSquad/junction-pets",
+  "commit": "17fb5ab116fa6871062bfe64861543bf3d4f6fd0"
+ },
+ "writers": [
+  "gemini-3.5-flash-lite",
+  "gemini-3.5-flash",
+  "gemini-flash-lite-latest",
+  "openai:gpt-5.4-mini"
+ ],
+ "geminiOnly": false,
+ "critic": true,
+ "complete": true,
+ "metrics": {
+  "lines": 10,
+  "questionEndRate": 0.2,
+  "praiseOpenerRate": 0.0,
+  "buzzwordsPerLine": 0.0,
+  "namesAnotherPetRate": 0.3,
+  "templateRate": 0.0,
+  "meanWords": 9.0,
+  "lengthVariation": 0.31,
+  "shortLineRate": 0.6,
+  "actingTagsUsed": 0,
+  "longestDuet": 2,
+  "callbacks": 1,
+  "nonSequiturLines": 0,
+  "exclamationOpeners": 3,
+  "maxLineShare": 0.2,
+  "linesWithOpenProblems": 0,
+  "openProblems": [],
+  "criticRewriteRate": 0.4,
+  "directorFallbackRate": 0.0,
+  "movesUsed": [
+   "answer",
+   "push back",
+   "react",
+   "short reaction",
+   "wrap up"
+  ],
+  "speakers": 6
+ },
+ "memoryNotes": [
+  {
+   "pet": "bahn-express",
+   "scene": "demo-crash-0312",
+   "note": "Bahn calculated zero minutes left before departure while staring at the fallen robot.",
+   "at": "2026-11-15T08:18:07Z",
+   "uses": 0
+  },
+  {
+   "pet": "openai-codex",
+   "scene": "demo-crash-0312",
+   "note": "Codex insisted on bypassing the clock to run a pure raw script with zero weights.",
+   "at": "2026-11-15T08:18:07Z",
+   "uses": 0
+  },
+  {
+   "pet": "google-deepmind",
+   "scene": "demo-crash-0312",
+   "note": "DeepMind calculated that three percent battery allows for precisely one controlled measurement.",
+   "at": "2026-11-15T08:18:07Z",
+   "uses": 0
+  },
+  {
+   "pet": "aalto-university",
+   "scene": "demo-crash-0312",
+   "note": "Aalto noted that the system has just enough battery left to crash one last time.",
+   "at": "2026-11-15T08:18:07Z",
+   "uses": 0
+  },
+  {
+   "pet": "rokoko",
+   "scene": "demo-crash-0312",
+   "note": "Rokoko compared the robot's sudden collapse on the floor to a pure tango move.",
+   "at": "2026-11-15T08:18:07Z",
+   "uses": 0
+  }
+ ],
+ "turns": [
+  {
+   "turn": 0,
+   "name": "Bahn",
+   "slug": "bahn-express",
+   "language": "de-DE",
+   "move": "react",
+   "text": "Achtung. Es ist drei Uhr zwölf. Fünfundvierzig Minuten Verluste durch den Absturz.",
+   "voiceDirection": "Klar, präzise, leicht angespannt",
+   "respondsTo": "",
+   "callbackNote": null,
+   "director": {
+    "next": "bahn-express",
+    "move": "react",
+    "why": "scene opener",
+    "by": "rule"
+   },
+   "draft": {
+    "line": "Achtung. Es ist drei Uhr zwölf. Fünfundvierzig Minuten Verluste durch den Absturz.",
+    "voice_direction": "Klar, präzise, leicht angespannt",
+    "responds_to": ""
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Achtung. Es ist drei Uhr zwölf. Fünfundvierzig Minuten Verluste durch den Absturz.",
+    "voice_direction": "klar, präzise",
+    "responds_to": "",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": null,
+   "heardAccuracy": null,
+   "voice": "voice_qabhy9p3b7hr",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 1,
+   "name": "Codex",
+   "slug": "openai-codex",
+   "language": "en-US",
+   "move": "push back",
+   "text": "Bypass the clock. Ten minutes, one failing test.",
+   "voiceDirection": "Rapid-fire, breathless",
+   "respondsTo": "drei Uhr zwölf",
+   "callbackNote": "Codex successfully plugged in just in time to merge the critical hotfix.",
+   "director": {
+    "next": "openai-codex",
+    "move": "push back",
+    "why": "Codex responds to Bahn's strict timetable with urgency about the code rather than the clock.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Forget the clock. Give me ten minutes and one failing test.",
+    "voice_direction": "Fast pace, high energy, confident.",
+    "responds_to": "Fünfundvierzig Minuten Verluste"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "reuses an example line",
+     "too long"
+    ],
+    "line": "Bypass the clock. Ten minutes, one failing test.",
+    "voice_direction": "Rapid-fire, breathless",
+    "responds_to": "drei Uhr zwölf",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_3nds7t0jd6tn",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 2,
+   "name": "DeepMind",
+   "slug": "google-deepmind",
+   "language": "en-GB",
+   "move": "react",
+   "text": "Fascinating. What falsifies that test?",
+   "voiceDirection": "Dry, measured, lower pitch",
+   "respondsTo": "one failing test",
+   "callbackNote": null,
+   "director": {
+    "next": "google-deepmind",
+    "move": "react",
+    "why": "Codex was just active, and DeepMind has not spoken yet, offering a precise, quiet undercut to the previous technical foc",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Interesting. What would convince you that test was measuring the wrong thing?",
+    "voice_direction": "Dry, measured, moderate pace, slightly lower pitch",
+    "responds_to": "Bypass the clock"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "reuses an example line",
+     "too wordy for the character"
+    ],
+    "line": "Fascinating. What falsifies that test?",
+    "voice_direction": "Dry, measured, lower pitch",
+    "responds_to": "one failing test",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_h1djdxeor80g",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 3,
+   "name": "Aalto",
+   "slug": "aalto-university",
+   "language": "fi-FI",
+   "move": "answer",
+   "text": "Mä en tiiä mikä sen testin kaataa, mut koodi kaatuu nyt suoraan tohon.",
+   "voiceDirection": "Slow pace, low pitch, dry tone",
+   "respondsTo": "What falsifies that test?",
+   "callbackNote": null,
+   "director": {
+    "next": "aalto-university",
+    "move": "answer",
+    "why": "Aalto addresses the technical failure of the robot lying on the floor following DeepMind's query.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Mä en tiiä mikä sen testin kaataa, mut koodi kaatuu nyt suoraan tohon.",
+    "voice_direction": "Slow pace, low pitch, dry tone",
+    "responds_to": "What falsifies that test?"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Mä en tiiä mikä sen testin kaataa, mut koodi kaatuu nyt suoraan tohon.",
+    "voice_direction": "Slow pace, low pitch, dry tone",
+    "responds_to": "What falsifies that test?",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_jcgl3uq115s8",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 4,
+   "name": "Rokoko",
+   "slug": "rokoko",
+   "language": "da-DK",
+   "move": "react",
+   "text": "Det der ryk var ren tango, Aalto.",
+   "voiceDirection": "Fast pace, high pitch, excited.",
+   "respondsTo": "koodi kaatuu nyt suoraan tohon",
+   "callbackNote": null,
+   "director": {
+    "next": "rokoko",
+    "move": "react",
+    "why": "Rokoko has not spoken yet and reacts to the immediate technical panic with physical agitation.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Det der ryk var ren tango, Aalto.",
+    "voice_direction": "Fast pace, high pitch, excited.",
+    "responds_to": "koodi kaatuu nyt suoraan tohon"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Det der ryk var ren tango, Aalto.",
+    "voice_direction": "fast pace, high pitch, excited",
+    "responds_to": "koodi kaatuu nyt suoraan tohon.",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_pvy1s8t09xck",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 5,
+   "name": "Featherless",
+   "slug": "featherless",
+   "language": "ja-JP",
+   "move": "short reaction",
+   "text": "先輩、オープンモデルでやりました！？",
+   "voiceDirection": "High pitch, breathless, starstruck",
+   "respondsTo": "Det der ryk var ren tango",
+   "callbackNote": null,
+   "director": {
+    "next": "featherless",
+    "move": "short reaction",
+    "why": "Featherless has not spoken yet and needs to chime in after the chaotic troubleshooting.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "ディープマインド先輩、今の動きオープンなモデルで記録しましたっけ？",
+    "voice_direction": "High pitch, fast pace, slightly nervous",
+    "responds_to": "ren tango, Aalto"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Reuses an example line",
+     "A bit too long and robotic"
+    ],
+    "line": "先輩、オープンモデルでやりました！？",
+    "voice_direction": "High pitch, breathless, starstruck",
+    "responds_to": "Det der ryk var ren tango",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_udrz0ybd7ono",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 6,
+   "name": "Codex",
+   "slug": "openai-codex",
+   "language": "en-US",
+   "move": "answer",
+   "text": "Zero weights. Pure raw script now.",
+   "voiceDirection": "Fast pace, high pitch, eager",
+   "respondsTo": "オープンモデルでやりました！？",
+   "callbackNote": null,
+   "director": {
+    "next": "openai-codex",
+    "move": "answer",
+    "why": "Featherless just asked if they used an open model in Japanese; Codex is the most direct technical match to answer or byp",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Zero weights. Pure raw script now.",
+    "voice_direction": "Fast pace, high pitch, eager",
+    "responds_to": "オープンモデルでやりました！？"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Too generic and brochure-like",
+     "Does not clearly respond to a specific previous line"
+    ],
+    "line": "Zero weights. Push fast.",
+    "voice_direction": "Fast pace, high pitch, eager",
+    "responds_to": "koodi kaatuu nyt suoraan",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_3nds7t0jd6tn",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 7,
+   "name": "Bahn",
+   "slug": "bahn-express",
+   "language": "de-DE",
+   "move": "push back",
+   "text": "Null Gewichte. Ein reiner Briefbeschwerer mit Puls, exakt null Minuten vor Abfahrt.",
+   "voiceDirection": "Monotone, clipped, flat pitch.",
+   "respondsTo": "Zero weights. Pure raw script now.",
+   "callbackNote": null,
+   "director": {
+    "next": "bahn-express",
+    "move": "push back",
+    "why": "Bahn steps in to restore order after Codex's reckless raw script suggestion, keeping the conductor persona alive.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Achtung. Ein Roboter ohne Gewichte ist kein Roboter, das ist ein Briefbeschwerer mit Puls.",
+    "voice_direction": "Ksharp and dry, deadpan delivery.",
+    "responds_to": "Zero weights. Pure raw script now."
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "catchphrase 'Achtung' already used in this scene",
+     "same opening words as your previous line",
+     "opens with a one-word exclamation again"
+    ],
+    "line": "Null Gewichte. Ein reiner Briefbeschwerer mit Puls, exakt null Minuten vor Abfahrt.",
+    "voice_direction": "Monotone, clipped, flat pitch.",
+    "responds_to": "Zero weights. Pure raw script now.",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_qabhy9p3b7hr",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 8,
+   "name": "DeepMind",
+   "slug": "google-deepmind",
+   "language": "en-GB",
+   "move": "push back",
+   "text": "Three percent battery leaves precisely enough time for exactly one controlled measurement.",
+   "voiceDirection": "calm, dry, measured pace",
+   "respondsTo": "Ein reiner Briefbeschwerer",
+   "callbackNote": null,
+   "director": {
+    "next": "google-deepmind",
+    "move": "push back",
+    "why": "DeepMind responds to the technical despair with dry British wit, questioning the pure script approach.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Three percent battery leaves precisely enough time for exactly one controlled measurement.",
+    "voice_direction": "calm, dry, measured pace",
+    "responds_to": "Ein reiner Briefbeschwerer"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Three percent battery leaves precisely enough time for exactly one controlled measurement.",
+    "voice_direction": "calm, dry, measured pace",
+    "responds_to": "Null Gewichte",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_h1djdxeor80g",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 9,
+   "name": "Aalto",
+   "slug": "aalto-university",
+   "language": "fi-FI",
+   "move": "wrap up",
+   "text": "Kolme prosenttia. Se ehtii vielä kerran kaatua kunnolla.",
+   "voiceDirection": "slow pace, quiet volume, dry emotion",
+   "respondsTo": "Three percent battery",
+   "callbackNote": null,
+   "director": {
+    "next": "aalto-university",
+    "move": "wrap up",
+    "why": "Aalto has to make the final call as the hardware builder before the 09:00 deadline.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Kolme prosenttia. Se ehtii vielä kerran kaatua kunnolla.",
+    "voice_direction": "slow pace, quiet volume, dry emotion",
+    "responds_to": "Three percent battery"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Kolme prosenttia. Se ehtii vielä kerran kaatua kunnolla.",
+    "voice_direction": "slow pace, quiet volume, dry emotion",
+    "responds_to": "Three percent battery",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_jcgl3uq115s8",
+   "ttsModel": null,
+   "ttsFidelity": null
+  }
+ ]
+}

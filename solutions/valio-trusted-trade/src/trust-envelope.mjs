@@ -6,10 +6,48 @@
  * real delegated authority, AP2 conformance or payments.
  * No external signature, payment or commercial service is contacted.
  */
-import { createHash, createPublicKey, generateKeyPairSync, sign, verify } from 'node:crypto';
+import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, sign, verify } from 'node:crypto';
 
 export class TrustFault extends Error {
   constructor(code, message) { super(message); this.code = code; }
+}
+
+
+/** Private local-state codec helpers, never a public authorization input. */
+export const invalidPrivateState = () => {
+  throw new TrustFault('INVALID_COMPONENT_STATE', 'Private demo component state is malformed, incomplete or unsupported.');
+};
+export function restorePrivateComponent(value, kind, fields) {
+  if (value === undefined) return null;
+  const expected = ['kind', 'version', ...fields];
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      value.kind !== kind || value.version !== 1 ||
+      Object.keys(value).length !== expected.length || expected.some((key) => !Object.hasOwn(value, key))) invalidPrivateState();
+  const ancestors = new Set();
+  let count = 0;
+  const inspect = (item, depth = 0) => {
+    if (++count > 1000000 || depth > 100) invalidPrivateState();
+    if (item === null || typeof item === 'string' || typeof item === 'boolean') return;
+    if (typeof item === 'number' && Number.isFinite(item)) return;
+    if (!item || typeof item !== 'object' || ancestors.has(item) ||
+        (!Array.isArray(item) && Object.getPrototypeOf(item) !== Object.prototype) ||
+        Reflect.ownKeys(item).some((key) => typeof key !== 'string')) invalidPrivateState();
+    ancestors.add(item);
+    for (const entry of Object.values(item)) inspect(entry, depth + 1);
+    ancestors.delete(item);
+  };
+  inspect(value);
+  return structuredClone(value);
+}
+export function restorePrivateEntries(entries, validValue = () => true) {
+  if (!Array.isArray(entries) || entries.length > 100000) invalidPrivateState();
+  const map = new Map();
+  for (const entry of entries) {
+    if (!Array.isArray(entry) || entry.length !== 2 || typeof entry[0] !== 'string' ||
+        !entry[0] || entry[0].length > 1000 || map.has(entry[0]) || !validValue(entry[1], entry[0])) invalidPrivateState();
+    map.set(entry[0], entry[1]);
+  }
+  return map;
 }
 
 export function canonical(value) {
@@ -51,14 +89,38 @@ const makeSigner = (role) => {
   return { privateKey, publicKey, jwk: { ...jwk, kid, use: 'sig', alg: 'EdDSA' }, kid };
 };
 
-export function createDemoTrustRegistry({ clock = () => Date.now() } = {}) {
-  const supplier = makeSigner('supplier');
-  const knownKeys = new Map([[supplier.kid, supplier.publicKey]]);
-  const registeredKeys = new Map([[supplier.kid, supplier.jwk]]);
-  const buyersBySession = new Map();
-  const offers = new Map();
-  const byQuote = new Map();
-  const usedNonces = new Set();
+export function createDemoTrustRegistry({ clock = () => Date.now(), initialState } = {}) {
+  const restored = restorePrivateComponent(initialState, 'demo-trust-registry',
+    ['supplierPrivateKey', 'supplierKid', 'registeredKeys', 'buyersBySession', 'offers', 'byQuote', 'usedNonces']);
+  let supplier;
+  if (restored) {
+    try {
+      if (typeof restored.supplierPrivateKey !== 'string' || !/^[A-Za-z0-9+/]+={0,2}$/.test(restored.supplierPrivateKey)) invalidPrivateState();
+      const privateKey = createPrivateKey({ key: Buffer.from(restored.supplierPrivateKey, 'base64'), type: 'pkcs8', format: 'der' });
+      if (privateKey.asymmetricKeyType !== 'ed25519') invalidPrivateState();
+      const publicKey = createPublicKey(privateKey);
+      const jwk = publicKey.export({ format: 'jwk' });
+      const kid = 'demo-supplier-' + createHash('sha256').update(jwk.x).digest('hex').slice(0, 16);
+      if (kid !== restored.supplierKid) invalidPrivateState();
+      supplier = { privateKey, publicKey, kid, jwk: { ...jwk, kid, use: 'sig', alg: 'EdDSA' } };
+    } catch { invalidPrivateState(); }
+  } else supplier = makeSigner('supplier');
+  const registeredKeys = restored ? restorePrivateEntries(restored.registeredKeys, (jwk, kid) =>
+    jwk && jwk.kid === kid && jwk.kty === 'OKP' && jwk.crv === 'Ed25519' &&
+    typeof jwk.x === 'string' && /^[A-Za-z0-9_-]{43}$/.test(jwk.x) &&
+    jwk.use === 'sig' && jwk.alg === 'EdDSA' && Object.keys(jwk).every((key) => ['kty', 'crv', 'x', 'kid', 'use', 'alg'].includes(key))) : new Map([[supplier.kid, supplier.jwk]]);
+  if (restored && JSON.stringify(registeredKeys.get(supplier.kid)) !== JSON.stringify(supplier.jwk)) invalidPrivateState();
+  const knownKeys = new Map();
+  try { for (const [kid, jwk] of registeredKeys) knownKeys.set(kid, createPublicKey({ key: jwk, format: 'jwk' })); }
+  catch { invalidPrivateState(); }
+  const buyersBySession = restored ? restorePrivateEntries(restored.buyersBySession, (entry) => entry &&
+    typeof entry.kid === 'string' && entry.kid.startsWith('demo-buyer-') &&
+    JSON.stringify(registeredKeys.get(entry.kid)) === JSON.stringify(entry.jwk)) : new Map();
+  const offers = restored ? restorePrivateEntries(restored.offers, (entry, id) => entry?.payload?.quoteId === id) : new Map();
+  const byQuote = restored ? restorePrivateEntries(restored.byQuote, (entry, id) => entry?.signedOffer?.payload?.quoteId === id && entry?.signedMandate?.payload?.quoteId === id) : new Map();
+  if (restored && (!Array.isArray(restored.usedNonces) || restored.usedNonces.some((nonce) => typeof nonce !== 'string' || !/^[0-9a-f-]{36}$/.test(nonce)) ||
+      new Set(restored.usedNonces).size !== restored.usedNonces.length)) invalidPrivateState();
+  const usedNonces = new Set(restored?.usedNonces ?? []);
 
   const registerBuyerKey = (sessionToken, publicJwk) => {
     if (typeof sessionToken !== 'string' || !publicJwk || typeof publicJwk !== 'object' ||
@@ -165,7 +227,23 @@ export function createDemoTrustRegistry({ clock = () => Date.now() } = {}) {
     return structuredClone(proof);
   };
 
+  if (restored) {
+    try {
+      for (const offer of offers.values()) verifySeal(offer, supplier.kid);
+      for (const [quoteId, proof] of byQuote) {
+        verifySeal(proof.signedOffer, supplier.kid);
+        verifySeal(proof.signedMandate, proof.signedMandate.protected.kid);
+        if (digest(proof.signedOffer) !== digest(offers.get(quoteId)) ||
+            !usedNonces.has(proof.signedMandate.payload.nonce) ||
+            proof.signedMandate.payload.signedOfferDigest !== digest(proof.signedOffer)) invalidPrivateState();
+      }
+    } catch { invalidPrivateState(); }
+  }
   return Object.freeze({
+    // This contains a SYNTHETIC supplier private key. Only the private local store may consume it.
+    exportState: () => structuredClone({ kind: 'demo-trust-registry', version: 1,
+      supplierPrivateKey: supplier.privateKey.export({ type: 'pkcs8', format: 'der' }).toString('base64'), supplierKid: supplier.kid,
+      registeredKeys: [...registeredKeys], buyersBySession: [...buyersBySession], offers: [...offers], byQuote: [...byQuote], usedNonces: [...usedNonces] }),
     registerBuyerKey,
     signOffer,
     issueHandshake,

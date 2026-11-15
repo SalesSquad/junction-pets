@@ -1,5 +1,7 @@
 # SAMA: the big picture, what to fix, and what to build next
 
+> Working notes from the hackathon night; README.md and submission/ are the current versions.
+
 Revision 2. Written Saturday 14 November 2026, 22:15-22:50 UTC, by the wave-2 synthesis step.
 Read-only: this file is the only thing written. No git, no cloud resource, no paid API call.
 All patient-like data in SAMA is SYNTHETIC. Nothing here is a clinical claim.

@@ -4,7 +4,7 @@
  * No calls to Valio or a production purchasing system are made.
  */
 import { planProcurementPortfolio, PlannerFault } from './procurement-planner.mjs';
-import { digest } from './trust-envelope.mjs';
+import { digest, restorePrivateComponent, restorePrivateEntries, invalidPrivateState } from './trust-envelope.mjs';
 import { createSyntheticSettlement } from './settlement.mjs';
 import { resolveGtin, ScanFault } from './scanning.mjs';
 
@@ -116,18 +116,42 @@ export function unsignedQuoteBody(q) {
     source_snapshot_id: q.snapshotId ?? null, total_cents: q.totalCents };
 }
 
-export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = FIXTURE_POLICY, clock = () => Date.now() } = {}) {
-  const catalog = new Map(initialCatalog.map((item) => [item.sku, { ...item }]));
-  const quotes = new Map();
-  const plans = new Map();
-  const orders = new Map();
-  const reviews = new Map();
-  const sourceEpoch = randomUUID();
-  const idempotency = new Map();
-  const deliveryObservations = new Map();
-  const deliveryReplay = new Map();
-  const audit = [];
-  let serial = 0;
+export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = FIXTURE_POLICY, clock = () => Date.now(), initialState } = {}) {
+  const restored = restorePrivateComponent(initialState, 'trade-service',
+    ['catalog', 'quotes', 'plans', 'orders', 'reviews', 'sourceEpoch', 'idempotency', 'deliveryObservations', 'deliveryReplay', 'audit', 'serial', 'policy', 'settlement']);
+  if (restored) policy = restored.policy;
+  if (restored && (!policy || typeof policy.buyerId !== 'string' || !policy.buyerId ||
+      !Number.isSafeInteger(policy.perOrderBudgetCents) || policy.perOrderBudgetCents < 1 ||
+      !Number.isSafeInteger(policy.autoCommitLimitCents) || policy.autoCommitLimitCents < 0 || policy.autoCommitLimitCents > policy.perOrderBudgetCents ||
+      !Number.isSafeInteger(policy.quoteLifetimeMs) || policy.quoteLifetimeMs < 1 ||
+      !Number.isSafeInteger(policy.deliveryFeeCents) || policy.deliveryFeeCents < 0 ||
+      !Number.isSafeInteger(policy.taxBps) || policy.taxBps < 0 || policy.taxBps > 10000)) invalidPrivateState();
+  const catalog = restored ? restorePrivateEntries(restored.catalog, (item, sku) => item?.sku === sku &&
+    Number.isSafeInteger(item.unitsAvailable) && item.unitsAvailable >= 0 && item.unitsAvailable <= 1000000 &&
+    Number.isSafeInteger(item.priceCents) && item.priceCents > 0 && Number.isSafeInteger(item.version) && item.version > 0 &&
+    Number.isSafeInteger(item.packLitres) && item.packLitres > 0 && Number.isSafeInteger(item.minOrderPacks) && item.minOrderPacks > 0) : new Map(initialCatalog.map((item) => [item.sku, { ...item }]));
+  const entity = (item, id) => item && item.id === id && typeof item.buyerId === 'string';
+  const quotes = restored ? restorePrivateEntries(restored.quotes, (item, id) => entity(item, id) && Array.isArray(item.lines) && item.requested && item.sourceSnapshot &&
+    typeof item.snapshotId === 'string' && Number.isSafeInteger(item.totalCents) && item.totalCents > 0 &&
+    Number.isSafeInteger(item.createdAtMs) && Number.isSafeInteger(item.expiresAtMs) && item.expiresAtMs > item.createdAtMs && typeof item.status === 'string') : new Map();
+  const plans = restored ? restorePrivateEntries(restored.plans, (item, id) => entity(item, id) && Array.isArray(item.options) && Array.isArray(item.requirements) && item.sourceSnapshot) : new Map();
+  const orders = restored ? restorePrivateEntries(restored.orders, (item, id) => entity(item, id) && quotes.has(item.quoteId) && Array.isArray(item.lines) &&
+    Number.isSafeInteger(item.totalCents) && item.totalCents > 0 && ['SIMULATED_COMMITTED', 'SIMULATED_CANCELLED'].includes(item.status)) : new Map();
+  const reviews = restored ? restorePrivateEntries(restored.reviews, (item, id) => entity(item, id) && item.sourceSnapshot && (item.quoteId === null || quotes.has(item.quoteId))) : new Map();
+  const sourceEpoch = restored?.sourceEpoch ?? randomUUID();
+  const idempotency = restored ? restorePrivateEntries(restored.idempotency, (entry) => typeof entry?.fingerprint === 'string' && orders.has(entry.orderId)) : new Map();
+  const deliveryObservations = restored ? restorePrivateEntries(restored.deliveryObservations, (entry, id) => Array.isArray(entry) && orders.has(id)) : new Map();
+  if (restored) for (const [id, tally] of deliveryObservations) deliveryObservations.set(id, restorePrivateEntries(tally, (count) => Number.isSafeInteger(count) && count >= 0));
+  const deliveryReplay = restored ? restorePrivateEntries(restored.deliveryReplay, (entry) => typeof entry?.fingerprint === 'string' && entry.result && orders.has(entry.result.orderId)) : new Map();
+  const audit = restored?.audit ?? [];
+  let serial = restored?.serial ?? 0;
+  if (restored) {
+    try {
+      if (typeof sourceEpoch !== 'string' || !/^[0-9a-f-]{36}$/.test(sourceEpoch) || !Number.isSafeInteger(serial) || serial < 0 ||
+          !verifyAuditChain(audit).valid || [...quotes.values(), ...plans.values(), ...orders.values(), ...reviews.values(), ...audit].some((entry) =>
+            !/^[A-Z]+-DEMO-[0-9]+$/.test(entry.id) || Number(entry.id.split('-').at(-1)) > serial)) invalidPrivateState();
+    } catch { invalidPrivateState(); }
+  }
   const nextId = (prefix) => `${prefix}-DEMO-${String(++serial).padStart(4, '0')}`;
   const record = (event, detail) => {
     const prevHash = audit.at(-1)?.hash ?? 'GENESIS';
@@ -167,7 +191,7 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     if (!o) throw new TradeError('ORDER_NOT_FOUND', 'This order does not exist.', 404);
     return o;
   };
-  const settlement = createSyntheticSettlement({ getOrder, TradeError, record, clock });
+  const settlement = createSyntheticSettlement({ getOrder, TradeError, record, clock, ...(restored ? { initialState: restored.settlement } : {}) });
 
   const resolveProductScan = (gtin) => {
     try { return resolveGtin(catalogList(), gtin); }
@@ -185,7 +209,6 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     }
     const order = getOrder(orderId);
     if (order.buyerId !== buyerId) throw new TradeError('BUYER_MISMATCH', 'Only the original demo buyer can record receipt evidence.', 403);
-    if (order.status !== 'SIMULATED_COMMITTED') throw new TradeError('ORDER_NOT_ACTIVE', 'Cannot scan against a cancelled order.', 409);
     if (!order.verifiedQuoteBodyDigest) throw new TradeError('SIGNED_TRADE_REQUIRED', 'Receipt comparison requires a previously verified signed trade.', 403);
     const product = resolveProductScan(gtin);
     const fingerprint = digestLike({ orderId, buyerId, gtin: product.gtin });
@@ -194,6 +217,7 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
       if (prior.fingerprint !== fingerprint) throw new TradeError('IDEMPOTENCY_CONFLICT', 'Scan key belongs to another observation.', 409);
       return { ...structuredClone(prior.result), idempotentReplay: true };
     }
+    if (order.status !== 'SIMULATED_COMMITTED') throw new TradeError('ORDER_NOT_ACTIVE', 'Cannot scan against a cancelled order.', 409);
     const line = order.lines.find((item) => item.sku === product.sku);
     if (!line) throw new TradeError('PRODUCT_NOT_ON_ORDER', 'This barcode belongs to another product; no receipt recorded.', 409);
     const tally = deliveryObservations.get(orderId) ?? new Map();
@@ -458,8 +482,8 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
       status: 'SIMULATED_COMMITTED',
       createdAt: new Date(clock()).toISOString(),
       commitment: 'SIMULATION_ONLY_NO_REAL_PURCHASE',
-      paymentEligible: Boolean(q.planId && q.verifiedHandshake),
-      verifiedQuoteBodyDigest: q.planId ? (q.verifiedHandshake?.quoteBodyDigest ?? null) : null,
+      paymentEligible: Boolean(q.verifiedHandshake),
+      verifiedQuoteBodyDigest: q.verifiedHandshake?.quoteBodyDigest ?? null,
       humanDecision: q.approval ? structuredClone(q.approval) : null,
     };
     orders.set(orderId, order);
@@ -503,6 +527,11 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     const p = catalog.get(sku);
     if (!p) throw new TradeError('SKU_NOT_FOUND', 'Unknown synthetic product.', 404);
     safeWhole(unitsAvailable, 0, 1_000_000, 'Available litres');
+    const committedUnits = [...orders.values()].filter((order) => order.status === 'SIMULATED_COMMITTED')
+      .reduce((sum, order) => sum + order.lines.filter((line) => line.sku === sku).reduce((units, line) => units + line.quantityLitres, 0), 0);
+    if (unitsAvailable + committedUnits > 1_000_000) {
+      throw new TradeError('STOCK_CAPACITY_EXCEEDED', 'Available stock plus cancellable allocations must stay within the fixture stock limit.', 409);
+    }
     const previousUnitsAvailable = p.unitsAvailable;
     p.unitsAvailable = unitsAvailable;
     p.version += 1;
@@ -511,6 +540,9 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
   };
 
   return Object.freeze({
+    exportState: () => structuredClone({ kind: 'trade-service', version: 1, catalog: [...catalog], quotes: [...quotes], plans: [...plans], orders: [...orders], reviews: [...reviews],
+      sourceEpoch, idempotency: [...idempotency], deliveryObservations: [...deliveryObservations].map(([id, tally]) => [id, [...tally]]),
+      deliveryReplay: [...deliveryReplay], audit, serial, policy, settlement: settlement.exportState() }),
     catalog: catalogList,
     resolveProductScan,
     scanDelivery,
@@ -539,5 +571,6 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     auditVerify: () => verifyAuditChain(audit),
     recordVerifiedHandshake,
     recordRefusal: (code, path) => record('HTTP_REFUSED', { reason: code, path }),
+    recordIdentityAuthorization: (authorization) => record('HOST_IDENTITY_AUTHORIZED_SYNTHETIC_ACTION', structuredClone(authorization)),
   });
 }

@@ -1,8 +1,25 @@
 # Junction Company Companions
 
-**34 independently authored, versioned company companions for Junction, with one auditable monorepo and a separate Chibi runtime.** This is the private source repository [`SalesSquad/junction-pets`](https://github.com/SalesSquad/junction-pets). A companion can explain public technical documentation, inspect material supplied by its user and suggest a bounded next step. It is **not** an official company representative, endorsement, published ChatGPT agent or automatically functioning Chibi account.
+**34 independently authored, versioned company companions for Junction, with one auditable monorepo and a separate Chibi runtime.** This is the public source repository [`SalesSquad/junction-pets`](https://github.com/SalesSquad/junction-pets). A companion can explain public technical documentation, inspect material supplied by its user and suggest a bounded next step. It is **not** an official company representative, endorsement, published ChatGPT agent or automatically functioning Chibi account.
+
+
+## Junction 2026 submission
+
+**This repository is our Junction 2026 submission.** It is built in three layers:
+
+1. **One agent ("pet") per company.** Each of the 34 Junction companies and challenges has its own independently authored companion in `pets/<company>/`: a character, instructions, source-bound challenge research, starter prompts and evaluation cases. The same package is exported as a skills plugin in `plugins/junction-<company>/`.
+2. **Skills and special capabilities per agent.** Every pet has its basic capabilities in `pets/<company>/pet.json`. Some pets also have extra abilities, such as speaking with a voice, observing an image (NVIDIA, Stoa), finding and verifying objects (Meta), or database workflows (Aiven, MariaDB). Service-backed ones are declared in [`config/special-capabilities.json`](config/special-capabilities.json) and implemented in `services/`. Some pets also carry smaller company-specific skills in their own folder, for example recipe scaling for Valio Aimo (`pets/valio-aimo/recipe-scale.mjs`) and SMS guidance for S-Pankki (`pets/s-pankki/sms-guidance.mjs`).
+3. **Product pages built on top of the agents.** Some companies also have a full demo product in `solutions/<product>/` that reuses one or more pets. Examples: [Trusted Trade](solutions/valio-trusted-trade/README.md) for Valio Aimo (procurement agents with a Mission Control web page), and the S-Pankki products [Lumo](solutions/s-pankki-economic-trainer/README.md) and [Rahasää](solutions/s-pankki-rahasaa-coach/README.md). Other products are in [`solutions/`](solutions/README.md).
+
+Where to look: [`pets/`](pets) for the agents, [`plugins/`](plugins) for their skills, [`services/`](services) for special capabilities, [`solutions/`](solutions) for the product pages and [`apps/catalog`](apps/catalog) for the browsable catalog of all pets.
+
+Everything here is an independent hackathon prototype. Company data, accounts, prices and orders in demos are synthetic, and nothing is an official company product or endorsement. What is and is not verified is listed under [Source-bound status](#source-bound-status).
 
 Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS.md) for contributor rules, and the [cloud developer playbook](docs/CLOUD_DEVELOPER_PLAYBOOK.md) for assigning and continuing independent company work. Finnish overview: *34 yrityskohtaista, itsenäisesti laadittua kumppania; yritys- tai Chibi-julkaisua ei pidä päätellä valmiista lähdekoodista.*
+
+## Find every pet and app
+
+[Repository map](docs/REPOSITORY_MAP.md) links every pet, plugin, solution and browser app to its canonical source. The catalog pet pages now link their bundled browser apps. Regenerate the map with `node scripts/repo-map.mjs --write`; check source associations with `npm run validate`. Companion metadata, full solutions, shared services and generated exports stay in their existing directories.
 
 ## Challenge research —13 November2026
 
@@ -19,6 +36,10 @@ The original Meta scanning PR #60 (https://github.com/SalesSquad/junction-pets/p
 ## Build a solution
 
 This repo also supports complete challenge products, beyond an agent package. [Junction Product Factory — 19 products + 19 technology integrations](https://github.com/SalesSquad/junction-pets/issues/80) is the canonical development backlog. Start with [solution workspaces](docs/SOLUTION_WORKSPACES.md): scaffold a bounded product directory, hand it to any authorized developer executor, and reuse existing agent/service contracts. `node scripts/solution-workspace.mjs list` discovers the current product workspaces.
+
+## Pets and special capabilities
+
+Every company has one pet with its basic capabilities in `pets/<company>/pet.json`. Some pets also have **special capabilities**: extra abilities backed by a service in `services/`. They are declared once in [`config/special-capabilities.json`](config/special-capabilities.json) with the pets that have them (`"all"` or a list of company slugs). `npm run validate` checks the registry against the 34-company roster and the service directories, and `npm run build` adds each pet's `specialCapabilities` to the catalog. An entry describes source, not a live provider or Chibi connection.
 
 ## Start a new agent
 
@@ -44,7 +65,7 @@ Historical evidence is preserved separately: W3 commit [`be3b9f6`](https://githu
 
 ## Quick start
 
-Requires Node.js 22+, npm and access to this private repository:
+Requires Node.js 22+, npm and access to this repository:
 
 ```sh
 npm ci --ignore-scripts
@@ -86,4 +107,4 @@ This repository owns independently authored companion content, the catalog, type
 
 The next recipient-facing proof is one exact version of one companion passing the full **Chibi sign-in → explicit offer acceptance → permitted activation → real bounded task → auditable receipt** path. Until then, label catalog, Council, model and adoption examples as authored/synthetic/test-only. See [CHIBI_INTEGRATION.md](docs/CHIBI_INTEGRATION.md), [JUNCTION_SUBMISSION.md](docs/JUNCTION_SUBMISSION.md), [EVENT_GUIDE.md](docs/EVENT_GUIDE.md), the [34 companions](docs/COMPANIONS.md) and [the private worker system](docs/DEVELOPMENT_SYSTEM.md).
 
-The Junction package source is private. Any challenge submission, public export, licensing change, Chibi installation, spend, merge or deployment requires its own approved workflow; a passing build is not that approval.
+The Junction package source is public. Any challenge submission, public export, licensing change, Chibi installation, spend, merge or deployment requires its own approved workflow; a passing build is not that approval.

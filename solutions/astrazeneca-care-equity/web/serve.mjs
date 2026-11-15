@@ -1,5 +1,6 @@
 import http from 'node:http';
 import {readFile,stat} from 'node:fs/promises';
+import {existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {applySecondReader} from './scribe-demo.mjs';
@@ -16,9 +17,12 @@ function scribeWorker(){
  if(scribe.ready)return scribe.ready;
  if(process.env.SAMA_SCRIBE_LIVE==='0')return Promise.reject(new Error('live scribe switched off (SAMA_SCRIBE_LIVE=0)'));
  if(Date.now()-scribe.failedAt<60000)return Promise.reject(new Error(`live scribe failed less than a minute ago: ${scribe.error}`));
+ // A fresh clone has no serve/.venv. Fail at once (not after 180 s) so the stored fallback shows immediately. Not cached in failedAt, so creating the venv takes effect without a restart.
+ const python=process.env.SAMA_SCRIBE_PYTHON||path.join(root,'serve','.venv','bin','python');
+ if(/[\\/]/.test(python)&&!existsSync(python))return Promise.reject(new Error(`live scribe is not set up: the Python interpreter ${process.env.SAMA_SCRIBE_PYTHON?'named by SAMA_SCRIBE_PYTHON':'serve/.venv/bin/python'} does not exist`));
  scribe.ready=(async()=>{
   const {spawn}=await import('node:child_process'), {createInterface}=await import('node:readline');
-  const proc=spawn(process.env.SAMA_SCRIBE_PYTHON||path.join(root,'serve','.venv','bin','python'),[process.env.SAMA_SCRIBE_WORKER||path.join(root,'serve','demo','worker.py')],{cwd:root,stdio:['pipe','pipe','ignore'],env:{...process.env,HF_HUB_OFFLINE:'1'}});
+  const proc=spawn(python,[process.env.SAMA_SCRIBE_WORKER||path.join(root,'serve','demo','worker.py')],{cwd:root,stdio:['pipe','pipe','ignore'],env:{...process.env,HF_HUB_OFFLINE:'1'}});
   return await new Promise((resolve,reject)=>{
    let started=false;
    const fail=(e)=>{clearTimeout(timer);if(scribe.proc!==proc&&started)return;scribe.failedAt=Date.now();scribe.error=e.message;scribe.ready=null;scribe.proc=null;for(const [id,w] of scribe.pending){clearTimeout(w.timer);w.reject(e);scribe.pending.delete(id);}if(!started)reject(e);try{proc.kill();}catch{}};
@@ -47,7 +51,7 @@ if(process.env.SAMA_SCRIBE_PRELOAD==='1')scribeWorker().catch(()=>{});
 // serve/demo/engine.py). POST /api/scribe/second (below) asks Nemotron live when a person presses the button.
 const SECOND_FILE='data/scribe/nemotron/val-v3.jsonl';
 const SECOND_HOW='stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built';
-async function readSecond(){try{const m=new Map();for(const line of (await readFile(path.join(root,SECOND_FILE),'utf8')).split('\n'))if(line.trim()){const r=JSON.parse(line);m.set(r.id,r.prediction??null);}return m;}catch{return new Map();}}
+async function readSecond(){try{const m=new Map();for(const line of (await readFile(path.join(root,SECOND_FILE),'utf8')).split('\n'))if(line.trim()){const r=JSON.parse(line);m.set(r.id,r.prediction??null);}return m;}catch(e){console.warn(`second reader file ${SECOND_FILE} could not be read, so no stored Nemotron answers are used: ${e?.code||e?.message||'error'}`);return new Map();}}
 const secondFor=(demo)=>demo&&!demo.rewritten_by_code&&scribe.data.second.has(demo.source_id)?{available:true,prediction:scribe.data.second.get(demo.source_id),how:SECOND_HOW,source:SECOND_FILE}:null;
 async function loadScribeData(){
  const stamp=(await Promise.all([path.join(root,'data','scribe','demo','demo-notes.json'),path.join(root,'data','scribe','demo','demo-outputs.json'),path.join(root,SECOND_FILE)].map((f)=>stat(f).then((s)=>`${s.mtimeMs}:${s.size}`).catch(()=>'missing')))).join('|');
@@ -134,6 +138,8 @@ async function secondRoute(body){
  }catch(e){return fallback(e.message);}
  finally{NEMOTRON.inFlight--;}
 }
+// Short reason for the page and the log. The key and the upstream URL never appear in it.
+function errorReason(e){let m=String(e?.message||e?.code||'claim check failed');for(const secret of [process.env.TYPESAFE_API_KEY,process.env.TYPESAFE_ENDPOINT])if(secret)m=m.split(secret).join('[hidden]');return m.replace(/https?:\/\/\S+/g,'[url]').replace(/\s+/g,' ').trim().slice(0,120)||'claim check failed';}
 const server=http.createServer(async(req,res)=>{
  res.setHeader('Content-Security-Policy',csp);res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','no-referrer');
  const json=(x,status=200)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(x));};
@@ -144,7 +150,8 @@ const server=http.createServer(async(req,res)=>{
  let size=0, chunks=[];for await(const chunk of req){size+=chunk.length;if(size>65536)return json({error:'Body too large'},413);chunks.push(chunk);}
  let body;try{body=JSON.parse(Buffer.concat(chunks));}catch{return json({error:'Invalid JSON'},400);}
  if(!Array.isArray(body.claims))return json({error:'claims must be an array'},400);
- try{const {verifyClaims}=await import('../src/claim-check.mjs');return json(await verifyClaims(body.claims));}catch{return json({status:'NOT_CONFIGURED',results:[]});}
+  if(!process.env.TYPESAFE_API_KEY)return json({status:'NOT_CONFIGURED',results:[]});
+ try{const {verifyClaims}=await import('../src/claim-check.mjs');const out=await verifyClaims(body.claims);if(out?.status==='SERVICE_ERROR')return json({status:'ERROR',reason:'the claim-check service did not answer'},502);return json(out);}catch(e){console.warn(`claim check failed: ${errorReason(e)}`);return json({status:'ERROR',reason:errorReason(e)},502);}
  }
  if(p==='/api/scribe/second'&&req.method==='POST'){
  let size=0, chunks=[];for await(const chunk of req){size+=chunk.length;if(size>4096)return json({error:'Body too large'},413);chunks.push(chunk);}

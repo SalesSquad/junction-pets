@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "note": "Every company has one pet with its basic capabilities in pets/<company>/pet.json. This registry lists the extra, service-backed capabilities and which pets have them. An entry describes source in this repository; it does not prove a live provider, host or Chibi connection.",
+  "capabilities": [
+    {
+      "id": "voice",
+      "title": "Spoken voice",
+      "description": "Speaks and listens with a per-pet Gemini TTS voice and can relay a conversation to the next pet.",
+      "service": "services/pet-voice",
+      "pets": "all",
+      "requiresConnection": true,
+      "status": "needs-host-connection"
+    },
+    {
+      "id": "visual-observation",
+      "title": "Visual observation with Nemotron",
+      "description": "Observes an image with Nemotron VL, picks fixed tools, synthesizes evidence and checks the proposed answer.",
+      "service": "services/nemotron-vl",
+      "pets": ["nvidia"],
+      "requiresConnection": true,
+      "status": "offline-demo",
+      "run": "npm run demo:nvidia"
+    },
+    {
+      "id": "drawing-evidence",
+      "title": "Drawing questions with visual evidence",
+      "description": "Stoa binds a construction-drawing question to declared page regions and NVIDIA observes those regions; Stoa keeps the geometry checks and final answer.",
+      "service": "services/stoa-nvidia",
+      "pets": ["stoa", "nvidia"],
+      "requiresConnection": true,
+      "status": "offline-demo",
+      "run": "npm run demo:stoa-nvidia"
+    },
+    {
+      "id": "find-and-verify",
+      "title": "Find and verify objects (Chibi Lens)",
+      "description": "Retrieves source-backed sightings of personally important objects and guides one grounded step at a time.",
+      "service": "services/meta-spatial",
+      "pets": ["meta"],
+      "requiresConnection": true,
+      "status": "offline-demo",
+      "run": "node services/meta-spatial/observation-server.mjs"
+    },
+    {
+      "id": "learned-help",
+      "title": "Learned help in the current view",
+      "description": "Adds an admitted learning suggestion to the Lens resume episode, with the amount of explanation set by the user's preference.",
+      "service": "services/lens-learning",
+      "pets": ["meta"],
+      "requiresConnection": true,
+      "status": "offline-demo"
+    },
+    {
+      "id": "database-workflow",
+      "title": "Aiven and MariaDB developer workflow",
+      "description": "Joins pinned public Aiven documentation, the synthetic MariaDB analyzer and durable PostgreSQL replay in one finite workflow.",
+      "service": "services/demo-host",
+      "pets": ["aiven", "mariadb"],
+      "requiresConnection": true,
+      "status": "offline-demo"
+    }
+  ]
+}

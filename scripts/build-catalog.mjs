@@ -1,13 +1,26 @@
-import {mkdir,writeFile,readFile,copyFile} from 'node:fs/promises';
+import {mkdir,writeFile,readFile,copyFile,cp,mkdtemp,rm} from 'node:fs/promises';
 import {resolve} from 'node:path';
+import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {loadPackages,collectionDigest,packageDigest} from '../lib/catalog.mjs';
-const root=fileURLToPath(new URL('../',import.meta.url)),packs=await loadPackages(root);
+import {loadSpecialCapabilities,specialCapabilitiesFor} from '../lib/special-capabilities.mjs';
+import {exportApps} from '../apps/companion-browser-apps/export.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url)),packs=await loadPackages(root),special=await loadSpecialCapabilities(root);
 const out=resolve(root,'apps/catalog/public');await mkdir(out,{recursive:true});
 const revision=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
-const catalog={schemaVersion:1,collection:{id:'junction-2026',title:'Junction companions',sourceRevision:revision,contentSha256:collectionDigest(packs)},pets:packs.map(p=>({...p.pet,packageSha256:packageDigest(p)}))};
+const temp=await mkdtemp(resolve(tmpdir(),'junction-catalog-apps-'));
+let browserApps;
+try {
+  browserApps=await exportApps(resolve(temp,'bundle'));
+  // Replace only this producer-owned generated subtree so removed apps cannot linger.
+  await rm(resolve(out,'apps/companions'),{recursive:true,force:true});
+  await cp(resolve(temp,'bundle'),resolve(out,'apps/companions'),{recursive:true});
+} finally {await rm(temp,{recursive:true,force:true});}
+const catalog={schemaVersion:1,collection:{id:'junction-2026',title:'Junction companions',sourceRevision:revision,contentSha256:collectionDigest(packs)},pets:packs.map(p=>({...p.pet,specialCapabilities:specialCapabilitiesFor(special,p.pet.company.slug),browserApps:browserApps.filter(app=>app.petSlug===p.pet.slug).map(app=>({name:app.name,path:`apps/companions${app.path}`})),packageSha256:packageDigest(p)}))};
 await writeFile(resolve(out,'catalog.json'),JSON.stringify(catalog,null,2)+'\n');
 await copyFile(resolve(root,'config/host-config.json'),resolve(out,'host-config.json'));
+// Public shell only: owner-private adapters/data never enter catalog output.
+await cp(resolve(root,'apps/knowledge-os/public'),resolve(out,'apps/knowledge-os'),{recursive:true});
 for(const pack of packs){const dir=resolve(out,'packages',pack.pet.company.slug);await mkdir(dir,{recursive:true});await Promise.all([writeFile(resolve(dir,'profile.json'),JSON.stringify(pack.pet,null,2)+'\n'),writeFile(resolve(dir,'AGENTS.md'),pack.instructions),writeFile(resolve(dir,'STORY.md'),pack.story)]);}
 console.log(JSON.stringify({packages:packs.length,sourceRevision:revision,contentSha256:catalog.collection.contentSha256}));

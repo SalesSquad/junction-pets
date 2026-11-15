@@ -35,32 +35,96 @@ export function decodeStepString(s) {
 /** Parse a STEP argument list "a,'b',(#1,#2),$,.X.,IFCLABEL('y')" into JS values. */
 export function parseArgs(src) {
   let i = 0;
-  const value = () => {
-    while (src[i] === ' ') i++;
+  const ws = () => { while (/\s/.test(src[i] ?? '') && i < src.length) i++; };
+  const value = (depth = 0) => {
+    if (depth > 64) throw new Error('STEP nesting limit exceeded.');
+    ws();
     const c = src[i];
     if (c === "'") {
-      let j = i + 1, out = '';
-      while (j < src.length) {
-        if (src[j] === "'" && src[j + 1] === "'") { out += "''"; j += 2; continue; }
-        if (src[j] === "'") break;
-        out += src[j++];
+      let out = ''; i++;
+      while (i < src.length) {
+        if (src[i] === "'" && src[i + 1] === "'") { out += "''"; i += 2; continue; }
+        if (src[i] === "'") { i++; return decodeStepString(out); }
+        out += src[i++];
       }
-      i = j + 1;
-      return decodeStepString(out);
+      throw new Error('Unterminated STEP string.');
     }
-    if (c === '(') { i++; const list = []; while (src[i] !== ')') { list.push(value()); if (src[i] === ',') i++; } i++; return list; }
-    if (c === '#') { const m = /^#(\d+)/.exec(src.slice(i)); i += m[0].length; return { ref: Number(m[1]) }; }
+    if (c === '(') {
+      i++; const list = []; ws();
+      if (src[i] === ')') { i++; return list; }
+      while (i < src.length) {
+        list.push(value(depth + 1)); ws();
+        if (src[i] === ')') { i++; return list; }
+        if (src[i++] !== ',') throw new Error('Malformed STEP list.');
+      }
+      throw new Error('Unterminated STEP list.');
+    }
+    if (c === '#') {
+      const m = /^#(\d+)/.exec(src.slice(i));
+      if (!m) throw new Error('Malformed STEP reference.');
+      i += m[0].length; return { ref: Number(m[1]) };
+    }
     if (c === '$' || c === '*') { i++; return null; }
-    if (c === '.') { const j = src.indexOf('.', i + 1); const v = src.slice(i + 1, j); i = j + 1; return v === 'T' ? true : v === 'F' ? false : v; }
-    const typed = /^([A-Z0-9_]+)\(/.exec(src.slice(i));
-    if (typed) { i += typed[0].length; const v = value(); while (src[i] !== ')') i++; i++; return v; }
-    const num = /^[-+0-9.Ee]+/.exec(src.slice(i));
-    if (num) { i += num[0].length; return Number(num[0]); }
-    throw new Error(`STEP parse error near: ${src.slice(i, i + 30)}`);
+    if (c === '.' && !/\d/.test(src[i + 1] ?? '')) {
+      const m = /^\.([A-Z0-9_]+)\./i.exec(src.slice(i));
+      if (!m) throw new Error('Malformed STEP enum.');
+      i += m[0].length; return m[1] === 'T' ? true : m[1] === 'F' ? false : m[1];
+    }
+    const typed = /^([A-Z][A-Z0-9_]*)\(/.exec(src.slice(i));
+    if (typed) {
+      i += typed[0].length; const v = value(depth + 1); ws();
+      if (src[i++] !== ')') throw new Error('Unterminated STEP typed value.');
+      return v;
+    }
+    const num = /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][-+]?\d+)?/.exec(src.slice(i));
+    if (num) {
+      i += num[0].length; const n = Number(num[0]);
+      if (!Number.isFinite(n)) throw new Error('Non-finite STEP number.');
+      return n;
+    }
+    throw new Error('Malformed STEP value.');
   };
-  const out = [];
-  while (i < src.length) { out.push(value()); while (src[i] === ' ') i++; if (src[i] === ',') i++; else break; }
+  const out = []; ws();
+  while (i < src.length) {
+    out.push(value()); ws();
+    if (i === src.length) break;
+    if (src[i++] !== ',') throw new Error('Malformed STEP arguments.');
+    ws(); if (i === src.length) throw new Error('Missing STEP argument.');
+  }
   return out;
+}
+
+export const IFC_LIMITS = Object.freeze({ bytes: 16 * 1024 * 1024, entities: 100000, record: 512 * 1024 });
+
+/** Bounded upload parser. Semicolons in quoted STEP strings are data, not record delimiters. */
+export function parseIfc(input) {
+  if (typeof input !== 'string' || Buffer.byteLength(input, 'latin1') > IFC_LIMITS.bytes || !input.startsWith('ISO-10303-21;')) throw new Error('Use an IFC STEP file up to 16 MiB.');
+  input = input.replace(/'(?:[^']|'')*'|\/\*[\s\S]*?\*\//g, part => part.startsWith("'") ? part : ' ');
+  const entities = new Map(), seen = new Set();
+  let start = 0, quoted = false, schema = null, count = 0;
+  for (let i = 0; i < input.length; i++) {
+    if (i - start > IFC_LIMITS.record) throw new Error('IFC record limit exceeded.');
+    if (input[i] === "'") {
+      if (quoted && input[i + 1] === "'") { i++; continue; }
+      quoted = !quoted;
+    }
+    if (input[i] !== ';' || quoted) continue;
+    const record = input.slice(start, i).trim(); start = i + 1;
+    const sm = /FILE_SCHEMA\s*\(\s*\(\s*'([^']+)'/.exec(record); if (sm) schema = sm[1];
+    const m = /^#(\d+)\s*=\s*([A-Z0-9_]+)\s*\(/.exec(record);
+    if (!m) continue;
+    if (++count > IFC_LIMITS.entities) throw new Error('IFC entity limit exceeded.');
+    const id = Number(m[1]);
+    if (seen.has(id)) throw new Error('Duplicate IFC entity ID.');
+    seen.add(id);
+    if (!record.endsWith(')')) throw new Error('Malformed IFC entity.');
+    if (KEEP.has(m[2]) || GEOMETRY.has(m[2]) || m[2].endsWith('TYPE')) {
+      const args = parseArgs(record.slice(m[0].length, -1));
+      entities.set(id, { id, type: m[2], args, sourceRecord: record + ';' });
+    }
+  }
+  if (quoted || input.slice(start).trim() || !schema || !entities.size || !input.trimEnd().endsWith('END-ISO-10303-21;')) throw new Error('Incomplete IFC STEP file.');
+  return model(entities, schema);
 }
 
 export async function readIfc(path) {
@@ -79,6 +143,15 @@ export async function readIfc(path) {
     buf = '';
   }
   return model(entities, schema);
+}
+
+/** SI prefix applies to the base metre before squaring/cubing. Unsupported units stay unknown. */
+export function siUnit(u) {
+  if (u?.type !== 'IFCSIUNIT') return null;
+  const prefix = { MILLI: 1e-3, CENTI: 1e-2, DECI: 1e-1, KILO: 1e3 };
+  const exponent = { METRE: 1, SQUARE_METRE: 2, CUBIC_METRE: 3 }[u.args[3]];
+  const factor = u.args[2] == null ? 1 : prefix[u.args[2]];
+  return exponent && factor ? { kind: u.args[1], prefix: u.args[2], name: u.args[3], factor: factor ** exponent } : null;
 }
 
 /** Build spatial and quantity indexes over the kept entities. */
@@ -115,26 +188,25 @@ function model(E, schema) {
     if (!def) continue;
     const rows = [];
     if (def.type === 'IFCELEMENTQUANTITY') {
-      for (const q of (def.args[5] ?? []).map(get).filter(Boolean)) rows.push({ set: def.args[2], name: q.args[0], value: q.args[3], kind: q.type });
+      for (const q of (def.args[5] ?? []).map(get).filter(Boolean)) rows.push({ set: def.args[2], name: q.args[0], value: q.args[3], kind: q.type, entityId: q.id, unitDeclared: q.args[2] != null, unit: get(q.args[2]) });
       for (const r of rel.args[4] ?? []) quantities.set(r.ref, [...(quantities.get(r.ref) ?? []), ...rows]);
     } else if (def.type === 'IFCPROPERTYSET') {
-      for (const p of (def.args[4] ?? []).map(get).filter(Boolean)) if (p.type === 'IFCPROPERTYSINGLEVALUE') rows.push({ set: def.args[2], name: p.args[0], value: p.args[2] });
+      for (const p of (def.args[4] ?? []).map(get).filter(Boolean)) if (p.type === 'IFCPROPERTYSINGLEVALUE') rows.push({ set: def.args[2], name: p.args[0], value: p.args[2], entityId: p.id });
       for (const r of rel.args[4] ?? []) props.set(r.ref, [...(props.get(r.ref) ?? []), ...rows]);
     }
   }
   // Project units come from the IfcUnitAssignment (a file may define several SI units of one kind).
   const assigned = (of('IFCUNITASSIGNMENT')[0]?.args[0] ?? []).map(get).filter(u => u?.type === 'IFCSIUNIT');
-  const PREFIX = { MILLI: 1e-3, CENTI: 1e-2, DECI: 1e-1, KILO: 1e3 };
-  const units = Object.fromEntries(assigned.map(u => [u.args[1], { prefix: u.args[2], name: u.args[3], factor: PREFIX[u.args[2]] ?? 1 }]));
+  const units = Object.fromEntries(assigned.map(u => [u.args[1], siUnit(u)]));
   // Element id -> its type object (IfcRelDefinesByType), e.g. IfcSanitaryTerminalType.
   const typeOf = new Map();
   for (const rel of of('IFCRELDEFINESBYTYPE')) { const t = get(rel.args[5]); for (const r of rel.args[4] ?? []) if (t) typeOf.set(r.ref, t); }
   const byType = new Map();
   for (const e of E.values()) if (!GEOMETRY.has(e.type)) byType.set(e.type, [...(byType.get(e.type) ?? []), e]);
   const ofFast = (...types) => types.flatMap(t => byType.get(t) ?? []);
-  const lengthFactor = units.LENGTHUNIT?.factor ?? 1;
+  const lengthFactor = units.LENGTHUNIT?.factor;
   return { schema, entities: E, of: ofFast, get, storeys, storeyOf, isPart, quantities, props, units, typeOf,
-    planArea: e => planArea(E, e, lengthFactor),
+    planArea: e => Number.isFinite(lengthFactor) ? planArea(E, e, lengthFactor) : null,
     project: ofFast('IFCPROJECT')[0], building: ofFast('IFCBUILDING')[0] };
 }
 

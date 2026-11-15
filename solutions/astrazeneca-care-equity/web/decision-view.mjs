@@ -3,6 +3,8 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[c]));
 const number = value => Number.isFinite(value) ? value.toLocaleString('en-GB', { maximumFractionDigits: 2 }) : 'Not measured';
+// Ratios keep two decimals (1.10, not 1.1) so the card reads like the deck and the demo script.
+const ratio = value => Number.isFinite(value) ? value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'Not measured';
 const sourceLink = source => source?.url?.startsWith('https://')
   ? `<a href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">${esc(source.publisher || source.title || 'Source')}</a>`
   : esc(source?.publisher || source?.title || 'Source unavailable');
@@ -22,7 +24,7 @@ export function renderRegistryContext(records) {
 export function renderDecisionCard(decision, { detailed = false } = {}) {
   const d = decision, a = d.action, s = d.signal, o = d.observation;
   const outcome = o.kind === 'observed_aggregate'
-    ? `<p class="decision-number">${number(o.value)} <span>mortality ratio</span></p><p>95% interval ${number(o.low)}–${number(o.high)} · Finland = 1.</p><p class="caption">${esc(o.period.join(', '))} · age standardised and shrunk.</p><p>${esc(o.interpretation)}</p><p class="caption">${sourceLink(o.source)}</p>`
+    ? `<p class="decision-number">${ratio(o.value)} <span>mortality ratio</span></p><p>95% interval ${ratio(o.low)}–${ratio(o.high)} · Finland = 1.</p><p class="caption">${esc(o.period.join(', '))} · age standardised and shrunk.</p><p>${esc(o.interpretation)}</p><p class="caption">${sourceLink(o.source)}</p>`
     : `<p>${esc(o.reason)}</p>`;
   const signal = s
     ? `<p><strong>${esc(s.title)}</strong></p><p>County ${number(s.county)} ${esc(s.unit)} · national ${number(s.national)} ${esc(s.unit)}.</p><p class="caption">Means over the same years: ${esc(s.years.join(', '))}.</p><p>${esc(s.interpretation)}</p><p class="caption">${sourceLink(s.source)}</p>`

@@ -5,3 +5,17 @@
 /* V2 conversation and separate-party controls, using the existing paper palette. */
 .interest-note{display:block;font-size:12px;margin-top:10px}.questions{padding-left:20px;font-size:13px}.questions li+li{margin-top:10px}.party-actions{border:1px solid var(--line);padding:12px;margin:16px 0;border-radius:8px;display:flex;gap:10px;flex-wrap:wrap}.party-actions legend{font-weight:650;font-size:12px;padding:0 5px}.party-actions button{background:var(--white);font-size:13px;min-height:44px}.draft-note h3{font-size:17px;line-height:1.4}.draft-note p{margin-top:10px}.draft-note .badge{white-space:normal}.schedule .primary{margin-top:16px}.skill-top{flex-wrap:wrap}.skill-note{font-size:12px}.small{font-size:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;max-width:100%;padding:10px;background:var(--paper)}.candidate,.role-section,.detail{overflow-wrap:anywhere}.workspace>section{min-width:0}select{min-width:0}#baseline{font-size:13px}#baseline li{margin-top:8px}
 @media(max-width:700px){.candidate-list{grid-template-columns:1fr}.topbar{flex-wrap:wrap}.party-actions{display:grid}.skill-status{font-size:11px}.candidate .headline{font-size:13px}.candidate .candidate-foot{font-size:12px}.badge{font-size:10px}}
+
+/* Public EU taxonomy glossary: separate from all candidate and matching evidence. */
+.esco-explorer{margin-top:34px;padding:19px 23px;background:var(--mint);border:1px solid var(--line);border-radius:var(--radius)}
+.esco-explorer>details>summary{font-weight:700;font-size:13px}
+.esco-explorer .muted{margin:8px 0 18px}
+.esco-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.esco-group{min-width:0;padding:15px;border-radius:10px;background:var(--white)}
+.esco-group h3{font-size:13px;letter-spacing:0;line-height:1.4}
+.esco-list{list-style:none;margin:10px 0 0;padding:0}
+.esco-list li{padding:10px 0;border-top:1px solid var(--line);display:grid;gap:4px;font-size:12px;overflow-wrap:anywhere}
+.esco-list li>span{color:var(--muted)}
+.esco-list a{font-size:12px;width:fit-content}
+.esco-grid>.small{grid-column:1/-1}
+@media(max-width:700px){.esco-grid{grid-template-columns:1fr}.esco-explorer{padding:17px}}

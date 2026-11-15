@@ -37,14 +37,20 @@ function abstain(reason, drawing) {
   return { status: 'abstained', answer: null, explanation: reason, metric: null, evidence: [], source: { filename: drawing.filename, sha256: drawing.sha256 || null }, inference: 'deterministic; no external model' };
 }
 
+export function questionRejection(question) {
+  if (typeof question !== 'string' || question.trim().length < 4 || question.length > 400) return 'Ask one short question about this sheet.';
+  if (injection.test(question)) return 'Instruction-like text is not drawing evidence. Ask a verifiable drawing question.';
+  return null;
+}
+
 export function answerDrawing(drawing, question) {
   if (!drawing || !Array.isArray(drawing.entities) || drawing.entities.length > 12000) throw new Error('Invalid drawing payload.');
-  if (typeof question !== 'string' || question.trim().length < 4 || question.length > 400) return abstain('Ask one short question about this sheet.', drawing);
-  if (injection.test(question)) return abstain('Instruction-like text is not drawing evidence. Ask a verifiable drawing question.', drawing);
+  const rejected = questionRejection(question);
+  if (rejected) return abstain(rejected, drawing);
   const entities = drawing.entities;
   const q = normalize(question);
   const labelTexts = entities.filter(isLabel);
-  const roomOutlines = entities.filter(e => e.layer === 'ROOM_OUTLINE' && e.type === 'LWPOLYLINE' && e.closed && e.points.length >= 3);
+  const roomOutlines = entities.filter(e => e.layer === 'ROOM_OUTLINE' && ['LWPOLYLINE', 'HATCH'].includes(e.type) && !e.unsupportedGeometry && (e.closed || Math.hypot(e.points[0].x - e.points.at(-1).x, e.points[0].y - e.points.at(-1).y) < 1e-6) && e.points.length >= 3);
 
   if (areaIntent.test(q)) {
     const roomNumber = q.match(/\b(?:[a-z]-\d+|\d+(?:[.\-]\d+){1,2})\b/i)?.[0];
@@ -76,7 +82,7 @@ export function answerDrawing(drawing, question) {
       const units = entities.filter(e => e.layer === 'UNIT_OUTLINE');
       if (!units.length) return abstain('No distinct unit-outline entities are available; text labels alone are insufficient.', drawing);
       const validRing = e => {
-        if (e.type !== 'LWPOLYLINE' || !Array.isArray(e.points) || e.points.length < 3) return false;
+        if (!['LWPOLYLINE', 'HATCH'].includes(e.type) || e.unsupportedGeometry || !Array.isArray(e.points) || e.points.length < 3) return false;
         const first = e.points[0], last = e.points[e.points.length - 1];
         const endpointsClose = Math.hypot(first.x - last.x, first.y - last.y) <= 1e-6;
         return (e.closed || endpointsClose) && polygonArea(e.points) > 1e-8;

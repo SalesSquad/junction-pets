@@ -107,11 +107,15 @@ def system_prompt(slug: str, cast: list[str], lang: str, memory_notes: list[str]
             "pace, volume, pitch and emotion only — never body movement.")
 
 
+def writer_order() -> list[str]:
+    return pv.route_filter(WRITERS)
+
+
 def gen_json(system: str, parts: list[dict], schema: dict, key: str, log: list, temperature: float = 1.0) -> tuple[dict, str, float]:
     body = {"systemInstruction": {"parts": [{"text": system}]}, "contents": [{"role": "user", "parts": parts}],
             "generationConfig": {"responseMimeType": "application/json", "responseSchema": schema, "temperature": temperature,
                                  "maxOutputTokens": 2048, "thinkingConfig": {"thinkingLevel": "low"}}}
-    for model in WRITERS:
+    for model in writer_order():
         if model in pv.EXHAUSTED:
             continue
         if model.startswith("openai:"):
@@ -133,6 +137,8 @@ def gen_json(system: str, parts: list[dict], schema: dict, key: str, log: list, 
             continue
         except ValueError as e:
             log.append({"model": model, "status": 200, "code": "BAD_JSON", "message": str(e)[:120]})
+    if pv.gemini_only():
+        raise pv.gemini_only_failure("writer")
     raise pv.ProviderError(0, "GEN_UNAVAILABLE", "no writer model answered")
 
 
@@ -489,14 +495,17 @@ def voice_for(slug: str) -> str:
     return designed.get("id") or prebuilt
 
 
-def speak_line(slug: str, text: str, direction: str, key: str, tts_order: list[str], log: list, prefer: dict) -> dict:
-    """Own designed voice first; Live models only know prebuilt names, so they get the prebuilt fallback voice."""
+def speak_line(slug: str, text: str, direction: str, key: str, tts_order: list[str], log: list, prefer: dict,
+               pinned: bool = False) -> dict:
+    """Own designed voice first; Live models only know prebuilt names, so they get the prebuilt fallback voice.
+    pinned=True keeps the caller's TTS models as given (a fair voice A/B needs the same model for both voices)."""
     voice, prebuilt = voice_for(slug), pv.load_voices()[slug]["voice"]
     style = direction or characters()[slug]["delivery"]
     if voice.startswith("voice_"):
         # The model the voice was designed on goes first: the free tier gives each TTS model only ~10-15 calls a day,
-        # so a designed id sent to a model that cannot use it burns quota for nothing.
-        home = designed_voices().get(slug, {}).get("model")
+        # so a designed id sent to a model that cannot use it burns quota for nothing. 15 Nov: designed voices also
+        # work on gemini-3.8-flash-lite-tts, which doubles the daily designed-voice budget.
+        home = None if pinned else designed_voices().get(slug, {}).get("model")
         order = ([home] if home else []) + [m for m in tts_order if m != home and not m.startswith(("live:", "openai:"))]
         try:
             out = pv.speak(text, voice, style, key, order, log, prefer)
@@ -535,7 +544,7 @@ def voice_script(lines: list[dict], run_id: str, prebuilt: bool = False, models:
                               openai_voice=openai_voice(slug))
             spoken["voiceUsed"] = f"openai:{spoken['openaiVoice']}" if spoken.get("openaiVoice") else pv.load_voices()[slug]["voice"]
         else:
-            spoken = speak_line(slug, ln["text"], style, key, tts_order, log, prefer)
+            spoken = speak_line(slug, ln["text"], style, key, tts_order, log, prefer, pinned=bool(models))
         wf.write_bytes(spoken["wav"])
         turn = {"turn": i, "slug": slug, "speakerSlug": slug, "name": p["name"], "speakerName": p["name"],
                 "language": pv.load_voices()[slug]["language"], "text": ln["text"], "style": style, "status": "ok",
@@ -792,7 +801,8 @@ def run_scene(scene_id: str, *, audio: bool, run_id: str, use_critic: bool = Tru
             turn.update({"status": "failed", "error": e.record("n/a")})
         tf.write_text(json.dumps(turn, ensure_ascii=False, indent=1))
         print(f"[{i:02d}] {turn['status']:6} {p['name']:<12} {d['move']:<16} {turn.get('text', '')[:80]}"
-              + (f"  ⚠ {turn['problems']}" if turn.get("problems") else ""), flush=True)
+              + (f"  ⚠ {turn['problems']}" if turn.get("problems") else "")
+              + (f"  ✖ {turn['error'].get('code')}: {turn['error'].get('message', '')[:160]}" if turn.get("error") else ""), flush=True)
         if turn["status"] != "ok":
             break
         history.append(turn)
@@ -807,7 +817,7 @@ def run_scene(scene_id: str, *, audio: bool, run_id: str, use_critic: bool = Tru
             notes = []
     commit, _ = pv.source_commit()
     report = {"schema": "junction.pet-voice.scene/v2", "runId": run_id, "scene": scene_id, "audio": audio, "finishedAt": now(),
-              "source": {"repository": "SalesSquad/junction-pets", "commit": commit}, "writers": WRITERS, "critic": use_critic,
+              "source": {"repository": "SalesSquad/junction-pets", "commit": commit}, "writers": writer_order(), "geminiOnly": pv.gemini_only(), "critic": use_critic,
               "complete": complete, "metrics": scene_metrics(history) if history else {}, "memoryNotes": notes,
               "turns": [{k: h.get(k) for k in ("turn", "name", "slug", "language", "move", "text", "voiceDirection", "respondsTo",
                                                "callbackNote", "director", "draft", "critic", "problems", "heard", "heardAccuracy",
@@ -826,6 +836,9 @@ def as_text(history: list[dict]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    GO = dict(action="store_true", default=argparse.SUPPRESS,
+              help="Gemini only: never call OpenAI (also PET_VOICE_GEMINI_ONLY=1); fail clearly if Gemini routes are exhausted")
+    ap.add_argument("--gemini-only", **{**GO, "default": False})
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run", help="play one or more scenes (comma list or 'all')")
     r.add_argument("scenes")
@@ -847,7 +860,11 @@ def main(argv: list[str] | None = None) -> int:
     m = sub.add_parser("memory", help="print continuity notes and habits")
     m.add_argument("--rebuild", action="store_true",
                    help="drop near-duplicate notes and rebuild opener/word habits from scene-evidence/ in time order")
+    for sp in sub.choices.values():
+        sp.add_argument("--gemini-only", **GO)
     args = ap.parse_args(argv)
+    if args.gemini_only:
+        pv.set_gemini_only()
     if args.cmd == "voice-script":
         spec = json.loads(Path(args.script).read_text())
         by_name = {pv.persona(s)["name"].casefold(): s for s in pv.all_pet_slugs()}
