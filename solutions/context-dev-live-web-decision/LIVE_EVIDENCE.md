@@ -54,6 +54,13 @@ failed to bind a localhost socket (EPERM); the authorized unsandboxed run
 executed that check successfully, without removing assertions or skipping it.
 No broad suite or new GitHub Actions configuration was used.
 
+Before final integration the existing repository-owned CRACI automatic workflow
+started on the ready PR. It was not manually dispatched or reconfigured; its
+actual result is tracked separately on PR279. A final source read also found
+and fixed a cold-start race in capture initialization: all concurrent readers
+and refreshes now await one initialization promise. The concurrency regression
+now starts both refreshes immediately, without a timing-dependent sleep.
+
 The generated `live/capture.json` independently retains two selected public
 MCP retrievals at 02:29:32 UTC (request IDs in that file), useful as **saved
 historical captures**, not a substitute for the REST/browser execution above.

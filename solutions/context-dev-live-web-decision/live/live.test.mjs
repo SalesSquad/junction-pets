@@ -70,7 +70,7 @@ test('provider failures, bounded bodies, malformed JSON and timeout never return
 test('single-flight refresh, cooldown and credit exhaustion prevent duplicate repeated calls',async()=>{
   let release,calls=0;const gate=new Promise(r=>release=r);let clock=now;
   const service=createLiveService({apiKey:'test',captureFile:'/nonexistent-supplypulse-test',now:()=>clock,scrape:async id=>{calls++;await gate;return capture(id,'109');}});
-  const running=service.refresh();await new Promise(r=>setTimeout(r,5));await assert.rejects(service.refresh(),{message:'REFRESH_BUSY'});release();await running;
+  const running=service.refresh();await assert.rejects(service.refresh(),{message:'REFRESH_BUSY'});release();await running;
   assert.equal(calls,2);await assert.rejects(service.refresh(),{message:'REFRESH_COOLDOWN'});clock+=10_000;await service.refresh();assert.equal(calls,4);
   let spent=0;const exhausted=createLiveService({apiKey:'test',captureFile:'/nonexistent-supplypulse-test',now:()=>clock,scrape:async()=>{spent++;throw Error('PROVIDER_CREDITS_EXHAUSTED');}});
   assert.equal((await exhausted.refresh()).status,'REFUSE');await assert.rejects(exhausted.refresh(),{message:'PROVIDER_CREDITS_EXHAUSTED'});assert.equal(spent,2);
