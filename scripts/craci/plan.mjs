@@ -50,6 +50,7 @@ export const WORKLOADS = Object.freeze([
   'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision', 'lens-hb-scene8-ood', 'lens-hb-six-feedback', 'lens-six-unknown-ml',
   'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab',
   'rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-mujoco-v12-pilot', 'rokoko-mujoco-v13-causal', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos',
+  'rokoko-r-tournament',
 ]);
 
 function choose(value, choices, label) {
@@ -185,6 +186,12 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     for (const [index, profile] of ['provenance', 'network', 'control', 'evidence'].entries()) {
       add(`chaos-${epoch}-${profile}`, harnessSha, {epoch: Number(epoch), profile,
         seed: Number(epoch) * 10007 + index * 73});
+    }
+  } else if (workload === 'rokoko-r-tournament') {
+    const simulator = '59479b42b177c1829a2e6678adfff1fb68aef09c';
+    if (override && override !== simulator) throw new Error('R tournament requires pinned simulator SHA');
+    for (let cohort = 0; cohort < 4; cohort++) {
+      add(`rokoko-r-${cohort}`, simulator, {cohort});
     }
   } else if (workload === 'rokoko-rl-ablations') {
     for (const learnerSeed of [17,43]) add(`rokoko-ablation-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});

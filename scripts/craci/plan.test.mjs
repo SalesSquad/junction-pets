@@ -36,7 +36,8 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
   for (const workload of WORKLOADS) {
     const input = {workload};
     // Main's frozen Meta R / Lens workloads pin their own harness and reject overrides.
-    const harnessPinned = workload.startsWith('meta-r-') || workload.startsWith('lens-');
+    const harnessPinned = workload.startsWith('meta-r-') || workload.startsWith('lens-') ||
+      workload === 'rokoko-r-tournament';
     if (!harnessPinned && !['tieto-sponsor', 'immune-tournament', 'chaos-lab',
          'portfolio-browser', 'new-products-browser'].includes(workload)) {
       input.source_sha = candidate;
@@ -225,3 +226,17 @@ test('V13 causal original TRAIN admission is a single pinned source and never au
     ...context, now: '2026-11-15T17:00:00Z',
   }), /deadline/);
 });
+
+test('R training cohort maps to the exact physics source, never an implicit branch', () => {
+  const expected = '59479b42b177c1829a2e6678adfff1fb68aef09c';
+  const plan = resolvePlan({workload: 'rokoko-r-tournament', source_sha: expected}, context);
+  assert.equal(plan.jobCount, 4);
+  assert.equal(plan.maxParallel, 4);
+  assert.deepEqual(plan.matrix.include.map(row => row.cohort), [0, 1, 2, 3]);
+  assert.ok(plan.matrix.include.every(row => row.source_sha === expected));
+  assert.throws(
+    () => resolvePlan({workload: 'rokoko-r-tournament', source_sha: candidate}, context),
+    /pinned simulator SHA/
+  );
+});
+
