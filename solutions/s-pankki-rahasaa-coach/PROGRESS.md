@@ -17,10 +17,18 @@ Done 2026-11-15: **speculative card** — `POST /api/customers/:id/peek` returns
 question, shown as "Pikavastaus – valmentaja tarkentaa" until the coach's reply replaces it
 ([SalesSquad/spankki-coach#96](https://github.com/SalesSquad/spankki-coach/pull/96), `4eb0c564`; 457 pass / 0 fail).
 
+Done 2026-11-15: **router capacity** — the router server skipped no stale work (answered 8 requests a minute under
+load); now it drops requests past 1.2 s. One Mac mini instance answers 100 % of 4 req/s within the API timeout, two
+answer 100 % of 6 req/s, a third on the same GPU makes it worse
+([SalesSquad/spankki-coach#97](https://github.com/SalesSquad/spankki-coach/pull/97), `5daae68b`).
+
+Measured, waiting for the owner: **prompt tool-internals** (branch `feat/prompt-no-internals`, `d8aaf157`). Routing
+449 vs 447/489 (p 0.77), red team 0/785 both, but the Sonnet pairwise judge preferred the current prompt 54.1 %
+(CI 50.2–58.2 %), so it was not merged.
+
 Further candidates:
 
-1. Multi-instance router: run 2–3 `router_server.py` instances and set `ROUTER_URL` to the list; repeat `router_chaos.py`.
-2. Demo/submission material for the S-Pankki judging clauses.
+1. Demo/submission material for the S-Pankki judging clauses.
 
 ## Evidence
 
