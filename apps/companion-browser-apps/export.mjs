@@ -101,6 +101,9 @@ export async function exportApps(output) {
     }
     exported.push({petSlug:app.petSlug,name:app.name,path:`/apps/${app.directory}/${app.entry}`,solution:app.solution});
   }
+  const esc = text => String(text).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const items = exported.map(app => `<li><a href="${esc('.' + app.path)}">${esc(app.name)}</a> <small>${esc(app.petSlug)}</small></li>`).join('\n');
+  await writeFile(join(target, 'index.html'), `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Junction companion apps</title></head><body><main><h1>Junction companion apps</h1><p>Independent browser demonstrations with synthetic or fictional data. Not sponsor connections or production services.</p><ul>\n${items}\n</ul></main></body></html>\n`, {flag:'wx'});
   await writeFile(join(target, 'catalog.json'), JSON.stringify({schemaVersion:1,apps:exported}, null, 2) + '\n', {flag:'wx'});
   return exported;
 }

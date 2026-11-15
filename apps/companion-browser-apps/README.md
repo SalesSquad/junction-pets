@@ -13,7 +13,7 @@ node apps/companion-browser-apps/export.mjs /tmp/new-junction-app-bundle
 ```
 
 The output directory must not exist and must be outside this repository. It
-contains `catalog.json` and `apps/`; the consumer records the exact Junction
+contains `catalog.json`, an `index.html` that links every app, and `apps/`; the consumer records the exact Junction
 commit and publishes the bundle under its own access policy. Only the listed
 browser files and synthetic fixtures are copied. Adaptations make the original
 apps' absolute paths work under an app directory. ProofMatch's localhost status

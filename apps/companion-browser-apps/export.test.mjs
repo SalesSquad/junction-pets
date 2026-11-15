@@ -42,6 +42,8 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     assert.equal(artifact.embeddedClientDigest,expectedDigest);
     assert.match(artifact.upstreamProductSourceDigest,/^[0-9a-f]{64}$/);
     assert.equal(Object.hasOwn(artifact,'productSourceDigest'),false);
+    const index = await readFile(join(output,'index.html'),'utf8');
+    for (const app of apps) assert.ok(index.includes(`href="./${app.path.slice(1)}"`));
     await assert.rejects(exportApps(output), {code:'EEXIST'});
   } finally { await rm(temp, {recursive:true,force:true}); }
 });
