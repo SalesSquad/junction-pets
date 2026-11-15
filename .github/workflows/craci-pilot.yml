@@ -73,6 +73,7 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - rokoko-shared-preflight
         - valio-wal-chaos
         - rokoko-r-tournament
+        - hf-open3d-ml
       lane_slice:
         description: R8 only; pilot first, then seven unique remaining arms
         type: choice
@@ -7274,3 +7275,260 @@ jobs:
         compression-level: 6
         overwrite: false
         include-hidden-files: false
+
+  hf-open3d-prepare:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'hf-open3d-ml' && github.event_name == 'workflow_dispatch' && github.run_attempt == 1 }}
+    needs: plan
+    name: Fetch and verify public 3D, motion and video sources
+    runs-on: craci
+    timeout-minutes: 30
+    env:
+      CRACI_SOURCE_SHA: ${{ github.sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: hf-open3d-ml
+      CRACI_CELL: open3d-prepare
+      CRACI_NEXT_OWNER: Rokoko open-data research
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure full-size CRACI runner and public dataset routes
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '32'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+          connections:
+            - tls:
+                serverNamePatterns: [huggingface.co, us.aws.cdn.hf.co, cas-bridge.xethub.hf.co, '*.xethub.hf.co', cdn-lfs.hf.co]
+                ports: [443]
+    - name: Enforce credit deadline and initialize receipt
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1800
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      with:
+        python-version: '3.12'
+    - name: Install fixed public-data dependencies
+      shell: bash
+      run: |
+        set -euo pipefail
+        if ! command -v ffmpeg >/dev/null; then
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -qq -y --no-install-recommends ffmpeg
+        fi
+        python -m venv "$RUNNER_TEMP/open3d-venv"
+        "$RUNNER_TEMP/open3d-venv/bin/python" -m pip install --disable-pip-version-check --only-binary=:all: \
+          numpy==2.1.3 pyarrow==21.0.0
+        test "$(git -C "$CRACI_HARNESS_ROOT" rev-parse HEAD)" = "$CRACI_HARNESS_SHA"
+    - id: qualification
+      name: Download and hash-check original files and prepare aligned samples
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- \
+          "$RUNNER_TEMP/open3d-venv/bin/python" -B "$CRACI_HARNESS_ROOT/scripts/craci/hf_open3d_prepare.py" \
+          --manifest "$CRACI_HARNESS_ROOT/scripts/craci/fixtures/hf-open3d-manifest.json" \
+          --out "$RUNNER_TEMP/open3d-prepared" --scratch "$RUNNER_TEMP/open3d-downloads"
+        "$RUNNER_TEMP/open3d-venv/bin/python" "$CRACI_HARNESS_ROOT/scripts/craci/hf_open3d_features.py" pack \
+          --source "$RUNNER_TEMP/open3d-prepared" --target "$CRACI_RECEIPT_DIR/artifacts/hf-open3d"
+    - id: receipt
+      name: Finalize the original data-preparation receipt
+      if: ${{ always() }}
+      shell: bash
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          mkdir -p "$CRACI_RECEIPT_DIR/upload"
+          printf '%s\n' '{"status":"incomplete","reason":"pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+          printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+    - name: Retain bounded derived features and receipt
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: hf-open3d-prepared-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 0
+
+  hf-open3d-pilot:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'hf-open3d-ml' && github.run_attempt == 1 }}
+    needs: [plan, hf-open3d-prepare]
+    name: Open 3D pilot / ${{ matrix.line }} / fold 0
+    runs-on: craci
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        line: [v2d, g1, robo]
+    env:
+      CRACI_SOURCE_SHA: ${{ github.sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: hf-open3d-ml
+      CRACI_CELL: open3d-${{ matrix.line }}-0-ridge
+      CRACI_NEXT_OWNER: Rokoko open-data research
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '32'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: ./harness/.github/actions/hf-open3d-train
+      with:
+        line: ${{ matrix.line }}
+        fold: '0'
+        method: ridge
+
+  hf-open3d-train:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'hf-open3d-ml' && github.run_attempt == 1 }}
+    needs: [plan, hf-open3d-prepare, hf-open3d-pilot]
+    name: Open 3D / ${{ matrix.line }} / fold ${{ matrix.fold }} / ${{ matrix.method }}
+    runs-on: craci
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: hf-open3d-ml
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Rokoko open-data research
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '32'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: ./harness/.github/actions/hf-open3d-train
+      with:
+        line: ${{ matrix.line }}
+        fold: ${{ matrix.fold }}
+        method: ${{ matrix.method }}
+
+  hf-open3d-summary:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'hf-open3d-ml' && github.run_attempt == 1 }}
+    needs: [plan, hf-open3d-prepare, hf-open3d-pilot, hf-open3d-train]
+    name: Verify all 45 model artifacts and grouped results
+    runs-on: craci
+    timeout-minutes: 20
+    env:
+      CRACI_SOURCE_SHA: ${{ github.sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: hf-open3d-ml
+      CRACI_CELL: open3d-summary
+      CRACI_NEXT_OWNER: Rokoko open-data research
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce deadline and initialize receipt
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1200
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      with:
+        pattern: hf-open3d-cell-${{ github.run_id }}-${{ github.run_attempt }}-*
+        path: ${{ runner.temp }}/open3d-cells
+        merge-multiple: false
+    - id: qualification
+      name: Reassemble model parts and summarize paired group folds
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- \
+          python3 -B "$CRACI_HARNESS_ROOT/scripts/craci/hf_open3d_summarize.py" \
+          --artifacts "$RUNNER_TEMP/open3d-cells" --out "$CRACI_RECEIPT_DIR/artifacts/hf-open3d"
+    - id: receipt
+      name: Finalize source-bound summary
+      if: ${{ always() }}
+      shell: bash
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          mkdir -p "$CRACI_RECEIPT_DIR/upload"
+          printf '%s\n' '{"status":"incomplete","reason":"pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+          printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+    - name: Retain grouped model comparison
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: hf-open3d-summary-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6

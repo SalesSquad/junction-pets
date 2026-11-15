@@ -1,0 +1,92 @@
+name: Train one pinned open 3D research fold
+description: Train one fixed group-disjoint CPU model and retain source-bound evidence.
+inputs:
+  line:
+    required: true
+    description: Data line.
+  fold:
+    required: true
+    description: Held-out group fold.
+  method:
+    required: true
+    description: Fixed model family.
+runs:
+  using: composite
+  steps:
+  - name: Check credit deadline and prepare receipt directory
+    shell: bash
+    run: |
+      set -euo pipefail
+      test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1800
+      mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+      printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+  - name: Set up Node 22
+    uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+    with:
+      node-version: '22'
+  - name: Set up Python 3.12
+    uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+    with:
+      python-version: '3.12'
+  - name: Install fixed CPU model dependencies
+    shell: bash
+    run: |
+      set -euo pipefail
+      python -m venv "$RUNNER_TEMP/open3d-venv"
+      "$RUNNER_TEMP/open3d-venv/bin/python" -m pip install --disable-pip-version-check --only-binary=:all: \
+        numpy==2.1.3 scipy==1.14.1 scikit-learn==1.5.2 joblib==1.4.2 threadpoolctl==3.5.0
+      test "$(git -C "$CRACI_HARNESS_ROOT" rev-parse HEAD)" = "$CRACI_HARNESS_SHA"
+  - name: Download pinned, derived preparation from this workflow run
+    uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+    with:
+      name: hf-open3d-prepared-${{ github.run_id }}-${{ github.run_attempt }}
+      path: ${{ runner.temp }}/open3d-input
+  - name: Restore and hash-check derived features
+    shell: bash
+    run: |
+      set -euo pipefail
+      "$RUNNER_TEMP/open3d-venv/bin/python" "$CRACI_HARNESS_ROOT/scripts/craci/hf_open3d_features.py" unpack \
+        --source "$RUNNER_TEMP/open3d-input/artifacts/hf-open3d" --target "$RUNNER_TEMP/open3d-features"
+  - id: qualification
+    name: Fit and evaluate one group-disjoint model
+    shell: bash
+    env:
+      OPEN3D_LINE: ${{ inputs.line }}
+      OPEN3D_FOLD: ${{ inputs.fold }}
+      OPEN3D_METHOD: ${{ inputs.method }}
+      OPENBLAS_NUM_THREADS: '32'
+      OMP_NUM_THREADS: '32'
+      MKL_NUM_THREADS: '32'
+    run: |
+      set -euo pipefail
+      node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- \
+        "$RUNNER_TEMP/open3d-venv/bin/python" -B "$CRACI_HARNESS_ROOT/scripts/craci/hf_open3d_train.py" \
+        --features "$RUNNER_TEMP/open3d-features" --out "$CRACI_RECEIPT_DIR/artifacts/hf-open3d" \
+        --line "$OPEN3D_LINE" --fold "$OPEN3D_FOLD" --method "$OPEN3D_METHOD" --threads 32
+  - id: receipt
+    name: Finalize truthful source-bound receipt
+    if: ${{ always() }}
+    shell: bash
+    env:
+      CRACI_JOB_STATUS: ${{ job.status }}
+      CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+    run: |
+      set -euo pipefail
+      export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+      if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+      else
+        mkdir -p "$CRACI_RECEIPT_DIR/upload"
+        printf '%s\n' '{"status":"incomplete","reason":"pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+        printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+        exit 1
+      fi
+  - name: Retain model parts, metrics and receipt
+    if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+    uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+    with:
+      name: hf-open3d-cell-${{ github.run_id }}-${{ github.run_attempt }}-${{ inputs.line }}-${{ inputs.fold }}-${{ inputs.method }}
+      path: ${{ runner.temp }}/craci-evidence/upload/
+      if-no-files-found: error
+      retention-days: 7
+      compression-level: 0
