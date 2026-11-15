@@ -70,6 +70,11 @@ test('CLI runs pinned application and creates private immutable report',async t=
   const {writeFile}=await import('node:fs/promises');
   t.after(async()=>{for(const p of [input,manifest,output])await unlink(p).catch(()=>{});});
   await writeFile(input,bytes,{flag:'wx',mode:0o600});await immutableJson(manifest,suite());
+  // The pinned-application check reads BASE from git history. A shallow CI
+  // checkout lacks that commit: the CLI must then fail closed, not score.
+  const {execFileSync}=await import('node:child_process');
+  let pinned=true; try{execFileSync('git',['cat-file','-e','79d998af372c26cb05907ad9a4aa8e0662caeaf8^{commit}'],{stdio:'ignore'});}catch{pinned=false;}
+  if(!pinned){await assert.rejects(run(['--drawing',input,'--suite',manifest,'--output',output]));await assert.rejects(stat(output),/ENOENT/);return;}
   await run(['--drawing',input,'--suite',manifest,'--output',output]);
   const report=JSON.parse(await readFile(output));assert.equal(report.metrics.correct,2);assert.equal(report.app.baseCommit,'79d998af372c26cb05907ad9a4aa8e0662caeaf8');
   assert.equal((await stat(output)).mode & 0o777,0o600);
