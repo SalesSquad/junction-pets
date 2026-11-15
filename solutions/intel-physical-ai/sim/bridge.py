@@ -12,6 +12,9 @@ SCENARIOS = ('nominal', 'grip_loss', 'camera_missing', 'camera_disagreement',
              'threshold_ambiguous', 'operator_local_stop')
 FRAMES = 180
 FAULT_FRAME = 70
+GLOBAL_TRIPS = frozenset(('grip_loss', 'camera_missing', 'camera_disagreement',
+                          'stale_capture', 'low_confidence', 'operator_global_stop'))
+LOCAL_HOLDS = frozenset(('threshold_ambiguous', 'operator_local_stop'))
 
 
 def sha(path):
@@ -94,12 +97,20 @@ class Bridge:
         require(injection['source'] == 'SYNTHETIC_FAULT_INJECTION', 'Wrong injection source')
         fault = injection['fault']
         require(fault is None or fault in SCENARIOS[1:], 'Unknown injected fault')
-        self.latched = self.latched or fault is not None
-        # No defect label/region/score/calibration has been produced by a model.
-        return {'state': 'GLOBAL_STOP_LATCHED' if self.latched else 'DEMO_ONLY',
-                'route': 'HOLD', 'sorting_allowed': False,
+        # A per-item local STOP is not an emergency GLOBAL STOP. The two
+        # intentionally remain distinct, matching M4/M5 source semantics.
+        self.latched = self.latched or fault in GLOBAL_TRIPS
+        local_hold = fault in LOCAL_HOLDS
+        if self.latched:
+            state = 'GLOBAL_STOP_LATCHED'
+        elif local_hold:
+            state = 'LOCAL_HOLD'
+        else:
+            state = 'DEMO_ONLY'
+        # None of these synthetic fault names is a trained defect score.
+        return {'state': state, 'route': 'HOLD', 'sorting_allowed': False,
                 'reason': 'NO_REAL_CALIBRATED_DEFECT_SOURCE',
-                'command_allowed': not self.latched}
+                'command_allowed': not self.latched and not local_hold}
 
 
 def verify_episode(directory, model_root):
@@ -126,6 +137,7 @@ def verify_episode(directory, model_root):
     sensor_valid = True
     previous_time = -1
     previous_command = None
+    previously_holding = False
     drift = 0.0
     held_qpos = None
     camera_paths = set()
@@ -165,8 +177,22 @@ def verify_episode(directory, model_root):
         sensor_valid = sensor_valid and gate['reason'] != 'INVALID_OR_ABSENT_SENSOR'
         require(row['bridge'] == gate, 'Bridge replay mismatch')
         require(row['command_emitted'] is gate['command_allowed'], 'Command after latch')
+        require(type(row.get('hold_override_applied')) is bool, 'Missing hold override provenance')
+        if gate['command_allowed']:
+            require(not row['hold_override_applied'], 'Unnecessary safety hold')
+            previously_holding = False
+        else:
+            if not previously_holding:
+                require(row['hold_override_applied'], 'First blocked frame must set a measured hold')
+                # The hold setpoint is measured physical qpos, clipped to actuator
+                # limits by the generator, rather than the last moving waypoint.
+                require(max(abs(a-b) for a,b in zip(row['servo_target'], row['qpos'][:6])) < .05,
+                        'First hold target not based on measured state')
+            else:
+                require(not row['hold_override_applied'], 'Repeated safety hold override')
+                require(previous_command == row['servo_target'], 'Servo target changed after STOP/HOLD')
+            previously_holding = True
         if bridge.latched:
-            require(previous_command is None or previous_command == row['servo_target'], 'Servo target changed after latch')
             if held_qpos is None:
                 held_qpos = row['qpos'][:6]
             drift = max(drift, math.sqrt(sum((a-b)**2 for a,b in zip(row['qpos'][:6], held_qpos))))
