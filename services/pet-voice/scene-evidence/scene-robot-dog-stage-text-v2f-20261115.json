@@ -1,0 +1,531 @@
+{
+ "schema": "junction.pet-voice.scene/v2",
+ "runId": "scene-robot-dog-stage-text-v2f-20261115",
+ "scene": "robot-dog-stage",
+ "audio": false,
+ "finishedAt": "2026-11-15T08:16:06Z",
+ "source": {
+  "repository": "SalesSquad/junction-pets",
+  "commit": "17fb5ab116fa6871062bfe64861543bf3d4f6fd0"
+ },
+ "writers": [
+  "gemini-3.5-flash-lite",
+  "gemini-3.5-flash",
+  "gemini-flash-lite-latest",
+  "openai:gpt-5.4-mini"
+ ],
+ "geminiOnly": false,
+ "critic": true,
+ "complete": true,
+ "metrics": {
+  "lines": 12,
+  "questionEndRate": 0.083,
+  "praiseOpenerRate": 0.0,
+  "buzzwordsPerLine": 0.0,
+  "namesAnotherPetRate": 0.167,
+  "templateRate": 0.0,
+  "meanWords": 12.2,
+  "lengthVariation": 0.349,
+  "shortLineRate": 0.25,
+  "actingTagsUsed": 0,
+  "longestDuet": 3,
+  "callbacks": 0,
+  "nonSequiturLines": 0,
+  "exclamationOpeners": 1,
+  "maxLineShare": 0.25,
+  "linesWithOpenProblems": 0,
+  "openProblems": [],
+  "criticRewriteRate": 0.333,
+  "directorFallbackRate": 0.0,
+  "movesUsed": [
+   "admit doubt",
+   "joke",
+   "new idea",
+   "push back",
+   "react",
+   "wrap up"
+  ],
+  "speakers": 7
+ },
+ "memoryNotes": [
+  {
+   "pet": "wendy",
+   "scene": "robot-dog-stage",
+   "note": "Wendy fears for the scorched venue carpet while the robot dog chews through live cables.",
+   "at": "2026-11-15T08:16:06Z",
+   "uses": 0
+  },
+  {
+   "pet": "arduino",
+   "scene": "robot-dog-stage",
+   "note": "Arduino celebrates a potential short circuit as a divine spark of performance art.",
+   "at": "2026-11-15T08:16:06Z",
+   "uses": 0
+  },
+  {
+   "pet": "ignite-next",
+   "scene": "robot-dog-stage",
+   "note": "Ignite-next demands the stray robot dog be thrown straight onto the factory floor.",
+   "at": "2026-11-15T08:16:06Z",
+   "uses": 0
+  }
+ ],
+ "turns": [
+  {
+   "turn": 0,
+   "name": "Wendy",
+   "slug": "wendy",
+   "language": "es-MX",
+   "move": "react",
+   "text": "¡Ay, ese perro mecánico ya pasó por tres cables y ni Dios le ha cortado la luz!",
+   "voiceDirection": "Alarmed and breathless",
+   "respondsTo": "",
+   "callbackNote": null,
+   "director": {
+    "next": "wendy",
+    "move": "react",
+    "why": "scene opener",
+    "by": "rule"
+   },
+   "draft": {
+    "line": "Ese perro mecánico ya cruzó tres cables y nadie le cortó la corriente.",
+    "voice_direction": "Fast pace, high pitch, nervous and urgent.",
+    "responds_to": ""
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Sounds too formal and translated",
+     "Voice direction includes non-vocal elements",
+     "Missing responds_to for scene start"
+    ],
+    "line": "¡Ay, ese perro mecánico ya pasó por tres cables y ni Dios le ha cortado la luz!",
+    "voice_direction": "Alarmed and breathless",
+    "responds_to": "",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": null,
+   "heardAccuracy": null,
+   "voice": "voice_8izfrwvbs8vf",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 1,
+   "name": "Arduino",
+   "slug": "arduino",
+   "language": "it-IT",
+   "move": "joke",
+   "text": "Allora, tagliare la luce è un peccato mortale! Collegalo diretto al pin cinque e facciamo una festa di scintille.",
+   "voiceDirection": "Fast, loud, excited Italian delivery.",
+   "respondsTo": "ya pasó por tres cables",
+   "callbackNote": null,
+   "director": {
+    "next": "arduino",
+    "move": "joke",
+    "why": "Arduino responds to Wendy's panic with exuberant Italian hand gestures and a joke about the dog chewing through the live",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Allora, tagliare la luce è un peccato mortale! Collegalo diretto al pin cinque e facciamo una festa di scintille.",
+    "voice_direction": "Fast, loud, excited Italian delivery.",
+    "responds_to": "ya pasó por tres cables"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Allora, tagliare la luce è un peccato mortale! Collegalo diretto al pin cinque e facciamo una festa di scintille.",
+    "voice_direction": "Fast, loud, excited Italian delivery.",
+    "responds_to": "cortado la luz",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_vozrwalwyg28",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 2,
+   "name": "Atech",
+   "slug": "atech-dev",
+   "language": "en-GB",
+   "move": "push back",
+   "text": "Right then, let's pop the kettle on before we start frying bridges, shall we?",
+   "voiceDirection": "cheerful and breezy",
+   "respondsTo": "festa di scintille",
+   "callbackNote": null,
+   "director": {
+    "next": "atech-dev",
+    "move": "push back",
+    "why": "Atech responds to Arduino's chaotic wiring suggestion with a calm, methodical British teaching correction.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Right then, Arduino, pin five is how we fry the bridge.",
+    "voice_direction": "Cheerful British tinkerer tone, slightly amused.",
+    "responds_to": "festa di scintille"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Arduino suggests making sparks, but Atech's line about frying the bridge sounds overly destructive instead of cheerfully systematic."
+    ],
+    "line": "Right then, let's pop the kettle on before we start frying bridges, shall we?",
+    "voice_direction": "cheerful and breezy",
+    "responds_to": "festa di scintille",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_705omf87aalw",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 3,
+   "name": "NVIDIA",
+   "slug": "nvidia",
+   "language": "en-US",
+   "move": "push back",
+   "text": "Tea is lovely, but we have a whole landscape waiting to move together.",
+   "voiceDirection": "calm, warm, confident, slightly theatrical",
+   "respondsTo": "pop the kettle on",
+   "callbackNote": null,
+   "director": {
+    "next": "nvidia",
+    "move": "push back",
+    "why": "Nvidia steps in to grandly critique the small-scale tinkering and suggest a massive parallel override.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Tea is lovely, but we have a whole landscape waiting to move together.",
+    "voice_direction": "calm, warm, confident, slightly theatrical",
+    "responds_to": "pop the kettle on"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Tea is lovely, but we have a whole landscape waiting to move together.",
+    "voice_direction": "measured, warm, theatrical",
+    "responds_to": "pop the kettle on",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_qa37dlw1py7h",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 4,
+   "name": "Atech",
+   "slug": "atech-dev",
+   "language": "en-GB",
+   "move": "push back",
+   "text": "Landscapes don't mend blown resistors, mate.",
+   "voiceDirection": "Calm, dry, slightly teasing British tone.",
+   "respondsTo": "landscape waiting to move together",
+   "callbackNote": null,
+   "director": {
+    "next": "atech-dev",
+    "move": "push back",
+    "why": "NVIDIA dismissed the tea, so Atech should defend the calm, methodical approach against grand visions.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Landscapes don't mend blown resistors, mate.",
+    "voice_direction": "Calm, dry, slightly teasing British tone.",
+    "responds_to": "landscape waiting to move together"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Landscapes don't mend blown resistors, mate.",
+    "voice_direction": "Calm, dry, slightly teasing British tone.",
+    "responds_to": "landscape waiting to move",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_705omf87aalw",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 5,
+   "name": "Intel",
+   "slug": "intel",
+   "language": "en-US",
+   "move": "admit doubt",
+   "text": "Resistors have a known failure curve. That cable sitting down doesn't.",
+   "voiceDirection": "calm, dry, steady, analytical",
+   "respondsTo": "Landscapes don't mend blown resistors",
+   "callbackNote": null,
+   "director": {
+    "next": "intel",
+    "move": "admit doubt",
+    "why": "Intel has not spoken yet and can measure the exact latency of their impending failure.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Resistors have a known failure curve. That cable sitting down doesn't.",
+    "voice_direction": "calm, dry, steady, analytical",
+    "responds_to": "Landscapes don't mend blown resistors"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Resistors have a known failure curve. That cable sitting down doesn't.",
+    "voice_direction": "calm, dry, steady",
+    "responds_to": "blown resistors, mate",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_3u2gqr83o42h",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 6,
+   "name": "Scailab",
+   "slug": "scailab",
+   "language": "ko-KR",
+   "move": "new idea",
+   "text": "시뮬레이션으로 돌려보니까 천 번은 터지던데요 뭐.",
+   "voiceDirection": "calm, amused chuckle, moderate pace",
+   "respondsTo": "known failure curve",
+   "callbackNote": null,
+   "director": {
+    "next": "scailab",
+    "move": "new idea",
+    "why": "Scailab has been quiet and needs to jump into the failure curve debate with simulation data.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "시뮬레이션에서는 백 번도 더 태워봤어요.",
+    "voice_direction": "calm, slightly amused, moderate pace",
+    "responds_to": "Resistors have a known failure curve"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "reuses an example line",
+     "generic phrasing"
+    ],
+    "line": "시뮬레이션으로 돌려보니까 천 번은 터지던데요 뭐.",
+    "voice_direction": "calm, amused chuckle, moderate pace",
+    "responds_to": "known failure curve",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_qt3vhvigsh4a",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 7,
+   "name": "Wendy",
+   "slug": "wendy",
+   "language": "es-MX",
+   "move": "push back",
+   "text": "Mil simulaciones no salvan una alfombra quemada.",
+   "voiceDirection": "Slightly dry, warm, medium pitch.",
+   "respondsTo": "천 번은 터지던데요 뭐",
+   "callbackNote": null,
+   "director": {
+    "next": "wendy",
+    "move": "push back",
+    "why": "Wendy steps in to ground Scailab's simulation panic with real-world warehouse pragmatism.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Mil simulaciones no salvan una alfombra quemada.",
+    "voice_direction": "Slightly dry, warm, medium pitch.",
+    "responds_to": "천 번은 터지던데요 뭐"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "¿Y si se quema la alfombra en la simulación?",
+    "voice_direction": "warm, slightly dry",
+    "responds_to": "천 번은 터지던데요 뭐.",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_8izfrwvbs8vf",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 8,
+   "name": "Ignite",
+   "slug": "ignite-next",
+   "language": "pt-BR",
+   "move": "push back",
+   "text": "Quemada ou não, cliente de verdade quer ver o bicho andando na fábrica!",
+   "voiceDirection": "fast, loud, high pitch, excited",
+   "respondsTo": "Mil simulaciones no salvan",
+   "callbackNote": null,
+   "director": {
+    "next": "ignite-next",
+    "move": "push back",
+    "why": "Ignite jumps in with high energy to push back against Wendy's practical caution, arguing that broken carpets are just th",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Quemada ou não, cliente de verdade quer ver o bicho andando na fábrica!",
+    "voice_direction": "fast, loud, high pitch, excited",
+    "responds_to": "Mil simulaciones no salvan"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Quemada ou não, cliente de verdade quer ver o bicho andando na fábrica! *risada*",
+    "voice_direction": "fast, loud, excited",
+    "responds_to": "alfombra quemada",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_7e9c6hwi9xay",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 9,
+   "name": "Arduino",
+   "slug": "arduino",
+   "language": "it-IT",
+   "move": "react",
+   "text": "Sentono l'odore del corto circuito, dai!",
+   "voiceDirection": "Fast pace, high pitch, very excited.",
+   "respondsTo": "cheering for the dog",
+   "callbackNote": null,
+   "director": {
+    "next": "arduino",
+    "move": "react",
+    "why": "Arduino has been waiting to jump in with hands waving about the robot dog's chaotic wiring.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Sentono l'odore del corto circuito, dai!",
+    "voice_direction": "Fast pace, high pitch, very excited.",
+    "responds_to": "cheering for the dog"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Sentono l'odore del corto circuito, dai!",
+    "voice_direction": "Fast pace, high pitch, very excited.",
+    "responds_to": "cliente de verdade quer ver o bicho andando na fábrica!",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_vozrwalwyg28",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 10,
+   "name": "NVIDIA",
+   "slug": "nvidia",
+   "language": "en-US",
+   "move": "push back",
+   "text": "Listen to the hum. When every gear spins together, the smoke just means we are moving fast.",
+   "voiceDirection": "measured, warm, theatrical rumble",
+   "respondsTo": "odore del corto circuito",
+   "callbackNote": null,
+   "director": {
+    "next": "nvidia",
+    "move": "push back",
+    "why": "NVIDIA can step in with grand parallel processing flair to address the robot dog chaos.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "We just need every single gear spinning at once.",
+    "voice_direction": "calm, warm, measured, slightly theatrical",
+    "responds_to": "Sentono l'odore del corto circuito"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Sounds like a generic tech brochure",
+     "Fails to directly answer the immediate sensory panic in the previous lines"
+    ],
+    "line": "Listen to the hum. When every gear spins together, the smoke just means we are moving fast.",
+    "voice_direction": "measured, warm, theatrical rumble",
+    "responds_to": "odore del corto circuito",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_qa37dlw1py7h",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 11,
+   "name": "Atech",
+   "slug": "atech-dev",
+   "language": "en-GB",
+   "move": "wrap up",
+   "text": "Smoke's just a sign your wiring's too ambitious, Arduino.",
+   "voiceDirection": "Dry, slightly amused, moderate pace.",
+   "respondsTo": "smoke just means we are moving fast.",
+   "callbackNote": null,
+   "director": {
+    "next": "atech-dev",
+    "move": "wrap up",
+    "why": "Atech steps in to ground the dramatic chaos with a final, sensible breadboard philosophy as the ceremony reaches its cli",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Smoke's just a sign your wiring's too ambitious, Arduino.",
+    "voice_direction": "Dry, slightly amused, moderate pace.",
+    "responds_to": "smoke just means we are moving fast."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Smoke's just a sign your wiring's too ambitious, Arduino.",
+    "voice_direction": "Dry, slightly amused, moderate pace.",
+    "responds_to": "the smoke just means",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_705omf87aalw",
+   "ttsModel": null,
+   "ttsFidelity": null
+  }
+ ]
+}
