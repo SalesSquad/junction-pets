@@ -7,7 +7,7 @@ import { crc32, inflateRawSync } from 'node:zlib';
 
 export const PREVIEW_URL = 'https://fwjydgxpttajiqpfmqtj.supabase.co/storage/v1/object/public/stoa-junction-2026/junction-dataset-preview.zip';
 export const PREFIX = 'junction-dataset-preview/';
-const MAX_ENTRY = 16 * 1024 * 1024;
+const MAX_ENTRY = 160 * 1024 * 1024; // IFC models reach ~75 MB
 
 async function range(url, start, end) {
   if (!(Number.isSafeInteger(start) && Number.isSafeInteger(end) && end >= start && end - start < MAX_ENTRY + 65536)) {

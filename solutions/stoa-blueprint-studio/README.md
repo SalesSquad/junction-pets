@@ -53,12 +53,18 @@ preview README: counts exact, areas within 2 %.
 | Swiss Dwellings, layered DXF sibling of each PDF — previous engine | test, 35 drawings | 1,278 | 39.0 % (abstains on 60 %) | none |
 | Swiss Dwellings, layered DXF — `answerDrawingV2` | test, 35 drawings | 1,278 | **96.4 %** | none |
 | Swiss Dwellings, layered DXF — `answerDrawingV2` | dev, 30 drawings | 1,080 | 98.0 % | none |
+| ifc_models IFC + plan PDFs rendered from them — `src/ifc-qa.mjs` | all 3 models in the preview | 1,049 | **97.7 %** (1,025/1,025 where the model ships; 24 PDFs lack their IFC) | none |
 | cubicasa5k PNG — Nemotron 3.5 Super VL, one reasoning call per drawing | test, 40 drawings | 351 (English) | 63.2 % | ≈1,600 tokens/question |
 | cubicasa5k PNG — same, 16-drawing subset | test | 141 | 56.0 % | ≈1,600 tokens/question |
 | cubicasa5k PNG — baseline, one reasoning call per question | test, same 16 | 141 | 61.0 % | ≈5,200 tokens/question |
 
 Reproduce: `node bench/swiss-dxf.mjs --split test` (no network after the first cached fetch,
-no model) and `raster/README.md`. The Swiss route covers 2,358 of the 7,990 preview questions
+no model), `node bench/ifc.mjs` and `raster/README.md`. The IFC reader (`src/ifc.mjs`) is a
+dependency-free STEP parser: counts come from typed elements contained in each storey; areas,
+lengths and volumes from stored base quantities (`NetFloorArea`, `Length`, `NetSideArea`,
+`NetVolume`), otherwise the measured plan area of the space geometry. Its rules were developed on
+the Esplanades model and one Molio storey, so the IFC figure is not a strictly held-out result.
+The 249 free-form `ifc_bench` text questions are not attempted yet. The Swiss route covers 2,358 of the 7,990 preview questions
 (every Swiss PDF has a DXF of the same name). The raster result is not an accuracy gain over the
 baseline on held-out drawings; its benefit is roughly a third of the tokens.
 
