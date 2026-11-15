@@ -25,7 +25,7 @@ observations, seven-bit masks by option, full actions, or trajectory logs.
 The original ZIP is **not in Git**. Its unchanged private iCloud location was
 verified on the Mac Mini, with SHA-256 equal to the original GitHub artifact:
 
-`/Users/mikaelmini/Library/Mobile Documents/com~apple~CloudDocs/Junction/CRACI/rokoko-v13-43660619725-github-artifact.zip`
+`Junction/CRACI/rokoko-v13-43660619725-github-artifact.zip` (in iCloud Drive)
 
 This hash verifies local file bytes, **not** cross-device iCloud sync or a signed
 compute-provider attestation. Original billing is unknown.
