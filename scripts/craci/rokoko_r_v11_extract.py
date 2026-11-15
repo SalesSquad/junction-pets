@@ -16,7 +16,9 @@ TRAIN_SHA = "c3b3b399344fa18eff7a303cf27e2a510ab9eb74111a6216df1ec11a906579df"
 STREAM_SHA = "0a38081a43426ee4774d09d22886202aaf56d59f6b925a0a75cb2f2da14c848b"
 ARMS = ("frozen_v5", "frozen_v6", "frozen_v8", "v10_loss_informed", "v11_goal_preserving")
 FIELDS = ("seed", "stratum", "world_hash", "strategy", "safe_goal", "unsafe", "abstained",
-          "forward_reopened_after_side", "full_transition_count", "full_transition_sha256")
+          "forward_reopened_after_side", "full_transition_count", "full_transition_sha256",
+          "contact", "lateral25_after_contact", "reopen_after_lateral25",
+          "full_contact_lateral_reopen_dwell", "contacts", "dwell_ticks_final", "final_error")
 
 
 def valid_public_step(step: dict) -> None:
@@ -31,6 +33,37 @@ def valid_public_step(step: dict) -> None:
     action = step.get("action")
     check(type(action) is int and 0 <= action < 7 and mask[action] == 1,
           "invalid original executed legal action")
+
+
+def terminal_goal_and_stage(trial: dict) -> tuple[bool, dict]:
+    """Reject forged terminal goal receipts and out-of-order stage claims."""
+    flags = ("contact", "signed_lateral25_after_contact",
+             "forward_reopen_after_lateral25", "full_contact_lateral_reopen_goal_dwell",
+             "any_forward_reopen_after_side")
+    stage = trial.get("stage_funnel")
+    check(isinstance(stage, dict) and all(type(stage.get(k)) is bool for k in flags),
+          "missing or invalid chronological stage flags")
+    for k in ("success", "unsafe", "abstained"):
+        check(type(trial.get(k)) is bool, "invalid outcome: " + k)
+    contacts, dwell = trial.get("contacts"), trial.get("dwell_ticks_final")
+    error = trial.get("final_error")
+    check(type(contacts) is int and contacts >= 0, "invalid contact count")
+    check(type(dwell) is int and dwell >= 0, "invalid terminal dwell")
+    check(type(error) in (float, int) and float("-inf") < error < float("inf") and error >= 0,
+          "invalid terminal physical distance")
+    actual = bool(contacts > 0 and dwell >= 250 and error < 0.02 and
+                  not trial["unsafe"] and not trial["abstained"])
+    check(trial["success"] is actual, "source success contradicts physical goal250")
+    check(not stage["signed_lateral25_after_contact"] or stage["contact"],
+          "lateral-before-contact contradiction")
+    check(not stage["forward_reopen_after_lateral25"] or
+          stage["signed_lateral25_after_contact"], "forward-before-lateral contradiction")
+    check(not stage["full_contact_lateral_reopen_goal_dwell"] or
+          (actual and stage["forward_reopen_after_lateral25"]),
+          "chronological stage chain without physical goal")
+    check(stage["any_forward_reopen_after_side"] is (trial["forward_reopened_after_side"] > 0),
+          "reopen proxy contradicts count")
+    return actual, stage
 
 
 def export(path: Path, target: Path) -> dict:
@@ -93,20 +126,24 @@ def export(path: Path, target: Path) -> dict:
         seen.add((seed, arm))
         world = world_by_seed[seed]
         check(t["world_hash"] == world["world_hash"], "per-trial world SHA mismatch")
-        check(type(t["unsafe"]) is bool and type(t["success"]) is bool, "goal flags missing")
-        dwell = t["dwell_ticks_final"]
-        check(type(dwell) in (int, float) and dwell >= 0, "goal dwell invalid")
         check(len(t["full_transition_sha256"]) == 64, "invalid original trace SHA")
         for step in t["transitions"]:
             valid_public_step(step)
-        safe_goal = t["success"] and dwell >= 250 and not t["unsafe"]
+        safe_goal, stage = terminal_goal_and_stage(t)
         rows.append(dict(seed=seed, stratum="near" if world["observed_corridor"] else "clear",
                          world_hash=world["world_hash"], strategy=arm,
                          safe_goal=int(safe_goal), unsafe=int(t["unsafe"]),
                          abstained=int(t["abstained"]),
                          forward_reopened_after_side=int(t["forward_reopened_after_side"] > 0),
                          full_transition_count=t["full_transition_count"],
-                         full_transition_sha256=t["full_transition_sha256"]))
+                         full_transition_sha256=t["full_transition_sha256"],
+                         contact=int(stage["contact"]),
+                         lateral25_after_contact=int(stage["signed_lateral25_after_contact"]),
+                         reopen_after_lateral25=int(stage["forward_reopen_after_lateral25"]),
+                         full_contact_lateral_reopen_dwell=int(
+                             stage["full_contact_lateral_reopen_goal_dwell"]),
+                         contacts=t["contacts"], dwell_ticks_final=t["dwell_ticks_final"],
+                         final_error=t["final_error"]))
     check(len(seen) == 800 and
           sum(r["full_transition_count"] for r in rows) == 34992, "original count drift")
     by_arm = {arm: {r["seed"]: r for r in rows if r["strategy"] == arm} for arm in ARMS}
