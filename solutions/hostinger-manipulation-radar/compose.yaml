@@ -1,0 +1,35 @@
+name: signal-desk
+services:
+  signal-desk:
+    build: .
+    restart: unless-stopped
+    init: true
+    read_only: true
+    user: "1000:1000"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: "4173"
+    ports: ["127.0.0.1:4173:4173"]
+    volumes: [signal-state:/app/state]
+    tmpfs: ["/tmp:size=16m,mode=1777,noexec,nosuid"]
+    mem_limit: 512m
+    cpus: 1
+  caddy:
+    image: caddy:2-alpine
+    profiles: [tls]
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      SIGNAL_DOMAIN: ${SIGNAL_DOMAIN:?Set a verified Hostinger hostname}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on: [signal-desk]
+volumes:
+  signal-state:
+  caddy-data:
+  caddy-config:

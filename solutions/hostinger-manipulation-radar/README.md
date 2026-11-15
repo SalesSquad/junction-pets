@@ -1,3 +1,11 @@
+## 15 November 2026 continuation — current source
+
+The owner explicitly requested coordination-quality improvements, PR193 traffic integration and a live Hostinger demo. This source now combines the three workspaces with a bounded optional Hostinger AI Router backend and Docker/TLS deployment configuration. Live hosting and AI remain unverified until the team coupon and provider activation are completed.
+
+V2 fixes weak transitive grouping, content-query URL equivalence and metadata-driven decisions while explicitly abstaining on intent. Original v1 detector bytes, labels and historical 512-case metrics remain unchanged. New v2 examples are **mechanistic contract validation, not a measured improvement in field precision/recall**. The traffic workflow remains entirely client-side.
+
+Executed on the authorized MBP, Node v26.13.0: **56/56 solution-local tests passed, zero skips**, including local HTTP, privacy/alias normalization, rolling-window boundaries, exact-quote validation, origin/consent/size rejection and persistent quota admission across service instances. These include the original frozen v1 assertions. No real Hostinger or model request was substituted with a mock pass. See [HOSTINGER_DEPLOYMENT.md](HOSTINGER_DEPLOYMENT.md) for exact activation and operating steps.
+
 # Signal Desk — Hostinger Manipulation Radar
 
 An offline analyst dashboard for **possible coordinated campaigns**, with inspectable evidence, explicit counterevidence and an honest error ledger. **SYNTHETIC / OFFLINE_DETERMINISTIC. Maturity 2/6: functional local prototype, not field or live-host qualified.** No real AI or provider calls. Independent work, not Hostinger endorsement.
@@ -27,7 +35,7 @@ The server binds **127.0.0.1 only**, exposes an exact read-only allowlist and ne
 5. Use **Mixed investigation desk** to investigate three independent groups. Mark a group Needs investigation, Likely benign or Insufficient context, or reset it. Only disposition enums and synthetic IDs enter localStorage; a denied store falls back to session memory. No text/account observations are persisted.
 6. Download a structured JSON report with synthetic observations, signal evidence, base SHA, review dispositions and ablation selections. Benchmark metrics and exact denominators remain visible in the quality ledger. Native controls support keyboard use; layout adapts to narrow screens. Actual visual, screen-reader and device behavior still needs browser qualification.
 
-There is intentionally no arbitrary-file import or live data ingestion. This keeps the demo bounded and avoids collecting personal data before licensing, consent and data-governance work exists.
+The original Radar remains synthetic-only. The separate M4 Traffic Forensics journey accepts bounded local Nginx logs, with no raw uploads or persistence; see below.
 
 ## Development benchmark, not a field claim
 
@@ -91,3 +99,42 @@ M357 weights detection quality, false positives and explainability at **40%** an
 The latest supplied clarification states: team booth coupon → KVM 2 for one month → 5000 AI credits and Instant web scraping. VPS, AI Router and possible AI Builder activation are separate. **Own-account activation, all real Hostinger integrations and public deployment: NOT VERIFIED.** No benefit was redeemed or claimed available.
 
 Acceptance and exact execution evidence are in [PROGRESS.md](PROGRESS.md); trust boundaries and scoring rules are in [ARCHITECTURE.md](ARCHITECTURE.md). Next dependency: **valid licensed labelled data + authorized live coupon / Hostinger deployment access**, owned by the coordinator/data and deployment owner. No deployment artifact, submission or production efficacy is claimed.
+
+
+## M4 / Traffic Forensics (source-only)
+
+Run `node server.mjs`, open `http://127.0.0.1:4173/traffic/index.html` (also linked in Radar navigation), and choose **Open synthetic demonstration**. Inspect the five-minute window, exact event IDs and benign explanations; choose an analyst disposition and export redacted JSON. For a user-selected log choose the file input. Each import clears the prior report and alias mapping; no filename, raw request, original client address, user agent, referer or query is rendered/exported. No browser storage or raw network request is used.
+
+CLI equivalent, from this directory:
+
+```sh
+node traffic/cli.mjs traffic/synthetic.txt
+node traffic/cli.mjs traffic/synthetic.txt --output my-redacted-report.json
+node --test traffic/*.test.mjs
+```
+
+The CLI sample is authored SYNTHETIC data, but CLI input always carries `USER_SUPPLIED_UNVERIFIED_LOG`: file contents cannot prove origin. CLI prints JSON by default and writes only an explicitly selected **new** output file (no overwrite). User data is never saved otherwise. Review exported metadata before sharing: sequential aliases are not general anonymization.
+
+Strict supported subset: UTF-8 Nginx combined, numeric IPv4/IPv6 clients, literal `-` identity field, bounded username, HTTP/1.0 or 1.1, known uppercase request verbs and origin-form request paths. Other formats explicitly refuse the whole import. Maximum 1 MiB, 5000 lines, 4096 characters/line, 512-character request target, 160-character path, 1024-character referer/UA, seven-day span, years 2000–2100. CRLF is accepted; invalid encoding, control/bidi characters and malformed dates/offsets fail closed. Only a fixed known-route vocabulary survives; all other paths become `[other path]`. Times use the supplied Nginx UTC offset, which itself is unverified.
+
+Policy `traffic-review-1`: fixed UTC five-minute windows; candidate requires both ≥10 authenticated-route 401/403 events from ≥3 aliases and ≥5 HTTP 429 responses. Volume (≥30 events / ≥3 aliases) is contextual, and ≥5 5xx is operational, neither escalates alone. Alias count is not people count. Two co-occurring response families are not statistically independent evidence of malicious intent. Shared proxies, load tests and ordinary mistakes can satisfy the rule; boundary splitting and evasion can miss activity. There is no bot/attack classification, automatic ban or identity verdict. Counts, denominators, exact IDs, UTC timestamps, provenance, rule version and analyst disposition are exported; original client identifiers are not.
+
+Real labels, field precision/FPR, live Hostinger deployment/provider integration and coupon activation remain **UNKNOWN / NOT VERIFIED**. No efficacy numbers are inferred from the authored examples. Existing M3 policy and OOD corpus are untouched. Next dependency: licensed labelled traffic with an agreed evaluation protocol, followed by separately authorized Hostinger deployment.
+
+### Rolling traffic replay (M5)
+
+The traffic view now shows deterministic rolling review episodes below the
+unchanged fixed UTC window comparator. The same thresholds apply: at least ten
+login-route 401/403 responses across at least three aliases, plus five HTTP 429
+responses. Replay evaluates `(end − five minutes, end]` at each distinct event
+timestamp, sorting once and maintaining a sliding window (O(n log n), max 5,000
+events). Overlapping positive intervals merge; episode start/end describe their
+union, which may last longer than five minutes. Evidence IDs include every
+sanitized event in that union, once, in timestamp/input-order tie order.
+
+`node traffic/cli.mjs traffic/synthetic.txt` prints the existing JSON report with
+an additive `rolling.episodes` field containing interval bounds, alias counts,
+evidence IDs and benign explanations. User imports remain
+`USER_SUPPLIED_UNVERIFIED_LOG`; replay is not tuned or qualified on real labels.
+Only human review is supported. Authorized load testing and shared reverse
+proxies remain plausible explanations. No raw IP is added to exports.

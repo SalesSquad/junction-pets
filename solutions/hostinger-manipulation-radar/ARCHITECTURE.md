@@ -38,3 +38,10 @@ The benchmark uses one prediction per scenario (any group flagged), exact confus
 ## Unqualified external boundary
 
 Base SHA `b7a51ee7acc3b1923fa0506b31a0f2eafb56f402`, partnerEvidenceKey `hostinger`, official M357, snapshot 2026-11-14. No Hostinger SDK, secret, scraping integration, AI Router, model call, provider activation, public deployment or automatic enforcement exists. All real Hostinger integration and public deployment remain **NOT VERIFIED**. Valid licensed labelled data and authorized live coupon/deployment access are the exact next dependencies.
+
+
+## M4 traffic isolation
+
+`public/traffic/core.mjs` is a dependency-free browser/Node parser and conservative review detector, separate from the unchanged Radar policy/OOD corpus. It refuses whole invalid imports. Original client addresses exist only in a per-call map; sequential aliases reset on every import. Only allowlisted constant routes survive normalization. The browser File API reads ≤1 MiB locally; no fetch, storage or raw DOM rendering exists. All derived display values use textContent. Async import generations prevent stale reads replacing a newer import. Dispositions are session-memory enums. Export is an explicit Blob download.
+
+Four exact new GET/HEAD static assets are served under `/traffic/`; existing CSP and method guards remain intact. No upload endpoint or host integration is added. `traffic/cli.mjs` reads at most limit+1 bytes from a regular file and prints only the normalized report, or exclusively creates the operator-selected output. Errors omit raw data and filenames. CLI always declares USER_SUPPLIED_UNVERIFIED_LOG; browser demo alone explicitly sets SYNTHETIC. Fixed-window co-occurrence cannot establish actor identity, intent or statistically independent likelihood. Detailed limits and review gates are in README. Metadata remains sensitive despite removing direct identifiers.

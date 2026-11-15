@@ -1,3 +1,11 @@
+## 15 November 2026 continuation — current source
+
+The owner explicitly requested coordination-quality improvements, PR193 traffic integration and a live Hostinger demo. This source now combines the three workspaces with a bounded optional Hostinger AI Router backend and Docker/TLS deployment configuration. Live hosting and AI remain unverified until the team coupon and provider activation are completed.
+
+V2 fixes weak transitive grouping, content-query URL equivalence and metadata-driven decisions while explicitly abstaining on intent. Original v1 detector bytes, labels and historical 512-case metrics remain unchanged. New v2 examples are **mechanistic contract validation, not a measured improvement in field precision/recall**. The traffic workflow remains entirely client-side.
+
+Executed on the authorized MBP, Node v26.13.0: **56/56 solution-local tests passed, zero skips**, including local HTTP, privacy/alias normalization, rolling-window boundaries, exact-quote validation, origin/consent/size rejection and persistent quota admission across service instances. These include the original frozen v1 assertions. No real Hostinger or model request was substituted with a mock pass. See [HOSTINGER_DEPLOYMENT.md](HOSTINGER_DEPLOYMENT.md) for exact activation and operating steps.
+
 # J26-HOSTINGER-M2-20261114 — delivery receipt
 
 ## M3 OOD audit — 14 November 2026
@@ -107,3 +115,20 @@ Next executable action, coordinator: integrate the uncommitted product scope, th
 - **Separate authorized Mac Mini execution** outside the restricted Codex subprocess independently ran the final product-local `node --test tests/*.test.mjs`: **15/15 PASS, 0 skip** including **actual TCP localhost HTTP GET/HEAD/405/404/CSP/asset/benchmark smoke**. This resolves ONLY the local HTTP capability blocked by the writer's sandbox; it does not qualify a real browser, public endpoint, Hostinger VPS or SDK. The original writer's separate **14 pass / 1 socket-denied skip** is preserved above as historical evidence, not silently rewritten. All product `.mjs` files passed `node --check`; quick static injection search found no `innerHTML`, `eval`, `document.write`, or `sendBeacon`.
 - **Source:** authenticated main `b7a51ee7acc3b1923fa0506b31a0f2eafb56f402`; partner key `hostinger`; official M357, source snapshot 2026-11-14. **Local synthetic results remain tiny and authored:** held-out precision 4/5, FPR 1/7, recall 4/5. No direct user data, model calls, sponsor credits, secrets, releases or live provider qualification.
 - **Remaining acceptance:** actual visual/a11y browser, independently licensed labels and reproducible Hostinger deployment/AI integration; no live access currently asserted.
+
+## M4 — J26-PF-HOSTINGER-TRAFFIC-M4-20261114
+
+Source base `fff9672a25b803c2cca79670c4ab27047a047194`, clean baseline, source-only handoff on 2026-11-14. Owned changes: `public/traffic/{index.html,style.css,app.mjs,core.mjs}`, `traffic/{cli.mjs,core.test.mjs,synthetic.txt}`, existing `public/index.html` navigation, server static allowlist, README/ARCHITECTURE/this record. No commit/push/PR/provider operation. Existing detector, stress corpus and tests untouched; no OOD tuning or rerun.
+
+Implemented local UTF-8 combined-log import → strict bounded redaction → fixed five-minute candidate windows → explicit benign explanations → analyst enum disposition → exact redacted JSON download. Separate dependency-free CLI shares the parser and detector. Original IP/target/query/UA/referer/filename are absent from reports. No raw upload/network or storage API. Four exact static GET/HEAD assets added; CSP unchanged. See README for input subset, limits and detection policy. Aliases do not anonymize usage metadata generally.
+
+Executed on local Node host:
+- `node --test solutions/hostinger-manipulation-radar/traffic/*.test.mjs`: exit 0, 10/10 including CLI equivalence, DOM review/download flow, safe output, malformed input refusal and socket-free allowlist/method checks. DOM harness is not browser qualification.
+- `node --check solutions/hostinger-manipulation-radar/public/traffic/app.mjs` and `node --check solutions/hostinger-manipulation-radar/server.mjs`: exit 0.
+- `node solutions/hostinger-manipulation-radar/traffic/cli.mjs solutions/hostinger-manipulation-radar/traffic/synthetic.txt > /dev/null`: exit 0.
+- `git diff --check`: exit 0.
+- Ephemeral `createServer().listen(0,'127.0.0.1',...)` HTTP probe: BLOCKED, `EPERM`; no listener remained. Real loopback browser journey, visual 390px/desktop behavior, native downloads and assistive technology NOT VERIFIED. Semantic controls, focus management, responsive layout and reduced-motion rules have source/contract evidence only.
+
+Concrete journey: from product directory run `node server.mjs`; open `/traffic/index.html`, select synthetic demonstration (40 events, five aliases, one candidate), inspect event IDs and benign explanations, select Insufficient context, download JSON. Or import `traffic/synthetic.txt` as a user file; provenance intentionally becomes USER_SUPPLIED_UNVERIFIED_LOG. CLI equivalent: `node traffic/cli.mjs traffic/synthetic.txt`.
+
+Real labels/error rates UNKNOWN; authored tests are SYNTHETIC. Sponsor M357 requires live Hostinger deployment for qualification: coupon, KVM2, credits/scraping and provider integration remain NOT VERIFIED. Next owner dependency: coordinator source integration plus an authorized browser executor; field claims additionally require licensed labelled logs and a fixed evaluation protocol, and live qualification requires separately authorized Hostinger deployment. Knowledge OS lifecycle tools were not present in the current tool catalog (`registry_identity_unverifiable` routing note); no saved reference was reused.
