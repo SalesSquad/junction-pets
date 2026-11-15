@@ -240,7 +240,7 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
       if (object && (Object.keys(supplied).some(key => !['proof', 'decision'].includes(key)) ||
           !['approve', 'reject'].includes(supplied.decision))) fail('HOST_DECISION_REQUIRED');
       const proof = hostToken(object ? supplied.proof : supplied);
-      let decision = object ? supplied.decision : context.decision;
+      let decision = object ? supplied.decision : null;
       let until = now + 300000;
       // Selection/cache minimization only: this decode never verifies identity or grants consent.
       // The server must verify the signature and bind this exact decision and scope.
@@ -250,7 +250,8 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
         if (Number.isSafeInteger(payload?.exp) && payload.exp >= 0 && payload.exp <= Math.floor(Number.MAX_SAFE_INTEGER / 1000)) {
           until = Math.min(until, payload.exp * 1000); // Unverified metadata may shorten retention, never extend it.
         }
-      } catch { /* Old test transports may supply opaque, non-JSON marker payloads. */ }
+      } catch { /* A raw proof without an explicit decision is refused below. */ }
+      if (!['approve', 'reject'].includes(decision)) fail('HOST_DECISION_REQUIRED');
       if (until > Date.now()) hostProofs.set(cacheKey, { proof, decision, until });
       return { proof, decision, cacheKey };
     } catch { fail('HOST_DECISION_REQUIRED'); } finally { clearTimeout(timer); }

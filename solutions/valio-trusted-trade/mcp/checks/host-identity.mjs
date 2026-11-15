@@ -74,7 +74,7 @@ const hostDecisionProof=async context=>{
   proofCalls++;assert.equal(context.action,'QUOTE_DECISION');assert.equal(context.decision,'approve');
   assert.equal(context.buyerId,BUYER);assert.equal(context.ownerRef,initialIdentity.ownerRef);assert.equal(context.profileId,initialIdentity.profileId);
   assert.match(context.quoteBodyDigest,/^[A-Za-z0-9_-]{43}$/);assert.ok(context.totalCents>prepared.budgetCents);
-  return proofMarker+'.exact.signature';
+  return {proof:proofMarker+'.exact.signature',decision:'approve'};
 };
 const file=join(directory,'host.sqlite');
 let client=await createTradeClient({stateFile:file,fetchImpl:host.respond,hostAccessToken,hostDecisionProof});
@@ -166,7 +166,7 @@ try{
   assert.equal(rejected.quote.status,'REJECTED');assert.equal(readState(objectRejectFile).runs[0][1].acceptedScope,null);
 }finally{objectReject.close();}
 const tokenFile=join(directory,'access.jwt'),proofFile=join(directory,'proof.jwt');
-await writeFile(tokenFile,accessMarker+'.file.signature',{mode:0o600});await writeFile(proofFile,proofMarker+'.file.signature',{mode:0o600});
+await writeFile(tokenFile,accessMarker+'.file.signature',{mode:0o600});await writeFile(proofFile,proofMarker+'.'+Buffer.from(JSON.stringify({decision:'approve'})).toString('base64url')+'.signature',{mode:0o600});
 assert.equal(await privateHostCredentialFile(tokenFile)(),accessMarker+'.file.signature');
 await chmod(tokenFile,0o644);await assert.rejects(privateHostCredentialFile(tokenFile)(),{code:'HOST_CREDENTIAL_UNAVAILABLE'});await chmod(tokenFile,0o600);
 const linked=join(directory,'linked.jwt');await symlink(tokenFile,linked);await assert.rejects(privateHostCredentialFile(linked)(),{code:'HOST_CREDENTIAL_UNAVAILABLE'});
