@@ -1,0 +1,76 @@
+{
+  "action4ModelInferenceAuthorized": false,
+  "burstLengths": [
+    2,
+    4
+  ],
+  "cohort": {
+    "clear": 8,
+    "near": 40,
+    "nearAbsPublicObservation7Lt": 0.122,
+    "selection": "first per stratum in ascending seed order; merge ascending"
+  },
+  "contactGoal": {
+    "contactsGreaterThan": 0,
+    "finalErrorMetersStrictlyBelow": 0.02,
+    "minimumActualContactDwellTicks": 250,
+    "noUnsafeOrAbstain": true
+  },
+  "devCalTestOodOpened": false,
+  "dispatchAuthorized": false,
+  "excludedExecutedV12": [
+    518000,
+    518511
+  ],
+  "excludedReservedFollowup": [
+    518512,
+    519023
+  ],
+  "executionOrder": "world-major, strategy order, V5 first",
+  "expectedTrials": 192,
+  "hardStopAnyArmLostV5Goal": true,
+  "hardStopAnyUnsafe": true,
+  "hardStopZeroNovelGoals": true,
+  "independentPhysicsReplayRequired": true,
+  "maxBurstsPerEpisode": 1,
+  "modelPromotionAuthorized": false,
+  "originalV12ModelSha256": "82cfa42ba2240aff6d00ec3e2b15c06d78386d3c0682986a23e478977f2dbf9e",
+  "originalV12PlanSha256": "8074f8f8978e2e55bdf201eeb9713888e44befe1d93856da44c1830bb86cfc48",
+  "originalV12PolicySha256": "bd748f604dafbc6e0d3d59e0a5b7e08dab5e9e8ed010a13053f1417a32fd6fc6",
+  "parentHead": "c77158f9ae80acc2b1eafaf9284c4397426799b2",
+  "preflightOnly": {
+    "clear": 334,
+    "near": 178,
+    "outcomesOrTraining": false,
+    "path": "v13-world-survey.json",
+    "sha256": "099d8cc69d0d11bca1e21d0fe2b4c7c397b3f094a352d80ea3fcc52a2fddad29"
+  },
+  "protocolSchema": "junction.rokoko.v13.preliminary-train-contact-readout.v1",
+  "requireOriginalMask4BeforeEveryStep": true,
+  "requirePublicGateBeforeEveryStep": true,
+  "resetV5AfterBurst": true,
+  "schema": "junction.rokoko.v13.right-dwell-train-plan.v1",
+  "selectedWorlds": 48,
+  "strategies": [
+    "frozen_v5",
+    "v12_phase_dwell_supported_actions",
+    "train_only_right4_burst2",
+    "train_only_right4_burst4"
+  ],
+  "trainSeedRangeInclusive": [
+    519024,
+    519535
+  ],
+  "trialFields": [
+    "seed",
+    "world_hash",
+    "strategy",
+    "success",
+    "unsafe",
+    "abstained",
+    "contact_dwell_ticks",
+    "contacts",
+    "final_error_m"
+  ],
+  "workId": "J26-CRACI-V13-RIGHT4-CONTACT-20261115"
+}
