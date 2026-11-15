@@ -1,3 +1,4 @@
+import { browserSession, restoredBearer } from './browser-session.js';
 /* Browser client for a completely fictional local purchasing provider. */
 const DEMO_BUYER = 'helsinki-hotel-demo';
 const elements = Object.fromEntries([
@@ -12,19 +13,26 @@ const elements = Object.fromEntries([
   'refresh-audit', 'family', 'quantity', 'need-mode', 'activity', 'replay', 'export-body', 'interop-body', 'quote-title',
 ].map((id) => [id, document.getElementById(id)]));
 const money = (cents) => new Intl.NumberFormat('en-FI', { style: 'currency', currency: 'EUR' }).format(cents / 100);
-const state = { quote: null, review: null, order: null, idempotencyKey: null, busy: false, stale: false, dirty: false, expired: false, expiryTimer: null, intentRevision: 0 };
-let sessionToken;
-const sessionReady = fetch('/api/demo/session', { method: 'POST', body: JSON.stringify({ buyerId: DEMO_BUYER }) }).then(async (response) => {
-  const body = await response.json();
-  if (!response.ok) throw new Error('Demo session unavailable.');
-  sessionToken = body.token;
+const state = { quote: null, review: null, order: null, idempotencyKey: null, busy: true, stale: false, dirty: false, recoveryBlocked: false, expired: false, expiryTimer: null, intentRevision: 0, quotedForm: null };
+const recoveryCache = browserSession('classic');
+let sessionToken, savedSession;
+const sessionReady = restoredBearer(recoveryCache, DEMO_BUYER).then(({ token, saved }) => {
+  sessionToken = token; savedSession = saved;
+});
+const persistBrowser = () => recoveryCache.save({
+  token: sessionToken, quoteId: state.quote?.id ?? null, snapshotId: state.quote?.snapshotId ?? null,
+  review: state.review, orderId: state.order?.id ?? null, idempotencyKey: state.idempotencyKey,
+  dirty: state.dirty, stale: state.stale,
+  // Free text is deliberately absent from both cached form copies.
+  quotedForm: state.quotedForm ? Object.fromEntries(Object.entries(state.quotedForm).filter(([id]) => id !== 'request-text')) : null,
+  form: Object.fromEntries(['need-mode','family','quantity','budget'].map(id => [id,elements[id].value])),
 });
 const api = async (path, payload) => {
   await sessionReady;
   const response = await fetch(path, {
     method: payload === undefined ? 'GET' : 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionToken}` },
-    body: payload === undefined ? undefined : JSON.stringify(payload),
+    body: payload === undefined ? undefined : JSON.stringify(payload), redirect: 'error', signal: AbortSignal.timeout(7000),
   });
   const body = await response.json();
   if (!response.ok) {
@@ -187,12 +195,13 @@ const refreshAudit = async () => {
   }
 };
 const act = async (label, action) => {
-  if (state.busy) return;
+  if (state.busy || state.recoveryBlocked) return;
   const started = performance.now();
   state.busy = true;
   showAlert();
   render();
   try {
+    await persistBrowser();
     await action();
   } catch (error) {
     if (error.code === 'QUOTE_STALE') state.stale = true;
@@ -204,12 +213,15 @@ const act = async (label, action) => {
     activity(`${label}: ${(performance.now() - started).toFixed(1)} ms local processing including HTTP. Manual baseline unmeasured.`);
     state.busy = false;
     render();
+    await persistBrowser();
+    if (!recoveryCache.available) activity('Local recovery storage unavailable; this tab is ephemeral. Keep it open until cancellation or completion.');
     try { await refreshAudit(); } catch { /* Audit is optional if the demo server stops. */ }
   }
 };
 
 elements.find.addEventListener('click', () => act('Quote', async () => {
   const requestedRevision = state.intentRevision;
+  const requestedForm = Object.fromEntries(['need-mode','family','quantity','request-text','budget'].map(id => [id,elements[id].value]));
   clearTimeout(state.expiryTimer);
   state.quote = null;
   state.review = null;
@@ -225,6 +237,7 @@ elements.find.addEventListener('click', () => act('Quote', async () => {
   });
   state.review = review;
   state.quote = quote;
+  state.quotedForm = requestedForm;
   state.dirty = state.intentRevision !== requestedRevision;
   if (!quote) {
     say(review.diagnosis.explanation);
@@ -280,7 +293,52 @@ elements.cancel.addEventListener('click', () => act('Cancel', async () => {
 }));
 elements['refresh-audit'].addEventListener('click', () => act('Audit refresh', async () => refreshAudit()));
 render();
-refreshAudit().catch(() => showAlert('The local demo backend is offline. Run npm start in the solution directory.'));
+async function bootClassic() {
+  try {
+    await sessionReady;
+    if (savedSession?.quoteId) {
+      const { quote } = await api('/api/quotes/' + encodeURIComponent(savedSession.quoteId));
+      if (quote.buyerId !== DEMO_BUYER || quote.snapshotId !== savedSession.snapshotId) throw Error('Stored proposal does not match the current server source.');
+      const { freshness } = await api('/api/quotes/' + encodeURIComponent(quote.id) + '/proof');
+      state.quote = quote;
+      state.review = savedSession.review?.id === quote.reviewId && savedSession.review.snapshotId === quote.snapshotId ? savedSession.review : null;
+      if (state.review) {
+        state.review.status = quote.status; state.review.quoteId = quote.id;
+        state.review.requested = quote.requested; state.review.sourceSnapshot = quote.sourceSnapshot;
+        state.review.originalBudgetCents = quote.budgetCents;
+        state.review.diagnosis = { ...state.review.diagnosis, missingLitres: 0, minimumCostCents: quote.totalCents,
+          outcome: quote.budgetException ? 'BUDGET_REVIEW_NEEDED' : 'FEASIBLE_AT_SNAPSHOT' };
+      }
+      state.idempotencyKey = savedSession.idempotencyKey;
+      state.dirty = savedSession.dirty === true;
+      state.stale = savedSession.stale === true || freshness?.valid !== true;
+      state.expired = Date.now() >= quote.expiresAtMs;
+      const orderId = quote.orderId ?? savedSession.orderId;
+      if (orderId) {
+        const { order } = await api('/api/orders/' + encodeURIComponent(orderId));
+        if (order.quoteId !== quote.id || order.snapshotId !== quote.snapshotId || order.buyerId !== DEMO_BUYER) throw Error('Stored receipt does not match current server terms.');
+        state.order = order;
+      }
+      for (const [id,value] of Object.entries(savedSession.form ?? {})) if (['need-mode','family','quantity','budget'].includes(id) && typeof value === 'string') elements[id].value = value;
+      state.quotedForm = savedSession.quotedForm ? Object.fromEntries(Object.entries(savedSession.quotedForm).filter(([id]) => id !== 'request-text')) : null;
+      state.dirty ||= elements['need-mode'].value !== 'typed' || !state.quotedForm || Object.keys(state.quotedForm).some(id => elements[id]?.value !== state.quotedForm[id]) ||
+        Number(elements.budget.value) !== quote.budgetCents || (elements['need-mode'].value === 'typed' &&
+          (elements.family.value !== quote.requested.family || Number(elements.quantity.value) !== quote.requested.quantityLitres));
+      elements['request-text'].disabled = elements['need-mode'].value === 'typed';
+      elements.family.disabled = elements.quantity.disabled = elements['need-mode'].value !== 'typed';
+      if (!state.order) state.expiryTimer = setTimeout(() => { state.expired = true; render(); }, Math.max(0,quote.expiresAtMs - Date.now()));
+      say('Original local demo session restored; current quote and receipt were rechecked. No new decision or order was made.');
+    }
+    await refreshAudit();
+    await persistBrowser();
+    if (!recoveryCache.available) say('Local recovery storage unavailable; this tab is ephemeral. Keep it open until cancellation or completion.');
+  } catch (error) {
+    // Preserve the original cache on network failures; never autoapprove/recommit it.
+    state.stale = true; state.recoveryBlocked = true;
+    showAlert('Recovery paused: ' + error.message + ' Reload when the original local backend is available; no purchasing action was taken.');
+  } finally { state.busy = state.recoveryBlocked; render(); }
+}
+bootClassic();
 
 elements.replay.addEventListener('click', () => act('Replay verification', async () => {
   const { order } = await api('/api/orders', { quoteId: state.quote.id, buyerId: DEMO_BUYER, idempotencyKey: state.idempotencyKey });
@@ -303,9 +361,11 @@ for (const id of ['need-mode', 'family', 'quantity', 'request-text', 'budget']) 
   elements[id].addEventListener('input', () => {
     state.intentRevision += 1;
     if (state.quote || state.review) { state.dirty = true; render(); }
+    if (sessionToken) persistBrowser();
   });
   elements[id].addEventListener('change', () => {
     state.intentRevision += 1;
     if (state.quote || state.review) { state.dirty = true; render(); }
+    if (sessionToken) persistBrowser();
   });
 }

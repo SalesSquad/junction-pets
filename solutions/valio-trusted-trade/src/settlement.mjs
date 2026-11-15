@@ -4,19 +4,25 @@
  * when the demo process restarts. BankMatch remains the canonical finance
  * integration candidate; this fixture deliberately has no production API.
  */
-import { digest } from './trust-envelope.mjs';
+import { digest, restorePrivateComponent, restorePrivateEntries, invalidPrivateState } from './trust-envelope.mjs';
 
 export const DEMO_STARTING_FUNDS_CENTS = 250_000;
 const BUYER_WALLET = 'demo:buyer:wallet';
 const supplierWallet = (supplierId) => `demo:supplier:${supplierId}:wallet`;
 
-export function createSyntheticSettlement({ getOrder, TradeError, record, clock }) {
-  const balances = new Map([[BUYER_WALLET, DEMO_STARTING_FUNDS_CENTS]]);
-  const approvals = new Map();
-  const transfers = new Map();
-  const idempotencyKeys = new Map();
-  const journal = [];
-  let transferSerial = 0;
+export function createSyntheticSettlement({ getOrder, TradeError, record, clock, initialState }) {
+  const restored = restorePrivateComponent(initialState, 'synthetic-settlement',
+    ['balances', 'approvals', 'transfers', 'idempotencyKeys', 'journal', 'transferSerial']);
+  const balances = restored ? restorePrivateEntries(restored.balances, (amount) => Number.isSafeInteger(amount) && amount >= 0) : new Map([[BUYER_WALLET, DEMO_STARTING_FUNDS_CENTS]]);
+  const approvals = restored ? restorePrivateEntries(restored.approvals, (entry, id) => entry?.orderId === id && ['approve', 'reject'].includes(entry.decision) && typeof entry.proposalDigest === 'string') : new Map();
+  const transfers = restored ? restorePrivateEntries(restored.transfers, (entry, id) => entry?.orderId === id && typeof entry.id === 'string' &&
+    ['SIMULATED_SETTLED', 'SIMULATED_REFUNDED'].includes(entry.status) && Number.isSafeInteger(entry.amountCents) && entry.amountCents > 0 &&
+    Array.isArray(entry.allocations) && Array.isArray(entry.journalEntryIds)) : new Map();
+  const idempotencyKeys = restored ? restorePrivateEntries(restored.idempotencyKeys, (id) => typeof id === 'string' && transfers.has(id)) : new Map();
+  const journal = restored?.journal ?? [];
+  let transferSerial = restored?.transferSerial ?? 0;
+  if (restored && (!Array.isArray(journal) || !Number.isSafeInteger(transferSerial) || transferSerial < 0 ||
+      !balances.has(BUYER_WALLET) || [...transfers.values()].some((entry) => !/^PAY-DEMO-[0-9]+$/.test(entry.id) || Number(entry.id.slice(9)) > transferSerial))) invalidPrivateState();
 
   const fail = (code, reason, status = 409) => { throw new TradeError(code, reason, status); };
   const matchOrder = (orderId, buyerId) => {
@@ -165,6 +171,21 @@ export function createSyntheticSettlement({ getOrder, TradeError, record, clock 
       journalEntries: journal.length, totalDebitCents, totalCreditCents,
       headDigest: prevHash, mode: 'SYNTHETIC_IN_MEMORY_NOT_EXTERNAL_ANCHORED' };
   };
-  return Object.freeze({ payment, wallet: snapshot, approve: decidePayment, settle,
+  if (restored) {
+    try {
+      if (!verify().valid) invalidPrivateState();
+      for (const [orderId, transfer] of transfers) {
+        const order = getOrder(orderId);
+        if (order.totalCents !== transfer.amountCents ||
+            JSON.stringify(allocations(order)) !== JSON.stringify(transfer.allocations) ||
+            approvals.get(orderId)?.decision !== 'approve' ||
+            approvals.get(orderId)?.proposalDigest !== transferProposal(order).digest) invalidPrivateState();
+      }
+    } catch { invalidPrivateState(); }
+  }
+  return Object.freeze({
+    exportState: () => structuredClone({ kind: 'synthetic-settlement', version: 1,
+      balances: [...balances], approvals: [...approvals], transfers: [...transfers], idempotencyKeys: [...idempotencyKeys], journal, transferSerial }),
+    payment, wallet: snapshot, approve: decidePayment, settle,
     refundForCancellation, journal: () => structuredClone(journal), verify });
 }

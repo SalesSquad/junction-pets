@@ -21,7 +21,7 @@ async function fixture(fn) {
   const base = `http://127.0.0.1:${server.address().port}`;
   const call = async (path, data, token) => {
     const result = await fetch(base + path, { method: data === undefined ? 'GET' : 'POST',
-      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: data === undefined ? undefined : JSON.stringify(data) });
     return { status: result.status, ...await result.json() };
   };

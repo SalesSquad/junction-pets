@@ -135,7 +135,7 @@ async function fixture(run) {
   const base = 'http://127.0.0.1:' + server.address().port;
   const call = async (path, body, token) => {
     const response = await fetch(base + path, { method: body === undefined ? 'GET' : 'POST',
-      headers: token ? { Authorization: 'Bearer ' + token } : {}, body: body === undefined ? undefined : JSON.stringify(body) });
+      headers: { ...(body === undefined ? {} : { 'Content-Type': 'application/json' }), ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) });
     return { status: response.status, ...await response.json() };
   };
   try { await run({ server, service, base, call, session: async () => (await call('/api/demo/session', { buyerId })).token }); }

@@ -74,7 +74,7 @@ export async function runDiagnostics({ args = [], supplierUrl = 'http://127.0.0.
   return {
     ...diagnoseProcurement({ catalog: catalog.products, requirements,
       budgetCents: quantities.budgetCents ?? policy.perOrderBudgetCents,
-      policyBudgetCents: policy.perOrderBudgetCents }),
+      policyBudgetCents: policy.perOrderBudgetCents, deliveryFeeCents: policy.deliveryFeeCents, taxBps: policy.taxBps }),
     observedAt: new Date().toISOString(),
     readConsistency: 'Separate public reads, not an atomic or reserved inventory snapshot.',
     requests,
