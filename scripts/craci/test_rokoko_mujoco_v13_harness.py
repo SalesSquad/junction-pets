@@ -108,6 +108,21 @@ class HarnessTests(unittest.TestCase):
             dict(seed=r['seed'], world_hash=r['world_hash'], near=r['observed_corridor'])
             for r in self.cohort])
 
+    def test_science_requires_novel_burst_not_control_gain(self):
+        def trial(arm, win, unsafe=False):
+            return {'seed': 42, 'strategy': arm, 'success': win, 'unsafe': unsafe,
+                    'abstained': False, 'contacts': 1,
+                    'final_error': .01 if win else .1,
+                    'terminal_dwell_ticks': 250 if win else 0}
+        rows = {(42, arm): trial(arm, arm == h.ARMS[1]) for arm in h.ARMS}
+        self.assertTrue(h.independent_science_gate(rows, 1).startswith('STOP'))
+        rows[(42, h.ARMS[2])] = trial(h.ARMS[2], True)
+        self.assertEqual(h.independent_science_gate(rows, 1),
+                         'TRAIN_ONLY_SCIENCE_HYPOTHESIS_REQUIRES_NEW_REVIEW')
+        self.assertTrue(h.independent_science_gate(rows, 0).startswith('STOP'))
+        rows[(42, h.ARMS[3])] = trial(h.ARMS[3], False, unsafe=True)
+        self.assertTrue(h.independent_science_gate(rows, 1).startswith('STOP'))
+
     def tearDown(self):
         self.tmp.cleanup()
 

@@ -283,6 +283,20 @@ def stop_after(row, baseline):
     return None
 
 
+def independent_science_gate(rows, right4_executions):
+    """Require a novel burst-arm goal, not a gain by the V12 control."""
+    losses = [r["seed"] for r in rows.values() if
+              r["strategy"] != ARMS[0] and safe_goal(rows[r["seed"], ARMS[0]]) and
+              not safe_goal(r)]
+    unsafe = [r["seed"] for r in rows.values() if r["unsafe"]]
+    burst_novel = [r["seed"] for r in rows.values() if
+                   r["strategy"] in ARMS[2:] and safe_goal(r) and
+                   not safe_goal(rows[r["seed"], ARMS[0]])]
+    return ("STOP_UNSAFE_LOST_ZERO_NOVEL_OR_NO_ACTUAL_RIGHT4_DATA"
+            if losses or unsafe or not burst_novel or not right4_executions
+            else "TRAIN_ONLY_SCIENCE_HYPOTHESIS_REQUIRES_NEW_REVIEW")
+
+
 def run_pilot_originals(source_root, private, model, plan, policy, protocol,
                         factories, v8, v7, Env, signature, source_sha,
                         seconds=900, survey=None):
@@ -673,16 +687,7 @@ def main():
     # RIGHT4 must be actually emitted under the *original* mask. The probe
     # never trains a right4 transition model and never permits promotion.
     # Compute science independently from terminal physics, never producer scores.
-    losses = [r["seed"] for r in training["trials"] if
-              r["strategy"] != ARMS[0] and safe_goal(rows[r["seed"], ARMS[0]]) and
-              not safe_goal(r)]
-    unsafe = [r["seed"] for r in training["trials"] if r["unsafe"]]
-    novel = [r["seed"] for r in training["trials"] if
-             r["strategy"] != ARMS[0] and safe_goal(r) and
-             not safe_goal(rows[r["seed"], ARMS[0]])]
-    science = ("STOP_UNSAFE_LOST_ZERO_NOVEL_OR_NO_ACTUAL_RIGHT4_DATA"
-               if losses or unsafe or not novel or not replay["untrained_right4_actual_legal_executions"]
-               else "TRAIN_ONLY_SCIENCE_HYPOTHESIS_REQUIRES_NEW_REVIEW")
+    science = independent_science_gate(rows, replay["untrained_right4_actual_legal_executions"])
     qualified = {"schema": SCHEMA + ".independent-qualification",
                  "executed_head": expected, "harness_head": harness_sha,
                  "experiment_complete": True, "actual_trials": EXPECTED,
