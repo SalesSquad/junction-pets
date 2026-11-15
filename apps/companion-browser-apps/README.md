@@ -27,7 +27,9 @@ original localhost servers and their response headers are not included.
 Stoa's DXF parser and conservative evidence-bound question engine run inside
 the browser and keep imported drawings in tab memory. Room-label counts,
 validated room areas and unit outlines are supported; unsupported object counts
-are refused. Chronicle Witness runs its original comparison engine
+are refused. IFC import, source revision comparisons and review exports require
+the separately run local Stoa server and are not available in the browser bundle.
+Chronicle Witness runs its original comparison engine
 on the bundled synthetic fixture only; it has no live Wikipedia or MariaDB
 connection. Both embedded pages block outgoing connections.
 SAMA includes its existing public-data snapshot and synthetic, precomputed
