@@ -36,3 +36,14 @@ details.scenario-model{margin-top:45px;border-top:1px solid var(--line);padding-
 .planner-summary{border-left:3px dashed var(--amber);padding:6px 0 6px 16px;margin:14px 0 20px;max-width:1000px}
 .planner-summary p{margin:6px 0;font-size:.9rem}
 #insight .table-wrap,#insight li,#insight td,#insight th,.planner-summary p{overflow-wrap:anywhere}
+
+/* Demo polish (15 Nov): readable tables, ranking label, demo layout */
+svg text.caption-text{fill:var(--muted);font-size:10px}
+.track-section td,.track-section th,.safetynet td,.safetynet th,.flare-gate td,.flare-gate th,#insight td,#insight th{overflow-wrap:break-word;word-break:normal}
+.track-section td code,.safetynet td code,.flare-gate td code,#insight td code{overflow-wrap:anywhere}
+thead th{hyphens:manual}
+@media(max-width:600px){.demo-events thead{display:none}.demo-events,.demo-events tbody,.demo-events tr,.demo-events th,.demo-events td{display:block;width:100%}.demo-events tr{border-top:1px solid var(--line);padding:8px 0}.table-wrap .demo-events th,.table-wrap .demo-events td{border:0;padding:2px 0;min-width:0}.demo-events [data-label]::before{content:attr(data-label);display:inline-block;min-width:9.5em;color:var(--muted);font-size:.75rem;font-weight:400}.demo-events th{font-weight:600}}
+@media(max-width:600px){.promise br{display:none}}
+@media(max-width:640px){nav{-webkit-mask-image:linear-gradient(to right,#000 85%,transparent);mask-image:linear-gradient(to right,#000 85%,transparent);padding-right:40px}}
+@media(max-width:600px){.table-wrap .demo-events th,.table-wrap .demo-events td{display:grid;grid-template-columns:7.5rem minmax(0,1fr);column-gap:10px;align-items:baseline}.demo-events [data-label]::before{min-width:0}}
+.safetynet-rows td:nth-child(3){white-space:nowrap}

@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+        }
+        .w-left {
+          position: absolute;
+          left: 96px;
+          top: 150px;
+          width: 700px;
+        }
+        .w-head {
+          font-family: var(--serif);
+          font-size: 92px;
+          line-height: 1.02;
+          letter-spacing: -0.015em;
+          margin-top: 22px;
+          color: var(--ink);
+        }
+        .w-where {
+          margin-top: 48px;
+          border-top: 3px solid var(--ink);
+          padding-top: 22px;
+        }
+        .w-k {
+          font-family: var(--mono);
+          font-size: 22px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--muted);
+        }
+        .w-where p {
+          font-family: var(--serif);
+          font-size: 46px;
+          line-height: 1.15;
+          margin-top: 10px;
+        }
+        .w-where .chip {
+          margin-top: 16px;
+        }
+        .w-right {
+          position: absolute;
+          left: 880px;
+          top: 150px;
+          width: 944px;
+        }
+        .blk {
+          background: #fff;
+          border: 2px solid var(--line);
+          padding: 26px 32px 24px;
+        }
+        .blk + .blk {
+          margin-top: 26px;
+        }
+        .blk h3 {
+          font-family: var(--sans);
+          font-size: 30px;
+          font-weight: 700;
+          color: var(--ink);
+          line-height: 1.2;
+        }
+        .blk .sub {
+          font-family: var(--sans);
+          font-size: 22px;
+          color: var(--muted);
+          margin-top: 4px;
+        }
+        .row {
+          display: grid;
+          grid-template-columns: 290px 1fr;
+          align-items: center;
+          gap: 18px;
+          margin-top: 16px;
+        }
+        .row .rl {
+          font-family: var(--sans);
+          font-size: 24px;
+          color: var(--ink);
+          line-height: 1.15;
+        }
+        .track {
+          position: relative;
+          height: 44px;
+        }
+        .fill {
+          position: absolute;
+          left: 0;
+          top: 0;
+          height: 44px;
+          transform-origin: left center;
+        }
+        .fill.lo {
+          background: var(--amber);
+        }
+        .fill.hi {
+          background: var(--teal);
+        }
+        .val {
+          position: absolute;
+          top: 2px;
+          font-family: var(--serif);
+          font-size: 36px;
+          line-height: 40px;
+          color: var(--ink);
+          font-weight: 700;
+          white-space: nowrap;
+        }
+        .blk .note {
+          margin-top: 14px;
+          font-family: var(--mono);
+          font-size: 19px;
+          color: var(--muted);
+        }
+      </style>
+
+      <div id="root" data-composition-id="s2-who" data-width="1920" data-height="1080">
+        <div class="w-left" id="s2-left">
+          <div class="eyebrow" id="s2-eye">Who, how and where</div>
+          <div class="w-head" id="s2-head">Where you live is not the main gap.</div>
+          <div class="w-where" id="s2-where">
+            <div class="w-k">Where</div>
+            <p>Survival does not differ significantly between regions.</p>
+            <span class="chip">Published · OECD/EU 2025</span>
+          </div>
+        </div>
+
+        <div class="w-right" id="s2-right">
+          <div class="blk" id="s2-edu">
+            <h3>Who you are: five-year survival by education</h3>
+            <div class="sub">All cancers, Finland. Lower against higher education.</div>
+            <div class="row">
+              <div class="rl">Men, lower education</div>
+              <div class="track"><div class="fill lo" id="s2-f1" style="width: 384px"></div><div class="val" style="left: 400px">64%</div></div>
+            </div>
+            <div class="row">
+              <div class="rl">Men, higher education</div>
+              <div class="track"><div class="fill hi" id="s2-f2" style="width: 462px"></div><div class="val" style="left: 478px">77%</div></div>
+            </div>
+            <div class="row">
+              <div class="rl">Women, lower education</div>
+              <div class="track"><div class="fill lo" id="s2-f3" style="width: 390px"></div><div class="val" style="left: 406px">65%</div></div>
+            </div>
+            <div class="row">
+              <div class="rl">Women, higher education</div>
+              <div class="track"><div class="fill hi" id="s2-f4" style="width: 468px"></div><div class="val" style="left: 484px">78%</div></div>
+            </div>
+          </div>
+
+          <div class="blk" id="s2-route">
+            <h3>How you enter care: first symptom to treatment</h3>
+            <div class="sub">Median days, one Finnish lymphoma cohort.</div>
+            <div class="row" id="s2-r1">
+              <div class="rl">Public health centre appointment</div>
+              <div class="track"><div class="fill lo" id="s2-f5" style="width: 400px"></div><div class="val" style="left: 416px">127 days</div></div>
+            </div>
+            <div class="row" id="s2-r2">
+              <div class="rl">Occupational or private care</div>
+              <div class="track"><div class="fill hi" id="s2-f6" style="width: 239px"></div><div class="val" style="left: 255px">76 days</div></div>
+            </div>
+            <div class="note" id="s2-note">48 against 39 patients · p = 0.027 · Kuitunen J et al., Cancer Medicine 2026</div>
+          </div>
+        </div>
+
+        <div class="src" id="s2-src">
+          Sources: submission/evidence-v2.json → oecd-2025-fi-survival-education (64/65% vs 77/78%; no
+          significant regional difference) and kuitunen-2026-route-medians-groups (127 vs 76 days, n 48 vs 39, p 0.027).
+        </div>
+      </div>
+
+      <script>
+        (function () {
+          window.__timelines = window.__timelines || {};
+          const tl = gsap.timeline({ paused: true });
+          tl.fromTo("#s2-eye", { autoAlpha: 0, x: -30 }, { autoAlpha: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.15);
+          tl.fromTo("#s2-head", { autoAlpha: 0, y: 50 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: "expo.out" }, 0.3);
+          tl.fromTo("#s2-where", { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" }, 3.6);
+          tl.fromTo("#s2-src", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, 3.8);
+
+          // Education bars (6.6)
+          tl.fromTo("#s2-edu", { autoAlpha: 0, x: 60 }, { autoAlpha: 1, x: 0, duration: 0.6, ease: "power3.out" }, 6.5);
+          tl.fromTo("#s2-edu .val", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, stagger: 0.1 }, 7.5);
+          tl.fromTo("#s2-f1, #s2-f2, #s2-f3, #s2-f4", { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: "power2.out", stagger: 0.1 }, 6.8);
+
+          // Entry-route bars: 127 days (when the voice reaches it), then 76
+          tl.fromTo("#s2-route", { autoAlpha: 0, x: 60 }, { autoAlpha: 1, x: 0, duration: 0.6, ease: "power3.out" }, 11.2);
+          tl.fromTo("#s2-r1", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, 11.4);
+          tl.fromTo("#s2-f5", { scaleX: 0 }, { scaleX: 1, duration: 1.4, ease: "power2.out" }, 14.6);
+          tl.fromTo("#s2-r1 .val", { autoAlpha: 0, x: -20 }, { autoAlpha: 1, x: 0, duration: 0.4, ease: "back.out(1.6)" }, 15.6);
+          tl.fromTo("#s2-r2", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, 19.6);
+          tl.fromTo("#s2-f6", { scaleX: 0 }, { scaleX: 1, duration: 1.0, ease: "power2.out" }, 19.8);
+          tl.fromTo("#s2-r2 .val", { autoAlpha: 0, x: -20 }, { autoAlpha: 1, x: 0, duration: 0.4, ease: "back.out(1.6)" }, 20.6);
+          tl.fromTo("#s2-note", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, 16.2);
+
+          tl.to("#s2-left, #s2-right, #s2-src", { autoAlpha: 0, duration: 0.35, ease: "power1.in" }, 23.1);
+          window.__timelines["s2-who"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,5 +1,42 @@
 # Progress
 
+## Demo fixes after the first wave (15 November 2026, 01:20-01:55 UTC)
+
+Owner `deliv-polish` (log `runs/deliv-polish.jsonl`). No git, no model run, no hosted call. Page fixes
+from the demo QA findings, all read from the same JSON files as before:
+
+- Start page: the survival tile reads "17.9% vs 31.1%" with "13.2 percentage points below
+  Sweden–Norway" under it; provenance line "Public data snapshot, 14 Nov 2026 · 57 source requests".
+- Ranking chart: round ticks (0.90 / 1.00 / 1.10), dashed line labelled "national = 1.00", ratios
+  to 3 decimals. County pathway and Goal 3: one MEASURED chip per block, plain cancer-site names,
+  "About 59 more cancer deaths a year than national rates predict for its age structure (estimate
+  58.7; interval 37.9 to 79.9)".
+- Tables no longer break inside words (`overflow-wrap: break-word` for cells; long codes keep
+  `anywhere`); safety-net headers "Age", "Language"; "(fewer than 5 at the 90-day sensitivity
+  threshold)"; build command and reason codes removed from the panel.
+- Comparability gate: the two arms are "The model's own dates" and "Gemma reads, code counts"
+  (`flare/flare.test.mjs` label assertions updated to match); plain event names; the histogram
+  detail moved into the folded table.
+- Planner: the plan comes right under the county list; the amber warnings became one small caption
+  ("Drafted on an earlier data build; 1 sentence withheld by the check ..."); the method, prompt v1/v2
+  and the tool re-check are in a folded block below the plan. The drafts were not re-run (no model
+  calls in this step).
+- Pilot card: "We chose Satakunta because ..." and "not under the state assessment procedure"
+  (Finnish Government, 16 June 2026). First-action card: "Minimum for every county ... Optional for
+  a pilot county ...".
+- Gemma demo: opens on Note 4 (pre-filled, both readers agree); "MDT decision"; the raw model output
+  is folded below the verdict; on phones each event is a label/value card; the not-run reason reads
+  "Nemotron, the second reader, never read this rewritten note, so a person edits it".
+- Scribe results (section 10): three plain numbers first (stress 280 / 223 / 88 / 85 of 308; new
+  phrasings 120 / 95 / 0 / 11 of 143; two readers 684 of 700 pre-filled with 4 wrong), then one line
+  labelled POST HOC for the vague-phrase gate (`data/scribe/vague/results-v1.json` via
+  `src/tracks.mjs` `buildVague`), then the method and every table folded. p below 0.001 reads
+  "< 0.001".
+- `web/serve.mjs` reloads the demo files when they change on disk (no stale verdicts after a rebuild).
+- Re-shot `submission/shots/` (39 files, 390 px at device scale 1: 15 MB instead of 30 MB), re-cropped
+  `submission/deck/img/demo04-*.png` and the video frames (`submission/video/tools/crops.sh` offsets),
+  re-printed `submission/deck/SAMA-deck.pdf` and re-rendered `submission/video/SAMA-video.mp4`.
+
 ## NVIDIA lanes integrated (15 November 2026, from 00:00 UTC)
 
 Written by the lane integrator (log `runs/integrate-lanes.jsonl`). Nothing was committed or pushed. No

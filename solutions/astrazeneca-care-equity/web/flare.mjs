@@ -11,7 +11,11 @@ const n = (v, d = 0, unit = '') => `<span class="n">${esc(fmt(v, d))}${unit}</sp
 const pc = (v, d = 1) => (v == null ? '<span class="n">n/a</span>' : n(100 * v, d, '%'));
 const signed = (v, d = 1) => (v == null ? '<span class="n">n/a</span>' : `<span class="n">${v > 0 ? '+' : ''}${esc(fmt(v, d))}</span>`);
 const link = (label, url) => (/^https?:\/\//.test(url || '') ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>` : esc(label));
-const ARMS = [['raw', 'If dates came from the raw scribe'], ['resolver', 'With the code resolver']];
+// Plain names for non-technical readers: "raw" = the model writes the dates itself; "resolver" = Gemma copies the
+// date phrase and code computes the date.
+const ARMS = [['raw', 'The model’s own dates'], ['resolver', 'Gemma reads, code counts']];
+const EVENTS = { FIRST_CONTACT: 'first contact', REFERRAL_SENT: 'the referral being sent', DIAGNOSIS: 'diagnosis', TREATMENT_START: 'the start of treatment' };
+const eventName = (e) => EVENTS[e] || String(e ?? '').toLowerCase().replace(/_/g, ' ');
 
 function cell(row, arm) {
   const s = row.scribe?.[arm];
@@ -35,10 +39,10 @@ export function flareGateHtml(gate) {
   const headline = `<div class="headline-box" data-kind="SYNTHETIC">${chip('SYNTHETIC')}<p class="large-claim">A county is compared only when it can see itself.</p>`
     + `<ul>${counts}</ul><p>In the simulator, ${pc(national.share_within)} of ${n(national.n)} SYNTHETIC pathways started treatment within ${n(clock.threshold_days)} days of the referral being sent: the simulator's own rate, not an estimate for Finland. The ${n(clock.threshold_days)}-day threshold is a ${esc(clock.threshold_label)}.</p></div>`;
   const ruleBox = `<p data-kind="ASSUMPTION">${chip('ASSUMPTION')} <strong>Rule (${esc(rule.label)}):</strong> a cell is "not comparable" when the scribe's median bias is above ${n(rule.bias_limit_days)} days either way, or its missed-event share is above ${pc(rule.missed_limit, 0)}. Median bias: ${esc(rule.median_bias_definition)}. Missed share: ${esc(rule.missed_definition)}. The raw value stays visible.</p>`;
-  const clockBox = `<p data-kind="ASSUMPTION">${chip('ASSUMPTION')} <strong>Clock:</strong> from ${esc(clock.start_event)} (${esc(clock.starts)}) to ${esc(clock.end_event)}. The histogram edge sits at ${n(clock.histogram_edge_days, 1)} days, so whole-day pathways of at most ${n(clock.threshold_days)} days fall below it. ${esc(clock.threshold_text)} Sources: ${(clock.sources || []).map((s) => link(s.name + (s.page ? `, PDF page ${s.page}` : ''), s.url)).join('; ')}.</p>`;
+  const clockBox = `<p data-kind="ASSUMPTION">${chip('ASSUMPTION')} <strong>Clock:</strong> from ${esc(eventName(clock.start_event))} to ${esc(eventName(clock.end_event))}. ${esc(clock.threshold_text)} Sources: ${(clock.sources || []).map((s) => link(s.name + (s.page ? `, PDF page ${s.page}` : ''), s.url)).join('; ')}.</p>`;
   const rows = gate.counties.map((r) => `<tr><th>${esc(r.county)}</th><td>${r.rtt?.suppressed ? '<span class="n">suppressed</span>' : `${pc(r.rtt?.share_within)} <span class="range">(n = ${n(r.rtt?.n)})</span>`}</td><td>${pc(r.completeness?.complete_share)} <span class="range">(open ${pc(r.completeness?.open_share)})</span></td>${ARMS.map(([arm]) => `<td>${cell(r, arm)}</td>`).join('')}</tr>`).join('');
   const cap = (s) => String(s ?? '').replace(/^./, (x) => x.toUpperCase());
-  const table = `<details class="gate-table"><summary>Show the table: every SYNTHETIC row, both scribe arms</summary><div class="table-wrap" data-kind="SYNTHETIC"><p class="caption">${chip('SYNTHETIC')} County codes are the real area codes, but every value in this table is SYNTHETIC and says nothing about that area. Notes were dealt to areas by a content-blind rule: ${esc(gate.scribe_input?.assignment)}. Scenario: ${esc(cap(gate.scribe_input?.scenario))}.</p>`
+  const table = `<details class="gate-table"><summary>Show the table: every SYNTHETIC county, both ways of setting dates</summary><div class="table-wrap" data-kind="SYNTHETIC"><p class="caption">${chip('SYNTHETIC')} County codes are the real area codes, but every value in this table is SYNTHETIC and says nothing about that area. Notes were dealt to areas by a content-blind rule: ${esc(gate.scribe_input?.assignment)}. Scenario: ${esc(cap(gate.scribe_input?.scenario))}. The histogram edge sits at ${n(clock.histogram_edge_days, 1)} days, so whole-day pathways of at most ${n(clock.threshold_days)} days fall below it.</p>`
     + `<table><thead><tr><th>County code</th><th>Within ${n(clock.threshold_days)} days</th><th>Complete clocks</th>${ARMS.map(([, label]) => `<th>${esc(label)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></details>`;
   const realKind = realData?.kind || 'PUBLISHED';
   const real = realData

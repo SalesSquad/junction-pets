@@ -1,0 +1,408 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+        }
+        /* A: the worklist */
+        .l-left {
+          position: absolute;
+          left: 96px;
+          top: 140px;
+          width: 560px;
+        }
+        .l-head {
+          font-family: var(--serif);
+          font-size: 84px;
+          line-height: 1.02;
+          margin-top: 20px;
+        }
+        .l-law {
+          margin-top: 28px;
+          border-top: 3px solid var(--ink);
+          padding-top: 18px;
+          font-family: var(--sans);
+          font-size: 27px;
+          line-height: 1.3;
+        }
+        .l-law .chip {
+          margin-bottom: 12px;
+        }
+        .l-trial {
+          margin-top: 26px;
+          background: var(--wash);
+          border: 2px solid var(--line);
+          padding: 18px 22px;
+          font-family: var(--sans);
+          font-size: 24px;
+          line-height: 1.32;
+          color: var(--ink);
+        }
+        .l-trial b {
+          font-family: var(--serif);
+          font-size: 34px;
+        }
+        .l-panel {
+          position: absolute;
+          left: 720px;
+          top: 140px;
+          width: 1104px;
+          background: #fff;
+          border: 2px solid var(--line);
+          padding: 26px 32px 18px;
+        }
+        .l-ph {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          font-family: var(--sans);
+          font-size: 30px;
+          font-weight: 700;
+        }
+        .l-ph small {
+          font-family: var(--mono);
+          font-size: 19px;
+          font-weight: 400;
+          color: var(--muted);
+          margin-left: auto;
+        }
+        .l-counts {
+          display: flex;
+          gap: 60px;
+          margin: 18px 0 8px;
+          border-bottom: 3px solid var(--ink);
+          padding-bottom: 16px;
+        }
+        .l-count .num {
+          font-family: var(--serif);
+          font-size: 96px;
+          line-height: 1;
+        }
+        .l-count .lab {
+          font-family: var(--sans);
+          font-size: 24px;
+          color: var(--muted);
+        }
+        .l-row {
+          display: grid;
+          grid-template-columns: 1fr 210px;
+          gap: 20px;
+          border-bottom: 2px solid var(--line);
+          padding: 14px 0;
+        }
+        .l-row .code {
+          font-family: var(--mono);
+          font-size: 18px;
+          color: var(--amber);
+          font-weight: 700;
+        }
+        .l-row .what {
+          font-family: var(--sans);
+          font-size: 26px;
+          font-weight: 700;
+          margin-top: 4px;
+        }
+        .l-row .why {
+          font-family: var(--sans);
+          font-size: 22px;
+          color: var(--ink);
+          margin-top: 4px;
+          line-height: 1.3;
+        }
+        .l-row .why i {
+          color: var(--muted);
+        }
+        .l-row .st {
+          align-self: center;
+          justify-self: end;
+          font-family: var(--mono);
+          font-size: 19px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          padding: 8px 10px;
+          border: 2px solid var(--teal);
+          color: var(--teal);
+          text-align: center;
+        }
+        .l-row .st.ed {
+          border-color: var(--amber);
+          color: var(--amber);
+        }
+        .l-row .days {
+          font-family: var(--serif);
+          font-size: 30px;
+          color: var(--amber);
+          font-weight: 700;
+        }
+        /* B: the note */
+        .n-left {
+          position: absolute;
+          left: 96px;
+          top: 140px;
+          width: 940px;
+        }
+        .n-card {
+          margin-top: 22px;
+          background: #fff;
+          border: 2px solid var(--line);
+          padding: 24px 30px;
+        }
+        .n-card .hd {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          font-family: var(--mono);
+          font-size: 19px;
+          color: var(--muted);
+        }
+        .n-text {
+          margin-top: 14px;
+          font-family: var(--serif);
+          font-size: 36px;
+          line-height: 1.38;
+          color: var(--ink);
+        }
+        .mark {
+          position: relative;
+          display: inline-block;
+          padding: 0 4px;
+        }
+        .mark .hl {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 4px;
+          bottom: 2px;
+          background: rgba(138, 80, 6, 0.22);
+          border-bottom: 4px solid var(--amber);
+          transform-origin: left center;
+        }
+        .mark span {
+          position: relative;
+        }
+        .n-right {
+          position: absolute;
+          left: 1100px;
+          top: 196px;
+          width: 724px;
+        }
+        .ev {
+          background: #fff;
+          border: 3px solid var(--teal);
+          padding: 24px 30px;
+        }
+        .ev .k {
+          font-family: var(--mono);
+          font-size: 20px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--teal);
+          font-weight: 700;
+        }
+        .ev .date {
+          font-family: var(--serif);
+          font-size: 92px;
+          line-height: 1.05;
+          color: var(--teal);
+          margin-top: 6px;
+        }
+        .ev .how {
+          font-family: var(--sans);
+          font-size: 25px;
+          line-height: 1.3;
+          color: var(--ink);
+        }
+        .ev .own {
+          margin-top: 16px;
+          font-family: var(--sans);
+          font-size: 25px;
+          color: var(--muted);
+        }
+        .ev .own s {
+          position: relative;
+          text-decoration: none;
+          font-family: var(--serif);
+          font-size: 36px;
+          color: var(--amber);
+          margin-left: 8px;
+        }
+        .strike {
+          position: absolute;
+          left: -4px;
+          right: -4px;
+          top: 50%;
+          height: 4px;
+          background: var(--amber);
+          transform-origin: left center;
+        }
+        .verdict {
+          margin-top: 22px;
+          border-left: 6px solid var(--teal);
+          background: var(--wash);
+          padding: 18px 24px;
+          font-family: var(--serif);
+          font-size: 36px;
+          line-height: 1.2;
+        }
+        .verdict small {
+          display: block;
+          font-family: var(--sans);
+          font-size: 23px;
+          color: var(--ink);
+          margin-top: 8px;
+          line-height: 1.3;
+        }
+        .n-stat {
+          margin-top: 20px;
+          font-family: var(--sans);
+          font-size: 23px;
+          line-height: 1.35;
+          color: var(--ink);
+        }
+        .n-stat b {
+          font-family: var(--serif);
+          font-size: 32px;
+        }
+      </style>
+
+      <div id="root" data-composition-id="s4-list" data-width="1920" data-height="1080">
+        <!-- A: worklist -->
+        <div class="part" id="s4-a">
+          <div class="l-left">
+            <div class="eyebrow" id="s4-eye">Close loops, don’t count them</div>
+            <div class="l-head" id="s4-head">Measuring is not enough.</div>
+            <div class="l-law" id="s4-law">
+              <span class="chip" style="display: table">Law change · in force 1 June 2026</span>
+              A county may identify patients whose care does not follow recommendations. Contact must
+              respect data protection and self-determination.
+            </div>
+            <div class="l-trial" id="s4-trial">
+              Why a list, not faster reading: in a trial of <b>93,326</b> GP chest X-rays, AI
+              prioritisation did not shorten the wait for CT (median <b>53</b> days in both arms).
+            </div>
+          </div>
+
+          <div class="l-panel" id="s4-panel">
+            <div class="l-ph"><span class="chip syn">Synthetic</span> Nurse’s worklist · Satakunta (pilot county) <small>replay date 1 Dec 2025</small></div>
+            <div class="l-counts">
+              <div class="l-count"><div class="num" id="s4-open">120</div><div class="lab">open loops</div></div>
+              <div class="l-count"><div class="num" id="s4-over" style="color: var(--amber)">16</div><div class="lab">overdue</div></div>
+              <div class="l-count" style="align-self: flex-end"><div class="lab">at most 3 unnamed example rows shown</div></div>
+            </div>
+            <div class="l-row" id="s4-row1">
+              <div>
+                <div class="code">SYNTHETIC-SN-20261115-HVA06-0128</div>
+                <div class="what">Imaging follow-up · <span class="days">154</span> days overdue</div>
+                <div class="why">Code reads the follow-up recommendation: <i>“Seuranta-TT kuuden kuukauden kuluttua.”</i> Not done by the due date.</div>
+              </div>
+              <div class="st">Nurse confirms</div>
+            </div>
+            <div class="l-row" id="s4-row2">
+              <div>
+                <div class="code">SYNTHETIC-20261114-2025-HVA06-310</div>
+                <div class="what">Suspected-cancer referral · <span class="days">118</span> days overdue</div>
+                <div class="why">No diagnosis recorded by day 42 after the referral was sent (42 days is a placeholder).</div>
+              </div>
+              <div class="st">Nurse confirms</div>
+            </div>
+            <div class="l-row" id="s4-row3" style="border-bottom: 0">
+              <div>
+                <div class="code">SYNTHETIC-SN-20261115-HVA06-0152</div>
+                <div class="what">Recommendation without a set date</div>
+                <div class="why"><i>“Mikäli kliinisesti aiheellista, kontrolli-TT 3 kk kuluttua.”</i> Conditional, so a person sets the date.</div>
+              </div>
+              <div class="st ed">Needs editing</div>
+            </div>
+          </div>
+          <div class="src" id="s4-a-src">
+            Sources: data/safetynet/safetynet-v1.json (SYNTHETIC; HVA06 counts and examples); submission/evidence-v2.json →
+            stm-2026-proactive-care-law, lungimpact-2026 (93,326 X-rays; median 53 days in both arms).
+          </div>
+        </div>
+
+        <!-- B: Gemma reads the note -->
+        <div class="part" id="s4-b">
+          <div class="n-left">
+            <div class="eyebrow" id="s4-b-eye">Gemma reads, code counts the days</div>
+            <div class="n-card" id="s4-card">
+              <div class="hd"><span class="chip syn">Synthetic note</span> referral letter · written 2.3.2024 · Finnish</div>
+              <div class="n-text">
+                Syöpäpolun tuloreitti on yksityinen terveydenhuolto. Pot. sai lääkärin arvion toukokuussa
+                2023. Lähetteen vastaanottaminen tapahtui 29.6.2023. Moniammatillinen hoitopäätös tehtiin
+                <span class="mark"><i class="hl" id="s4-hl"></i><span>25 viikkoa sitten.</span></span>
+                Syöpähoidon aloitus oli 18.11.2023. Potilaan yleistila on vakaa.
+              </div>
+            </div>
+            <div class="n-stat" id="s4-stat">
+              <span class="chip draft">Measured on synthetic notes</span>&nbsp; When two readers (Gemma 3 1B and
+              Nemotron) agreed, <b>684</b> of <b>700</b> test notes were pre-filled; <b>4</b> of those were wrong,
+              so a person checks every one.
+            </div>
+          </div>
+          <div class="n-right">
+            <div class="ev" id="s4-ev">
+              <div class="k">Proposed event · MDT decision</div>
+              <div class="date" id="s4-date">9.9.2023</div>
+              <div class="how">Counted by code: 25 weeks before the note date, 2.3.2024.</div>
+              <div class="own" id="s4-own">Gemma’s own date: <s>8.10.2023<i class="strike" id="s4-strike"></i></s></div>
+            </div>
+            <div class="verdict" id="s4-verdict">
+              Pre-filled for one-click confirmation.
+              <small>Gemma and the stored Nemotron reading agree. A person confirms every event. Gemma 3 270M ran offline on a CPU.</small>
+            </div>
+          </div>
+          <div class="src" id="s4-b-src">
+            Sources: data/scribe/demo/demo-outputs.json (demo-04, SYNTHETIC; stored CPU output) ·
+            data/scribe/v4/eval/results-v1.json → cascade, Gemma 1B + Nemotron agreement (test: 684 of 700, 4 wrong).
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (function () {
+          window.__timelines = window.__timelines || {};
+          const tl = gsap.timeline({ paused: true });
+
+          // ---- A (0 - 15.2)
+          tl.fromTo("#s4-eye", { autoAlpha: 0, x: -30 }, { autoAlpha: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.15);
+          tl.fromTo("#s4-head", { autoAlpha: 0, y: 46 }, { autoAlpha: 1, y: 0, duration: 0.7, ease: "expo.out" }, 0.3);
+          tl.fromTo("#s4-law", { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, 1.9);
+          tl.fromTo("#s4-trial", { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, 6.9);
+          tl.fromTo("#s4-a-src", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, 2.2);
+
+          tl.fromTo("#s4-panel", { autoAlpha: 0, x: 80 }, { autoAlpha: 1, x: 0, duration: 0.7, ease: "power3.out" }, 9.8);
+          const c1 = { v: 0 };
+          tl.fromTo(c1, { v: 0 }, { v: 120, duration: 1.2, ease: "power2.out", onUpdate: () => { document.getElementById("s4-open").textContent = Math.round(c1.v); } }, 10.1);
+          const c2 = { w: 0 };
+          tl.fromTo(c2, { w: 0 }, { w: 16, duration: 1.2, ease: "power2.out", onUpdate: () => { document.getElementById("s4-over").textContent = Math.round(c2.w); } }, 10.3);
+          tl.fromTo("#s4-row1, #s4-row2, #s4-row3", { autoAlpha: 0, x: 40 }, { autoAlpha: 1, x: 0, duration: 0.45, ease: "power3.out", stagger: 0.16 }, 11.3);
+          tl.to("#s4-a", { autoAlpha: 0, y: -30, duration: 0.4, ease: "power2.in" }, 14.9);
+
+          // ---- B (15.3 - 22.5)
+          tl.fromTo("#s4-b-eye", { autoAlpha: 0, x: -30 }, { autoAlpha: 1, x: 0, duration: 0.4, ease: "power3.out" }, 15.3);
+          tl.fromTo("#s4-card", { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" }, 15.4);
+          tl.fromTo("#s4-hl", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power2.inOut" }, 16.3);
+          tl.fromTo("#s4-ev", { autoAlpha: 0, x: 60 }, { autoAlpha: 1, x: 0, duration: 0.6, ease: "expo.out" }, 16.9);
+          tl.fromTo("#s4-date", { scale: 0.8 }, { scale: 1, duration: 0.6, ease: "back.out(1.6)", transformOrigin: "left center" }, 16.9);
+          tl.fromTo("#s4-own", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.35 }, 17.9);
+          tl.fromTo("#s4-strike", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power2.out" }, 18.4);
+          tl.fromTo("#s4-verdict", { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" }, 19.2);
+          tl.fromTo("#s4-stat", { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, 19.8);
+          tl.fromTo("#s4-b-src", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, 15.6);
+          tl.to("#s4-b", { autoAlpha: 0, duration: 0.3, ease: "power1.in" }, 22.15);
+
+          window.__timelines["s4-list"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

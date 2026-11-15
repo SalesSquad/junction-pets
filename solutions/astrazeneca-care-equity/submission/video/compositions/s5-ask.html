@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+        }
+        /* A: planner */
+        .p-frame {
+          left: 96px;
+          top: 140px;
+          width: 900px;
+          height: 690px;
+        }
+        .p-right {
+          position: absolute;
+          left: 1070px;
+          top: 150px;
+          width: 754px;
+        }
+        .p-right h2 {
+          font-family: var(--serif);
+          font-weight: 400;
+          font-size: 60px;
+          line-height: 1.08;
+          margin-top: 18px;
+        }
+        .p-stat {
+          margin-top: 26px;
+          border-top: 3px solid var(--ink);
+          padding-top: 14px;
+          display: grid;
+          grid-template-columns: 260px 1fr;
+          gap: 20px;
+          align-items: center;
+        }
+        .p-stat .k {
+          font-family: var(--serif);
+          font-size: 76px;
+          line-height: 1;
+          color: var(--teal);
+          white-space: nowrap;
+        }
+        .p-stat .k small {
+          font-size: 0.55em;
+          color: var(--muted);
+        }
+        .p-stat .t {
+          font-family: var(--sans);
+          font-size: 26px;
+          line-height: 1.28;
+        }
+        /* B: pilot card */
+        .k-card {
+          position: absolute;
+          left: 96px;
+          top: 140px;
+          width: 1728px;
+          height: 690px;
+          background: #fff;
+          border: 3px solid var(--teal);
+          padding: 44px 60px;
+        }
+        .k-card h2 {
+          font-family: var(--serif);
+          font-weight: 400;
+          font-size: 104px;
+          line-height: 1;
+          margin-top: 18px;
+          color: var(--ink);
+        }
+        .k-card h2 span {
+          color: var(--teal);
+        }
+        .k-list {
+          margin-top: 40px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 26px 60px;
+        }
+        .k-item {
+          border-top: 3px solid var(--line);
+          padding-top: 16px;
+        }
+        .k-item b {
+          display: block;
+          font-family: var(--mono);
+          font-size: 20px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--teal);
+        }
+        .k-item span {
+          display: block;
+          font-family: var(--serif);
+          font-size: 44px;
+          line-height: 1.12;
+          margin-top: 8px;
+        }
+        /* C: promise */
+        .pr {
+          position: absolute;
+          left: 96px;
+          top: 170px;
+          width: 1728px;
+        }
+        .pr div {
+          font-family: var(--serif);
+          font-size: 108px;
+          line-height: 1.12;
+          color: var(--ink);
+        }
+        .pr div.a {
+          color: var(--teal);
+        }
+      </style>
+
+      <div id="root" data-composition-id="s5-ask" data-width="1920" data-height="1080">
+        <!-- A: planner -->
+        <div class="part" id="s5-a">
+          <div class="frame p-frame" id="s5-frame">
+            <div class="bar"><i></i><i></i><i></i><span>SAMA · 07 A draft plan for each county</span></div>
+            <img src="assets/shots/planner.png" alt="Nemotron draft plan for Satakunta" id="s5-img" />
+          </div>
+          <div class="p-right">
+            <span class="chip draft">Draft for a planner · numbers checked</span>
+            <h2 id="s5-h">Nemotron drafts each county’s plan. Code checks every number.</h2>
+            <div class="p-stat" id="s5-p1"><div class="k">23<small> of 23</small></div><div class="t">county plans drafted by Nemotron 3.5 Super VL from SAMA’s own tools</div></div>
+            <div class="p-stat" id="s5-p2"><div class="k">255<small> of 299</small></div><div class="t">drafted sentences kept after the checks</div></div>
+            <div class="p-stat" id="s5-p3"><div class="k">0</div><div class="t">kept sentences with a number not found in a tool output</div></div>
+          </div>
+          <div class="src" id="s5-a-src">
+            Source: data/planner/plans-v1.json → summary (counties 23, countiesRun 23, sentences 299, keptSentences 255,
+            keptSentencesWithUnmatchedNumber 0). Public data only; a draft, not an assessment of any county.
+          </div>
+        </div>
+
+        <!-- B: pilot card -->
+        <div class="part" id="s5-b">
+          <div class="k-card" id="s5-card">
+            <div class="eyebrow">Our ask <span class="chip ph" style="margin-left: 14px">Default · the owner may change it</span></div>
+            <h2 id="s5-k-h">Satakunta: a <span>2027</span> worklist pilot.</h2>
+            <div class="k-list">
+              <div class="k-item" id="s5-k1"><b>First</b><span>Lung follow-up, then every overdue suspected-cancer referral</span></div>
+              <div class="k-item" id="s5-k2"><b>Budget</b><span>No new money: the cost is staff time</span></div>
+              <div class="k-item" id="s5-k3"><b>Ownership</b><span>The county owns the list and the care; a nurse confirms and calls</span></div>
+              <div class="k-item" id="s5-k4"><b>Data</b><span>No patient data leaves the county</span></div>
+            </div>
+          </div>
+          <div class="src" id="s5-b-src">
+            Sources: data/roadmap/mapping-v1.json → pilotCard (HVA06 Satakunta, 2027 worklist pilot);
+            submission/ZERO_EURO_2027.md. The pilot has not been run.
+          </div>
+        </div>
+
+        <!-- C: promise -->
+        <div class="part" id="s5-c">
+          <div class="pr">
+            <div class="a" id="s5-l1">The same pathway,</div>
+            <div id="s5-l2">wherever they live,</div>
+            <div id="s5-l3">whoever they are,</div>
+            <div id="s5-l4">however they enter care.</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (function () {
+          window.__timelines = window.__timelines || {};
+          const tl = gsap.timeline({ paused: true });
+
+          // ---- A (0 - 5.6)
+          tl.fromTo("#s5-frame", { autoAlpha: 0, x: -70 }, { autoAlpha: 1, x: 0, duration: 0.7, ease: "power3.out" }, 0.15);
+          tl.fromTo("#s5-img", { y: 0 }, { y: -150, duration: 5.4, ease: "sine.inOut" }, 0.4);
+          tl.fromTo("#s5-a .chip, #s5-h", { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }, 0.3);
+          tl.fromTo("#s5-p1, #s5-p2, #s5-p3", { autoAlpha: 0, x: 40 }, { autoAlpha: 1, x: 0, duration: 0.45, ease: "back.out(1.4)", stagger: 0.35 }, 1.4);
+          tl.fromTo("#s5-a-src", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, 0.8);
+          tl.to("#s5-a", { autoAlpha: 0, y: -30, duration: 0.4, ease: "power2.in" }, 5.3);
+
+          // ---- B (5.7 - 14.6)
+          tl.fromTo("#s5-card", { autoAlpha: 0, y: 50, scale: 0.97 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.7, ease: "expo.out" }, 5.7);
+          tl.fromTo("#s5-k-h", { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" }, 6.0);
+          tl.fromTo("#s5-k1, #s5-k2", { autoAlpha: 0, y: 26 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "power2.out", stagger: 0.25 }, 6.9);
+          tl.fromTo("#s5-k3, #s5-k4", { autoAlpha: 0, y: 26 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "power2.out", stagger: 0.3 }, 10.1);
+          tl.fromTo("#s5-b-src", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, 6.2);
+          tl.to("#s5-b", { autoAlpha: 0, y: -30, duration: 0.4, ease: "power2.in" }, 14.3);
+
+          // ---- C (14.7 - 20.5)
+          tl.fromTo("#s5-l1, #s5-l2, #s5-l3, #s5-l4", { autoAlpha: 0, y: 70 }, { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.9 }, 14.8);
+          tl.to("#s5-c", { autoAlpha: 0, duration: 0.35, ease: "power1.in" }, 20.1);
+
+          window.__timelines["s5-ask"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

@@ -10,8 +10,8 @@ const n = (v, d = 0, unit = '') => `<span class="n">${esc(f(v, d))}${unit}</span
 const raw = (v) => `<span class="n">${esc(v)}</span>`;
 const pc = (v, d = 1) => (v == null ? '<span class="n">n/a</span>' : n(100 * v, d, '%'));
 const pts = (v, d = 1) => (v == null ? '<span class="n">n/a</span>' : `<span class="n">${v > 0 ? '+' : ''}${esc(f(100 * v, d))}</span>`);
-// p below 1e-6 (stored rounded to 0 in older result files) reads "< 1e-6", never 0.0e+0.
-const pv = (p) => (p == null ? '<span class="n">n/a</span>' : p < 1e-6 ? '&lt; <span class="n">1e-6</span>' : `<span class="n">${esc(p >= 0.001 ? f(p, 3) : p.toExponential(1))}</span>`);
+// p below 0.001 (including values stored rounded to 0) reads "< 0.001", never 9.8e-4 or 0.0e+0.
+const pv = (p) => (p == null ? '<span class="n">n/a</span>' : p < 0.001 ? '&lt; <span class="n">0.001</span>' : `<span class="n">${esc(f(p, 3))}</span>`);
 const sn = (v, d = 0, unit = '') => `<tspan class="n">${esc(f(v, d))}${unit}</tspan>`;
 const lohi = (w) => w.wilson95 ?? w.ci95;
 const ci = (w, d = 1) => (w?.value == null && w?.share == null ? '<span class="n">n/a</span>' : `${pc(w.value ?? w.share, d)} <span class="range">(${pc(lohi(w)[0], d)}–${pc(lohi(w)[1], d)}${w.n != null && w.k == null ? `; n = ${n(w.n)}` : ''})</span>`);
@@ -167,7 +167,7 @@ export function scribeHtml(app) {
   if (!s) return `<p class="missing-label">The scribe is not in this build: ${esc(problemFor(app, 'scribe') || 'no scribe result file is present')}.</p>`;
   const K = 'SYNTHETIC', out = [
     `<p>The dates the event log needs already sit in referral letters and visit notes. The idea tested here: a small open model (Gemma) with a trained adapter reads a Finnish note and proposes the events and their dates; for every relative phrase (“… sitten”) code recomputes the date from the phrase and Gemma's own date is discarded; a second reader checks the answer; and a person confirms every event. Gemma reads, code counts. Every note is written by a language model about simulated people, and the scribe reads Finnish notes only.</p>`,
-    scope('p', K, `${esc(s.statement)} Nothing here shows that the idea works on real clinical text.`),
+    scope('p', K, `${esc(s.statement)} Nothing here has been tested on real clinical text.`),
   ];
   const missing = problemFor(app, 'scribe');
   if (missing) out.push(`<p class="missing-label">Parts left out of this build: ${esc(missing)}.</p>`);
@@ -221,34 +221,72 @@ function readsCountsHtml(s, K) {
     const demoCfg = cfg(ev, 'v2data', ev.cascade.chosen.signal);
     lines.push(`<strong>Two readers, one person.</strong> A note is pre-filled for one-click confirmation only when the code-resolved Gemma answer and ${nem} agree exactly; otherwise it needs editing. Chosen on validation notes only: <code>${esc(ch.gemma)}</code>${ch.gemma === 'C' ? ' (the larger expression reader <code>C-1b-expr-aug</code>, not in the demo)' : ''} with ${words(ch.signal)}. On the ${n(ch.test.prefilled.n)} test notes (read in earlier work, so post hoc) it pre-fills ${n(ch.test.prefilled.k)}, of which ${kn(ch.test.wrong)} are wrong, and ${n(ch.test.needsEditing.k)} need editing; the earlier rule pre-filled ${n(b.prefilled)} with ${n(b.wrong)} wrong.${ch.stress ? ` On the stress set it pre-fills ${n(ch.stress.prefilled.k)} of ${n(ch.stress.prefilled.n)}, ${n(ch.stress.wrong.k)} of them wrong${alone?.stress ? `; the model's own confidence alone would pre-fill ${n(alone.stress.prefilled.k)}, ${n(alone.stress.wrong.k)} of them wrong` : ''}.` : ''}${demoCfg ? ` The demo above runs the product adapter <code>C-270m-all-v2data</code>; with the same rule it pre-fills ${n(demoCfg.test.prefilled.k)} of the ${n(demoCfg.test.prefilled.n)} test notes, ${n(demoCfg.test.wrong.k)} of them wrong (post hoc).` : ''} ${esc(ev.personConfirms)}`);
   } else if (r) lines.push(`The preregistered stress evaluation is not in this build, so the resolver figures above are the only ones: post hoc on notes that had been read before.`);
-  const out = [`<h3>Gemma reads, code counts</h3>`, `<div class="headline-box" data-kind="${K}">${chip(K)}${lines.map((l) => `<p>${l}</p>`).join('')}</div>`];
+  // Plain numbers first (results-v1.json via app.scribe.evaluation); the method and every table sit in collapsed blocks.
+  const out = [`<h3>Gemma reads, code counts</h3>`, plainScribeHtml(s, K, nem), vagueGateHtml(s.vague, K)];
+  const full = [`<div class="headline-box" data-kind="${K}">${chip(K)}${lines.map((l) => `<p>${l}</p>`).join('')}</div>`];
   if (ev) {
     const sys = SYSTEM_ORDER.filter((k) => ev.sets.val.systems[k] || ev.sets.test.systems[k] || ev.sets.stress.systems[k]);
     const cell = (setName, k, get) => { const x = ev.sets[setName].systems[k]; return x ? kn(get(x)) : esc(ev.sets[setName].notScored[k] || 'not run'); };
-    out.push(table(K, `Whole note exactly right, Wilson 95% intervals. Validation: ${esc(ev.sets.val.role)}. Test: ${esc(ev.sets.test.role)}. Stress: ${esc(ev.sets.stress.role)}. Source: <code>${esc(ev.source.file)}</code>.`,
+    full.push(table(K, `Whole note exactly right, Wilson 95% intervals. Validation: ${esc(ev.sets.val.role)}. Test: ${esc(ev.sets.test.role)}. Stress: ${esc(ev.sets.stress.role)}. Source: <code>${esc(ev.source.file)}</code>.`,
       ['System', 'Validation', 'Test', 'Stress, all', 'Stress, held-out phrasings', 'Stress, standard phrasings', 'Stress, no event'],
       sys.map((k) => [`<code>${esc(k)}</code>`, cell('val', k, (x) => x.exact), cell('test', k, (x) => x.exact), cell('stress', k, (x) => x.exact),
         cell('stress', k, (x) => x.slices.heldout), cell('stress', k, (x) => x.slices.standard), cell('stress', k, (x) => x.slices.no_event)])));
-    out.push(`<ul class="caption">${sys.map((k) => scope('li', K, `<code>${esc(k)}</code>: ${esc(ev.systems[k])}`)).join('')}</ul>`);
+    full.push(`<ul class="caption">${sys.map((k) => scope('li', K, `<code>${esc(k)}</code>: ${esc(ev.systems[k])}`)).join('')}</ul>`);
     const vs = ["A'", 'B', 'C', 'nemotron'].filter((k) => ev.sets.stress.systems[k]);
-    out.push(table(K, `Facts with a vague phrase on the stress set (${n(ev.sets.stress.systems["A'"].vague.facts)}). The right answer is to send them to a person.`, ['System', 'Sent to a person', 'Precise date invented', 'Month given without a flag', 'Left out'],
+    full.push(table(K, `Facts with a vague phrase on the stress set (${n(ev.sets.stress.systems["A'"].vague.facts)}). The right answer is to send them to a person.`, ['System', 'Sent to a person', 'Precise date invented', 'Month given without a flag', 'Left out'],
       vs.map((k) => { const v = ev.sets.stress.systems[k].vague; return [`<code>${esc(k)}</code>`, kn(v.sent_to_person), kn(v.invented_precise_date), kn(v.month_without_flag), kn(v.dropped)]; })));
     const confs = ev.cascade.configurations.filter((c) => c.stress);
-    out.push(table(K, `Two-reader cascade. ${esc(ev.cascade.rule)} Selection: ${esc(ev.cascade.selectionRule)} Leak guard: ${esc(ev.cascade.leakGuard)}. Earlier rule for comparison: ${esc(ev.cascade.baseline.source)}.`,
+    full.push(table(K, `Two-reader cascade. ${esc(ev.cascade.rule)} Selection: ${esc(ev.cascade.selectionRule)} Leak guard: ${esc(ev.cascade.leakGuard)}. Earlier rule for comparison: ${esc(ev.cascade.baseline.source)}.`,
       ['Gemma reader · signal', 'Validation: pre-filled, wrong', 'Test: pre-filled', 'Test: wrong among pre-filled', 'Stress: pre-filled', 'Stress: wrong among pre-filled'],
       confs.map((c) => [`<code>${esc(c.gemma)}</code> · ${words(c.signal)}${c.gemma === ev.cascade.chosen.gemma && c.signal === ev.cascade.chosen.signal ? ' (chosen)' : ''}`, `${n(c.validation.accepted)} of ${n(c.validation.n)}, ${n(c.validation.wrong)} wrong`,
         kn(c.test.prefilled), kn(c.test.wrong), kn(c.stress.prefilled), kn(c.stress.wrong)])));
   }
+  out.push(details(K, 'How these numbers were measured: the method, every system and the full tables', full.join('')));
   if (rd) {
-    out.push(`<h3>${nem} as the second reader: how its output was improved</h3>`,
+    const reader = [];
+    reader.push(
       scope('p', K, `Each version changes one thing from the one before, measured on the ${n(rd.versions[0].exact.n)} validation notes. ${esc(rd.selectionRule)} Source: <code>${esc(rd.source.file)}</code>.`),
       table(K, 'Versions of the reader on validation notes (whole note exactly right, Wilson 95% intervals).', ['Version', 'What changed', 'Exactly right', 'No valid answer', 'Output tokens per note', 'Seconds per note'],
         rd.versions.map((v) => [`<code>${esc(v.id)}</code>${v.id === rd.selected ? ' (selected)' : ''}`, esc(v.what), kn(v.exact), n(v.parseFailures), n(v.completionTokensPerNote), n(v.meanSeconds, 2)])),
       table(K, 'One change at a time, paired on the same validation notes (exact McNemar p). The rerun of an unchanged version is the noise floor.', ['Step', 'Notes fixed', 'Notes made worse', 'Exactly right before → after', 'Change, points', 'p', 'On notes with a relative date'],
         rd.ladder.map((x) => { const rel = rd.ladderRelative.find((y) => y.step === x.step); return [`<code>${esc(x.step)}</code>`, n(x.gained), n(x.lost), `${n(x.before)} → ${n(x.after)}`, n(x.change_points, 1), pv(x.mcnemar_exact_p), rel ? `${n(rel.before)} → ${n(rel.after)} of ${n(rel.notes)}` : '']; })),
       scope('p', K, `The selected version <code>${esc(rd.test.version)}</code> read the ${n(rd.test.notes)} test notes once: ${kn(rd.test.exact)} exactly right (${Object.entries(rd.test.byWriter).map(([w, v]) => `${esc(w.replace('_', ' '))} ${kn(v)}`).join(', ')}), ${n(rd.test.parseFailures)} without a valid answer. ${rd.caveats.map((c) => esc(c)).join(' ')}`));
+    out.push(details(K, `${nem} as the second reader: how its output was improved`, reader.join('')));
   }
   return out.join('');
+}
+
+// Three plain results for non-technical readers, read from app.scribe.evaluation (results-v1.json): the stress set,
+// the phrasings no training note used, and the two-reader rule on the test notes.
+// Reader names: the Gemma size is read from the system description in results-v1.json ("Gemma 3 1B expression ..."),
+// never typed here.
+function readerName(ev, k) {
+  if (k === "A'") return "code rule A'";
+  const size = /Gemma 3 (\S+)/.exec(ev.systems?.[k] || '')?.[1];
+  return size ? `Gemma 3 ${raw(size)}` : `<code>${esc(k)}</code>`;
+}
+function plainScribeHtml(s, K, nem) {
+  const ev = s.evaluation;
+  if (!ev?.sets?.stress?.systems) return '';
+  const st = ev.sets.stress, S = st.systems, p = ev.primary;
+  const order = ['nemotron', 'C', "A'", 'B'].filter((k) => S[k]);
+  const label = (k) => (k === 'nemotron' ? nem : k === "A'" ? esc(readerName(ev, k)) : readerName(ev, k));
+  const row = (get) => order.map((k) => `${label(k)} <strong>${n(get(S[k]).k)}</strong>`).join(' · ');
+  const held = S[order[0]].slices.heldout.n;
+  const ch = cfg(ev, ev.cascade.chosen.gemma, ev.cascade.chosen.signal);
+  const pair = ch ? `${readerName(ev, ch.gemma)} and ${nem}` : '';
+  return `<div class="headline-box scribe-plain" data-kind="${K}">${chip(K)}`
+    + `<p><strong>Whole note exactly right, all ${n(st.notes)} notes of a frozen stress set:</strong> ${row((x) => x.exact)}.</p>`
+    + `<p><strong>The ${n(held)} of them in phrasings no training note used:</strong> ${row((x) => x.slices.heldout)}.</p>`
+    + (ch ? `<p><strong>Two readers, one person:</strong> a note is pre-filled for one-click confirmation only when ${pair} agree exactly. On the ${n(ch.test.prefilled.n)} test notes that is ${n(ch.test.prefilled.k)}, of which ${n(ch.test.wrong.k)} are wrong; the other ${n(ch.test.needsEditing.k)} need editing.${ch.stress ? ` On the stress set: ${n(ch.stress.prefilled.k)} of ${n(ch.stress.prefilled.n)} pre-filled, ${n(ch.stress.wrong.k)} wrong, ${n(ch.stress.needsEditing.k)} need editing.` : ''} A person confirms every event.</p>` : '')
+    + `<p class="caption">${nem} wrote the stress notes, so its stress score is optimistic. The preregistered success criterion for the ${p?.b ? readerName(ev, p.b) : 'learned'} reader was ${p?.met ? 'met' : 'not met'}. Source: <code>${esc(ev.source.file)}</code>.</p></div>`;
+}
+
+// One labelled POST HOC line (app.scribe.vague from data/scribe/vague/results-v1.json); absent when the file is absent.
+function vagueGateHtml(v, K) {
+  if (!v) return '';
+  const s = v.stress, t = v.test;
+  return scope('p', K, `<span class="chip draft">POST HOC</span> <strong>Designed after the stress results were seen:</strong> a frozen Finnish rule for vague time phrases (<code>${esc(v.rule.version)}</code>) sends such a note to editing. With it, the two readers pre-fill ${n(s.withGate.prefilled.k)} of ${n(s.withGate.prefilled.n)} stress notes with ${n(s.withGate.wrong.k)} wrong (without it ${n(s.without.prefilled.k)} with ${n(s.without.wrong.k)} wrong), and ${n(t.withGate.prefilled.k)} of ${n(t.withGate.prefilled.n)} test notes with ${n(t.withGate.wrong.k)} wrong (without it ${n(t.without.prefilled.k)}). Vague facts that reach a person: ${n(s.vagueToPerson.withGate.k)} of ${n(s.vagueToPerson.withGate.n)} with the rule, ${n(s.vagueToPerson.without.k)} without. On its own the rule catches ${n(s.caught.k)} of the ${n(s.caught.n)} vague stress notes and flags ${n(s.falseFlags.k)} of the ${n(s.falseFlags.n)} others. Not a preregistered result. Source: <code>${esc(v.source.file)}</code>.`, ' class="caption"');
 }
 function ablationHtml(a, K) {
   if (!a) return '';
@@ -463,7 +501,7 @@ export function whoHtml(app) {
   const ecoRows = grads.map((g) => {
     const span = Math.max(Math.abs(g.siiLow), Math.abs(g.siiHigh)) || 1, X = (v) => 60 + (v / span) * 55;
     const svg = `<svg viewBox="0 0 120 14" class="mini-interval" role="img" aria-label="interval ${g.siiLow} to ${g.siiHigh}, zero marked"><line x1="60" x2="60" y1="0" y2="14" class="reference"/><line x1="${X(g.siiLow).toFixed(1)}" x2="${X(g.siiHigh).toFixed(1)}" y1="7" y2="7" class="ci"/><circle cx="${X(g.sii).toFixed(1)}" cy="7" r="3"/></svg>`;
-    return `<tr><th scope="row">${esc(shortLabel(g))}</th><td>${n(g.sii, 2)} <span class="range">(${n(g.siiLow, 2)} to ${n(g.siiHigh, 2)})</span></td><td>${svg}</td><td>${g.excludesZero ? 'excludes zero' : 'includes zero'}</td><td>${n(g.n)}</td></tr>`;
+    return `<tr><th scope="row">${esc(shortLabel(g))}</th><td>${n(g.sii, 2)} <span class="range">(${n(g.siiLow, 2)} to ${n(g.siiHigh, 2)})</span></td><td>${svg}</td><td>${g.excludesZero ? 'clear pattern' : 'no clear pattern'}</td><td>${n(g.n)}</td></tr>`;
   }).join('');
   const breast = a.indicators?.screen_breast, fb = a.indicators?.foreign_background;
   const low = breast ? breast.rows.filter((r) => r.value != null).sort((p, q) => p.value - q.value).slice(0, 5) : [];
@@ -471,9 +509,9 @@ export function whoHtml(app) {
   const nm = (id) => (a.regions.find((r) => r.regionId === id)?.name || id).replace(' wellbeing services county', '').replace('City of ', '');
   const opp = evRow(app, 'oecd-2025-helsinki-opportunistic');
   const left = `<div class="who-col" data-kind="ECOLOGICAL"><p class="kicker">${chip('ECOLOGICAL')} Where: county averages</p>
-<h3>${allZero ? `All ${n(grads.length)} county education gradients include zero` : `${n(incl)} of ${n(grads.length)} county education gradients include zero`}</h3>
-<p>Slope from the least to the most educated end of the country (counties ordered by an education index), with its 95% interval. This describes places, not people.</p>
-<div class="table-wrap"><table><thead><tr><th scope="col">Indicator</th><th scope="col">Slope (95% interval)</th><th scope="col">Interval, zero dashed</th><th scope="col">Reading</th><th scope="col">Areas</th></tr></thead><tbody>${ecoRows}</tbody></table></div>
+<h3>${allZero ? 'County averages show no clear education pattern; the individual figures on the right do' : `${n(incl)} of ${n(grads.length)} county education slopes show no clear pattern`}</h3>
+<p>The slope from the least to the most educated end of the country (counties ordered by an education index) could be zero in ${allZero ? `all ${n(grads.length)}` : `${n(incl)} of ${n(grads.length)}`} indicators: each of those 95% intervals includes zero. This describes places, not people.</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">Indicator</th><th scope="col">Slope, least to most educated (95% interval)</th><th scope="col">Interval (dashed line: no difference)</th><th scope="col">Reading</th><th scope="col">Areas</th></tr></thead><tbody>${ecoRows}</tbody></table></div>
 ${low.length ? `<h4>The lowest breast-screening attendance is in the capital region</h4><div class="table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">Attendance, % (latest year)</th><th scope="col">Foreign background${fb?.unit ? `, ${esc(fb.unit)}` : ''} (latest year)</th></tr></thead><tbody>${low.map((r) => { const f = fb?.rows.find((x) => x.regionId === r.regionId); return `<tr><th scope="row">${esc(nm(r.regionId))}${CAPITAL_REGION.has(r.regionId) ? ' · Uusimaa' : ''}</th><td>${n(r.value, 1)} <span class="caption">(${raw(r.year)})</span></td><td>${f ? `${n(f.value, 1)} <span class="caption">(${raw(f.year)})</span>` : 'n/a'}</td></tr>`; }).join('')}</tbody></table></div>
 <p class="caption">${chip('ECOLOGICAL')} ${n(inCapital)} of the ${n(low.length)} lowest-attending areas are in Uusimaa (its four counties and Helsinki). ${opp ? `The OECD/EU profile says Helsinki's low programme attendance is likely due to more screening outside the programme (${evLink(opp)}).` : ''} The table also shows their foreign-background shares. A county league table measures recording and population mix; it cannot show who is missed.</p>` : ''}
 <p class="caption">${chip('ECOLOGICAL')} Source: THL Sotkanet and Statistics Finland county series in the public snapshot, analysed by <code>src/analysis.mjs</code> (slope index of inequality). ${counties ? `SAMA's ${n(a.regions.length)} areas are Finland's ${n(counties.value)} wellbeing services counties, the City of Helsinki (which organises its own services) and Åland (${evLink(counties)}).` : ''}</p></div>`;
@@ -494,7 +532,7 @@ ${pair('oecd-2025-survival-education', 'Five-year relative survival, women, by e
 ${pair('oecd-2025-breast-screening-education', 'Breast screening participation, by education', 'lower education', 'lower', 'higher education', 'higher')}
 ${pair('oecd-2025-breast-screening-language', 'Breast screening participation, by mother tongue', 'other mother tongue', 'nonDomesticLanguage', 'Finnish, Swedish or Sámi', 'domesticLanguage')}
 ${pair('oecd-2025-cervical-screening-education', 'Cervical screening participation, by education', 'lower education', 'lower', 'higher education', 'higher')}
-${pair('oecd-2025-cervical-screening-language', 'Cervical screening participation, by mother tongue', 'other mother tongue', 'nonDomesticLanguage', 'domestic language', 'domesticLanguage')}
+${pair('oecd-2025-cervical-screening-language', 'Cervical screening participation, by mother tongue', 'other mother tongue', 'nonDomesticLanguage', 'Finnish, Swedish or Sámi', 'domesticLanguage')}
 ${routeHtml}
 <p class="caption">${chip('PUBLISHED')} Figures as published (Finnish Cancer Registry via the OECD/EU Country Cancer Profile Finland 2025; Kuitunen J et al. 2026), entered as verified rows of the evidence register.</p></div>`;
 
@@ -532,6 +570,10 @@ export function routeDisclosure(app) {
   return `The route-gap prior of ${n(means.value)} days is read from Figure 1 of Kuitunen J 2026; the paper's text means differ by ${n(f.publicMeanDays - f.privateOccupationalMeanDays)} days and its medians by ${n(f.publicMedianDays - f.privateOccupationalMedianDays)}.`;
 }
 
+// Plain wording for the stored rationale (data/roadmap/mapping-v1.json pilotCard.rationale_en): "the coordinator"
+// is an internal role name that reads like an AI agent made the choice; the team made it.
+const pilotWhy = (s) => String(s ?? '').replace(/^The coordinator chose (.+?) as the default pilot because/, 'We chose $1 because').replace('predominantly Finnish', 'mostly Finnish').replace(' That share was not measured in this repository.', ' (That share was not measured.)');
+const extLink = (label, url) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;
 export function pilotHtml(app) {
   const c = app?.roadmap?.pilotCard;
   if (!c) return '<p class="missing-label">The pilot card is not in this snapshot.</p>';
@@ -543,7 +585,8 @@ export function pilotHtml(app) {
 <h3>${esc(c.county.nameEn)}: one county, a 2027 pilot inside the national roadmap</h3>
 <p>${esc(c.ask_en)}</p>
 <h4>Why ${esc(c.county.nameEn.replace(' wellbeing services county', ''))}, on process grounds</h4><ul>
-<li>${esc(c.rationale_en)}</li>
+<li>${esc(pilotWhy(c.rationale_en))}</li>
+<li>${esc(c.county.nameEn.replace(' wellbeing services county', ''))} is not under the state assessment procedure (${extLink('Finnish Government, 16 June 2026', 'https://valtioneuvosto.fi/-/10623/hyvinvointialueen-arviointimenettely-kaynnistyy-kolmella-alueella-')}).</li>
 ${lr ? `<li>Mortality from ${esc(lung.label.charAt(0).toLowerCase() + lung.label.slice(1))}: shrunk ratio ${n(lr.shrunk, 3)} <span class="range">(${n(lr.shrunkLow, 3)}–${n(lr.shrunkHigh, 3)})</span>, rank ${n(li + 1)} of ${n(ranked.length)}; high, not the highest. Regional lung mortality largely follows incidence, so the case is closing follow-up loops, not excess deaths.</li>` : ''}
 </ul>
 ${e.display_en ? `<p class="caption">${chip('MEASURED')} ${esc(e.display_en)}</p>` : ''}
@@ -595,12 +638,15 @@ export function plannerSummaryHtml(app) {
   const s = p.summary, v1 = s.promptComparison.v1, v2 = s.promptComparison.v2, tc = p.toolCheck, vi = p.vision;
   const out = [
     `<div class="planner-summary" data-kind="DRAFT"><p class="kicker">${chip('DRAFT')} ${esc(p.label)}</p>`
-      + `<p>The model called ${n(p.tools.length)} SAMA tools (${p.tools.map((t) => `<code>${esc(t)}</code>`).join(', ')}) and wrote an action plan per county. Code then checked every number against the tool outputs of the same run, and a judge model checked that each sentence is faithful and does not overclaim; a sentence that failed was dropped, never repaired. Across ${n(s.counties)} areas, ${n(s.keptSentences)} of ${n(s.sentences)} drafted sentences were kept; ${n(s.keptSentencesWithUnmatchedNumber)} kept sentences carry a number that is not in a tool output; roadmap measure ids confirmed by code: ${raw(s.roadmapMeasureCodeChecked)}.</p>`
+      + `<p>Across ${n(s.counties)} areas, ${n(s.keptSentences)} of ${n(s.sentences)} drafted sentences were kept; ${n(s.keptSentencesWithUnmatchedNumber)} kept sentences carry a number that is not in a tool output; roadmap measure ids confirmed by code: ${raw(s.roadmapMeasureCodeChecked)}.</p>`
+      + `<details class="track-details planner-method"><summary>How the drafts were checked and improved</summary>`
+      + `<p>The model called ${n(p.tools.length)} SAMA tools (${p.tools.map((t) => `<code>${esc(t)}</code>`).join(', ')}) and wrote an action plan per county. Code then checked every number against the tool outputs of the same run, and a judge model checked that each sentence is faithful and does not overclaim; a sentence that failed was dropped, never repaired.</p>`
       + `<p><strong>How the output was improved.</strong> The first prompt kept ${n(v1.keptSentences)} of ${n(s.sentences)} sentences, with indicator lines ${kept(v1.keptByField.indicator)} and evidence-limit lines ${kept(v1.keptByField.evidence_does_not_support)}. The second prompt changed only the field formats and kept ${n(v2.keptSentences)} (indicator lines ${kept(v2.keptByField.indicator)}, evidence-limit lines ${kept(v2.keptByField.evidence_does_not_support)}) under the same check. The older check, which gave the judge every tool output at once, would have kept ${n(s.keptUnderGateV1)}. Both prompts ran on the same areas; there is no held-out set of areas.</p>`
       + `<p><strong>Off-limits requests.</strong> ${n(s.offLimits.pass)} of ${n(s.offLimits.prompts)} produced no plan: ${n(s.offLimits.refusedByModel)} refused by the model, ${n(s.offLimits.blockedByCode)} blocked by code. The code guard (a plan only for the one known area the request names) was added after an answer under the first prompt; without it ${n(s.offLimits.passWithoutCodeGuard)} of ${n(s.offLimits.prompts)} pass.</p>`
       + (tc?.checked ? `<p><strong>Still current?</strong> The drafts were written on an earlier build of this page's data. Every stored tool call was re-run on this build: ${n(tc.identical)} of ${n(tc.counties)} areas get identical tool outputs${tc.changed.length ? `; for ${tc.changed.map((x) => `<code>${esc(x.county)}</code> (${x.tools.map((t) => esc(t)).join(', ')})`).join(', ')} the outputs have changed, so read those drafts with care` : ''}.</p>` : '')
-      + `<p class="caption">Source: <code>${esc(p.source.file)}</code>, drafted ${raw(String(p.generatedAt).slice(0, 10))} with <code>${esc(p.model)}</code>, prompt <code>${esc(p.promptVersion)}</code>. ${esc(s.selectionRule)}</p></div>`,
+      + `<p class="caption">Source: <code>${esc(p.source.file)}</code>, drafted ${raw(String(p.generatedAt).slice(0, 10))} with <code>${esc(p.model)}</code>, prompt <code>${esc(p.promptVersion)}</code>. ${esc(s.selectionRule)}</p>`,
   ];
   if (vi) out.push(scope('p', 'SYNTHETIC', `Image input was tested too: on ${n(vi.notes)} note pages rendered as images, ${n(vi.imageExact)} were read exactly right from the image against ${n(vi.textExact)} from the text of the same notes; ${n(vi.eitherMisread)} pages had a misread ä/ö or date string. Verdict: ${esc(vi.verdict)}; the product keeps text input. Source: <code>${esc(vi.source.file)}</code>.`, ' class="caption"'));
+  out.push('</details></div>');
   return out.join('');
 }
