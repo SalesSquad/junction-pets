@@ -106,3 +106,31 @@ privacy and tenant boundaries owned by the appropriate host.
 5 → 6: independently qualify reliability, accessibility, real recipient outcomes and
 release. Any future effectful integration requires separate authority and confirmation.
 No live service, endorsement, deployment or submission is implied by this roadmap.
+
+## M3: live-source human curation (local only)
+
+After explicitly consenting to one `/api/live` lookup, inspect the returned source
+text, select one or more sources, and copy an exact excerpt for each. Write your
+own observation and meaningful source-linked next action, then edit your message
+and list unresolved uncertainties. All human content is visibly
+`USER_CURATED_NOT_VERIFIED`. Validate and acknowledge the review to approve
+`LOCAL_ONLY`, then copy or download the complete JSON packet. It includes the
+exact response ledger, publisher/observation timestamps, nullable request IDs,
+selected quotes, human notes/actions, draft, uncertainties and local approval.
+Any content edit clears approval; changing the goal requires new evidence.
+Nothing is sent, booked or executed. Reload clears tab state; only explicit
+copy/download exports it. Fixture replay remains a separate journey.
+
+`curation.mjs` is a pure browser-compatible validation/assembly module served by
+an exact static allowlist. Its closure snapshots the received ledger; quotes
+must exist byte-for-byte as JavaScript string substrings in the selected source.
+It rejects invalid/replay envelopes, arbitrary source references, duplicates,
+bad URLs/dates and oversized values. It cannot authenticate a forged response
+created by someone controlling the local runtime: provenance records the server
+response, not a cryptographic provider attestation. Publisher assertions remain
+unverified. No automatic claim extraction occurs. The adapter rejects oversized
+text rather than truncating it and rejects duplicate search URLs.
+
+Verification for this uncommitted M3 slice is in `PROGRESS.md`. Real Exa access
+and browser acceptance are not established; a missing key remains
+`CONNECTION_NEEDED`. No provider calls or new packages are needed for tests.

@@ -6,7 +6,7 @@ import {retrieveExa} from './exa-adapter.mjs';
 const root=new URL('./',import.meta.url);
 const fixture=JSON.parse(await readFile(new URL('fixtures/official.json',root)));
 const anchors=JSON.parse(await readFile(new URL('fixtures/anchors.json',root)));
-const files={'/':['public/index.html','text/html'],'/app.mjs':['public/app.mjs','text/javascript'],'/style.css':['public/style.css','text/css']};
+const files={'/curation.mjs':['curation.mjs','text/javascript'],'/':['public/index.html','text/html'],'/app.mjs':['public/app.mjs','text/javascript'],'/style.css':['public/style.css','text/css']};
 export function createServer({apiKey=process.env.EXA_API_KEY}={}) {
   let liveBusy=false; let recent=[];
   return http.createServer(async(req,res)=>{
