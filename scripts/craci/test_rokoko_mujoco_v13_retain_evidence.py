@@ -8,14 +8,17 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from scripts.craci.test_rokoko_mujoco_v13_causal_qualification import fixture, q
-
-
 def load(path, name):
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+causal_tests = load(Path(__file__).resolve().parent /
+                    "test_rokoko_mujoco_v13_causal_qualification.py",
+                    "v13_causal_retention_fixtures")
+fixture, q = causal_tests.fixture, causal_tests.q
 
 
 packer = load(Path(__file__).resolve().parent /

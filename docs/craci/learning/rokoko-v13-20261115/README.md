@@ -3,8 +3,10 @@
 
 The main branch contains the qualifier, burst retainer, tests, public survey
 fixture, V7 trace validator and a manual-only, source-pinned workflow route.
-The route remains disabled until the existing credit window and the separate
-source-review variable are both open; neither variable proves the actual
+The 519024–519535 burst study was executed in run #43666894721 and reached a
+science STOP with zero novel goals. Repeating this spent cohort is blocked by
+default: the route requires the existing credit window, the source-review
+variable and a separate explicit repeat-authorization variable. These variables do not prove the actual
 account balance or physical safety. The work record below describes the
 original research branch, not a current dispatch or qualification. No model
 promotion is authorized.
@@ -81,7 +83,9 @@ records are read. Source receipts do not attest a provider bill. The coordinator
 owns aggregate credit accounting and duplicate source/cohort/seed admission
 across hosts; this standalone harness does not create a distributed ledger.
 The main workflow and planner pin this study's exact product source and leave
-the manual source-review flag unset by default. No run follows automatically.
+the manual source-review and repeat-authorization flags unset by default. No
+run follows automatically. Any future evidence-based study needs its own
+cohort and source review; this repeat gate is not model promotion authority.
 
 Frozen inputs:
 
