@@ -1,5 +1,5 @@
-import {readFile,writeFile} from 'node:fs/promises';
-import {createHash} from 'node:crypto';
+import {readFile,writeFile,rename,rm} from 'node:fs/promises';
+import {createHash,randomUUID} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {compare} from '../../solutions/context-dev-live-web-decision/live/compare.mjs';
 
@@ -22,5 +22,9 @@ export function projectEvidence(bytes){
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
   const bytes=await readFile(new URL('../../solutions/context-dev-live-web-decision/live/capture.json',import.meta.url),'utf8');
-  await writeFile(new URL('./evidence.json',import.meta.url),JSON.stringify(projectEvidence(bytes),null,2)+'\n');
+  const next=new URL('./.evidence-'+randomUUID()+'.tmp',import.meta.url);
+  try{
+    await writeFile(next,JSON.stringify(projectEvidence(bytes),null,2)+'\n',{flag:'wx'});
+    await rename(next,new URL('./evidence.json',import.meta.url));
+  }finally{await rm(next,{force:true});}
 }
