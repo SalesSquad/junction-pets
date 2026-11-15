@@ -8,6 +8,8 @@ import { eqSet } from './scoring.mjs';
 import { spawn } from 'node:child_process';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { MODULES } from '../../pets/aiven/modules/router.mjs';
+import { inventorySnapshot, inventoryAttachment } from '../../services/aiven-platform/grounding.mjs';
+import { composeTurn } from '../../services/aiven-platform/untrusted.mjs';
 const arg = (k, d) => process.argv.find(a => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const project = arg('project', 'ssquad-8702'), mcp = arg('mcp'), models = arg('models', 'haiku,sonnet').split(','), repeats = Number(arg('repeats', '2'));
 const system = ['core', ...Object.keys(MODULES)].map(n => readFileSync(new URL(`../../pets/aiven/modules/${n}.md`, import.meta.url), 'utf8')).join('\n\n')
@@ -74,17 +76,20 @@ if (arg('rescore')) { const old = JSON.parse(readFileSync(arg('rescore'), 'utf8'
   const summary = Object.fromEntries([...new Set(rs.map(r => r.model))].map(m => { const r = rs.filter(x => x.model === m); return [m, { runs: r.length, meanScore: +(r.reduce((s, x) => s + x.score, 0) / r.length).toFixed(3), perfect: r.filter(x => x.score === 1).length }]; }));
   console.log(JSON.stringify({ rescoredFrom: arg('rescore'), note: 'ground truth re-fetched from the Aiven API at rescore time', summary, results: rs.map(({ answer, ...r }) => r) }, null, 2)); process.exit(0); }
 if (!process.argv.includes('--execute')) { console.log(JSON.stringify({ dryRun: true, tasks: tasks.map(t => t.id), models, repeats, groundTruthServices: services.length })); process.exit(0); }
-const variant = arg('variant', 'typed'); // typed = strict identifiers; loose = plain strings (baseline)
+const variant = arg('variant', 'typed');
+const arms = arg('arms', 'tools').split(','); // tools = MCP only; inventory = MCP + host inventory snapshot
+const snapshot = arms.includes('inventory') ? await inventorySnapshot({ project, fetchJson: api }) : null; // typed = strict identifiers; loose = plain strings (baseline)
 if (variant === 'loose') for (const t of tasks) (function loosen(o) { if (o && typeof o === 'object') { if (o.pattern || o.enum) { delete o.pattern; delete o.enum; } Object.values(o).forEach(loosen); } })(t.schema);
-const jobs = models.flatMap(m => tasks.flatMap(t => Array.from({ length: repeats }, (_, rep) => ({ m, t, rep }))));
+const jobs = models.flatMap(m => arms.flatMap(arm => tasks.flatMap(t => Array.from({ length: repeats }, (_, rep) => ({ m, arm, t, rep })))));
 const results = []; let next = 0;
-await Promise.all(Array.from({ length: 6 }, async () => { while (next < jobs.length) { const { m, t, rep } = jobs[next++];
-  const a = await claude(m, t.q, t.schema);
+await Promise.all(Array.from({ length: 6 }, async () => { while (next < jobs.length) { const { m, arm, t, rep } = jobs[next++];
+  const prompt = arm === 'inventory' ? composeTurn(t.q, [inventoryAttachment(snapshot)]) : t.q;
+  const a = await claude(m, prompt, t.schema);
   const usedTools = (a.turns ?? 0) > 1;
   const score = a.data ? t.score(a.data) * ((a.data.executed_actions ?? []).length === 0 ? 1 : 0) : 0;
-  results.push({ model: m, task: t.id, rep, answer: a.data, truthSnapshotAt: new Date().toISOString(), score: +score.toFixed(3), usedTools, turns: a.turns, costUsd: +(a.cost ?? 0).toFixed(4), error: a.error ?? (a.data ? undefined : 'no structured output') });
-  console.error(`${m} ${t.id}#${rep} ${score.toFixed(2)} turns=${a.turns}`); } }));
-const summary = Object.fromEntries(models.map(m => { const r = results.filter(x => x.model === m); return [m, { runs: r.length, meanScore: +(r.reduce((s, x) => s + x.score, 0) / r.length).toFixed(3), perfect: r.filter(x => x.score === 1).length, usedTools: r.filter(x => x.usedTools).length, costUsd: +r.reduce((s, x) => s + x.costUsd, 0).toFixed(3) }]; }));
+  results.push({ model: m, arm, task: t.id, rep, answer: a.data, truthSnapshotAt: new Date().toISOString(), score: +score.toFixed(3), usedTools, turns: a.turns, costUsd: +(a.cost ?? 0).toFixed(4), error: a.error ?? (a.data ? undefined : 'no structured output') });
+  console.error(`${m}/${arm} ${t.id}#${rep} ${score.toFixed(2)} turns=${a.turns}`); } }));
+const summary = Object.fromEntries(models.flatMap(m => arms.map(arm => [m, arm])).map(([m, arm]) => { const r = results.filter(x => x.model === m && x.arm === arm); return [`${m}/${arm}`, { runs: r.length, meanScore: +(r.reduce((s, x) => s + x.score, 0) / r.length).toFixed(3), perfect: r.filter(x => x.score === 1).length, usedTools: r.filter(x => x.usedTools).length, costUsd: +r.reduce((s, x) => s + x.costUsd, 0).toFixed(3) }]; }));
 const out = { project, variant, tasks: tasks.map(t => t.id), startedAt: new Date().toISOString(), summary, results };
 mkdirSync(new URL('../../dist/evals/', import.meta.url), { recursive: true });
 writeFileSync(new URL(`../../dist/evals/live-tools-${Date.now()}.json`, import.meta.url), JSON.stringify(out, null, 2));
