@@ -51,18 +51,27 @@ export function toLines(words) {
 }
 
 /** Load a sheet (PDF or image): rendered image for the model + text lines with boxes. */
-export async function loadSheet(path, { maxPx = 3584 } = {}) {
+/**
+ * textSource 'auto' uses the PDF text layer when present, else OCR. 'ocr' ignores the text layer
+ * (the screenshot situation): the sheet is rendered at ocrPx and read by ocrFn (default: local
+ * tiled Vision OCR), so OCR engines can be compared on the same sheets.
+ */
+export async function loadSheet(path, { maxPx = 3584, textSource = 'auto', ocrFn = ocr, ocrPx = 7168, label = 'local-ocr' } = {}) {
   const key = createHash('sha256').update(await readFile(path)).digest('hex').slice(0, 24);
   const img = join(CACHE, 'sheets', `${key}.jpg`);
   await mkdir(join(CACHE, 'sheets'), { recursive: true });
-  let words = [], source;
+  let words = [], source, ocrInput = path;
   if (/\.pdf$/i.test(path)) {
     const out = JSON.parse(execFileSync(await helper(), [path, img, String(maxPx)], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 120_000 }));
-    words = out.words; source = 'pdf-text-layer';
+    if (textSource !== 'ocr') { words = out.words; source = 'pdf-text-layer'; }
+    if (!words.length) {
+      ocrInput = join(CACHE, 'sheets', `${key}.${ocrPx}.jpg`);
+      execFileSync(await helper(), [path, ocrInput, String(ocrPx)], { stdio: 'ignore', maxBuffer: 64 * 1024 * 1024, timeout: 120_000 });
+    }
   } else {
     execFileSync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '75', '-Z', String(maxPx), path, '--out', img], { stdio: 'ignore' });
   }
-  if (!words.length) { words = (await ocr(path)).map(t => ({ text: t.text, box: t.box })); source = 'local-ocr'; }
+  if (!words.length) { words = (await ocrFn(ocrInput)).map(t => ({ text: t.text, box: t.box })); source = label; }
   return { path, image: await imageDataUrl(img), lines: toLines(words), source };
 }
 
