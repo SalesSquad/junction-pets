@@ -1,0 +1,231 @@
+# Owner-authorized 10-job ML campaign, 15 Nov 2026 only.
+# Public pinned datasets; private model checkpoints; no product deployment.
+name: CRACI HF intent training
+'on':
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: craci-hf-intents-20261115
+  cancel-in-progress: false
+env:
+  CRACI_WINDOW_END: '2026-11-15T17:00:00Z'
+  TRAINING_CUTOFF: '2026-11-15T16:40:00Z'
+  RELEASE_TAG: hf-intents-20261115
+  OMP_NUM_THREADS: '8'
+  OPENBLAS_NUM_THREADS: '8'
+  MKL_NUM_THREADS: '8'
+  NUMEXPR_NUM_THREADS: '8'
+  PYTHONUNBUFFERED: '1'
+  PYTHONHASHSEED: '20261115'
+jobs:
+  init:
+    name: Pin data and reserve the private campaign release
+    if: ${{ github.ref == 'refs/heads/main' && vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
+    runs-on: craci
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, pypi]
+            connections:
+              - tls:
+                  serverNamePatterns:
+                    - huggingface.co
+                    - uploads.github.com
+                    - release-assets.githubusercontent.com
+                    - cas-bridge.xethub.hf.co
+                    - cas-bridge.xethub-eu.hf.co
+                    - cas-server.xethub.hf.co
+                    - cas-server.xethub-eu.hf.co
+                    - transfer.xethub.hf.co
+                    - transfer.xethub-eu.hf.co
+                    - cdn-lfs-us-1.hf.co
+                    - cdn-lfs-eu-1.hf.co
+                    - us.aws.cdn.hf.co
+                    - us.gcp.cdn.hf.co
+                  ports: [443]
+      - name: Refuse late campaign admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud '2026-11-15T16:00:00Z' +%s)"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Create immutable private dataset and admission snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python experiments/hf-intents/cloud.py init
+          --manifest experiments/hf-intents/manifest.json
+          --release-tag "$RELEASE_TAG"
+          --source-sha "$GITHUB_SHA"
+          --run-id "$GITHUB_RUN_ID"
+          --work-dir "$RUNNER_TEMP/intent-init"
+  train:
+    name: ${{ matrix.dataset }} / ${{ matrix.lane }}
+    needs: init
+    if: ${{ github.ref == 'refs/heads/main' && vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
+    runs-on: craci
+    timeout-minutes: 900
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        dataset: [banking77, massive-fi-FI]
+        lane: [word_svm, char_svm, hybrid_linear, complement_nb, svd_mlp]
+    steps:
+      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '8'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, pypi]
+            connections:
+              - tls:
+                  serverNamePatterns:
+                    - huggingface.co
+                    - uploads.github.com
+                    - release-assets.githubusercontent.com
+                    - cas-bridge.xethub.hf.co
+                    - cas-bridge.xethub-eu.hf.co
+                    - cas-server.xethub.hf.co
+                    - cas-server.xethub-eu.hf.co
+                    - transfer.xethub.hf.co
+                    - transfer.xethub-eu.hf.co
+                    - cdn-lfs-us-1.hf.co
+                    - cdn-lfs-eu-1.hf.co
+                    - us.aws.cdn.hf.co
+                    - us.gcp.cdn.hf.co
+                  ports: [443]
+      - name: Enforce training cutoff before installation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud "$TRAINING_CUTOFF" +%s)"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install the hash-locked binary ML dependencies
+        timeout-minutes: 10
+        run: >-
+          python -m pip --disable-pip-version-check install
+          --only-binary=:all: --require-hashes
+          -r experiments/hf-intents/requirements.lock
+      - name: Train and preserve checkpoints, phase 1
+        timeout-minutes: 300
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DATASET: ${{ matrix.dataset }}
+          LANE: ${{ matrix.lane }}
+        run: >-
+          python experiments/hf-intents/cloud.py run
+          --dataset "$DATASET" --lane "$LANE"
+          --manifest experiments/hf-intents/manifest.json
+          --release-tag "$RELEASE_TAG"
+          --source-sha "$GITHUB_SHA" --run-id "$GITHUB_RUN_ID"
+          --work-dir "$RUNNER_TEMP/intent-training" --minutes 280
+      - name: Train and preserve checkpoints, phase 2
+        timeout-minutes: 300
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DATASET: ${{ matrix.dataset }}
+          LANE: ${{ matrix.lane }}
+        run: >-
+          python experiments/hf-intents/cloud.py run
+          --dataset "$DATASET" --lane "$LANE"
+          --manifest experiments/hf-intents/manifest.json
+          --release-tag "$RELEASE_TAG"
+          --source-sha "$GITHUB_SHA" --run-id "$GITHUB_RUN_ID"
+          --work-dir "$RUNNER_TEMP/intent-training" --minutes 280
+      - name: Train and preserve checkpoints, phase 3
+        timeout-minutes: 300
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DATASET: ${{ matrix.dataset }}
+          LANE: ${{ matrix.lane }}
+        run: >-
+          python experiments/hf-intents/cloud.py run
+          --dataset "$DATASET" --lane "$LANE"
+          --manifest experiments/hf-intents/manifest.json
+          --release-tag "$RELEASE_TAG"
+          --source-sha "$GITHUB_SHA" --run-id "$GITHUB_RUN_ID"
+          --work-dir "$RUNNER_TEMP/intent-training" --minutes 280
+  finalize:
+    name: Select validation winners and evaluate each sealed test once
+    needs: [init, train]
+    if: ${{ always() && !cancelled() && needs.init.result == 'success' && vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
+    runs-on: craci
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, pypi]
+            connections:
+              - tls:
+                  serverNamePatterns:
+                    - huggingface.co
+                    - uploads.github.com
+                    - release-assets.githubusercontent.com
+                    - cas-bridge.xethub.hf.co
+                    - cas-bridge.xethub-eu.hf.co
+                    - cas-server.xethub.hf.co
+                    - cas-server.xethub-eu.hf.co
+                    - transfer.xethub.hf.co
+                    - transfer.xethub-eu.hf.co
+                    - cdn-lfs-us-1.hf.co
+                    - cdn-lfs-eu-1.hf.co
+                    - us.aws.cdn.hf.co
+                    - us.gcp.cdn.hf.co
+                  ports: [443]
+      - name: Reserve time for final cloud preservation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud '2026-11-15T16:45:00Z' +%s)"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install the same locked evaluator
+        timeout-minutes: 5
+        run: >-
+          python -m pip --disable-pip-version-check install
+          --only-binary=:all: --require-hashes
+          -r experiments/hf-intents/requirements.lock
+      - name: Evaluate held-out tests and preserve selected models privately
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python experiments/hf-intents/cloud.py finalize
+          --manifest experiments/hf-intents/manifest.json
+          --release-tag "$RELEASE_TAG"
+          --source-sha "$GITHUB_SHA" --run-id "$GITHUB_RUN_ID"
+          --work-dir "$RUNNER_TEMP/intent-final"
