@@ -76,21 +76,30 @@ human. Pilot result: `persona-evidence/pilot-20261115.json` (bible arm won 4/4 b
 production line per turn:
 
 1. **Director** picks who speaks next and the move (tease, push back, short reaction, …).
-   Rules first: opener, everyone speaks once, no A-B-A duets, nobody past two lines while
-   someone is still silent; then an LLM director for the most natural next speaker.
+   Rules first: opener, everyone speaks once, an argument may run A-B-A-B before a third voice
+   has to enter, nobody past three lines while someone is still silent; then an LLM director
+   for the most natural next speaker. A pet's first line must come in on the line before it.
 2. **Writer** gets the character bible (`characters.json`: core, want, flaw, speech, humour,
    opinions, relationships, own-language anchors, catchphrases, never-list, vocal delivery),
    the scene beat, memory notes and the owner's taste, hears the previous WAV and writes one
    line plus a vocal direction (pace, volume, pitch, emotion).
-3. **Checks** (`check_line`): length, reused example lines, catchphrase budget per scene,
-   same opener as last time, one voice tag max, stage directions, praise openers, buzzwords,
-   question streaks, body-movement directions, native script for the language.
-4. **Critic** keeps or rewrites the line; the version with fewer problems wins.
+3. **Checks** (`check_line`, `check_reply`): length, reused or lifted example lines (4 words,
+   or 3 distinctive ones), catchphrase budget per scene, same opener as last time, a second
+   one-word exclamation opener (any word — "Fascinating." after "Interesting."), reheating your
+   own earlier idea, one voice tag max, stage directions, praise openers, buzzwords, question
+   streaks, body-movement directions, native script, and **non-sequiturs**: the writer must
+   copy the words it answers (`responds_to`), which have to be in the last two lines or beat.
+4. **Critic** must fix every listed problem (a second round when a hard one survives); the
+   version with fewer problems wins.
 5. **Voice**: the pet's designed Gemini voice (`design-voices`, Voice design API,
    `learned/designed-voices.json`) with the per-line direction as `speech_metadata.style`;
    prebuilt voice or Live audio as fallback.
-6. **Memory**: after the scene each pet keeps up to 6 short notes (`~/Library/Application Support/JunctionPetVoice/memory/pets.json`, local, not in git), so
-   running jokes and grudges carry into the next scene.
+6. **Memory** (`~/Library/Application Support/JunctionPetVoice/memory/pets.json`, local, not
+   in git): after a scene each pet keeps up to 6 short notes, so running jokes and grudges carry
+   over. A pet gets at most one callback per scene (`callback` field) and a note retires after
+   two callbacks. Habits are tracked too: repeated line openings and content words a pet used in
+   two of its last four scenes come back as "start differently" / "find a fresh image" hints.
+   `scene.py memory --rebuild` drops near-duplicate notes and replays `scene-evidence/`.
 
 ```sh
 python3 scene.py design-voices --pets rokoko,bahn-express  # one designed voice per pet
