@@ -10,7 +10,7 @@
 
 ## Verification
 
-- `node --test tests/*.test.mjs`: **146 / 146 pass** (re-run 15 Nov 2026 at `320b8cf`, Node v22.23.4, no third-party installs). The coordinator observed the same 146/146 at `0ef075a`.
+- `node --test tests/*.test.mjs`: **161 / 161 pass** on main after #301 (re-run 15 Nov 2026 on `2c71caf` plus this docs change, Node v22.23.4, no third-party installs). Before #301 it was 146 / 146 at `320b8cf`.
 - Demo commands in SUBMISSION.md were run against a live server: `/api/health`, `/`, `/mission`, `demo:frontier happy` and `shock --decision=approve` all behaved as documented. State went to a `/tmp` path.
 - Browser scripts (`tests/*.browser.mjs`) need Playwright and were not re-run in this pass.
 
