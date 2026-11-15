@@ -2,6 +2,8 @@ import { roles, candidates, asOf } from './data.mjs';
 import { conversation, renderEvidence } from './skill-graph.mjs';
 import { sharedEventSlots, proposeMeeting, transitionMeeting } from './event-meetings.mjs';
 import { benchmark } from './benchmark.mjs';
+import { ESCO_CATALOG } from './esco/catalog.mjs';
+import { validateCatalog, definitionUrl } from './esco/validation.mjs';
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let role = roles[0], selected = candidates[0].id, records = [];
@@ -9,6 +11,21 @@ const name = id => candidates.find(c => c.id === id)?.name ?? id;
 const announce = message => { $('#status').textContent = message; };
 const format = slot => `${new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(slot.start))}–${slot.end.slice(11, 16)} UTC`;
 const evidenceLine = item => `<li>${escape(renderEvidence(item))}</li>`;
+function renderEsco() {
+  const container = $('#esco-results');
+  try {
+    validateCatalog(ESCO_CATALOG);
+    container.innerHTML = ESCO_CATALOG.categories.map(category =>
+      `<div class="esco-group"><h3>${escape(category.query)} · public glossary examples</h3>
+      <ul class="esco-list">${category.results.map(term =>
+        `<li><strong>${escape(term.en)}</strong><span lang="fi">${escape(term.fi)}</span>
+        <a href="${escape(definitionUrl(term.uri))}" target="_blank" rel="noopener noreferrer">Open EU concept ↗</a></li>`).join('')}</ul></div>`).join('') +
+      `<p class="small">Six illustrative European Commission terms. Fetched: ${escape(ESCO_CATALOG.observedAt.slice(0, 10))}.
+      This glossary never changes candidate evidence, proficiency, visibility or event proposals.</p>`;
+  } catch {
+    container.textContent = 'Public vocabulary source is unavailable; the fictional conversation demo is unchanged.';
+  }
+}
 $('#role').innerHTML = roles.map(r => `<option value="${escape(r.id)}">${escape(r.title)} · ${escape(r.employer.split(' · ')[0])}</option>`).join('');
 $('#role').addEventListener('change', event => {
   role = roles.find(r => r.id === event.target.value); render(); announce(`${role.title}. All candidates remain visible; conversation evidence updated.`);
@@ -97,7 +114,7 @@ function renderMeetings() {
   }));
 }
 $('#reset').addEventListener('click', () => { records = []; $('#meeting-error').hidden = true; render(); announce('Simulation reset. All local proposals and time holds cleared.'); });
-try { render(); } catch { $('#detail').innerHTML = '<p class="error" role="alert">Demo fixtures could not be read. Reload or check the local data files.</p>'; }
+try { render(); renderEsco(); } catch { $('#detail').innerHTML = '<p class="error" role="alert">Demo fixtures could not be read. Reload or check the local data files.</p>'; }
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).then(() => navigator.serviceWorker.ready).then(() => {
   $('#offline').textContent = 'Offline shell cached on this localhost origin. Proposals remain in memory only.';
 }).catch(() => { $('#offline').textContent = 'Offline cache unavailable. Keep the local Node server running; no internet needed.'; });
