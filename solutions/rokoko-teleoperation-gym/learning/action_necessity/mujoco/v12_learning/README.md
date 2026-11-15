@@ -35,7 +35,10 @@ Actual source action support (V10+V11):
 | ABSTAIN 6 | 73,561 | 25,217 | original safety hold, not a learned motor |
 
 The original 320 distinct TRAIN worlds are split deterministically by `seed%5`:
-185 FIT, 65 CAL and 70 untouched diagnostic worlds. Each world gets equalized
+185 FIT, 65 CAL and 70 **world-disjoint diagnostic TRAIN** worlds. The DIAG
+results are used to reject inadequately supported action models, therefore
+this DIAG set is **not** a final untouched evaluation holdout and implies no
+generalization or physics safety guarantee. Each world gets equalized
 training weight across its long/short sequences. The CAL 95% bound uses the
 **maximum prediction error per independent world**, not option count; the
 held diagnostic reports both world-max and event-level coverage, effective
@@ -101,9 +104,12 @@ The source-bound protocol in `next-train-plan.json` and `protocol.py` freezes:
    HEAD and harness SHA receipts. A preliminary source readout is not an
    independently qualified promotion; **no automatic dispatch or spending**.
 
-`protocol.derive_cohort()` independently derives/validates the 512 scan and
-the precise paired world set; `paired_physical_goal_readout()` rejects any
-missing/duplicated trial and calculates only actual physical goal results.
+`protocol.derive_cohort()` verifies the SHA of the **entire pinned plan
+object** and independently derives/validates the 512 scan, so an injected
+different seed window is rejected. `paired_physical_goal_readout()` requires
+the same entire raw public 512 scan and plan again, rederives the exact
+world cohort, rejects any missing/duplicated trial or handpicked cohort,
+and calculates only actual physical goal results.
 It does not execute MuJoCo or certify an output by itself. The existing
 integrator/hosted qualifier owns runner and retention changes. No historical
 CRACI workflow, safety limit or shared output is edited by this task branch.
