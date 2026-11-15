@@ -49,6 +49,12 @@ function adapt(kind, file, text) {
     return replaceOnce(text, '<head>', `<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
   }
   if (kind === 'intel-batch' && file === 'batch/studio/index.html') return replaceOnce(text, 'href="/" aria-label="Inspect / Action home"', 'href="./index.html" aria-label="Inspect / Action home"');
+  if (kind === 'supplypulse' && file === 'index.html') {
+    text = replaceOnce(text, 'href="/style.css"', 'href="./style.css"');
+    text = replaceOnce(text, 'src="/app.mjs"', 'src="./app.mjs"');
+    text = replaceOnce(text, 'href="/" class="brand"', 'href="./index.html" class="brand"');
+    return replaceOnce(text, '<meta charset="utf-8">', `<meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
+  }
   if (kind === 'roundlens' && file === 'public/index.html') {
     text = replaceOnce(text, 'href="/style.css"', 'href="./style.css"');
     text = replaceOnce(text, 'src="/app.mjs"', 'src="./app.mjs"');
