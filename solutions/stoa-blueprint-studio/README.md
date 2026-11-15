@@ -54,6 +54,9 @@ preview README: counts exact, areas within 2 %.
 | Swiss Dwellings, layered DXF — `answerDrawingV2` | test, 35 drawings | 1,278 | **96.4 %** | none |
 | Swiss Dwellings, layered DXF — `answerDrawingV2` | dev, 30 drawings | 1,080 | 98.0 % | none |
 | ifc_models IFC + plan PDFs rendered from them — `src/ifc-qa.mjs` | all 3 models in the preview | 1,049 | **97.7 %** (1,025/1,025 where the model ships; 24 PDFs lack their IFC) | none |
+| ifc_models, 10 GB full dataset — held-out half of 26 models never used for tuning | test, 14 models | 503 | **97.2 %** | none |
+| opening_design construction sheets (A-801, A-701, A700) — sheet context: PDF text layer + Nemotron, 10 parallel | full dataset | 64 | **85.9 %** (count 34/39, area 8/9, text 13/16 lenient) | ≈16,700 tokens/question |
+| same sheets, image only | full dataset | 64 | 23.4 % | ≈15,200 tokens/question |
 | cubicasa5k PNG — Nemotron 3.5 Super VL, one reasoning call per drawing | test, 40 drawings | 351 (English) | 63.2 % | ≈1,600 tokens/question |
 | cubicasa5k PNG — same, 16-drawing subset | test | 141 | 56.0 % | ≈1,600 tokens/question |
 | cubicasa5k PNG — baseline, one reasoning call per question | test, same 16 | 141 | 61.0 % | ≈5,200 tokens/question |
