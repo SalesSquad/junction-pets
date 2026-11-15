@@ -12,12 +12,16 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     const apps = await exportApps(output);
     const catalog = JSON.parse(await readFile(join(output, 'catalog.json'), 'utf8'));
     assert.deepEqual(catalog.apps, apps);
-    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express']));
+    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta']));
     for (const app of apps) assert.match(await readFile(join(output, app.path), 'utf8'), /<html/i);
     assert.match(await readFile(join(output,'apps/spread-director/index.html'), 'utf8'), /Use synthetic example/);
     const example = JSON.parse(await readFile(join(output,'apps/spread-director/demo.json'), 'utf8'));
     assert.equal(example.mode, 'SYNTHETIC_OFFLINE');
     assert.match(await readFile(join(output,'apps/proofmatch/app.mjs'), 'utf8'), /cached in this browser/);
+    const lumo = await readFile(join(output,'apps/lumo/web/index.html'), 'utf8');
+    assert.match(lumo, /href="\.\/styles\.css"/); assert.match(lumo, /src="\.\/app\.mjs"/); assert.doesNotMatch(lumo, /(?:href|src)="\/web\//);
+    assert.match(await readFile(join(output,'apps/lumo/src/coach.mjs'), 'utf8'), /export /);
+    for (const file of ['app.mjs','guide/index.html','guide/guide-app.mjs']) assert.ok((await readFile(join(output,'apps/meta-lens',file),'utf8')).length > 0);
     await assert.rejects(exportApps(output), {code:'EEXIST'});
   } finally { await rm(temp, {recursive:true,force:true}); }
 });
