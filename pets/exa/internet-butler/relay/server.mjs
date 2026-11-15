@@ -10,7 +10,8 @@ import { IMAGES_HEADER, localDecisions, logprobDecisions, openaiDecisions, types
 import { amendmentsAfter, thenNowNext, OFFICIAL_DOMAINS, REGISTRY } from "../src/timetravel/timetravel.ts";
 import { announcedChanges, GOV_DOMAINS } from "../src/timetravel/announced.ts";
 import { nextSteps } from "../src/timetravel/nextSteps.ts";
-import { relativeDate, spokenDate } from "../src/ui/voice.ts";
+import { timeVerdict } from "../src/timetravel/verdict.ts";
+import { monthDate, relativeDate, spokenDate } from "../src/ui/voice.ts";
 import { isPointInTimeUrl, officialFetch } from "../src/warrant/pointInTime.ts";
 
 loadDotEnv(new URL("../.env.local", import.meta.url));
@@ -28,7 +29,7 @@ const MAX_BODY = 256 * 1024;
 const MAX_IMAGE_BODY = 24 * 1024 * 1024;
 const QUESTION_TYPES = new Set(["noul", "choice", "score", "box"]);
 
-// Loaded only with a key, so the keyless relay (and the monorepo test run without this package installed) starts.
+// Keep the relay usable without the optional provider SDK when no key is set.
 const typesafeSdk = TS_KEY ? await import("@typesafe-ai/sdk") : null;
 const typesafe = TS_KEY ? new typesafeSdk.TypeSafeClient({ apiKey: TS_KEY, defaultModel: TS_MODEL }) : null;
 // OpenAI Decisions API (gpt-6-luna). Key from the environment or a key file outside the repo.
@@ -244,7 +245,7 @@ export function createRelay() {
         // answer with its official source, who was asked for what, and what still needs a human, out.
         const question = str(body.question, 5, 2000);
         const today = new Date().toISOString().slice(0, 10);
-        const date = typeof body.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.date) ? body.date : (spokenDate(question) ?? relativeDate(question, today) ?? today);
+        const date = typeof body.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.date) ? body.date : (spokenDate(question) ?? monthDate(question) ?? relativeDate(question, today) ?? today);
         const self = async (path, payload) => {
           const r = await fetch(`http://127.0.0.1:${req.socket.localPort}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
           return { ok: r.ok, json: await r.json().catch(() => ({})) };
@@ -272,6 +273,7 @@ export function createRelay() {
           changed: r.changed,
           evidence: r.evidence,
           computed: r.computed ?? null,
+          verdict: timeVerdict(question, r.then.amount) ?? null,
           agreed: !!r.agreement?.agreed,
           reviewNeeded: !r.agreement?.agreed,
           asked,

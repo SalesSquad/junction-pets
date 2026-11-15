@@ -7,8 +7,10 @@ import type { ThenNowNext } from "../timetravel/timetravel.ts";
 import { asTwoLane } from "../timetravel/timetravel.ts";
 import { buildArtifact, generateDeviceKey, verifyArtifact, type WarrantArtifact } from "../warrant/artifact.ts";
 import { Authority, type AgentGrant, type Authorization, type Proposal } from "../authority/authority.ts";
-import { dictate, relativeDate, speak, spokenDate, stopSpeaking, voiceSupport, VOICE_LANGS } from "./voice.ts";
+import { dictate, monthDate, relativeDate, speak, spokenDate, stopSpeaking, voiceSupport, VOICE_LANGS } from "./voice.ts";
 import { copyText, dictationNote } from "./embed.ts";
+import { icsEvent, lastDay, timeVerdict } from "../timetravel/verdict.ts";
+import { buildPacket } from "./packet.ts";
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
 const today = () => new Date().toISOString().slice(0, 10);
@@ -161,7 +163,7 @@ export function mountThenNow(root: HTMLElement): void {
       (error) => {
         state.listening = false;
         state.voiceNote = dictationNote(error);
-        const said = spokenDate(state.question) ?? relativeDate(state.question, today());
+        const said = spokenDate(state.question) ?? monthDate(state.question) ?? relativeDate(state.question, today());
         if (said) state.date = said;
         render();
       },
@@ -397,6 +399,7 @@ export function mountThenNow(root: HTMLElement): void {
         ${r ? `
         <div class="tt-provision small muted">${support.speak ? `<button id="tt-say" class="tt-mini">Read aloud</button> ` : ""}${esc(r.provision.title)} · found via ${esc(r.provision.via)} · clause chosen by ${esc((r.judges ?? [r.judge ?? "judge"]).join(", "))} (p = ${r.then.p.toFixed(2)}) ${agreementChip(r)}${r.computed ? `<div class="small">${esc(r.computed)}</div>` : ""}</div>
         ${trace(r)}
+        ${(() => { const v = timeVerdict(state.question, r.then.amount); return v ? `<p class="tt-verdict tt-warn"><b>Estimate, not a legal deadline.</b> ${esc(v.text)}${(() => { const last = lastDay(r.eventDate, r.then.amount); return last ? ` Calendar estimate using the displayed date: <b>${esc(last)}</b>. <button id="tt-ics" class="tt-mini" data-last="${esc(last)}">Add verification reminder</button>` : ""; })()}</p>` : ""; })()}
         <div class="tt-grid">
           ${moment("Then", r.then, `<blockquote>${esc(r.evidence.quote)}</blockquote>`)}
           ${moment("Now", r.now, r.changed ? `<div class="tt-warn">Changed since ${esc(r.eventDate)} — a date-blind answer would say ${esc(r.now.amount?.text ?? "something else")}.</div>` : `<div class="tt-ok">Unchanged since ${esc(r.eventDate)}.</div>`)}
@@ -421,7 +424,7 @@ export function mountThenNow(root: HTMLElement): void {
           ${!c.sent ? `<button id="tt-approve" class="primary">Approve with this device and send</button>` : `
           <div class="${c.receiver?.decision === "ACCEPT" ? "tt-ok" : "tt-bad"}"><b>Receiver: ${esc(c.receiver?.decision)}</b>${c.sent.reference ? ` · reference ${esc(c.sent.reference)}` : ""}<br/><span class="small">checked: ${esc(c.receiver?.checked.join(", "))}${c.receiver?.reasons.length ? ` · ${esc(c.receiver.reasons.join("; "))}` : ""}</span></div>
           <p class="small muted">Ledger: ${esc(c.ledger.join(" → "))}</p>
-          <div class="row">${whereUrl() ? `<a class="tt-linkbtn" href="${esc(safeUrl(whereUrl()))}" target="_blank" rel="noreferrer">Open the claim page</a>` : ""}<button id="tt-copy">Copy the claim text</button><a class="tt-linkbtn" id="tt-warrant" download="warrant.json" href="data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(c.artifact ?? {}, null, 1))}">Download the Warrant</a></div>
+          <div class="row">${whereUrl() ? `<a class="tt-linkbtn" href="${esc(safeUrl(whereUrl()))}" target="_blank" rel="noreferrer">Open the claim page</a>` : ""}<button id="tt-copy">Copy the claim text</button><button id="tt-packet">Download the claim packet</button><a class="tt-linkbtn" id="tt-warrant" download="warrant.json" href="data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(c.artifact ?? {}, null, 1))}">Download the Warrant</a></div>
           <p class="small muted">The receiver above is a simulation of what a counterparty can check. Nothing has been sent to the real one: you submit it yourself on their page.</p>
           ${r.changed ? `<button id="tt-blind">What if the receiver read today's page instead?</button>${c.dateBlind ? `<div class="tt-bad small"><b>${esc(c.dateBlind.decision)}</b> — ${esc(c.dateBlind.reasons.join("; "))}. Pinning the official version is what makes the claim checkable.</div>` : ""}` : ""}`}`}
         </div>` : ""}
@@ -454,6 +457,29 @@ export function mountThenNow(root: HTMLElement): void {
     root.querySelector("#tt-date")?.addEventListener("input", (ev) => { state.date = (ev.target as HTMLInputElement).value; state.dateTouched = true; });
     root.querySelector("#tt-run")?.addEventListener("click", () => void run());
     root.querySelector("#tt-steps-go")?.addEventListener("click", () => void workOutSteps());
+    root.querySelector("#tt-packet")?.addEventListener("click", () => {
+      if (!r) return;
+      const v = timeVerdict(state.question, r.then.amount);
+      const html = buildPacket({ r, question: state.question, letter: state.claim?.letter, verdict: v, lastDay: lastDay(r.eventDate, r.then.amount), steps: state.steps?.steps, warrantDigest: state.claim?.artifact?.signature ? `signature ${state.claim.artifact.signature.slice(0, 32)}…` : undefined, generated: new Date().toISOString() });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
+      a.download = `claim-packet-${r.eventDate}.html`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    });
+    root.querySelector("#tt-ics")?.addEventListener("click", (ev) => {
+      const last = (ev.currentTarget as HTMLElement).dataset.last;
+      if (!last || !r) return;
+      // The reminder is for the next local day, not for the unverified estimate.
+      const reminder = new Date(); reminder.setDate(reminder.getDate() + 1);
+      const reminderDate = [reminder.getFullYear(), String(reminder.getMonth() + 1).padStart(2, "0"), String(reminder.getDate()).padStart(2, "0")].join("-");
+      const ics = icsEvent({ summary: `Verify time limit: ${r.provision.title.slice(0, 80)}`, date: reminderDate, description: `This is not a verified legal deadline. Check the starting event, applicable rules and exceptions now. A rough calendar estimate is ${last}, calculated from ${r.eventDate} and ${r.then.amount?.text ?? "the stated period"}. Source: ${r.then.url}`, uid: `${reminderDate}-${last}@internet-butler`, stamp: new Date().toISOString() });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+      a.download = `verify-time-limit-${reminderDate}.ics`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    });
     root.querySelector("#tt-copy")?.addEventListener("click", () => { if (state.claim) void copyText(state.claim.letter); });
     root.querySelector("#tt-lookup-q")?.addEventListener("input", (ev) => (state.lookup.q = (ev.target as HTMLInputElement).value));
     root.querySelector("#tt-lookup-q")?.addEventListener("keydown", (ev) => { if ((ev as KeyboardEvent).key === "Enter") void lookup(); });
@@ -487,7 +513,7 @@ export function mountThenNow(root: HTMLElement): void {
   if (q && q.length >= 5) {
     state.question = q;
     const d = link.get("date");
-    const date = d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : (spokenDate(q) ?? relativeDate(q, today()) ?? today());
+    const date = d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : (spokenDate(q) ?? monthDate(q) ?? relativeDate(q, today()) ?? today());
     state.date = date;
     state.privateMode = link.get("private") === "1";
     state.sayResult = link.get("say") === "1";

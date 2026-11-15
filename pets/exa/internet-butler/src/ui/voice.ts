@@ -10,10 +10,10 @@
  */
 const pad = (n: number | string) => String(n).padStart(2, "0");
 const MONTHS: Array<[RegExp, number]> = [
-  [/^(jan(uary|uar)?|tammikuu(ta|n)?)$/, 1], [/^(feb(ruary|ruar)?|helmikuu(ta|n)?)$/, 2], [/^(mar(ch)?|märz|maerz|maaliskuu(ta|n)?)$/, 3],
-  [/^(apr(il)?|huhtikuu(ta|n)?)$/, 4], [/^(may|mai|toukokuu(ta|n)?)$/, 5], [/^(june?|juni|kesäkuu(ta|n)?)$/, 6],
-  [/^(july?|juli|heinäkuu(ta|n)?)$/, 7], [/^(aug(ust)?|elokuu(ta|n)?)$/, 8], [/^(sep(t|tember)?|syyskuu(ta|n)?)$/, 9],
-  [/^(oct(ober)?|okt(ober)?|lokakuu(ta|n)?)$/, 10], [/^(nov(ember)?|marraskuu(ta|n)?)$/, 11], [/^(dec(ember)?|dez(ember)?|joulukuu(ta|n)?)$/, 12],
+  [/^(jan(uary|uar)?|tammikuu(ta|n|ssa)?)$/, 1], [/^(feb(ruary|ruar)?|helmikuu(ta|n|ssa)?)$/, 2], [/^(mar(ch)?|märz|maerz|maaliskuu(ta|n|ssa)?)$/, 3],
+  [/^(apr(il)?|huhtikuu(ta|n|ssa)?)$/, 4], [/^(may|mai|toukokuu(ta|n|ssa)?)$/, 5], [/^(june?|juni|kesäkuu(ta|n|ssa)?)$/, 6],
+  [/^(july?|juli|heinäkuu(ta|n|ssa)?)$/, 7], [/^(aug(ust)?|elokuu(ta|n|ssa)?)$/, 8], [/^(sep(t|tember)?|syyskuu(ta|n|ssa)?)$/, 9],
+  [/^(oct(ober)?|okt(ober)?|lokakuu(ta|n|ssa)?)$/, 10], [/^(nov(ember)?|marraskuu(ta|n|ssa)?)$/, 11], [/^(dec(ember)?|dez(ember)?|joulukuu(ta|n|ssa)?)$/, 12],
 ];
 const monthOf = (w: string) => MONTHS.find(([re]) => re.test(w.toLowerCase()))?.[1];
 const ORDINALS: Record<string, number> = { first: 1, second: 2, third: 3, fourth: 4, fifth: 5, sixth: 6, seventh: 7, eighth: 8, ninth: 9, tenth: 10, eleventh: 11, twelfth: 12, thirteenth: 13, fourteenth: 14, fifteenth: 15, sixteenth: 16, seventeenth: 17, eighteenth: 18, nineteenth: 19, twentieth: 20, thirtieth: 30 };
@@ -46,6 +46,22 @@ export function spokenDate(text: string): string | undefined {
     const after = yi > i + 1 ? dayOf(words[i + 1]) : undefined;
     const d = before ?? after;
     if (d && valid(y, m, d)) return `${y}-${pad(m)}-${pad(d)}`;
+  }
+  return undefined;
+}
+
+/**
+ * Only a month and a year ("in March 2024", "maaliskuussa 2024"): the middle of that month, or undefined.
+ * Kept apart from spokenDate, which never guesses a day: a form field is left to the person, but a caller
+ * with no field (another agent asking over the API) must not silently fall back to today. Rates change on the
+ * first or last day of a period, so the 15th is the safest single day to read the law on.
+ */
+export function monthDate(text: string): string | undefined {
+  const words = text.replace(/[,]/g, " ").split(/\s+/).filter(Boolean);
+  for (let i = 0; i < words.length; i++) {
+    const m = monthOf(words[i]!.replace(/[.]$/, ""));
+    const y = m && /^\d{4}[.;:?!]?$/.test(words[i + 1] ?? "") ? parseInt(words[i + 1]!, 10) : undefined;
+    if (m && y && valid(y, m, 15)) return `${y}-${pad(m)}-15`;
   }
   return undefined;
 }

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Earned Trust · Review desk</title><link rel="stylesheet" href="style.css">
+<script type="module" src="app.mjs"></script>
+</head>
+<body>
+<a class="skip" href="#workspace">Skip to review</a>
+<header><span class="brand">EARNED TRUST <span>/ REVIEW DESK</span></span><span class="badge">OFFLINE · LOCAL DEMO</span></header>
+<main id="workspace">
+<div class="heading"><p class="eyebrow">TIETO CHALLENGE / INDEPENDENT REFERENCE</p><h1>What earns this change your trust?</h1><p>Inspect the requirement, challenge the evidence, then record your own judgment.</p></div>
+<p class="warning" id="review-status">REVIEW REQUIRED / NOT VERIFIED</p>
+<section class="import-section" aria-labelledby="import-heading"><div><h2 id="import-heading">01 / Open the evidence</h2><p>Choose the retained public sample <strong>run-003/differential.json</strong>. Other packets and altered files are refused. Do not select private records or secrets.</p><p class="path">tools/earned-trust/verification/evidence/run-003/differential.json</p></div><div><label for="receipt">Import JSON · maximum 256 KiB</label><input type="file" id="receipt" accept=".json,application/json"><button id="clear" type="button">Clear local review</button></div></section>
+<p id="message" role="status" aria-live="polite">Choose the original fixture to begin. Nothing is stored or sent.</p>
+<div id="review" hidden>
+<section aria-labelledby="evidence-heading"><p class="eyebrow">02 / REQUIREMENT & EVIDENCE</p><h2 id="evidence-heading">Metadata generics without crashes</h2><p class="fine">Review-desk requirement mapping from the existing packet producer; the receipt itself has no requirement field.</p><p id="requirement"></p><dl id="identity"></dl><p class="counterexample"><strong>Green build ≠ resolver evidence.</strong> Both builds exit 0. The base probe fails, its analyzer/generator crashes and its consumer resolver is absent. A successful build alone does not prove the fix.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Reported evidence gates"><table><caption>Declared source results · no checks run by this desk</caption><thead><tr><th scope="col">Gate</th><th scope="col">Reported status</th><th scope="col">Evidence / limit</th></tr></thead><tbody id="gates"></tbody></table></div>
+<details><summary>Inspect every literal source field</summary><pre id="literal"></pre></details>
+</section>
+<div class="decision-layout"><section aria-labelledby="limits-heading"><p class="eyebrow">REVIEW BOUNDARY</p><h2 id="limits-heading">What remains unverified</h2><ul id="limits"></ul><p>SHA256 binds the imported bytes. It does not authenticate a person, runner or source checkout. No signature is verified.</p></section>
+<section aria-labelledby="decision-heading"><p class="eyebrow">03 / YOUR DECLARATION</p><h2 id="decision-heading">Make the human decision</h2><form id="decision-form">
+<label for="reviewer">Reviewer name · self-declared</label><input id="reviewer" name="reviewer" required maxlength="120" autocomplete="off">
+<label for="decision">Decision</label><select id="decision" required><option value="">Choose explicitly…</option><option value="request-evidence">Request more evidence</option><option value="refuse">Refuse the claim</option><option value="conditional-demonstration-approval">Conditional demonstration approval</option></select>
+<label for="rationale">Rationale · what evidence is missing or sufficient for a demo?</label><textarea id="rationale" rows="5" required maxlength="2000"></textarea>
+<label class="check"><input id="ack" type="checkbox" required><span>I understand this is demo-only and unauthenticated. My decision cannot override failed or unknown evidence gates, approve GitHub acceptance or authorize a release.</span></label>
+<button class="primary" type="submit">Export local declaration (.json)</button><p class="fine">Plain text only. The export includes the source hash, fixed evidence gates, limitations and your declaration. No persistence or identity verification.</p>
+</form></section></div>
+</div>
+<noscript>This desk requires JavaScript modules. Serve this directory on localhost; no internet connection is needed.</noscript>
+</main><footer>Independent reference · no Tieto endorsement · no merge, release or model execution</footer>
+</body></html>

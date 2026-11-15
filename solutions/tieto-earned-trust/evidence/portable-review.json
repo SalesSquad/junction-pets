@@ -1,0 +1,97 @@
+{
+  "workId": "J26-PF-TIETO-REVIEW-20261115",
+  "observedAt": "2026-11-15T10:40:07.726Z",
+  "sourceCommit": "2e8d16686eecc47d0bdea104b541b1af88691739",
+  "sourceState": "Uncommitted task-owned changes atop pinned source; no push/PR authorized.",
+  "branch": "codex/j26-tieto-portable-review-20261115",
+  "executor": {
+    "node": "v26.13.0",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "kind": "local managed workspace-write executor"
+  },
+  "checks": [
+    {
+      "command": "node --test solutions/tieto-earned-trust/review.test.mjs",
+      "exitCode": 0,
+      "result": "pass",
+      "output": "✔ accepts exact original fixture; binds bytes and immutable source IDs (17.295875ms)\n✔ request-evidence is explicit, unauthenticated and cannot override failed/unknown gates (5.42475ms)\n✔ refuse is explicit, unauthenticated and cannot override failed/unknown gates (1.5945ms)\n✔ conditional-demonstration-approval is explicit, unauthenticated and cannot override failed/unknown gates (1.428583ms)\n✔ requires name, rationale, explicit supported decision and acknowledgment (1.626417ms)\n✔ rejects empty, excessive, malformed, invalid UTF8 and non-byte input (0.739083ms)\n✔ rejects altered, missing-check, cross-issue and mismatched source claims (6.392666ms)\n✔ input mutation during digest does not affect the accepted snapshot (0.927291ms)\n✔ rejects markup, controls and misleading direction overrides in human fields (1.30225ms)\n✔ UI uses local modules, text-only data sinks and denies connections (2.582292ms)\nℹ tests 10\nℹ suites 0\nℹ pass 10\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 201.503542"
+    },
+    {
+      "command": "node --check solutions/tieto-earned-trust/desk/review.mjs",
+      "exitCode": 0,
+      "result": "pass",
+      "output": ""
+    },
+    {
+      "command": "node --check solutions/tieto-earned-trust/desk/app.mjs",
+      "exitCode": 0,
+      "result": "pass",
+      "output": ""
+    },
+    {
+      "command": "node --check solutions/tieto-earned-trust/review.test.mjs",
+      "exitCode": 0,
+      "result": "pass",
+      "output": ""
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "pass",
+      "output": "git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead"
+    }
+  ],
+  "testSummary": {
+    "passed": 10,
+    "failed": 0,
+    "skipped": 0
+  },
+  "fixture": {
+    "path": "tools/earned-trust/verification/evidence/run-003/differential.json",
+    "sha256": "cb9164598c280eafdbc677c8ad68030a1579b6a0d489add6faab5d06f1052e8e"
+  },
+  "files": [
+    {
+      "path": "solutions/tieto-earned-trust/desk/index.html",
+      "sha256": "441479da345b8d62cf7d93b633b85ca2c052f7e86403ddf2343431f2c05da6ff"
+    },
+    {
+      "path": "solutions/tieto-earned-trust/desk/style.css",
+      "sha256": "1244be84f446a23b32eab7bb782383bfbcf18fb02f16ee36e23f70450b25af99"
+    },
+    {
+      "path": "solutions/tieto-earned-trust/desk/app.mjs",
+      "sha256": "56dbc3a126d39b5b5d0d0b1b5c59caa9b7a7c6be6ac0407f2cc755dfee318f6b"
+    },
+    {
+      "path": "solutions/tieto-earned-trust/desk/review.mjs",
+      "sha256": "8377fef9cb7746f5afd2134c584752550483145ae1b3ef27a96226f37cccd080"
+    },
+    {
+      "path": "solutions/tieto-earned-trust/review.test.mjs",
+      "sha256": "6ae70b90bdf17d4b674d6f1ab479526da5980f71ddad3ff320ff72dfb74b378b"
+    },
+    {
+      "path": "solutions/tieto-earned-trust/README.md",
+      "sha256": "2ac68a0c04e97fc9e9dfef9822361f5b652329e4e3b335a08d08c3e65de54d7c"
+    },
+    {
+      "path": "solutions/tieto-earned-trust/PROGRESS.md",
+      "sha256": "3928362f12e476586f14b1a7aa2004538bd0a9f65bfff97e81b37b871b7e1ac7"
+    }
+  ],
+  "httpSmoke": {
+    "result": "blocked",
+    "command": "python3 -B -u -m http.server 0 --bind 127.0.0.1 --directory solutions/tieto-earned-trust/desk (bounded Node subprocess smoke)",
+    "error": "PermissionError: [Errno 1] Operation not permitted at socket.bind",
+    "cleanup": "Child exited; no server remains."
+  },
+  "limitations": [
+    "No browser rendering, responsive viewport, import UI, actual download or screen-reader execution.",
+    "No independent review, .NET execution, source/runner/reviewer identity authentication or release.",
+    "Only exact retained differential.json accepted; native packet.json unsupported.",
+    "Live GitHub source/ownership admission provided by work order; not refreshed from this executor."
+  ],
+  "nextAction": "Coordinator: run README localhost walkthrough on an authorized executor, then handle commit/PR."
+}

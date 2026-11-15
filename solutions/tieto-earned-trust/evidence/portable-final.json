@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "workId": "J26-PF-TIETO-REVIEW-20261115",
+  "observedAtUtc": "2026-11-15T10:43:47.620351+00:00",
+  "sourceMain": "2e8d16686eecc47d0bdea104b541b1af88691739",
+  "partnerEvidenceKey": "tieto",
+  "ownedBriefRefs": [
+    "M351"
+  ],
+  "sourceOwner": "solutions/tieto-earned-trust/**",
+  "finalSourceFileSha256": {
+    "solutions/tieto-earned-trust/desk/index.html": "5d5f6cc2a4420d042fe2b215b36f831a5622faeb313d4e416dba803284c4b37c",
+    "solutions/tieto-earned-trust/desk/app.mjs": "56dbc3a126d39b5b5d0d0b1b5c59caa9b7a7c6be6ac0407f2cc755dfee318f6b",
+    "solutions/tieto-earned-trust/desk/review.mjs": "8377fef9cb7746f5afd2134c584752550483145ae1b3ef27a96226f37cccd080",
+    "solutions/tieto-earned-trust/desk/style.css": "1244be84f446a23b32eab7bb782383bfbcf18fb02f16ee36e23f70450b25af99",
+    "solutions/tieto-earned-trust/review.test.mjs": "bddaf535de2b9e6af48d82cba9ca915cd77c732841cd43fa33f0ca882ea4db0c",
+    "solutions/tieto-earned-trust/README.md": "aafd5917a159ed1a7067d7f21e151c7b4ab654ac5020775269528255082be7a6",
+    "solutions/tieto-earned-trust/PROGRESS.md": "9bbb30da768dd02d72d70ec129e9931c25b69c39762a0bc2dceec7ec00552aa4",
+    "solutions/tieto-earned-trust/evidence/portable-review.json": "926e6fffd7744ec328477ff6074c9e13695216685f0555c17c27400116d6fe64"
+  },
+  "acceptance": {
+    "targetedNodeTests": "10/10 PASS after corrected review menu",
+    "syntax": "three ESM files PASS",
+    "diffCheck": "PASS",
+    "HTTP": {
+      "host": "authorized Mac Mini, one-shot localhost only",
+      "200": [
+        "index.html",
+        "app.mjs",
+        "review.mjs",
+        "style.css"
+      ],
+      "404": [
+        "not-present"
+      ],
+      "serverStopped": true
+    },
+    "independentReadOnlyReview": "precursor source reviewed; no P0/P1/P2, but the coordinator found a missed malformed <option> and corrected it after reviewer completed"
+  },
+  "limitations": [
+    "Historical author snapshot hashes predate coordinator corrections and remain intentionally preserved",
+    "Actual Safari/Chromium responsive flow, JSON downloads and accessibility still not executed",
+    "No authenticated human, original SDK qualification, provider connection, source/harness signature or public release",
+    "The unchanged historical comparator evidence is not fresh model execution"
+  ],
+  "newSpending": 0,
+  "providerInferenceCalls": 0,
+  "cost": "unknown; existing subscribed local execution",
+  "nextExternalDependency": "sponsor-original compiler/toolchain qualification and named human review with authenticated independent evidence"
+}
