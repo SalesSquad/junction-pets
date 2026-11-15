@@ -1,0 +1,286 @@
+{
+  "causes": {
+    "late": {
+      "deadline_close": 5,
+      "driver_drop": 3,
+      "driver_late": 1,
+      "failed_visit": 6,
+      "late_refund": 3,
+      "next_day": 5,
+      "orders": 6,
+      "undelivered": 3,
+      "visit_failed_closed": 1,
+      "visit_failed_no_plates": 2,
+      "visit_failed_not_ready": 3
+    },
+    "on_time": {
+      "deadline_close": 10,
+      "driver_drop": 46,
+      "failed_visit": 8,
+      "next_day": 610,
+      "orders": 696,
+      "visit_failed_closed": 1,
+      "visit_failed_no_plates": 2,
+      "visit_failed_not_ready": 5
+    }
+  },
+  "causes_are_overlapping_associations_not_causal_attribution": true,
+  "decision_rows": 702,
+  "labels_reconcile_with_official_score": true,
+  "schemaVersion": 1,
+  "world_count": 6,
+  "worlds": [
+    {
+      "bundle_sha256": "a9ab0493327643496719968e49fa78f75a878ee3d0e4b568a89923371f391ce2",
+      "causes": {
+        "late": {
+          "deadline_close": 2,
+          "driver_drop": 2,
+          "driver_late": 1,
+          "failed_visit": 3,
+          "late_refund": 2,
+          "next_day": 3,
+          "orders": 3,
+          "undelivered": 1,
+          "visit_failed_no_plates": 1,
+          "visit_failed_not_ready": 2
+        },
+        "on_time": {
+          "deadline_close": 3,
+          "driver_drop": 7,
+          "next_day": 96,
+          "orders": 107
+        }
+      },
+      "decision_rows": 110,
+      "margin_cents": 245718,
+      "on_time_orders": 107,
+      "partition": "development",
+      "policy": "learned",
+      "ranked": true,
+      "seed_group": "bahn-reliability-dev-20261115-01",
+      "source": {
+        "files_sha256": {
+          "admission_experiment.py": "87978c32d09afabbd1f4666dadd5d46e515781da41bc983d2df71f6f7a88d2b8",
+          "discovery_experiment.py": "a4591318949347614c217dfbac8db10d8ada8681c4ceee7822c906fff577bf8b",
+          "dispatch.py": "7d02a31cd7dcf04a76ba2fc7b0ca984524e8f89803faeac791f83365f8136b9b",
+          "notes_experiment.py": "a7e32cd9ed0435a1c1a6038cb8c3b70d760edc2dacd96992ed4fae0726cbdda7",
+          "official_study.py": "243d508a44e4ddff30c7b81319fedf370b545b4bf943e0de1412efa1bddf5954",
+          "reliability_experiment.py": "59b3843a9f3a19706cc727d95a6a77cd247c9ac9000b61cf7b1c6420ad3dc956",
+          "typed_notes.py": "73112136261ebc3a02f9436bbcd1894648b8d63a23be9b13e7c7ad22ca66aa8e"
+        },
+        "model_sha256": "33115ca3e7ca4d4520785955e0be92b9aecdc68f9f78fb4bcaa347541f971675",
+        "sdk_version": "0.1.0",
+        "source_sha": "74c551ede77caa613c1a5166f0a4f293318a9c89"
+      },
+      "won_orders": 110,
+      "world_id": "w3db664e7c4c7a7b62a0f"
+    },
+    {
+      "bundle_sha256": "04163075ecaea31e98cf5fd3df7a2ca027c5a8e570c573fb80b14800d415ed76",
+      "causes": {
+        "late": {},
+        "on_time": {
+          "deadline_close": 2,
+          "driver_drop": 9,
+          "failed_visit": 2,
+          "next_day": 60,
+          "orders": 64,
+          "visit_failed_no_plates": 1,
+          "visit_failed_not_ready": 1
+        }
+      },
+      "decision_rows": 64,
+      "margin_cents": 148100,
+      "on_time_orders": 64,
+      "partition": "development",
+      "policy": "learned",
+      "ranked": true,
+      "seed_group": "bahn-reliability-dev-20261115-02",
+      "source": {
+        "files_sha256": {
+          "admission_experiment.py": "87978c32d09afabbd1f4666dadd5d46e515781da41bc983d2df71f6f7a88d2b8",
+          "discovery_experiment.py": "a4591318949347614c217dfbac8db10d8ada8681c4ceee7822c906fff577bf8b",
+          "dispatch.py": "7d02a31cd7dcf04a76ba2fc7b0ca984524e8f89803faeac791f83365f8136b9b",
+          "notes_experiment.py": "a7e32cd9ed0435a1c1a6038cb8c3b70d760edc2dacd96992ed4fae0726cbdda7",
+          "official_study.py": "243d508a44e4ddff30c7b81319fedf370b545b4bf943e0de1412efa1bddf5954",
+          "reliability_experiment.py": "59b3843a9f3a19706cc727d95a6a77cd247c9ac9000b61cf7b1c6420ad3dc956",
+          "typed_notes.py": "73112136261ebc3a02f9436bbcd1894648b8d63a23be9b13e7c7ad22ca66aa8e"
+        },
+        "model_sha256": "33115ca3e7ca4d4520785955e0be92b9aecdc68f9f78fb4bcaa347541f971675",
+        "sdk_version": "0.1.0",
+        "source_sha": "74c551ede77caa613c1a5166f0a4f293318a9c89"
+      },
+      "won_orders": 64,
+      "world_id": "wc3a014dc51e846d51063"
+    },
+    {
+      "bundle_sha256": "87a109b4d639d89fd326caa2b29e9f346fbe1cb4f614af7e6ac785ed1cbbdafb",
+      "causes": {
+        "late": {
+          "deadline_close": 1,
+          "failed_visit": 1,
+          "late_refund": 1,
+          "next_day": 1,
+          "orders": 1,
+          "visit_failed_not_ready": 1
+        },
+        "on_time": {
+          "deadline_close": 2,
+          "driver_drop": 3,
+          "failed_visit": 3,
+          "next_day": 153,
+          "orders": 154,
+          "visit_failed_closed": 1,
+          "visit_failed_no_plates": 1,
+          "visit_failed_not_ready": 1
+        }
+      },
+      "decision_rows": 155,
+      "margin_cents": 350717,
+      "on_time_orders": 154,
+      "partition": "development",
+      "policy": "learned",
+      "ranked": true,
+      "seed_group": "bahn-reliability-dev-20261115-03",
+      "source": {
+        "files_sha256": {
+          "admission_experiment.py": "87978c32d09afabbd1f4666dadd5d46e515781da41bc983d2df71f6f7a88d2b8",
+          "discovery_experiment.py": "a4591318949347614c217dfbac8db10d8ada8681c4ceee7822c906fff577bf8b",
+          "dispatch.py": "7d02a31cd7dcf04a76ba2fc7b0ca984524e8f89803faeac791f83365f8136b9b",
+          "notes_experiment.py": "a7e32cd9ed0435a1c1a6038cb8c3b70d760edc2dacd96992ed4fae0726cbdda7",
+          "official_study.py": "243d508a44e4ddff30c7b81319fedf370b545b4bf943e0de1412efa1bddf5954",
+          "reliability_experiment.py": "59b3843a9f3a19706cc727d95a6a77cd247c9ac9000b61cf7b1c6420ad3dc956",
+          "typed_notes.py": "73112136261ebc3a02f9436bbcd1894648b8d63a23be9b13e7c7ad22ca66aa8e"
+        },
+        "model_sha256": "33115ca3e7ca4d4520785955e0be92b9aecdc68f9f78fb4bcaa347541f971675",
+        "sdk_version": "0.1.0",
+        "source_sha": "74c551ede77caa613c1a5166f0a4f293318a9c89"
+      },
+      "won_orders": 155,
+      "world_id": "w332363ab5663cb9466e0"
+    },
+    {
+      "bundle_sha256": "dcdb5e154c83f50690a07767470db2a416d67fb62706c8fe3710160de5cc3321",
+      "causes": {
+        "late": {
+          "deadline_close": 1,
+          "failed_visit": 1,
+          "next_day": 1,
+          "orders": 1,
+          "undelivered": 1,
+          "visit_failed_closed": 1
+        },
+        "on_time": {
+          "deadline_close": 1,
+          "driver_drop": 13,
+          "failed_visit": 2,
+          "next_day": 102,
+          "orders": 138,
+          "visit_failed_not_ready": 2
+        }
+      },
+      "decision_rows": 139,
+      "margin_cents": 331370,
+      "on_time_orders": 138,
+      "partition": "development",
+      "policy": "learned",
+      "ranked": true,
+      "seed_group": "bahn-reliability-dev-20261115-04",
+      "source": {
+        "files_sha256": {
+          "admission_experiment.py": "87978c32d09afabbd1f4666dadd5d46e515781da41bc983d2df71f6f7a88d2b8",
+          "discovery_experiment.py": "a4591318949347614c217dfbac8db10d8ada8681c4ceee7822c906fff577bf8b",
+          "dispatch.py": "7d02a31cd7dcf04a76ba2fc7b0ca984524e8f89803faeac791f83365f8136b9b",
+          "notes_experiment.py": "a7e32cd9ed0435a1c1a6038cb8c3b70d760edc2dacd96992ed4fae0726cbdda7",
+          "official_study.py": "243d508a44e4ddff30c7b81319fedf370b545b4bf943e0de1412efa1bddf5954",
+          "reliability_experiment.py": "59b3843a9f3a19706cc727d95a6a77cd247c9ac9000b61cf7b1c6420ad3dc956",
+          "typed_notes.py": "73112136261ebc3a02f9436bbcd1894648b8d63a23be9b13e7c7ad22ca66aa8e"
+        },
+        "model_sha256": "33115ca3e7ca4d4520785955e0be92b9aecdc68f9f78fb4bcaa347541f971675",
+        "sdk_version": "0.1.0",
+        "source_sha": "74c551ede77caa613c1a5166f0a4f293318a9c89"
+      },
+      "won_orders": 139,
+      "world_id": "wa5086acf2e7567286538"
+    },
+    {
+      "bundle_sha256": "4a75ab8325ab2ebaa0d344728bbc826b7b3b8be525f74623235011a2d365ebde",
+      "causes": {
+        "late": {
+          "deadline_close": 1,
+          "driver_drop": 1,
+          "failed_visit": 1,
+          "orders": 1,
+          "undelivered": 1,
+          "visit_failed_no_plates": 1
+        },
+        "on_time": {
+          "deadline_close": 2,
+          "driver_drop": 11,
+          "failed_visit": 1,
+          "next_day": 164,
+          "orders": 191,
+          "visit_failed_not_ready": 1
+        }
+      },
+      "decision_rows": 192,
+      "margin_cents": 395128,
+      "on_time_orders": 191,
+      "partition": "development",
+      "policy": "learned",
+      "ranked": true,
+      "seed_group": "bahn-reliability-dev-20261115-05",
+      "source": {
+        "files_sha256": {
+          "admission_experiment.py": "87978c32d09afabbd1f4666dadd5d46e515781da41bc983d2df71f6f7a88d2b8",
+          "discovery_experiment.py": "a4591318949347614c217dfbac8db10d8ada8681c4ceee7822c906fff577bf8b",
+          "dispatch.py": "7d02a31cd7dcf04a76ba2fc7b0ca984524e8f89803faeac791f83365f8136b9b",
+          "notes_experiment.py": "a7e32cd9ed0435a1c1a6038cb8c3b70d760edc2dacd96992ed4fae0726cbdda7",
+          "official_study.py": "243d508a44e4ddff30c7b81319fedf370b545b4bf943e0de1412efa1bddf5954",
+          "reliability_experiment.py": "59b3843a9f3a19706cc727d95a6a77cd247c9ac9000b61cf7b1c6420ad3dc956",
+          "typed_notes.py": "73112136261ebc3a02f9436bbcd1894648b8d63a23be9b13e7c7ad22ca66aa8e"
+        },
+        "model_sha256": "33115ca3e7ca4d4520785955e0be92b9aecdc68f9f78fb4bcaa347541f971675",
+        "sdk_version": "0.1.0",
+        "source_sha": "74c551ede77caa613c1a5166f0a4f293318a9c89"
+      },
+      "won_orders": 192,
+      "world_id": "w6e3d1866d116a2348693"
+    },
+    {
+      "bundle_sha256": "854a2330dbe90d49ef0ee6be1aacf42fd05c445e1fd2f58ffc9c8aae0634d99a",
+      "causes": {
+        "late": {},
+        "on_time": {
+          "driver_drop": 3,
+          "next_day": 35,
+          "orders": 42
+        }
+      },
+      "decision_rows": 42,
+      "margin_cents": 100635,
+      "on_time_orders": 42,
+      "partition": "development",
+      "policy": "learned",
+      "ranked": true,
+      "seed_group": "bahn-reliability-dev-20261115-06",
+      "source": {
+        "files_sha256": {
+          "admission_experiment.py": "87978c32d09afabbd1f4666dadd5d46e515781da41bc983d2df71f6f7a88d2b8",
+          "discovery_experiment.py": "a4591318949347614c217dfbac8db10d8ada8681c4ceee7822c906fff577bf8b",
+          "dispatch.py": "7d02a31cd7dcf04a76ba2fc7b0ca984524e8f89803faeac791f83365f8136b9b",
+          "notes_experiment.py": "a7e32cd9ed0435a1c1a6038cb8c3b70d760edc2dacd96992ed4fae0726cbdda7",
+          "official_study.py": "243d508a44e4ddff30c7b81319fedf370b545b4bf943e0de1412efa1bddf5954",
+          "reliability_experiment.py": "59b3843a9f3a19706cc727d95a6a77cd247c9ac9000b61cf7b1c6420ad3dc956",
+          "typed_notes.py": "73112136261ebc3a02f9436bbcd1894648b8d63a23be9b13e7c7ad22ca66aa8e"
+        },
+        "model_sha256": "33115ca3e7ca4d4520785955e0be92b9aecdc68f9f78fb4bcaa347541f971675",
+        "sdk_version": "0.1.0",
+        "source_sha": "74c551ede77caa613c1a5166f0a4f293318a9c89"
+      },
+      "won_orders": 42,
+      "world_id": "w87d2f98c95eeca2c09f0"
+    }
+  ]
+}
