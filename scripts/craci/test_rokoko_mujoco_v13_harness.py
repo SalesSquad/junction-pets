@@ -156,7 +156,8 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(h.MODEL_SHA, '82cfa42ba2240aff6d00ec3e2b15c06d78386d3c0682986a23e478977f2dbf9e')
 
     def test_known_preflight(self):
-        d = h.verify_preflight('/private/tmp/rokoko-v13-new-world-survey-20261115.json')
+        # Exact public survey from product source faec266; verify_preflight checks its frozen SHA.
+        d = h.verify_preflight(HERE / 'fixtures' / 'rokoko-v13-world-survey.json')
         self.assertEqual(d['near_count'],178)
 
     def test_preflight_tamper(self):
