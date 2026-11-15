@@ -1,6 +1,6 @@
 # Rahasää continuation
 
-Stage: building. Product API, router lab and chaos lab exist in SalesSquad/spankki-coach main `26ced7e78fb4f8533961b9b3b69e88028fc719e4`.
+Stage: building. Product API, router lab and chaos lab exist in SalesSquad/spankki-coach main `35b91e8d6907599ffa96393d10ecae3b184432c1`.
 
 ## Next task
 
@@ -20,6 +20,10 @@ Done 2026-11-15 (SalesSquad/spankki-coach #98–#101, main `26ced7e7`, local CI 
 - **Answer checks** (#100): count/date facts and a language re-ask on; a Haiku claim checker measured (2× cost,
   +3.4 s, no judged gain) and left off. The "do not describe your tools" prompt sentence: two rounds, pooled judge
   53.2 % for the current prompt, not shipped.
+- **Buffer fund honest** (#102): progress only from the savings balance the customer enters; transfers shown for information.
+- **Gated claim checker** (#102, #104): checks only comparisons and period claims (22 % of answers); 200-item A/B
+  showed no judged gain (53.9 % for the product without it, n.s.), so it stays off.
+- **Calmer Home** (#103): grouped sections, two columns on wide screens, weather method behind a toggle.
 - **Support features** (#101): support plan with free debt-advice links, buffer fund, alerts (duplicate charge,
   price rise, new recurring charge), weekly review, own salary for irregular income.
 
