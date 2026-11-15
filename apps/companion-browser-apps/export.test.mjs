@@ -16,6 +16,7 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     assert.deepEqual(catalog.apps, apps);
     assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker','junction-aalto-university','junction-hostinger','junction-cala','junction-context-dev']));
     assert.equal(apps.filter(app=>app.petSlug==='junction-intel').length,2);
+    assert.equal(apps.find(app=>app.petSlug==='junction-context-dev').path,'/apps/supplypulse/index.html');
     for (const app of apps) assert.match(await readFile(join(output, app.path), 'utf8'), /<html/i);
     assert.match(await readFile(join(output,'apps/spread-director/index.html'), 'utf8'), /Use synthetic example/);
     const example = JSON.parse(await readFile(join(output,'apps/spread-director/demo.json'), 'utf8'));
@@ -33,6 +34,10 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     assert.match(traffic,/connect-src 'none'/); assert.match(traffic,/src="\.\/app\.mjs"/);
     const replay=await readFile(join(output,'apps/supplypulse-replay/index.html'),'utf8');
     assert.match(replay,/SYNTHETIC_REPLAY/); assert.match(replay,/connect-src 'none'/); assert.match(replay,/src="\.\/app\.mjs"/);
+    const supplypulse=await readFile(join(output,'apps/supplypulse/index.html'),'utf8');
+    assert.match(supplypulse,/127\.0\.0\.1:4188\/watches\//);
+    const saved=JSON.parse(await readFile(join(output,'apps/supplypulse/evidence.json'),'utf8'));
+    assert.equal(saved.mode,'HISTORICAL_CAPTURE');assert.equal(saved.offers.length,2);assert(!('winner' in saved));
     const roundlens=join(output,'apps/roundlens');
     const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css'];
     const entries=await Promise.all(names.map(async name=>`${name}\0${createHash('sha256').update(await readFile(join(roundlens,name))).digest('hex')}\n`));

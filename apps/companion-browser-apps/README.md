@@ -37,3 +37,10 @@ required local asset, with no secrets or private data. Server-backed solutions
 need their actual runtime and deployment before they can be listed as runnable
 here. Never infer an app URL from a repository, company website or localhost
 port. Keep synthetic/demo boundaries visible and retain upstream provenance.
+
+SupplyPulse's primary App entry (`apps/supplypulse`) presents saved real public
+Context observations and opens the complete product watches/live comparison on
+the owner's Mac. It does not embed or export its server, SQLite state or key;
+the page explicitly identifies that runtime requirement. The earlier synthetic
+replay remains a separate secondary app. Registration must be consumed through
+Chibi's source-pinned browser-app sync before it appears in the deployed Site.
