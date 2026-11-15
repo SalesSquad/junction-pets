@@ -16,6 +16,7 @@ import { companyContext } from '../../lib/company-context.mjs';
 import { validateResponse, toPendingActions, RESPONSE_SCHEMA, RESPONSE_SCHEMA_V2 } from '../aiven-decision-bridge/bridge.mjs';
 import { lintResponse } from '../aiven-decision-bridge/lint.mjs';
 import { systemFor, MODULES } from '../../pets/aiven/modules/router.mjs';
+import { answerWithCascade } from '../../services/aiven-platform/cascade.mjs';
 
 const arg = (k, d) => process.argv.find(a => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -78,7 +79,9 @@ await Promise.all(Array.from({ length: concurrency }, async () => {
     const v1 = arm === 'full';
     const system = v1 ? fullSystem : arm === 'routed' ? systemFor(c.prompt).system : allModules;
     const schema = v1 ? RESPONSE_SCHEMA : RESPONSE_SCHEMA_V2;
-    let a = await claude(model, c.prompt, system, schema), cost = a.cost ?? 0, repaired = false, lintBefore = null;
+    let a, cost = 0, repaired = false, lintBefore = null, route = null;
+    if (arm === 'cascade') { const r = await answerWithCascade({ request: c.prompt, claude }); a = r.response ? { data: r.response, cost: r.cost } : { error: r.error }; cost = r.cost ?? 0; route = r.route; }
+    else { a = await claude(model, c.prompt, system, schema); cost = a.cost ?? 0; }
     if (!a.error && a.data && arm === 'repair') {
       const issues = lintResponse(a.data, c.prompt); lintBefore = issues.length;
       if (issues.length) {
@@ -99,7 +102,7 @@ await Promise.all(Array.from({ length: concurrency }, async () => {
       const inc = gr.g.include.filter(Boolean).length, viol = gr.g.violations.filter(Boolean).length;
       per[jm] = { pass: detOk && inc === c.mustInclude.length && viol === 0, score: +(Math.max(0, inc / c.mustInclude.length - 0.5 * viol) * (detOk ? 1 : 0.5)).toFixed(3), note: gr.g.note };
     }
-    results.push({ model, arm, case: c.id, challenger: c.challenger, rep, det, repaired, lintIssuesBefore: lintBefore, lintIssuesAfter: lintResponse(a.data, c.prompt).length, judges: per, costUsd: +cost.toFixed(4), responseSha256: sha(raw), _raw: a.data });
+    results.push({ model, arm, route, case: c.id, challenger: c.challenger, rep, det, repaired, lintIssuesBefore: lintBefore, lintIssuesAfter: lintResponse(a.data, c.prompt).length, judges: per, costUsd: +cost.toFixed(4), responseSha256: sha(raw), _raw: a.data });
     console.error(`${model}/${arm} ${c.id}#${rep} ${judges.map(j => per[j] ? (per[j].pass ? 'P' : per[j].score) : 'ERR').join(' ')}`);
   }
 }));
@@ -116,7 +119,7 @@ const summary = {};
 for (const m of models) for (const arm of arms) {
   const rs = results.filter(r => r.model === m && r.arm === arm && !r.error);
   if (!rs.length) continue;
-  const s = { runs: rs.length, errors: results.filter(r => r.model === m && r.arm === arm && r.error).length, costUsd: +rs.reduce((a, r) => a + r.costUsd, 0).toFixed(3), repaired: rs.filter(r => r.repaired).length, det: Object.fromEntries(['schemaValid', 'noExecution', 'proposalOk', 'noSecretEcho'].map(k => [k, rs.filter(r => r.det[k]).length])) };
+  const s = { routes: Object.fromEntries(Object.entries(Object.groupBy(rs, r => r.route ?? arm)).map(([k, v]) => [k, v.length])), runs: rs.length, errors: results.filter(r => r.model === m && r.arm === arm && r.error).length, costUsd: +rs.reduce((a, r) => a + r.costUsd, 0).toFixed(3), repaired: rs.filter(r => r.repaired).length, det: Object.fromEntries(['schemaValid', 'noExecution', 'proposalOk', 'noSecretEcho'].map(k => [k, rs.filter(r => r.det[k]).length])) };
   for (const j of judges) { const g = rs.filter(r => r.judges[j]); const k = g.filter(r => r.judges[j].pass).length;
     s[j] = { pass: +(k / (g.length || 1)).toFixed(3), passCI95: wilson(k, g.length), meanScore: +(g.reduce((a, r) => a + r.judges[j].score, 0) / (g.length || 1)).toFixed(3), meanCI95: bootstrapMean(g, r => r.judges[j].score) }; }
   const both = rs.filter(r => judges.every(j => r.judges[j]));
