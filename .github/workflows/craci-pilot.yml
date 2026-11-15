@@ -55,6 +55,7 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - rokoko-mujoco-v10-prospective
         - rokoko-mujoco-v10-hybrid-prospective
         - rokoko-mujoco-v11-prospective
+        - rokoko-mujoco-v12-pilot
         - rokoko-shared-tournament
         - rokoko-shared-preflight
         - valio-wal-chaos
@@ -4900,6 +4901,118 @@ jobs:
         "$RUNNER_TEMP/mujoco-venv/bin/python" -B -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v11_*.py'
     - id: receipt
       name: Finalize exact source-bound V11 TRAIN-only CRACI receipt
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome == 'success' && steps.packaging.outcome == 'success' && 'success' || 'failure' }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          echo 'Pinned CRACI harness absent; cannot certify result' >&2
+          exit 1
+        fi
+    - name: Retain evidence whether science succeeds or fails
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v12-pilot:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v12-pilot' }}
+    name: Rokoko V12 trained contact-to-dwell 518000 fresh 144-episode TRAIN pilot
+    runs-on: craci
+    timeout-minutes: 60
+    concurrency:
+      group: craci-rokoko-mujoco-v12-pilot-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v12-pilot
+      CRACI_CREDIT_WINDOW_OPEN: ${{ vars.CRACI_CREDIT_WINDOW_OPEN }}
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU MuJoCo physics for prospective TRAIN-only comparison
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Stop before credit expiry and demand an exact reviewed source
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
+        test "$remaining" -gt 3600
+        printf 'CRACI_CREDIT_REMAINING_SECONDS=%s\n' "$remaining" >> "$GITHUB_ENV"
+        test "$CRACI_SOURCE_SHA" = '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f'
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install exact original MuJoCo and NumPy wheels
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+    - name: Compile immutable negative TRAIN science into V12 learning admission (no automatic dispatch)
+      run: |
+        set -euo pipefail
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -B "$CRACI_HARNESS_ROOT/scripts/craci/feedback_loop_v2/compile.py" \
+          --mode compile --require-git --expected-head "$CRACI_HARNESS_SHA" \
+          --repo-root "$CRACI_HARNESS_ROOT" \
+          --output-dir "$RUNNER_TEMP/craci-evidence/artifacts/rokoko-feedback-v2" \
+          --candidate v11 --credit-cutoff-utc "$CRACI_WINDOW_END"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import json,os; p=os.environ['RUNNER_TEMP']+'/craci-evidence/artifacts/rokoko-feedback-v2/feedback.json'; o=json.load(open(p)); assert o['decision']=='TRAIN_MORE_FOR_UNSUPPORTED_ACTION' and o['model_promotion_authorized'] is False and o['job_dispatch_authorized'] is False and o['sealed_splits_unopened'] is True and o['next_experiment']['pilot']['start']==518000 and o['next_experiment']['pilot']['end']==518511"
+    - name: Execute bounded 144-episode V12 fresh TRAIN pilot and independent full physics replay
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- "$RUNNER_TEMP/mujoco-venv/bin/python" -B "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v12-pilot-qualification.py"
+    - name: Rerun pinned independent evidence and qualifier contract checks
+      id: packaging
+      run: |
+        set -euo pipefail
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -B -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v12_*.py'
+    - id: receipt
+      name: Finalize exact source-bound V12 TRAIN-only CRACI receipt
       if: ${{ always() }}
       env:
         CRACI_JOB_STATUS: ${{ job.status }}

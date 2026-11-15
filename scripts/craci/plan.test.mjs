@@ -73,3 +73,19 @@ test('V11 fresh real MuJoCo 800-episode workload requires one exact reviewed sou
     ...context, now: '2026-11-15T17:00:00Z'
   }), /deadline/);
 });
+
+test('V12 source-trained 144-episode fresh pilot source and deadline are exact inputs', () => {
+  const workload = 'rokoko-mujoco-v12-pilot';
+  assert.ok(WORKLOADS.includes(workload));
+  assert.throws(() => resolvePlan({workload}, context), /requires an explicit source_sha/);
+  const source = '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f';
+  const admitted = resolvePlan({workload, source_sha: source}, context);
+  assert.equal(admitted.jobCount, 1);
+  assert.equal(admitted.maxParallel, 1);
+  assert.deepEqual(admitted.matrix.include.map(x => x.source_sha), [source]);
+  assert.deepEqual(admitted.matrix.include.map(x => x.cell), [workload]);
+  assert.deepEqual(admitted.matrix.include.map(x => x.qualification), ['product-source']);
+  assert.throws(() => resolvePlan({workload, source_sha: source}, {
+    ...context, now: '2026-11-15T17:00:00Z'
+  }), /deadline/);
+});
