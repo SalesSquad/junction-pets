@@ -1,0 +1,183 @@
+{
+ "ai_jev": {
+  "jev": {
+   "choice": "keep_option",
+   "confidence": 0.55,
+   "p": {
+    "keep_option": 0.7,
+    "promote": 0.29,
+    "reject": 0.01
+   }
+  },
+  "openai": {
+   "choice": "keep_option",
+   "confidence": 0.34,
+   "p": {
+    "keep_option": 0.56,
+    "promote": 0.25,
+    "reject": 0.19
+   }
+  },
+  "stats": {
+   "fail_rate": 0.0,
+   "mean_margin_eur": 8546,
+   "p10_on_time": 0.91,
+   "paired_worlds": 12,
+   "policy": "ai_jev",
+   "ranked_margin_delta_pct": 22.1,
+   "ranked_margin_delta_pct_95ci": [
+    -4.9,
+    49.1
+   ],
+   "reference": "vol360",
+   "reference_fail_rate": 0.167,
+   "worlds_better": 8,
+   "worst_on_time": 0.91
+  }
+ },
+ "ai_openai": {
+  "jev": {
+   "choice": "reject",
+   "confidence": 0.92,
+   "p": {
+    "keep_option": 0.05,
+    "promote": 0.0,
+    "reject": 0.95
+   }
+  },
+  "openai": {
+   "choice": "reject",
+   "confidence": 0.67,
+   "p": {
+    "keep_option": 0.13,
+    "promote": 0.09,
+    "reject": 0.78
+   }
+  },
+  "stats": {
+   "fail_rate": 0.167,
+   "mean_margin_eur": 8108,
+   "p10_on_time": 0.8906,
+   "paired_worlds": 12,
+   "policy": "ai_openai",
+   "ranked_margin_delta_pct": 0.0,
+   "ranked_margin_delta_pct_95ci": [
+    0.0,
+    0.0
+   ],
+   "reference": "vol360",
+   "reference_fail_rate": 0.167,
+   "worlds_better": 0,
+   "worst_on_time": 0.8881
+  }
+ },
+ "switch": {
+  "jev": {
+   "choice": "reject",
+   "confidence": 0.96,
+   "p": {
+    "keep_option": 0.03,
+    "promote": 0.0,
+    "reject": 0.97
+   }
+  },
+  "openai": {
+   "choice": "reject",
+   "confidence": 0.45,
+   "p": {
+    "keep_option": 0.31,
+    "promote": 0.06,
+    "reject": 0.63
+   }
+  },
+  "stats": {
+   "fail_rate": 0.125,
+   "mean_margin_eur": 8183,
+   "p10_on_time": 0.8919,
+   "paired_worlds": 24,
+   "policy": "switch",
+   "ranked_margin_delta_pct": -1.8,
+   "ranked_margin_delta_pct_95ci": [
+    -17.8,
+    14.2
+   ],
+   "reference": "vol360",
+   "reference_fail_rate": 0.083,
+   "worlds_better": 15,
+   "worst_on_time": 0.8844
+  }
+ },
+ "switch_wk": {
+  "jev": {
+   "choice": "reject",
+   "confidence": 0.25,
+   "p": {
+    "keep_option": 0.46,
+    "promote": 0.04,
+    "reject": 0.5
+   }
+  },
+  "openai": {
+   "choice": "reject",
+   "confidence": 0.42,
+   "p": {
+    "keep_option": 0.32,
+    "promote": 0.07,
+    "reject": 0.61
+   }
+  },
+  "stats": {
+   "fail_rate": 0.0,
+   "mean_margin_eur": 7227,
+   "p10_on_time": 0.9142,
+   "paired_worlds": 23,
+   "policy": "switch_wk",
+   "ranked_margin_delta_pct": -2.2,
+   "ranked_margin_delta_pct_95ci": [
+    -17.3,
+    12.9
+   ],
+   "reference": "vol360",
+   "reference_fail_rate": 0.087,
+   "worlds_better": 2,
+   "worst_on_time": 0.9091
+  }
+ },
+ "v360wk240": {
+  "jev": {
+   "choice": "reject",
+   "confidence": 0.26,
+   "p": {
+    "keep_option": 0.47,
+    "promote": 0.02,
+    "reject": 0.51
+   }
+  },
+  "openai": {
+   "choice": "reject",
+   "confidence": 0.55,
+   "p": {
+    "keep_option": 0.28,
+    "promote": 0.02,
+    "reject": 0.7
+   }
+  },
+  "stats": {
+   "fail_rate": 0.0,
+   "mean_margin_eur": 6883,
+   "p10_on_time": 0.9388,
+   "paired_worlds": 24,
+   "policy": "v360wk240",
+   "ranked_margin_delta_pct": -7.4,
+   "ranked_margin_delta_pct_95ci": [
+    -22.2,
+    7.3
+   ],
+   "reference": "vol360",
+   "reference_fail_rate": 0.083,
+   "worlds_better": 2,
+   "worst_on_time": 0.9227
+  }
+ }
+}
+AI_USAGE={"jev_calls": 5, "jev_input_tokens": 3199, "jev_ms": 1114, "openai_calls": 5, "openai_input_tokens": 1919, "openai_ms": 1204, "usd": 0.00033}

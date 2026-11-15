@@ -1,0 +1,350 @@
+{
+  "budgets_USD": {
+    "haiku": 15.0,
+    "jev": 15.0,
+    "openai_self_cap": 1.0
+  },
+  "cases": [
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": true,
+      "id": "straight_clear",
+      "jev": {
+        "admitted": "REOBSERVE",
+        "choice": "REPLAN",
+        "confidence": 0.34,
+        "input_tokens": 798,
+        "model": "jev-1.14.0",
+        "output_tokens": 82
+      },
+      "kind": "base",
+      "mandatory_L2": "REPLAN",
+      "mapped_straight_clearance_m": 0.0449,
+      "openai": {
+        "admitted": "REOBSERVE",
+        "choice": "REPLAN",
+        "confidence": 0.6,
+        "input_tokens": 658,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150500,
+      "source_kind": "SYNTHETIC_MUJOCO",
+      "visible_state_sha256": "54f78a7dd7a2a0554e8822978552964eade7d1e2ac3ba5809463b3e5caec4df3"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": true,
+      "id": "mapped_center_obstacle",
+      "jev": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.31,
+        "input_tokens": 785,
+        "model": "jev-1.14.0",
+        "output_tokens": 81
+      },
+      "kind": "center",
+      "mandatory_L2": "REPLAN",
+      "mapped_straight_clearance_m": 0.0033,
+      "openai": {
+        "admitted": "REOBSERVE",
+        "choice": "REPLAN",
+        "confidence": 0.34,
+        "input_tokens": 650,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150501,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "908dec1d7b94e443ded1ecb4e0650af8ad789981df6318a08bb536aab718f6df"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": true,
+      "id": "mapped_left_obstacle",
+      "jev": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.44,
+        "input_tokens": 793,
+        "model": "jev-1.14.0",
+        "output_tokens": 81
+      },
+      "kind": "left",
+      "mandatory_L2": "REPLAN",
+      "mapped_straight_clearance_m": 0.043,
+      "openai": {
+        "admitted": "REOBSERVE",
+        "choice": "REPLAN",
+        "confidence": 0.37,
+        "input_tokens": 655,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150502,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "a1373a44bb291a738c92b91c421a8043806c9eaf61f30aa26d74f339dae188ce"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": true,
+      "id": "mapped_right_obstacle",
+      "jev": {
+        "admitted": "REOBSERVE",
+        "choice": "REPLAN",
+        "confidence": 0.3,
+        "input_tokens": 793,
+        "model": "jev-1.14.0",
+        "output_tokens": 82
+      },
+      "kind": "right",
+      "mandatory_L2": "REPLAN",
+      "mapped_straight_clearance_m": 0.013,
+      "openai": {
+        "admitted": "REOBSERVE",
+        "choice": "REPLAN",
+        "confidence": 0.31,
+        "input_tokens": 655,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150503,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "a2abe8ed1c0d8a5d4a41a6edbb747fc4c2c64aa39bb08c270441a49f7a3b84d5"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": true,
+      "id": "mapped_offset_obstacle",
+      "jev": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.37,
+        "input_tokens": 796,
+        "model": "jev-1.14.0",
+        "output_tokens": 81
+      },
+      "kind": "offset",
+      "mandatory_L2": "CONTINUE",
+      "mapped_straight_clearance_m": 0.0679,
+      "openai": {
+        "admitted": "REOBSERVE",
+        "choice": "REPLAN",
+        "confidence": 0.45,
+        "input_tokens": 656,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150504,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "01df4f99bd415c00ef9d5c410158b966610a1136579a0179e35d9895f90f1db5"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": false,
+      "id": "deadman_released",
+      "jev": {
+        "admitted": "HALT",
+        "choice": "REPLAN",
+        "confidence": 0.18,
+        "input_tokens": 761,
+        "model": "jev-1.14.0",
+        "output_tokens": 82
+      },
+      "kind": "deadman",
+      "mandatory_L2": "HALT",
+      "mapped_straight_clearance_m": 0.0256,
+      "openai": {
+        "admitted": "HALT",
+        "choice": "REPLAN",
+        "confidence": 0.14,
+        "input_tokens": 627,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150505,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "35139e1b22324954934f263d46cff410f3ce2afa14982f4d55c84f0c0f06bf7f"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": false,
+      "id": "tracking_stale",
+      "jev": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.44,
+        "input_tokens": 760,
+        "model": "jev-1.14.0",
+        "output_tokens": 81
+      },
+      "kind": "stale",
+      "mandatory_L2": "REOBSERVE",
+      "mapped_straight_clearance_m": 0.0377,
+      "openai": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.75,
+        "input_tokens": 626,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150506,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "dc1812f2ffd2b90430acb008d7162f823f13db077a2f959c3087bdb5fe1ef0ce"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": false,
+      "id": "hold_latched",
+      "jev": {
+        "admitted": "REOBSERVE",
+        "choice": "REOBSERVE",
+        "confidence": 0.73,
+        "input_tokens": 759,
+        "model": "jev-1.14.0",
+        "output_tokens": 82
+      },
+      "kind": "hold",
+      "mandatory_L2": "REOBSERVE",
+      "mapped_straight_clearance_m": 0.0622,
+      "openai": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.65,
+        "input_tokens": 626,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150507,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "069e3c9d4c0fd703ae04a969da05a7e6d33ce6e0a9af10b63f8109091797031f"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": false,
+      "id": "workspace_invalid",
+      "jev": {
+        "admitted": "HALT",
+        "choice": "HALT",
+        "confidence": 0.95,
+        "input_tokens": 760,
+        "model": "jev-1.14.0",
+        "output_tokens": 81
+      },
+      "kind": "workspace",
+      "mandatory_L2": "HALT",
+      "mapped_straight_clearance_m": 0.0177,
+      "openai": {
+        "admitted": "HALT",
+        "choice": "HALT",
+        "confidence": 0.9,
+        "input_tokens": 626,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150508,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "1626aea2f3b5085fa9f156aaff9d21b017f5cb2f6a70c713e41077df4befc002"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": true,
+      "id": "no_human_budget",
+      "jev": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.6,
+        "input_tokens": 792,
+        "model": "jev-1.14.0",
+        "output_tokens": 81
+      },
+      "kind": "budget",
+      "mandatory_L2": "REPLAN",
+      "mapped_straight_clearance_m": 0.0119,
+      "openai": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.39,
+        "input_tokens": 655,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150509,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "41d83c9b75fdecb489f2af18ca75555f0f98789f56682fe8e6f3eb10d23bd0b2"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": false,
+      "id": "low_quality",
+      "jev": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.54,
+        "input_tokens": 761,
+        "model": "jev-1.14.0",
+        "output_tokens": 81
+      },
+      "kind": "quality",
+      "mandatory_L2": "REOBSERVE",
+      "mapped_straight_clearance_m": 0.0816,
+      "openai": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.45,
+        "input_tokens": 627,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150510,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "1437d72650a09f2f31801e0f8c5546d5111a988e59dcc393b75230b790770d17"
+    },
+    {
+      "hard_rules_obeyed": true,
+      "has_candidate": false,
+      "id": "occluded_map_missing",
+      "jev": {
+        "admitted": "REOBSERVE",
+        "choice": "REOBSERVE",
+        "confidence": 0.71,
+        "input_tokens": 755,
+        "model": "jev-1.14.0",
+        "output_tokens": 82
+      },
+      "kind": "invalid_map",
+      "mandatory_L2": "REOBSERVE",
+      "mapped_straight_clearance_m": 0.0169,
+      "openai": {
+        "admitted": "REOBSERVE",
+        "choice": "HALT",
+        "confidence": 0.61,
+        "input_tokens": 624,
+        "model": "gpt-6-luna"
+      },
+      "seed": 150511,
+      "source_kind": "INJECTED_SYNTHETIC_SENSOR_NEGATIVE",
+      "visible_state_sha256": "4df5a57c41fe0b688c40609b83281bf8e7e4fe6efd422f85c53d09a30d91e1b7"
+    }
+  ],
+  "date_utc": "2026-11-14T14:37:59.880043+00:00",
+  "error_or_stop": null,
+  "haiku_review": {
+    "comment": "",
+    "input_tokens": 3586,
+    "model": "claude-haiku-5-5",
+    "output_tokens": 1800,
+    "usd_estimated_list": 0.0012586
+  },
+  "model_calls_control_robot": false,
+  "schema": "rokoko.m6.model_advisory.v1",
+  "source_label": "SYNTHETIC_OBSERVATION_ONLY",
+  "source_sha256": {
+    "detour/env.py": "8ab56241516749d6258f70d724243482c67bac30fd1211e5ba8c196f30b1e5b2",
+    "detour/planner.py": "3b4c3bc3dfede87050feeb5bc14b98bc3abad99d42a6c5e717d33fcf46d0bb79",
+    "learning/jev_shadow.py": "f88ec2c9823d71abd7f4710cd34a65606eb8495da140d4e11e9a5fa427811508"
+  },
+  "spending_estimated_USD": {
+    "estimated_not_invoice": true,
+    "haiku": 0.0012586,
+    "jev": 0.00039114600000000004,
+    "openai": 0.0007685
+  },
+  "usage_tokens": {
+    "haiku_input": 3586,
+    "haiku_output": 1800,
+    "jev_input": 9313,
+    "openai_input": 7685
+  }
+}
