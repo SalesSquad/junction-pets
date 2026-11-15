@@ -4,7 +4,7 @@ Stage: building. Created 15 November 2026 from main `e0d397463f03adb92e106d46eac
 `claude/rokoko-hand-force-lab-20261115`. Writer: Claude session for the owner. Checks actually run in that session:
 `python3 rokoko_v3.py` (round trip passes), `python3 teleop_replay.py` (153.8 N peak grip from the simulated stream),
 `tasks.cup_task()` (bottle placed upright), all five scenarios rendered, `exp.py feedback friction learn`.
-No hosted CI run. `node scripts/solution-workspace.mjs check` result is recorded in the PR/branch report.
+Registered in `apps/companion-browser-apps/catalog.json` as a second junction-rokoko app (`hand-force-lab`, entry `site/index.html`); `export.mjs` and `export.test.mjs` pass with it. No hosted CI run. `node scripts/solution-workspace.mjs check` result is recorded in the PR/branch report.
 
 ## Next tasks
 
