@@ -54,11 +54,22 @@ _Updated 2026-11-14T21:55:11Z from 3 run(s), 74/74 turns ok._
   problems; the extra critic round for surviving hard problems never had to fire. (2026-11-15)
 - **Memory makes running jokes — and new tics.** Rokoko's three-quarter-time waltz carried
   from the crash scene into the ethics scene, MariaDB's 13 May 2018 came back in every
-  disk-full run. Good once per scene; next: let a note fade after it has been used. (2026-11-15)
+  disk-full run. Good once per scene; so notes now fade (next entry). (2026-11-15)
+- **Catch tics by shape, not by list.** Word lists miss the swap ("Fascinating." for a spent
+  "Interesting."). The checks now look at shape: a second one-word exclamation opener, a pet
+  reheating two content words of its own earlier line, a distinctive three-word lift from an
+  example line, and a non-sequitur test (the writer copies what it answers; it must be in the
+  last two lines or the beat). Across scenes a habit ledger keeps openers and the content words
+  a pet used in two of its last four scenes. Replaying the 9 text receipts, it surfaced exactly
+  what the blind judge complained about: Rokoko trekvart/hofterne, NVIDIA thousand/threads,
+  MariaDB minns/datum, Atech kettle. Callbacks: one per pet per scene, a note retires after two.
+  Live effect not yet measured — every text model was daily-capped by 02:00. (2026-11-15)
 - **Free text quota ≈ 8 scenes a night.** A 12-turn scene costs ~45 Gemini text calls
   (director, writer, critic, memory). After ~8 scenes 3.5-flash-lite and then 3.5-flash hit
   their daily caps (reset ≈ 08:00 UTC). Iterate on text in small batches, judge with Haiku, and
-  keep the morning quota for audio. (2026-11-15)
+  keep the morning quota for audio. The `gemini-flash-lite-latest` alias answered a probe at
+  02:00 but was capped two calls later; 3.6-flash was capped, 3.7-flash 503, 3.8-flash and
+  `flash-latest` timed out, the rest 404. It stays as the third writer. (2026-11-15)
 
 - **Use the MBP Keychain key directly in-process.** `gemini-agent` deliberately refuses
   generation (`status|inventory|probe` only); voice work uses `pet_voice.py`, which reads the

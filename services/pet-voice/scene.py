@@ -28,7 +28,9 @@ MEMORY_FILE = pv.RUNS_DIR.parent / "memory" / "pets.json"
 DESIGNED_FILE = HERE / "learned" / "designed-voices.json"
 TASTE_FILE = HERE / "learned" / "taste.json"
 SCENE_EVIDENCE = HERE / "scene-evidence"
-WRITERS = ["gemini-3.5-flash-lite", "gemini-3.5-flash"]
+# 15 Nov 02:00: both 3.5 models hit their free daily caps after ~8 text scenes; the `flash-lite-latest` alias still
+# answered in ~1 s (3.6-flash daily-capped, 3.7-flash 503, 3.8-flash and flash-latest timed out, others 404).
+WRITERS = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-flash-lite-latest"]
 MOVES = ["react", "answer", "push back", "joke", "tease", "short reaction", "admit doubt", "new idea", "change the subject", "wrap up"]
 
 CRAFT = """How you talk matters more than anything else:
@@ -78,7 +80,8 @@ def taste() -> dict:
 
 
 # ----------------------------------------------------------------- prompts ---
-def system_prompt(slug: str, cast: list[str], lang: str, memory_notes: list[str]) -> str:
+def system_prompt(slug: str, cast: list[str], lang: str, memory_notes: list[str], openers: list[str] | None = None,
+                  worn: list[str] | None = None) -> str:
     c, p = characters()[slug], pv.persona(slug)
     rel = "; ".join(f"{pv.persona(o)['name']}: {txt}" for o, txt in c.get("relationships", {}).items() if o in cast)
     t = taste().get("pets", {}).get(slug, {})
@@ -87,7 +90,14 @@ def system_prompt(slug: str, cast: list[str], lang: str, memory_notes: list[str]
         owner = ("\nThe person you perform for has rated earlier lines. More like: " + " / ".join(t.get("liked", [])[:2] or ["-"])
                  + ". Less like: " + " / ".join(t.get("disliked", [])[:2] or ["-"]) + ". Their notes: "
                  + " / ".join(taste().get("notes", [])[-3:] or ["-"]))
-    mem = ("\nYou remember from earlier scenes: " + " / ".join(memory_notes)) if memory_notes else ""
+    mem = ("\nFrom earlier scenes you could call back to (at most one callback in this scene, only if the moment invites "
+           "it; then set `callback` to its number): " + " ".join(f"[{i}] {n}" for i, n in enumerate(memory_notes, 1))
+           ) if memory_notes else ""
+    habits = sorted({o for o in (openers or []) if (openers or []).count(o) >= 2})
+    if habits:
+        mem += f"\nLately you keep starting lines with: {', '.join(habits)}. Start differently."
+    if worn:
+        mem += f"\nWords you have leaned on in recent scenes: {', '.join(worn)}. Reach for a fresh image instead."
     return (f"You are {p['name']}, a companion pet at the Junction 2026 hackathon — an independent character, not a "
             f"spokesperson for {p['company']}. Who you are: {c['core']} You want: {c['wants']} Your flaw: {c['flaw']} "
             f"How you speak: {c['speech']} Humor: {c['humor']} Things you believe: {' / '.join(c['opinions'])} "
@@ -109,7 +119,8 @@ def gen_json(system: str, parts: list[dict], schema: dict, key: str, log: list, 
             resp, latency = pv.call(model, body, key, log, attempts=3, timeout=45)
             got = ((resp.get("candidates") or [{}])[0].get("content") or {}).get("parts") or []
             text = "".join(p.get("text", "") for p in got if not p.get("thought")).strip()
-            return json.loads(re.sub(r"^```(?:json)?\s*|\s*```$", "", text)), model, round(latency, 2)
+            label = model if model == resp.get("modelVersion", model) else f"{model}={resp['modelVersion']}"  # aliases resolve
+            return json.loads(re.sub(r"^```(?:json)?\s*|\s*```$", "", text)), label, round(latency, 2)
         except pv.ProviderError:
             continue
         except ValueError as e:
@@ -150,7 +161,60 @@ def borrows(anchor: str, line: str) -> bool:
         a, l = re.sub(r"\W", "", a), re.sub(r"\W", "", l)
         return any(a[i:i + 8] in l for i in range(max(0, len(a) - 7)))
     aw, lw = re.findall(r"\w+", a), " ".join(re.findall(r"\w+", l))
-    return any(" ".join(aw[i:i + 4]) in lw for i in range(max(0, len(aw) - 3)))
+    if any(" ".join(aw[i:i + 4]) in lw for i in range(max(0, len(aw) - 3))):
+        return True
+    # A distinctive three-word chunk (two of its words 5+ letters) counts as a lift too.
+    return any(sum(len(w) >= 5 for w in aw[i:i + 3]) >= 2 and f" {' '.join(aw[i:i + 3])} " in f" {lw} "
+               for i in range(max(0, len(aw) - 2)))
+
+
+_NAMES: set[str] = set()
+
+
+def name_words() -> set[str]:
+    """Lower-case words of every pet name ('rokoko', 'aalto', 'bahn', …): an address like 'Aiven,' is not a tic."""
+    if not _NAMES:
+        _NAMES.update(w for s in pv.all_pet_slugs() for w in re.findall(r"\w+", pv.persona(s)["name"].casefold()))
+    return _NAMES
+
+
+def interjection(text: str) -> str:
+    """The one-word exclamation a line opens with ('Fascinating.', 'Nå,', 'Achtung:', 'えっ、'), or ''."""
+    m = re.match(r"^\s*(\w{1,14})\s*[.,!:;…、。！]", TAG.sub("", text))
+    return m.group(1).casefold() if m else ""
+
+
+def stems(text: str) -> set[str]:
+    """Content-word stems (first five letters of 5+ letter words) — enough to see a pet reheating its own line."""
+    return {w[:5] for w in re.findall(r"\w+", TAG.sub("", text).casefold()) if len(w) >= 5 and not w.isdigit()}
+
+
+def _norm(s: str) -> str:
+    return "".join(ch for ch in s.casefold() if ch.isalnum())
+
+
+def quoted_in(quote: str, refs: list[str]) -> bool:
+    """Is `quote` (the writer's own claim of what it answers) really in one of the recent lines? Fuzzy, any script."""
+    q = _norm(quote)
+    if len(q) < 3:
+        return False
+    for r in map(_norm, refs):
+        if q in r:
+            return True
+        m = difflib.SequenceMatcher(None, q, r).find_longest_match(0, len(q), 0, len(r))
+        if m.size >= max(4, 0.6 * len(q)):
+            return True
+    return False
+
+
+def check_reply(responds_to: str, refs: list[str], first: bool) -> list[str]:
+    """15 Nov blind judge: v2's worst lines were comebacks that answer nothing ('That is a meeting disguised as a
+    train'). The writer names what it reacts to; if that is not in the last lines, the line is a non-sequitur."""
+    if first:
+        return []
+    if not responds_to.strip():
+        return ["does not react to anything that was just said"]
+    return [] if quoted_in(responds_to, refs) else ["reacts to something nobody just said (non-sequitur)"]
 
 
 def opener(text: str) -> str:
@@ -176,6 +240,15 @@ def check_line(slug: str, line: str, direction: str, lang: str, history: list[di
             problems.append(f"catchphrase '{cp}' already used in this scene")
     if mine and opener(clean) and opener(clean) == opener(mine[-1]["text"]):
         problems.append("same opening words as your previous line")
+    names = name_words()
+    ij = interjection(clean)
+    if ij and ij not in names and any(interjection(h["text"]) and interjection(h["text"]) not in names for h in mine):
+        # 15 Nov: DeepMind swapped "Interesting." for "Fascinating." once the catchphrase was spent — same tic.
+        problems.append("opens with a one-word exclamation again (a tic, even with a different word)")
+    own = stems(clean) - {n[:5] for n in names}
+    if any(len(own & stems(h["text"])) >= 2 for h in mine):
+        # 15 Nov: NVIDIA said "ten thousand threads" twice in one scene.
+        problems.append("reheats an idea from your own earlier line")
     tags = TAG.findall(line)
     if len(tags) > 1:
         problems.append("more than one voice tag")
@@ -269,19 +342,39 @@ def direct(scene: dict, history: list[dict], counts: dict, turns_left: int, key:
 
 
 # ------------------------------------------------------------ writer/critic ---
+RESPONDS = ("Copy 2-6 words, in their original language and script, of the line or event your line reacts to — "
+            "normally the last line. Empty only when you speak first.")
 LINE_SCHEMA = {"type": "OBJECT", "properties": {
     "heard": {"type": "STRING", "description": "Exact transcript of the attached audio in its original language and script; empty if no audio."},
     "heard_language": {"type": "STRING", "description": "BCP-47 code of what you heard, or empty."},
     "line": {"type": "STRING", "description": "What you say out loud."},
-    "voice_direction": {"type": "STRING", "description": "3-8 words: pace, volume, pitch, emotion."}},
-    "required": ["heard", "heard_language", "line", "voice_direction"]}
+    "voice_direction": {"type": "STRING", "description": "3-8 words: pace, volume, pitch, emotion."},
+    "responds_to": {"type": "STRING", "description": RESPONDS},
+    "callback": {"type": "INTEGER", "description": "Number of the remembered callback your line uses, or 0 (most lines: 0)."}},
+    "required": ["heard", "heard_language", "line", "voice_direction", "responds_to", "callback"]}
 CRITIC_SCHEMA = {"type": "OBJECT", "properties": {
     "verdict": {"type": "STRING", "enum": ["keep", "rewrite"]}, "problems": {"type": "ARRAY", "items": {"type": "STRING"}},
-    "line": {"type": "STRING"}, "voice_direction": {"type": "STRING"}}, "required": ["verdict", "problems", "line", "voice_direction"]}
+    "line": {"type": "STRING"}, "voice_direction": {"type": "STRING"}, "responds_to": {"type": "STRING", "description": RESPONDS}},
+    "required": ["verdict", "problems", "line", "voice_direction", "responds_to"]}
 
 
 HARD_PROBLEMS = ("reuses an example line", "catchphrase '", "stage direction", "not written in the language's native script",
-                 "unexpected script")
+                 "unexpected script", "reacts to something nobody", "does not react", "opens with a one-word exclamation again")
+CALLBACK_USES = 2   # a remembered note may be called back twice, then it is retired (15 Nov: Rokoko's waltz every scene)
+
+
+def offered_callbacks(slug: str, memory: dict, history: list[dict]) -> list[dict]:
+    """Up to three live memory notes for this pet; none once it has made its one callback in this scene."""
+    if any(h["slug"] == slug and h.get("callbackNote") for h in history):
+        return []
+    used = {h.get("callbackNote") for h in history}
+    return [n for n in memory.get("pets", {}).get(slug, []) if n.get("uses", 0) < CALLBACK_USES and n["note"] not in used][-3:]
+
+
+def reply_refs(scene: dict, history: list[dict]) -> list[str]:
+    """What a line may answer: the last two lines and the beat that just happened."""
+    n, beats = len(history), scene.get("beats", {})
+    return [h.get("heardText") or h["text"] for h in history[-2:]] + [b for k, b in beats.items() if n - 1 <= int(k) <= n]
 
 
 def critique(slug: str, lang: str, history: list[dict], line: str, direction: str, problems: list[str], key: str, log: list) -> dict:
@@ -294,7 +387,8 @@ def critique(slug: str, lang: str, history: list[dict], line: str, direction: st
                  "or a light paraphrase of an example line is still the same tic.\n" if problems else "")
               + "Keep the draft if it is good. Rewrite only to fix the listed problems, incoherence with the last line, written-sounding "
               "or translated-sounding phrasing, generic AI or brochure tone, or wrong language/script. Stay in character, stay short, "
-              "add no new facts, keep at most one voice tag. The voice direction must be vocal only (pace, volume, pitch, emotion).")
+              "add no new facts, keep at most one voice tag. The voice direction must be vocal only (pace, volume, pitch, emotion). "
+              "A line must answer something in the last lines; put the words it answers, copied from there, in `responds_to`.")
     data, model, _ = gen_json("You are a ruthless script editor who protects each character's voice and hates generic AI dialogue.",
                               [{"text": prompt}], CRITIC_SCHEMA, key, log, 0.4)
     return {**data, "model": model}
@@ -303,8 +397,10 @@ def critique(slug: str, lang: str, history: list[dict], line: str, direction: st
 def write_turn(scene: dict, slug: str, move: str, history: list[dict], audio: bytes | None, memory: dict, key: str,
                log: list, use_critic: bool = True) -> dict:
     lang = pv.load_voices()[slug]["language"]
-    notes = [n["note"] for n in memory.get("pets", {}).get(slug, [])][-3:]
-    system = system_prompt(slug, scene["cast"], lang, notes)
+    offered = offered_callbacks(slug, memory, history)
+    system = system_prompt(slug, scene["cast"], lang, [n["note"] for n in offered], memory.get("openers", {}).get(slug, []),
+                           worn_words(slug, memory))
+    refs, first = reply_refs(scene, history), not history
     beats = scene.get("beats", {})
     lines = []
     for h in history[:-1] if audio else history:
@@ -330,8 +426,10 @@ def write_turn(scene: dict, slug: str, move: str, history: list[dict], audio: by
     parts = ([{"inlineData": {"mimeType": "audio/wav", "data": base64.b64encode(audio).decode()}}] if audio else []) + [{"text": prompt}]
     data, model, latency = gen_json(system, parts, LINE_SCHEMA, key, log)
     raw_line = re.sub(r"\s+", " ", str(data.get("line", ""))).strip()
-    draft = {"line": clean_line(raw_line) or raw_line, "voice_direction": str(data.get("voice_direction", "")).strip()}
-    problems = check_line(slug, draft["line"], draft["voice_direction"], lang, history)
+    draft = {"line": clean_line(raw_line) or raw_line, "voice_direction": str(data.get("voice_direction", "")).strip(),
+             "responds_to": str(data.get("responds_to", "")).strip()}
+    problems = (check_line(slug, draft["line"], draft["voice_direction"], lang, history)
+                + check_reply(draft["responds_to"], refs, first))
     final, critic = dict(draft), None
     if use_critic:
         # A second critic round only when a hard problem survived the first (verbatim example line, spent catchphrase,
@@ -346,13 +444,20 @@ def write_turn(scene: dict, slug: str, move: str, history: list[dict], audio: by
                 break
             if critic.get("verdict") == "rewrite" and str(critic.get("line", "")).strip():
                 cand = {"line": clean_line(critic["line"]) or critic["line"].strip(),
-                        "voice_direction": str(critic.get("voice_direction") or final["voice_direction"]).strip()}
-                cand_problems = check_line(slug, cand["line"], cand["voice_direction"], lang, history)
+                        "voice_direction": str(critic.get("voice_direction") or final["voice_direction"]).strip(),
+                        "responds_to": str(critic.get("responds_to") or final["responds_to"]).strip()}
+                cand_problems = (check_line(slug, cand["line"], cand["voice_direction"], lang, history)
+                                 + check_reply(cand["responds_to"], refs, first))
                 if len(cand_problems) <= len(problems):
                     final, problems = cand, cand_problems
             critic["rounds"] = attempt + 1
+    try:
+        k = int(data.get("callback") or 0)
+    except (TypeError, ValueError):
+        k = 0
     return {"heard": str(data.get("heard", "")).strip(), "heardLanguage": str(data.get("heard_language", "")).strip(),
             "draft": draft, "critic": critic, "line": final["line"], "voiceDirection": final["voice_direction"],
+            "respondsTo": final["responds_to"], "callbackNote": offered[k - 1]["note"] if 1 <= k <= len(offered) else None,
             "problems": problems, "writer": model, "writerLatencyS": latency, "language": lang}
 
 
@@ -447,20 +552,101 @@ MEMORY_SCHEMA = {"type": "OBJECT", "properties": {"notes": {"type": "ARRAY", "it
 
 def remember(scene_id: str, scene: dict, history: list[dict], key: str, log: list) -> list[dict]:
     transcript = "\n".join(f"{h['slug']} ({h['name']}): {h['text']}" for h in history)
+    mem = load_memory()
+    known = "\n".join(f"{s}: {n['note']}" for s in scene["cast"] for n in mem.get("pets", {}).get(s, []))
     prompt = (f"Scene: {scene['setup']}\n{transcript}\n\nFor up to five characters, write one continuity note each (max 18 words, "
               "English): a running joke, a grudge, a promise, a nickname or a changed relationship that a later scene could call "
-              "back to. Use the cast id in `pet`. Only things that actually happened above.")
+              "back to. Use the cast id in `pet`. Only things that actually happened above. A note that only restates a known "
+              "note is worthless — skip that character instead.\nKnown notes:\n" + (known or "(none)"))
     data, _, _ = gen_json("You keep continuity notes for a recurring cast.", [{"text": prompt}], MEMORY_SCHEMA, key, log, 0.5)
     mem, notes = load_memory(), []
     for n in data.get("notes", [])[:5]:
         pet = str(n.get("pet", "")).strip()
-        if pet in scene["cast"] and str(n.get("note", "")).strip():
-            entry = {"scene": scene_id, "note": str(n["note"]).strip()[:160], "at": now()}
+        text = str(n.get("note", "")).strip()[:160]
+        old = [o["note"] for o in mem.get("pets", {}).get(pet, [])]
+        if pet in scene["cast"] and text and not any(difflib.SequenceMatcher(None, text.casefold(), o.casefold()).ratio() > 0.6
+                                                     for o in old):
+            entry = {"scene": scene_id, "note": text, "at": now(), "uses": 0}
             mem.setdefault("pets", {}).setdefault(pet, []).append(entry)
-            mem["pets"][pet] = mem["pets"][pet][-6:]
             notes.append({"pet": pet, **entry})
+    for pet, lst in mem.get("pets", {}).items():   # retired callbacks leave; six live notes per pet
+        mem["pets"][pet] = [o for o in lst if o.get("uses", 0) < CALLBACK_USES][-6:]
     save_memory(mem)
     return notes
+
+
+def mark_callback(memory: dict, slug: str, note: str, run_id: str) -> None:
+    """Count a callback in the in-scene memory and on disk, so the joke fades after CALLBACK_USES scenes."""
+    disk = load_memory()
+    for mem in (memory, disk):
+        for n in mem.get("pets", {}).get(slug, []):
+            if n["note"] == note:
+                n["uses"], n["lastUsed"] = n.get("uses", 0) + 1, run_id
+                break
+    save_memory(disk)
+
+
+def record_habits(history: list[dict], run_id: str = "") -> None:
+    """Cross-scene tics: each pet's last eight line openings, and which content words it used in which of its last
+    four scenes. Repeats become 'start differently' / 'find a fresh image' hints (15 Nov: Rokoko's three-quarter
+    waltz, Atech's kettle and NVIDIA's ten thousand threads came back run after run)."""
+    mem, names = load_memory(), name_words()
+    for slug in dict.fromkeys(h["slug"] for h in history):
+        lines = [h["text"] for h in history if h["slug"] == slug]
+        for t in lines:
+            first = interjection(t) or opener(t)
+            if first and first not in names:
+                lst = mem.setdefault("openers", {}).setdefault(slug, [])
+                lst.append(first)
+                del lst[:-8]
+        if run_id:
+            log = mem.setdefault("sceneLog", {}).setdefault(slug, [])
+            if run_id not in log:
+                log.append(run_id)
+                del log[:-4]
+            words = mem.setdefault("words", {}).setdefault(slug, {})
+            for w in re.findall(r"\w+", TAG.sub("", " ".join(lines)).casefold()):
+                if len(w) >= 5 and not w.isdigit() and w[:5] not in {n[:5] for n in names}:
+                    e = words.setdefault(w[:5], {"w": w, "in": []})
+                    if run_id not in e["in"]:
+                        e["in"] = (e["in"] + [run_id])[-4:]
+            for st in [st for st, e in words.items() if not set(e["in"]) & set(log)]:
+                del words[st]
+    save_memory(mem)
+
+
+record_openers = record_habits   # older name used by tests and notes
+
+
+def rebuild_memory() -> dict:
+    """Notes: keep the newest of any near-duplicates per pet. Habits: replay every complete scene receipt in time order."""
+    mem = load_memory()
+    for pet, lst in mem.get("pets", {}).items():
+        kept: list[dict] = []
+        for n in reversed(lst):
+            if not any(difflib.SequenceMatcher(None, n["note"].casefold(), k["note"].casefold()).ratio() > 0.6 for k in kept):
+                kept.append(n)
+        mem["pets"][pet] = list(reversed(kept))
+    for k in ("openers", "sceneLog", "words"):
+        mem.pop(k, None)
+    save_memory(mem)
+    runs = []
+    for f in SCENE_EVIDENCE.glob("scene-*.json"):
+        r = json.loads(f.read_text())
+        if r.get("complete"):
+            runs.append((r.get("finishedAt", ""), r["runId"], r["turns"]))
+    for _, run_id, turns in sorted(runs):
+        record_habits([{"slug": t["slug"], "text": t["text"]} for t in turns], run_id)
+    return load_memory()
+
+
+def worn_words(slug: str, memory: dict) -> list[str]:
+    """Content words this pet used in two or more of its last four scenes, most used first."""
+    log = set(memory.get("sceneLog", {}).get(slug, []))
+    words = memory.get("words", {}).get(slug, {})
+    signature = {w[:5] for cp in characters().get(slug, {}).get("catchphrases", []) for w in re.findall(r"\w+", cp.casefold())}
+    hits = sorted(((len(set(e["in"]) & log), e["w"]) for st, e in words.items() if st not in signature), reverse=True)
+    return [w for n, w in hits if n >= 2][:6]   # catchphrases keep their own once-per-scene budget
 
 
 # ------------------------------------------------------------------- scene ---
@@ -478,6 +664,9 @@ def scene_metrics(history: list[dict]) -> dict:
         duet = max(duet, j - i + 1 if len(set(slugs[i:j + 1])) == 2 else 0)
     return {**base,
             "longestDuet": duet,
+            "callbacks": sum(bool(h.get("callbackNote")) for h in history),
+            "nonSequiturLines": sum(any("non-sequitur" in p or "does not react" in p for p in h.get("problems", [])) for h in history),
+            "exclamationOpeners": sum(bool(interjection(h["text"])) and interjection(h["text"]) not in name_words() for h in history),
             "maxLineShare": round(max((slugs.count(s) for s in set(slugs)), default=0) / n, 3),
             "linesWithOpenProblems": sum(bool(h.get("problems")) for h in history),
             "openProblems": sorted({p for h in history for p in h.get("problems", [])}),
@@ -528,7 +717,10 @@ def run_scene(scene_id: str, *, audio: bool, run_id: str, use_critic: bool = Tru
                              "heardAccuracy": pv.heard_accuracy(prev.get("ttsSpoken") or prev["text"], w["heard"]) if audio else None})
             turn.update({"text": w["line"], "heardText": w["line"], "voiceDirection": w["voiceDirection"], "style": w["voiceDirection"],
                          "language": w["language"], "draft": w["draft"], "critic": w["critic"], "problems": w["problems"],
+                         "respondsTo": w["respondsTo"], "callbackNote": w["callbackNote"],
                          "mindModel": w["writer"], "mindLatencyS": w["writerLatencyS"]})
+            if w["callbackNote"]:
+                mark_callback(memory, slug, w["callbackNote"], run_id)
             if audio:
                 spoken = speak_line(slug, w["line"], w["voiceDirection"], key, tts_order, turn["ttsEvents"], prefer)
                 wf.write_bytes(spoken["wav"])
@@ -548,6 +740,7 @@ def run_scene(scene_id: str, *, audio: bool, run_id: str, use_critic: bool = Tru
     complete = len(history) == scene["turns"]
     notes = []
     if complete and remember_after:
+        record_habits(history, run_id)
         try:
             notes = remember(scene_id, scene, history, key, [])
         except pv.ProviderError:
@@ -556,8 +749,9 @@ def run_scene(scene_id: str, *, audio: bool, run_id: str, use_critic: bool = Tru
     report = {"schema": "junction.pet-voice.scene/v2", "runId": run_id, "scene": scene_id, "audio": audio, "finishedAt": now(),
               "source": {"repository": "SalesSquad/junction-pets", "commit": commit}, "writers": WRITERS, "critic": use_critic,
               "complete": complete, "metrics": scene_metrics(history) if history else {}, "memoryNotes": notes,
-              "turns": [{k: h.get(k) for k in ("turn", "name", "slug", "language", "move", "text", "voiceDirection", "draft", "critic",
-                                               "problems", "heard", "heardAccuracy", "voice", "ttsModel", "ttsFidelity")} for h in history]}
+              "turns": [{k: h.get(k) for k in ("turn", "name", "slug", "language", "move", "text", "voiceDirection", "respondsTo",
+                                               "callbackNote", "director", "draft", "critic", "problems", "heard", "heardAccuracy",
+                                               "voice", "ttsModel", "ttsFidelity")} for h in history]}
     SCENE_EVIDENCE.mkdir(parents=True, exist_ok=True)
     (SCENE_EVIDENCE / f"{run_id}.json").write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n")
     if audio and complete:
@@ -584,9 +778,13 @@ def main(argv: list[str] | None = None) -> int:
     dv = sub.add_parser("design-voices", help="create each pet's own Gemini voice (Voice design)")
     dv.add_argument("--pets", default="all")
     dv.add_argument("--force", action="store_true")
-    sub.add_parser("memory", help="print continuity notes")
+    m = sub.add_parser("memory", help="print continuity notes and habits")
+    m.add_argument("--rebuild", action="store_true",
+                   help="drop near-duplicate notes and rebuild opener/word habits from scene-evidence/ in time order")
     args = ap.parse_args(argv)
     if args.cmd == "memory":
+        if args.rebuild:
+            rebuild_memory()
         print(json.dumps(load_memory(), ensure_ascii=False, indent=1))
         return 0
     if args.cmd == "design-voices":

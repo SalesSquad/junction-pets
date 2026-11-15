@@ -101,6 +101,68 @@ class Critic(unittest.TestCase):
         self.assertEqual(out["problems"], [])
 
 
+class Quality(unittest.TestCase):
+    def test_a_different_exclamation_is_still_the_same_tic(self):
+        hist = [h(0, "google-deepmind", "Interesting. What falsifies it?")]
+        p = scene.check_line("google-deepmind", "Fascinating. And the baseline?", "calm", "en-GB", hist)
+        self.assertIn("opens with a one-word exclamation again (a tic, even with a different word)", p)
+        hist = [h(0, "google-deepmind", "Bahn, wait.")]
+        p = scene.check_line("google-deepmind", "Codex, no.", "calm", "en-GB", hist)   # addressing someone is not a tic
+        self.assertFalse(any("exclamation" in x for x in p))
+
+    def test_reheating_your_own_idea_is_flagged(self):
+        hist = [h(0, "nvidia", "Ten thousand threads watching that tail twitch.")]
+        p = scene.check_line("nvidia", "Every roar flows when you thread ten thousand minds.", "warm", "en-US", hist)
+        self.assertIn("reheats an idea from your own earlier line", p)
+
+    def test_distinctive_three_word_lift(self):
+        anchor = "Every problem is a parallel problem if you squint."
+        self.assertTrue(scene.borrows(anchor, "Every problem is boring today."))
+        self.assertFalse(scene.borrows(anchor, "It is a parallel universe."))
+
+    def test_non_sequitur_needs_a_real_quote(self):
+        refs = ["Achtung. Ein Fahrplan ohne Fahrgäste fährt von allein in den Graben."]
+        self.assertEqual(scene.check_reply("ohne Fahrgäste", refs, False), [])
+        self.assertEqual(scene.check_reply("a meeting disguised as a train", refs, False),
+                         ["reacts to something nobody just said (non-sequitur)"])
+        self.assertEqual(scene.check_reply("", refs, False), ["does not react to anything that was just said"])
+        self.assertEqual(scene.check_reply("", [], True), [])
+        self.assertTrue(scene.quoted_in("まって、いま", ["えっ、まって、いまロボット動きませんでした！？"]))
+
+    def test_callbacks_fade_and_one_per_scene(self):
+        mem = {"pets": {"rokoko": [{"note": "waltz", "uses": 1}, {"note": "hips", "uses": 2}, {"note": "new"}]}}
+        self.assertEqual([n["note"] for n in scene.offered_callbacks("rokoko", mem, [])], ["waltz", "new"])
+        used = [{**h(0, "rokoko", "Det er en vals."), "callbackNote": "waltz"}]
+        self.assertEqual(scene.offered_callbacks("rokoko", mem, used), [])
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            orig = scene.MEMORY_FILE
+            scene.MEMORY_FILE = Path(d) / "pets.json"
+            try:
+                scene.save_memory(json.loads(json.dumps(mem)))
+                scene.mark_callback(mem, "rokoko", "waltz", "run-x")
+                self.assertEqual(mem["pets"]["rokoko"][0]["uses"], 2)
+                self.assertEqual(scene.load_memory()["pets"]["rokoko"][0]["uses"], 2)
+                scene.record_habits([h(0, "rokoko", "Nå, igen."), h(1, "rokoko", "Nå, hvad så.")])
+                self.assertEqual(scene.load_memory()["openers"]["rokoko"], ["nå", "nå"])
+                scene.record_habits([h(0, "rokoko", "Den vals er i trekvart takt.")], "run-a")
+                scene.record_habits([h(0, "rokoko", "Hofterne, altså. Trekvart takt igen.")], "run-b")
+                self.assertEqual(scene.worn_words("rokoko", scene.load_memory()), ["trekvart"])
+                for r in ("run-c", "run-d", "run-e", "run-f"):        # four fresh scenes later the word has faded
+                    scene.record_habits([h(0, "rokoko", "Robotten falder.")], r)
+                worn = scene.worn_words("rokoko", scene.load_memory())
+                self.assertNotIn("trekvart", worn)
+                self.assertIn("robotten", worn)
+            finally:
+                scene.MEMORY_FILE = orig
+
+    def test_prompt_numbers_callbacks_and_names_habits(self):
+        p = scene.system_prompt("google-deepmind", ["google-deepmind", "openai-codex"], "en-GB", ["Codex owes a coffee."],
+                                ["interesting", "interesting", "right"])
+        self.assertIn("[1] Codex owes a coffee.", p)
+        self.assertIn("Lately you keep starting lines with: interesting. Start differently.", p)
+
+
 class Taste(unittest.TestCase):
     def test_ratings_become_taste_and_steer_voice(self):
         import tempfile
