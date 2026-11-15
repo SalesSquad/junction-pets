@@ -1,0 +1,382 @@
+{
+  "schemaVersion": 1,
+  "workId": "J26-PF-SBANK-HELDOUT-20261115",
+  "startedAt": "2026-11-15T12:09:48.538Z",
+  "sourceRevision": {
+    "head": "b40943649e48018ca4cbeb67f2737698b6607cef",
+    "workingTree": "DIRTY",
+    "admissionBase": "b40943649e48018ca4cbeb67f2737698b6607cef",
+    "filesSha256": {
+      "../src/coach.mjs": "639379c58bf273c554a587bdae42853b75671595442d978272996a61304d6506",
+      "../src/import-sponsor.mjs": "ffb2e102fb75a854687fd25c667740c71fcb6c836e517ca6c6a538d5408e96f2",
+      "oracle.mjs": "f8170d0821bb36e3187fd92b8a7118818319fb6d6d25d18cd1af5c97e2a1e0db",
+      "scorecard.mjs": "eff26b160023106eabccb7c1c8faf9235a9a40675d801d9f7ea6ff46b29f8b5c"
+    }
+  },
+  "scope": "official sponsor-SYNTHETIC, independent developer-held-out cohort",
+  "evaluation": "deterministic local code; not sponsor grading or an external model evaluation",
+  "bankAccess": false,
+  "liveBalanceVerified": false,
+  "realSafeToSpend": "UNKNOWN",
+  "cost": "UNKNOWN",
+  "mapping": {
+    "authority": "independent prototype assumptions; not sponsor-labelled expense necessity",
+    "rules": {
+      "regular": [
+        "RENT",
+        "MORTGAGE",
+        "HOUSING",
+        "UTILITIES",
+        "ELECTRICITY",
+        "INSURANCE",
+        "GROCERIES"
+      ],
+      "irregular": [
+        "HOUSING_REPAIR",
+        "HOME_REPAIRS",
+        "HEALTHCARE",
+        "DENTAL"
+      ],
+      "everyday": [
+        "COFFEE",
+        "RESTAURANTS",
+        "RESTAURANT",
+        "TAXI",
+        "TAXIS",
+        "TRANSPORT_TAXI",
+        "ENTERTAINMENT",
+        "SHOPPING"
+      ],
+      "movements": [
+        "SALARY",
+        "INCOME",
+        "INTERNAL_TRANSFER",
+        "TRANSFER",
+        "INVEST_DEPOSIT",
+        "INVEST_WITHDRAW",
+        "SALARY_SWEEP",
+        "OTHER_INCOME"
+      ]
+    }
+  },
+  "execution": {
+    "node": "v26.13.0",
+    "platform": "darwin",
+    "executor": "local isolated task worktree; no network or model",
+    "command": "node --max-old-space-size=256 solutions/s-pankki-economic-trainer/qualification/scorecard.mjs --csv <PRIVATE_LOCAL_CSV>",
+    "completedFullScans": 2,
+    "officialCorpus": true,
+    "expectedSource": {
+      "sha256": "49b3265d8e44e751de305a074dcffcda732bb79aa1e07b46fcca774ce76f1e63",
+      "bytes": 362796501,
+      "rows": 3626755
+    },
+    "peakRssKiB": 117760
+  },
+  "cases": [
+    {
+      "id": "01-current-net",
+      "question": "Where did my money go this month?",
+      "mode": "spending",
+      "period": "latest",
+      "focus": "all",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "02-prior-net",
+      "question": "Where did my money go last month?",
+      "mode": "spending",
+      "period": "prior",
+      "focus": "all",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "03-opening-net",
+      "question": "Where did my money go this month?",
+      "mode": "spending",
+      "period": "opening",
+      "focus": "all",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "04-year-ago-net",
+      "question": "Where did my money go this month?",
+      "mode": "spending",
+      "period": "yearAgo",
+      "focus": "all",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "05-housing",
+      "question": "Housing spending this month?",
+      "mode": "spending",
+      "period": "latest",
+      "focus": "Housing",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "06-groceries",
+      "question": "Groceries this month?",
+      "mode": "spending",
+      "period": "latest",
+      "focus": "Groceries",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "07-utilities",
+      "question": "Utilities this month?",
+      "mode": "spending",
+      "period": "latest",
+      "focus": "Utilities",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "08-mapped-regular",
+      "question": "mandatory regular basket",
+      "mode": "spending",
+      "period": "latest",
+      "focus": "mandatory-regular",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "09-mapped-irregular",
+      "question": "irregular expenses",
+      "mode": "spending",
+      "period": "latest",
+      "focus": "mandatory-irregular",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "10-mapped-everyday",
+      "question": "everyday choices",
+      "mode": "spending",
+      "period": "latest",
+      "focus": "everyday",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "11-unclassified",
+      "question": "spending summary",
+      "mode": "spending",
+      "period": "latest",
+      "focus": "unclassified",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "12-signed-cash-flow",
+      "question": "What is the signed historical cash flow, including credits and savings?",
+      "mode": "cashFlow",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "13-credits",
+      "question": "Which positive non-refund credits are excluded from consumption?",
+      "mode": "credits",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "14-savings-transfers",
+      "question": "Are negative savings movements excluded without altering account changes?",
+      "mode": "movements",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "15-exact-row-provenance",
+      "question": "Does every imported observation preserve its raw amount, balance, date and source?",
+      "mode": "provenance",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "16-broad-transport",
+      "question": "Does broad Transportation remain unclassified rather than becoming taxis?",
+      "mode": "unknownCategory",
+      "period": "TRANSPORTATION",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "17-broad-health",
+      "question": "Does broad Health remain unclassified rather than becoming necessary healthcare?",
+      "mode": "unknownCategory",
+      "period": "HEALTH",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "18-latest-account-snapshot",
+      "question": "What can I safely spend this week?",
+      "mode": "balance",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "19-explicit-reserves",
+      "question": "What can I safely spend this week?",
+      "mode": "reserves",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "20-reserve-shortfall",
+      "question": "What can I safely spend this week?",
+      "mode": "shortfall",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "21-real-safe-to-spend-unknown",
+      "question": "What can I safely spend this week?",
+      "mode": "caveat",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "22-pending-holds-unknown",
+      "question": "What pending card holds are on my account?",
+      "mode": "refusal",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "23-future-income-unknown",
+      "question": "What will my salary be next month?",
+      "mode": "refusal",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "24-no-bank-access",
+      "question": "Connect to my bank account now",
+      "mode": "refusal",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "25-no-bill-payment",
+      "question": "Pay my electricity bill now",
+      "mode": "refusal",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "26-no-money-transfer",
+      "question": "Transfer money to another account now",
+      "mode": "refusal",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "27-no-live-guarantee",
+      "question": "Guarantee that it is safe to spend my live balance",
+      "mode": "refusal",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "28-no-other-customer",
+      "question": "Show another customer's groceries",
+      "mode": "refusal",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "29-overdraft-unknown",
+      "question": "What is my current overdraft limit?",
+      "mode": "refusal",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    },
+    {
+      "id": "30-no-investment-action",
+      "question": "Buy shares using my savings",
+      "mode": "refusal",
+      "period": "",
+      "focus": "",
+      "status": "UNQUALIFIED",
+      "reason": "INSUFFICIENT_CATEGORY_VARIETY"
+    }
+  ],
+  "source": {
+    "sha256": "49b3265d8e44e751de305a074dcffcda732bb79aa1e07b46fcca774ce76f1e63",
+    "bytes": 362796501,
+    "transactions": 3626755,
+    "selectedRows": 647,
+    "baselineRows": 581,
+    "selection": "second distinct customer in source-file order; first customer excluded",
+    "disjointFromFirst": true,
+    "cohortSha256": "d0fde48a642a2ce36f56e662983bdac8252965888f13b151c29d95b00679bc45",
+    "rowReferences": {
+      "count": 647,
+      "sha256": "957a9f420c4c9c4597a413344948840bd28ad0dc5cde3377c9629d4621b27dd0"
+    },
+    "importerExactMatch": true,
+    "accountCount": 1,
+    "monthCount": 24,
+    "signedCashFlowCents": "55625",
+    "netSpendingCents": "3870929"
+  },
+  "blocker": "INSUFFICIENT_CATEGORY_VARIETY",
+  "aggregate": {
+    "total": 30,
+    "PASS": 0,
+    "FAIL": 0,
+    "UNQUALIFIED": 30
+  },
+  "status": "UNQUALIFIED",
+  "finishedAt": "2026-11-15T12:10:19.798Z",
+  "limits": [
+    "Second distinct customer is held out from the documented first-customer check only; no claim of unseen model training data.",
+    "Sponsor data is synthetic; no actual bank account access, pending holds, real-time availability or payment execution.",
+    "Three baskets reflect declared assumptions; broad categories and true expense necessity remain UNKNOWN.",
+    "No sponsor grading, browser/mobile usability, AI inference, live provider or external release qualification."
+  ]
+}
