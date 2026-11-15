@@ -69,4 +69,3 @@ class NumericalOracle(unittest.TestCase):
    with self.assertRaisesRegex(ValueError,'Conflicting duplicate labels'):run(source,out)
 
 if __name__=='__main__':unittest.main()
-

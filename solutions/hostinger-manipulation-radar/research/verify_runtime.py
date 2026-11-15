@@ -36,7 +36,8 @@ const {graphFeatures,graphScore}=await import(pathToFileURL(process.argv[1]));
 const input=JSON.parse(fs.readFileSync(0,'utf8'));
 console.log(JSON.stringify({features:graphFeatures({edges:input.edges}),result:graphScore({edges:input.edges},input.model)}));"""
     result=subprocess.run(["node","--input-type=module","-e",javascript,str(Path(core).resolve())],
-                          input=json.dumps({"edges":edges,"model":model}),capture_output=True,text=True,timeout=30)
+                          input=json.dumps({"edges":edges,"model":model}),capture_output=True,text=True,timeout=30,
+                          cwd=Path(core).resolve().parent)
     del edges
     if result.returncode:
         errors=[line[:240] for line in result.stderr.splitlines() if re.match(r"^[A-Za-z]*Error(?::| \[)",line)]
