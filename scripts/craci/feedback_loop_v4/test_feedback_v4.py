@@ -66,7 +66,10 @@ def fake_bundle(*,complete=False,witness_seeds=()):
         # V13 unsafe branch need not have any independently qualified result.
         world_results=[]
     training={"sourceFailureDiagnosis":{"v5FailedWorlds":failed,
-        "v5WinningWorlds":wins},"recorded_branches":len(branches),
+        "v5WinningWorlds":wins,
+        "v5FailedEarlyLegalAbstainWorlds":failed[:26],
+        "v5FailedLiveDropAtOption17Worlds":failed[26:]},
+        "recorded_branches":len(branches),
         "durably_journaled_all_executed_option_events":len(events),
         "status":"COMPLETE_TRAIN_DIAGNOSTIC_ONLY" if complete else "INCOMPLETE_STOP",
         "worldResults":world_results,"allWorldsComplete":complete,
@@ -127,8 +130,8 @@ class FeedbackV4Tests(unittest.TestCase):
         # branch rows, 216 option events, or all three pairwise action pairs.
         action2=next(r for r in result["decision"][
             "actionEvidenceWithDistinctWorldPairedBayesianUncertainty"] if r["action"]==2)
-        self.assertEqual(action2["matchedWithinForkDistinctWorldCount"],36)
-        self.assertEqual(action2["distinctInformativeWorlds"],36)
+        self.assertEqual(action2["matchedWithinForkDistinctWorldCount"],26)
+        self.assertEqual(action2["distinctInformativeWorlds"],26)
         self.assertLess(action2["conservativePosteriorOneSided95Lower"],
                         action2["posteriorMean"])
 
