@@ -304,12 +304,22 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(doc['status'],'UNQUALIFIED_FAILURE')
 
     def test_credit_cutoff_and_reserve(self):
-        env=dict(CRACI_WORKLOAD='rokoko-mujoco-v13-original',CRACI_CREDIT_WINDOW_OPEN='true',
-                 CRACI_CREDIT_REMAINING_SECONDS='3600',CRACI_MANUAL_SOURCE_REVIEWED='true')
-        h.admission(env,h.CUTOFF-3600)
-        with self.assertRaises(AssertionError):h.admission(env,h.CUTOFF-3599)
-        env['CRACI_CREDIT_WINDOW_OPEN']='false'
-        with self.assertRaises(AssertionError):h.admission(env,h.CUTOFF-7200)
+        env=dict(CRACI_WORKLOAD='rokoko-mujoco-v13-pilot',CRACI_CREDIT_WINDOW_OPEN='true',
+                 CRACI_CREDIT_REMAINING_SECONDS='7200',CRACI_MANUAL_SOURCE_REVIEWED='true')
+        for stage in ('full', 'original'):
+            h.admission(env,h.CUTOFF-7200,stage)
+            with self.assertRaises(AssertionError):h.admission(env,h.CUTOFF-7199,stage)
+        # A qualifying child that starts within the 60-minute job timeout
+        # still clears the original one-hour gate at the exact boundary.
+        h.admission(env,h.CUTOFF-3600,'qualify')
+        with self.assertRaises(AssertionError):h.admission(env,h.CUTOFF-3599,'qualify')
+        for key,value in [('CRACI_WORKLOAD','rokoko-mujoco-v13-original'),
+                          ('CRACI_CREDIT_WINDOW_OPEN','false'),
+                          ('CRACI_MANUAL_SOURCE_REVIEWED','false'),
+                          ('CRACI_CREDIT_REMAINING_SECONDS','7199')]:
+            with self.assertRaises(AssertionError):
+                h.admission({**env,key:value},h.CUTOFF-7200,'full')
+        with self.assertRaises(AssertionError):h.admission(env,h.CUTOFF-7200,'unknown')
 
     def test_missing_product_no_fallback(self):
         with self.assertRaises(AssertionError):h.load_module(self.root/'absent.py','missing')
