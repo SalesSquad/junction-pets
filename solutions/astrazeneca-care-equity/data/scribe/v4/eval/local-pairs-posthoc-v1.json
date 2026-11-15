@@ -1,0 +1,304 @@
+{
+ "schema": "scribe-v4-local-pairs-posthoc-v1",
+ "synthetic": true,
+ "post_hoc": true,
+ "person_confirms": "A person confirms every event; pre-filled means one-click confirmation, not skipped review.",
+ "source": "stored outputs scored by scribe/v4/eval8.py (data/scribe/v4/eval/outputs, the Nemotron v3 cache)",
+ "caveat": "Nemotron wrote the stress notes, so its stress figures are optimistic.",
+ "sets": {
+  "test": {
+   "notes": 700,
+   "alone_exact": {
+    "C": {
+     "k": 684,
+     "n": 700,
+     "value": 0.9771,
+     "ci95": [
+      0.9632,
+      0.9859
+     ]
+    },
+    "A'": {
+     "k": 668,
+     "n": 700,
+     "value": 0.9543,
+     "ci95": [
+      0.9362,
+      0.9674
+     ]
+    },
+    "nemotron": {
+     "k": 690,
+     "n": 700,
+     "value": 0.9857,
+     "ci95": [
+      0.9739,
+      0.9922
+     ]
+    }
+   },
+   "gemma_1b_alone_all_prefilled_wrong": {
+    "k": 16,
+    "n": 700,
+    "value": 0.0229,
+    "ci95": [
+     0.0141,
+     0.0368
+    ]
+   },
+   "pairs": [
+    {
+     "readers": [
+      "C",
+      "nemotron"
+     ],
+     "flag_blocks": null,
+     "what": "Gemma 3 1B + Nemotron 3.5 Super VL (the chosen rule)",
+     "prefilled": {
+      "k": 684,
+      "n": 700,
+      "value": 0.9771,
+      "ci95": [
+       0.9632,
+       0.9859
+      ]
+     },
+     "wrong_among_prefilled": {
+      "k": 4,
+      "n": 684,
+      "value": 0.0058,
+      "ci95": [
+       0.0023,
+       0.0149
+      ]
+     }
+    },
+    {
+     "readers": [
+      "C",
+      "A'"
+     ],
+     "flag_blocks": null,
+     "what": "local only: Gemma 3 1B + Gemma 3 270M with the frozen Finnish lexicon resolver",
+     "prefilled": {
+      "k": 669,
+      "n": 700,
+      "value": 0.9557,
+      "ci95": [
+       0.9378,
+       0.9686
+      ]
+     },
+     "wrong_among_prefilled": {
+      "k": 7,
+      "n": 669,
+      "value": 0.0105,
+      "ci95": [
+       0.0051,
+       0.0214
+      ]
+     }
+    },
+    {
+     "readers": [
+      "C",
+      "A'"
+     ],
+     "flag_blocks": "A'",
+     "what": "local only, as above, and the lexicon's vague-phrase flag sends the note to a person",
+     "prefilled": {
+      "k": 669,
+      "n": 700,
+      "value": 0.9557,
+      "ci95": [
+       0.9378,
+       0.9686
+      ]
+     },
+     "wrong_among_prefilled": {
+      "k": 7,
+      "n": 669,
+      "value": 0.0105,
+      "ci95": [
+       0.0051,
+       0.0214
+      ]
+     }
+    },
+    {
+     "readers": [
+      "C",
+      "B"
+     ],
+     "flag_blocks": null,
+     "what": "local only: Gemma 3 1B + Gemma 3 270M expression format",
+     "prefilled": {
+      "k": 636,
+      "n": 700,
+      "value": 0.9086,
+      "ci95": [
+       0.8849,
+       0.9278
+      ]
+     },
+     "wrong_among_prefilled": {
+      "k": 6,
+      "n": 636,
+      "value": 0.0094,
+      "ci95": [
+       0.0043,
+       0.0204
+      ]
+     }
+    }
+   ]
+  },
+  "stress": {
+   "notes": 308,
+   "alone_exact": {
+    "C": {
+     "k": 223,
+     "n": 308,
+     "value": 0.724,
+     "ci95": [
+      0.6716,
+      0.771
+     ]
+    },
+    "A'": {
+     "k": 88,
+     "n": 308,
+     "value": 0.2857,
+     "ci95": [
+      0.2381,
+      0.3386
+     ]
+    },
+    "nemotron": {
+     "k": 280,
+     "n": 308,
+     "value": 0.9091,
+     "ci95": [
+      0.8717,
+      0.9364
+     ]
+    }
+   },
+   "gemma_1b_alone_all_prefilled_wrong": {
+    "k": 85,
+    "n": 308,
+    "value": 0.276,
+    "ci95": [
+     0.229,
+     0.3284
+    ]
+   },
+   "pairs": [
+    {
+     "readers": [
+      "C",
+      "nemotron"
+     ],
+     "flag_blocks": null,
+     "what": "Gemma 3 1B + Nemotron 3.5 Super VL (the chosen rule)",
+     "prefilled": {
+      "k": 220,
+      "n": 308,
+      "value": 0.7143,
+      "ci95": [
+       0.6614,
+       0.7619
+      ]
+     },
+     "wrong_among_prefilled": {
+      "k": 3,
+      "n": 220,
+      "value": 0.0136,
+      "ci95": [
+       0.0046,
+       0.0393
+      ]
+     }
+    },
+    {
+     "readers": [
+      "C",
+      "A'"
+     ],
+     "flag_blocks": null,
+     "what": "local only: Gemma 3 1B + Gemma 3 270M with the frozen Finnish lexicon resolver",
+     "prefilled": {
+      "k": 92,
+      "n": 308,
+      "value": 0.2987,
+      "ci95": [
+       0.2503,
+       0.352
+      ]
+     },
+     "wrong_among_prefilled": {
+      "k": 6,
+      "n": 92,
+      "value": 0.0652,
+      "ci95": [
+       0.0302,
+       0.1351
+      ]
+     }
+    },
+    {
+     "readers": [
+      "C",
+      "A'"
+     ],
+     "flag_blocks": "A'",
+     "what": "local only, as above, and the lexicon's vague-phrase flag sends the note to a person",
+     "prefilled": {
+      "k": 91,
+      "n": 308,
+      "value": 0.2955,
+      "ci95": [
+       0.2473,
+       0.3487
+      ]
+     },
+     "wrong_among_prefilled": {
+      "k": 5,
+      "n": 91,
+      "value": 0.0549,
+      "ci95": [
+       0.0237,
+       0.1222
+      ]
+     }
+    },
+    {
+     "readers": [
+      "C",
+      "B"
+     ],
+     "flag_blocks": null,
+     "what": "local only: Gemma 3 1B + Gemma 3 270M expression format",
+     "prefilled": {
+      "k": 97,
+      "n": 308,
+      "value": 0.3149,
+      "ci95": [
+       0.2656,
+       0.3688
+      ]
+     },
+     "wrong_among_prefilled": {
+      "k": 17,
+      "n": 97,
+      "value": 0.1753,
+      "ci95": [
+       0.1124,
+       0.2629
+      ]
+     }
+    }
+   ]
+  }
+ }
+}

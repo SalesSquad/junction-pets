@@ -104,8 +104,18 @@ the 700 test notes the same rule pre-filled 684 with 4 wrong, and all four read 
 "referral sent". Gemma stays inside the county; with real notes the second reader must also run in a
 county-controlled environment, or a person does that step.
 
+*If asked "why not two local models?"* We checked, post hoc and on stored outputs. If Gemma 3 1B and
+Gemma 3 270M (with the Finnish lexicon resolver) must agree, the test set is close (669 of 700
+pre-filled, 7 wrong), but on the stress set only 92 of 308 are pre-filled, 6 of them wrong. With
+Nemotron as second reader it is 220 of 308, 3 wrong. Nemotron wrote the stress notes, so its figures
+there are optimistic; even so, the local-only pair leaves most unseen phrasings to the person.
+Nemotron's weights are published on Hugging Face (`NVIDIA-Nemotron-3.5-Super-VL-120B-A12B`), so a
+county could host the second reader itself; that needs data-centre GPUs, not a laptop (licence
+terms for this use: UNVERIFIED).
+
 Source: `data/scribe/v4/eval/results-v1.json` (`sets.stress.systems.C`, `cascade.configurations`,
-Gemma C with agreement); `submission/PATH_TO_SCALE.md` (box 4b).
+Gemma C with agreement); `data/scribe/v4/eval/local-pairs-posthoc-v1.json` (post hoc, written by
+`scribe/v4/local_pairs.py`); `submission/PATH_TO_SCALE.md` (box 4b).
 
 ### 6. Why Gemma 3 270M, and what does Gemma do if code does the arithmetic?
 *Asked by: Google DeepMind.*
@@ -124,7 +134,12 @@ Source: `data/scribe/demo/http-timing.json`; `runs/diagnose/diagnose-v1.json` (`
 ### 7. Is Nemotron really in the working product, and does it understand Finnish?
 *Asked by: NVIDIA.*
 
-Yes, in two jobs on the page and one in the data. It drafted a plan for 23 of 23 areas by calling four
+Yes, in two jobs on the page and one in the data, and the page can call it live: in the scribe demo,
+"Ask Nemotron live (second reader)" sends the SYNTHETIC note to the hosted Nemotron 3.5 Super VL
+endpoint with the frozen v3 reader protocol, and the two-reader rule is applied to its answer on
+screen (test run on 15 November: note 4 in 2.7 s, agrees with Gemma; note 1 in 11.1 s, agrees after
+one repair call; `runs/nemotron-live-demo.jsonl`). Without a key or network it falls back to the
+stored answer and says so. It drafted a plan for 23 of 23 areas by calling four
 SAMA tools, and code dropped every sentence with a number that is not a tool output: 255 of 299
 sentences kept, 0 kept with an unmatched number; of 10 off-limits requests the model refused 9 itself,
 and the 10th was blocked by a code guard added after seeing the same prompts (post hoc). As
@@ -135,7 +150,7 @@ stored drafts (re-running their tool calls on today's build gave identical outpu
 and the other three carry a small caption: drafted on an earlier data build), and image input was tested but not used (13 of 20
 from page images against 19 of 20 from text).
 
-Source: `data/planner/plans-v1.json` (`summary`); `data/scribe/nemotron/reader-v1.json`
+Source: `runs/nemotron-live-demo.jsonl`; `data/planner/plans-v1.json` (`summary`); `data/scribe/nemotron/reader-v1.json`
 (`validation`, `test`); `data/planner/vision/vision-6b-v1.json` (`summary`); `web/data/app.json`
 (`planner.toolCheck`).
 
@@ -436,7 +451,7 @@ Source: `PROGRESS.md` ("Failed or not done"); `data/scribe/v4/eval/results-v1.js
 1. **Oikeat potilastekstit:** ei testattu. Kaikki potilastiedon kaltainen aineisto on SYNTEETTISTÄ. Seuraava askel on Findata-lupa tai hyvinvointialueen pilotti ja tietosuojan vaikutustenarviointi (DPIA).
 2. **Ihminen vahvistaa aina:** jokainen poimittu tapahtuma ja jokainen listan rivi vahvistetaan käsin. SAMA ei päätä jatkotutkimuksesta, vaan kopioi radiologin kirjoittaman suosituksen.
 3. **Ennakkoon kirjattu kriteeri jäi täyttymättä:** uusia sanamuotoja sisältävistä muistiinpanoista 270M-malli sai oikein 11/143 ja sääntö 0/143. Gemma 3 1B sai oikein 95/143. Kerromme tämän suoraan.
-4. **Miksi Gemma tarvitsee Nemotronia:** muistiinpano esitäytetään yhden klikkauksen vahvistusta varten vain, kun molemmat lukijat ovat samaa mieltä. Stressiaineistossa 220/308 esitäytettiin ja niistä 3 oli väärin; 88 meni muokattavaksi.
+4. **Miksi Gemma tarvitsee Nemotronia:** muistiinpano esitäytetään yhden klikkauksen vahvistusta varten vain, kun molemmat lukijat ovat samaa mieltä. Stressiaineistossa 220/308 esitäytettiin ja niistä 3 oli väärin; 88 meni muokattavaksi. Kahdella paikallisella Gemmalla esitäytettäisiin vain 92/308, ja niistä 6 olisi väärin (jälkikäteen laskettu).
 5. **Kuusi viikkoa:** OECD/EU:n raportoima tavoite, ei laki. Hoitotakuu edellyttää hoidon alkavan viimeistään kuuden kuukauden kuluessa. Meidän 42 päivää on paikkamerkki.
 6. **Miksi Satakunta:** palvelut pääosin suomeksi, alue ei ole arviointimenettelyssä ja keuhkosyöpäkuolleisuus on korkea (1,126). Emme väitä, että hoito olisi siellä huonompaa.
 7. **Oikeusperusta:** 1.6.2026 alkaen hyvinvointialue saa tunnistaa potilaat, joiden hoito ei vastaa suosituksia. Kattaako se hoitopolun aikataulut, on VARMISTAMATTA: kysytään STM:ltä ja THL:ltä.

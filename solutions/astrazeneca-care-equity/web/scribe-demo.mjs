@@ -1,4 +1,4 @@
-// Offline scribe demo: renders one POST /api/scribe response as HTML. Pure function, no DOM access, so it can be
+// Scribe demo: renders one POST /api/scribe response as HTML. Pure function, no DOM access, so it can be
 // tested in Node and called from app.mjs. The note, highlighted date phrases, what Gemma wrote, the dates code
 // computed, and "a person confirms every event". Every value is escaped. Uses classes already in styles.css only
 // (the Content-Security-Policy blocks inline styles).
@@ -77,10 +77,65 @@ function eventRow(e) {
 
 // The stored reason code stays as serve/demo/engine.py writes it (NOT_RUN); the page says it in plain words.
 const reasonText = (r) => (r.review_reason === NOT_RUN
-  ? `Nemotron, the second reader, never read this ${r.demo?.rewritten_by_code ? 'rewritten note' : r.synthetic_note === true ? 'note' : 'typed text'}, so a person edits it`
+  ? `Nemotron, the second reader, has no stored answer for this ${r.demo?.rewritten_by_code ? 'rewritten note' : r.synthetic_note === true ? 'note' : 'typed text'}, so a person edits it`
   : r.review_reason);
+// The stored "how" of the second reader was written before the page could ask Nemotron live; its last clause is dropped.
+const howText = (how) => String(how ?? '').replace(/; the page does not call it$/, '');
+const seconds = (ms) => (Number.isFinite(ms) ? (ms / 1000).toFixed(1) : '?');
+const eventKey = (e) => `${typeLabel(e?.type)} ${fmtDate(e?.date, e?.precision)}`;
+// What differs between two answers, in words (entry route, events only one reader lists).
+function answerDiff(gemma, nemo) {
+  const parts = [];
+  if (gemma.entry_route !== nemo.entry_route) parts.push(`entry route: Gemma ${esc(typeLabel(gemma.entry_route))}, Nemotron ${esc(typeLabel(nemo.entry_route))}`);
+  const a = (gemma.events ?? []).map(eventKey), b = (nemo.events ?? []).map(eventKey);
+  const onlyA = a.filter((k) => !b.includes(k)), onlyB = b.filter((k) => !a.includes(k));
+  if (onlyA.length) parts.push(`only Gemma lists ${onlyA.map(esc).join(', ')}`);
+  if (onlyB.length) parts.push(`only Nemotron lists ${onlyB.map(esc).join(', ')}`);
+  return parts.length ? parts.join('; ') : 'the same events in a different order';
+}
 
-// response: the JSON body of POST /api/scribe ({served, result, fallback_reason?, server_seconds?}) or a bare result.
+// The page's "Ask Nemotron live (second reader)" button: the POST /api/scribe/second answer
+// ({served:'live'|'stored'|'none', prediction, model, latency_ms, how, source, reason}) applied to the Gemma answer on
+// screen with the same two-reader rule. 'none' (no answer at all) leaves the result on screen as it is.
+export function withSecondCall(response, call) {
+  const r = response?.result ?? (response?.note ? response : null);
+  const usable = !!call && (call.served === 'live' || call.served === 'stored');
+  const how = call?.served === 'live' ? `${call.how ?? 'asked live'}, ${seconds(call.latency_ms)} s` : call?.how;
+  const result = r && usable ? applySecondReader(r, {available: true, prediction: call.prediction ?? null, how, source: call.source ?? null}) : r;
+  return {...(response?.result ? response : {}), result, second_call: call ?? null};
+}
+
+// The second reader's own answer, whether it agrees with the Gemma answer on screen, and the verdict of the rule.
+export function secondCallHtml(call, result) {
+  if (!call || typeof call !== 'object') return '';
+  const pred = call.prediction ?? null;
+  const gemma = result?.resolved?.prediction ?? null;
+  const answered = call.served === 'live' || call.served === 'stored';
+  const out = [`<div class="second-call" data-served="${esc(call.served)}">`];
+  out.push(`<h4>Second reader: Nemotron 3.5 Super VL${call.served === 'live' ? ', asked live' : ''}</h4>`);
+  if (call.served === 'live') {
+    out.push(`<p>Answered in <strong>${esc(seconds(call.latency_ms))} s</strong> on the hosted endpoint (${esc(call.model ?? 'nemotron-3.5-super-vl')}, reader ${esc(call.version ?? 'v3')}${Number.isInteger(call.calls) ? `, ${call.calls === 1 ? 'one call' : `${call.calls} calls: a read and one repair`}` : ''}). Code resolved the dates.</p>`);
+  } else if (call.served === 'stored') {
+    out.push(`<p>The live call was not used (${esc(call.reason ?? 'unavailable')}), so Nemotron's stored answer for this note is shown.</p>`);
+  } else {
+    out.push(`<p>No second answer: ${esc(call.reason ?? call.error ?? 'unavailable')}.</p>`);
+  }
+  if (answered) {
+    if (!pred) out.push(`<p class="flag">Nemotron's answer could not be read as the expected JSON, so it counts as a different answer.</p>`);
+    else if (pred.events?.length) out.push(`<div class="table-wrap"><table class="demo-events"><thead><tr><th scope="col">Event</th><th scope="col">Date</th></tr></thead><tbody>${pred.events.map((e) => `<tr><th scope="row" data-label="Event">${esc(typeLabel(e.type))}</th><td data-label="Date">${fmtDate(e.date, e.precision)}</td></tr>`).join('')}</tbody></table></div><p class="caption">Entry route: ${esc(typeLabel(pred.entry_route))}.</p>`);
+    else out.push(`<p>No pathway event (entry route ${esc(typeLabel(pred.entry_route))}).</p>`);
+    if (call.flagged) out.push(`<p class="caption">The reader's own check flagged this answer after one repair (a date it returned is not printed in the note in digits). The two-reader rule compares the answers only.</p>`);
+    if (gemma && pred) out.push(`<p><strong>${sameAnswer(gemma, pred) ? 'Same answer as the Gemma answer on screen' : 'A different answer from the Gemma answer on screen'}</strong>${sameAnswer(gemma, pred) ? ': every event, date and the entry route match exactly.' : `: ${answerDiff(gemma, pred)}.`}</p>`);
+    else if (!gemma) out.push(`<p class="caption">There is no Gemma answer on screen to compare with.</p>`);
+  }
+  if (result) out.push(`<p class="large-claim">Two-reader rule: ${result.review === PREFILLED && result.second_reader?.agrees === true ? 'pre-filled for one-click confirmation' : 'needs editing'}. ${PERSON}</p>`);
+  else out.push(`<p>${PERSON}</p>`);
+  out.push('</div>');
+  return out.join('');
+}
+
+// response: the JSON body of POST /api/scribe ({served, result, fallback_reason?, server_seconds?}) or a bare result;
+// second_call (from withSecondCall) adds the second reader's own answer below the verdict.
 export function scribeDemoHtml(response) {
   const r = response?.result ?? response;
   if (!r || typeof r !== 'object' || !r.note) {
@@ -121,10 +176,11 @@ export function scribeDemoHtml(response) {
   out.push(`<div class="headline-box"><p class="large-claim">${esc(review)}. ${PERSON}</p>`);
   if (r.review_reason) out.push(`<p class="caption">Why: ${esc(reasonText(r))}.</p>`);
   else if ((r.flags ?? []).length) out.push(`<p class="caption">Why: ${esc(r.flags.join(', '))}.</p>`);
-  if (sr) out.push(`<p class="caption">Second reader, Nemotron 3.5 Super VL: ${sr.available ? `${sr.agrees ? 'same answer as Gemma' : 'a different answer from Gemma'} (${esc(sr.how)})` : 'not run for this text (it never read it; the page does not call a hosted model), so the note needs editing'}. A note is pre-filled only when both readers give exactly the same answer.</p>`);
+  if (sr) out.push(`<p class="caption">Second reader, Nemotron 3.5 Super VL: ${sr.available ? `${sr.agrees ? 'same answer as Gemma' : 'a different answer from Gemma'} (${esc(howText(sr.how))})` : 'no stored answer for this text (Nemotron did not read it before the demo was built; “Ask Nemotron live” sends it now), so the note needs editing'}. A note is pre-filled only when both readers give exactly the same answer.</p>`);
   else out.push(`<p class="caption">No second reader was applied to this result, so it needs editing.</p>`);
   if (r.answer_key) out.push(`<p class="caption">Against the note's SYNTHETIC answer key: ${r.exact_match_with_answer_key ? 'every event and date matches' : 'does not match; the person confirming would have to edit it'}.</p>`);
   out.push(`</div>`);
+  if (response?.second_call) out.push(secondCallHtml(response.second_call, r));
   out.push(`<details class="track-details"><summary>What Gemma wrote: the model's raw output</summary><pre><code>${esc(r.model?.raw ?? '')}</code></pre></details>`);
   out.push(`<p class="caption">${servedLine} Model: ${esc(p.base_model?.repo)} (revision ${esc(String(p.base_model?.revision ?? '').slice(0, 8))}) with the LoRA adapter ${esc(p.adapter?.run)}, ${esc(p.decoding?.dtype)} on ${esc(p.decoding?.device)}, greedy. Dates: ${esc(res.rule)}, arm ${esc(res.arm)}${res.frozen ? ' (frozen, hashes checked)' : ' (not the frozen arm)'}. Trained and tested on SYNTHETIC notes only; research demo, not a medical device.</p>`);
   out.push(`</div>`);

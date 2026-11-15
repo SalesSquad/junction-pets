@@ -20,12 +20,11 @@ const W = 1440, H = 810, FPS = 15; // 15 divides the 30 fps output exactly
 // The click path: [start second, label, section id, extra offset px, pan px over the hold]
 const steps = [
   [0, '0:00 The gap', null, 0, 260],
-  [15, '0:15 Who, how and where', 'who', 0, 1100],
-  [35, '0:35 What to do', 'action', 0, 420],
-  [50, '0:50 Comparability gate', 'comparability-gate', 0, 420],
-  [70, '1:10 Close the loop', 'safety-net', 0, 900],
-  [90, '1:30 Gemma demo, Note 4 (stored output)', 'scribe', 0, 1300],
-  [105, '1:45 Nemotron county plan and the ask', 'plan', 0, 1000],
+  [15, '0:15 Start here: Satakunta, one next step', 'decision', 0, 700],
+  [40, '0:40 Close the loop', 'safety-net', 0, 900],
+  [55, '0:55 Comparability gate', 'comparability-gate', 0, 420],
+  [75, '1:15 Gemma demo, Note 4 (stored output)', 'scribe', 0, 1300],
+  [100, '1:40 Nemotron county plan and the ask', 'plan', 0, 1000],
 ];
 const END = 120;
 
