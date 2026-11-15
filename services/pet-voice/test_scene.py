@@ -163,6 +163,77 @@ class Quality(unittest.TestCase):
         self.assertIn("Lately you keep starting lines with: interesting. Start differently.", p)
 
 
+class OpenAIFallback(unittest.TestCase):
+    def setUp(self):
+        self.saved = (set(pv.EXHAUSTED), dict(pv._OPENAI_KEY), dict(pv.OPENAI_CALLS), pv.call, pv.live_speak, pv.openai_speak,
+                      pv.openai_post, pv.openai_transcribe)
+        pv.EXHAUSTED.clear()
+
+    def tearDown(self):
+        ex, key, calls, pv.call, pv.live_speak, pv.openai_speak, pv.openai_post, pv.openai_transcribe = self.saved
+        pv.EXHAUSTED.clear(); pv.EXHAUSTED.update(ex)
+        pv._OPENAI_KEY.clear(); pv._OPENAI_KEY.update(key)
+        pv.OPENAI_CALLS.clear(); pv.OPENAI_CALLS.update(calls)
+
+    def test_schema_becomes_strict_json_schema(self):
+        s = pv.to_json_schema(scene.MEMORY_SCHEMA)
+        self.assertEqual(s["type"], "object")
+        self.assertFalse(s["additionalProperties"])
+        item = s["properties"]["notes"]["items"]
+        self.assertEqual((item["type"], item["required"], item["additionalProperties"]), ("object", ["pet", "note"], False))
+        self.assertEqual(pv.to_json_schema(scene.DIRECT_SCHEMA)["required"], ["next", "move", "why"])  # strict: all
+
+    def test_openai_stays_last_whatever_learning_says(self):
+        learned = {"modelOrder": {"tts": ["openai:gpt-4o-mini-tts", "gemini-3.8-flash-tts"]},
+                   "cooldownUntil": {"gemini-3.8-flash-tts": "2999-01-01T00:00:00Z"}}
+        order = pv.model_order(learned, "tts", pv.DEFAULT_TTS_MODELS, None)
+        self.assertEqual(order[-1], "openai:gpt-4o-mini-tts")
+        self.assertLess(order.index("gemini-3.8-flash-tts"), order.index("openai:gpt-4o-mini-tts"))  # cooling Gemini first
+
+    def test_speech_falls_back_to_openai_after_gemini_and_live(self):
+        def no_quota(model, *a, **k):
+            raise pv.ProviderError(429, "RESOURCE_EXHAUSTED", "per day", daily=True)
+        pv.call = no_quota
+        pv.live_speak = lambda *a, **k: (_ for _ in ()).throw(pv.ProviderError(0, "TIMEOUT", "live"))
+        pv.openai_speak = lambda text, voice, style, model: pv.pcm_to_wav(b"\0\0" * 2400)
+        log = []
+        out = pv.speak("Hei kaikki", "Puck", "warm", "k", ["gemini-3.8-flash-tts", "live:x", "openai:gpt-4o-mini-tts"], log,
+                       openai_voice=scene.openai_voice("rokoko"))
+        self.assertEqual(out["model"], "openai:gpt-4o-mini-tts")
+        self.assertIn(out["openaiVoice"], pv.OPENAI_MALE)
+        self.assertIn(scene.openai_voice("cala"), pv.OPENAI_FEMALE)
+
+    def test_no_key_or_spend_cap_means_no_call(self):
+        pv._OPENAI_KEY["key"] = None
+        with self.assertRaises(pv.ProviderError) as e:
+            pv.openai_post("audio/speech", payload={})
+        self.assertEqual(e.exception.code, "NO_KEY")
+        pv._OPENAI_KEY["key"] = "sk-test-" + "x" * 30
+        pv.OPENAI_CALLS["n"] = pv.OPENAI_MAX_CALLS
+        with self.assertRaises(pv.ProviderError) as e:
+            pv.openai_post("audio/speech", payload={})
+        self.assertEqual(e.exception.code, "OPENAI_CAP")
+
+    def test_writer_falls_back_to_openai_and_hears_through_transcription(self):
+        def no_quota(model, *a, **k):
+            raise pv.ProviderError(429, "RESOURCE_EXHAUSTED", "per day", daily=True)
+        sent = {}
+        pv.call = no_quota
+        pv.openai_transcribe = lambda wav, model=pv.OPENAI_STT_MODEL: "Es ist 03:12."
+        def fake_post(path, timeout=90, payload=None, multipart=None):
+            sent["body"] = payload
+            line = {"heard": "Es ist 03:12.", "heard_language": "de-DE", "line": "Codex. Jetzt.", "voice_direction": "clipped",
+                    "responds_to": "03:12", "callback": 0}
+            return json.dumps({"output": [{"type": "message", "content": [{"type": "output_text", "text": json.dumps(line)}]}]}).encode()
+        pv.openai_post = fake_post
+        import base64
+        parts = [{"inlineData": {"mimeType": "audio/wav", "data": base64.b64encode(b"RIFF").decode()}}, {"text": "Reply as Bahn."}]
+        data, model, _ = scene.gen_json("sys", parts, scene.LINE_SCHEMA, "k", [])
+        self.assertEqual((model, data["line"]), ("openai:gpt-5.4-mini", "Codex. Jetzt."))
+        self.assertIn("Es ist 03:12.", sent["body"]["input"])
+        self.assertTrue(sent["body"]["text"]["format"]["strict"])
+
+
 class VoiceSamples(unittest.TestCase):
     def test_thumbs_down_on_a_designed_voice_falls_back_until_redesign(self):
         import tempfile

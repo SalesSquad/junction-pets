@@ -72,6 +72,13 @@ _Updated 2026-11-14T21:55:11Z from 3 run(s), 74/74 turns ok._
   passed first time. The free tier gives each TTS model only ~10–15 calls a day, so the
   designed voice's own model goes first and Live (separate quota) voices fixed transcripts
   for listening tests: 40 lines, fidelity 0.99. (2026-11-15)
+- **A paid fallback must stay last by construction.** OpenAI is now the final step for speech
+  and text, but the learning loop ranks models by reliability, and OpenAI would soon win and
+  become the default spend. `model_order()` therefore always appends `openai:` models after
+  every Gemini model, cooling ones included, and a per-process call cap guards the bill. First
+  live check: Finnish TTS 2.3 s, transcription fidelity 0.94, writer line clean in 4.0 s. The
+  free 3.5 Gemini models stay the writers; OpenAI only fills the hours their daily cap is
+  spent. (2026-11-15)
 - **Free text quota ≈ 8 scenes a night.** A 12-turn scene costs ~45 Gemini text calls
   (director, writer, critic, memory). After ~8 scenes 3.5-flash-lite and then 3.5-flash hit
   their daily caps (reset ≈ 08:00 UTC). Iterate on text in small batches, judge with Haiku, and

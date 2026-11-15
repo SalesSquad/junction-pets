@@ -93,7 +93,8 @@ production line per turn:
    version with fewer problems wins.
 5. **Voice**: the pet's designed Gemini voice (`design-voices`, Voice design API,
    `learned/designed-voices.json`) with the per-line direction as `speech_metadata.style`;
-   prebuilt voice or Live audio as fallback.
+   prebuilt voice or Live audio as fallback, then OpenAI as the last, paid fallback (also for
+   the text steps — see PLAYBOOK).
 6. **Memory** (`~/Library/Application Support/JunctionPetVoice/memory/pets.json`, local, not
    in git): after a scene each pet keeps up to 6 short notes, so running jokes and grudges carry
    over. A pet gets at most one callback per scene (`callback` field) and a note retires after

@@ -29,6 +29,8 @@ import time
 import unicodedata
 import urllib.error
 import urllib.request
+import uuid
+import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -48,11 +50,12 @@ ICLOUD_DIR = Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/Events/
 # TTS models hit their free-tier daily limit (observed after ~45 TTS calls/day across the four models, 14 Nov).
 # 2.5 native audio recited a Finnish line word-for-word (fidelity 1.0); 3.8-live spoke but returned no transcript.
 DEFAULT_TTS_MODELS = ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts", "gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts",
-                      "live:gemini-2.5-flash-native-audio-latest", "live:gemini-3.8-live", "live:gemini-3.1-flash-live-preview"]
+                      "live:gemini-2.5-flash-native-audio-latest", "live:gemini-3.8-live", "live:gemini-3.1-flash-live-preview",
+                      "openai:gpt-4o-mini-tts"]
 EXHAUSTED: set[str] = set()  # models that returned a per-day quota error in this process
 # Listening/answering: 3.5-flash follows the "address the next pet" instruction best; 3.8-flash stalled >2 min
 # on this JSON+audio request on 2026-11-14 (kept last so `learn` can re-promote it if it recovers).
-DEFAULT_MIND_MODELS = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash"]
+DEFAULT_MIND_MODELS = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash", "openai:gpt-5.4-mini"]
 PREBUILT_VOICES = ["Zephyr", "Puck", "Charon", "Kore", "Fenrir", "Leda", "Orus", "Aoede", "Callirrhoe", "Autonoe",
                    "Enceladus", "Iapetus", "Umbriel", "Algieba", "Despina", "Erinome", "Algenib", "Rasalgethi",
                    "Laomedeia", "Achernar", "Alnilam", "Schedar", "Gacrux", "Pulcherrima", "Achird",
@@ -160,6 +163,130 @@ def call(model: str, body: dict, key: str, log: list, attempts: int = 6, max_wai
                 continue
             raise
     raise ProviderError(0, "EXHAUSTED", "retries exhausted")
+
+
+# --------------------------------------------------------- openai fallback ---
+# Last-resort provider, used only after every Gemini route (TTS, Live, text) failed — on 15 Nov the free Gemini
+# text quota ran out after ~8 scenes and TTS after ~45 calls. Models are "openai:<model>" in any order list and
+# model_order() always keeps them last, so learning can never promote paid calls ahead of Gemini.
+# gpt-4o-mini-tts on /v1/audio/speech shuts down 6 Jan 2027 (migrate to gpt-realtime-2.1-mini, Realtime API).
+OPENAI_API = "https://api.openai.com/v1"
+OPENAI_KEYCHAIN = ("OpenAI API Key", "openai")
+OPENAI_MAX_CALLS = int(os.environ.get("PET_VOICE_OPENAI_MAX_CALLS", "150"))  # per process: a spend guard
+OPENAI_CALLS = {"n": 0}
+OPENAI_STT_MODEL = "gpt-4o-mini-transcribe"
+OPENAI_FEMALE = ["marin", "coral", "nova", "shimmer", "sage"]
+OPENAI_MALE = ["cedar", "ash", "onyx", "verse", "ballad", "echo"]
+GEMINI_FEMALE = {"Zephyr", "Kore", "Leda", "Aoede", "Callirrhoe", "Autonoe", "Despina", "Erinome", "Laomedeia", "Achernar",
+                 "Gacrux", "Pulcherrima", "Vindemiatrix", "Sulafat"}
+_OPENAI_KEY: dict = {}
+
+
+def read_openai_key() -> str | None:
+    """OPENAI_API_KEY from the environment, else the owner's Keychain item; None disables the fallback."""
+    if os.environ.get("PET_VOICE_OPENAI", "1") == "0":
+        return None
+    if "key" not in _OPENAI_KEY:
+        key = os.environ.get("OPENAI_API_KEY", "").strip()
+        if not key:
+            try:
+                r = subprocess.run(["/usr/bin/security", "find-generic-password", "-s", OPENAI_KEYCHAIN[0], "-a", OPENAI_KEYCHAIN[1],
+                                    "-w"], capture_output=True, text=True, timeout=20)
+                key = r.stdout.strip() if r.returncode == 0 else ""
+            except (OSError, subprocess.TimeoutExpired):
+                key = ""
+        _OPENAI_KEY["key"] = key if len(key) > 20 else None
+    return _OPENAI_KEY["key"]
+
+
+def openai_voice_for(name: str, gender: str | None = None) -> str:
+    """A stable OpenAI voice of the same gender as the pet's Gemini voice (or the gender its voice design names)."""
+    female = gender == "female" if gender else name in GEMINI_FEMALE
+    pool = OPENAI_FEMALE if female else OPENAI_MALE
+    return pool[zlib.crc32(name.encode()) % len(pool)]
+
+
+def openai_post(path: str, timeout: float = 90, payload: dict | None = None, multipart: tuple[dict, tuple[str, bytes, str]] | None = None) -> bytes:
+    key = read_openai_key()
+    if not key:
+        raise ProviderError(0, "NO_KEY", "OpenAI fallback disabled: no key")
+    if OPENAI_CALLS["n"] >= OPENAI_MAX_CALLS:
+        raise ProviderError(0, "OPENAI_CAP", f"spend guard: {OPENAI_MAX_CALLS} OpenAI calls in this process", daily=True)
+    OPENAI_CALLS["n"] += 1
+    headers = {"Authorization": f"Bearer {key}"}
+    if multipart:
+        fields, (fname, blob, mime) = multipart
+        boundary = f"----petvoice{uuid.uuid4().hex}"
+        body = b"".join(f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode() for k, v in fields.items())
+        body += (f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{fname}"\r\nContent-Type: {mime}\r\n\r\n'.encode()
+                 + blob + f"\r\n--{boundary}--\r\n".encode())
+        headers["content-type"] = f"multipart/form-data; boundary={boundary}"
+    else:
+        body = json.dumps(payload).encode()
+        headers["content-type"] = "application/json"
+    req = urllib.request.Request(f"{OPENAI_API}/{path}", data=body, headers=headers, method="POST")
+    try:
+        with urllib.request.build_opener(_NoRedirect()).open(req, timeout=timeout) as resp:
+            return resp.read()
+    except urllib.error.HTTPError as e:
+        try:
+            info = json.loads(e.read().decode("utf-8", "replace")).get("error", {})
+        except (ValueError, AttributeError):
+            info = {}
+        code = str(info.get("code") or info.get("type") or "")
+        raise ProviderError(e.code, code, str(info.get("message") or "")[:400], daily=code == "insufficient_quota")
+    except (TimeoutError, urllib.error.URLError, OSError) as e:
+        raise ProviderError(0, "TIMEOUT" if "timed out" in str(e).lower() else "NETWORK", type(e).__name__)
+
+
+def openai_speak(text: str, voice: str, style: str, model: str = "gpt-4o-mini-tts") -> bytes:
+    instructions = (style or "natural, expressive") + ". Speak in the language the text is written in, with a native accent."
+    raw = openai_post("audio/speech", payload={"model": model, "voice": voice, "input": text, "instructions": instructions,
+                                               "response_format": "wav"})
+    return normalize_audio(raw, "audio/wav")
+
+
+def openai_transcribe(wav: bytes, model: str = OPENAI_STT_MODEL) -> str:
+    raw = openai_post("audio/transcriptions", timeout=60, multipart=({"model": model, "response_format": "json"},
+                                                                    ("turn.wav", wav, "audio/wav")))
+    return str(json.loads(raw).get("text", "")).strip()
+
+
+def to_json_schema(s: dict) -> dict:
+    """Gemini responseSchema → strict OpenAI JSON schema (lower-case types, every property required, no extras)."""
+    out = {"type": str(s.get("type", "string")).lower()}
+    for k in ("description", "enum"):
+        if k in s:
+            out[k] = s[k]
+    if out["type"] == "object":
+        props = s.get("properties", {})
+        out.update({"properties": {k: to_json_schema(v) for k, v in props.items()}, "required": list(props),
+                    "additionalProperties": False})
+    if out["type"] == "array":
+        out["items"] = to_json_schema(s.get("items", {"type": "STRING"}))
+    return out
+
+
+def openai_json(system: str, prompt: str, schema: dict, audio: bytes | None, model: str, log: list) -> tuple[dict, float]:
+    """Structured reply from an OpenAI text model; audio is transcribed first (Gemini hears it natively)."""
+    t0 = time.monotonic()
+    try:
+        if audio:
+            prompt = f"Transcript of the audio you just heard (transcribed for you):\n{openai_transcribe(audio)}\n\n{prompt}"
+        body = {"model": model, "instructions": system, "input": prompt, "reasoning": {"effort": "low"}, "max_output_tokens": 3000,
+                "text": {"format": {"type": "json_schema", "name": "reply", "schema": to_json_schema(schema), "strict": True}}}
+        data = json.loads(openai_post("responses", timeout=60, payload=body))
+        text = "".join(c.get("text", "") for item in data.get("output", []) if item.get("type") == "message"
+                       for c in item.get("content", []) if c.get("type") == "output_text").strip()
+        return json.loads(text), time.monotonic() - t0
+    except ProviderError as e:
+        log.append(e.record(f"openai:{model}"))
+        if e.daily or e.code in ("NO_KEY", "OPENAI_CAP"):
+            EXHAUSTED.add(f"openai:{model}")
+        raise
+    except (ValueError, KeyError) as e:
+        log.append({"model": f"openai:{model}", "status": 200, "code": "BAD_JSON", "message": str(e)[:160]})
+        raise ProviderError(200, "BAD_JSON", str(e)[:160])
 
 
 # ------------------------------------------------------------------- audio ---
@@ -414,11 +541,23 @@ def live_speak(text: str, voice: str, style: str, key: str, model: str, timeout:
         ws.close()
 
 
-def speak(text: str, voice: str, style: str, key: str, models: list[str], log: list, prefer: dict | None = None) -> dict:
+def speak(text: str, voice: str, style: str, key: str, models: list[str], log: list, prefer: dict | None = None,
+          openai_voice: str | None = None) -> dict:
     """Synthesize `text`; walk models and request variants until one returns audio."""
     for model in models:
         if model in EXHAUSTED:
             continue
+        if model.startswith("openai:"):
+            ov, t0 = openai_voice or openai_voice_for(voice), time.monotonic()
+            try:
+                wav = openai_speak(text, ov, style, model.removeprefix("openai:"))
+            except ProviderError as e:
+                log.append(e.record(model))
+                if e.daily or e.code in ("NO_KEY", "OPENAI_CAP"):
+                    EXHAUSTED.add(model)
+                continue
+            return {"wav": wav, "model": model, "variant": "openai-speech", "latency": round(time.monotonic() - t0, 2),
+                    "mime": "audio/wav", "openaiVoice": ov}
         if model.startswith("live:"):
             # Live models sometimes *answer* the line instead of reading it (fidelity 0.19 on 14 Nov).
             # Check what was actually said; re-voice once with a stricter frame before accepting.
@@ -489,6 +628,16 @@ def think(system: str, prompt: str, audio: bytes | None, key: str, models: list[
     for model in models:
         if model in EXHAUSTED:
             continue
+        if model.startswith("openai:"):
+            try:
+                data, latency = openai_json(system, prompt, REPLY_SCHEMA, audio, model.removeprefix("openai:"), log)
+            except ProviderError:
+                continue
+            if not str(data.get("reply", "")).strip():
+                continue
+            return {"heard": str(data.get("heard", "")).strip(), "heard_language": str(data.get("heard_language", "")).strip(),
+                    "reply": re.sub(r"\s+", " ", str(data["reply"])).strip(), "model": model, "latency": round(latency, 2),
+                    "thinking": "openai-low"}
         bodies = [low, base]
         while bodies:
             body = bodies[0]
@@ -533,7 +682,9 @@ def model_order(learned: dict, kind: str, defaults: list[str], override: list[st
     learned_order = (learned.get("modelOrder") or {}).get(kind) or []
     order = learned_order + [m for m in defaults if m not in learned_order]
     cooling = {m for m, until in (learned.get("cooldownUntil") or {}).items() if until > now()}
-    return [m for m in order if m not in cooling] + [m for m in order if m in cooling]
+    ordered = [m for m in order if m not in cooling] + [m for m in order if m in cooling]
+    # Paid fallback stays last whatever learning says: Gemini (free, the hackathon's API) is always tried first.
+    return [m for m in ordered if not m.startswith("openai:")] + [m for m in ordered if m.startswith("openai:")]
 
 
 def adapt_voice(learned: dict, voice: str, language: str, threshold: float = 0.75, min_samples: int = 2) -> tuple[str, str | None]:
