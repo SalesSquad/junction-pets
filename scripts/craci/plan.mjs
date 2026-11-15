@@ -99,7 +99,7 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     // must provide the exact reviewed task commit before CRACI reserves capacity.
     if (!override) throw new Error(`${workload} requires an explicit source_sha`);
     if (workload === 'rokoko-mujoco-v12-pilot' &&
-        override !== 'c77158f9ae80acc2b1eafaf9284c4397426799b2')
+        override !== '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f')
       throw new Error('V12 pilot requires exact reviewed source_sha');
     if (workload === 'rokoko-mujoco-v13-pilot' &&
         override !== 'faec266d6d3a44af3a564f46e0778209c1dc3af1')
