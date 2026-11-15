@@ -54,7 +54,11 @@ export const OFFICIAL_DOMAINS = ["ecfr.gov", "www.ecfr.gov", "legislation.gov.uk
 // ---------- a small registry of well-known, amount-bearing rights (robust demo; Exa covers the rest) ----------
 
 /** `also`: provisions of the same family whose clauses compete (e.g. adult and younger-worker wage rates). */
-export interface Known { ref: OfficialRef; title: string; about: string; jurisdiction: string; keywords: string[]; also?: OfficialRef[] }
+const RAIL_WORDS = /\b(trains?|rail(way)?|zug|z[üu]ge[n]?|bahn|juna\w*|tågs?|metro|tram)\b/i;
+const AIR_WORDS = /\b(flights?|flug|fl[üu]ge|lento\w*|lennon|airlines?|airport|plane|aircraft|boarding|flew|flying)\b/i;
+const AIR_ONLY = /\b(flights?|flug|lento\w*|airlines?|airport|plane|boarding)\b/i;
+
+export interface Known { ref: OfficialRef; title: string; about: string; jurisdiction: string; keywords: string[]; also?: OfficialRef[]; /** The right is not about this: a question matching `avoid` (and not `unless`) never takes it. */ avoid?: RegExp; unless?: RegExp }
 export const REGISTRY: Known[] = [
   { ref: { source: "ecfr", title: 14, part: 250, section: "250.5" }, title: "14 CFR 250.5 — denied boarding compensation (US)", about: "Money an airline must pay a passenger involuntarily bumped from an oversold flight in or from the United States, depending on how late the substitute flight arrives.", jurisdiction: "US", keywords: ["bumped", "oversold", "denied boarding", "overbook", "us", "domestic", "united states"] },
   { ref: { source: "ecfr", title: 12, part: 1026, section: "1026.52" }, title: "12 CFR 1026.52 — credit card late and penalty fees (US)", about: "The maximum late payment or penalty fee a US credit card issuer may charge (safe-harbor amounts).", jurisdiction: "US", keywords: ["credit card", "late fee", "penalty fee", "card issuer"] },
@@ -64,15 +68,40 @@ export const REGISTRY: Known[] = [
   { ref: { source: "ukleg", path: "uksi/1986/1960/regulation/6" }, title: "Statutory Maternity Pay (General) Regulations 1986, reg. 6 — maternity pay rate (UK)", about: "The weekly rate of statutory maternity pay in the UK.", jurisdiction: "UK", keywords: ["maternity pay", "smp", "maternity"] },
   { ref: { source: "ukleg", path: "uksi/2002/2818/regulation/2" }, title: "Statutory Paternity Pay and Statutory Adoption Pay (Weekly Rates) Regulations 2002, reg. 2 (UK)", about: "The weekly rate of statutory paternity pay (and adoption pay) in the UK.", jurisdiction: "UK", keywords: ["paternity pay", "adoption pay", "spp", "shared parental"] },
   { ref: { source: "ukleg", path: "ukpga/1996/18/section/227" }, title: "Employment Rights Act 1996, s. 227 — maximum week's pay (UK)", about: "The cap on a week's pay used to calculate statutory redundancy pay and the basic award for unfair dismissal in the UK.", jurisdiction: "UK", keywords: ["redundancy pay", "week's pay", "unfair dismissal", "basic award", "redundant"] },
-  { ref: { source: "eurlex", celex: "32004R0261", article: "7" }, title: "Regulation (EC) No 261/2004, Art. 7 — flight compensation (EU)", about: "Fixed compensation an airline owes passengers in the EU for a cancelled, long-delayed or overbooked flight, by flight distance.", jurisdiction: "EU", keywords: ["eu261", "flight delay", "cancelled flight", "delayed flight", "eu", "europe", "€", "261/2004", "lento", "lennon", "peruttiin", "flug", "annulliert", "verspätung"] },
+  { ref: { source: "eurlex", celex: "32004R0261", article: "7" }, title: "Regulation (EC) No 261/2004, Art. 7 — flight compensation (EU)", about: "Fixed compensation an airline owes passengers in the EU for a cancelled, long-delayed or overbooked flight, by flight distance.", jurisdiction: "EU", keywords: ["eu261", "flight delay", "cancelled flight", "delayed flight", "eu", "europe", "€", "261/2004", "lento", "lennon", "peruttiin", "flug", "annulliert"], avoid: RAIL_WORDS, unless: AIR_WORDS },
+  { ref: { source: "eurlex", celex: "32021R0782", article: "19" }, title: "Regulation (EU) 2021/782, Art. 19 — rail passenger compensation for delay (EU)", about: "The share of the ticket price a railway company in the EU must pay a passenger whose train arrives 60 minutes or more late (25 % from 60 minutes, 50 % from 120 minutes).", jurisdiction: "EU", keywords: ["train delay", "delayed train", "late train", "railway", "rail passenger", "2021/782", "juna myöhässä", "junan myöhästyminen", "juna myöhästyi", "zug verspätung", "zugverspätung", "verspätung zug", "zug hatte", "bahn verspätung", "train"], avoid: AIR_ONLY, unless: RAIL_WORDS },
   { ref: { source: "eurlex", celex: "32016R0679", article: "12" }, title: "Regulation (EU) 2016/679 (GDPR), Art. 12 — time to answer data requests (EU)", about: "How long a company in the EU has to answer a person's request about their personal data (access, erasure and other GDPR rights).", jurisdiction: "EU", keywords: ["gdpr", "data access", "subject access", "personal data", "data request"] },
 ];
+
+
+/**
+ * The one jurisdiction the person's own words point to, if exactly one: "federal", a dollar sign or a US state
+ * mean the US; a pound sign or "UK" mean the UK; a euro sign, "EU" or Finland and Germany mean the EU.
+ * Mixed or no cues: undefined (an international trip names several).
+ */
+export function jurisdictionCue(question: string): "US" | "UK" | "EU" | undefined {
+  const q = question;
+  const found = new Set<string>();
+  if (/\$|\bfederal\b|\bUSA?\b|\bU\.S\.|united states|\bamerican?\b|\b(california|texas|florida|new york|illinois|washington state)\b|\byhdysvalloissa\b/i.test(q.replace(/\bus\b/g, ""))) found.add("US");
+  if (/£|\bUK\b|\bU\.K\.|britain|british|england|scotland|wales|\bhmrc\b|isossa-britanniassa/i.test(q)) found.add("UK");
+  if (/€|\bEU\b|\beuropean union\b|\bsuomessa\b|\bfinland\b|\bdeutschland\b|\bgermany\b|\bsaksassa\b/i.test(q)) found.add("EU");
+  return found.size === 1 ? ([...found][0] as "US" | "UK" | "EU") : undefined;
+}
+
+/** A built-in right the question rules out: wrong jurisdiction named in it, or the wrong kind of journey. */
+export function ruledOutBy(question: string, k: Known): boolean {
+  const cue = jurisdictionCue(question);
+  if (cue && cue !== k.jurisdiction) return true;
+  return !!k.avoid && k.avoid.test(question) && !(k.unless && k.unless.test(question));
+}
+
+const ruledOutHit = (question: string, ref: OfficialRef) => { const k = REGISTRY.find((x) => JSON.stringify(x.ref) === JSON.stringify(ref)); return !!k && ruledOutBy(question, k); };
 
 function registryScores(question: string): Array<{ k: Known; score: number }> {
   const q = question.toLowerCase();
   // A short word must stand alone: "us" is inside the Finnish "ilmoitusta" and "eu" inside "neuvo".
   const has = (w: string) => (w.length <= 3 && /^[a-z0-9]+$/.test(w) ? new RegExp(`(^|[^\\p{L}\\p{N}])${w}($|[^\\p{L}\\p{N}])`, "u").test(q) : q.includes(w));
-  return REGISTRY.map((k) => ({ k, score: k.keywords.reduce((s, w) => s + (has(w) ? (w.length > 3 ? 2 : 1) : 0), 0) })).sort((a, b) => b.score - a.score);
+  return REGISTRY.map((k) => ({ k, score: ruledOutBy(question, k) ? 0 : k.keywords.reduce((s, w) => s + (has(w) ? (w.length > 3 ? 2 : 1) : 0), 0) })).sort((a, b) => b.score - a.score);
 }
 
 const STOP = new Set(["i", "my", "me", "was", "is", "the", "a", "an", "and", "or", "of", "on", "in", "to", "for", "how", "much", "what", "am", "owed", "do", "get", "did", "from", "at", "it", "be", "with", "that", "this", "when", "can", "could", "would", "under", "per", "after", "then", "they", "their", "there", "only"]);
@@ -123,7 +152,7 @@ export async function findProvision(question: string, opts: { exaSearch?: ExaSea
     // catalog, which also runs on this device. Its first hit is taken as it is: the on-device judge, trained to
     // choose clauses, did not improve on it when asked to choose among the top five (39.5 % against 43.8 %).
     const hits = opts.catalogSearch ? await opts.catalogSearch(question, opts.date).catch(() => []) : [];
-    const reg = hits.find((h) => h.kind === "registry"), cfr = hits.find((h) => h.kind !== "registry");
+    const reg = hits.find((h) => h.kind === "registry" && !ruledOutHit(question, h.ref)), cfr = hits.find((h) => h.kind !== "registry");
     // 1. A built-in right matched by meaning (any language). 2. A clear keyword match. 3. The nearest CFR provision.
     if (reg && reg.score >= REGISTRY_MATCH && reg.score >= (cfr?.score ?? 0) - REGISTRY_MARGIN) return { ref: reg.ref, title: reg.title, via: "registry", also: reg.also, p: reg.score };
     if (top && top.score >= 2) return { ref: top.k.ref, title: top.k.title, via: "registry", also: top.k.also };

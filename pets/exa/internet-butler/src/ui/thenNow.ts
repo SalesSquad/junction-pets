@@ -7,7 +7,7 @@ import type { ThenNowNext } from "../timetravel/timetravel.ts";
 import { asTwoLane } from "../timetravel/timetravel.ts";
 import { buildArtifact, generateDeviceKey, verifyArtifact, type WarrantArtifact } from "../warrant/artifact.ts";
 import { Authority, type AgentGrant, type Authorization, type Proposal } from "../authority/authority.ts";
-import { dictate, relativeDate, speak, spokenDate, stopSpeaking, voiceSupport, VOICE_LANGS } from "./voice.ts";
+import { dictate, monthDate, relativeDate, speak, spokenDate, stopSpeaking, voiceSupport, VOICE_LANGS } from "./voice.ts";
 import { copyText, dictationNote } from "./embed.ts";
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
@@ -161,7 +161,7 @@ export function mountThenNow(root: HTMLElement): void {
       (error) => {
         state.listening = false;
         state.voiceNote = dictationNote(error);
-        const said = spokenDate(state.question) ?? relativeDate(state.question, today());
+        const said = spokenDate(state.question) ?? monthDate(state.question) ?? relativeDate(state.question, today());
         if (said) state.date = said;
         render();
       },
@@ -487,7 +487,7 @@ export function mountThenNow(root: HTMLElement): void {
   if (q && q.length >= 5) {
     state.question = q;
     const d = link.get("date");
-    const date = d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : (spokenDate(q) ?? relativeDate(q, today()) ?? today());
+    const date = d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : (spokenDate(q) ?? monthDate(q) ?? relativeDate(q, today()) ?? today());
     state.date = date;
     state.privateMode = link.get("private") === "1";
     state.sayResult = link.get("say") === "1";
