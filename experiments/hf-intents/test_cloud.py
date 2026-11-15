@@ -289,6 +289,60 @@ class CloudBoundaries(unittest.TestCase):
             self.assertIn("campaign-summary.md", published)
             self.assertTrue((work / "campaign-summary.md").is_file())
 
+    def cache_transport(self, payload, asset_changes=None, private=True, tag=None):
+        digest = hashlib.sha256(payload).hexdigest()
+        entry = {"url": "https://huggingface.co/datasets/publisher/data/resolve/" + "a" * 40 + "/data.parquet",
+                 "sha256": digest, "bytes": len(payload)}
+        asset = {"id": 1234, "name": "sha256-" + digest, "size": len(payload),
+                 "label": "sha256:" + digest, "digest": "sha256:" + digest}
+        asset.update(asset_changes or {})
+        calls = []
+        def provider(*args, output=None, timeout=180):
+            calls.append(args)
+            if args == ("api", f"repos/{cloud.REPO}"):
+                return json.dumps({"private": private, "full_name": cloud.REPO}).encode()
+            if args == ("api", f"repos/{cloud.REPO}/releases/tags/{cloud.DATA_CACHE_TAG}"):
+                return json.dumps({"id": 900, "tag_name": tag or cloud.DATA_CACHE_TAG,
+                                   "prerelease": True, "draft": False}).encode()
+            if args == ("api", "--paginate", "--slurp", f"repos/{cloud.REPO}/releases/900/assets?per_page=100"):
+                return json.dumps([[asset]]).encode()
+            if args == ("api", f"repos/{cloud.REPO}/releases/assets/1234", "-H", "Accept: application/octet-stream"):
+                output.write(payload)
+                return None
+            raise AssertionError("Unexpected provider request")
+        return entry, provider, calls
+
+    def test_private_cache_fetches_exact_opaque_publisher_bytes(self):
+        payload = b"opaque public licensed dataset bytes"
+        entry, provider, calls = self.cache_transport(payload)
+        with tempfile.TemporaryDirectory() as folder, patch.object(cloud, "_DATA_CACHE_ASSETS", None), \
+                patch.object(cloud, "gh", side_effect=provider):
+            path = Path(folder) / "train.parquet"
+            cloud.fetch(entry, path)
+            self.assertEqual(path.read_bytes(), payload)
+            count = len(calls)
+            cloud.fetch(entry, path)
+            self.assertEqual(len(calls), count)
+
+    def test_private_cache_refuses_wrong_name_hash_and_size(self):
+        for changed in ({"name": "sha256-" + "f" * 64}, {"label": "sha256:" + "f" * 64},
+                        {"digest": "sha256:" + "f" * 64}, {"size": 999}):
+            entry, provider, _ = self.cache_transport(b"public bytes", changed)
+            with self.subTest(changed=changed), tempfile.TemporaryDirectory() as folder, \
+                    patch.object(cloud, "_DATA_CACHE_ASSETS", None), patch.object(cloud, "gh", side_effect=provider):
+                path = Path(folder) / "train.parquet"
+                with self.assertRaises(ValueError):
+                    cloud.fetch(entry, path)
+                self.assertFalse(path.exists())
+
+    def test_private_cache_refuses_public_repository_and_wrong_release(self):
+        for settings in ({"private": False}, {"tag": "other-release"}):
+            entry, provider, _ = self.cache_transport(b"public bytes", **settings)
+            with self.subTest(settings=settings), tempfile.TemporaryDirectory() as folder, \
+                    patch.object(cloud, "_DATA_CACHE_ASSETS", None), patch.object(cloud, "gh", side_effect=provider):
+                with self.assertRaises(ValueError):
+                    cloud.fetch(entry, Path(folder) / "train.parquet")
+
 
 if __name__ == "__main__":
     unittest.main()
