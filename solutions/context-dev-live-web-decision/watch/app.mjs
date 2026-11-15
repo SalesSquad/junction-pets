@@ -7,7 +7,7 @@ const allowedHosts=new Set(['gigantti.fi','www.gigantti.fi','proshop.fi','www.pr
 const defaults=()=>({name:'',query:'',requirements:'',gtin:'',maxPriceCents:null,quantity:1,condition:'new',inStockOnly:true,includeMemberPrices:false,merchantIds:Object.keys(merchants),schedule:{kind:'manual',timeZone:'Europe/Helsinki'},maxRuns:10,expandCatalog:false});
 const errorMessages={CONNECTION_REQUIRED:'The local server needs its Context.dev connection before it can search. You can still save your watch.',REVISION_CONFLICT:'This watch changed in another window. Reload its saved version before applying your edits.',WATCH_CONFLICT:'This watch changed in another window. Reload it before trying again.',WATCH_BUSY:'This watch is already searching. Its results will appear here.',RUN_BUSY:'This watch is already searching. Its results will appear here.',REFRESH_BUSY:'A search is already running. Please wait for it to finish.',DAILY_LIMIT:'The daily request limit has been reached. No additional search was started.',DAILY_REQUEST_LIMIT:'The daily request limit has been reached. No additional search was started.',RUN_LIMIT:'This watch has reached its chosen search limit. Edit the watch to review its limit.',WATCH_RUN_LIMIT:'This watch has reached its chosen search limit. Edit the watch to review its limit.',PROVIDER_CREDITS_EXHAUSTED:'Context.dev credits are exhausted. Check the server connection before searching again.',PROVIDER_AUTH:'Context.dev could not authorize this server connection.',PROVIDER_RATE_LIMIT:'Context.dev asked this agent to wait. Try again later.',PROVIDER_TIMEOUT:'The search took too long. No new recommendation is available.',WATCH_NOT_FOUND:'This watch is no longer available. Refresh your watch list.',INVALID_SCHEDULE:'Check the date, time zone and selected weekdays.',INVALID_DEFINITION:'Check your product, conditions and schedule before saving.'};
 Object.assign(errorMessages,{PRIVATE_VALUE_NOT_ALLOWED:'Keep personal details, credentials and private URLs out of a product wish.',INVALID_TIME_ZONE:'Enter a valid time zone, such as Europe/Helsinki.',INVALID_DATE_TIME:'Choose a valid future local date and time.',INVALID_TARGET_PRICE:'Enter a positive item-price target with at most two decimals.',INVALID_GTIN:'Enter an EAN / GTIN with 8, 12, 13 or 14 digits.',INVALID_MERCHANTS:'Choose at least one supported retailer.',RUN_LIMIT_REACHED:'This watch has reached its chosen search limit. Review its settings before running again.',REQUEST_LIMIT:'The request budget for this search has been reached.',RUN_CANCELLED:'This search was stopped. Requests already submitted may still consume credits.',PROVIDER_PARTIAL:'The provider returned incomplete evidence. Review the results before deciding.',PROVIDER_SCHEMA:'The retrieved evidence did not have the expected product structure.',SOURCE_REJECTED:'A result did not pass the selected retailer and public-source checks.',IDEMPOTENCY_CONFLICT:'This save may already have completed. Refresh the watch list before creating it again.',WATCH_LIMIT:'This local agent has reached its saved-watch limit. Reuse or edit an existing watch.',STORE_UNAVAILABLE:'The local watch history could not be opened. Check the server’s storage connection.'});
-let watches=[],runner={},selectedId=null,detail=null,editing=null,createKey=crypto.randomUUID(),pollTimer=null,loadingDetail=0,busy=false,conflicted=false;
+let watches=[],runner={},selectedId=null,detail=null,editing=null,createKey=crypto.randomUUID(),pollTimer=null,loadingDetail=0,boardFetching=false,detailFetches=0,busy=false,conflicted=false;
 
 function safeLink(url,label){try{const u=new URL(url);if(u.protocol!=='https:'||!allowedHosts.has(u.hostname)||u.username||u.password)throw Error();const a=node('a',label);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';return a;}catch{return node('span',label);}}
 async function request(path,{method='GET',body}={}){
@@ -20,6 +20,7 @@ async function request(path,{method='GET',body}={}){
 }
 function explain(error){return errorMessages[error.message]??(error.status===409?'The watch changed or is already running. Refresh its details before trying again.':error.status===429?'This action reached the agent’s run or request limit. Review the watch and try later.':error.message==='NETWORK'?'The local server is unavailable. Reconnect and refresh this page.':'This action could not be completed. Check your watch settings and try again.');}
 function announce(text){$('activity').textContent=text;}
+function displayWarning(warning){if(typeof warning!=='string')return '';if(warning.startsWith('Offer could not be verified:'))return 'Some discovered pages could not be verified against this watch.';if(warning.startsWith('Catalog expansion incomplete:'))return 'The extra retailer catalogue could not be fully checked.';return warning;}
 function scheduleText(schedule){
  if(!schedule||schedule.kind==='manual')return 'Run when you choose';
  const zone=schedule.timeZone??'Europe/Helsinki';
@@ -41,20 +42,21 @@ function renderList(){
 }
 function setPane(which){$('editor').hidden=which!=='editor';$('detail').hidden=which!=='detail';$('empty-state').hidden=which!=='empty';}
 async function loadBoard({preserveSelection=true}={}){
+ if(boardFetching)return;boardFetching=true;
  try{const data=await request('/api/watches');watches=data.watches??[];runner=data.runner??{};renderRunner();renderList();
   if(editing!==null)return;
   if(preserveSelection&&selectedId&&watches.some(w=>w.id===selectedId)){await loadDetail(selectedId);return;}
   const first=watches.find(w=>w.status!=='archived');if(first){selectedId=first.id;await loadDetail(first.id);renderList();}else{selectedId=null;detail=null;setPane('empty');}
- }catch(error){announce(explain(error));}
+ }catch(error){announce(explain(error));}finally{boardFetching=false;}
 }
 function stopPolling(){if(pollTimer)clearTimeout(pollTimer);pollTimer=null;}
 async function select(id){stopPolling();editing=null;selectedId=id;renderList();await loadDetail(id);}
 async function loadDetail(id){
- const generation=++loadingDetail;
+ const generation=++loadingDetail;detailFetches++;
  try{const value=await request('/api/watches/'+encodeURIComponent(id));if(generation!==loadingDetail||selectedId!==id||editing!==null)return;detail=value;
   const position=watches.findIndex(w=>w.id===id);if(position>=0)watches[position]=value.watch;renderList();renderDetail();stopPolling();
-  if(value.runs?.some(r=>r.status==='running'))pollTimer=setTimeout(()=>loadDetail(id),2000);
- }catch(error){if(generation===loadingDetail)announce(explain(error));}
+  if(!document.hidden&&value.runs?.some(r=>r.status==='running'))pollTimer=setTimeout(()=>{pollTimer=null;loadDetail(id);},2000);
+ }catch(error){if(generation===loadingDetail)announce(explain(error));}finally{detailFetches--;}
 }
 function fact(label,value){const wrap=node('div','');wrap.append(node('dt',label),node('dd',value));return wrap;}
 function addEmpty(target,text){target.append(node('p',text,'empty-note'));}
@@ -66,9 +68,9 @@ function renderDetail(){
  $('pause-watch').textContent=watch.status==='archived'?'Restore watch':watch.status==='paused'?(d.schedule.kind==='manual'?'Resume watch':'Resume schedule'):(d.schedule.kind==='manual'?'Pause watch':'Pause schedule');$('pause-watch').disabled=busy;
  $('run-watch').disabled=busy||running||watch.status==='archived'||!runner.connected||!!runner.blockedCode||(watch.runCount??0)>=d.maxRuns;
  $('research-watch').disabled=$('run-watch').disabled;$('archive-watch').disabled=busy||watch.status==='archived';$('edit-watch').disabled=busy||watch.status==='archived';
- $('result-headline').textContent=running?'Searching the selected retailers…':latest?.status==='failed'?'The latest search could not finish.':latest?.status==='cancelled'?'The latest search was stopped.':summary?.headline??'Your first search is ready when you are.';
+ $('result-headline').textContent=running?'Searching the selected retailers…':latest?.status==='failed'?'The latest search could not finish.':latest?.status==='cancelled'?'The latest search was stopped.':summary?.headline?.replace(/(\d+) fresh offer(s?)/g,'$1 offer$2 observed')??'Your first search is ready when you are.';
  const warnings=[...(summary?.warnings??[])];if(latest?.errorCode)warnings.unshift(errorMessages[latest.errorCode]??'This search could not produce a complete result.');if(running)warnings.unshift('The agent is retrieving and checking product evidence. Previous offers remain historical while this search runs.');else if(latest&&(latest.status==='failed'||latest.status==='cancelled'||latest.summary?.research))warnings.unshift('The offers below retain earlier source observations; this last activity did not refresh them.');if(summary?.offers?.length)warnings.push('Prices and availability are observations from the displayed retrieval times. Recheck the retailer before purchasing.');
- $('result-warning').textContent=warnings.join(' ');renderOffers(summary?.offers??[],d);renderChanges(summary?.changes??[]);renderEvents(detail.events??[]);renderRuns(runs);renderResearch(research);
+ $('result-warning').textContent=[...new Set(warnings.map(displayWarning).filter(Boolean))].join(' ');renderOffers(summary?.offers??[],d);renderChanges(summary?.changes??[]);renderEvents(detail.events??[]);renderRuns(runs);renderResearch(research);
  $('download-memo').disabled=!summary;
 }
 function renderOffers(offers,definition){
@@ -78,7 +80,7 @@ function renderOffers(offers,definition){
   const price=node('div',money(offer.selectedPriceCents),'offer-price');price.append(node('small','per unit · delivery excluded'));top.append(heading,price);article.append(top);const observation=node('p','Observed '+(offer.receivedAt?date(offer.receivedAt):'at an unknown retrieval time')+' · historical until next search','muted');article.append(observation);
   const flags=node('div','','offer-flags');if(offer.meetsTarget)flags.append(node('span',Number.isSafeInteger(definition.maxPriceCents)?'PRICE TARGET MET':'FILTERS MET','flag target'));if(offer.needsReview)flags.append(node('span','MATCH NEEDS REVIEW','flag review'));flags.append(node('span',String(offer.stockStatus??'unknown').replaceAll('_',' ').toUpperCase(),'flag'));if(offer.selectedPriceCents===offer.memberPriceCents&&offer.memberPriceCents!==null)flags.append(node('span','MEMBER PRICE SELECTED','flag review'));article.append(flags);
   const facts=node('dl','','offer-facts');facts.append(fact('Ordinary item price',money(offer.priceCents)),fact('Member price',offer.memberPriceCents===null?'Not supplied':money(offer.memberPriceCents)),fact(`Items subtotal · ${definition.quantity} unit${definition.quantity===1?'':'s'}`,money(offer.itemSubtotalCents)),fact('Shipping from',money(offer.shippingFromCents)),fact('Product identity',offer.gtin||'Exact EAN not confirmed'),fact('Match',String(offer.matchStatus??'needs_review').replaceAll('_',' ')));article.append(facts);
-  for(const warning of offer.warnings??[])article.append(node('p',warning,'offer-warning'));
+  for(const warning of new Set((offer.warnings??[]).map(displayWarning).filter(Boolean)))article.append(node('p',warning,'offer-warning'));
   if(offer.evidence?.length){const evidence=node('details','');evidence.append(node('summary','Product evidence'));const list=node('ul','');for(const item of offer.evidence){const li=node('li','');li.append(node('b',item.field+': '),document.createTextNode(item.quote??''));list.append(li);}evidence.append(list);article.append(evidence);}
   target.append(article);
  }
@@ -125,4 +127,5 @@ $('refresh-view').addEventListener('click',()=>{if(editing===null)loadBoard();el
 $('show-archived').addEventListener('change',renderList);$('schedule-kind').addEventListener('change',updateScheduleFields);for(const id of ['time-zone','schedule-at','schedule-time','schedule-minutes','max-runs'])$(id).addEventListener('input',updateSchedulePreview);for(const e of document.querySelectorAll('[name=weekday]'))e.addEventListener('change',updateSchedulePreview);
 $('download-memo').addEventListener('click',()=>{if(!detail?.watch)return;const data={watch:detail.watch,runs:detail.runs,events:detail.events};const content=['SUPPLYPULSE — PRODUCT WATCH MEMO',detail.watch.definition.name,detail.watch.definition.query,'Item prices and retailer claims require review. Shipping, arrival and stock quantities may be unknown.','No purchase or reservation was sent.','',JSON.stringify(data,null,2)].join('\n');const url=URL.createObjectURL(new Blob([content],{type:'text/plain;charset=utf-8'})),a=node('a','');a.href=url;a.download='SupplyPulse-product-watch-memo.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopPolling();else if(editing===null)loadBoard();});window.addEventListener('focus',()=>{if(editing===null)loadBoard();});
+setInterval(()=>{if(!document.hidden&&editing===null&&!busy&&!boardFetching&&!detailFetches){stopPolling();loadBoard();}},15_000);
 loadBoard();
