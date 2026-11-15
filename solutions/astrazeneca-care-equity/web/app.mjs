@@ -4,7 +4,7 @@ import {buildBrief,locateGap,flagSignal} from '/src/claims.mjs';
 import {ASSUMPTIONS,INTERVENTIONS,metricRows,computePortfolio} from './bindings.mjs';
 import {dataPlanHtml,scribeHtml,scribeHeadlineHtml,whoHtml,processHtml,pilotHtml,roadmapLine,routeDisclosure,insightHtml,plannerSummaryHtml} from './tracks.mjs';
 import {plannerHtml} from './planner.mjs';
-import {scribeDemoHtml} from './scribe-demo.mjs';
+import {scribeDemoHtml,withSecondCall} from './scribe-demo.mjs';
 import {safetyNetHtml} from './safetynet.mjs';
 import {flareGateHtml} from './flare.mjs';
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -57,20 +57,28 @@ const stale=[changed?'Drafted on an earlier data build':'',held?`${held} sentenc
 el.innerHTML=(stale.length?`<p class="caption">${stale.join('; ')}.</p>`:'')+(selected==='HVA91'?`<p class="flag">Åland organises its own health care; the national roadmap measures and wellbeing-county owners in this draft do not apply as written.</p>`:'')+(actions.some(a=>a.action_id==='pathway-timestamps')?`<p class="caption">The “four pathway timestamps” action in this draft was drafted before the minimum dataset became two dates and an end reason (section 05); the four timestamps are now optional, for a pilot county.</p>`:'')+`<p class="caption">${chip('SCENARIO')} Deaths in a draft are modelled upper-bound scenario figures, not measured effects. The draft covers the portfolio actions; the proposed pilot is the worklist in section 05.</p>`+plannerHtml(plans,selected,{withhold,withheldWhy:`it states a confirmed gap where SAMA now sees only a possible signal`})+`<p class="caption">Draft input on public data, not an assessment. “${esc(fmt(plans.summary?.counties))} counties” in the drafts means SAMA's ${esc(fmt(app.analysis.regions.length))} areas: the ${esc(fmt(app.evidence.find(x=>x.id==='stm-wellbeing-services-counties')?.value))} wellbeing services counties, the City of Helsinki and Åland.</p>`;}
 async function loadPlanner(){try{const r=await fetch('/data/planner/plans-v1.json');if(!r.ok)throw Error(`HTTP ${r.status}`);plans=await r.json();}catch(e){plansError=e.message;}renderPlanner();}
 // Scribe demo: stored output first (no model process starts); "Run live" asks the local CPU process. Without the
-// /api/scribe route (static hosting) the stored outputs file is read directly.
-let demoOutputs=null;
+// /api/scribe route (static hosting) the stored outputs file is read directly. "Ask Nemotron live" sends the selected
+// SYNTHETIC note to the hosted Nemotron endpoint through POST /api/scribe/second and applies the two-reader rule to
+// the Gemma answer on screen.
+let demoOutputs=null,demoShown=null;
+const demoBusy=(on)=>{for(const b of ['demo-stored','demo-live','demo-second'])if($(b))$(b).disabled=on;};
 async function storedDemo(id,reason){if(!demoOutputs){const r=await fetch('/data/scribe/demo/demo-outputs.json');if(!r.ok)throw Error(`stored outputs unavailable (HTTP ${r.status})`);demoOutputs=await r.json();}const result=demoOutputs.results?.[id];if(!result)throw Error('no stored output for this note');return {served:'precomputed',fallback_reason:reason,result};}
-async function runDemo(mode){const id=$('demo-note').value;if(!id)return;$('demo-stored').disabled=$('demo-live').disabled=true;$('demo-status').textContent=mode==='live'?'Reading the note on this computer…':'Loading the stored output…';let data;
+async function runDemo(mode){const id=$('demo-note').value;if(!id)return;demoBusy(true);$('demo-status').textContent=mode==='live'?'Reading the note on this computer…':'Loading the stored output…';let data;
 try{const res=await fetch('/api/scribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({demo_id:id,mode})});const body=await res.json().catch(()=>null);if(res.ok&&body?.result)data=body;else data=await storedDemo(id,body?.error||`the /api/scribe route answered HTTP ${res.status}`);}
 catch(e){try{data=await storedDemo(id,'the /api/scribe route is not available here');}catch(e2){data={error:e2.message};}}
-if($('demo-note').value!==id)return;$('demo-content').innerHTML=scribeDemoHtml(data);$('demo-status').textContent=data.served==='live'?'Live run finished.':data.result?'Stored output shown.':'';$('demo-stored').disabled=$('demo-live').disabled=false;}
+if($('demo-note').value!==id)return;demoShown={id,data};$('demo-content').innerHTML=scribeDemoHtml(data);$('demo-status').textContent=data.served==='live'?'Live run finished.':data.result?'Stored output shown.':'';demoBusy(false);}
+async function askSecond(){const id=$('demo-note').value;if(!id)return;demoBusy(true);$('demo-status').textContent='Sending the SYNTHETIC note to the hosted Nemotron 3.5 Super VL endpoint…';let call;
+try{const res=await fetch('/api/scribe/second',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({demo_id:id})});call=await res.json().catch(()=>null);if(!call?.served)call={served:'none',prediction:null,reason:call?.error||`the /api/scribe/second route answered HTTP ${res.status}`};}
+catch{call={served:'none',prediction:null,reason:'the live second reader needs the SAMA server (npm start), which is not running behind this page'};}
+if($('demo-note').value!==id)return;const shown=demoShown?.id===id?demoShown.data:null;$('demo-content').innerHTML=scribeDemoHtml(withSecondCall(shown,call));
+$('demo-status').textContent=call.served==='live'?`Nemotron answered live in ${(call.latency_ms/1000).toFixed(1)} s.`:call.served==='stored'?'Live call not used; the stored Nemotron answer is shown.':'No second answer for this note.';demoBusy(false);}
 // Plain labels for the note picker: what kind of date the note carries and who wrote it (all SYNTHETIC).
 const WRITERS={nemotron:'written by Nemotron',haiku:'written by Claude Haiku'};
 function demoLabel(n,i){const head=`Note ${i+1}`,who=WRITERS[n.writer]||'';if(n.rewritten_by_code&&n.rewrite?.to_phrase)return `${head}: “${n.rewrite.to_phrase}”, a phrasing the hand-written Finnish lexicon covers (not in the training notes)`;if(n.kind==='no_event')return `${head}: no pathway event, ${who}`;const s=String(n.stratum||'');const what=s.endsWith('/no-relative')?'calendar dates only':s.endsWith('/relative')?'a relative date (“… sitten”)':`${String(n.kind||'note').replace(/_/g,' ')} note`;return `${head}: ${what}, ${who}`;}
 async function initDemo(){try{const r=await fetch('/data/scribe/demo/demo-notes.json');if(!r.ok)throw Error(`HTTP ${r.status}`);const notes=await r.json();$('demo-note').innerHTML=(notes.notes||[]).map((n,i)=>`<option value="${esc(n.demo_id)}">${esc(demoLabel(n,i))}</option>`).join('');
 // Opens on Note 4 (demo-04): Gemma's own date is struck out, code sets the date, both readers agree, so it is
 // pre-filled for one-click confirmation. Any other note can be picked from the list.
-if((notes.notes||[]).some(n=>n.demo_id==='demo-04'))$('demo-note').value='demo-04';$('demo-stored').onclick=()=>runDemo('precomputed');$('demo-live').onclick=()=>runDemo('live');$('demo-note').onchange=()=>runDemo('precomputed');await runDemo('precomputed');}catch(e){$('demo-content').innerHTML=`<p class="missing-label">The scribe demo notes could not be loaded: ${esc(e.message)}.</p>`;}}
+if((notes.notes||[]).some(n=>n.demo_id==='demo-04'))$('demo-note').value='demo-04';$('demo-stored').onclick=()=>runDemo('precomputed');$('demo-live').onclick=()=>runDemo('live');$('demo-second').onclick=askSecond;$('demo-note').onchange=()=>runDemo('precomputed');await runDemo('precomputed');}catch(e){$('demo-content').innerHTML=`<p class="missing-label">The scribe demo notes could not be loaded: ${esc(e.message)}.</p>`;}}
 function renderGeography(){const key=$('metric').value,rows=metricRows(app,key),valid=rows.filter(x=>x.value!=null),min=Math.min(...valid.map(x=>x.low??x.value)),max=Math.max(...valid.map(x=>x.high??x.value));
 const colour=v=>{if(v==null)return 'var(--missing)';if(key==='mortality')return v>1?'var(--amber)':'var(--teal)';const t=(v-min)/(max-min||1);return `color-mix(in srgb, var(--teal) ${25+t*70}%, var(--paper))`;};
 if(geometry){const project=([lon,lat])=>[(lon-19)*23*Math.cos(65*Math.PI/180)+35,(70.5-lat)*47+5];const path=geom=>(geom.type==='Polygon'?[geom.coordinates]:geom.coordinates).map(poly=>poly.map(ring=>ring.map((p,i)=>`${i?'L':'M'}${project(p).map(v=>v.toFixed(2)).join(',')}`).join(' ')+'Z').join(' ')).join(' ');

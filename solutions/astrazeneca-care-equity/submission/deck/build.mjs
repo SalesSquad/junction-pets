@@ -3,6 +3,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import * as L from './lib.mjs';
+import { buildDecisionBrief } from '../../src/decisions.mjs';
 const { val, get, inText, find, esc, nf, pct, load } = L;
 
 const OUT = resolve(L.ROOT, 'submission/deck');
@@ -189,13 +190,18 @@ const fact = (big, text, cls = '') => `<div class="fact ${cls}"><p class="big">$
 
 const slides = [];
 
+// The page's "One county. One next step." card for the pilot county, read from the same app.json.
+const dec = buildDecisionBrief(load(APP), 'HVA06');
+if (dec.regionId !== 'HVA06' || dec.action.first30Days.length !== 3) throw new Error('decision brief changed');
 // 1 -------------------------------------------------------------- title
 slides.push(slide({ id: 's1', kicker: 'Junction 2026 · AstraZeneca challenge "Equal Care Across Finland"', cls: 'title',
   body: `<div class="t-left">
     <p class="wordmark">SAMA</p>
     <p class="gloss"><i>sama</i> is Finnish for "the same"</p>
     <p class="promise">The same cancer pathway for everyone in Finland: wherever they live, whoever they are, however they enter care.</p>
-    <p class="what">SAMA measures how long the cancer pathway takes, compares only areas that can see their own clock, and turns that clock into a nurse's list of people whose next step is overdue.</p>
+    <div class="monday"><p class="vh">Start here · ${esc(dec.regionName)} · one county, one next step · proposal for human review</p>
+      <ol>${dec.action.first30Days.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>
+      <p>Then a nurse-confirmed list of people whose next step is overdue (slide 7). Review at 90 days: ${esc(dec.action.reviewAt90Days.charAt(0).toLowerCase() + dec.action.reviewAt90Days.slice(1))}</p></div>
   </div>
   <div class="t-right">${charts.equals}
     <ol class="rubric-map">
@@ -207,7 +213,7 @@ slides.push(slide({ id: 's1', kicker: 'Junction 2026 · AstraZeneca challenge "E
     </ol>
     <p class="scope">Public data for ${areas} areas: the ${counties} wellbeing services counties, Helsinki and Åland. Everything patient-like is SYNTHETIC and labelled. A person confirms every extracted event and every list item.</p>
   </div>`,
-  sources: `${code(APP)} analysis.goal3 nordic-survival (NORDCAN); ${code(EV)} stm-21-counties.` }));
+  sources: `${code(APP)} analysis.goal3 nordic-survival (NORDCAN); ${code(EV)} stm-21-counties; the first-30-days steps are ${code('src/decisions.mjs')} buildDecisionBrief for ${dec.regionId}, as on the page's Start here section.` }));
 
 // 2 -------------------------------------------------------------- the gap
 slides.push(slide({ id: 's2', rubric: 'Insight', kicker: 'The gap',
@@ -221,7 +227,7 @@ slides.push(slide({ id: 's2', rubric: 'Insight', kicker: 'The gap',
 
 // 3 -------------------------------------------------------------- who, how, where
 slides.push(slide({ id: 's3', rubric: 'Insight', kicker: 'Who, how and where',
-  title: 'Who you are and how you enter care matter more than where you live.',
+  title: 'The gap follows who you are and how you enter care. County averages cannot see it yet.',
   body: `<div class="split s3"><div class="viz"><p class="vh">Who is missed (individual-level figures, Finland)</p>${charts.dumbbell}
       <p class="action"><b>Act on it.</b> Roadmap measure 1.3.1: raise screening among people whose mother tongue is not Finnish or Swedish. Mailed HPV self-sampling to cervical-screening non-attenders: relative participation ${selfRR} (${selfLo}-${selfHi}) in a Finnish trial.</p></div>
     <div class="facts">
@@ -292,13 +298,13 @@ slides.push(slide({ id: 's7', rubric: 'Actionability', kicker: 'Close the loop',
 
 // 8 -------------------------------------------------------------- Gemma reads, code counts
 slides.push(slide({ id: 's8', rubric: 'Execution', kicker: 'Gemma reads, code counts', synthetic: 'notes written by language models',
-  title: 'A small open model reads the note. Code counts the days. A person confirms.',
+  title: `Pre-filled only when two readers agree: ${casStress.prefilled} of ${casStress.n} stress notes, ${casStress.wrong} wrong.`,
   body: `<div class="split s8">
     <div class="facts">
       ${fact(`"${esc(d4phrase)}"`, `${/^(\d+) viikkoa sitten$/.test(d4phrase) ? `("${d4phrase.split(' ')[0]} weeks ago") ` : ''}Dates in referral letters are often relative. Gemma 3 270M finds the phrase; code counts back from the note date to <b>${d4code}</b>; Gemma's own date, <s>${d4model}</s>, is not used.`)}
       ${fact(`${relK} of ${relN}`, 'test notes with a relative date came out right when Gemma did the subtraction itself. That is why code counts.')}
       ${fact(`${httpK} of ${httpN}`, `demo notes exact on the laptop CPU through the product's own endpoint, median ${httpMed} s per note. Finnish notes only; other languages go to manual entry.`)}
-      <p class="note">The demo runs the 270M product adapter on a laptop CPU, paired with Nemotron's stored answers; the two-reader figures on slide 9 use Gemma 3 1B.</p>
+      <p class="note">The demo runs the 270M product adapter on a laptop CPU. Nemotron's answer is stored, or asked live from the page with one button (the SYNTHETIC note goes to the hosted endpoint). The two-reader figures in the title and on slide 9 use Gemma 3 1B.</p>
     </div>
     <div class="shots"><p class="shot-cap">The product: demo note 4, stored output (SYNTHETIC)</p>
       <img src="img/demo04-note.png" alt="Synthetic Finnish referral note with date phrases marked"/>
@@ -312,8 +318,9 @@ const v = (s) => `${s.vague}`;
 const critPts = inText(RES, 'primary_result.criterion', /\((\d+) points\)/), critStd = inText(RES, 'primary_result.criterion', /B >= 0\.(\d+) exact/);
 const primDiff = val(RES, 'primary_result.difference_b_minus_a_points', (x) => nf(x, 1));
 const primStdK = val(RES, 'primary_result.B_standard_slice.k'), primStdN = val(RES, 'primary_result.B_standard_slice.n');
+const cAloneN = Number(val(RES, 'sets.stress.systems.C.exact_match.n')), cAloneWrong = cAloneN - Number(val(RES, 'sets.stress.systems.C.exact_match.k'));
 slides.push(slide({ id: 's9', rubric: 'Execution', kicker: 'Tested on a frozen stress set', synthetic: 'notes written by language models',
-  title: 'Two readers agree, or a person edits.',
+  title: `Gemma 1B alone: ${cAloneWrong} of ${cAloneN} wrong. With a second reader: ${casStress.wrong}.`,
   body: `<div class="viz"><p class="vh">1 · Each reader alone, on ${stress[0].n} stress notes frozen before any system read them</p>${charts.stress}
       <p class="note"><b>Goal set in advance for the small 270M phrase model: not met.</b> It got ${prim.bk} of ${prim.n} new phrasings right against ${prim.ak} for the code rule (it needed ${critPts} points more), and ${primStdK} of ${primStdN} standard notes (it needed ${critStd}%).<br>Vague dates such as "a couple of weeks ago" sent to a person: ${stress.map((s) => v(s)).join(', ')} of ${stress[0].vagueN} (code rule, 270M, 1B, Nemotron); Nemotron left the date out in ${nemoDropped}.</p></div>
     <div class="split s9b">

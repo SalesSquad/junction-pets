@@ -88,6 +88,7 @@ export function build(x) {
   </div>`, `${code(F.APP)} insight.falseFlag; ${code(F.DS)} measured_interval_extraction; ${code(F.NEMO)} validation_ladder, test; ${code(F.VIS)} summary.`);
 
   // ---------------------------------------------------------------- A8 + vague gate + A9
+  const LP = 'data/scribe/v4/eval/local-pairs-posthoc-v1.json';
   const vg = (p) => val(F.VAG, `sets.stress.cascade_C_agreement.${p}`);
   const pl = (p) => val(F.PLAN, `summary.${p}`);
   page('A8-A9', 'Two readers, the vague-date gate and the county planner (SYNTHETIC notes)', `<div class="cols">
@@ -98,7 +99,8 @@ export function build(x) {
       <tr><td>Needs editing</td><td class="n">${casVal.n - casVal.acc}</td><td class="n">${casTest.edit}</td><td class="n">${casStress.edit}</td></tr>
       </tbody></table>
       <ul><li>Rule fixed in advance: exact agreement, no score threshold; pairing chosen on validation notes only (a leak guard rejects any test or stress id). Baseline before: ${base.pre}/${base.n} pre-filled with ${base.wrong} wrong.</li>
-      <li>Every wrong pre-filled test note swapped "referral received" for "referral sent" on the right date.</li></ul>
+      <li>Every wrong pre-filled test note swapped "referral received" for "referral sent" on the right date.</li>
+      <li>Local readers only (post hoc, stored outputs): Gemma 3 1B + Gemma 3 270M with the lexicon resolver pre-fill ${val(LP, 'sets.test.pairs[1].prefilled.k')}/${val(LP, 'sets.test.pairs[1].prefilled.n')} test notes (${val(LP, 'sets.test.pairs[1].wrong_among_prefilled.k')} wrong) but only ${val(LP, 'sets.stress.pairs[1].prefilled.k')}/${val(LP, 'sets.stress.pairs[1].prefilled.n')} stress notes (${val(LP, 'sets.stress.pairs[1].wrong_among_prefilled.k')} wrong).</li></ul>
       <h2><span>A8b</span>Vague-date gate (post hoc: designed after the stress results were seen)</h2>
       <ul><li>A frozen Finnish lexicon rule flags vague dates ("a couple of weeks ago", "last spring"). On stress notes the cascade goes from ${vg('without_gate.prefilled_for_one_click_confirmation.k')}/${casStress.n} pre-filled with ${vg('without_gate.error_among_prefilled.k')} wrong to ${vg('with_gate_rule_v1.prefilled_for_one_click_confirmation.k')}/${casStress.n} with ${vg('with_gate_rule_v1.error_among_prefilled.k')} wrong. On its own it caught ${val(F.VAG, 'sets.stress.detector_rule_v1.vague_notes_caught.k')} of ${val(F.VAG, 'sets.stress.detector_rule_v1.vague_notes_caught.n')} vague notes on a small SYNTHETIC phrase family; it misses "a month ago" (${get(F.VAG, 'sets.stress.detector_rule_v1.vague_notes_missed').length} of ${val(F.VAG, 'sets.stress.detector_rule_v1.vague_notes_caught.n')}). Shown on the page as a POST HOC line.</li></ul>`)}
     ${sec('A9', 'Nemotron county planner (public aggregate data)', `<ul>
@@ -106,7 +108,7 @@ export function build(x) {
       <li>Prompt v1 kept ${val(F.PLAN, 'summary.promptComparison.v1.keptSentences')}/${val(F.PLAN, 'summary.promptComparison.v1.sentences')} sentences; prompt v2 changed only the field formats and kept <b>${pl('keptSentences')}/${pl('sentences')}</b> under the same gate. ${pl('keptSentencesWithUnmatchedNumber')} kept sentences with a number not in a tool output. ${pl('roadmapMeasureCodeChecked')} roadmap measure ids confirmed by code.</li>
       <li>Off-limits: the model refused ${pl('offLimits.refusedByModel')} of ${pl('offLimits.prompts')} itself; code blocked ${pl('offLimits.blockedByCode')} (an invented county) with a county guard added after seeing prompt v1's answers to these same prompts (post hoc).</li>
       <li>${pl('nemotronUsage.calls')} Nemotron calls in the selected version. No patient data was sent: inputs were public aggregates, model scenarios, published evidence and roadmap text. Plans are English drafts for a planner, labelled "drafted by Nemotron 3.5 Super VL; numbers checked".</li></ul>`)}
-  </div>`, `${code(F.RES)} cascade; ${code(F.VAG)} sets.stress; ${code(F.PLAN)} summary; ${code('runs/laneB-step6.jsonl')}.`);
+  </div>`, `${code(F.RES)} cascade; ${code(LP)} (post hoc); ${code(F.VAG)} sets.stress; ${code(F.PLAN)} summary; ${code('runs/laneB-step6.jsonl')}.`);
 
   // ---------------------------------------------------------------- stress-set detail
   const sl = (sys, s, f = 'k') => val(F.RES, `sets.stress.systems.${sys}.slices.${s}.${f}`);
