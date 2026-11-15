@@ -1,16 +1,18 @@
 /** Callback/transport qualification only. Fake host assertions do not prove an identity issuer. */
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, chmod, symlink } from 'node:fs/promises';
+import { mkdtemp, writeFile, chmod, symlink, realpath } from 'node:fs/promises';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, generateKeyPairSync, sign, verify } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import { createTradeClient, privateHostCredentialFile } from '../trade-client.mjs';
 import { createTradeService, unsignedQuoteBody } from '../../src/core.mjs';
 import { openLocalStateStore } from '../../src/local-state-store.mjs';
+import { digest } from '../../src/trust-envelope.mjs';
 
 const BUYER='helsinki-hotel-demo';
 const accessMarker='TESTACCESS', proofMarker='TESTPROOF';
@@ -23,9 +25,12 @@ function backend(requireHostProof=true){
   const service=createTradeService();
   let quoteId,reviewId,serial=0;
   const calls=[],replays=new Map();
-  const state={identity:{...initialIdentity},lostDecisionAck:false,decisionEffects:0};
-  const full=()=>({mode:'SYNTHETIC',run:{id:'RUN-DEMO-HOST-001',buyerId:BUYER,quoteId,reviewId,status:service.quote(quoteId).status},
-    quote:service.quote(quoteId),policy:service.policy(),nextActions:['request_human_approval']});
+  const state={identity:{...initialIdentity},lostDecisionAck:false,decisionEffects:0,paymentDecisionEffects:0,settlementEffects:0,order:null,payment:null,verifyProof:null};
+  const full=()=>{
+    const q=service.quote(quoteId),quote=state.order?{...q,orderId:state.order.id,status:'SIMULATED_COMMITTED'}:q;
+    return {mode:'SYNTHETIC',run:{id:'RUN-DEMO-HOST-001',buyerId:BUYER,quoteId,reviewId,status:quote.status,...(state.order?{orderId:state.order.id}:{})},
+      quote,policy:service.policy(),nextActions:['request_human_approval'],...(state.order?{order:state.order,payment:state.payment}:{})};
+  };
   const respond=async(url,init={})=>{
     const path=new URL(url).pathname,method=init.method??'GET',headers=new Headers(init.headers);
     const body=init.body===undefined?undefined:JSON.parse(init.body);
@@ -42,6 +47,7 @@ function backend(requireHostProof=true){
     if(path==='/api/quotes/'+quoteId+'/body')return json({body:unsignedQuoteBody(service.quote(quoteId))});
     if(path==='/api/agent/runs/RUN-DEMO-HOST-001/decision'){
       if(requireHostProof)assert.ok(headers.get('x-buyer-decision-proof'));
+      state.verifyProof?.(headers.get('x-buyer-decision-proof'),body,'QUOTE_DECISION');
       const key=headers.get('idempotency-key');assert.ok(key);
       if(replays.has(key))return json(replays.get(key));
       service.decideReview({...body,reviewId});state.decisionEffects++;
@@ -49,11 +55,18 @@ function backend(requireHostProof=true){
       if(state.lostDecisionAck){state.lostDecisionAck=false;return json({error:{code:'ACK_LOST'}},503);}
       return json(result);
     }
+    if(state.order&&path==='/api/orders/'+state.order.id+'/payment')return json(state.payment);
+    if(state.order&&path==='/api/orders/'+state.order.id+'/payment-approval'){
+      state.verifyProof?.(headers.get('x-buyer-decision-proof'),body,'PAYMENT_DECISION');
+      assert.equal(body.proposalDigest,state.payment.proposal.digest);
+      state.paymentDecisionEffects++;state.payment.approval={decision:body.decision};return json(state.payment);
+    }
+    if(path.endsWith('/settlement')){state.settlementEffects++;throw Error('Unexpected settlement after rejection');}
     throw Error('Unexpected fixture operation: '+path);
   };
-  return {state,calls,respond};
+  return {state,calls,respond,full};
 }
-const directory=await mkdtemp('/private/tmp/valio-mcp-host-check-');
+const directory=await realpath(await mkdtemp(join(tmpdir(),'valio-mcp-host-check-')));
 const readState=file=>{const store=openLocalStateStore(file);try{return store.read().value;}finally{store.close();}};
 const host=backend();let accessCalls=0,proofCalls=0;
 const hostAccessToken=async()=>accessMarker+'.'+(++accessCalls)+'.signature';
@@ -86,6 +99,9 @@ try{
   assert.equal(context.q.status,'APPROVED');assert.equal(context.callerScopeAccepted,false);
   await client.decide(run.run.id,'host-review-command-001','approve',context.binding);
   assert.equal(host.state.decisionEffects,1);assert.equal(proofCalls,1,'same command reuses in-memory exact host proof after lost ACK');
+  await client.decide(run.run.id,'host-review-command-001','approve',context.binding);
+  assert.equal(proofCalls,2,'successful ACK discarded the previous raw proof from process memory');
+  assert.equal(host.state.decisionEffects,1);
   const snapshot=JSON.stringify(readState(file));
   assert.equal(snapshot.includes(accessMarker),false);assert.equal(snapshot.includes(proofMarker),false);
   assert.equal(readState(file).runs[0][1].acceptedScope.binding,context.binding);
@@ -128,6 +144,27 @@ try{
 }finally{noProof.close();}
 await assert.rejects(createTradeClient({fetchImpl:host.respond,hostAccessToken:async()=>{throw Error(accessMarker);}}),error=>error.code==='HTTP_UNAVAILABLE'&&!error.message.includes(accessMarker));
 await assert.rejects(createTradeClient({fetchImpl:host.respond,hostAccessToken:async()=>new Promise(()=>{}),timeoutMs:20}),{code:'HTTP_DEADLINE'});
+// Test-only signed host proofs: production verification remains the server's responsibility.
+const signing=generateKeyPairSync('ed25519');
+const signedProof=context=>{
+  const parts=[Buffer.from(JSON.stringify({alg:'EdDSA',typ:'buyer-decision+jwt'})).toString('base64url'),
+    Buffer.from(JSON.stringify({...context,jti:randomUUID(),iat:Math.floor(Date.now()/1000),exp:Math.floor(Date.now()/1000)+60})).toString('base64url')];
+  return parts.join('.')+'.'+sign(null,Buffer.from(parts.join('.')),signing.privateKey).toString('base64url');
+};
+const verifySignedProof=(token,body,action)=>{
+  const parts=token.split('.');assert.equal(verify(null,Buffer.from(parts.slice(0,2).join('.')),signing.publicKey,Buffer.from(parts[2],'base64url')),true);
+  const payload=JSON.parse(Buffer.from(parts[1],'base64url').toString('utf8'));
+  assert.equal(payload.decision,body.decision);assert.equal(payload.action,action);
+};
+const objectRejectBackend=backend(),objectRejectFile=join(directory,'object-reject.sqlite');
+objectRejectBackend.state.verifyProof=verifySignedProof;
+const objectReject=await createTradeClient({stateFile:objectRejectFile,fetchImpl:objectRejectBackend.respond,hostAccessToken,
+  hostDecisionProof:async context=>({proof:signedProof({...context,decision:'reject'}),decision:'reject'})});
+try{
+  const run=await objectReject.prepare(prepared),context=await objectReject.reviewContext(run.run.id);
+  const rejected=await objectReject.decide(run.run.id,'host-object-reject-001','approve',context.binding);
+  assert.equal(rejected.quote.status,'REJECTED');assert.equal(readState(objectRejectFile).runs[0][1].acceptedScope,null);
+}finally{objectReject.close();}
 const tokenFile=join(directory,'access.jwt'),proofFile=join(directory,'proof.jwt');
 await writeFile(tokenFile,accessMarker+'.file.signature',{mode:0o600});await writeFile(proofFile,proofMarker+'.file.signature',{mode:0o600});
 assert.equal(await privateHostCredentialFile(tokenFile)(),accessMarker+'.file.signature');
@@ -159,9 +196,29 @@ try{
   const approved=await sdk.callTool({name:'review_purchase',arguments:{runId:made.structuredContent.data.run.id,commandKey:'sdk-host-decision-001'}});
   assert.notEqual(approved.isError,true,JSON.stringify(approved));assert.equal(approved.structuredContent.data.quote.status,'APPROVED');
   assert.equal(sdkBackend.state.decisionEffects,1);assert.equal(sdkBackend.calls.some(c=>c.path==='/api/demo/session'),false);
+  sdkBackend.state.verifyProof=verifySignedProof;
+  const paidQuote=sdkBackend.full().quote,allocations=new Map();
+  for(const line of paidQuote.lines)allocations.set(line.supplierId,(allocations.get(line.supplierId)??0)+line.totalCents);
+  const unsignedProposal={orderId:'O-DEMO-HOST-001',amountCents:paidQuote.totalCents,currency:'EUR',
+    signedQuoteBodyDigest:digest(unsignedQuoteBody(paidQuote)),allocations:[...allocations].map(([supplierId,amountCents])=>({supplierId,amountCents}))};
+  sdkBackend.state.order={id:unsignedProposal.orderId,quoteId:paidQuote.id,status:'SIMULATED_COMMITTED',totalCents:paidQuote.totalCents};
+  sdkBackend.state.payment={proposal:{...unsignedProposal,digest:digest(unsignedProposal)},transfer:null};
+  await writeFile(proofFile,signedProof({action:'PAYMENT_DECISION',decision:'reject',orderId:unsignedProposal.orderId,
+    paymentProposalDigest:sdkBackend.state.payment.proposal.digest}));
+  const deniedPayment=await sdk.callTool({name:'settle_purchase',arguments:{runId:made.structuredContent.data.run.id,commandKey:'sdk-host-payment-reject-001'}});
+  assert.notEqual(deniedPayment.isError,true,JSON.stringify(deniedPayment));assert.equal(deniedPayment.structuredContent.data.paymentApproval,'REJECTED');
+  assert.equal(sdkBackend.state.paymentDecisionEffects,1);assert.equal(sdkBackend.state.settlementEffects,0);
+  sdkBackend.state.order=null;sdkBackend.state.payment=null;
+  const second=await sdk.callTool({name:'prepare_purchase',arguments:{...prepared,commandKey:'sdk-host-reject-prepare'}});
+  assert.notEqual(second.isError,true,JSON.stringify(second));
+  await writeFile(proofFile,signedProof({action:'QUOTE_DECISION',decision:'reject',quoteId:second.structuredContent.data.quote.id}));
+  const rejected=await sdk.callTool({name:'review_purchase',arguments:{runId:second.structuredContent.data.run.id,commandKey:'sdk-host-quote-reject-001'}});
+  assert.notEqual(rejected.isError,true,JSON.stringify(rejected));assert.equal(rejected.structuredContent.data.quote.status,'REJECTED');
+  const cannotCommit=await sdk.callTool({name:'commit_purchase',arguments:{runId:second.structuredContent.data.run.id,commandKey:'sdk-host-reject-commit-001'}});
+  assert.equal(cannotCommit.isError,true,'signed rejection must not grant caller approval or commitment');
   assert.equal(JSON.stringify([made,approved]).includes(accessMarker),false);assert.equal(JSON.stringify([made,approved]).includes(proofMarker),false);
-  assert.ok(sdkBackend.calls.filter(c=>c.proof).every(c=>c.path.endsWith('/decision')));
+  assert.ok(sdkBackend.calls.filter(c=>c.proof).every(c=>c.path.endsWith('/decision')||c.path.endsWith('/payment-approval')));
   assert.equal(stderr.some(line=>line.includes(accessMarker)||line.includes(proofMarker)),false);
 }finally{await sdk.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 console.log(JSON.stringify({check:'official-sdk-host-credential-callback-boundary',outcome:'PASS',tools:8,noDemoMint:true,freshCredentialPerWorkflowRequest:true,
-  lostAckDecisionEffects:1,ownerAndProfilePinned:true,rawHostCredentialsPersisted:false,modelCredentialArguments:false,realIdentityIssuer:false,realProviderCalls:0}));
+  lostAckDecisionEffects:1,signedHostRejection:true,rejectedPaymentSettlementEffects:0,proofDiscardedAfterAck:true,ownerAndProfilePinned:true,rawHostCredentialsPersisted:false,modelCredentialArguments:false,realIdentityIssuer:false,realProviderCalls:0}));

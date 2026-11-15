@@ -110,6 +110,27 @@ export function createBuyerIdentity({ profileId, issuer, verifier, grants, clock
       (orderId ? service.order(orderId).quoteId : undefined);
     return quoteId ? service.quote(quoteId) : null;
   };
+  const assertRecordedConsent = (kind, quote, owner, context, service) => {
+    const saved = context.identityState.get('consent:' + kind + ':' + quote.id);
+    if (!saved || saved.decision !== 'approve' || saved.expiresAtMs <= clock() ||
+        saved.snapshotId !== quote.snapshotId || saved.totalCents !== quote.totalCents ||
+        saved.quoteBodyDigest !== digest(unsignedQuoteBody(quote))) {
+      refuse('HOST_CONSENT_EXPIRED', 'A current exact host decision is required before this effect.');
+    }
+    const reviewerGrant = list().find(grant => 'actor-' + sha([profileId, issuer, grant.subject]) === saved.reviewerRef);
+    if (!reviewerGrant) refuse('IDENTITY_REVOKED', 'The original human decision grant is no longer available.');
+    const reviewer = resolve(reviewerGrant.subject);
+    if (reviewer.ownerRef !== owner || reviewer.grant.principalType !== 'HUMAN' ||
+        reviewer.grant.revision !== saved.reviewerGrantRevision ||
+        !reviewer.grant.actions.includes(kind === 'PAYMENT_DECISION' ? 'pay' : 'approve') ||
+        quote.totalCents > reviewer.grant.maxOrderCents) {
+      refuse('IDENTITY_REVOKED', 'The original human decision grant changed before the effect.');
+    }
+    if (kind === 'PAYMENT_DECISION' && (saved.orderId !== quote.orderId ||
+        saved.paymentProposalDigest !== service.payment(quote.orderId, quote.buyerId).proposal.digest)) {
+      refuse('HOST_DECISION_SCOPE_MISMATCH', 'Payment consent no longer matches the current proposal.');
+    }
+  };
   return Object.freeze({
     profileId, issuerDigest, authenticate,
     isPublic: path => publicPaths.has(path),
@@ -133,6 +154,10 @@ export function createBuyerIdentity({ profileId, issuer, verifier, grants, clock
         refuse('IDENTITY_BUDGET_DENIED', 'This operation exceeds the current host procurement grant.');
       }
       if (method === 'GET') return null;
+      if (action === 'commit' && quote) {
+        if (path.endsWith('/settlement')) assertRecordedConsent('PAYMENT_DECISION', quote, owner, context, service);
+        else if (quote.approvalRequired) assertRecordedConsent('QUOTE_DECISION', quote, owner, context, service);
+      }
       if (action !== 'decision') return { actorRef: identity.actorRef, grantRevision: grant.revision, action,
         ownerRef: owner, mode: 'HOST_AUTHENTICATED', consent: null };
       const payment = path.endsWith('/payment-approval');
@@ -169,12 +194,15 @@ export function createBuyerIdentity({ profileId, issuer, verifier, grants, clock
       return { mode: 'HOST_AUTHENTICATED', actorRef: identity.actorRef, ownerRef: owner,
         grantRevision: grant.revision, action, consent: { kind: payment ? 'PAYMENT_DECISION' : 'QUOTE_DECISION',
           reviewerRef: reviewer.actorRef, reviewerGrantRevision: reviewerGrant.revision,
+          decision: proof.decision, quoteBodyDigest: proof.quoteBodyDigest,
+          orderId: payment ? proof.orderId : null, paymentProposalDigest: payment ? proof.paymentProposalDigest : null,
           quoteId: quote.id, snapshotId: quote.snapshotId, totalCents: quote.totalCents,
           proofDigest: identity.proofDigest, expiresAtMs: proof.exp * 1000, nonceKey, commandFingerprint } };
     },
     record(context, service, authorization) {
       if (!authorization) return;
       if (authorization.consent) {
+        for (const [key, value] of context.identityState) if (key.startsWith('nonce:') && value.expiresAtMs <= clock()) context.identityState.delete(key);
         if (context.identityState.size >= 10000) refuse('IDENTITY_CAPACITY', 'The bounded identity receipt store is full.', 429);
         context.identityState.set(authorization.consent.nonceKey, structuredClone(authorization.consent));
         context.identityState.set('consent:' + authorization.consent.kind + ':' + authorization.consent.quoteId, structuredClone(authorization.consent));

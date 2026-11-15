@@ -1,9 +1,10 @@
+import { tmpdir } from 'node:os';
 /** Injected verifier tests: policy/HTTP/persistence, not cryptographic qualification. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { request as httpRequest } from 'node:http';
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { realpath, mkdtemp, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createTradeHttpServer, createPersistentTradeServer } from '../src/server.mjs';
 import { createTradeService } from '../src/core.mjs';
@@ -30,7 +31,7 @@ async function fixture({ persistent = true, afterVerify, stateFile: supplied } =
   const verifier = { async verifyAccessToken(raw) { accesses++; if (!records.has(raw)) throw Error('unverified'); const value = structuredClone(records.get(raw)); afterVerify?.(grants); return value; },
     async verifyDecisionProof(raw) { if (!records.has(raw)) throw Error('unverified'); return structuredClone(records.get(raw)); } };
   const identity = createBuyerIdentity({ profileId: 'test-host-v1', issuer, verifier, grants: () => grants, clock: () => now });
-  const directory = await mkdtemp('/private/tmp/valio-identity-');
+  const directory = await realpath(await mkdtemp(join(tmpdir(),'valio-identity-')));
   const stateFile = supplied ?? join(directory, 'state.sqlite');
   let server, base;
   const start = async () => {
@@ -119,6 +120,7 @@ test('exact signed-host decision is atomic and replay safe; cross-action/source/
     const replay=await send();assert.deepEqual(replay.body,first.body);
     assert.equal((await f.request('/api/agent/runs/'+run.run.id+'/decision',{bearer:access,key:'different-command-key',proof,body:input})).body.error.code,'HOST_DECISION_REPLAY');
     f.grants[1].active=false;
+    assert.equal((await f.request('/api/orders',{bearer:access,key:'revoked-after-approval',body:{buyerId:BUYER,quoteId:run.quote.id,idempotencyKey:'revoked-order-body-key'}})).body.error.code,'IDENTITY_REVOKED','human authority must still be active at commitment');
     assert.equal((await send()).status,403,'revoked reviewer must fail even for successful cached command');
   } finally { await f.stop(); }
 });
@@ -172,5 +174,17 @@ test('revocation during a real delayed request body refuses before domain write'
     f.grants[0].active=true;f.grants[0].revision++;f.grants[0].actions.push('audit');
     const audit=await f.request('/api/audit',{bearer:f.token()});
     assert.equal(audit.body.receipts.some(value=>['QUOTE_CREATED','REVIEW_CREATED'].includes(value.event)),false);
+  } finally {await f.stop();}
+});
+
+
+test('an expired recorded human approval cannot authorize a later commitment', async () => {
+  const f=await fixture();
+  try {
+    const bearer=f.token(),run=await f.prepare(bearer),proof=await f.decision(run,bearer);
+    const body={buyerId:BUYER,quoteId:run.quote.id,snapshotId:run.quote.snapshotId,decision:'approve'};
+    assert.equal((await f.request('/api/agent/runs/'+run.run.id+'/decision',{bearer,proof,key:'soon-expiring-consent',body})).status,200);
+    f.setNow(f.now+121000);
+    assert.equal((await f.request('/api/orders',{bearer,key:'expired-consent-commit',body:{buyerId:BUYER,quoteId:run.quote.id,idempotencyKey:'expired-consent-order'}})).body.error.code,'HOST_CONSENT_EXPIRED');
   } finally {await f.stop();}
 });

@@ -112,18 +112,26 @@ includes its order and payment-proposal digest. A trusted host must independentl
 obtain the human decision and sign the server's required short-lived proof.
 A role, access token or synthetic MCP form is not that proof. If the callback is
 missing or refuses, the tool returns `HOST_DECISION_REQUIRED`; it does not approve
-anything. `review_purchase` asks the host for an approval proof; the host may
-refuse that request, and rejection can be recorded through the host's exact
-HTTP decision flow. This adapter does not invent a host login or human-presence
-claim.
+anything. `review_purchase` proposes an approval request to the host; that proposal is
+not a grant. The preferred callback result is `{ proof, decision }`, with the
+host's actual `approve` or `reject` decision. A raw JWT string remains supported:
+its bounded payload decision is decoded only to select the request body, never
+to verify identity or authorize an effect. The server must verify its signature
+and exact decision/scope. A signed rejection is relayed as a rejection and cannot
+grant the caller a budget exception. Payment rejection records that decision
+without sending settlement. This adapter does not invent a host login, honest
+human interaction or human-presence claim; those remain the trusted host's job.
 
 Only decision/payment-approval requests carry `X-Buyer-Decision-Proof`. The
 server verifies issuer, audience, signature, scope, human grant, expiry and nonce
 atomically with the domain decision. The MCP client continues independently
 checking its original need, quote/body and budget exception. It records its
 accepted caller scope only after the server accepts the decision. A lost-ACK
-retry uses the same command; its proof is cached only in process memory for the
-short retry window, never in SQLite. After restart the trusted host must provide
+retry uses the same command; its proof is cached only in process memory while
+an ACK is unresolved, never in SQLite. A successful decision ACK discards the
+matching raw proof immediately, and expired entries are pruned before cache
+lookup/capacity checks. A decoded expiry may shorten that retention window but
+can never extend it or replace server verification. After restart the trusted host must provide
 its original still-valid keyed proof or direct the caller to inspect status;
 there is no generic approval token.
 

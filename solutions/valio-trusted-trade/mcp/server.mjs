@@ -37,6 +37,7 @@ function compact(result) {
     diagnosis: result.review.diagnosis?.outcome, minimumCostCents: result.review.diagnosis?.minimumCostCents,
     additionalBudgetCents: result.review.diagnosis?.additionalBudgetCents, missingLitres: result.review.diagnosis?.missingLitres };
   if (result.order) out.order = { id: result.order.id, status: result.order.status, totalCents: result.order.totalCents };
+  if (result.paymentApproval) out.paymentApproval = result.paymentApproval;
   if (result.payment) out.payment = { status: result.payment.transfer?.status ?? null,
     amountCents: result.payment.proposal?.amountCents ?? null };
   return out;

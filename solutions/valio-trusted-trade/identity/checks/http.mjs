@@ -1,9 +1,10 @@
+import { tmpdir } from 'node:os';
 /** Real JOSE signatures through HTTP and persistent synthetic commerce; no provider calls. */
 import assert from 'node:assert/strict';
 import { generateKeyPair, exportJWK, SignJWT } from 'jose';
 import { generateKeyPairSync, randomUUID } from 'node:crypto';
 import { once } from 'node:events';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { realpath, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createJwtHostVerifier } from '../jwt-host.mjs';
 import { loadBuyerIdentity } from '../../src/identity-config.mjs';
@@ -18,7 +19,7 @@ const grants=[
   {subject:'test-only-agent',buyerId,ownerScope:'kitchen-a',principalType:'AGENT',active:true,revision:1,actions:['read','prepare','commit','cancel','relay_decision'],maxOrderCents:250000},
   {subject:'test-only-reviewer',buyerId,ownerScope:'kitchen-a',principalType:'HUMAN',active:true,revision:1,actions:['read','approve','pay'],maxOrderCents:250000},
 ];
-const directory=await mkdtemp('/private/tmp/valio-real-jwt-http-'),stateFile=join(directory,'state.sqlite'),configFile=join(directory,'identity.json');
+const directory=await realpath(await mkdtemp(join(tmpdir(),'valio-real-jwt-http-'))),stateFile=join(directory,'state.sqlite'),configFile=join(directory,'identity.json');
 const config={profileId:'fixture-host-v1',issuer,accessAudience:'valio-local-api',decisionAudience:'valio-local-decisions',jwks:{keys:[jwk]},algorithms:['EdDSA'],grants};
 await writeFile(configFile,JSON.stringify(config),{mode:0o600});
 const identity=await loadBuyerIdentity(configFile);
@@ -56,6 +57,9 @@ try {
   const payScope=await call('/api/identity/decision-context?quoteId='+q.id+'&action=PAYMENT_DECISION&orderId='+order.id);
   const payProof=await mint('test-only-reviewer',{...payScope,reviewerGrantRevision:1,decision:'approve'});
   await call('/api/orders/'+order.id+'/payment-approval',{buyerId,decision:'approve',proposalDigest:payment.proposal.digest},payProof,200,'signed-http-pay-approval');
+  grants[1].active=false;await writeFile(configFile,JSON.stringify(config),{mode:0o600});
+  await call('/api/orders/'+order.id+'/settlement',{buyerId,idempotencyKey:'signed-http-transfer'},null,403,'signed-http-settlement');
+  grants[1].active=true;await writeFile(configFile,JSON.stringify(config),{mode:0o600});
   await call('/api/orders/'+order.id+'/settlement',{buyerId,idempotencyKey:'signed-http-transfer'},null,201,'signed-http-settlement');
   const paid=(await call('/api/orders/'+order.id+'/payment')).transfer;
   assert.ok(paid);
@@ -75,5 +79,5 @@ try {
   const bytes=await readFile(stateFile);
   for(const prohibited of [access,proof,payProof,'test-only-agent','test-only-reviewer']) assert.equal(bytes.includes(Buffer.from(prohibited)),false);
   console.log(JSON.stringify({check:'signed-host-http-trade',outcome:'PASS',realJoseSignatures:true,stableOwnerAfterRotationRestart:true,
-    machineCannotSelfApprove:true,privateConfigRevocationWithoutRestart:true,quoteProofCannotApprovePayment:true,syntheticSettlementRefund:true,nonSendableHandoff:true,rawHostCredentialsStored:false,providerCalls:0}));
+    machineCannotSelfApprove:true,privateConfigRevocationWithoutRestart:true,reviewerRevocationStopsSettlement:true,quoteProofCannotApprovePayment:true,syntheticSettlementRefund:true,nonSendableHandoff:true,rawHostCredentialsStored:false,providerCalls:0}));
 } finally {await stop();}

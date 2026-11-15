@@ -227,15 +227,32 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
     if (!hostAuthenticated || typeof hostDecisionProof !== 'function') fail('HOST_DECISION_REQUIRED');
     context = { ...context, buyerId: BUYER, ...read().authBinding };
     const cacheKey = fingerprint([commandKey, context]);
+    const now = Date.now();
+    for (const [key, entry] of hostProofs) if (entry.until <= now) hostProofs.delete(key);
     const existing = hostProofs.get(cacheKey);
-    if (existing && existing.until > Date.now()) return existing.proof;
+    if (existing) return { proof: existing.proof, decision: existing.decision, cacheKey };
     if (hostProofs.size >= 1000) fail('CLIENT_STATE_CAPACITY');
     let timer;
     try {
-      const proof = hostToken(await Promise.race([Promise.resolve().then(() => hostDecisionProof(clone(context))),
-        new Promise((_, reject) => { timer = setTimeout(() => reject(new BridgeError('HOST_DECISION_REQUIRED')), timeoutMs); })]));
-      hostProofs.set(cacheKey, { proof, until: Date.now() + 300000 });
-      return proof;
+      const supplied = await Promise.race([Promise.resolve().then(() => hostDecisionProof(clone(context))),
+        new Promise((_, reject) => { timer = setTimeout(() => reject(new BridgeError('HOST_DECISION_REQUIRED')), timeoutMs); })]);
+      const object = supplied && typeof supplied === 'object' && !Array.isArray(supplied);
+      if (object && (Object.keys(supplied).some(key => !['proof', 'decision'].includes(key)) ||
+          !['approve', 'reject'].includes(supplied.decision))) fail('HOST_DECISION_REQUIRED');
+      const proof = hostToken(object ? supplied.proof : supplied);
+      let decision = object ? supplied.decision : context.decision;
+      let until = now + 300000;
+      // Selection/cache minimization only: this decode never verifies identity or grants consent.
+      // The server must verify the signature and bind this exact decision and scope.
+      try {
+        const payload = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.from(proof.split('.')[1], 'base64url')));
+        if (!object && ['approve', 'reject'].includes(payload?.decision)) decision = payload.decision;
+        if (Number.isSafeInteger(payload?.exp) && payload.exp >= 0 && payload.exp <= Math.floor(Number.MAX_SAFE_INTEGER / 1000)) {
+          until = Math.min(until, payload.exp * 1000); // Unverified metadata may shorten retention, never extend it.
+        }
+      } catch { /* Old test transports may supply opaque, non-JSON marker payloads. */ }
+      if (until > Date.now()) hostProofs.set(cacheKey, { proof, decision, until });
+      return { proof, decision, cacheKey };
     } catch { fail('HOST_DECISION_REQUIRED'); } finally { clearTimeout(timer); }
   };
   if (hostAuthenticated) {
@@ -301,21 +318,23 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
       const full = await status(id, true), checked = terms(full);
       if (checked.binding !== binding) fail('STALE_CONFIRMATION');
       if (!['approve', 'reject'].includes(decision)) fail('INVALID_DECISION');
-      let proof;
+      let evidence;
       if (hostAuthenticated) {
         command(commandKey, 'review', { id, binding, decision });
         const exported = await request('/api/quotes/' + encodeURIComponent(checked.q.id) + '/body');
         try { verifyBuyerBody(exported.body, checked.q); } catch { fail('BUYER_BODY_REFUSED'); }
-        proof = await decisionEvidence(commandKey, { action: 'QUOTE_DECISION', decision, runId: id,
+        evidence = await decisionEvidence(commandKey, { action: 'QUOTE_DECISION', decision, runId: id,
           quoteId: checked.q.id, snapshotId: checked.q.snapshotId, totalCents: checked.q.totalCents,
           quoteBodyDigest: digest(exported.body) });
       } else {
         const authorization = entries(read(), 'challenges').get(commandKey)?.authorization;
         if (authorization?.decision !== decision) fail('HUMAN_APPROVAL_REQUIRED');
       }
+      const actualDecision = evidence?.decision ?? decision;
       const accepted = await request('/api/agent/runs/' + encodeURIComponent(id) + '/decision',
-        { buyerId: BUYER, decision, quoteId: checked.q.id, snapshotId: checked.q.snapshotId }, phaseKey(commandKey, 'decision'), true, proof);
-      if (decision === 'approve') update(state => {
+        { buyerId: BUYER, decision: actualDecision, quoteId: checked.q.id, snapshotId: checked.q.snapshotId }, phaseKey(commandKey, 'decision'), true, evidence?.proof);
+      if (evidence) hostProofs.delete(evidence.cacheKey); // Successful ACK: do not retain raw proof.
+      if (actualDecision === 'approve') update(state => {
         const saved = entries(state, 'runs').get(id);
         put(state, 'runs', id, { ...saved, acceptedScope: { binding, quoteId: checked.q.id, budgetCents: checked.ceiling } });
       });
@@ -393,17 +412,20 @@ export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', sta
       const context = await this.paymentContext(id);
       if (context.binding !== binding || context.pay.proposal.digest !== proposalDigest) fail('STALE_CONFIRMATION');
       if (context.pay.transfer) return status(id);
-      let proof;
+      let evidence;
       const orderId = context.full.run.orderId;
       if (hostAuthenticated) {
         command(commandKey, 'payment', { id, binding, proposalDigest });
         const q = context.full.quote;
-        proof = await decisionEvidence(commandKey, { action: 'PAYMENT_DECISION', decision: 'approve', runId: id,
+        evidence = await decisionEvidence(commandKey, { action: 'PAYMENT_DECISION', decision: 'approve', runId: id,
           quoteId: q.id, snapshotId: q.snapshotId, totalCents: q.totalCents,
           quoteBodyDigest: context.pay.proposal.signedQuoteBodyDigest, orderId, paymentProposalDigest: proposalDigest });
       } else if (entries(read(), 'challenges').get(commandKey)?.authorization?.decision !== 'approve') fail('HUMAN_APPROVAL_REQUIRED');
+      const actualDecision = evidence?.decision ?? 'approve';
       await request('/api/orders/' + encodeURIComponent(orderId) + '/payment-approval',
-        { buyerId: BUYER, decision: 'approve', proposalDigest }, phaseKey(commandKey, 'payment-approval'), true, proof);
+        { buyerId: BUYER, decision: actualDecision, proposalDigest }, phaseKey(commandKey, 'payment-approval'), true, evidence?.proof);
+      if (evidence) hostProofs.delete(evidence.cacheKey);
+      if (actualDecision !== 'approve') return { ...await status(id), paymentApproval: 'REJECTED' };
       await request('/api/orders/' + encodeURIComponent(orderId) + '/settlement',
         { buyerId: BUYER, idempotencyKey: phaseKey(commandKey, 'transfer') }, phaseKey(commandKey, 'payment'));
       return status(id);

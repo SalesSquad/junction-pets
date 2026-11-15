@@ -57,3 +57,7 @@ Exact source, executed outcomes and independent risk-review dispositions are rec
 See [identity verifier API and primary references](identity/README.md), [MCP host integration](mcp/README.md) and [Valio order connection](VALIO_ORDER_CONNECTION.md).
 
 The additional `npm --prefix identity run check:mcp` joins the official SDK, private host credential files, real JOSE signatures and persistent HTTP in one executable synthetic end-to-end check (separate quote/payment proof, commit, settlement, refund, no external calls). The real HTTP check also activates the private configuration loader and verifies live grant revocation/revision without restarting.
+
+Recorded human consent is revalidated again before quote commitment and before settlement: its current reviewer grant/revision, exact source/body/amount, approval decision and expiry must still match. An earlier approval does not survive revocation before the effect. Expired nonce replay markers are pruned; the bounded per-quote consent/effect audit remains private provenance, not a credential or login session.
+
+Host proof providers can relay a signed approve or reject decision. A signed payment rejection records refusal and never dispatches settlement. After a successful approval/rejection ACK the client drops matching raw proof from its memory cache; a lost ACK retains the exact proof only until its bounded signed expiry for acknowledgement recovery.
