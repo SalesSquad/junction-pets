@@ -104,6 +104,7 @@ def incomplete_source_proof(private):
             stop.get("reason") == partial.get("stop_reason") and
             (stop.get("completed_episodes") != 144 or stop.get("reason") in (
                 "CANDIDATE_LOST_ACTUAL_FROZEN_V5_GOAL",
+                "TRAIN_ONLY_RIGHT4_LOST_ACTUAL_FROZEN_V5_GOAL",
                 "OBSERVED_UNSAFE_ACTUAL_MUJOCO_COST")) and
             stop.get("executed_head") == partial.get("executed_head") and
             0 <= stop.get("completed_episodes", -1) <= 144 and
@@ -202,7 +203,9 @@ def verify_reassembled(published, manifest):
 
 def _publish(private, collector, status, sources, proofs, identity):
     private = safe_root(private)
-    collector = Path(collector).absolute()
+    # Canonicalize existing parent aliases (/var -> /private/var on macOS) and
+    # symlinks *before* enforcing source/collector directory separation.
+    collector = Path(collector).resolve(strict=False)
     require(not collector.exists() and
             not collector.is_relative_to(private) and
             not private.is_relative_to(collector),
