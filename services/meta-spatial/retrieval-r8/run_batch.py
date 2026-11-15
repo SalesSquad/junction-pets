@@ -20,6 +20,9 @@ import signal
 import subprocess
 import time
 import urllib.parse
+import urllib.error
+import urllib.request
+import zlib
 
 import boto3
 from botocore.config import Config
@@ -116,6 +119,48 @@ class Run:
             raise RuntimeError("object_scope_not_verified") from None
         return False
 
+    def create_with_diagnostics(self, body):
+        """Keep bounded validation diagnostics for this non-secret definition.
+
+        The shared helper intentionally discards HTTP error bodies. This local
+        adapter uses the same authorized OAuth route without changing that helper.
+        Credentials and successful OAuth responses are never persisted.
+        """
+        cfg = self.common.credentials()
+        status, auth, _ = self.common.request(self.common.API + "/oauth2/token", "POST", {
+            "grant_type": "client_credentials", "client_id": cfg["verda_client_id"],
+            "client_secret": cfg["verda_client_secret"]})
+        require(status == 200 and isinstance(auth.get("access_token"), str), "cloud_authentication_failed")
+        request = urllib.request.Request(self.common.API + "/job-deployments", method="POST",
+            data=json.dumps(body).encode(), headers={"Content-Type": "application/json",
+            "Authorization": "Bearer " + auth["access_token"]})
+        try:
+            with self.common.opener.open(request, timeout=20) as response:
+                raw = response.read(65537)
+                require(len(raw) <= 65536, "create_response_too_large")
+                return response.status, json.loads(raw) if raw else {}
+        except urllib.error.HTTPError as error:
+            try:
+                raw = error.read(16385)
+                value = json.loads(raw) if len(raw) <= 16384 else {}
+                diagnostics = {}
+                if isinstance(value, dict):
+                    for key in ("message", "error", "code", "statusCode"):
+                        item = value.get(key)
+                        if isinstance(item, (str, int, list)):
+                            rendered = json.dumps(item)
+                            # Payload contains only code and public-image metadata;
+                            # still suppress any provider-echoed credential pattern.
+                            if len(rendered) <= 6000 and not re.search(r"(?i)bearer |access_token|client_secret|x-amz-signature", rendered):
+                                diagnostics[key] = item
+                return error.code, {"error": "provider_http_error", "diagnostics": diagnostics}
+            except (ValueError, OSError):
+                return error.code, {"error": "provider_http_error_body_unavailable"}
+            finally:
+                error.close()
+        except (urllib.error.URLError, TimeoutError, OSError):
+            return 0, {"error": "transport_unavailable_delivery_unknown"}
+
     def preflight(self):
         a = self.args
         require(re.fullmatch(r"meta-r8-[a-z0-9-]{8,60}", a.job_id), "invalid_owned_job_id")
@@ -187,10 +232,10 @@ class Run:
                     + "p=Path('/work/meta-r8-worker.py');p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(raw)\n"
                     + "exec(compile(raw,str(p),'exec'),{'__name__':'__main__','__file__':str(p),'CONFIG':"
                     + repr(config) + "})\n")
-        code = base64.b64encode(launcher.encode()).decode()
+        code = base64.b64encode(zlib.compress(launcher.encode(), level=9)).decode()
         bootstrap = ('apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends '
-                     'python3 python3-venv python3-dev build-essential && exec python3 -u -c '
-                     "'import sys,base64;exec(base64.b64decode(\"\".join(sys.argv[1:])))' \"$@\"")
+                     'python3 ca-certificates && exec python3 -u -c '
+                     "'import sys,base64,zlib;exec(zlib.decompress(base64.b64decode(\"\".join(sys.argv[1:]))))' \"$@\"")
         require(len(bootstrap) <= 253, "entrypoint_argument_too_long")
         body = {"name": a.job_id, "containers": [{"image": IMAGE, "should_use_cached_image": True,
                 "exposed_port": 8000, "healthcheck": {"enabled": True, "port": 8000, "path": "/health"},
@@ -201,7 +246,7 @@ class Run:
         write(self.c / "create-intent.json", {"method": "POST", "path": "/job-deployments", "job_id": a.job_id,
                                                "spec_sha256": sha(self.c / "deployment-spec.json")})
         self.create_attempted = True
-        status, response, _ = self.api("/job-deployments", "POST", body)
+        status, response = self.create_with_diagnostics(body)
         write(self.c / "create-response.json", {"http_status": status, "body": response})
         # Never repeat POST, including a timeout. Reconcile only the exact unique name.
         detail = self.read_api(self.deployment_path)
