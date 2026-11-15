@@ -107,7 +107,14 @@ function adapt(kind, file, text) {
   }
   if (kind === 'roundlens' && file === 'public/app.mjs') {
     text = replaceOnce(text, "from '/fixture.mjs'", "from '../fixture.mjs'");
+    text = replaceOnce(text, "from '/restore.mjs'", "from '../workspace/restore.mjs'");
     return replaceOnce(text, "from '/core.mjs'", "from '../core.mjs'");
+  }
+  if (kind === 'roundlens' && file === 'workspace/restore.mjs') {
+    text = replaceOnce(text, "import { PRODUCT_SOURCE_DIGEST }", "import { PRODUCT_SOURCE_DIGEST, EMBEDDED_CLIENT_DIGEST }");
+    text = replaceOnce(text, "archived.schema !== 'roundlens.shortlist.v1'", "archived.schema !== 'roundlens.shortlist.embedded.v1'");
+    text = replaceOnce(text, "if (![PRODUCT_SOURCE_DIGEST, ...LEGACY_FIXTURE_DIGESTS].includes(archived.productSourceDigest))", "if (archived.upstreamProductSourceDigest !== PRODUCT_SOURCE_DIGEST || archived.embeddedClientDigest !== EMBEDDED_CLIENT_DIGEST)");
+    return replaceOnce(text, '  reconstructed.productSourceDigest = archived.productSourceDigest;', '  // Embedded recovery accepts only this exact adapted client.');
   }
   if (kind === 'roundlens' && file === 'core.mjs') {
     text = replaceOnce(text, "import { PRODUCT_SOURCE_DIGEST }", "import { PRODUCT_SOURCE_DIGEST, EMBEDDED_CLIENT_DIGEST }");
@@ -182,7 +189,7 @@ export async function exportApps(output) {
       // The embedded client differs from the original local-server package. Its
       // exported artifact names both the original package digest and a digest
       // over exactly these adapted browser bytes, never the old digest as its own.
-      const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css'];
+      const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css','workspace/restore.mjs'];
       const entries=await Promise.all(names.map(async name=>`${name}\0${createHash('sha256').update(await readFile(join(target,'apps',app.directory,name))).digest('hex')}\n`));
       const digest=createHash('sha256').update(entries.join('')).digest('hex');
       const meta=join(target,'apps',app.directory,'source-meta.mjs');
