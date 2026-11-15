@@ -14,7 +14,8 @@ The job installs locked dependencies without install scripts, runs
 `npm audit --audit-level=high` (including development dependencies), validates
 source contracts, runs the Node suite and builds the catalog. Audit service
 errors and high/critical findings fail the job. Lockfile and build-manifest
-digests are logged. CRACI supplies network traces, SBOM and vulnerability views;
+digests are logged. After successful installation, audit, validation, tests
+and build each run even if another check fails; the job still reports failure. CRACI supplies network traces, SBOM and vulnerability views;
 those provider findings and SBOM completeness must be inspected separately.
 This does not exercise all browser, Python, native, scientific or model lanes.
 
