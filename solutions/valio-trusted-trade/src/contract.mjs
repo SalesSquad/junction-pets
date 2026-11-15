@@ -274,12 +274,25 @@ successSchema('/api/suppliers/valio-mock/observe','post',{type:'object',required
   mode:{const:'SPONSOR_MOCK_READ_ONLY'},requiresTradeCoreValidation:{const:true},provenance:{type:'object'},
   availability:{type:'object'},prices:{type:'object'},classifications:{type:'array',items:{type:'object'}},cache:{type:'object'},
 }});
+openapi.paths['/api/identity/configuration']={get:operation('Inspect identity mode only; this makes no authentication or provider probe')};
+openapi.paths['/api/identity/me']={get:operation('Read the current host-verified actor and operator grant; no raw claims are exposed',null,'200',true)};
+openapi.paths['/api/identity/decision-context']={get:{...operation('Read exact owned terms for a separate host decision; this is not consent',null,'200',true),parameters:[
+  {name:'quoteId',in:'query',required:true,schema:{type:'string'}},{name:'action',in:'query',required:true,schema:{enum:['QUOTE_DECISION','PAYMENT_DECISION']}},{name:'orderId',in:'query',required:false,schema:{type:'string'}}]}};
+openapi.paths['/api/integrations/valio-order']={get:operation('Inspect dated order-connection evidence and missing integration material; never enables sending')};
+openapi.paths['/api/orders/{id}/supplier-handoff']={parameters:[parameter('id')],get:operation('Read the owning committed synthetic receipt as an INTERNAL NON-SENDABLE handoff; not a vendor request',null,'200',true)};
+successSchema('/api/identity/configuration','get',object({mode:{enum:['SYNTHETIC','HOST_AUTHENTICATED']},commerce:{const:'SYNTHETIC'},anonymousSessionMinting:{type:'boolean'},credentialSource:{type:'string'},login:{type:'string'},exactDecisionProofRequired:{type:'boolean'}},['mode','commerce','anonymousSessionMinting']));
+successSchema('/api/identity/me','get',{oneOf:[object({mode:{const:'SYNTHETIC_NOT_AUTHENTICATED'},commerce:{const:'SYNTHETIC'}}),object({mode:{const:'HOST_AUTHENTICATED'},buyerId:{type:'string'},actorRef:{type:'string'},ownerRef:{type:'string'},profileId:{type:'string'},principalType:{enum:['AGENT','HUMAN']},actions:{type:'array',items:{type:'string'}},grantRevision:{type:'integer',minimum:1},commerce:{const:'SYNTHETIC'}})]});
+successSchema('/api/orders/{id}/supplier-handoff','get',object({version:{const:'valio.internal.non-sendable-handoff.v1'},sendAllowed:{const:false},vendorRequest:{const:false},source:{const:'INVENTED_FIXTURE'},blocker:{const:'NO_VERIFIED_ORDER_CONTRACT'},references:{type:'object'},terms:{type:'object'},idempotencyReference:{type:'string'},evidence:{type:'object'},requiredIntegrationMaterial:{type:'array',items:{type:'string'}},payloadDigest:{type:'string'}}));
+for (const [path,item] of Object.entries(openapi.paths)) if(item.post && /\/(approval|decision|payment-approval)$/.test(path)) item.post.parameters=[...(item.post.parameters??[]),{
+  name:'X-Buyer-Decision-Proof',in:'header',required:false,schema:{type:'string',maxLength:16384},
+  description:'REQUIRED in host-authenticated mode: a private-host signed buyer-decision+jwt for the exact quote/source/amount/action/decision and one effect per jti, exact same-command ACK replay only; separate payment proposal binding. Never a model argument. Synthetic mode alone uses demo buttons.'
+}];
 const ids=new Set();
 for (const [path,item] of Object.entries(openapi.paths)) for (const method of ['get','post']) if(item[method]) {
   const op=item[method];
   op.operationId=method+'_'+path.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'');
   if(ids.has(op.operationId))throw Error('Duplicate operation ID');ids.add(op.operationId);
-  for(const status of ['400','403','404','405','408','409','413','415','429','500','503'])op.responses[status]={
+  for(const status of ['400','401','403','404','405','408','409','413','415','429','500','503'])op.responses[status]={
     description:'Typed refusal; follow error.recovery and never invent new buying authority.',content:json(ref('ErrorEnvelope'))
   };
   if(method==='post'&&path!==endpoints.session)op.parameters=[...(op.parameters??[]),{

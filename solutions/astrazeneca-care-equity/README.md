@@ -4,13 +4,37 @@
 "the same": the same cancer pathway for everyone, wherever they live, whoever they are, however they
 enter care.
 
+## Quick start
+
+SAMA is a decision-support page for Finland's cancer pathway: public data on who is missed and where, plus a pathway clock and a nurse's follow-up list that a person checks. Everything patient-like in it is SYNTHETIC, and a person confirms every extracted event.
+
+```bash
+npm test     # checks, no install and no keys needed
+npm start    # then open http://127.0.0.1:4179 (default PORT in web/serve.mjs); the page uses stored outputs
+```
+
+Optional live Gemma (laptop CPU): see `submission/DEMO_SCRIPT.md`. Optional live Nemotron ("Ask Nemotron live" button): see `submission/DEMO_SCRIPT.md`, step 7.
+
+Links: [deck (PDF)](submission/deck/SAMA-deck.pdf) | [demo script](submission/DEMO_SCRIPT.md) | [Q&A](submission/QA.md) | [video source](submission/video/) (the rendered MP4 is kept out of git; rebuild it from that folder)
+
+| Result | Value | Source file |
+| --- | --- | --- |
+| Lung cancer survival, men, relative (Finland vs Sweden-Norway mean) | 17.9% vs 31.1% | `web/data/app.json` `analysis.goal3` |
+| Two-reader rule, pre-filled for one-click confirmation | 684/700 test notes, 4 wrong (post hoc); 220/308 frozen stress notes, 3 wrong | `data/scribe/v4/eval/results-v1.json` |
+| Gemma 3 1B alone on the stress set | 85 of 308 notes wrong | `data/scribe/v4/eval/local-pairs-posthoc-v1.json` (post hoc) |
+| FLARE vs central table; comparability | 253/253 cells equal; 15 of 23 counties not comparable with the model's own dates, 1 of 23 with the code resolver | `data/flare/gate-v1.json` |
+| Safety net, Satakunta replay (SYNTHETIC) | 16 of 120 open loops overdue | `data/safetynet/safetynet-v1.json` |
+| County planner drafts | 255 of 299 sentences kept | `data/planner/plans-v1.json` |
+
 ## The story
 
-**Where you live is not the main cancer gap in Finland. Who you are and how you enter care is.** No
-significant regional difference in five-year survival was found, but there is one by education, and
-one by the door a patient comes in through. Finland has a target nobody can check: the OECD/EU
-reports six weeks from a suspected-cancer referral to treatment, the treatment guarantee in law
-allows up to six months, and no county publishes the time for any cancer. SAMA is the missing
+**In the public data we could read, who you are and how you enter care show clearer cancer gaps in
+Finland than where you live.** We found no significant regional difference in five-year survival,
+but one by education, and one by the door a patient comes in through. The regional result is not
+significant, and low power is not evidence of absence, so this does not show that place is
+irrelevant. Finland also has a target we found no open way to check: the OECD/EU reports six weeks
+from a suspected-cancer referral to treatment, the treatment guarantee in law allows up to six
+months, and we found no county that publishes the time for any cancer. SAMA is the missing
 measurement and action layer:
 
 1. **See who, how and where** on public data (the panel right after the map).
@@ -20,7 +44,7 @@ measurement and action layer:
 3. **Close loops, don't count them.** The same clock becomes a nurse's daily list of people whose
    next step is overdue. A nurse confirms every item; SAMA never decides what follow-up is due.
 4. **Pilot: Satakunta, lung follow-up first**, chosen on process grounds, inside the national cancer
-   roadmap. The county owns the list and the care; no patient data leaves the county.
+   roadmap. The county owns the list and the care; the design keeps patient data inside the county (a design, not built yet).
 
 Everything patient-like in SAMA is SYNTHETIC and labelled so on the page.
 
@@ -89,33 +113,6 @@ SAMA answers the three questions of the brief on real public data, with a source
 It is decision support for planners. It makes no diagnosis, no patient-level inference and no
 causal claim about a county.
 
-## Decision and evidence update (15 November 2026)
-
-Start at **One county. One next step.** Select a county to see its measured mortality
-result, a separately labelled pathway question, and a proposed 30-day investigation
-with an accountable owner, denominator, missing-data rule and 90-day review. The
-investigation order is transparent; it is not an estimate of which action saves most
-lives. General healthcare access remains a proxy for cancer pathways. County and
-national observations must cover the same actual years before a signal enters this
-new decision view. The existing scenario optimiser remains a separate planning tool.
-
-The downloadable/printable brief includes source scope and limitations. National
-lung/trachea registry context is **7,097 of 14,873 cases (47.7%)** without recorded
-extent information in the 2019–2023 report; it is not assigned to counties, other
-cancers or model parameters. Missing extent/MDT records do not establish absent care.
-See [registry evidence](data/evidence/registry-context-v1.json) for the source tables.
-Goal 3.1/3.2 links the proposed measurement work to timely, comparable pathways.
-Precision diagnostics is a clearly unimplemented Goal 4.3 direction; BioNeMo has not
-been run on this product and no molecular or clinical benefit is claimed.
-
-**Historical forecasts are withheld from the demo.** The saved run reused 2023
-validation targets in test evaluation. Colorectal screening also had no validation
-winner but was exported as persistence with collapsed intervals. The original
-artifacts are preserved byte-for-byte. New code enforces disjoint target years,
-per-horizon training/validation/test evidence, and abstention for missing evidence.
-A corrected public-data evaluation has **not** yet been executed. See
-[the evaluation protocol](ml/README.md) and [historical audit](data/ml/forecast-v1-audit.json).
-
 ## What the data shows (snapshot of 14 November 2026)
 
 | Finding | Value | Source |
@@ -132,7 +129,7 @@ A corrected public-data evaluation has **not** yet been executed. See
 | Screening participation by education and mother tongue | breast 66% vs 85% by education, 63% vs 82% by mother tongue (2020-21); cervical 51% vs 78% and 57% vs 73% | same profile, p. 15 |
 | County education gradients (ecological) | all 10 slope intervals include zero; the five lowest breast-screening areas are all in Uusimaa | `web/data/app.json` `analysis.gradients` |
 | Target from suspected-cancer referral to treatment | six weeks as reported by the OECD/EU (p. 19); the treatment guarantee in law allows up to six months for non-urgent specialised care and names no cancer-specific limit | OECD/EU 2025; STM hoitotakuu, updated 29 Oct 2026 |
-| Time from referral to treatment, by county | not published for any cancer | (data gap) |
+| Time from referral to treatment, by county | we found none published for any cancer | (data gap) |
 
 Goal 3 of the National Cancer Strategy 2026-2035 ("Ensuring equal and effective cancer care") is
 covered by all three of its indicators: Nordic-level survival for poor-prognosis cancers, cancer
@@ -163,9 +160,9 @@ was read from).
    confirmed by a person (0.003). Writing style alone (county notes like Haiku's, country like
    Nemotron's): 0.018 as is, 0.004 with the resolver.
 5. **County plan draft** (section 07): a summary bundled in `app.json` `planner` (what was checked,
-   prompt v1 164 against prompt v2 255 of 299 sentences kept, 10 of 10 off-limits requests with no
-   plan (the model refused 9; the 10th is stopped by a county guard added after seeing prompt v1's
-   answers to these same prompts, post hoc; without it, 9 of 10), the image-input test 13 of 20 against 19 of 20 from text, "tested, not good enough yet"),
+   prompt v1 164 against prompt v2 255 of 299 sentences kept, off-limits requests: the model refused 9
+   of 10; the 10th was stopped by a county code guard added afterwards, after seeing prompt v1's
+   answers to these same prompts (post hoc), the image-input test 13 of 20 against 19 of 20 from text, "tested, not good enough yet"),
    then the stored Nemotron 3.5 Super VL drafts (`data/planner/plans-v1.json`), labelled "Draft for a
    planner, drafted by Nemotron 3.5 Super VL; numbers checked". The build re-runs every stored tool
    call on the current data (`src/build.mjs` `plannerToolCheck`): 20 of 23 areas get identical tool
@@ -177,10 +174,10 @@ was read from).
    the teacher and the judges folded into one collapsed block.
 7. The Evo 2 benchmark is not on this page: it is a separate research appendix (`/research.html`).
 
-## Supporting tracks (below the product, never feeding it)
+## How SAMA reads notes, checks itself and federates (below the product, never feeding it)
 
-Two SYNTHETIC studies sit under the product on the same page, and one RESEARCH benchmark sits on a
-separate appendix page (`web/research.html`). None of them changes a county figure, a
+Two SYNTHETIC studies sit under the product on the same page (how it reads notes and how it checks
+its own data), and one RESEARCH benchmark sits on a separate appendix page (`web/research.html`). None of them changes a county figure, a
 recommendation or the brief (`tests/tracks.test.mjs` checks this). Each is labelled on the page and
 in `app.json` as `SYNTHETIC` or `RESEARCH` and names the JSON file every figure is copied from.
 `src/build.mjs` fails if a cited file lacks a field it needs, and leaves a part out, with the reason
@@ -223,7 +220,10 @@ note was written by a language model, and the scribe reads Finnish notes only.
   The scribe demo applies the same rule to Nemotron's stored answers for its SYNTHETIC notes with
   the 270M product adapter (`C-270m-all-v2data`; 651/700 test notes with that adapter, post hoc):
   15 of 20 demo notes pre-filled, 0 wrong; free text and notes rewritten by code have no second
-  answer and need editing. The page calls no hosted model.
+  answer and need editing. "15 of 20 pre-filled" and "18 of 20 exact" are different measures:
+  pre-filled counts notes where both readers agree, exact counts notes where the 270M reader alone
+  matches the answer key. By default the page calls no hosted model; the optional "Ask Nemotron
+  live" button under Note 4 does (see `submission/DEMO_SCRIPT.md`).
 - Version-2 ablation on one A100 (`data/scribe/v2/ablation-v1.json`): selected Gemma 3 270M LoRA r16
   (validation exact match 36.1%, n = 310); test exact match 42.0% on 500 teacher-written (Nemotron)
   notes and 13.0% on 200 notes by a different writer (Haiku). The 1B and 4B sizes and every later
@@ -333,17 +333,44 @@ and [runs/RUNLOG.md](runs/RUNLOG.md) for one line per run.
 - The safety-net rule was measured on SYNTHETIC lines from its own templates, not on real radiology
   reports. A nurse confirms every worklist item; SAMA never decides what follow-up is due. Whether
   the 1 June 2026 law covers the timing of pathway steps is not confirmed.
-- The FLARE run is a simulation: 23 sites on one Mac reading partitions of one folder, no network or
+- The FLARE run is a simulation (the third of the three tracks, how counties federate): 23 sites on one Mac reading partitions of one folder, no network or
   site approval. FLARE is not a legal permit, and aggregates still need a disclosure policy.
-- Every 42-day threshold is a placeholder for the OECD/EU-reported six-week target; Finnish law names
-  no cancer-specific limit.
-- Nothing from simulated people or model-written notes is a finding about Finnish patients, and no
-  scribe result has been tested on real clinical text. Judges and auditors are models;
+- Every 42-day threshold is a placeholder for the OECD/EU-reported six-week target; We found no
+  cancer-specific limit in Finnish law.
+- Nothing from simulated people or model-written notes is a finding about Finnish patients, and we
+  have not tested any scribe result on real clinical text. Judges and auditors are models;
   their agreement is not ground truth.
 - The genomics benchmark is research only and sits on a separate appendix page: no variant
   classification, no clinical use.
 - AstraZeneca sponsors the challenge. No AstraZeneca data or product information is used, and no
   medicine is recommended.
+
+## Changelog: decision and evidence update (15 November 2026)
+
+Start at **One county. One next step.** Select a county to see its measured mortality
+result, a separately labelled pathway question, and a proposed 30-day investigation
+with an accountable owner, denominator, missing-data rule and 90-day review. The
+investigation order is transparent; it is not an estimate of which action saves most
+lives. General healthcare access remains a proxy for cancer pathways. County and
+national observations must cover the same actual years before a signal enters this
+new decision view. The existing scenario optimiser remains a separate planning tool.
+
+The downloadable/printable brief includes source scope and limitations. National
+lung/trachea registry context is **7,097 of 14,873 cases (47.7%)** without recorded
+extent information in the 2019–2023 report; it is not assigned to counties, other
+cancers or model parameters. Missing extent/MDT records do not establish absent care.
+See [registry evidence](data/evidence/registry-context-v1.json) for the source tables.
+Goal 3.1/3.2 links the proposed measurement work to timely, comparable pathways.
+Precision diagnostics is a clearly unimplemented Goal 4.3 direction; BioNeMo has not
+been run on this product and no molecular or clinical benefit is claimed.
+
+**Historical forecasts are withheld from the demo.** The saved run reused 2023
+validation targets in test evaluation. Colorectal screening also had no validation
+winner but was exported as persistence with collapsed intervals. The original
+artifacts are preserved byte-for-byte. New code enforces disjoint target years,
+per-horizon training/validation/test evidence, and abstention for missing evidence.
+A corrected public-data evaluation has **not** yet been executed. See
+[the evaluation protocol](ml/README.md) and [historical audit](data/ml/forecast-v1-audit.json).
 
 ## Disclosure
 

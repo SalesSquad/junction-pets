@@ -217,7 +217,7 @@ slides.push(slide({ id: 's1', kicker: 'Junction 2026 · AstraZeneca challenge "E
 
 // 2 -------------------------------------------------------------- the gap
 slides.push(slide({ id: 's2', rubric: 'Insight', kicker: 'The gap',
-  title: `Finnish men with lung cancer: ${finS}% alive after five years. Sweden and Norway: ${benS}%.`,
+  title: `Finnish men with lung cancer: ${finS}% five-year relative survival. Sweden and Norway: ${benS}%.`,
   body: `<div class="split"><div class="viz">${charts.history}</div>
     <div class="facts">
       ${fact('By chance', 'Finland\'s national lung programme: lung cancers found in time are mostly found by chance, on scans taken for something else. What happens after that scan decides how early treatment starts.')}
@@ -238,7 +238,7 @@ slides.push(slide({ id: 's3', rubric: 'Insight', kicker: 'Who, how and where',
 
 // 4 -------------------------------------------------------------- a target nobody can see
 slides.push(slide({ id: 's4', rubric: 'Insight', kicker: 'A target nobody can see',
-  title: 'Finland reports a six-week cancer target. No open dataset can check it.',
+  title: 'Finland reports a six-week cancer target. We found no open dataset that can check it.',
   body: `<div class="viz wide">${charts.law}</div>
     <div class="row3">
       ${fact('No legal limit found', `The OECD/EU reports a target of ${sixW} weeks from a suspected-cancer referral to treatment. The treatment-guarantee law allows treatment up to ${lawTr} months after the need is established and names no cancer-specific limit. THL guidance 21/2016 not checked (unverified).`)}
@@ -320,7 +320,7 @@ const primDiff = val(RES, 'primary_result.difference_b_minus_a_points', (x) => n
 const primStdK = val(RES, 'primary_result.B_standard_slice.k'), primStdN = val(RES, 'primary_result.B_standard_slice.n');
 const cAloneN = Number(val(RES, 'sets.stress.systems.C.exact_match.n')), cAloneWrong = cAloneN - Number(val(RES, 'sets.stress.systems.C.exact_match.k'));
 slides.push(slide({ id: 's9', rubric: 'Execution', kicker: 'Tested on a frozen stress set', synthetic: 'notes written by language models',
-  title: `Gemma 1B alone: ${cAloneWrong} of ${cAloneN} wrong. With a second reader: ${casStress.wrong}.`,
+  title: `Gemma 1B alone: ${cAloneN - cAloneWrong} of ${cAloneN} right. Two readers: ${casStress.wrong} wrong.`,
   body: `<div class="viz"><p class="vh">1 · Each reader alone, on ${stress[0].n} stress notes frozen before any system read them</p>${charts.stress}
       <p class="note"><b>Goal set in advance for the small 270M phrase model: not met.</b> It got ${prim.bk} of ${prim.n} new phrasings right against ${prim.ak} for the code rule (it needed ${critPts} points more), and ${primStdK} of ${primStdN} standard notes (it needed ${critStd}%).<br>Vague dates such as "a couple of weeks ago" sent to a person: ${stress.map((s) => v(s)).join(', ')} of ${stress[0].vagueN} (code rule, 270M, 1B, Nemotron); Nemotron left the date out in ${nemoDropped}.</p></div>
     <div class="split s9b">
@@ -333,7 +333,7 @@ slides.push(slide({ id: 's9', rubric: 'Execution', kicker: 'Tested on a frozen s
 
 // 10 ------------------------------------------------------------- zero-euro 2027
 slides.push(slide({ id: 's10', rubric: 'Actionability', kicker: 'The zero-euro 2027 plan',
-  title: 'Three actions for 2027 that need staff time, not new money.',
+  title: 'Three actions for 2027 that need staff time, not a new budget line.',
   lede: 'The Cancer Organisations say no strategy money is in sight for 2027. These actions need no capital spending.',
   body: `<div class="split s10"><table class="plan">
       <thead><tr><th>Action</th><th>Owner</th><th>Roadmap</th><th>Measured by</th></tr></thead>

@@ -4,14 +4,15 @@ import { once } from 'node:events';
 import { mkdtemp } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createPersistentTradeServer } from '../src/server.mjs';
+import { createBuyerIdentity } from '../src/buyer-identity.mjs';
 
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE ?? 'playwright');
 const browser = await chromium.launch({ headless: true,
   ...(process.env.PLAYWRIGHT_CHROMIUM_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH } : {}) });
 const directory = await mkdtemp('/private/tmp/valio-browser-recovery-');
 let server, port;
-const start = async file => {
-  server = createPersistentTradeServer({ stateFile: join(directory,file) });
+const start = async (file, identity = null) => {
+  server = createPersistentTradeServer({ stateFile: join(directory,file), identity });
   server.listen(port ?? 0,'127.0.0.1'); await once(server,'listening');
   port = server.address().port;
   return 'http://127.0.0.1:' + port;
@@ -162,6 +163,17 @@ try {
     await fallback.waitForFunction(()=>!document.getElementById('plan-button').disabled);
     assert.match(await fallback.locator('#buyer-context').textContent(),/ephemeral tab/);
   } finally { await denied.close(); }
+  await stop();
+  const hostIdentity=createBuyerIdentity({profileId:'browser-host-fixture',issuer:'https://host-fixture.invalid',
+    verifier:{verifyAccessToken:async()=>{throw Error('no host credential');},verifyDecisionProof:async()=>{throw Error('no host proof');}},
+    grants:[{subject:'fixture-browser',buyerId:'helsinki-hotel-demo',ownerScope:'kitchen-a',principalType:'AGENT',active:true,revision:1,actions:['read'],maxOrderCents:250000}]});
+  await start('host-mode.sqlite',hostIdentity);
+  const beforeHostSessions=sessionCreations;
+  await page.goto(base+'/mission'); await text('alert','Identity connection required');
+  assert.equal(await page.locator('#plan-button').isDisabled(),true);
+  await page.goto(base+'/'); await text('alert','Identity connection required');
+  assert.equal(await page.locator('#find').isDisabled(),true);
+  assert.equal(sessionCreations,beforeHostSessions,'host mode must never fall back to anonymous demo credentials');
   assert.deepEqual(errors,[]);
   assert.deepEqual(external,[]);
   console.log(JSON.stringify({outcome:'PASS',reloadBeforeApproval:true,staleSourceReloadRefusesAuthority:true,nonextractableBrowserKey:true,

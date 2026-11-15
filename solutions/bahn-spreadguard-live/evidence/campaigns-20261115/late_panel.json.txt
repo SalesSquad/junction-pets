@@ -1,0 +1,3057 @@
+{
+ "late_orders": 148,
+ "worlds": 5,
+ "counts": {
+  "code_tag": {
+   "weekend_gap": 58,
+   "slow_booking": 55,
+   "failed_visit": 27,
+   "other": 8
+  },
+  "jev": {
+   "slow_booking": 73,
+   "weekend_gap": 31,
+   "failed_visit": 27,
+   "other": 16,
+   "tight_deadline": 1
+  },
+  "openai": {
+   "slow_booking": 88,
+   "other": 34,
+   "failed_visit": 17,
+   "weekend_gap": 9
+  }
+ },
+ "agreement": {
+  "jev": 0.635,
+  "openai": 0.453,
+  "jev_vs_openai": 0.581
+ },
+ "rows": [
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00005",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Mon 09:26 (day 0)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 106.6,
+    "first_driver_booked": "Sat 06:34 (day 5)",
+    "hours_win_to_first_booking": 117.1,
+    "delivered_at": "Mon 13:38 (day 7)",
+    "hours_late": 65.6,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00032",
+   "code_tag": "other",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Mon 10:21 (day 0)",
+    "deadline": "Tue 20:00 (day 1)",
+    "hours_win_to_deadline": 33.6,
+    "first_driver_booked": "Mon 15:22 (day 0)",
+    "hours_win_to_first_booking": 5.0,
+    "delivered_at": "Tue 21:10 (day 1)",
+    "hours_late": 1.2,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00102",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Mon 13:56 (day 0)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 102.1,
+    "first_driver_booked": "Fri 19:10 (day 4)",
+    "hours_win_to_first_booking": 101.2,
+    "delivered_at": "Mon 15:57 (day 7)",
+    "hours_late": 68.0,
+    "deadline_warnings": 3,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00149",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Mon 15:00 (day 0)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 77.0,
+    "first_driver_booked": "Thu 19:04 (day 3)",
+    "hours_win_to_first_booking": 76.1,
+    "delivered_at": "Fri 13:07 (day 4)",
+    "hours_late": 17.1,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00206",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Mon 16:39 (day 0)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 51.4,
+    "first_driver_booked": "Wed 19:13 (day 2)",
+    "hours_win_to_first_booking": 50.6,
+    "delivered_at": "Thu 19:31 (day 3)",
+    "hours_late": 23.5,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00291",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 11:17 (day 1)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 32.7,
+    "first_driver_booked": "Wed 19:30 (day 2)",
+    "hours_win_to_first_booking": 32.2,
+    "delivered_at": "Thu 15:21 (day 3)",
+    "hours_late": 19.4,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00297",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 11:36 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 56.4,
+    "first_driver_booked": "Thu 19:35 (day 3)",
+    "hours_win_to_first_booking": 56.0,
+    "delivered_at": "Fri 12:56 (day 4)",
+    "hours_late": 16.9,
+    "deadline_warnings": 4,
+    "failed_visits": [
+     "no_plates"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00303",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 11:50 (day 1)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 32.2,
+    "first_driver_booked": "Thu 07:38 (day 3)",
+    "hours_win_to_first_booking": 43.8,
+    "delivered_at": "Thu 13:41 (day 3)",
+    "hours_late": 17.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00318",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 12:21 (day 1)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 31.6,
+    "first_driver_booked": "Wed 20:08 (day 2)",
+    "hours_win_to_first_booking": 31.8,
+    "delivered_at": "Thu 15:04 (day 3)",
+    "hours_late": 19.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00385",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 15:32 (day 1)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 28.5,
+    "first_driver_booked": "Wed 19:02 (day 2)",
+    "hours_win_to_first_booking": 27.5,
+    "delivered_at": "Thu 14:02 (day 3)",
+    "hours_late": 18.0,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00462",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Wed 09:46 (day 2)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 130.2,
+    "first_driver_booked": "Fri 06:01 (day 4)",
+    "hours_win_to_first_booking": 44.2,
+    "delivered_at": "Mon 20:05 (day 7)",
+    "hours_late": 0.1,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00506",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 11:41 (day 2)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 32.3,
+    "first_driver_booked": "Thu 19:10 (day 3)",
+    "hours_win_to_first_booking": 31.5,
+    "delivered_at": "Fri 15:11 (day 4)",
+    "hours_late": 19.2,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00514",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Wed 11:50 (day 2)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 128.2,
+    "first_driver_booked": "Mon 19:03 (day 7)",
+    "hours_win_to_first_booking": 127.2,
+    "delivered_at": "Tue 13:45 (day 8)",
+    "hours_late": 17.8,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00521",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 12:00 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 56.0,
+    "first_driver_booked": "Fri 20:01 (day 4)",
+    "hours_win_to_first_booking": 56.0,
+    "delivered_at": "Sat 13:24 (day 5)",
+    "hours_late": 17.4,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00531",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 12:13 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 55.8,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 6,
+    "failed_visits": [
+     "no_plates",
+     "no_plates"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00546",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Wed 13:28 (day 2)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 126.5,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 5,
+    "failed_visits": [
+     "closed",
+     "closed"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00547",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Wed 13:30 (day 2)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 126.5,
+    "first_driver_booked": "Tue 05:56 (day 8)",
+    "hours_win_to_first_booking": 136.4,
+    "delivered_at": "Wed 16:21 (day 9)",
+    "hours_late": 44.4,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00562",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Wed 13:54 (day 2)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 126.1,
+    "first_driver_booked": "Mon 20:16 (day 7)",
+    "hours_win_to_first_booking": 126.4,
+    "delivered_at": "Tue 14:04 (day 8)",
+    "hours_late": 18.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00584",
+   "code_tag": "other",
+   "record": {
+    "option": "same_day",
+    "legs": 1,
+    "won_at": "Wed 14:59 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 53.0,
+    "first_driver_booked": "Wed 16:10 (day 2)",
+    "hours_win_to_first_booking": 1.2,
+    "delivered_at": "Fri 21:04 (day 4)",
+    "hours_late": 1.1,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00595",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 15:37 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 52.4,
+    "first_driver_booked": "Fri 09:26 (day 4)",
+    "hours_win_to_first_booking": 41.8,
+    "delivered_at": "Fri 21:19 (day 4)",
+    "hours_late": 1.3,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00626",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 17:24 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 50.6,
+    "first_driver_booked": "Sat 07:29 (day 5)",
+    "hours_win_to_first_booking": 62.1,
+    "delivered_at": "Mon 12:35 (day 7)",
+    "hours_late": 64.6,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00628",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 17:30 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 50.5,
+    "first_driver_booked": "Fri 19:20 (day 4)",
+    "hours_win_to_first_booking": 49.8,
+    "delivered_at": "Sat 11:36 (day 5)",
+    "hours_late": 15.6,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00656",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 09:59 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 34.0,
+    "first_driver_booked": "Sun 16:24 (day 6)",
+    "hours_win_to_first_booking": 78.4,
+    "delivered_at": "Mon 17:00 (day 7)",
+    "hours_late": 69.0,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "weekend_gap"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00670",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 10:48 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 105.2,
+    "first_driver_booked": "Thu 10:49 (day 3)",
+    "hours_win_to_first_booking": 0.0,
+    "delivered_at": "Mon 20:07 (day 7)",
+    "hours_late": 0.1,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00696",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 11:52 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 104.1,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 4,
+    "failed_visits": [
+     "closed",
+     "closed"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00710",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 12:37 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 31.4,
+    "first_driver_booked": "Mon 06:01 (day 7)",
+    "hours_win_to_first_booking": 89.4,
+    "delivered_at": "Tue 21:35 (day 8)",
+    "hours_late": 97.6,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00714",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 12:44 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 103.3,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 5,
+    "failed_visits": [
+     "closed",
+     "closed"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00721",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 13:06 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 30.9,
+    "first_driver_booked": "Fri 18:02 (day 4)",
+    "hours_win_to_first_booking": 28.9,
+    "delivered_at": "Sat 09:19 (day 5)",
+    "hours_late": 13.3,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00724",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 13:11 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 102.8,
+    "first_driver_booked": "Mon 19:02 (day 7)",
+    "hours_win_to_first_booking": 101.8,
+    "delivered_at": "Tue 14:22 (day 8)",
+    "hours_late": 18.4,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00736",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 13:42 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 102.3,
+    "first_driver_booked": "Tue 00:35 (day 8)",
+    "hours_win_to_first_booking": 106.9,
+    "delivered_at": "Wed 19:35 (day 9)",
+    "hours_late": 47.6,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00740",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 13:48 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 102.2,
+    "first_driver_booked": "Tue 01:02 (day 8)",
+    "hours_win_to_first_booking": 107.2,
+    "delivered_at": "Tue 15:33 (day 8)",
+    "hours_late": 19.6,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00776",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Thu 14:48 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 101.2,
+    "first_driver_booked": "Tue 06:44 (day 8)",
+    "hours_win_to_first_booking": 111.9,
+    "delivered_at": "Wed 15:07 (day 9)",
+    "hours_late": 43.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00792",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 15:32 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 28.5,
+    "first_driver_booked": "Mon 05:55 (day 7)",
+    "hours_win_to_first_booking": 86.4,
+    "delivered_at": "Wed 01:31 (day 9)",
+    "hours_late": 101.5,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00803",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Thu 16:03 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 100.0,
+    "first_driver_booked": "Tue 04:37 (day 8)",
+    "hours_win_to_first_booking": 108.6,
+    "delivered_at": "Tue 16:04 (day 8)",
+    "hours_late": 20.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00804",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Thu 16:04 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 99.9,
+    "first_driver_booked": "Mon 20:25 (day 7)",
+    "hours_win_to_first_booking": 100.3,
+    "delivered_at": "Tue 15:21 (day 8)",
+    "hours_late": 19.4,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00816",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 16:33 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 99.5,
+    "first_driver_booked": "Mon 20:35 (day 7)",
+    "hours_win_to_first_booking": 100.0,
+    "delivered_at": "Tue 14:13 (day 8)",
+    "hours_late": 18.2,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00829",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Thu 17:20 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 98.7,
+    "first_driver_booked": "Mon 20:43 (day 7)",
+    "hours_win_to_first_booking": 99.4,
+    "delivered_at": "Tue 13:49 (day 8)",
+    "hours_late": 17.8,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00835",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 17:34 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 98.4,
+    "first_driver_booked": "Mon 16:27 (day 7)",
+    "hours_win_to_first_booking": 94.9,
+    "delivered_at": "Tue 19:14 (day 8)",
+    "hours_late": 23.2,
+    "deadline_warnings": 3,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00840",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 17:55 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 98.1,
+    "first_driver_booked": "Mon 20:42 (day 7)",
+    "hours_win_to_first_booking": 98.8,
+    "delivered_at": "Tue 14:07 (day 8)",
+    "hours_late": 18.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00861",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 09:42 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 82.3,
+    "first_driver_booked": "Mon 19:05 (day 7)",
+    "hours_win_to_first_booking": 81.4,
+    "delivered_at": "Tue 19:00 (day 8)",
+    "hours_late": 23.0,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "other"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00878",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 10:54 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 81.1,
+    "first_driver_booked": "Mon 19:01 (day 7)",
+    "hours_win_to_first_booking": 80.1,
+    "delivered_at": "Tue 18:26 (day 8)",
+    "hours_late": 22.4,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00923",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 13:31 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 78.5,
+    "first_driver_booked": "Tue 08:05 (day 8)",
+    "hours_win_to_first_booking": 90.6,
+    "delivered_at": "Tue 22:25 (day 8)",
+    "hours_late": 26.4,
+    "deadline_warnings": 3,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00924",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 13:31 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 78.5,
+    "first_driver_booked": "Sat 03:08 (day 5)",
+    "hours_win_to_first_booking": 13.6,
+    "delivered_at": "Mon 20:12 (day 7)",
+    "hours_late": 0.2,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00987",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 17:02 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 75.0,
+    "first_driver_booked": "Mon 19:12 (day 7)",
+    "hours_win_to_first_booking": 74.2,
+    "delivered_at": "Tue 16:28 (day 8)",
+    "hours_late": 20.5,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "weekend_gap"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R00988",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 17:03 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 75.0,
+    "first_driver_booked": "Mon 19:41 (day 7)",
+    "hours_win_to_first_booking": 74.6,
+    "delivered_at": "Tue 16:28 (day 8)",
+    "hours_late": 20.5,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "other"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R01004",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 17:29 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 74.5,
+    "first_driver_booked": "Mon 19:03 (day 7)",
+    "hours_win_to_first_booking": 73.6,
+    "delivered_at": "Tue 14:42 (day 8)",
+    "hours_late": 18.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R01005",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 17:32 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 74.5,
+    "first_driver_booked": "Tue 07:06 (day 8)",
+    "hours_win_to_first_booking": 85.6,
+    "delivered_at": "Wed 15:01 (day 9)",
+    "hours_late": 43.0,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R01025",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 18:00 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 74.0,
+    "first_driver_booked": "Mon 06:01 (day 7)",
+    "hours_win_to_first_booking": 60.0,
+    "delivered_at": "Tue 03:04 (day 8)",
+    "hours_late": 7.1,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wbe1a6d236825563bc08c",
+   "order": "R01027",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 18:09 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 73.8,
+    "first_driver_booked": "Mon 19:05 (day 7)",
+    "hours_win_to_first_booking": 72.9,
+    "delivered_at": "Tue 15:02 (day 8)",
+    "hours_late": 19.0,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "other"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00164",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Mon 16:04 (day 0)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 99.9,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 5,
+    "failed_visits": [
+     "closed",
+     "closed"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00181",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Mon 16:43 (day 0)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 171.3,
+    "first_driver_booked": "Mon 18:09 (day 7)",
+    "hours_win_to_first_booking": 169.4,
+    "delivered_at": "Tue 16:32 (day 8)",
+    "hours_late": 20.5,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00186",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Mon 16:50 (day 0)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 171.2,
+    "first_driver_booked": "Mon 18:03 (day 7)",
+    "hours_win_to_first_booking": 169.2,
+    "delivered_at": "Tue 14:23 (day 8)",
+    "hours_late": 18.4,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00288",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 10:20 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 57.7,
+    "first_driver_booked": "Thu 20:47 (day 3)",
+    "hours_win_to_first_booking": 58.5,
+    "delivered_at": "Fri 17:46 (day 4)",
+    "hours_late": 21.8,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00319",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 11:01 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 57.0,
+    "first_driver_booked": "Fri 05:19 (day 4)",
+    "hours_win_to_first_booking": 66.3,
+    "delivered_at": "Mon 20:22 (day 7)",
+    "hours_late": 96.4,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00326",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 11:11 (day 1)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 32.8,
+    "first_driver_booked": "Thu 13:13 (day 3)",
+    "hours_win_to_first_booking": 50.0,
+    "delivered_at": "Fri 18:25 (day 4)",
+    "hours_late": 46.4,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00334",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 11:43 (day 1)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 152.3,
+    "first_driver_booked": "Mon 20:46 (day 7)",
+    "hours_win_to_first_booking": 153.1,
+    "delivered_at": "Tue 17:44 (day 8)",
+    "hours_late": 21.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00345",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 12:25 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 55.6,
+    "first_driver_booked": "Fri 07:02 (day 4)",
+    "hours_win_to_first_booking": 66.6,
+    "delivered_at": "Mon 16:17 (day 7)",
+    "hours_late": 92.3,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "weekend_gap"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00347",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 12:28 (day 1)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 151.5,
+    "first_driver_booked": "Mon 19:13 (day 7)",
+    "hours_win_to_first_booking": 150.8,
+    "delivered_at": "Tue 11:31 (day 8)",
+    "hours_late": 15.5,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00404",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 15:16 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 52.7,
+    "first_driver_booked": "Fri 05:27 (day 4)",
+    "hours_win_to_first_booking": 62.2,
+    "delivered_at": "Mon 16:22 (day 7)",
+    "hours_late": 92.4,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "weekend_gap"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00416",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 16:12 (day 1)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 75.8,
+    "first_driver_booked": "Sun 09:00 (day 6)",
+    "hours_win_to_first_booking": 112.8,
+    "delivered_at": "Mon 10:47 (day 7)",
+    "hours_late": 62.8,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00442",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 17:41 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 50.3,
+    "first_driver_booked": "Fri 06:09 (day 4)",
+    "hours_win_to_first_booking": 60.5,
+    "delivered_at": "Fri 17:29 (day 4)",
+    "hours_late": 21.5,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00458",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 19:35 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 48.4,
+    "first_driver_booked": "Fri 07:09 (day 4)",
+    "hours_win_to_first_booking": 59.6,
+    "delivered_at": "Mon 11:41 (day 7)",
+    "hours_late": 87.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00501",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 11:08 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 56.9,
+    "first_driver_booked": "Fri 20:08 (day 4)",
+    "hours_win_to_first_booking": 57.0,
+    "delivered_at": "Sat 11:36 (day 5)",
+    "hours_late": 15.6,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00553",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 13:41 (day 2)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 30.3,
+    "first_driver_booked": "Thu 20:03 (day 3)",
+    "hours_win_to_first_booking": 30.4,
+    "delivered_at": "Fri 15:36 (day 4)",
+    "hours_late": 19.6,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00561",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 14:18 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 53.7,
+    "first_driver_booked": "Fri 18:02 (day 4)",
+    "hours_win_to_first_booking": 51.7,
+    "delivered_at": "Mon 19:51 (day 7)",
+    "hours_late": 71.8,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00566",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 14:25 (day 2)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 29.6,
+    "first_driver_booked": "Thu 20:01 (day 3)",
+    "hours_win_to_first_booking": 29.6,
+    "delivered_at": "Fri 19:48 (day 4)",
+    "hours_late": 23.8,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00577",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 14:53 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 53.1,
+    "first_driver_booked": "Sat 07:00 (day 5)",
+    "hours_win_to_first_booking": 64.1,
+    "delivered_at": "Mon 18:01 (day 7)",
+    "hours_late": 70.0,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00612",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 16:30 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 51.5,
+    "first_driver_booked": "Sun 06:46 (day 6)",
+    "hours_win_to_first_booking": 86.3,
+    "delivered_at": "Mon 16:54 (day 7)",
+    "hours_late": 68.9,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00632",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 17:19 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 50.7,
+    "first_driver_booked": "Fri 20:00 (day 4)",
+    "hours_win_to_first_booking": 50.7,
+    "delivered_at": "Mon 17:57 (day 7)",
+    "hours_late": 70.0,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00635",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 17:36 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 50.4,
+    "first_driver_booked": "Fri 20:02 (day 4)",
+    "hours_win_to_first_booking": 50.4,
+    "delivered_at": "Sat 13:45 (day 5)",
+    "hours_late": 17.8,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00637",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 17:38 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 50.4,
+    "first_driver_booked": "Sat 22:38 (day 5)",
+    "hours_win_to_first_booking": 77.0,
+    "delivered_at": "Mon 15:39 (day 7)",
+    "hours_late": 67.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00638",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 17:42 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 50.3,
+    "first_driver_booked": "Mon 00:22 (day 7)",
+    "hours_win_to_first_booking": 102.7,
+    "delivered_at": "Tue 15:20 (day 8)",
+    "hours_late": 91.3,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "weekend_gap"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00650",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 19:25 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 48.6,
+    "first_driver_booked": "Sat 07:09 (day 5)",
+    "hours_win_to_first_booking": 59.7,
+    "delivered_at": "Mon 14:30 (day 7)",
+    "hours_late": 66.5,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "weekend_gap"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00740",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 13:22 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 102.6,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 7,
+    "failed_visits": [
+     "closed",
+     "closed"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00758",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 13:51 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 102.2,
+    "first_driver_booked": "Mon 18:06 (day 7)",
+    "hours_win_to_first_booking": 100.2,
+    "delivered_at": "Tue 13:31 (day 8)",
+    "hours_late": 17.5,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00851",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 18:05 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 97.9,
+    "first_driver_booked": "Mon 18:13 (day 7)",
+    "hours_win_to_first_booking": 96.1,
+    "delivered_at": "Tue 14:55 (day 8)",
+    "hours_late": 18.9,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00878",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 09:54 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 82.1,
+    "first_driver_booked": "Mon 20:05 (day 7)",
+    "hours_win_to_first_booking": 82.2,
+    "delivered_at": "Tue 16:15 (day 8)",
+    "hours_late": 20.2,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00904",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 11:12 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 80.8,
+    "first_driver_booked": "Tue 01:46 (day 8)",
+    "hours_win_to_first_booking": 86.6,
+    "delivered_at": "Wed 14:56 (day 9)",
+    "hours_late": 42.9,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00944",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 14:00 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 78.0,
+    "first_driver_booked": "Mon 20:03 (day 7)",
+    "hours_win_to_first_booking": 78.0,
+    "delivered_at": "Tue 15:35 (day 8)",
+    "hours_late": 19.6,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "no_plates"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00950",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 14:24 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 77.6,
+    "first_driver_booked": "Mon 20:18 (day 7)",
+    "hours_win_to_first_booking": 77.9,
+    "delivered_at": "Tue 17:54 (day 8)",
+    "hours_late": 21.9,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R00975",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 15:40 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 76.3,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 5,
+    "failed_visits": [
+     "closed",
+     "closed"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "w4954259a915985154d3f",
+   "order": "R01016",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 18:07 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 73.9,
+    "first_driver_booked": "Mon 19:14 (day 7)",
+    "hours_win_to_first_booking": 73.1,
+    "delivered_at": "Tue 18:17 (day 8)",
+    "hours_late": 22.3,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00331",
+   "code_tag": "other",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 12:45 (day 1)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 31.2,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 4,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00359",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 13:27 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 54.5,
+    "first_driver_booked": "Sat 08:04 (day 5)",
+    "hours_win_to_first_booking": 90.6,
+    "delivered_at": "Sat 13:15 (day 5)",
+    "hours_late": 41.2,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "weekend_gap"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00367",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 14:18 (day 1)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 77.7,
+    "first_driver_booked": "Fri 20:08 (day 4)",
+    "hours_win_to_first_booking": 77.8,
+    "delivered_at": "Sat 11:54 (day 5)",
+    "hours_late": 15.9,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "no_plates"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00371",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 14:25 (day 1)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 77.6,
+    "first_driver_booked": "Fri 19:28 (day 4)",
+    "hours_win_to_first_booking": 77.0,
+    "delivered_at": "Sat 12:19 (day 5)",
+    "hours_late": 16.3,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00396",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 15:10 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 52.8,
+    "first_driver_booked": "Thu 20:11 (day 3)",
+    "hours_win_to_first_booking": 53.0,
+    "delivered_at": "Fri 14:26 (day 4)",
+    "hours_late": 18.4,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00401",
+   "code_tag": "other",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 15:21 (day 1)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 28.6,
+    "first_driver_booked": "Tue 16:56 (day 1)",
+    "hours_win_to_first_booking": 1.6,
+    "delivered_at": "Wed 23:52 (day 2)",
+    "hours_late": 3.9,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00452",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 18:32 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 49.5,
+    "first_driver_booked": "Thu 20:52 (day 3)",
+    "hours_win_to_first_booking": 50.3,
+    "delivered_at": "Fri 19:00 (day 4)",
+    "hours_late": 23.0,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00477",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 10:04 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 57.9,
+    "first_driver_booked": "Fri 18:03 (day 4)",
+    "hours_win_to_first_booking": 56.0,
+    "delivered_at": "Tue 09:43 (day 8)",
+    "hours_late": 85.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00507",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 12:32 (day 2)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 127.5,
+    "first_driver_booked": "Wed 12:58 (day 2)",
+    "hours_win_to_first_booking": 0.4,
+    "delivered_at": "Mon 20:11 (day 7)",
+    "hours_late": 0.2,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00526",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 13:06 (day 2)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 30.9,
+    "first_driver_booked": "Thu 07:01 (day 3)",
+    "hours_win_to_first_booking": 17.9,
+    "delivered_at": "Thu 21:39 (day 3)",
+    "hours_late": 1.6,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00565",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 14:18 (day 2)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 29.7,
+    "first_driver_booked": "Thu 19:04 (day 3)",
+    "hours_win_to_first_booking": 28.8,
+    "delivered_at": "Fri 13:32 (day 4)",
+    "hours_late": 17.5,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00611",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 16:28 (day 2)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 123.5,
+    "first_driver_booked": "Fri 07:11 (day 4)",
+    "hours_win_to_first_booking": 38.7,
+    "delivered_at": "Mon 20:42 (day 7)",
+    "hours_late": 0.7,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00683",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 10:45 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 105.2,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 6,
+    "failed_visits": [
+     "closed",
+     "closed"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00690",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 11:00 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 105.0,
+    "first_driver_booked": "Fri 04:10 (day 4)",
+    "hours_win_to_first_booking": 17.2,
+    "delivered_at": "Mon 20:36 (day 7)",
+    "hours_late": 0.6,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00701",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 11:30 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 32.5,
+    "first_driver_booked": "Fri 19:08 (day 4)",
+    "hours_win_to_first_booking": 31.6,
+    "delivered_at": "Mon 13:40 (day 7)",
+    "hours_late": 65.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00705",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 11:40 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 32.3,
+    "first_driver_booked": "Fri 20:05 (day 4)",
+    "hours_win_to_first_booking": 32.4,
+    "delivered_at": "Mon 10:25 (day 7)",
+    "hours_late": 62.4,
+    "deadline_warnings": 3,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00706",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "same_day",
+    "legs": 1,
+    "won_at": "Thu 11:44 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 32.3,
+    "first_driver_booked": "Sat 08:02 (day 5)",
+    "hours_win_to_first_booking": 44.3,
+    "delivered_at": "Mon 10:00 (day 7)",
+    "hours_late": 62.0,
+    "deadline_warnings": 3,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00737",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Thu 13:21 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 102.7,
+    "first_driver_booked": "Tue 14:16 (day 8)",
+    "hours_win_to_first_booking": 120.9,
+    "delivered_at": "Wed 08:31 (day 9)",
+    "hours_late": 36.5,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "closed"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00781",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "within_3_days",
+    "legs": 1,
+    "won_at": "Thu 14:46 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 101.2,
+    "first_driver_booked": "Mon 18:01 (day 7)",
+    "hours_win_to_first_booking": 99.2,
+    "delivered_at": "Tue 12:06 (day 8)",
+    "hours_late": 16.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00785",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 15:00 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 101.0,
+    "first_driver_booked": "Mon 18:20 (day 7)",
+    "hours_win_to_first_booking": 99.3,
+    "delivered_at": "Tue 15:03 (day 8)",
+    "hours_late": 19.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00820",
+   "code_tag": "other",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 16:16 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 27.7,
+    "first_driver_booked": "Fri 00:15 (day 4)",
+    "hours_win_to_first_booking": 8.0,
+    "delivered_at": "Fri 21:49 (day 4)",
+    "hours_late": 1.8,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00840",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 17:03 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 26.9,
+    "first_driver_booked": "Fri 18:33 (day 4)",
+    "hours_win_to_first_booking": 25.5,
+    "delivered_at": "Sat 12:41 (day 5)",
+    "hours_late": 16.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00869",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 09:55 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 82.1,
+    "first_driver_booked": "Mon 21:52 (day 7)",
+    "hours_win_to_first_booking": 84.0,
+    "delivered_at": "Tue 15:12 (day 8)",
+    "hours_late": 19.2,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00875",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 10:05 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 81.9,
+    "first_driver_booked": "Mon 20:08 (day 7)",
+    "hours_win_to_first_booking": 82.0,
+    "delivered_at": "Tue 14:43 (day 8)",
+    "hours_late": 18.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00946",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 12:01 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 80.0,
+    "first_driver_booked": "Mon 20:02 (day 7)",
+    "hours_win_to_first_booking": 80.0,
+    "delivered_at": "Tue 16:07 (day 8)",
+    "hours_late": 20.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00957",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 12:54 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 79.1,
+    "first_driver_booked": "Mon 19:06 (day 7)",
+    "hours_win_to_first_booking": 78.2,
+    "delivered_at": "Tue 13:32 (day 8)",
+    "hours_late": 17.5,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00969",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 13:50 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 78.2,
+    "first_driver_booked": "Mon 19:04 (day 7)",
+    "hours_win_to_first_booking": 77.2,
+    "delivered_at": "Tue 13:00 (day 8)",
+    "hours_late": 17.0,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R00996",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 15:29 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 76.5,
+    "first_driver_booked": "Tue 06:04 (day 8)",
+    "hours_win_to_first_booking": 86.6,
+    "delivered_at": "Tue 18:06 (day 8)",
+    "hours_late": 22.1,
+    "deadline_warnings": 4,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "we7be114d6a5cef51b2af",
+   "order": "R01018",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 16:59 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 75.0,
+    "first_driver_booked": "Mon 20:04 (day 7)",
+    "hours_win_to_first_booking": 75.1,
+    "delivered_at": "Tue 19:39 (day 8)",
+    "hours_late": 23.6,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "no_plates"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00208",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "same_day",
+    "legs": 1,
+    "won_at": "Mon 18:15 (day 0)",
+    "deadline": "Tue 20:00 (day 1)",
+    "hours_win_to_deadline": 25.8,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 3,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00278",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "same_day",
+    "legs": 1,
+    "won_at": "Tue 11:53 (day 1)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 32.1,
+    "first_driver_booked": "Wed 20:02 (day 2)",
+    "hours_win_to_first_booking": 32.1,
+    "delivered_at": "Thu 15:26 (day 3)",
+    "hours_late": 19.4,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00285",
+   "code_tag": "other",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 12:39 (day 1)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 55.4,
+    "first_driver_booked": "Tue 12:41 (day 1)",
+    "hours_win_to_first_booking": 0.0,
+    "delivered_at": "Thu 20:26 (day 3)",
+    "hours_late": 0.4,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00294",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 12:54 (day 1)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 31.1,
+    "first_driver_booked": "Wed 19:25 (day 2)",
+    "hours_win_to_first_booking": 30.5,
+    "delivered_at": "Thu 14:07 (day 3)",
+    "hours_late": 18.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00351",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 16:03 (day 1)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 76.0,
+    "first_driver_booked": "Fri 19:46 (day 4)",
+    "hours_win_to_first_booking": 75.7,
+    "delivered_at": "Mon 13:34 (day 7)",
+    "hours_late": 65.6,
+    "deadline_warnings": 3,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00365",
+   "code_tag": "other",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Tue 16:42 (day 1)",
+    "deadline": "Wed 20:00 (day 2)",
+    "hours_win_to_deadline": 27.3,
+    "first_driver_booked": "Tue 17:08 (day 1)",
+    "hours_win_to_first_booking": 0.4,
+    "delivered_at": "Wed 20:36 (day 2)",
+    "hours_late": 0.6,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "tight_deadline",
+   "openai": "other"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00580",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 15:36 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 52.4,
+    "first_driver_booked": "Fri 20:01 (day 4)",
+    "hours_win_to_first_booking": 52.4,
+    "delivered_at": "Mon 12:44 (day 7)",
+    "hours_late": 64.7,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00718",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 12:37 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 31.4,
+    "first_driver_booked": "Fri 19:03 (day 4)",
+    "hours_win_to_first_booking": 30.4,
+    "delivered_at": "Mon 13:08 (day 7)",
+    "hours_late": 65.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00721",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 12:38 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 31.4,
+    "first_driver_booked": "Fri 19:04 (day 4)",
+    "hours_win_to_first_booking": 30.4,
+    "delivered_at": "Sat 13:09 (day 5)",
+    "hours_late": 17.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00754",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 14:11 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 29.8,
+    "first_driver_booked": "Sat 14:45 (day 5)",
+    "hours_win_to_first_booking": 48.6,
+    "delivered_at": "Mon 16:05 (day 7)",
+    "hours_late": 68.1,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "weekend_gap"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00780",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 14:51 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 29.1,
+    "first_driver_booked": "Fri 06:45 (day 4)",
+    "hours_win_to_first_booking": 15.9,
+    "delivered_at": "Sat 04:23 (day 5)",
+    "hours_late": 8.4,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00871",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 10:40 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 81.3,
+    "first_driver_booked": "Fri 10:43 (day 4)",
+    "hours_win_to_first_booking": 0.1,
+    "delivered_at": "Mon 20:21 (day 7)",
+    "hours_late": 0.3,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R00990",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 16:44 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 75.3,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 3,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "wfd2b735d9b387e653369",
+   "order": "R01016",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 18:00 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 74.0,
+    "first_driver_booked": "Mon 00:11 (day 7)",
+    "hours_win_to_first_booking": 54.2,
+    "delivered_at": "Tue 02:12 (day 8)",
+    "hours_late": 6.2,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00131",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Mon 14:20 (day 0)",
+    "deadline": "Tue 20:00 (day 1)",
+    "hours_win_to_deadline": 29.7,
+    "first_driver_booked": "Tue 19:02 (day 1)",
+    "hours_win_to_first_booking": 28.7,
+    "delivered_at": "Wed 13:36 (day 2)",
+    "hours_late": 17.6,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00446",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 10:36 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 57.4,
+    "first_driver_booked": "Fri 19:57 (day 4)",
+    "hours_win_to_first_booking": 57.4,
+    "delivered_at": "Mon 13:25 (day 7)",
+    "hours_late": 65.4,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00464",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 11:43 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 56.3,
+    "first_driver_booked": "Thu 02:00 (day 3)",
+    "hours_win_to_first_booking": 14.3,
+    "delivered_at": "Fri 21:21 (day 4)",
+    "hours_late": 1.4,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00562",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 16:20 (day 2)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 51.7,
+    "first_driver_booked": "Fri 20:33 (day 4)",
+    "hours_win_to_first_booking": 52.2,
+    "delivered_at": "Sat 13:41 (day 5)",
+    "hours_late": 17.7,
+    "deadline_warnings": 2,
+    "failed_visits": [
+     "not_ready"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00567",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 16:35 (day 2)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 27.4,
+    "first_driver_booked": "Thu 19:13 (day 3)",
+    "hours_win_to_first_booking": 26.6,
+    "delivered_at": "Fri 13:49 (day 4)",
+    "hours_late": 17.8,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00574",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Wed 16:56 (day 2)",
+    "deadline": "Thu 20:00 (day 3)",
+    "hours_win_to_deadline": 27.1,
+    "first_driver_booked": "Thu 07:24 (day 3)",
+    "hours_win_to_first_booking": 14.5,
+    "delivered_at": "Thu 20:35 (day 3)",
+    "hours_late": 0.6,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00615",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 08:34 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 107.4,
+    "first_driver_booked": "Fri 06:17 (day 4)",
+    "hours_win_to_first_booking": 21.7,
+    "delivered_at": "Tue 02:43 (day 8)",
+    "hours_late": 6.7,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00693",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 12:21 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 31.6,
+    "first_driver_booked": "Fri 19:59 (day 4)",
+    "hours_win_to_first_booking": 31.6,
+    "delivered_at": "Sat 12:17 (day 5)",
+    "hours_late": 16.3,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00695",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "same_day",
+    "legs": 1,
+    "won_at": "Thu 12:22 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 31.6,
+    "first_driver_booked": "Fri 12:04 (day 4)",
+    "hours_win_to_first_booking": 23.7,
+    "delivered_at": "Mon 09:00 (day 7)",
+    "hours_late": 61.0,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00714",
+   "code_tag": "failed_visit",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 13:33 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 30.4,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 7,
+    "failed_visits": [
+     "no_plates",
+     "no_plates",
+     "no_plates"
+    ]
+   },
+   "jev": "failed_visit",
+   "openai": "failed_visit"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00722",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 14:09 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 29.9,
+    "first_driver_booked": "Fri 19:02 (day 4)",
+    "hours_win_to_first_booking": 28.9,
+    "delivered_at": "Sat 11:40 (day 5)",
+    "hours_late": 15.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00727",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 14:27 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 29.6,
+    "first_driver_booked": "Fri 19:07 (day 4)",
+    "hours_win_to_first_booking": 28.7,
+    "delivered_at": "Sat 13:25 (day 5)",
+    "hours_late": 17.4,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00730",
+   "code_tag": "slow_booking",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 14:46 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 29.2,
+    "first_driver_booked": "Fri 18:09 (day 4)",
+    "hours_win_to_first_booking": 27.4,
+    "delivered_at": "Mon 19:35 (day 7)",
+    "hours_late": 71.6,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00734",
+   "code_tag": "other",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 14:49 (day 3)",
+    "deadline": "Fri 20:00 (day 4)",
+    "hours_win_to_deadline": 29.2,
+    "first_driver_booked": null,
+    "hours_win_to_first_booking": null,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00855",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Thu 19:57 (day 3)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 96.0,
+    "first_driver_booked": "Thu 21:14 (day 3)",
+    "hours_win_to_first_booking": 1.3,
+    "delivered_at": "Mon 21:56 (day 7)",
+    "hours_late": 1.9,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00916",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 11:52 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 80.1,
+    "first_driver_booked": "Tue 00:03 (day 8)",
+    "hours_win_to_first_booking": 84.2,
+    "delivered_at": "not delivered",
+    "hours_late": null,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "weekend_gap"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00917",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 11:52 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 80.1,
+    "first_driver_booked": "Fri 14:55 (day 4)",
+    "hours_win_to_first_booking": 3.0,
+    "delivered_at": "Mon 21:24 (day 7)",
+    "hours_late": 1.4,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00918",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 11:54 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 80.1,
+    "first_driver_booked": "Fri 16:34 (day 4)",
+    "hours_win_to_first_booking": 4.7,
+    "delivered_at": "Mon 20:52 (day 7)",
+    "hours_late": 0.9,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00943",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 13:08 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 78.9,
+    "first_driver_booked": "Sat 23:40 (day 5)",
+    "hours_win_to_first_booking": 34.5,
+    "delivered_at": "Mon 20:35 (day 7)",
+    "hours_late": 0.6,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "slow_booking",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00997",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 15:33 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 76.5,
+    "first_driver_booked": "Mon 22:59 (day 7)",
+    "hours_win_to_first_booking": 79.4,
+    "delivered_at": "Tue 16:40 (day 8)",
+    "hours_late": 20.7,
+    "deadline_warnings": 2,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "slow_booking"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R00998",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 15:35 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 76.4,
+    "first_driver_booked": "Mon 00:20 (day 7)",
+    "hours_win_to_first_booking": 56.8,
+    "delivered_at": "Mon 20:42 (day 7)",
+    "hours_late": 0.7,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "weekend_gap",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R01017",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 16:33 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 75.5,
+    "first_driver_booked": "Sat 00:26 (day 5)",
+    "hours_win_to_first_booking": 7.9,
+    "delivered_at": "Mon 20:05 (day 7)",
+    "hours_late": 0.1,
+    "deadline_warnings": 0,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "other"
+  },
+  {
+   "world": "w18e17669a15f01c10ade",
+   "order": "R01021",
+   "code_tag": "weekend_gap",
+   "record": {
+    "option": "next_day",
+    "legs": 1,
+    "won_at": "Fri 16:50 (day 4)",
+    "deadline": "Mon 20:00 (day 7)",
+    "hours_win_to_deadline": 75.2,
+    "first_driver_booked": "Fri 21:53 (day 4)",
+    "hours_win_to_first_booking": 5.0,
+    "delivered_at": "Mon 20:33 (day 7)",
+    "hours_late": 0.6,
+    "deadline_warnings": 1,
+    "failed_visits": []
+   },
+   "jev": "other",
+   "openai": "slow_booking"
+  }
+ ]
+}
+AI_USAGE={"jev_calls": 148, "jev_input_tokens": 93922, "jev_ms": 45044, "openai_calls": 148, "openai_input_tokens": 53274, "openai_ms": 40486, "usd": 0.00927}

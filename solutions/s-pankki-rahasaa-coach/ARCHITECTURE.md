@@ -2,12 +2,12 @@
 
 ## Components
 
-| Component | Source (SalesSquad/spankki-coach @ `12acbc5a`) | Interface | State |
+| Component | Source (SalesSquad/spankki-coach @ `4eb0c564`) | Interface | State |
 | --- | --- | --- | --- |
 | Deterministic money tools | `apps/api/src/tools.ts` | safe-to-spend, baskets, spend, replay_habit, pay cycles, balance outlook | built, tested |
 | Coach turn + firewall | `apps/api/src/agent.ts`, `conversations.ts` | Haiku 5.5 tool use; figures only from tool results; prior turns' tool outcomes as facts | built |
 | Router | `apps/api/src/router.ts`, `route-args.ts` | `ROUTER_URL` (comma list, round-robin + failover, 1.5 s timeout); margin rule chosen by two-fold CV | built, off by default |
-| Edge answers | `apps/api/src/edge-answer.ts` | card text without a model call | measured, not shipped |
+| Edge answers / speculative card | `apps/api/src/edge-answer.ts`, `POST /peek`, `apps/web/src/screens.tsx` | router's card shown until the coach's reply | speculative card shipped; card-only answers not shipped |
 | Gemma router training/serving | `data/gemma/` (MLX on Mac, Unsloth `router_cuda.py` on CUDA, `router_server.py`) | `POST /route` → `{tool, confidence}` | lab |
 | Lab and evals | `apps/lab/` (cascade-eval, label audit, boundary data, monitor, chaos-swarm), `eval/` | CLI scripts, JSONL results | lab |
 | Agent | `pets/s-pankki/` | existing declared capabilities | content only |
@@ -21,6 +21,7 @@
 | spankki-coach | [#93](https://github.com/SalesSquad/spankki-coach/pull/93) `95903428` | route-args, projection policy, CUDA training |
 | spankki-coach | [#94](https://github.com/SalesSquad/spankki-coach/pull/94) `64dbb04b` | v6/v7, edge-answer A/B |
 | spankki-coach | [#95](https://github.com/SalesSquad/spankki-coach/pull/95) `12acbc5a` | chaos lab, router server fix, spend future-period fix |
+| spankki-coach | [#96](https://github.com/SalesSquad/spankki-coach/pull/96) `4eb0c564` | speculative card |
 
 Integration owner: the spankki-coach repository. No code from it is duplicated in this monorepo.
 

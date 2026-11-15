@@ -1,58 +1,32 @@
 # SAMA pathway scribe
 
-Synthetic Finnish cancer-pathway extraction research. The specification is DATA_COLLECTION.md section 4. No patient/clinician names or real clinical notes are used. Everything here is SYNTHETIC and nothing is for clinical use.
+Reads one Finnish visit note plus its note date and proposes the patient's entry route and dated cancer-pathway events (spec: DATA_COLLECTION.md section 4). All notes are SYNTHETIC, nothing is for clinical use, and a person confirms every proposed event.
 
-**What was actually run (14 November 2026).** Results are in [RESULTS.md](RESULTS.md); every step is in `runs/train.jsonl`.
+**Start here.** Final numbers: [v4/RESULTS.md](v4/RESULTS.md). Reproduce them offline in seconds, with no key, network, model or GPU: `bash scribe/v4/reproduce.sh` (prints REPRODUCED or DIFFERS and leaves `data/` untouched; see [v4/README.md](v4/README.md)). What is live code and what is kept as history: [ARCHIVE.md](ARCHIVE.md). How the models were trained: [../TRAINING.md](../TRAINING.md).
 
-- **Version-1 GPU training: never trained.** The A100 box was set up with unpinned libraries (it got Transformers 5.23.0, `runs/train.jsonl`), then stopped answering and came back with a changed SSH host key; no training step ran there. The version-1 script could not have trained there anyway: `scribe/train_lora.py` passes `warmup_ratio`, which the Transformers version installed on the box no longer accepts (`scribe/check_cuda_path.py` checks the script's arguments against that same version; result in `data/scribe/cuda-path-check-v1.json`).
-- **What was trained instead:** a 1B MLX fallback on this MacBook Pro (`scribe/mlx_fallback.py`, base `mlx-community/gemma-3-1b-it-bf16`, which was downloaded here into the git-ignored `scribe/artifacts/hf-cache`). It was evaluated on held-out Nemotron-written notes and on Haiku-written notes.
-- **Superseded:** the GPU path is now `scribe/v2/`, which pins torch, Transformers, PEFT and Accelerate and uses integer warm-up steps. The version-1 CUDA files (`run_gpu.sh`, `train_lora.py`, `evaluate.py`) are kept as they are for the record and should not be used.
-- Checks added after review: `scribe/post_eval.py` (`data/scribe/post-eval-v1.json`: confidence cut-off fixed on validation notes, the adapter on all test notes, ground truth against the pathway order with the eventlog validator). Defects of the frozen dataset: `data/scribe/dataset-v1/ERRATA.md` and the card. Versions of every model and service: `scribe/provenance.py` (`data/scribe/provenance-v1.json`).
+## Current pipeline (as of 15 November 2026)
 
-**Terms.** Gemma models and anything derived from them, including the adapter, are subject to the Gemma Terms of Use (<https://ai.google.dev/gemma/terms>) and the Gemma Prohibited Use Policy (<https://ai.google.dev/gemma/prohibited_use_policy>). The policy restricts automated decisions in healthcare, so every extraction stays a proposal that a person confirms. Model, teacher and verifier identifiers are recorded in `data/scribe/provenance-v1.json`.
+Legend: **[keys]** needs an API key or hosted endpoint; **[GPU]** needs a GPU or Apple-silicon training run; **[offline]** reproducible from stored files (`v4/reproduce.sh` covers steps 8 and 9).
 
-## Local generation (Python 3.12)
+1. **Sample answer keys** (entry route, events, dates; no text yet) [offline]. `sample.py`; round 2 `teacher2/specs.py`; stress set `stress/specs.py`, `stress/phrases.py`.
+2. **Teacher writes the notes** [keys]. Nemotron 3.5 Super VL: round 1 `generate.py` (+ `finalise.py`), round 2 `teacher2/protocol.py`; stress notes `stress/pipeline.py`, code gate `stress/check.py`. Haiku-written notes go through `v2/data_tools.py`. Prompts: `prompts.py`.
+3. **Jev judges check note against key** [keys]. TypeSafe System One (and Decisions) in `judges/core.py`, run by `judges/run.py`; planted-error benchmark `judges/benchmark.py`; round-2 gate `v3/gate.py`. Code checks: `verify.py`.
+4. **Dataset and splits** [offline from stored notes]. `v2/data_tools.py` (dataset v2, whole-episode splits, the one the MLX arms use); `v3/build_dataset.py` (v2 plus round-2 notes, used by the CUDA v3 students); card/stats `v3/card.py`.
+5. **LoRA training** [GPU]. CUDA v2/v3: `v2/train.py`, `v2/config.py`, `v2/run_gpu.sh`, `v2/run_ablation.py`. MLX v4 (the three adapters evaluated at the end, A-270m-abs, B-270m-expr-aug, C-1b-expr-aug): `mlx2/export.py`, `mlx2/train.py`, `mlx2/run_arm.sh`, `mlx2/export_adapter.py`. Output formats: `v2/formats.py`.
+6. **Inference with the adapters** [GPU / Apple silicon]. MLX greedy generation: `mlx2/infer.py`, batched `v4/binfer.py`, `v4/infer8.py`, `v4/queue8.sh`; check against PEFT `mlx2/peft_parity.py`, `v4/parity8.py`. Stored outputs are in `data/scribe/v4/`.
+7. **Frozen resolver** [offline]. Code, not the model, turns "kolme viikkoa sitten" into a date: `v3/resolve.py` and `v3/lexicon.py` (sha256-pinned, never edit); vague-time flag `vague/rule.py`.
+8. **Nemotron second reader** [keys]. `nemotron/reader.py` (prompt v3, selected on validation), `nemotron/common.py`, `v4/nemo8.py` (stress-set reads); its stored answers are in `data/scribe/v4/eval/nemotron/`.
+9. **Cascade and preregistered evaluation** [offline]. A note is pre-filled only when two readers agree: `v3/cascade.py` (threshold rule, leak guard), `nemotron/cascade_agreement.py`, `v4/eval8.py` (`verify` then `score`), `v4/render8.py` (RESULTS.md), `v4/local_pairs.py` (local-only reader pairs, post hoc), `metrics.py`.
+10. **Serving** [GPU for vLLM, keys for the Nemotron reader]. `../serve/client.py` (schema check, code-computed dates, risk score), `../serve/convert_mlx_adapter.py`, `../serve/guard.py`, `../serve/demo/`; deployment notes `../serve/README.md`. Not deployed.
 
-```bash
-UV_CACHE_DIR=/tmp/sama-uv uv venv --python 3.12 scribe/.venv
-UV_CACHE_DIR=/tmp/sama-uv uv pip install --python scribe/.venv/bin/python httpx pyarrow
-set -a; . ~/.config/verda-inference/env; . ~/.config/typesafe/env; set +a
-scribe/.venv/bin/python scribe/generate.py --preflight
-scribe/.venv/bin/python scribe/generate.py --start 0 --count 20
-# Select remaining count from measured throughput/acceptance. Hard cap 4500 requests including retries.
-scribe/.venv/bin/python scribe/finalise.py
-scribe/.venv/bin/python scribe/build_dataset.py --audit
-scribe/.venv/bin/python -m unittest discover -s scribe/tests
-```
+Tests: `python3 -m unittest discover -s scribe/v4/tests` (and the same for `scribe/v3/tests`, `scribe/v2/tests`, `scribe/mlx2/tests`, `scribe/nemotron/tests`).
 
-Only one generation/audit process may write the usage ledger at once. Cache files are keyed by sample index; reuse keeps completed teacher calls and probabilities. Keep cache and usage.json together. Never reset the ledger to circumvent a cap. Failed verifier attempts reserve 100k tokens each conservatively; successful calls settle against actual reported tokens. A conservative $1 internal stop is far below the authorized $10. Actual cost uses the owner's $0.042/million-token price. Teacher price is unknown and logged as null. No credentials are stored.
+## History
 
-`models.json` records GET /models discovery. Teacher `chat_template_kwargs.enable_thinking=false` follows [NVIDIA's model documentation](https://docs.nvidia.com/nim/large-language-models/2.1.5/get-started/advanced/get-started-nemotron-3.5-super-vl.html). The verifier HTTP shape and usage follow [TypeSafe System One](https://docs.typesafe.ai/api/system-one). Initial failed prompts are retained in cache; later generation caches record their prompt; early pilots retain planned facts and observed output. Code checks include word count in addition to exact date spans. All semantic probabilities are recorded, including second-pass audit results in `data/scribe/audit/`.
+Everything below describes version 1 (14 November 2026). It is kept as the record of what was tried first; the files are listed in [ARCHIVE.md](ARCHIVE.md). Version-1 results are in [RESULTS.md](RESULTS.md).
 
-## Version-1 CUDA path (superseded, do not run)
-
-`scribe/run_gpu.sh` installs torch, Transformers, PEFT and Accelerate without version pins and then runs `scribe/train_lora.py` and `scribe/evaluate.py`. With the Transformers version such an install brought on 14 November 2026 the training stops when it builds its `TrainingArguments` (`warmup_ratio`; see `data/scribe/cuda-path-check-v1.json`). These files have never run on a GPU and are kept as they were. Use `scribe/v2/run_gpu.sh` (see `scribe/v2/README.md`). An earlier version of this file said this machine never downloads Gemma; the MLX fallback did download the 1B model here.
-
-The scoring code is shared: `scribe/metrics.py` is used by the MLX fallback and by version 2. `scribe/evaluate.py` also reads external-writer notes (`--extra-test`); external JSONL needs `note_text`, `note_date`, and `target_json` (or `entry_route` and `events`); optionally `date_forms`, `distractors`, `id`. Unknown distractor denominators remain unavailable, not zero-percent success. Risk thresholds chosen and scored on the same notes are optimistic; `scribe/post_eval.py` fixes the threshold on the validation notes and reports the test error with an exact upper bound. Neither is a clinical error bound. Wilson intervals apply to binomial proportions; F1 is a harmonic mean rather than a binomial proportion. McNemar is exact two-sided. Date errors pair same-type dates in sorted order and exclude unmatched events. An extracted distractor means any predicted pathway event on the distractor's date. Date-form breakdowns include notes containing that form, so groups overlap.
-
-Jev re-judging estimates *model disagreement*, not independently proven label noise: correlated errors may escape both passes. No clinical validity, clinical safety or live care integration is established: the evaluation measures agreement with a synthetic teacher-and-verifier pipeline, and no clinician has reviewed it.
-
-## Local MLX fallback and the checks added after review
-
-```bash
-export HF_HOME=$PWD/scribe/artifacts/hf-cache HF_HUB_OFFLINE=1
-PY=scribe/artifacts/mlx-venv/bin/python; E=scribe/artifacts/mlx-eval
-# adapter on the validation notes and on the 300 test notes outside the first seeded 200
-$PY scribe/mlx_fallback.py infer --model mlx-community/gemma-3-1b-it-bf16 --adapter scribe/artifacts/adapter-v1 --split val --output $E/adapter-val.jsonl
-$PY scribe/mlx_fallback.py infer --model mlx-community/gemma-3-1b-it-bf16 --adapter scribe/artifacts/adapter-v1 --test-subset 200 --complement --output $E/adapter-test-rest.jsonl
-# after a change to scribe/metrics.py: rebuild the evaluation file from the stored predictions
-scribe/.venv/bin/python scribe/mlx_fallback.py merge --extra-test data/scribe/haiku-test.jsonl --test-subset 200 --base $E/base.jsonl --adapter $E/adapter-0.jsonl,$E/adapter-1.jsonl --meta scribe/artifacts/eval-meta.json --output data/scribe/eval-v1.json
-$PY scribe/check_cuda_path.py                    # data/scribe/cuda-path-check-v1.json (needs the box's Transformers version, not torch)
-scribe/.venv/bin/python scribe/provenance.py     # data/scribe/provenance-v1.json
-scribe/.venv/bin/python scribe/post_eval.py      # data/scribe/post-eval-v1.json and dataset-v1/ERRATA.md
-scribe/.venv/bin/python scribe/build_dataset.py --card-only   # dataset-v1/CARD.md; the split files are not rewritten
-scribe/.venv/bin/python scribe/results_md.py     # scribe/RESULTS.md (add --update-data-collection to rewrite the status block of DATA_COLLECTION.md)
-scribe/.venv/bin/python scribe/manifest_eval.py  # data/scribe/manifest-eval-v1.json and the descriptive fields of manifest.json
-```
-
-`data/scribe/manifest.json` describes the dataset build; its hash map was written at the end of the build, before any training, and is kept as written because version 2 checks the version-1 inputs against it. Its other fields say what ran afterwards. `data/scribe/manifest-eval-v1.json` lists the files of the training and evaluation stage with their hashes.
+- **Version-1 GPU training never ran.** The A100 box got unpinned libraries (Transformers 5.23.0), then stopped answering and returned with a changed SSH host key. `train_lora.py` passes `warmup_ratio`, which that Transformers no longer accepts (`check_cuda_path.py`, `data/scribe/cuda-path-check-v1.json`). `run_gpu.sh`, `train_lora.py` and `evaluate.py` are kept as written and must not be used; `v2/run_gpu.sh` replaced them with pinned versions.
+- **What was trained instead:** a 1B MLX fallback (`mlx_fallback.py`, base `mlx-community/gemma-3-1b-it-bf16`), scored on held-out Nemotron-written and Haiku-written notes. Added after review: `post_eval.py` (validation-fixed confidence cut-off), `provenance.py` (model and service versions), `results_md.py`, `manifest_eval.py`.
+- **Version-1 generation** (`generate.py`, `finalise.py`, `build_dataset.py`, `topup.py`): hard cap 4,500 requests, a conservative $1 internal stop, one process writing the usage ledger at a time, never reset the ledger. Dataset defects: `data/scribe/dataset-v1/ERRATA.md`.
+- **Evaluation caveats that still apply.** Risk thresholds chosen and scored on the same notes are optimistic. Wilson intervals are for binomial proportions; McNemar is exact two-sided. Jev re-judging estimates model disagreement, not proven label noise. No clinical validity or safety is established; no clinician has reviewed anything.
+- **Terms.** Gemma models and derived adapters are under the [Gemma Terms of Use](https://ai.google.dev/gemma/terms) and [Prohibited Use Policy](https://ai.google.dev/gemma/prohibited_use_policy), which restricts automated healthcare decisions, so every extraction stays a proposal. Identifiers: `data/scribe/provenance-v1.json`.

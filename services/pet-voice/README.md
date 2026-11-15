@@ -12,6 +12,7 @@ speaker's WAV, transcribes it with Gemini audio understanding, answers in its ow
 - `evidence/<run>.json` — text/hash/metric receipts of real runs (no audio).
 - `experiments/` — the same runs recorded with the shared
   [experiment registry](../experiment-registry/README.md) CLI (`--root services/pet-voice/experiments`).
+- `demo/` — 2-minute demo video (`junction-pets-demo.mp4`) and the script that builds it.
 - `test_pet_voice.py` — offline checks (`python3 -m unittest services/pet-voice/test_pet_voice.py`).
 
 ## Run (owner's MacBook Pro)

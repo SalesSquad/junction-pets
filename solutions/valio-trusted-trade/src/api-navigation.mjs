@@ -68,6 +68,10 @@ export function recoveryFor(code, details = null) {
   const action = transient ? 'retry_same_command_key' :
     ['QUOTE_STALE', 'QUOTE_EXPIRED', 'PLAN_STALE', 'PLAN_EXPIRED', 'PROOF_EXPIRED'].includes(code) ? 'prepare_new_purchase_with_original_intent' :
     code === 'INTEGRATION_NOT_CONFIGURED' ? 'operator_configure_read_only_provider_no_model_credential_input' :
+    ['HOST_IDENTITY_REQUIRED','HOST_ASSERTION_INVALID','IDENTITY_EXPIRED','IDENTITY_REVOKED'].includes(code) ? 'reconnect_through_private_host_no_model_credential_input' :
+    ['HOST_DECISION_REQUIRED','HOST_CONSENT_EXPIRED'].includes(code) ? 'request_new_exact_signed_host_decision' :
+    ['HOST_DECISION_REPLAY','HOST_DECISION_SCOPE_MISMATCH'].includes(code) ? 'reconcile_status_then_request_exact_host_decision' :
+    ['IDENTITY_STATE_PROFILE_MISMATCH','HOST_PERSISTENCE_REQUIRED','IDENTITY_CONFIG_INVALID'].includes(code) ? 'operator_preserve_state_and_fix_identity_configuration' :
     code === 'CURSOR_STALE' ? 'restart_pagination_without_cursor' :
     ['APPROVAL_REQUIRED', 'REVIEW_CONFIRMATION_REQUIRED', 'PAYMENT_APPROVAL_REQUIRED'].includes(code) ? 'request_exact_human_approval' :
     code === 'BUYER_CAPABILITY_REQUIRED' ? 'resume_original_session' :
