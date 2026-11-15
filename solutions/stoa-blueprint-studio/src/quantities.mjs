@@ -12,11 +12,11 @@
  *   room area = area of the smallest closed ROOM_OUTLINE enclosing the room-number text
  * Anything outside these conventions returns null so the caller can abstain.
  */
-import { answerDrawing, pointInPolygon, polygonArea } from './grounding.mjs';
+import { answerDrawing, questionRejection, pointInPolygon, polygonArea } from './grounding.mjs';
 
 const UNIT_TO_M = Object.freeze({ 1: 0.0254, 2: 0.3048, 4: 0.001, 5: 0.01, 6: 1 });
 const OUTDOOR = /^(balkon|balcon|balcone|loggia|terrasse|terrazza|dachterrasse|sitzplatz|veranda|schacht|luftraum|vide|vuoto|cavedio|gaine|shaft|void)\b/i;
-const ROOM_NUMBER = /^[A-Z]?\d+(?:\.\d+)+$/;
+const ROOM_NUMBER = /^(?:[A-Z]-\d+|[A-Z]?\d+(?:[.\-]\d+)+)$/;
 const UNIT_LABEL = /^(Whg|App|Apt|Log|Wohnung|Appartamento|Appartement)\.?\s+([A-Z0-9]{1,3})$/i;
 
 const ev = (e, detail) => ({ entityId: e.id, layer: e.layer, kind: e.type, detail });
@@ -114,14 +114,15 @@ function intent(question) {
 }
 
 /** Each numbered room: its number text, the smallest enclosing closed outline, and its name label. */
-function rooms(drawing, scale) {
+function rooms(drawing) {
   const outlines = drawing.entities.filter(e => e.layer === 'ROOM_OUTLINE' && e.points?.length >= 3);
   const texts = drawing.entities.filter(e => e.layer === 'ROOM_TEXT' && e.text);
   const smallest = p => outlines.filter(o => pointInPolygon(p, o.points)).sort((a, b) => polygonArea(a.points) - polygonArea(b.points))[0];
   const nameOf = outline => texts.find(t => !ROOM_NUMBER.test(t.text.trim()) && !/m²|m2$/.test(t.text) && !UNIT_LABEL.test(t.text.trim()) && smallest(t) === outline);
   return texts.filter(t => ROOM_NUMBER.test(t.text.trim())).map(t => {
     const outline = smallest(t);
-    return outline && { number: t.text.trim(), numberText: t, outline, name: nameOf(outline), area: polygonArea(outline.points) * scale * scale };
+    const verified = answerDrawing(drawing, `What is the area of room ${t.text.trim()}?`);
+    return { number: t.text.trim(), numberText: t, outline, name: outline && nameOf(outline), area: verified.metric?.value, verified };
   }).filter(Boolean);
 }
 const round2 = v => Math.round(v * 100) / 100;
@@ -140,6 +141,13 @@ function quotedRoomName(drawing, question) {
 const LABEL_WORDS = /labell?ed|bezeichnung|désignation|désignées|denominazione|denominati/i;
 
 export function answerQuantities(drawing, question) {
+  const rejected = questionRejection(question);
+  if (rejected) return no(drawing, rejected);
+  // This resolver supports whole-sheet quantities. Never silently discard a narrower scope.
+  if (/\b(?:in|inside|within|of|for|on)\s+(?:(?:the|this|that)\s+)?(?:room|apartment|unit|bedroom|bathroom|kitchen)\b|\b(?:first|second|third|ground|upper|lower)\s+floor\b|\b(?:excluding|except|only)\b/i.test(question) && /how many|count|wie viele|combien|quanti|quante/i.test(question)) {
+    return no(drawing, 'Scoped object counts are not supported. Ask about the whole drawing.');
+  }
+  if (/how many|count|wie viele|combien|quanti|quante/i.test(question) && /\bdoors?\b/i.test(question) && /\bwindows?\b/i.test(question)) return no(drawing, 'Ask about one object class at a time.');
   let what = intent(question);
   if (LABEL_WORDS.test(question)) {
     const name = quotedRoomName(drawing, question);
@@ -166,7 +174,10 @@ export function answerQuantities(drawing, question) {
       w.map(e => ev(e, 'Window line')), { type: 'count', value: w.length / 3, unit: 'windows' });
   }
   if (['shower', 'bathtub', 'basin', 'wc'].includes(what)) {
-    const hits = fixtureSymbols(E, scale).filter(s => s.kind === what);
+    const symbols = fixtureSymbols(E, scale);
+    if (!symbols.length || symbols.some(s => !s.kind)) return no(drawing, 'Fixture coverage is missing or contains unclassified symbols; absence cannot be proved.');
+    const hits = symbols.filter(s => s.kind === what);
+    if (!hits.length) return no(drawing, 'No matching fixture was positively identified; a zero count is not proven.');
     const label = { shower: 'showers', bathtub: 'bathtubs', basin: 'washbasins', wc: 'toilets' }[what];
     const detail = { shower: 'Shower tray and drain', bathtub: 'Bathtub and drain', basin: 'Washbasin bowl and drain', wc: 'WC bowl' }[what];
     return ok(drawing, hits.length, `${hits.length} ${label}: FIXTURE outline rectangles whose own inner symbol matches (bowl, drain size, tub size). Each counted fixture is highlighted.`,
@@ -175,18 +186,11 @@ export function answerQuantities(drawing, question) {
   if (what === 'apartments') {
     const labels = E.filter(e => e.layer === 'ROOM_TEXT' && UNIT_LABEL.test(e.text?.trim() ?? ''));
     if (!labels.length) return null; // fall back to UNIT_OUTLINE counting in grounding.mjs
-    return ok(drawing, labels.length, `${labels.length} apartment labels (${labels.map(l => l.text.trim()).join(', ')}).`,
-      labels.map(e => ev(e, `Apartment label ${e.text.trim()}`)), { type: 'count', value: labels.length, unit: 'apartments' });
+    return answerDrawing(drawing, 'How many apartments are shown?');
   }
 
-  const all = rooms(drawing, scale);
-  const cite = rs => rs.flatMap(r => [ev(r.outline, `Room ${r.number} outline, ${round2(r.area)} m²`), ev(r.numberText, `Room number ${r.number}`)]);
-  const indoor = r => !(r.name && OUTDOOR.test(r.name.text.trim()));
   if (what.kind === 'roomArea') {
-    const r = all.filter(x => x.number === what.number);
-    if (r.length !== 1) return no(drawing, `Room ${what.number} is absent or not uniquely enclosed by one closed outline.`);
-    const a = round2(r[0].area);
-    return ok(drawing, `${a} m²`, `Room ${what.number}: measured area of its smallest enclosing closed outline.`, cite(r), { type: 'area', value: a, unit: 'm²', tolerancePercent: 2 });
+    return answerDrawing(drawing, `What is the area of room ${what.number}?`);
   }
   if (what.kind === 'labelCount') {
     const target = what.label.toLowerCase();
@@ -194,27 +198,37 @@ export function answerQuantities(drawing, question) {
     return ok(drawing, hits.length, `${hits.length} ROOM_TEXT labels read exactly “${what.label}”. Each label position is highlighted.`,
       hits.map(e => ev(e, `ROOM_TEXT: ${e.text}`)), { type: 'count', value: hits.length, unit: what.label });
   }
+  const all = rooms(drawing);
+  const cite = rs => [...new Map(rs.flatMap(r => r.verified.evidence).map(e => [e.entityId, e])).values()];
+  const invalid = rs => rs.some(r => r.verified.status !== 'supported');
+  const indoor = r => !(r.name && OUTDOOR.test(r.name.text.trim()));
   if (what.kind === 'labelArea') {
     const target = what.label.toLowerCase();
-    const rs = [...new Map(all.filter(r => r.name?.text.trim().toLowerCase() === target).map(r => [r.outline.id, r])).values()];
+    const candidates = all.filter(r => r.name?.text.trim().toLowerCase() === target);
+    if (invalid(candidates) || all.some(r => !r.outline)) return no(drawing, 'Every contributing room must have a unique closed boundary and matching area annotation.');
+    const rs = [...new Map(candidates.map(r => [r.outline.id, r])).values()];
     if (!rs.length) return no(drawing, `No numbered room labelled ${what.label}.`);
     const a = round2(rs.reduce((s, r) => s + r.area, 0));
     return ok(drawing, `${a} m²`, `Sum of ${rs.length} rooms labelled ${what.label}.`, cite(rs), { type: 'area', value: a, unit: 'm²', tolerancePercent: 2 });
   }
   if (what === 'numberedArea') {
+    if (invalid(all) || all.some(r => !r.name)) return no(drawing, 'An indoor total requires every numbered room to have a validated area and a room name.');
     const rs = [...new Map(all.filter(indoor).map(r => [r.outline.id, r])).values()];
     if (!rs.length) return no(drawing, 'No numbered rooms with closed outlines.');
     const a = round2(rs.reduce((s, r) => s + r.area, 0));
     return ok(drawing, `${a} m²`, `Sum of ${rs.length} numbered indoor rooms (balconies, loggias, terraces, shafts and voids excluded).`, cite(rs), { type: 'area', value: a, unit: 'm²', tolerancePercent: 2 });
   }
   if (what.kind === 'apartmentArea') {
-    const label = E.find(e => e.layer === 'ROOM_TEXT' && UNIT_LABEL.test(e.text?.trim() ?? '') && e.text.trim().match(UNIT_LABEL)[2].toUpperCase() === what.unit.toUpperCase());
-    if (!label) return no(drawing, `No apartment labelled ${what.unit}.`);
+    const labels = E.filter(e => e.layer === 'ROOM_TEXT' && UNIT_LABEL.test(e.text?.trim() ?? '') && e.text.trim().match(UNIT_LABEL)[2].toUpperCase() === what.unit.toUpperCase());
+    if (labels.length !== 1) return no(drawing, 'Apartment label is absent or ambiguous.');
+    const label = labels[0];
     const units = E.filter(e => e.layer === 'UNIT_OUTLINE' && e.points?.length >= 3 && pointInPolygon(label, e.points))
       .sort((a, b) => polygonArea(a.points) - polygonArea(b.points));
-    if (!units.length) return no(drawing, `Apartment ${what.unit} has no enclosing unit outline.`);
+    if (units.length !== 1 || !units[0].closed || units[0].unsupportedGeometry) return no(drawing, `Apartment ${what.unit} has no enclosing unit outline.`);
     const unit = units[0];
-    const rs = [...new Map(all.filter(r => indoor(r) && pointInPolygon(r.numberText, unit.points)).map(r => [r.outline.id, r])).values()];
+    const candidates = all.filter(r => pointInPolygon(r.numberText, unit.points));
+    if (!candidates.length || invalid(candidates) || candidates.some(r => !r.name)) return no(drawing, 'Apartment total requires complete, named rooms with validated areas.');
+    const rs = [...new Map(candidates.filter(indoor).map(r => [r.outline.id, r])).values()];
     const a = round2(rs.reduce((s, r) => s + r.area, 0));
     return ok(drawing, `${a} m²`, `Apartment ${what.unit}: sum of ${rs.length} indoor rooms inside its unit outline.`,
       [ev(unit, `Apartment ${what.unit} outline`), ev(label, `Label ${label.text.trim()}`), ...cite(rs)], { type: 'area', value: a, unit: 'm²', tolerancePercent: 2 });

@@ -48,18 +48,24 @@ export function parseDxf(input, filename = 'uploaded.dxf') {
     }
     if (section !== 'ENTITIES' || !current) continue;
     switch (code) {
+      case 91: if (current.type === 'HATCH') current.hatchLoops = Number(value); break;
+      case 92: if (current.type === 'HATCH') { current.hatchBoundary = true; current.hatchPolyline = Boolean(Number(value) & 2); } break;
+      case 73: if (current.type === 'HATCH') current.hatchClosed = Number(value) === 1; break;
+      case 93: if (current.type === 'HATCH') current.hatchVertices = Number(value); break;
+      case 97: if (current.type === 'HATCH') current.hatchBoundary = false; break;
       case 8: current.layer = value.slice(0, 80); break;
+      case 42: if (finite(value) !== 0) current.unsupportedGeometry = 'curved polyline (bulge)'; break;
       case 70: current.flags = Number(value); break;
       case 1: current.text = (current.text || '') + value; break;
       case 3: current.text = (current.text || '') + value; break;
       case 10:
-        if (current.type === 'LWPOLYLINE') {
+        if ((current.type === 'LWPOLYLINE' || (current.type === 'HATCH' && current.hatchBoundary))) {
           current._last = { x: finite(value), y: 0 };
           current.points.push(current._last);
         } else current.x = finite(value);
         break;
       case 20:
-        if (current.type === 'LWPOLYLINE' && current._last) current._last.y = finite(value);
+        if ((current.type === 'LWPOLYLINE' || (current.type === 'HATCH' && current.hatchBoundary)) && current._last) current._last.y = finite(value);
         else current.y = finite(value);
         break;
       case 11: current.x2 = finite(value); break;
@@ -95,8 +101,12 @@ function finite(value) {
 function finalizeEntity(raw, index) {
   const { type, layer } = raw;
   const common = { id: `e${index + 1}`, type, layer };
+  if (type === 'HATCH') {
+    if (raw.hatchLoops !== 1 || !raw.hatchPolyline || !raw.hatchClosed || raw.points.length !== raw.hatchVertices || raw.points.length < 3 || raw.unsupportedGeometry) throw new Error('Unsupported HATCH boundary: use one closed straight polyline loop without holes.');
+    return { ...common, points: raw.points, closed: true };
+  }
   if (type === 'LWPOLYLINE' && raw.points.length >= 2) {
-    return { ...common, points: raw.points, closed: Boolean(raw.flags & 1) };
+    return { ...common, points: raw.points, closed: Boolean(raw.flags & 1), ...(raw.unsupportedGeometry ? { unsupportedGeometry: raw.unsupportedGeometry } : {}) };
   }
   if (type === 'LINE' && Number.isFinite(raw.x) && Number.isFinite(raw.y) && Number.isFinite(raw.x2) && Number.isFinite(raw.y2)) {
     return { ...common, points: [{ x: raw.x, y: raw.y }, { x: raw.x2, y: raw.y2 }], closed: false };

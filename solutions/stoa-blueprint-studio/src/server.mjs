@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { parseDxf, DXF_LIMITS } from './dxf.mjs';
 import { answerDrawingV2 as answerDrawing } from './quantities.mjs';
+import { parseIfc, IFC_LIMITS } from './ifc.mjs';
+import { answerIfc } from './ifc-qa.mjs';
 import { makeDemo } from './demo.mjs';
 
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
@@ -33,10 +35,10 @@ function getDrawing(id) {
   if (id !== 'demo' && Date.now() - item.created > MAX_AGE_MS) { cache.delete(id); return null; }
   return item.drawing;
 }
-function remember(drawing) {
+function remember(drawing, model = null) {
   for (const [id, value] of cache) if (id !== 'demo' && Date.now() - value.created > MAX_AGE_MS) cache.delete(id);
   while (cache.size >= MAX_FILES + 1) cache.delete([...cache.keys()].find(id => id !== 'demo'));
-  cache.set(drawing.id, { drawing, created: Date.now() });
+  cache.set(drawing.id, { drawing, model, created: Date.now() });
 }
 
 export function createServer() {
@@ -52,7 +54,7 @@ export function createServer() {
       if (req.method === 'POST' && url.pathname === '/api/import-dxf') {
         if (!/^application\/(?:dxf|octet-stream)/i.test(req.headers['content-type'] || '')) return send(res, 415, { error: 'Use application/dxf or application/octet-stream.' });
         const bytes = await body(req, DXF_LIMITS.bytes);
-        const filename = String(req.headers['x-filename'] || 'uploaded.dxf');
+        const filename = decodeURIComponent(String(req.headers['x-filename'] || 'uploaded.dxf'));
         const drawing = parseDxf(bytes.toString('utf8'), filename);
         drawing.sha256 = createHash('sha256').update(bytes).digest('hex');
         drawing.id = randomUUID();
@@ -60,12 +62,33 @@ export function createServer() {
         remember(drawing);
         return send(res, 201, { drawing });
       }
+      if (req.method === 'POST' && url.pathname === '/api/import-ifc') {
+        if (!/^application\/(?:x-step|octet-stream)(?:;|$)/i.test(req.headers['content-type'] || '')) return send(res, 415, { error: 'Use application/x-step or application/octet-stream.' });
+        const bytes = await body(req, IFC_LIMITS.bytes);
+        const model = parseIfc(bytes.toString('latin1'));
+        const filename = decodeURIComponent(String(req.headers['x-filename'] || 'uploaded.ifc')).replace(/[\\/\u0000-\u001F]/g, '_').slice(0, 120);
+        if (!/\.ifc$/i.test(filename)) return send(res, 415, { error: 'Use an .ifc STEP file.' });
+        const drawing = { id: randomUUID(), filename, format: 'IFC STEP', schema: model.schema,
+          sha256: createHash('sha256').update(bytes).digest('hex'), unitsLabel: 'SI (validated per quantity)',
+          storeys: model.storeys.map(s => String(s.name)),
+          sourceNotice: 'LOCAL IFC · Entity evidence, not a projected floor plan',
+          entities: [...model.entities.values()].filter(e => !['IFCCARTESIANPOINT', 'IFCPOLYLINE'].includes(e.type)).map(e => ({
+            id: `#${e.id}`, type: e.type, layer: e.type, text: typeof e.args[2] === 'string' ? e.args[2] : e.type,
+            sourceText: [e.sourceRecord, ...[...(model.quantities.get(e.id) ?? []), ...(model.props.get(e.id) ?? [])].map(q => model.entities.get(q.entityId)?.sourceRecord), ...((model.quantities.get(e.id) ?? []).length ? model.of('IFCUNITASSIGNMENT', 'IFCSIUNIT').map(u => u.sourceRecord) : [])].filter(Boolean).join('\n'),
+          })) };
+        remember(drawing, model);
+        return send(res, 201, { drawing });
+      }
       if (req.method === 'POST' && url.pathname === '/api/ask') {
         if (!/^application\/json/i.test(req.headers['content-type'] || '')) return send(res, 415, { error: 'Use application/json.' });
         const input = JSON.parse((await body(req, 2048)).toString('utf8'));
         const drawing = getDrawing(input.drawingId);
         if (!drawing) return send(res, 404, { error: 'The drawing expired. Reimport the DXF file.' });
-        return send(res, 200, { result: answerDrawing(drawing, input.question) });
+        const result = drawing.format === 'IFC STEP'
+          ? answerIfc(cache.get(input.drawingId).model, input.question) ?? { status: 'abstained', answer: null, explanation: 'Unsupported IFC question. Use an exact quoted storey or room name.', evidence: [], metric: null }
+          : answerDrawing(drawing, input.question);
+        result.source = { filename: drawing.filename, sha256: drawing.sha256 ?? null, format: drawing.format, units: drawing.unitsLabel };
+        return send(res, 200, { result });
       }
       const staticFiles = new Map([
         ['/', ['index.html', 'text/html; charset=utf-8']],

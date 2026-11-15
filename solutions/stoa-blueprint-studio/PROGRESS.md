@@ -1,3 +1,44 @@
+# Stoa Atlas — Current reliability delivery
+
+Base: `f64f6ac1322339ee2213737af9b00776ae67af0b`, isolated branch
+`codex/stoa-evidence-and-ifc`. Scope: `solutions/stoa-blueprint-studio/**` only.
+
+## Implemented in this revision
+
+- Active V2 room areas delegate to strict geometry + annotation validation; totals require all
+  contributing rooms to validate. Ambiguous apartment labels and boundaries abstain.
+- Unsupported room-scoped object counts, multiple English object classes, invalid/injection-like
+  questions and fixture counts without positive evidence abstain.
+- IFC quantities convert area/volume SI prefixes dimensionally, honour declared quantity units,
+  reject unknown units and refuse incomplete totals. Citations are no longer truncated at 400.
+- Local IFC STEP upload, source hashing and inspectable entity/quantity/property/unit records in
+  the browser, with exact quoted storey/room questions and exact scalar property lookup.
+- Upload parser bounds size/record/entity count/nesting and rejects malformed STEP lists/strings.
+- Single closed straight polyline HATCH ingestion with native source citations. Complex HATCH
+  paths/holes/curves reject; curved LWPOLYLINE is excluded from trusted area measurements.
+- Offline source/page-bound citation-box IoU, precision, recall and one-to-one matching.
+- Regression checks target V2 and the real HTTP routes, not just the older grounding helper.
+
+## Verification and limits
+
+Local Node qualification: `node --test tests/*.test.mjs benchmark/*.test.mjs` — 53 passed,
+0 failed, 1 optional licensed-source skip (54 total). The historical benchmark CLI test exercises
+its fail-closed branch because the pinned old commit is absent in this shallow checkout; this
+is not a successful historical scored CLI replay. `node --check public/app.js` and
+`git diff --check` passed. Chromium browser flow passed locally; exact source is pinned in the PR. Synthetic fixtures only; the optional licensed sponsor test remains
+skipped. Browser checks cover DXF count/area/citation, IFC import/area/source selection, desktop
+and mobile rendering, and restoring the demo; zero page errors observed. No external inference,
+licensed dataset fetch, deployment, merge or shared-file edits.
+
+The historical tables below are evidence for the older engine. **The stricter revision's real-data
+accuracy and coverage are unmeasured.** The region scorer has synthetic tests, not independent
+sponsor region annotations. IFC record inspection is not 2D/3D spatial projection. DWG, general
+free-form IFC questions and improved raster accuracy remain open; see `IMPROVEMENTS.md`.
+
+---
+
+## Historical state before this revision
+
 # Stoa Atlas — Progress
 
 Status: **measured on the official preview questions; numbers match the README table.**
