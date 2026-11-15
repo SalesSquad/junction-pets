@@ -6,6 +6,7 @@
  * Counts/areas scored per the sponsor rule; free-text answers with a lenient key-token check.
  */
 import { writeFile, mkdir } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { CACHE, cached, loadQuestions } from '../raster/dataset.mjs';
 import { isCorrect } from '../raster/score.mjs';
@@ -14,11 +15,16 @@ import { askSheet, loadSheet } from '../sheet/sheet-qa.mjs';
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((a, v, i, all) => (v.startsWith('--') ? [...a, [v.slice(2), all[i + 1]]] : a), []));
 const modes = (args.mode ?? 'both') === 'both' ? ['text', 'image'] : [args.mode];
+// --text pdf (text layer) | ocr (local tiled OCR, text layer ignored) | sc (an external OCR binary
+// given in SC_OCR_BIN, e.g. a ScreenshotContext-configured Vision pass; text layer ignored).
+const textOpt = args.text ?? 'pdf';
+const scOcr = async p => JSON.parse(execFileSync(process.env.SC_OCR_BIN, [p], { encoding: 'utf8', maxBuffer: 1 << 26 }));
+const sheetOpts = textOpt === 'pdf' ? {} : textOpt === 'ocr' ? { textSource: 'ocr' } : { textSource: 'ocr', ocrFn: scOcr, label: 'external-ocr' };
 const conc = Number(args.concurrency ?? 10);
 const cfg = config();
 const qs = (await loadQuestions('full')).filter(q => q.path.startsWith('data/opening_design/'));
 const sheets = new Map();
-for (const p of new Set(qs.map(q => q.path))) sheets.set(p, await loadSheet(await cached(p, 'full')));
+for (const p of new Set(qs.map(q => q.path))) sheets.set(p, await loadSheet(await cached(p, 'full'), sheetOpts));
 
 const norm = s => String(s).toLowerCase().replace(/[\s"”″'’′]/g, '').replace(/[–—]/g, '-');
 /** Lenient text check: every number/code token of the truth appears in the answer. */
@@ -50,7 +56,7 @@ for (const mode of modes) {
     withEvidence: rs.filter(r => r.evidence?.length).length, failedCalls: rs.filter(r => !r.call.ok).length,
     tokensPerQuestion: Math.round(rs.reduce((s, r) => s + (r.call.usage?.prompt ?? 0) + (r.call.usage?.completion ?? 0), 0) / rs.length) };
 }
-const report = { sheets: [...sheets.values()].map(s => ({ path: s.path.split('/').pop(), lines: s.lines.length, source: s.source })), concurrency: conc, wallSeconds: Math.round((Date.now() - t0) / 1000), summary };
+const report = { textSource: textOpt, sheets: [...sheets.values()].map(s => ({ path: s.path.split('/').pop(), lines: s.lines.length, source: s.source })), concurrency: conc, wallSeconds: Math.round((Date.now() - t0) / 1000), summary };
 await mkdir(join(CACHE, 'reports'), { recursive: true });
 const file = join(CACHE, 'reports', `sheets-${new Date().toISOString().replace(/[:.]/g, '')}.json`);
 await writeFile(file, JSON.stringify({ report, rows: out }, null, 1));

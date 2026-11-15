@@ -57,6 +57,8 @@ preview README: counts exact, areas within 2 %.
 | ifc_models, 10 GB full dataset — held-out half of 26 models never used for tuning | test, 14 models | 503 | **97.2 %** | none |
 | opening_design construction sheets (A-801, A-701, A700) — sheet context: PDF text layer + Nemotron, 10 parallel | full dataset | 64 | **85.9 %** (count 34/39, area 8/9, text 13/16 lenient) | ≈16,700 tokens/question |
 | same sheets, image only | full dataset | 64 | 23.4 % | ≈15,200 tokens/question |
+| same sheets as screenshots: text from local tiled OCR (text layer ignored) | full dataset | 64 | 21.9 % | ≈21,700 tokens/question |
+| same, text from a ScreenshotContext-configured Vision pass (single full-image pass) | full dataset | 64 | 20.3 % | ≈16,900 tokens/question |
 | cubicasa5k PNG — Nemotron 3.5 Super VL, one reasoning call per drawing | test, 40 drawings | 351 (English) | 63.2 % | ≈1,600 tokens/question |
 | cubicasa5k PNG — same, 16-drawing subset | test | 141 | 56.0 % | ≈1,600 tokens/question |
 | cubicasa5k PNG — baseline, one reasoning call per question | test, same 16 | 141 | 61.0 % | ≈5,200 tokens/question |
@@ -67,7 +69,12 @@ dependency-free STEP parser: counts come from typed elements contained in each s
 lengths and volumes from stored base quantities (`NetFloorArea`, `Length`, `NetSideArea`,
 `NetVolume`), otherwise the measured plan area of the space geometry. Its rules were developed on
 the Esplanades model and one Molio storey, so the IFC figure is not a strictly held-out result.
-The 249 free-form `ifc_bench` text questions are not attempted yet. The Swiss route covers 2,358 of the 7,990 preview questions
+The 249 free-form `ifc_bench` text questions are not attempted yet.
+
+OCR on construction sheets rendered at 7,168 px, scored against the PDF text layer: adaptive tiled
+Vision OCR recovers 45–49 % of the sheet tokens, a single full-image pass (ScreenshotContext's
+configuration) 3–8 %. At that OCR quality schedule questions are no better than image-only, so the
+vector source (PDF text layer, DXF, IFC) is what makes the 86–97 % routes possible. The Swiss route covers 2,358 of the 7,990 preview questions
 (every Swiss PDF has a DXF of the same name). The raster result is not an accuracy gain over the
 baseline on held-out drawings; its benefit is roughly a third of the tokens.
 
