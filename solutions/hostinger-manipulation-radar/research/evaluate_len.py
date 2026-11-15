@@ -56,12 +56,18 @@ def threshold(model,calibration):
 def run(source,output):
     source=Path(source); output=Path(output); data=json.loads(source.read_text())
     assert data["features"]==FEATURES
-    rows=data["records"]
-    if len(rows)!=100 or len({r["case"] for r in rows})!=100 or collections.Counter(r["label"] for r in rows)!={0:49,1:51}: raise ValueError("Unexpected corpus")
+    raw_rows=data["records"]
+    groups={}
+    for row in raw_rows:
+        previous=groups.get(row["source_sha256"])
+        if previous and previous["label"]!=row["label"]: raise ValueError("Conflicting duplicate labels")
+        if not previous or row["case"]<previous["case"]: groups[row["source_sha256"]]=row
+    rows=list(groups.values())
+    if len(raw_rows)!=104 or len({r["case"] for r in raw_rows})!=104 or collections.Counter(r["label"] for r in raw_rows)!={0:51,1:53}: raise ValueError("Unexpected corpus")
     for r in rows:
         if r["label"] not in (0,1) or len(r["x"])!=len(FEATURES) or not all(math.isfinite(x) for x in r["x"]): raise ValueError("Invalid record")
     parts=split_records(rows)
-    if [len(v) for v in parts.values()]!=[59,19,22]: raise ValueError("Unexpected frozen split")
+    if any(sum(r["label"]==label for r in part)<2 for part in parts.values() for label in (0,1)): raise ValueError("Insufficient split class support")
     split_hash=hashlib.sha256(json.dumps({k:sorted(r["case"] for r in v) for k,v in parts.items()},sort_keys=True).encode()).hexdigest()
     models={}
     # Model fitting and threshold choice finish before any test scores are evaluated.
@@ -76,14 +82,16 @@ def run(source,output):
         results[name]=metrics(labels,[s>=entry["threshold"] for s in scores])
         results[name+"_fixed_0_5"]=metrics(labels,[s>=.5 for s in scores])
     here=Path(__file__).parent
-    report={"schema":"signal-desk-len-evaluation-v1","protocol_sha256":hashlib.sha256((here/"len-protocol.json").read_bytes()).hexdigest(),
+    report={"schema":"signal-desk-len-evaluation-v1","protocol_sha256":hashlib.sha256((here/"len-protocol-v2.json").read_bytes()).hexdigest(),
             "source":{"url":data["source"],"sha256":data["source_sha256"],"bytes":data["source_bytes"],"extracted_at":data["extracted_at"]},
             "feature_artifact_sha256":hashlib.sha256(source.read_bytes()).hexdigest(),"split_sha256":split_hash,
+            "release_graphs":len(raw_rows),"unique_graphs":len(rows),"byte_identical_duplicates_removed":len(raw_rows)-len(rows),
+            "label_basis":"provisional released filename campaign/noncampaign annotations; original label index not supplied",
             "counts":{k:{"n":len(v),"campaign":sum(r["label"] for r in v),"organic":sum(1-r["label"] for r in v)} for k,v in parts.items()},
             "calibration":{k:{"threshold":v["threshold"],"metrics":v["calibration"]} for k,v in models.items()},
             "held_out":results,
-            "limits":["One frozen LEN-small split; no field-generalization estimate.",
-                      "Target is source graph campaign annotation, not deception, bots, factuality or malicious intent.",
+            "limits":["One frozen split of the actual released 104-graph archive; source paper says 100. No field-generalization estimate.",
+                      "Provisional released filename labels; separate original gold-label index absent. Target is not deception, bots, factuality or malicious intent.",
                       "Only active edge endpoints count; isolates and all text/account fields excluded.",
                       "Collection, selection and graph-size biases; actors may recur across trends.",
                       "Wilson intervals are descriptive at graph level; unknown cross-graph dependence.",

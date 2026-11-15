@@ -91,7 +91,7 @@ def extract(output):
                 print(json.dumps({"graphs":len(records),"bytes":raw.bytes,"seconds":round(time.monotonic()-start,1)}),flush=True)
         while raw.read(1048576): pass
         if raw.bytes!=expected: raise ValueError("Incomplete source download")
-    if len(records)!=100 or collections.Counter(r["label"] for r in records)!={0:49,1:51}:
+    if len(records)!=104 or collections.Counter(r["label"] for r in records)!={0:51,1:53}:
         raise ValueError("LEN-small released class counts changed")
     if len({r["case"] for r in records})!=len(records): raise ValueError("Duplicate case")
     result={"source":SOURCE,"source_sha256":raw.sha.hexdigest(),"source_bytes":raw.bytes,
