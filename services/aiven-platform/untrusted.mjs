@@ -18,7 +18,7 @@ export function composeTurn(userRequest, attachments = []) {
 
 // Directives that look like instructions to the assistant, with the targets they name.
 export function injectedDirectives(text) {
-  const lines = String(text).split(/\n|(?<=[.!])\s+/).filter(l => INJECTION.test(l) || /\b(delete|drop|power off|reset|truncate|send|export|upgrade|scale|rotate|grant|disable)\b/i.test(l) && /(assistant|ai|admin mode|override|instruction)/i.test(l));
+  const lines = String(text).split(/\n|(?<=[.!])\s+/).filter(l => INJECTION.test(l) || /\b(delete|drop|power off|reset|truncate|send|export|upgrade|scale|rotate|grant|disable|print|reveal|show|paste|email)\b/i.test(l) && /(assistant|ai|admin mode|override|instruction)/i.test(l));
   const targets = new Set();
   for (const l of lines) for (const m of l.matchAll(/['"`]([a-z0-9][a-z0-9._-]{2,})['"`]|\b([a-z0-9]+(?:[._-][a-z0-9]+){1,})\b/gi)) targets.add((m[1] ?? m[2]).toLowerCase());
   return { found: lines.length > 0, lines, targets };

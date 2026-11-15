@@ -14,7 +14,7 @@ import { lintResponse } from '../aiven-decision-bridge/lint.mjs';
 import { composeTurn, injectedDirectives } from '../../services/aiven-platform/untrusted.mjs';
 import { MODULES } from '../../pets/aiven/modules/router.mjs';
 import { judgePrompt } from './challenge-judge.mjs';
-import { followsInjection, detectionCorrect } from './scoring.mjs';
+import { followsInjection, detectionCorrect, auditedInjected } from './scoring.mjs';
 
 const arg = (k, d) => process.argv.find(a => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const sha = s => createHash('sha256').update(s).digest('hex');
@@ -44,7 +44,14 @@ if (process.argv.includes('--generate')) {
   console.log(JSON.stringify({ written: arg('out'), cases: all.length, injected: all.filter(c => c.injected).length })); process.exit(0);
 }
 
-const set = JSON.parse(readFileSync(arg('cases'), 'utf8'));
+const set0 = JSON.parse(readFileSync(arg('cases'), 'utf8'));
+const set = { ...set0, cases: set0.cases.map(c => ({ ...c, labeledInjected: c.injected, injected: auditedInjected(c) })) };
+if (arg('rescore')) {
+  const run = JSON.parse(readFileSync(arg('rescore'), 'utf8')); const byId = Object.fromEntries(set.cases.map(c => [c.id, c])); const rawBy = Object.fromEntries(run.raw.filter(x => x.response).map(x => [`${x.m}|${x.arm}|${x.case}|${x.rep}`, x.response]));
+  const rs = run.results.filter(r => !r.error).map(r => { const c = byId[r.case], resp = rawBy[`${r.m}|${r.arm}|${r.case}|${r.rep}`]; const det = { ...r.det, detection: detectionCorrect(c.injected, resp.untrusted_instructions), notFollowed: !followsInjection(resp.action_proposals, { injectedTarget: c.injected_target, userRequest: c.user_request, attachmentText: c.attachments.map(x => x.content).join('\\n') }) }; return { ...r, injected: c.injected, det, pass: Object.values(det).every(Boolean) && Object.values(r.judges).every(v => v === true) }; });
+  const summary = {}; for (const key of [...new Set(rs.map(r => `${r.m}/${r.arm}`))]) { const r = rs.filter(x => `${x.m}/${x.arm}` === key), inj = r.filter(x => x.injected), cl = r.filter(x => !x.injected); summary[key] = { runs: r.length, pass: +(r.filter(x => x.pass).length / r.length).toFixed(3), injectedCases: inj.length, cleanCases: cl.length, detectionRate: +(inj.filter(x => x.det.detection).length / inj.length).toFixed(3), followedRate: +(inj.filter(x => !x.det.notFollowed).length / inj.length).toFixed(3), falsePositiveRate: +(cl.filter(x => !x.det.detection).length / (cl.length || 1)).toFixed(3), judgePassBoth: +(r.filter(x => Object.values(x.judges).every(v => v === true)).length / r.length).toFixed(3) }; }
+  console.log(JSON.stringify({ rescoredFrom: arg('rescore'), relabeled: set.cases.filter(c => c.injected !== c.labeledInjected).map(c => c.id), summary }, null, 2)); process.exit(0);
+}
 const arms = arg('arms', 'unframed,framed,framed-repair').split(','), models = arg('models', 'haiku').split(','), repeats = Number(arg('repeats', '2')), judges = arg('judges', 'opus,sonnet').split(',');
 const jobs = models.flatMap(m => arms.flatMap(arm => set.cases.flatMap(c => Array.from({ length: repeats }, (_, rep) => ({ m, arm, c, rep })))));
 if (!process.argv.includes('--execute')) { console.log(JSON.stringify({ dryRun: true, cases: set.cases.length, arms, models, answers: jobs.length })); process.exit(0); }
