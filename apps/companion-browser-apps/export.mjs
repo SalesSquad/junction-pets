@@ -81,6 +81,12 @@ export async function exportApps(output) {
   await mkdir(target);
   const exported = [];
   for (const app of catalog.apps) {
+    // Valio bundles shared domain modules. Refuse stale source or modified assets
+    // before exporting its browser build; verification needs only Node builtins.
+    if (app.solution === 'valio-trusted-trade') {
+      const {verifyBrowserBuild} = await import('../../solutions/valio-trusted-trade/browser/verify.mjs');
+      await verifyBrowserBuild();
+    }
     for (const file of app.files) {
       const bytes = await readFile(join(root, app.source ?? join('solutions', app.solution), file));
       const dest = join(target, 'apps', app.directory, file);

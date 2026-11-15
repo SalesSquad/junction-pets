@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp, readFile, rm} from 'node:fs/promises';
+import {mkdtemp, readFile, rm, mkdir, copyFile, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join, dirname} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
 import {exportApps} from './export.mjs';
@@ -14,8 +14,12 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     const apps = await exportApps(output);
     const catalog = JSON.parse(await readFile(join(output, 'catalog.json'), 'utf8'));
     assert.deepEqual(catalog.apps, apps);
-    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker','junction-aalto-university','junction-hostinger','junction-cala']));
+    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker','junction-aalto-university','junction-hostinger','junction-cala','junction-valio-aimo']));
     assert.equal(apps.filter(app=>app.petSlug==='junction-intel').length,2);
+    const valio=apps.find(app=>app.petSlug==='junction-valio-aimo');
+    assert.equal(valio.path,'/apps/aimo-trade/browser/dist/index.html');
+    for(const asset of ['index.html','app.js','app.css','export.json','NOTICE.txt'])assert.ok((await readFile(join(output,'apps/aimo-trade/browser/dist',asset))).length>0);
+
     for (const app of apps) assert.match(await readFile(join(output, app.path), 'utf8'), /<html/i);
     assert.match(await readFile(join(output,'apps/spread-director/index.html'), 'utf8'), /Use synthetic example/);
     const example = JSON.parse(await readFile(join(output,'apps/spread-director/demo.json'), 'utf8'));
@@ -44,4 +48,25 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     assert.equal(Object.hasOwn(artifact,'productSourceDigest'),false);
     await assert.rejects(exportApps(output), {code:'EEXIST'});
   } finally { await rm(temp, {recursive:true,force:true}); }
+});
+
+// Validate the producer in a dependency-free copy, then prove that stale domain
+// code and modified distribution bytes cannot pass the companion export gate.
+test('Valio browser verification rejects stale shared source and modified assets',async()=>{
+  const temp=await mkdtemp(join(tmpdir(),'valio-browser-integrity-'));
+  const source=new URL('../../solutions/valio-trusted-trade/',import.meta.url);
+  try{
+    const manifest=JSON.parse(await readFile(new URL('browser/dist/export.json',source),'utf8'));
+    const files=[...manifest.inputs.map(input=>input.path),...manifest.assets.map(asset=>'browser/dist/'+asset.path),'browser/dist/export.json'];
+    for(const path of files){await mkdir(dirname(join(temp,path)),{recursive:true});await copyFile(new URL(path,source),join(temp,path));}
+    const {verifyBrowserBuild}=await import(pathToFileURL(join(temp,'browser/verify.mjs')).href);
+    assert.equal((await verifyBrowserBuild()).valid,true);
+    const core=join(temp,'src/core.mjs'),original=await readFile(core);
+    await writeFile(core,Buffer.concat([original,Buffer.from('\n// stale source probe\n')]));
+    await assert.rejects(verifyBrowserBuild(),{code:'BROWSER_BUILD_STALE'});
+    await writeFile(core,original);
+    const bundle=join(temp,'browser/dist/app.js');
+    await writeFile(bundle,Buffer.concat([await readFile(bundle),Buffer.from('\n// changed bundle\n')]));
+    await assert.rejects(verifyBrowserBuild(),{code:'BROWSER_BUILD_STALE'});
+  }finally{await rm(temp,{recursive:true,force:true});}
 });
