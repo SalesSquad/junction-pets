@@ -67,8 +67,12 @@ Optional guards:
   e.g. `[{"start":518000,"end":518050,"split":"train","verified":true}]`.
   Any overlap with a proposed fresh seed cohort causes **STOP**.
 - `--credit-cutoff-utc 2026-11-15T17:00:00Z`, optionally
-  `--at-utc 2026-11-14T20:00:00Z` for deterministic repro. An elapsed
-  cutoff causes STOP. Passing a cutoff never authorizes dispatch.
+  `--at-utc 2026-11-14T20:00:00Z` for **offline deterministic replay only**.
+  The compiler returns STOP **at or within 31 minutes of the global cutoff**
+  (16:29 UTC for the pinned 17:00 UTC close); expired windows also STOP.
+  A caller-controlled `--at-utc` is not proof of current time or provider credit.
+  Passing a cutoff never authorizes dispatch; actual admission must verify
+  the live provider clock, quota and source with the existing integrator.
 - `--candidate v10` deliberately produces STOP because it lost eleven
   frozen-V5 goal250 wins.
 

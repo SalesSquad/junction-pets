@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import gzip
 import hashlib
 import json
@@ -59,6 +59,8 @@ KNOWN_USED=[(512000,512511),(513000,513511),(514000,514511),
 ACTION_NAMES=("ALIGN","PUSH_SLOW","PUSH_MEDIUM","SIDE_LEFT",
               "SIDE_RIGHT","RETREAT","ABSTAIN_TERMINAL")
 SUPPORTED_WORLD_MIN=20
+# Owner-authorized no-new-CRACI-admission margin before the global close.
+ADMISSION_GUARD_MINUTES=31
 
 class FeedbackStop(ValueError):
     pass
@@ -384,6 +386,8 @@ def compile_feedback(d,provenance,*,candidate="v11",raw_evidence=None,
         cutoff=parse_utc(credit_cutoff)
         now=parse_utc(clock) if clock else datetime.now(timezone.utc)
         demand(now<cutoff,"CREDIT_WINDOW_EXPIRED_NO_NEW_DISPATCH")
+        demand(now<cutoff-timedelta(minutes=ADMISSION_GUARD_MINUTES),
+               "CREDIT_WINDOW_31MIN_ADMISSION_STOP_NO_NEW_DISPATCH")
     metrics=m10 if candidate=="v10" else m11
     baseline=metric(metrics,"frozen-v5-safe-goals-total")
     candidate_name="v10" if candidate=="v10" else "v11"
