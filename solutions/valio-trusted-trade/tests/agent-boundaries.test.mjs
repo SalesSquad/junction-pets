@@ -94,7 +94,7 @@ test('typed oat need, no substitutions, strict quantities and exact UNSIGNED int
   assert.deepEqual(q.lines.map((x) => x.sku), ['DEMO-OAT-1']);
   const exported = await call(`/api/quotes/${q.id}/body`);
   assert.equal(exported.signature, 'UNSIGNED');
-  assert.deepEqual(exported.body, { version: 'kattely.procurement.quote.v1', quote_id: q.id, supplier_id: 'supplier-demo', buyer_id: buyerId, audience: 'https://supplier-demo.invalid', currency: 'EUR', issued_at: Math.floor(q.createdAtMs / 1000), expires_at: Math.floor(q.expiresAtMs / 1000), lines: [{ sku: 'DEMO-OAT-1', quantity: 12, unit: 'L', unit_price_cents: 162, stock_version: 1 }], total_cents: 1944 });
+  assert.deepEqual(exported.body, { version: 'kattely.procurement.quote.v3', quote_id: q.id, supplier_id: 'supplier-demo', buyer_id: buyerId, audience: 'https://supplier-demo.invalid', currency: 'EUR', issued_at: Math.floor(q.createdAtMs / 1000), expires_at: Math.floor(q.expiresAtMs / 1000), lines: [{ sku: 'DEMO-OAT-1', quantity: 12, unit: 'L', unit_price_cents: 162, stock_version: 1, supplier_id: 'fictional-oatworks', pack_litres: 1, pack_count: 12, min_order_packs: 1 }], source_snapshot_id: q.snapshotId, cost_breakdown: { subtotal_cents: 1944, delivery_fee_cents: 0, tax_cents: 0, tax_bps: 0 }, total_cents: 1944 });
   for (const invalid of [{ ...need, quantityLitres: 1.5 }, { ...need, family: 'juice' }, { ...need, priceCents: 1 }, { ...need, deliverBy: '2027-01-01' }]) {
     assert.equal((await call('/api/quotes', { buyerId, need: invalid }, token)).status, 400);
   }

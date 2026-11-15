@@ -1,3 +1,4 @@
+import { planPurchasableBasket, calculateBasketTotals, PurchaseUnitError } from './purchase-units.mjs';
 /**
  * Read-only, snapshot-bound explanations for the invented procurement catalog.
  * This module cannot issue a quote, change policy, approve or place an order.
@@ -58,7 +59,7 @@ const bySku = (a, b) => a.sku < b.sku ? -1 : a.sku > b.sku ? 1 : 0;
  * There are no freight, tax, package-size, reservation or external stock claims.
  * Insufficient stock never produces a supposed price for the complete need.
  */
-export function diagnoseProcurement({ catalog, requirements, budgetCents, policyBudgetCents } = {}) {
+export function diagnoseProcurement({ catalog, requirements, budgetCents, policyBudgetCents, deliveryFeeCents = 0, taxBps = 0 } = {}) {
   const typed = validateRequirements(requirements);
   validateCatalog(catalog);
   if (!whole(policyBudgetCents, 1, 5_000_000) || !whole(budgetCents, 1, policyBudgetCents)) {
@@ -78,30 +79,33 @@ export function diagnoseProcurement({ catalog, requirements, budgetCents, policy
     }
     eligible.sort((a, b) => a.priceCents - b.priceCents || bySku(a, b));
     const availableLitres = eligible.reduce((sum, product) => sum + product.unitsAvailable, 0);
-    let remaining = need.quantityLitres;
-    const lines = [];
-    for (const product of eligible) {
-      const quantityLitres = Math.min(remaining, product.unitsAvailable);
-      if (!quantityLitres) break;
-      lines.push({
-        sku: product.sku, family: product.family, quantityLitres,
-        unitPriceCents: product.priceCents, totalCents: quantityLitres * product.priceCents,
-        stockVersion: product.version, deliverBy: product.deliverBy,
-      });
-      remaining -= quantityLitres;
+    let remaining = Math.max(0, need.quantityLitres - availableLitres);
+    let lines = [];
+    let packingIssue = null;
+    if (availableLitres > 0) {
+      try { lines = planPurchasableBasket({ catalog, need: { ...need, quantityLitres: Math.min(need.quantityLitres, availableLitres) } }).lines; }
+      catch (error) {
+        if (!(error instanceof PurchaseUnitError)) throw error;
+        if (error.code !== 'PACKING_CONSTRAINT') fail('INVALID_CATALOG', error.message);
+        packingIssue = error.details;
+      }
     }
     const partialBasketCostCents = lines.reduce((sum, line) => sum + line.totalCents, 0);
     return {
       ...need, availableLitres, missingLitres: remaining, lines,
-      minimumCostCents: remaining ? null : partialBasketCostCents,
+      minimumCostCents: remaining || packingIssue ? null : partialBasketCostCents,
+      packingIssue,
       partialBasketCostCents, excludedProducts: excludedProducts.sort(bySku),
     };
   });
   const missingLitres = perFamily.reduce((sum, item) => sum + item.missingLitres, 0);
-  const minimumCostCents = missingLitres ? null :
-    perFamily.reduce((sum, item) => sum + item.minimumCostCents, 0);
+  const packingBlocked = perFamily.some((item) => item.packingIssue);
+  const costBreakdown = missingLitres || packingBlocked ? null : calculateBasketTotals({
+    subtotalCents: perFamily.reduce((sum, item) => sum + item.minimumCostCents, 0), deliveryFeeCents, taxBps,
+  });
+  const minimumCostCents = costBreakdown?.totalCents ?? null;
   const additionalBudgetCents = minimumCostCents === null ? null : Math.max(0, minimumCostCents - budgetCents);
-  const outcome = missingLitres ? 'STOCK_SHORTFALL' :
+  const outcome = missingLitres ? 'STOCK_SHORTFALL' : packingBlocked ? 'PACKING_CONSTRAINT' :
     minimumCostCents > policyBudgetCents ? 'POLICY_LIMIT_EXCEEDED' :
     additionalBudgetCents ? 'BUDGET_REVIEW_NEEDED' : 'FEASIBLE_AT_SNAPSHOT';
   return {
@@ -110,12 +114,14 @@ export function diagnoseProcurement({ catalog, requirements, budgetCents, policy
     adviceOnly: true, isQuote: false, grantsAuthority: false,
     outcome, currency: 'EUR', budgetCents, policyBudgetCents, minimumCostCents,
     additionalBudgetCents, missingLitres, requirements: typed, perFamily,
+    costBreakdown,
     budgetReview: additionalBudgetCents ? {
       targetBudgetCents: minimumCostCents, additionalCents: additionalBudgetCents,
       withinExistingPolicy: minimumCostCents <= policyBudgetCents,
       action: minimumCostCents <= policyBudgetCents ? 'REQUEST_BUYER_BUDGET_REVIEW' : 'REFER_TO_POLICY_OWNER',
     } : null,
     explanation: {
+      PACKING_CONSTRAINT: 'Whole packs and supplier minimum quantities cannot fill this exact request; no overdelivery or price is assumed.',
       STOCK_SHORTFALL: 'Exact-match stock is insufficient. More budget cannot resolve this snapshot; no full-basket price is claimed.',
       POLICY_LIMIT_EXCEEDED: 'The cheapest complete basket exceeds the server policy ceiling. This advice cannot change that policy.',
       BUDGET_REVIEW_NEEDED: 'A complete basket exists, but the stated budget needs explicit review. This is not approval or a quote.',
@@ -124,6 +130,6 @@ export function diagnoseProcurement({ catalog, requirements, budgetCents, policy
     sourceVersions: catalog.map(({ sku, version, priceCents, unitsAvailable, family, lactoseFree, deliverBy }) =>
       ({ sku, version, priceCents, unitsAvailable, family, lactoseFree, deliverBy })).sort(bySku),
     validity: 'SNAPSHOT_ONLY_NOT_RESERVED; fresh server validation and approval remain mandatory.',
-    costModel: 'Invented linear net EUR cents per whole litre; no freight, tax, pack sizes or real supplier guarantees.',
+    costModel: 'Explicit synthetic whole packs, supplier minimum packs, integer-cent prices, declared delivery fee and fixture tax only; no real supplier guarantees.',
   };
 }
