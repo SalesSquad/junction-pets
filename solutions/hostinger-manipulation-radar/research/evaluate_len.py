@@ -99,11 +99,13 @@ def run(source,output):
                       "Wilson intervals are descriptive at graph level; unknown cross-graph dependence.",
                       "Scores are uncalibrated model outputs, not probabilities. No automatic enforcement."]}
     output.mkdir(parents=True,exist_ok=True)
-    (output/"len-evaluation.json").write_text(json.dumps(report,indent=2,allow_nan=False)+"\n")
     exported={**models["topology"]["model"],"threshold":models["topology"]["threshold"],
               "schema":"signal-desk-len-model-v1","source_sha256":data["source_sha256"],
               "protocol_sha256":report["protocol_sha256"],"evaluation_split_sha256":split_hash}
-    (output/"len-model.json").write_text(json.dumps(exported,indent=2,allow_nan=False)+"\n")
+    model_text=json.dumps(exported,indent=2,allow_nan=False)+"\n"
+    report["model_sha256"]=hashlib.sha256(model_text.encode()).hexdigest()
+    (output/"len-model.json").write_text(model_text)
+    (output/"len-evaluation.json").write_text(json.dumps(report,indent=2,allow_nan=False)+"\n")
     print(json.dumps({"counts":report["counts"],"held_out":results},indent=2))
 if __name__=="__main__":
     p=argparse.ArgumentParser();p.add_argument("--source",required=True);p.add_argument("--output",required=True);a=p.parse_args();run(a.source,a.output)

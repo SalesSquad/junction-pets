@@ -1,11 +1,11 @@
-import {graphScore} from './core.mjs';
+import {graphScore,verifyModelArtifact} from './core.mjs';
 const byId=id=>document.getElementById(id),pct=v=>v===null?'undefined':(100*v).toFixed(1)+'%';
 let model;
 const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000);
 try{
  const responses=await Promise.all(['./evaluation.json','./model.json'].map(p=>fetch(p,{signal:controller.signal})));
  if(responses.some(r=>!r.ok))throw new Error('Unavailable');
- const [report,loaded]=await Promise.all(responses.map(r=>r.json()));model=loaded;
+ const [report,modelText]=await Promise.all([responses[0].json(),responses[1].text()]);model=await verifyModelArtifact(report,modelText);
  const counts=report.counts;
  byId('split').textContent=counts.train.n+' training / '+counts.calibration.n+' calibration / '+counts.test.n+' held-out trend graphs ('+report.byte_identical_duplicates_removed+' byte-identical duplicates removed). No test labels used for fitting or threshold choice.';
  for(const [name,key] of [['Majority baseline','majority'],['Size-only baseline','size_only'],['Topology candidate','topology']]){

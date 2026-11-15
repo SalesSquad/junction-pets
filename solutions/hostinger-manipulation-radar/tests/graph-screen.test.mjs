@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {FEATURES, graphFeatures, graphScore} from '../public/graph/core.mjs';
+import {createHash} from 'node:crypto';
+import {FEATURES, graphFeatures, graphScore, verifyModelArtifact} from '../public/graph/core.mjs';
 
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) <= 1e-12,
   `expected ${expected}, observed ${actual}`);
@@ -124,4 +125,44 @@ test('upper node boundary and explicit abstention threshold stay enforced',()=>{
  assert.equal(graphScore(sample(),model({threshold:1.000000001})).review,false);
  assert.throws(()=>graphScore(sample(),model({threshold:1.000000002})),/Model unavailable/);
  assert.throws(()=>graphFeatures({edges:[['a','b'],['a','b']]},{enforceDomain:false}),/Duplicate/);
+});
+
+test('shipped model bytes and protocol/source/split provenance must match the displayed evaluation', async () => {
+  const hash = text => createHash('sha256').update(text, 'utf8').digest('hex');
+  // Fictional source bytes only: no trained artifact or actual dataset is inspected.
+  const sourceSHA = hash('fictional cleared source bytes\n');
+  const protocolSHA = hash('fictional predeclared evaluation protocol\n');
+  const splitSHA = hash('fictional frozen campaign split\n');
+  const fictional = model({source_sha256: sourceSHA, protocol_sha256: protocolSHA,
+    evaluation_split_sha256: splitSHA});
+  const modelText = JSON.stringify(fictional, null, 2) + '\n';
+  const report = {schema: 'signal-desk-len-evaluation-v1', model_sha256: hash(modelText),
+    protocol_sha256: protocolSHA, source: {sha256: sourceSHA}, split_sha256: splitSHA};
+  assert.deepEqual(await verifyModelArtifact(report, modelText), fictional);
+  const mismatch = error => error instanceof Error && error.message === 'Model evidence mismatch.';
+  // A coefficient edit or formatting-only byte edit invalidates the original evidence hash.
+  await assert.rejects(verifyModelArtifact(report, JSON.stringify({...fictional, intercept: 1})), mismatch);
+  await assert.rejects(verifyModelArtifact(report, modelText.trim()), mismatch);
+  // Rehashing changed bytes cannot bypass independently bound provenance fields.
+  for (const key of ['source_sha256', 'protocol_sha256', 'evaluation_split_sha256']) {
+    const changed = JSON.stringify({...fictional, [key]: hash('different fictional provenance')});
+    await assert.rejects(verifyModelArtifact({...report, model_sha256: hash(changed)}, changed), mismatch);
+  }
+  // Missing or malformed values in BOTH sides must not pass through undefined equality.
+  for (const [modelKey, reportKey] of [['source_sha256', 'source'], ['protocol_sha256', 'protocol_sha256'], ['evaluation_split_sha256', 'split_sha256']]) {
+    const absentModel = {...fictional}, absentReport = {...report};
+    delete absentModel[modelKey]; delete absentReport[reportKey];
+    const absentText = JSON.stringify(absentModel);
+    await assert.rejects(verifyModelArtifact({...absentReport, model_sha256: hash(absentText)}, absentText), mismatch);
+  }
+  const invalidHashText = JSON.stringify({...fictional, source_sha256: 'not-a-sha256'});
+  await assert.rejects(verifyModelArtifact({...report, source: {sha256: 'not-a-sha256'}, model_sha256: hash(invalidHashText)}, invalidHashText), mismatch);
+  const malformed = '{"schema":';
+  await assert.rejects(verifyModelArtifact({...report, model_sha256: hash(malformed)}, malformed), mismatch);
+  const wrongSchema = JSON.stringify({...fictional, schema: 'unknown-artifact'});
+  await assert.rejects(verifyModelArtifact({...report, model_sha256: hash(wrongSchema)}, wrongSchema), mismatch);
+  const {model_sha256: omitted, ...missingHash} = report;
+  await assert.rejects(verifyModelArtifact(missingHash, modelText), mismatch);
+  await assert.rejects(verifyModelArtifact({...report, schema: 'unknown-report'}, modelText), mismatch);
+  await assert.rejects(verifyModelArtifact({...report, source: {}}, modelText), mismatch);
 });

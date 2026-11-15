@@ -24,3 +24,18 @@ export function graphScore(input,model){
  const score=z>=0?1/(1+Math.exp(-z)):Math.exp(z)/(1+Math.exp(z));
  return {score,review:score>=model.threshold,nodes:graph.nodes,edges:graph.edges,intent:'UNKNOWN',status:'EXPERIMENTAL'};
 }
+
+export async function verifyModelArtifact(report,modelText){
+ const mismatch=()=>{throw new Error('Model evidence mismatch.');};
+ try{
+  if(!report||report.schema!=='signal-desk-len-evaluation-v1'||typeof modelText!=='string'||typeof report.model_sha256!=='string')mismatch();
+  if(![report.protocol_sha256,report.source?.sha256,report.split_sha256].every(v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v)))mismatch();
+  const bytes=await globalThis.crypto.subtle.digest('SHA-256',new TextEncoder().encode(modelText));
+  const digest=Array.from(new Uint8Array(bytes),v=>v.toString(16).padStart(2,'0')).join('');
+  const model=JSON.parse(modelText);
+  if(digest!==report.model_sha256||model.schema!=='signal-desk-len-model-v1'||
+     model.protocol_sha256!==report.protocol_sha256||model.source_sha256!==report.source?.sha256||
+     model.evaluation_split_sha256!==report.split_sha256)mismatch();
+  return model;
+ }catch{mismatch();}
+}

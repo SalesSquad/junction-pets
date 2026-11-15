@@ -60,6 +60,8 @@ class NumericalOracle(unittest.TestCase):
    import contextlib,io
    with contextlib.redirect_stdout(io.StringIO()):run(source,out)
    report=json.loads((out/'len-evaluation.json').read_text())
+   import hashlib
+   self.assertEqual(report['model_sha256'],hashlib.sha256((out/'len-model.json').read_bytes()).hexdigest())
    self.assertEqual(report['byte_identical_duplicates_removed'],1)
    self.assertEqual(report['unique_graphs'],103)
    self.assertEqual([v['n'] for v in report['counts'].values()],[61,20,22])
