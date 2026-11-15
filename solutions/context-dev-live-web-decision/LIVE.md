@@ -19,6 +19,13 @@ the same normalization code, without exporting the connected MCP credential.
 MCP captures are historical once their five-minute freshness window expires.
 Their local hashes bind content, not provider authenticity.
 
+This is a single-user loopback tool: local processes and browser extensions on
+the operator's Mac are trusted. Origin/custom-header/Host checks protect against
+cross-site browser requests, not a malicious local process forging HTTP headers.
+Do not expose the port through a tunnel or bind it to other interfaces. A
+multi-user deployment needs separate authentication and per-user provider access.
+Provider request IDs identify public-data calls; they are not bearer capabilities.
+
 The original PR204 admission path is retained on its existing branch. Its
 40-lamp contract requires operator-calibrated confidence, exact stock, tax and
 shipping and does not accept the actual provider response. This comparison

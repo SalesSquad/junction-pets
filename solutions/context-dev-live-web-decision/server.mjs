@@ -8,7 +8,7 @@ export function createServer(options={}){const live=options.liveService??createL
   const host=req.headers.host;
   res.setHeader('Content-Security-Policy',`default-src 'none'; script-src 'self'; style-src 'self'; connect-src ${req.url==='/replay'?"'none'":"'self'"}; img-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`);
   res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Cache-Control','no-store');res.setHeader('Referrer-Policy','no-referrer');
-  const expectedHost=`127.0.0.1:${req.socket.localPort}`;
+  const expectedHost=`127.0.0.1:${req.socket?.localPort}`;
   if(host!==expectedHost){res.writeHead(404);return res.end();}
   const json=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(data));};
   if(req.url==='/api/comparison' && req.method==='GET'){
@@ -19,11 +19,14 @@ export function createServer(options={}){const live=options.liveService??createL
     // image tags, DNS rebinding, CORS or a GET prefetch.
     if(req.headers.origin!==`http://${expectedHost}` || req.headers['x-supplypulse-refresh']!=='1' || req.headers['content-type']!=='application/json')return json(403,{error:'ORIGIN_REQUIRED'});
     let size=0;const chunks=[];
+    const readDeadline=setTimeout(()=>{if(!res.writableEnded){json(408,{error:'BODY_TIMEOUT'});req.destroy();}},5_000);
     try{
       for await(const chunk of req){size+=chunk.length;if(size>16)return json(413,{error:'EMPTY_OBJECT_REQUIRED'});chunks.push(chunk);}
+      clearTimeout(readDeadline);
       if(Buffer.concat(chunks).toString('utf8')!=='{}')return json(400,{error:'EMPTY_OBJECT_REQUIRED'});
       return json(200,await live.refresh());
-    }catch(e){const code=safeCode(e);return json(code==='CONNECTION_REQUIRED'?503:['REFRESH_BUSY','REFRESH_COOLDOWN','SESSION_REFRESH_LIMIT'].includes(code)?429:502,{error:code});}
+    }catch(e){if(res.writableEnded||res.destroyed)return;const code=safeCode(e);return json(code==='CONNECTION_REQUIRED'?503:code==='PROVIDER_CREDITS_EXHAUSTED'?402:['REFRESH_BUSY','REFRESH_COOLDOWN','SESSION_REFRESH_LIMIT'].includes(code)?429:502,{error:code});}
+    finally{clearTimeout(readDeadline);}
   }
   if(!['GET','HEAD'].includes(req.method)||!Object.hasOwn(files,req.url)){res.writeHead(404);return res.end();}
   const [file,type]=files[req.url];try{const data=await readFile(new URL(file,import.meta.url));res.writeHead(200,{'Content-Type':type+'; charset=utf-8'});res.end(req.method==='HEAD'?undefined:data);}catch{res.writeHead(500);res.end();}

@@ -21,6 +21,17 @@ test('ordinary prices rank centrally; member discount and unknown shipping never
   assert.equal(reversed.winner,'proshop');assert.equal(reversed.winnerChanged,true);assert.deepEqual(reversed.changes[0].fields,['priceCents']);
 });
 test('equal item prices are an explicit tie, not a fabricated cheapest supplier',()=>assert.equal(compare([capture('gigantti','109'),capture('proshop','109')],{now}).winner,null));
+test('deep JSON-LD, conditional main price, inconsistent ordinary specification refuse',()=>{
+  let nested={'@type':'Product'};for(let i=0;i<20;i++)nested={'@graph':[nested]};
+  const b=body('gigantti');b.metadata.jsonLd=[nested];assert.throws(()=>capturePublic(b,{sourceId:'gigantti',startedAt:stamp,receivedAt:stamp,transport:'CONTEXT_REST'}),{message:'CAPTURE_INVALID'});
+  const bad=[capture('gigantti','69.99'),capture('proshop','110')];assert.equal(compare(bad,{now}).status,'REFUSE');
+  bad[0]=capture('gigantti','109');bad[0].offers[0].specifications.push({price:'120',currency:'EUR',vat:true,member:false});assert.equal(compare(bad,{now}).status,'REFUSE');
+});
+test('requalification of stale evidence is not claimed as a market winner change',()=>{
+  const captures=[capture('gigantti','109'),capture('proshop','110')];const stale=compare(captures,{now:now+300_001});
+  assert.equal(compare(captures,{now,previous:stale}).winnerChanged,false);
+  assert.equal(compare([capture('gigantti','109'),capture('proshop','109')],{now}).status,'TIE');
+});
 test('failed, partial, truncated, stale-cache and wrong-product provider outputs refuse',()=>{
   for(const mutate of [b=>b.markdown.success=false,b=>b.partial=true,b=>b._context_mcp={truncated:true},b=>b.cache_metadata.age_ms=1,b=>b.metadata.jsonLd[0].gtin13='other',b=>b.url='http://127.0.0.1/',b=>b.metadata.finalUrl='https://other.invalid/']){
     const b=body('gigantti');mutate(b);assert.throws(()=>capturePublic(b,{sourceId:'gigantti',startedAt:stamp,receivedAt:stamp,transport:'CONTEXT_REST'}));

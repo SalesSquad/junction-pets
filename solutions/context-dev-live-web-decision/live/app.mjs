@@ -8,7 +8,7 @@ function render(data){
  current=data;
  const captured=data.offers.some(o=>o.transport==='CONTEXT_MCP_CAPTURE');
  const fresh=data.offers.length===2&&data.offers.every(o=>o.fresh)&&!data.errors.length;
- $('mode').textContent=captured?'CONTEXT.DEV · SAVED MCP CAPTURE':fresh?'CONTEXT.DEV · FRESH RETRIEVAL':'CONTEXT.DEV · REFRESH REQUIRED';
+ $('mode').textContent=captured?`CONTEXT.DEV · SAVED MCP CAPTURE${fresh?'':' · HISTORICAL'}`:fresh?'CONTEXT.DEV · FRESH RETRIEVAL':'CONTEXT.DEV · REFRESH REQUIRED';
  $('connection').textContent=data.connection.connected?'Refresh makes two fresh Context.dev requests. No background polling.':'Live refresh needs the server’s Context.dev connection; saved retrievals are labelled with their actual time.';
  $('refresh').disabled=fetching||data.connection.busy||data.connection.creditBlocked||data.connection.refreshesRemaining===0||data.connection.refreshAfterMs>0;
  if(cooldownTimer)clearTimeout(cooldownTimer);

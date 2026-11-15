@@ -15,7 +15,7 @@ export function createLiveService({apiKey=process.env.CONTEXT_DEV_API_KEY,captur
       const value=JSON.parse(bytes);
       if(value.schemaVersion!==1 || !Array.isArray(value.captures) || value.captures.length!==2) throw Error('CAPTURE_INVALID');
       captures=value.captures;
-    }catch(e){if(e.code!=='ENOENT')errors=[{id:'capture',code:'CAPTURE_INVALID'}];}
+    }catch(e){if(e.code!=='ENOENT')errors=[{id:'capture',code:e.code?'CAPTURE_READ_FAILED':'CAPTURE_INVALID'}];}
   }
   const status=()=>({connected:!!apiKey,busy,creditBlocked,refreshesRemaining:Math.max(0,maxRefreshes-refreshes),refreshAfterMs:Math.max(0,cooldownMs-(now()-lastStart))});
   const result=()=>({...compare(captures,{now:now(),previous,errors}),connection:status()});

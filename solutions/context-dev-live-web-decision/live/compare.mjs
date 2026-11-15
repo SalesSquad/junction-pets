@@ -12,8 +12,10 @@ export function cents(value,{allowZero=false}={}) {
   const result=Number(whole)*100+Number(fraction.padEnd(2,'0'));
   return Number.isSafeInteger(result) && (result>0||allowZero&&result===0) ? result : null;
 }
-function nodes(items,path='metadata.jsonLd') {
-  return list(items).flatMap((v,i)=>v && typeof v==='object' ? [{v,path:`${path}[${i}]`},...nodes(v['@graph'],`${path}[${i}].@graph`)] : []);
+function nodes(items,path='metadata.jsonLd',depth=0,budget={remaining:4096}) {
+  if(depth>16 || list(items).length>budget.remaining) fail('CAPTURE_INVALID');
+  budget.remaining-=list(items).length;
+  return list(items).flatMap((v,i)=>v && typeof v==='object' ? [{v,path:`${path}[${i}]`},...nodes(v['@graph'],`${path}[${i}].@graph`,depth+1,budget)] : []);
 }
 function onlyValue(values) { const unique=[...new Set(values)]; return unique.length===1 ? unique[0] : null; }
 function fail(code) {throw Error(code);}
@@ -55,6 +57,9 @@ export function normalize(capture,now=Date.now()) {
   const price=onlyValue(ordinary.map(o=>cents(o.price)));
   const availability=onlyValue(ordinary.map(o=>o.availability));
   if(price===null) fail('PRICE_UNKNOWN_OR_CONFLICTING');
+  const publicSpecs=ordinary.flatMap(o=>o.specifications??[]).filter(s=>!s.member && s.vat===true && s.currency==='EUR');
+  const conditionalSpecs=ordinary.flatMap(o=>o.specifications??[]).filter(s=>s.member && s.vat===true && s.currency==='EUR');
+  if(publicSpecs.some(s=>cents(s.price)!==price) || conditionalSpecs.some(s=>cents(s.price)===price) && !publicSpecs.some(s=>cents(s.price)===price)) fail('PRICE_CONDITIONS_UNCONFIRMED');
   const memberPrices=ordinary.flatMap(o=>o.specifications??[]).filter(s=>s.member && s.vat===true && s.currency==='EUR').map(s=>cents(s.price)).filter(v=>v!==null);
   // Conditional rates, destination-specific fees and absent shipping are never zero.
   const shipping=onlyValue(ordinary.flatMap(o=>o.shipping??[]).filter(s=>s.country==='FI'&&s.currency==='EUR').map(s=>cents(s.value,{allowZero:true})).filter(v=>v!==null));
@@ -81,11 +86,11 @@ export function compare(captures,{now=Date.now(),previous=null,errors=[]}={}) {
     const changed=old ? ['priceCents','memberPriceCents','availability','shippingFromCents'].filter(k=>old[k]!==o[k]) : [];
     return {id:o.id,status:old?(changed.length?'material':'unchanged'):'first-observation',fields:changed,previousPriceCents:old?.priceCents??null};
   });
-  return {mode:'REAL_PUBLIC_WEB',asOf:new Date(now).toISOString(),product:PRODUCT,status:!complete?'REFUSE':best?'REVIEW_LISTED_PRICE':'NO_AVAILABLE_OFFER',winner,tied,
+  return {mode:'REAL_PUBLIC_WEB',asOf:new Date(now).toISOString(),product:PRODUCT,status:!complete?'REFUSE':tied?'TIE':best?'REVIEW_LISTED_PRICE':'NO_AVAILABLE_OFFER',winner,tied,
     actionAuthorized:false,rankingBasis:'Ordinary listed item price, one unit, EUR. Delivery fees excluded; total delivered cost and arrival date unknown.',
     reason:!complete?'Refresh both successful sources before comparing.':tied?'Listed item prices are equal.':best?`Review ${best.name}: lowest eligible ordinary item price.`:'Neither source confirms an available offer.',
     offers,errors:failures,changes,previousWinner:previous?.winner??null,winnerChanged:!!previous && previous.status==='REVIEW_LISTED_PRICE' && complete && previous.winner!==winner,
     limitations:['Retailer claims, not independently verified stock or price.','Member prices require membership and are excluded from ranking.','Shipping is destination-dependent; displayed shipping is a starting rate only.','No purchase, reservation, background monitoring or outbound supplier message.']};
 }
-const CODES=new Set(['TRANSPORT_UNKNOWN','CLOCK_INVALID','OUTPUT_FAILED_OR_PARTIAL','SOURCE_MISMATCH','REQUEST_ID_MISSING','CACHE_NOT_FRESH','PRODUCT_IDENTITY_UNCONFIRMED','OFFER_MISSING','CAPTURE_INVALID','PRICE_UNKNOWN_OR_CONFLICTING','CONNECTION_REQUIRED','PROVIDER_AUTH','PROVIDER_CREDITS_EXHAUSTED','PROVIDER_RATE_LIMIT','PROVIDER_FAILED','PROVIDER_TIMEOUT','RESPONSE_TOO_LARGE','INVALID_PROVIDER_JSON','REFRESH_BUSY','REFRESH_COOLDOWN','SESSION_REFRESH_LIMIT']);
+const CODES=new Set(['TRANSPORT_UNKNOWN','CLOCK_INVALID','OUTPUT_FAILED_OR_PARTIAL','SOURCE_MISMATCH','REQUEST_ID_MISSING','CACHE_NOT_FRESH','PRODUCT_IDENTITY_UNCONFIRMED','OFFER_MISSING','CAPTURE_INVALID','CAPTURE_READ_FAILED','PRICE_UNKNOWN_OR_CONFLICTING','PRICE_CONDITIONS_UNCONFIRMED','CONNECTION_REQUIRED','PROVIDER_AUTH','PROVIDER_CREDITS_EXHAUSTED','PROVIDER_RATE_LIMIT','PROVIDER_FAILED','PROVIDER_TIMEOUT','RESPONSE_TOO_LARGE','INVALID_PROVIDER_JSON','REFRESH_BUSY','REFRESH_COOLDOWN','SESSION_REFRESH_LIMIT']);
 export function safeCode(error) {return CODES.has(error?.message)?error.message:'PROVIDER_FAILED';}
