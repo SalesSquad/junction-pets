@@ -1,7 +1,5 @@
 # Internet Butler
 
-> **Development has moved.** This work now lives in [SalesSquad/junction-pets](https://github.com/SalesSquad/junction-pets) at `pets/exa/internet-butler/`, with the Exa companion. Make changes there. This repository is kept as the history up to `582bcfc` and as the copy the demo Mac runs from.
-
 **A local-first personal agent that takes errands off people's hands, with sources you can check and permissions you can revoke.**
 
 Built for Junction 2026: Exa's *Internet Butler* challenge. The same project can also be submitted to Google DeepMind's *Best Use of Gemma* tech challenge (on-device Gemma 4) and the CRACI tech challenge (CI on CRACI).
