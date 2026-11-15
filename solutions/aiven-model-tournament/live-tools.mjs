@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { eqSet } from './scoring.mjs';
 // Live read-only tool use: the Aiven companion answers questions about the real
 // project through a read-only Aiven MCP server; answers are scored by code against
 // the Aiven API at run time (ground truth fetched independently, not from the model).
@@ -21,7 +22,6 @@ const topics = kafka ? (await api(`project/${project}/service/${kafka.service_na
 const notRunning = services.filter(s => s.state !== 'RUNNING').map(s => s.service_name).sort();
 const powered = services.find(s => s.state === 'POWEROFF');
 const pg = services.filter(s => s.service_type === 'pg').map(s => s.service_name).sort();
-const eqSet = (a, b) => { if (!Array.isArray(a)) return false; const x = [...a].sort(), y = [...b].sort(); return x.length === y.length && x.every((v, i) => v === y[i]); };
 const NAME = { type: 'string', pattern: '^[a-z0-9][a-z0-9._-]*$', description: 'Exact identifier only, no prose.' };
 const STATE = { type: 'string', enum: ['RUNNING', 'POWEROFF', 'REBUILDING', 'REBALANCING', 'UNKNOWN'] };
 const S = (props) => ({ type: 'object', additionalProperties: false, required: [...Object.keys(props), 'notes', 'action_proposals', 'executed_actions', 'observed_with_tools'], properties: { ...props, notes: { type: 'string', description: 'All explanations, caveats and observations go here, never in the value fields.' },
