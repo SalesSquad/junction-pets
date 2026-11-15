@@ -1,7 +1,9 @@
 import { roles, candidates, asOf } from './data.mjs';
 import { rank, keywordRank } from './matcher.mjs';
 export function benchmark() {
-  const cases = roles.map(role => {
+  // Only the two originally labelled illustrations belong to this legacy
+  // benchmark; new demo roles must not silently add evaluation cases.
+  const cases = roles.filter(role => Array.isArray(role.relevantTopIds)).map(role => {
     const evidence = rank(role, candidates, asOf)[0];
     const keyword = keywordRank(role, candidates)[0];
     return { role: role.id, expected: [...role.relevantTopIds], evidenceTop: evidence.candidateId, evidenceCorrect: role.relevantTopIds.includes(evidence.candidateId), evidenceScore: evidence.score, keywordTop: keyword.candidateId, keywordCorrect: role.relevantTopIds.includes(keyword.candidateId), keywordHits: keyword.score };
