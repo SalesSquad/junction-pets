@@ -1,0 +1,3 @@
+import {open,writeFile} from 'node:fs/promises';
+import {analyzeLog,exportReport,MAX_BYTES} from '../public/traffic/core.mjs';
+try{const a=process.argv.slice(2);if(![1,3].includes(a.length)||(a.length===3&&a[1]!=='--output'))throw Error();const f=await open(a[0],'r');let b;try{if(!(await f.stat()).isFile())throw Error();b=Buffer.alloc(MAX_BYTES+1);const {bytesRead}=await f.read(b,0,b.length,0);b=b.subarray(0,bytesRead);}finally{await f.close();}const out=exportReport(analyzeLog(b));if(a[2])await writeFile(a[2],out,{flag:'wx',mode:0o600});else process.stdout.write(out);}catch{console.error('Import refused. Use: node traffic/cli.mjs INPUT [--output NEW-REPORT.json]. Check UTF-8, combined format and limits.');process.exitCode=1;}

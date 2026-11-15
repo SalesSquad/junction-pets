@@ -1,3 +1,7 @@
+# Current task scope — 15 November 2026
+
+The owner's current request explicitly authorizes improving detection, integrating the existing traffic analysis and deploying the demo to Hostinger using already granted team services. For this continuation, this replaces the prior no-activation task restriction below. No cash purchase, unrelated settings changes or new broad credential grants are authorized. Provider secrets remain host-local. Only text explicitly submitted with provider-transfer consent may reach AI Router; raw traffic logs remain in browser memory. Follow HOSTINGER_DEPLOYMENT.md and preserve the v1 detector and historical labels/metrics.
+
 # Signal Desk contributor scope
 
 Own only `solutions/hostinger-manipulation-radar/**`. Preserve the coordinator's branch and base; no root, ops, pets, shared manifests or generated exports. No commits, pushes, PRs, merges, installs, provider activation or deployment without a new explicit task.
