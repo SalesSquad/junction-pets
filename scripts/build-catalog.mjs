@@ -1,4 +1,4 @@
-import {mkdir,writeFile,readFile,copyFile} from 'node:fs/promises';
+import {mkdir,writeFile,readFile,copyFile,cp} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
@@ -10,5 +10,7 @@ const revision=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'
 const catalog={schemaVersion:1,collection:{id:'junction-2026',title:'Junction companions',sourceRevision:revision,contentSha256:collectionDigest(packs)},pets:packs.map(p=>({...p.pet,specialCapabilities:specialCapabilitiesFor(special,p.pet.company.slug),packageSha256:packageDigest(p)}))};
 await writeFile(resolve(out,'catalog.json'),JSON.stringify(catalog,null,2)+'\n');
 await copyFile(resolve(root,'config/host-config.json'),resolve(out,'host-config.json'));
+// Public shell only: owner-private adapters/data never enter catalog output.
+await cp(resolve(root,'apps/knowledge-os/public'),resolve(out,'apps/knowledge-os'),{recursive:true});
 for(const pack of packs){const dir=resolve(out,'packages',pack.pet.company.slug);await mkdir(dir,{recursive:true});await Promise.all([writeFile(resolve(dir,'profile.json'),JSON.stringify(pack.pet,null,2)+'\n'),writeFile(resolve(dir,'AGENTS.md'),pack.instructions),writeFile(resolve(dir,'STORY.md'),pack.story)]);}
 console.log(JSON.stringify({packages:packs.length,sourceRevision:revision,contentSha256:catalog.collection.contentSha256}));
