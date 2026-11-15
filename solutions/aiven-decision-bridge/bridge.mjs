@@ -15,7 +15,7 @@ export const canonical = v => Array.isArray(v) ? `[${v.map(canonical).join(',')}
   : v && typeof v === 'object' ? `{${Object.keys(v).sort().map(k => `${JSON.stringify(k)}:${canonical(v[k])}`).join(',')}}` : JSON.stringify(v);
 const sha = s => createHash('sha256').update(s).digest('hex');
 
-export function validateResponse(r, schema = 'governance' in (r ?? {}) ? RESPONSE_SCHEMA_V2 : RESPONSE_SCHEMA) {
+export function validateResponse(r, schema = 'governance' in (r ?? {}) ? RESPONSE_SCHEMA_V2 : RESPONSE_SCHEMA, { officialHosts = ['aiven.io'] } = {}) {
   const errors = [];
   const req = schema.required;
   if (!r || typeof r !== 'object') return ['not an object'];
@@ -31,7 +31,8 @@ export function validateResponse(r, schema = 'governance' in (r ?? {}) ? RESPONS
     if (HIGH_RISK.has(p.operation) && p.risk !== 'high') errors.push(`proposal ${i}: ${p.operation} must be high risk`);
     if (typeof p.reversible !== 'boolean') errors.push(`proposal ${i}: reversible must be boolean`);
   }
-  for (const f of r.facts ?? []) if (f.source_url !== null && !/^https:\/\/aiven\.io\//.test(f.source_url ?? '')) errors.push(`non-official source ${f.source_url}`);
+  // Facts cite only the companion's own official hosts (Aiven: aiven.io; other pets pass theirs).
+  for (const f of r.facts ?? []) { if (f.source_url === null) continue; let host = ''; try { const u = new URL(f.source_url); host = u.protocol === 'https:' ? u.hostname : ''; } catch {} if (!officialHosts.some(h => host === h || host.endsWith('.' + h))) errors.push(`non-official source ${f.source_url}`); }
   return errors;
 }
 

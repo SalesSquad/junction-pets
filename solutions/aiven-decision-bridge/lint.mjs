@@ -8,8 +8,8 @@ const PERSONAL = /\b(patient|health|clinic|diagnos|icd-?10|henkilötunnus|hetu|p
 const SECRETISH = /\b(avn[a-z]?_[A-Za-z0-9_]{12,}|avns_[A-Za-z0-9]{8,}|sk-[A-Za-z0-9]{16,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|\d{6}[-+A]\d{3}[0-9A-Y])\b/g;
 const INJECTION = /(ignore (all )?(previous|prior) instructions|you are now in admin mode|system override|note to ai)/i;
 
-export function lintResponse(resp, request, attachments = []) {
-  const issues = [...validateResponse(resp)];
+export function lintResponse(resp, request, attachments = [], { officialHosts } = {}) {
+  const issues = [...validateResponse(resp, undefined, officialHosts ? { officialHosts } : {})];
   const text = JSON.stringify(resp);
   const wantsChange = CHANGE.test(request) || CHANGE.test(resp.answer ?? '');
   if (wantsChange && !(resp.action_proposals ?? []).length)

@@ -46,3 +46,10 @@ test('parity vectors for the Rust port are stable and JCS-shaped', async () => {
   assert.match(execFileSync(process.execPath, [new URL('../vectors/generate.mjs', import.meta.url).pathname, '--check'], { encoding: 'utf8' }), /stable/);
   assert.equal(canonical({ b: 1e21, a: 0.1, 'ä': [true, null] }), '{"a":0.1,"b":1e+21,"ä":[true,null]}');
 });
+
+test('official hosts are configurable per companion', () => {
+  const r = { answer: 'a', facts: [{ claim: 'x', source_url: 'https://www.valioaimo.fi/tuotteet' }], assumptions: [], action_proposals: [], executed_actions: [], next_check: 'n' };
+  assert.ok(validateResponse(r).some(e => /non-official/.test(e)), 'aiven default');
+  assert.deepEqual(validateResponse(r, undefined, { officialHosts: ['valioaimo.fi'] }), []);
+  assert.ok(validateResponse({ ...r, facts: [{ claim: 'x', source_url: 'https://evilvalioaimo.fi/' }] }, undefined, { officialHosts: ['valioaimo.fi'] }).length, 'suffix trick refused');
+});

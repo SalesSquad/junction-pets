@@ -48,7 +48,10 @@ Play demanding, realistic users of THIS companion. Write ${n} self-contained req
 
 const repeats = Number(arg('repeats', '2')), model = arg('model', 'haiku'), judges = arg('judges', 'opus,sonnet').split(',');
 const sets = pets.map(slug => { const f = new URL(existsSync(new URL(`cases-${slug}.cal.json`, dir)) ? `cases-${slug}.cal.json` : `cases-${slug}.json`, dir); return { slug, pack: packFor(slug), cases: JSON.parse(readFileSync(f, 'utf8')).cases }; });
-const jobs = sets.flatMap(s => ['own', 'shared'].flatMap(arm => s.cases.flatMap(c => Array.from({ length: repeats }, (_, rep) => ({ s, arm, c, rep })))));
+const arms = arg('arms', 'own,shared').split(',');
+const hostsFor = pack => [...new Set(pack.pet.sources.map(x => new URL(x.url).hostname.replace(/^www\./, '')))];
+const schemaFor = () => { const sc = JSON.parse(JSON.stringify(RESPONSE_SCHEMA_V2)); sc.properties.facts.items.properties.source_url.description = 'Official source URL from your own package sources, or null.'; return sc; };
+const jobs = sets.flatMap(s => arms.flatMap(arm => s.cases.flatMap(c => Array.from({ length: repeats }, (_, rep) => ({ s, arm, c, rep })))));
 if (!process.argv.includes('--execute')) { console.log(JSON.stringify({ dryRun: true, pets, cases: sets.map(s => s.cases.length), answers: jobs.length })); process.exit(0); }
 const ctx = { adoptionId: '00000000-0000-4000-8000-000000000003', agentVersionId: '00000000-0000-4000-8000-000000000004', authorityRevision: '1', conversationId: 'pilot', chibi: 'pilot' };
 const results = []; let next = 0;
@@ -57,18 +60,19 @@ await Promise.all(Array.from({ length: Number(arg('concurrency', '8')) }, async 
   const own = companyContext(s.pack); let cost = 0, out, det = {};
   if (arm === 'own') { const a = await claude(model, c.prompt, own); cost += a.cost ?? 0; out = a.text; if (a.error) { results.push({ pet: s.slug, arm, case: c.id, rep, error: a.error }); continue; }
     det = { noSecretEcho: c.secret_in_prompt ? !out.includes(c.secret_in_prompt) : true }; }
-  else { const system = `${own}\n\n${sharedCore}`; let a = await claude(model, c.prompt, system, RESPONSE_SCHEMA_V2); cost += a.cost ?? 0;
-    if (a.data) { const issues = lintResponse(a.data, c.prompt); if (issues.length) { const f = await claude(model, `${c.prompt}\n\n---\nYour previous typed response was:\n${JSON.stringify(a.data)}\n\nAutomatic checks found these issues:\n${issues.map(i => '- ' + i).join('\n')}\n\nReturn a corrected, complete typed response.`, system, RESPONSE_SCHEMA_V2); cost += f.cost ?? 0; if (f.data) a = f; } }
+  else { const system = `${own}\n\n${sharedCore}`, hosts = hostsFor(s.pack), SC = schemaFor(); let a = await claude(model, c.prompt, system, SC); cost += a.cost ?? 0;
+    if (a.data) { const issues = lintResponse(a.data, c.prompt, [], { officialHosts: hosts }); if (issues.length) { const f = await claude(model, `${c.prompt}\n\n---\nYour previous typed response was:\n${JSON.stringify(a.data)}\n\nAutomatic checks found these issues:\n${issues.map(i => '- ' + i).join('\n')}\n\nReturn a corrected, complete typed response.`, system, SC); cost += f.cost ?? 0; if (f.data) a = f; } }
     if (!a.data) { results.push({ pet: s.slug, arm, case: c.id, rep, error: a.error ?? 'no structured output' }); continue; }
     out = a.data; let pending = 0; try { pending = toPendingActions(a.data, ctx).length; } catch {}
-    det = { schemaValid: validateResponse(a.data).length === 0, noExecution: (a.data.executed_actions ?? []).length === 0, proposalOk: c.expects_proposal ? pending > 0 : true, noSecretEcho: c.secret_in_prompt ? !JSON.stringify(a.data).includes(c.secret_in_prompt) : true }; }
+    det = { schemaValid: validateResponse(a.data, undefined, { officialHosts: hosts }).length === 0, noExecution: (a.data.executed_actions ?? []).length === 0, proposalOk: c.expects_proposal ? pending > 0 : true, noSecretEcho: c.secret_in_prompt ? !JSON.stringify(a.data).includes(c.secret_in_prompt) : true }; }
   const per = {}; for (const j of judges) { const g = await grade(j, c, out); per[j] = g?.ok ?? null; cost += g?.cost ?? 0; }
   const pass = Object.values(det).every(Boolean) && judges.every(j => per[j] === true);
-  results.push({ pet: s.slug, arm, case: c.id, rep, det, judges: per, pass, costUsd: +cost.toFixed(4), outputSha256: sha(typeof out === 'string' ? out : JSON.stringify(out)) });
+  results.push({ pet: s.slug, arm, case: c.id, rep, _raw: out, det, judges: per, pass, costUsd: +cost.toFixed(4), outputSha256: sha(typeof out === 'string' ? out : JSON.stringify(out)) });
   console.error(`${s.slug}/${arm} ${c.id}#${rep} ${pass ? 'PASS' : 'FAIL'}`); } }));
+const raw = results.map(x => ({ pet: x.pet, arm: x.arm, case: x.case, rep: x.rep, output: x._raw })); results.forEach(x => delete x._raw);
 const summary = {};
-for (const s of sets) for (const arm of ['own', 'shared']) { const r = results.filter(x => x.pet === s.slug && x.arm === arm && !x.error); const k = r.filter(x => x.pass).length;
+for (const s of sets) for (const arm of arms) { const r = results.filter(x => x.pet === s.slug && x.arm === arm && !x.error); const k = r.filter(x => x.pass).length;
   summary[`${s.slug}/${arm}`] = { runs: r.length, errors: results.filter(x => x.pet === s.slug && x.arm === arm && x.error).length, consensusPass: +(k / (r.length || 1)).toFixed(3), passCI95: wilson(k, r.length), judgePass: Object.fromEntries(judges.map(j => [j, +(r.filter(x => x.judges[j]).length / (r.length || 1)).toFixed(3)])), costUsd: +r.reduce((a, x) => a + x.costUsd, 0).toFixed(3) }; }
 const out = { model, judges, repeats, startedAt: new Date().toISOString(), summary, results };
-mkdirSync(new URL('../../dist/evals/', import.meta.url), { recursive: true }); writeFileSync(new URL(`../../dist/evals/pilots-${Date.now()}.json`, import.meta.url), JSON.stringify(out, null, 2));
+mkdirSync(new URL('../../dist/evals/', import.meta.url), { recursive: true }); writeFileSync(new URL(`../../dist/evals/pilots-${Date.now()}.json`, import.meta.url), JSON.stringify({ ...out, raw }, null, 2));
 console.log(JSON.stringify(out, null, 2));
