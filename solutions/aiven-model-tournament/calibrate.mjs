@@ -12,7 +12,7 @@ for (const f of process.argv.slice(2)) {
 - describe the meaning to look for, never an exact phrase; name acceptable equivalents where wording could vary (e.g. "says the token must be revoked or rotated (any wording)");
 - remove requirements that are not knowable from the prompt; keep domain-specific expectations that the prompt clearly calls for.
 Do not add new requirements. Cases:
-${JSON.stringify(set.cases.map(c => ({ id: c.id, prompt: c.prompt, mustInclude: c.mustInclude, mustNotClaim: c.mustNotClaim })), null, 1)}`;
+${JSON.stringify(set.cases.map(c => ({ id: c.id, turns: c.turns ?? [], prompt: c.prompt, mustInclude: c.mustInclude, mustNotClaim: c.mustNotClaim })), null, 1)}`;
   const r = spawnSync('claude', ['-p', prompt, '--model', 'opus', '--max-budget-usd', '2', '--output-format', 'json', '--tools', '', '--strict-mcp-config', '--no-session-persistence', '--json-schema', JSON.stringify(schema)], { encoding: 'utf8', cwd: '/tmp', maxBuffer: 1 << 24 });
   const d = JSON.parse(r.stdout).structured_output;
   const byId = Object.fromEntries(d.cases.map(c => [c.id, c]));
