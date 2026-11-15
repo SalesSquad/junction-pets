@@ -27,6 +27,12 @@ def mask(*actions):
     return [int(k in actions) for k in range(7)]
 
 
+def pilot_scans(first=518000):
+    return [{"seed":s,"observation":obs(obstacle=0. if s%3 else .13),
+             "mask":mask(3,4,6),"world_hash":f"verified-world-{s}"}
+            for s in range(first,first+512)]
+
+
 class V12ActualEvidenceContractTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -124,10 +130,7 @@ class V12ActualEvidenceContractTest(unittest.TestCase):
         self.assertFalse(self.plan["modelPromotionAuthorized"])
 
     def test_full512_public_initial_scan_derivation_and_fail_closed(self):
-        scans=[]
-        for s in range(518000,518512):
-            scans.append({"seed":s,"observation":obs(obstacle=0. if s%3 else .13),
-                          "mask":mask(3,4,6),"world_hash":f"verified-world-{s}"})
+        scans=pilot_scans()
         cohort=protocol.derive_cohort(scans,self.plan,"pilot")
         self.assertEqual(len(cohort),48)
         self.assertEqual(sum(w["observed_corridor"] for w in cohort),40)
@@ -137,24 +140,31 @@ class V12ActualEvidenceContractTest(unittest.TestCase):
         scans[1]["world_hash"]=scans[0]["world_hash"]
         with self.assertRaisesRegex(ValueError,"DUPLICATE"):
             protocol.derive_cohort(scans,self.plan,"pilot")
+        forged=dict(self.plan,pilotTrainSeedRangeInclusive=[600000,600511])
+        with self.assertRaisesRegex(ValueError,"PLAN_OBJECT_SHA_CHANGED"):
+            protocol.derive_cohort(pilot_scans(600000),forged,"pilot")
 
     def test_paired_actual_goal_not_forward_proxy_and_hard_stop(self):
-        cohort=[{"seed":s,"world_hash":f"world-{s}"} for s in range(48)]
+        scans=pilot_scans()
+        cohort=protocol.derive_cohort(scans,self.plan,"pilot")
         trials=[]
         for w in cohort:
             for arm in protocol.PILOT_ARMS:
                 trials.append({"seed":w["seed"],"world_hash":w["world_hash"],
-                    "strategy":arm,"success":arm=="frozen_v5" and w["seed"]==0,
+                    "strategy":arm,"success":arm=="frozen_v5" and w["seed"]==cohort[0]["seed"],
                     "unsafe":False,"abstained":False})
-        readout=protocol.paired_physical_goal_readout(trials,cohort,"pilot")
+        contract={"all_512_initial_public_worlds":scans,"plan":self.plan}
+        readout=protocol.paired_physical_goal_readout(trials,cohort,"pilot",**contract)
         self.assertEqual(readout["candidateNovelSafeGoalWorldSeeds"],[])
-        self.assertEqual(readout["candidateLostV5GoalWorldSeeds"],[0])
+        self.assertEqual(readout["candidateLostV5GoalWorldSeeds"],[cohort[0]["seed"]])
         self.assertTrue(readout["hardStopNoFurtherPhysics"])
         self.assertFalse(readout["modelPromotionAuthorized"])
         with self.assertRaisesRegex(ValueError,"INCOMPLETE"):
-            protocol.paired_physical_goal_readout(trials[:-1],cohort,"pilot")
+            protocol.paired_physical_goal_readout(trials[:-1],cohort,"pilot",**contract)
         with self.assertRaisesRegex(ValueError,"UNKNOWN_PHYSICAL_COHORT_STAGE"):
-            protocol.paired_physical_goal_readout(trials,cohort,"not-a-real-stage")
+            protocol.paired_physical_goal_readout(trials,cohort,"not-a-real-stage",**contract)
+        with self.assertRaisesRegex(ValueError,"COHORT_NOT_REDERIVED"):
+            protocol.paired_physical_goal_readout(trials,cohort[::-1],"pilot",**contract)
 
 
 if __name__=="__main__":unittest.main()
