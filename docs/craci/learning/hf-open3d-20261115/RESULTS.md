@@ -51,7 +51,7 @@ failure receipt was retained. The corrected run uses Ubuntu-only APT sources.
   copied to the execution workspace, totaling 122,877,180 bytes, and matched
   those reported digests. A local tar bundle containing all 48 ZIPs, the
   index, summary, audit, verifier and two sample fold models has SHA-256
-  `f91b835b396df825d056e8ac065c63291ae79a10a79b52bbe2fcbf7fa20ec40c`.
+  `27a93c2320835b2aaac9e7c7969b78f988ff435ac0d6d7e4ceb10cff106746a2`.
   GitHub's original artifacts expire on 22 November 2026. A workspace copy is
   not an asserted iCloud or cross-device backup.
 - The [offline audit](audit-43672442214.json) verified 47 source-bound

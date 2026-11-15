@@ -17,6 +17,7 @@ import numpy as np
 from sklearn.model_selection import GroupKFold
 
 SOURCE = "76138f0c27fca50694aef7b6016af65478df65e4"
+INDEX_SHA = "1ddd091d63168af573e1593c49d4084b74f277aa972420dce253ade68e6829f9"
 RUN = 43672442214
 LINES = ("v2d", "g1", "robo")
 METHODS = ("ridge", "trees", "mlp")
@@ -69,6 +70,7 @@ def verify_receipt(archive):
 
 def audit(root, index_path, local_features):
     index_raw = index_path.read_bytes()
+    require(digest(index_raw) == INDEX_SHA, "ARTIFACT_INDEX_DIGEST")
     index = json.loads(index_raw)
     require(len(index) == 48 and len({x["id"] for x in index}) == 48,
             "ARTIFACT_COUNT")

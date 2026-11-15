@@ -9,6 +9,7 @@ import zipfile
 
 RUN = 43672442214
 SOURCE = "76138f0c27fca50694aef7b6016af65478df65e4"
+INDEX_SHA = "1ddd091d63168af573e1593c49d4084b74f277aa972420dce253ade68e6829f9"
 MAX_MODEL = 50 * 1024 * 1024
 
 
@@ -18,7 +19,10 @@ def sha(data):
 
 def extract(artifacts, index, output, line, fold, method):
     expected_name = f"hf-open3d-cell-{RUN}-1-{line}-{fold}-{method}"
-    matches = [x for x in json.loads(index.read_text(encoding="utf-8"))
+    index_raw = index.read_bytes()
+    if sha(index_raw) != INDEX_SHA:
+        raise ValueError("artifact index digest mismatch")
+    matches = [x for x in json.loads(index_raw)
                if x["name"] == expected_name]
     if len(matches) != 1:
         raise ValueError("cell missing or duplicated in index")
@@ -33,11 +37,13 @@ def extract(artifacts, index, output, line, fold, method):
         manifest_raw = outer.read("manifest.json")
         manifest = json.loads(manifest_raw)
         binding = receipt["binding"]
-        if not (receipt["status"] == "succeeded" and receipt["sourceVerified"]
-                and receipt["harnessVerified"] and binding["sourceSha"] == SOURCE
+        if not (receipt["status"] == "succeeded" and receipt["sourceVerified"] is True
+                and receipt["harnessVerified"] is True and binding["sourceSha"] == SOURCE
                 and binding["harnessSha"] == SOURCE
+                and binding["workload"] == "hf-open3d-ml"
+                and binding["cell"] == f"open3d-{line}-{fold}-{method}"
                 and receipt["manifest"]["sha256"] == sha(manifest_raw)
-                and manifest["complete"]):
+                and manifest["complete"] is True):
             raise ValueError("source receipt mismatch")
         files = {x["path"]: x for x in manifest["files"]}
         prefix = "artifacts/hf-open3d/"
@@ -51,7 +57,8 @@ def extract(artifacts, index, output, line, fold, method):
             return data
 
         result = json.loads(verified_read(prefix + "result.json"))
-        if (result["line"], result["fold"], result["method"]) != (line, fold, method):
+        if ((result["line"], result["fold"], result["method"]) != (line, fold, method)
+                or result["promotion_authorized"] is not False):
             raise ValueError("cell result mismatch")
         chunks = []
         for part in result["trained_model"]["parts"]:
