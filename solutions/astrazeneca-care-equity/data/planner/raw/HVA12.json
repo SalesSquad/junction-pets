@@ -1,0 +1,1708 @@
+{
+ "id": "HVA12",
+ "kind": "county",
+ "countyId": "HVA12",
+ "userMessage": "Draft the action plan for county_id HVA12 (South Savo wellbeing services county).",
+ "model": "nemotron-3.5-super-vl",
+ "thinking": false,
+ "systemPromptSha256": "4de4ee0debf68e90aab3d1e98ea1f60bcb51277947ec2ba83660c97d2b0290a1",
+ "appSha256": "22f13cf64299358ebdb6c7e5349a0b51b1fd6fbdeb178e36b51ed1d7f367bf78",
+ "started": "2026-11-14T21:57:38.010Z",
+ "finished": "2026-11-14T21:57:40.958Z",
+ "error": null,
+ "outcome": "PLAN",
+ "usage": {
+  "prompt_tokens": 25365,
+  "completion_tokens": 1443,
+  "calls": 4,
+  "seconds": 2.9
+ },
+ "formatRepairs": 1,
+ "toolCalls": [
+  {
+   "turn": 0,
+   "name": "get_county_brief",
+   "args": {
+    "county_id": "HVA12"
+   },
+   "ok": true,
+   "output": {
+    "county_id": "HVA12",
+    "county_name": "South Savo wellbeing services county",
+    "title": "Cancer pathway brief: South Savo wellbeing services county",
+    "regionId": "HVA12",
+    "snapshotSha256": "9a68651c35a2f2265fe18ccd7da8cd637ab94e80c86a866e91dba057425f5831",
+    "humanApproval": "REQUIRED_NOT_GRANTED",
+    "claims": [
+     {
+      "id": "HVA12-mortality",
+      "kind": "MEASURED",
+      "text": "In 2021-2025, age-standardised cancer mortality in South Savo wellbeing services county was 0.5% below the national level (ratio 0.995, 95% interval 0.957-1.034), about 2.2 fewer deaths a year than its age structure predicts.",
+      "evidence": [],
+      "sources": [
+       {
+        "label": "Statistics Finland: causes of death 13u5 and 11az, population 14wx",
+        "url": "https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/"
+       }
+      ],
+      "facts": {
+       "county": "South Savo wellbeing services county",
+       "period": "2021-2025",
+       "measure": "age-standardised cancer mortality ratio, county relative to Finland (1 = national level)",
+       "ratio": 0.995,
+       "ratio_95_percent_interval": "0.957-1.034",
+       "percent_difference_from_national_level": 0.5,
+       "direction": "below the national level",
+       "deaths_per_year_compared_with_expected_from_age_structure": "2.2 fewer"
+      }
+     },
+     {
+      "id": "HVA12-locate",
+      "kind": "MEASURED",
+      "text": "No measured pathway stage shows South Savo wellbeing services county clearly worse than the country; if outcomes differ, the cause is not locatable from public data.",
+      "evidence": [],
+      "sources": [],
+      "facts": {
+       "county": "South Savo wellbeing services county",
+       "pathway_stages_measurable_from_public_data_in_order": [
+        "early detection (screening participation)",
+        "first contact and primary care access",
+        "referral into specialist care"
+       ],
+       "stages_where_county_is_clearly_worse_than_the_country": [],
+       "earliest_such_stage": "none"
+      }
+     },
+     {
+      "id": "HVA12-blind-spot",
+      "kind": "MEASURED",
+      "text": "Time from referral to diagnosis and from diagnosis to first treatment is not published by county for any cancer, so the Goal 3 indicator \"patients access treatment within the established target times\" cannot be checked from open data.",
+      "evidence": [
+       "fi-strategy-goal3",
+       "fi-strategy-3-1-no-national-pathways"
+      ],
+      "sources": [],
+      "facts": {
+       "statistics_not_published_by_county_for_any_cancer": [
+        "time from referral to diagnosis",
+        "time from diagnosis to first treatment"
+       ],
+       "goal_3_indicator_that_therefore_cannot_be_checked_from_open_data": "patients access treatment within the established target times"
+      }
+     },
+     {
+      "id": "HVA12-action-timed-pathways",
+      "kind": "SCENARIO",
+      "text": "Recommended: standardised, timed cancer pathways with a fast-track referral. Under the stated assumptions this postpones about 7.2 deaths a year in South Savo wellbeing services county (range 1.1-14.5) for an assumed EUR 192,216 a year; it stayed in the portfolio in 94% of sensitivity runs.",
+      "evidence": [
+       "jensen-2015-cpp-interval",
+       "jensen-2017-cpp-excess-hazard",
+       "fi-strategy-3-1-no-national-pathways"
+      ],
+      "sources": [],
+      "facts": {
+       "county": "South Savo wellbeing services county",
+       "recommended_action": "Standardised, timed cancer pathways with a fast-track referral",
+       "nature_of_estimate": "model scenario under stated assumptions, not a measured effect",
+       "deaths_postponed_per_year_central": 7.2,
+       "deaths_postponed_per_year_range": "1.1-14.5",
+       "assumed_cost_eur_per_year": 192216,
+       "percent_of_sensitivity_runs_in_which_action_stayed_in_portfolio": 94
+      }
+     },
+     {
+      "id": "HVA12-detect-screen_colorectal",
+      "kind": "SCENARIO",
+      "text": "Proportion of invited to colorectal cancer screening who attended, %: 78.7% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.33-1.33 percentage points, closing about 100% of the gap.",
+      "evidence": [
+       "virtanen-2015-attendance-steps",
+       "fi-strategy-goal2-screening"
+      ],
+      "sources": [
+       {
+        "label": "THL Sotkanet: Suolistosyövän seulontaan osallistuneiden osuus kutsutuista, %",
+        "url": "https://sotkanet.fi/sotkanet/fi/metadata/indicators/6103"
+       }
+      ],
+      "facts": {
+       "county": "South Savo wellbeing services county",
+       "indicator": "Proportion of invited to colorectal cancer screening who attended, %",
+       "county_participation_percent": 78.7,
+       "national_target_percent": 80,
+       "proposed_action": "Reminder and multilingual re-invitation for colorectal screening",
+       "expected_gain_percentage_points_range": "1.33-1.33",
+       "percent_of_gap_to_target_closed_at_central_estimate": 100,
+       "nature_of_estimate": "expected gain taken from Finnish trial evidence, a scenario"
+      }
+     },
+     {
+      "id": "HVA12-enable",
+      "kind": "MEASURED",
+      "text": "First step for every county: Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.",
+      "evidence": [
+       "fi-strategy-goal3",
+       "fi-strategy-3-1-no-national-pathways"
+      ],
+      "sources": [],
+      "facts": {
+       "recommended_first_step_for_every_county": "Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.",
+       "reason": "The Goal 3 indicator \"treatment within target times\" cannot be computed from open data today. Without it no county can see where its own pathway loses time."
+      }
+     }
+    ]
+   }
+  },
+  {
+   "turn": 0,
+   "name": "get_portfolio",
+   "args": {
+    "budget_meur": 6,
+    "equity_weight": 3,
+    "county_id": "HVA12"
+   },
+   "ok": true,
+   "output": {
+    "label": "SCENARIO: model output under stated assumptions, not a measured effect",
+    "budget_meur": 6,
+    "budget_eur_per_year": 6000000,
+    "equity_weight": 3,
+    "settings": "default (stored in app.json, with sensitivity ranges)",
+    "national_total": {
+     "deaths_postponed_per_year_central": 177.1,
+     "deaths_postponed_per_year_range": "38.2-351.5",
+     "spent_eur_per_year": 5949776,
+     "share_of_benefit_in_counties_with_above_national_mortality": 0.601
+    },
+    "picks_in_all_counties": 18,
+    "county_id": "HVA12",
+    "county_name": "South Savo wellbeing services county",
+    "county_picks": [
+     {
+      "county_id": "HVA12",
+      "action_id": "timed-pathways",
+      "cost_eur_per_year": 192216,
+      "deaths_postponed_per_year_central": 7.2,
+      "deaths_postponed_per_year_range": "1.1-14.5",
+      "percent_of_sensitivity_runs_in_which_action_stayed": 94
+     }
+    ],
+    "county_screening_actions": [
+     {
+      "action_id": "screening-reminders",
+      "indicator": "Proportion of invited to colorectal cancer screening who attended, %",
+      "county_participation_percent": 78.7,
+      "national_target_percent": 80,
+      "expected_gain_percentage_points_range": "1.33-1.33",
+      "percent_of_gap_to_target_closed_at_central_estimate": 100,
+      "assumed_cost_eur_per_year": 51258
+     }
+    ],
+    "note": "Screening actions are scored on participation, not mortality; they are not part of the budgeted mortality portfolio."
+   }
+  },
+  {
+   "turn": 1,
+   "name": "get_evidence",
+   "args": {
+    "action_id": "timed-pathways"
+   },
+   "ok": true,
+   "output": {
+    "action_id": "timed-pathways",
+    "title": "Standardised, timed cancer pathways with a fast-track referral",
+    "action": "Adopt national cancer-specific pathways with maximum times per step and a single fast-track referral from primary care, following the Danish and Swedish model.",
+    "accountable_owner": "Wellbeing services county, coordinated nationally by FICAN",
+    "track": "timeliness",
+    "level": "county",
+    "pathway_stage": "referral",
+    "mechanism": "One referral criterion and booked slots replace sequential queues between primary care, imaging and the specialist clinic.",
+    "indicator_to_monitor": {
+     "key": "specialist_wait_over_6m",
+     "title": "Patients waiting over 6 months during the year for access to specialised health care per 10 000 inhabitants",
+     "unit": "per 10 000"
+    },
+    "what_remains_unknown": "Danish evidence is before/after without a control group. Patients left outside the pathway waited 4 days longer, so coverage must be monitored.",
+    "evidence": [
+     {
+      "id": "jensen-2015-cpp-interval",
+      "finding": "After Denmark introduced standardised cancer patient pathways, the median diagnostic interval was 17 days shorter in 2010 than in 2004/05; patients not referred to a pathway waited 4 days longer.",
+      "value": -17,
+      "unit": "days, median diagnostic interval after vs before",
+      "citation": "Jensen H, Tørring ML, Olesen F, Overgaard J, Fenger-Grøn M, Vedsted P. Diagnostic intervals before and after implementation of cancer patient pathways. BMC Cancer 2015;15:308.",
+      "verified_at_source": true,
+      "caveat": "Before/after without control group; two-tier risk for patients outside the pathway."
+     },
+     {
+      "id": "jensen-2017-cpp-excess-hazard",
+      "finding": "Danish patients referred through a cancer patient pathway had a 1-year excess hazard ratio of 0.86 (0.73-1.01) vs patients not referred; 3-year relative survival rose from 45% to 54% across the implementation period.",
+      "value": 0.86,
+      "unit": "1-year excess hazard ratio, pathway-referred vs not",
+      "citation": "Jensen H, Tørring ML, Vedsted P. Prognostic consequences of implementing cancer patient pathways in Denmark. BMC Cancer 2017;17:627.",
+      "verified_at_source": true,
+      "caveat": "Interval includes 1; lead-time and secular-trend bias acknowledged by authors."
+     },
+     {
+      "id": "fi-strategy-3-1-no-national-pathways",
+      "finding": "Currently no unified national system guides disease-specific care guidelines or the implementation and monitoring of care pathways; existing guidelines, pathways, targets and indicators are not coordinated nationally, which perpetuates regional inequalities in access to and effectiveness of cancer care.",
+      "value": null,
+      "unit": "finding",
+      "citation": "National Cancer Strategy 2026-2035, sub-objective 3.1.",
+      "verified_at_source": true,
+      "caveat": null
+     }
+    ]
+   }
+  },
+  {
+   "turn": 1,
+   "name": "get_roadmap_measure",
+   "args": {
+    "action_id": "timed-pathways"
+   },
+   "ok": true,
+   "output": {
+    "query": "timed-pathways",
+    "actionId": "timed-pathways",
+    "source": "src/recommend.mjs INTERVENTIONS",
+    "fit": "named",
+    "statement": "Roadmap measure 3.1.2 names this action.",
+    "primaryMeasure": {
+     "id": "3.1.2",
+     "pages": [
+      56,
+      57
+     ],
+     "heading": {
+      "fi": "Toimenpide 3.1.2 Laaditaan syöpäkohtaiset hoitoketjukuvaukset, ja niiden pohjalta sovelletut alueelliset hoitoketjut, sekä mekanismi niiden ylläpitoon ja hallintaan",
+      "page": 56
+     },
+     "title_en": "Write cancer-specific care pathway descriptions, regional pathways adapted from them, and a mechanism to maintain and manage them",
+     "keyText": [
+      {
+       "fi": "Kansalliset hoitoketjut kuvataan hyödyntäen pohjoismaissa kehitettyjä malleja.",
+       "page": 56,
+       "en": "National pathways are described using models developed in the Nordic countries (the text names Denmark's Kræftpakkeforløb, Sweden's SVF and Norway's Pakkeforløp)."
+      },
+      {
+       "fi": "Ketjuissa määritellään ja sovitaan mm. työnjaosta eri toimijoiden välillä, tavoitelluista hoitoonpääsyajoista, keskeisistä laatu- ja vaikuttavuusindikaattoreista sekä kirjaamis- ja koodistokäytännöistä.",
+       "page": 56,
+       "en": "The pathways define and agree, among other things, the division of work, target access times, the key quality and effectiveness indicators, and recording and coding practices."
+      }
+     ],
+     "owner": {
+      "fi": "Vastuutaho: FICAN (kansallinen koordinaatio, prosessin hallinta ja tukitoiminnot sekä alueellinen käyttöönotto ja seuranta) yhteistyössä kansallisten monialaisten syöpäryhmien kanssa (hoitoketjujen sisällöt), hyvinvointialueet ja HUS (hoitoketjujen toteutus).",
+      "page": 57
+     },
+     "owner_en": "FICAN with the national multidisciplinary cancer groups (pathway content); wellbeing services counties and HUS (implementation)",
+     "resource": {
+      "fi": "Resurssi: Toteutetaan osana toimenpiteessä 3.1.1 kuvattua kokonaisresursointia.",
+      "page": 57
+     },
+     "schedule": [
+      {
+       "fi": "2026–2028: Kansalliset hoitoketjukuvaukset tehty viidestä syövästä ja syöpäkohtaiset hoitoonpääsyajat on määritetty.",
+       "page": 57,
+       "en": "2026–2028: national pathway descriptions done for five cancers and cancer-specific access times defined."
+      },
+      {
+       "fi": "2029–2031: Kansalliset hoitoketjukuvaukset laadittu kaikista merkittävistä syövistä/ syöpäryhmistä.",
+       "page": 57
+      }
+     ],
+     "metrics": [
+      {
+       "fi": "Mittari: Potilaat pääsevät hoitoon tavoiteaikojen puitteissa.",
+       "page": 57,
+       "en": "Patients access treatment within the target times."
+      }
+     ],
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=56"
+    },
+    "relatedMeasures": [
+     {
+      "id": "2.5.2",
+      "title_en": "Support a smooth transfer to specialised care by defining standardised referral criteria within national care pathways, so that patients with possible cancer symptoms who meet them are sent quickly to the diagnostic tests they need",
+      "pages": [
+       52,
+       53
+      ],
+      "owner_en": "FICAN (coordination and roll-out) with the national multiprofessional cancer groups",
+      "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=52"
+     },
+     {
+      "id": "3.1.4",
+      "title_en": "Define national quality and effectiveness targets and monitoring indicators so that care pathways can be monitored",
+      "pages": [
+       58,
+       59
+      ],
+      "owner_en": "FICAN with the national cancer diagnostics and treatment steering group (shared indicators) and the national multidisciplinary cancer groups (cancer-specific targets and indicators); THL (methodological support)",
+      "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=58"
+     }
+    ],
+    "reading_en": "3.1.2 writes cancer-specific national pathways on the Danish, Swedish and Norwegian models with target access times; 2.5.2 adds standardised referral criteria from primary care. Together they are this action.",
+    "gap_en": "SAMA's action text says 'maximum times per step'. The roadmap leaves the values to 3.1.2 (five cancers in 2026–2028); SAMA proposes no values of its own.",
+    "noRoadmapMeasureFor": [],
+    "thresholdRelabels": [
+     {
+      "location": "src/recommend.mjs INTERVENTIONS timed-pathways.action ('maximum times per step')",
+      "actions": [
+       "timed-pathways"
+      ],
+      "currentValues": {},
+      "relabel_en": "Maximum times per step are placeholders until roadmap measure 3.1.2 defines cancer-specific access times (five cancers, 2026–2028) and 3.1.4 sets the targets and indicators. SAMA proposes no values.",
+      "measures": [
+       "3.1.2",
+       "3.1.4"
+      ]
+     }
+    ],
+    "roadmap": {
+     "title": "Kansallinen syöpästrategia 2026–2035 – Toimeenpanon tiekartta vuosille 2026–2031",
+     "titleEn": "Finland's National Cancer Strategy 2026–2035: Roadmap for implementation for 2026–2031",
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf",
+     "pdfSha256": "f9d4ed478a7531b0ee26c84f9d5df7c96137f8e192ca27efd8afc5b1c1e2ecb5",
+     "note": "Finnish quotes are verbatim from the roadmap (see manifest quoteRule). English text is the SAMA team's own reading and translation, not an official one. A mapping says which roadmap measure an action would serve; it is not an endorsement by the roadmap's authors."
+    }
+   }
+  },
+  {
+   "turn": 1,
+   "name": "get_evidence",
+   "args": {
+    "action_id": "screening-reminders"
+   },
+   "ok": true,
+   "output": {
+    "action_id": "screening-reminders",
+    "title": "Reminder and multilingual re-invitation for colorectal screening",
+    "action": "Send a second kit with plain-language, multilingual instructions to non-responders; measure the gain as a stepped pilot.",
+    "accountable_owner": "Wellbeing services county screening unit",
+    "track": "detection",
+    "level": "county",
+    "pathway_stage": "detection",
+    "mechanism": "Transfers the reminder protocol proven in Finnish cervical screening.",
+    "indicator_to_monitor": {
+     "key": "screen_colorectal",
+     "title": "Proportion of invited to colorectal cancer screening who attended, %",
+     "unit": "%"
+    },
+    "what_remains_unknown": "No Finnish effect size exists for colorectal screening; the gain is borrowed from cervical screening and must be measured.",
+    "evidence": [
+     {
+      "id": "virtanen-2015-attendance-steps",
+      "finding": "In Finland, reminder letters raised cervical screening participation from 72.6% to 79.2% and adding self-sampling raised it to 82.2%.",
+      "value": 9.6,
+      "unit": "percentage points (72.6% to 79.2% with reminder letters, 82.2% adding self-sampling)",
+      "citation": "Virtanen A, et al. Improving cervical cancer screening attendance in Finland. Int J Cancer 2015;136(6):E677-E684.",
+      "verified_at_source": true,
+      "caveat": null
+     },
+     {
+      "id": "fi-strategy-goal2-screening",
+      "finding": "All cancer screening programmes achieve an 80% participation rate in each wellbeing services county; at least 70% of cancers are diagnosed at stages I to II.",
+      "value": 80,
+      "unit": "% participation target in every wellbeing services county",
+      "citation": "National Cancer Strategy 2026-2035, Figure 1.",
+      "verified_at_source": true,
+      "caveat": null
+     }
+    ]
+   }
+  },
+  {
+   "turn": 1,
+   "name": "get_roadmap_measure",
+   "args": {
+    "action_id": "screening-reminders"
+   },
+   "ok": true,
+   "output": {
+    "query": "screening-reminders",
+    "actionId": "screening-reminders",
+    "source": "src/recommend.mjs INTERVENTIONS",
+    "fit": "serves",
+    "statement": "Serves roadmap measure 1.3.1; the roadmap does not name this specific action.",
+    "primaryMeasure": {
+     "id": "1.3.1",
+     "pages": [
+      33
+     ],
+     "heading": {
+      "fi": "Toimenpide 1.3.1 Parannetaan eri kieliryhmiin kuuluvien väestöryhmien osallistumista rokotuksiin sekä syöpäseulontoihin kohdennetun ja yhteisölähtöisen viestinnän avulla",
+      "page": 33
+     },
+     "title_en": "Raise vaccination and cancer screening participation in different language groups through targeted, community-based communication",
+     "keyText": [
+      {
+       "fi": "monikielistä, selkokielistä ja kulttuurisesti sensitiivistä materiaalia",
+       "page": 33,
+       "en": "multilingual, plain-language and culturally sensitive material"
+      }
+     ],
+     "owner": {
+      "fi": "Vastuutaho: Hyvinvointialueet, Helsingin kaupunki ja HUS, järjestöt, Syöpärekisteri, THL.",
+      "page": 33
+     },
+     "owner_en": "Wellbeing services counties, City of Helsinki and HUS, NGOs, Cancer Registry, THL",
+     "resource": {
+      "fi": "Arvioitu tarvittava määräraha 400 000 €.",
+      "page": 33
+     },
+     "schedule": [
+      {
+       "fi": "2026–2028: Kohderyhmän kanssa jo yhteiskehitettyjä viestintämateriaaleja seulonnoista ja rokotuksista hyödynnetään ja uutta materiaalia tuotetaan tarpeen mukaan eri kielillä.",
+       "page": 33
+      },
+      {
+       "fi": "2029–2031: Terveydenedistämistyö julkisen sektorin ja eri kieli- ja kulttuurivähemmistöjä edustavien järjestöjen kanssa on vakiintunutta.",
+       "page": 33
+      }
+     ],
+     "metrics": [
+      {
+       "fi": "Mittari: Seulontoihin osallistumisasteen parantuminen siten, että äidinkielenään muita kieliä kuin suomea ja ruotsia puhuvan väestön osallistumisaste saavuttaa suomen- ja ruotsinkielisen väestön tason.",
+       "page": 33,
+       "en": "Screening participation of people whose mother tongue is not Finnish or Swedish reaches the level of the Finnish- and Swedish-speaking population."
+      }
+     ],
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=33"
+    },
+    "relatedMeasures": [
+     {
+      "id": "2.4.1",
+      "title_en": "Use the screening programmes' quality manuals throughout service procurement and steering",
+      "pages": [
+       47,
+       48
+      ],
+      "owner_en": "National cancer screening steering group, screening programme expert groups, wellbeing services counties and the City of Helsinki, Cancer Registry",
+      "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=47"
+     },
+     {
+      "id": "2.4.4",
+      "title_en": "Secure funding for pilot studies run within the screening programme",
+      "pages": [
+       50
+      ],
+      "owner_en": "Finnish Cancer Registry, wellbeing services counties, HUS and the City of Helsinki",
+      "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=50"
+     }
+    ],
+    "reading_en": "Multilingual, plain-language re-invitations are what 1.3.1 funds, and its metric is that participation of people whose mother tongue is not Finnish or Swedish reaches the level of Finnish and Swedish speakers. The stepped pilot fits 2.4.4.",
+    "gap_en": "The roadmap names no colorectal reminder protocol and no second kit.",
+    "noRoadmapMeasureFor": [
+     "a second colorectal screening kit for non-responders"
+    ],
+    "roadmap": {
+     "title": "Kansallinen syöpästrategia 2026–2035 – Toimeenpanon tiekartta vuosille 2026–2031",
+     "titleEn": "Finland's National Cancer Strategy 2026–2035: Roadmap for implementation for 2026–2031",
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf",
+     "pdfSha256": "f9d4ed478a7531b0ee26c84f9d5df7c96137f8e192ca27efd8afc5b1c1e2ecb5",
+     "note": "Finnish quotes are verbatim from the roadmap (see manifest quoteRule). English text is the SAMA team's own reading and translation, not an official one. A mapping says which roadmap measure an action would serve; it is not an endorsement by the roadmap's authors."
+    }
+   }
+  },
+  {
+   "turn": 1,
+   "name": "get_evidence",
+   "args": {
+    "action_id": "pathway-timestamps"
+   },
+   "ok": true,
+   "output": {
+    "action_id": "pathway-timestamps",
+    "title": "Record four pathway timestamps for every cancer patient",
+    "action": "Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.",
+    "accountable_owner": "FICAN with THL and the Finnish Cancer Registry",
+    "track": "enabling",
+    "level": "national",
+    "pathway_stage": "treatment",
+    "mechanism": "The Goal 3 indicator \"treatment within target times\" cannot be computed from open data today. Without it no county can see where its own pathway loses time.",
+    "indicator_to_monitor": {
+     "key": "Share of new cancer cases with all four timestamps recorded",
+     "title": "Share of new cancer cases with all four timestamps recorded"
+    },
+    "what_remains_unknown": "No health effect is modelled: this is the measurement that makes the other actions accountable.",
+    "evidence": [
+     {
+      "id": "fi-strategy-goal3",
+      "finding": "National Cancer Strategy 2026-2035, objective 3 'Ensuring equal and effective cancer care': five-year survival of poor-prognosis cancers reaches the Nordic level (lung +14 pp, pancreas +6 pp, liver +14 pp vs the 2023 NORDCAN level; Nordic = mean of Sweden and Norway); cancer mortality decreases by 10% (currently 13,300 deaths per year); patients access treatment within the established target times (THL Ohjaus 21/2016).",
+      "value": null,
+      "unit": "strategy indicator",
+      "citation": "Ministry of Social Affairs and Health / FICAN. National Cancer Strategy 2026-2035. Figure 1 and section 3.",
+      "verified_at_source": true,
+      "caveat": null
+     },
+     {
+      "id": "fi-strategy-3-1-no-national-pathways",
+      "finding": "Currently no unified national system guides disease-specific care guidelines or the implementation and monitoring of care pathways; existing guidelines, pathways, targets and indicators are not coordinated nationally, which perpetuates regional inequalities in access to and effectiveness of cancer care.",
+      "value": null,
+      "unit": "finding",
+      "citation": "National Cancer Strategy 2026-2035, sub-objective 3.1.",
+      "verified_at_source": true,
+      "caveat": null
+     }
+    ]
+   }
+  },
+  {
+   "turn": 1,
+   "name": "get_roadmap_measure",
+   "args": {
+    "action_id": "pathway-timestamps"
+   },
+   "ok": true,
+   "output": {
+    "query": "pathway-timestamps",
+    "actionId": "pathway-timestamps",
+    "source": "src/recommend.mjs INTERVENTIONS",
+    "fit": "serves",
+    "statement": "Serves roadmap measure 3.2.1; the roadmap does not name this specific action.",
+    "primaryMeasure": {
+     "id": "3.2.1",
+     "pages": [
+      59,
+      60
+     ],
+     "heading": {
+      "fi": "Toimenpide 3.2.1 Luodaan lainsäädännöllinen pohja THL:n Syöpärekisterin yhteyteen perustettavalle syövän hoidon laaturekisterille",
+      "page": 59
+     },
+     "title_en": "Create the legal basis for a cancer care quality register at THL's Cancer Registry",
+     "keyText": [
+      {
+       "fi": "Perustetaan THL:n Syöpärekisterin yhteyteen kansallinen syövän hoidon laaturekisteri.",
+       "page": 59,
+       "en": "A national cancer care quality register is set up at THL's Cancer Registry."
+      }
+     ],
+     "owner": {
+      "fi": "Vastuutaho: STM (asetusmuutos), THL/Suomen Syöpärekisteri (syövän laaturekisterin perustaminen ja ylläpito), FICAN.",
+      "page": 59
+     },
+     "owner_en": "STM (decree change), THL / Finnish Cancer Registry (establishes and maintains the register), FICAN",
+     "resource": {
+      "fi": "Arvioitu tarvittava määräraha 2 500 000 €.",
+      "page": 59
+     },
+     "schedule": [
+      {
+       "fi": "2026–2028: Laaturekisteriasetus on päivitetty koskemaan syöpäsairauksia.",
+       "page": 60
+      },
+      {
+       "fi": "2029–2031: Syövän laaturekisteri tuottaa vähintään viiden eri syövän vuosittaiset raportit",
+       "page": 60
+      }
+     ],
+     "metrics": [
+      {
+       "fi": "Mittari: Laaturekisterin tietopohja (ml. levinneisyystieto) mahdollistaa laadun ja vaikuttavuuden luotettavan arvioinnin ja vertailun (tietopohjan kattavuus 90 %); Kliinisten syöpäilmoitusten määrä (tavoitteena 90 % tapauksista automatisoidusti vuoteen 2030 mennessä).",
+       "page": 60,
+       "en": "Register data (including stage) allow reliable assessment and comparison of quality and effectiveness (coverage 90%); clinical cancer notifications (target: 90% of cases automated by 2030)."
+      }
+     ],
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=59"
+    },
+    "relatedMeasures": [
+     {
+      "id": "3.1.2",
+      "title_en": "Write cancer-specific care pathway descriptions, regional pathways adapted from them, and a mechanism to maintain and manage them",
+      "pages": [
+       56,
+       57
+      ],
+      "owner_en": "FICAN with the national multidisciplinary cancer groups (pathway content); wellbeing services counties and HUS (implementation)",
+      "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=56"
+     },
+     {
+      "id": "3.1.4",
+      "title_en": "Define national quality and effectiveness targets and monitoring indicators so that care pathways can be monitored",
+      "pages": [
+       58,
+       59
+      ],
+      "owner_en": "FICAN with the national cancer diagnostics and treatment steering group (shared indicators) and the national multidisciplinary cancer groups (cancer-specific targets and indicators); THL (methodological support)",
+      "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=58"
+     },
+     {
+      "id": "3.2.2",
+      "title_en": "Define and start peer-development processes that compare and review quality register data systematically",
+      "pages": [
+       60,
+       61
+      ],
+      "owner_en": "FICAN (organises peer review and peer development), THL",
+      "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=60"
+     },
+     {
+      "id": "4.1.3",
+      "title_en": "Produce reliable evidence from the national cancer data resource for research, treatment effectiveness and real-time management",
+      "pages": [
+       80
+      ],
+      "owner_en": "FHDS-Tieto, authorities, universities; also wellbeing services counties and HUS",
+      "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=80"
+     }
+    ],
+    "reading_en": "Recording first contact, referral, diagnosis and treatment dates in the national quality register is what the 3.1.2 metric 'patients access treatment within the target times' needs before it can be computed, and what 3.2.2's county benchmarking and 4.1.3's live views of treatment start delays would read.",
+    "gap_en": "The roadmap does not list these four dates, the entry route, or quarterly county medians. Which timestamps the register holds is left to 3.1.4 and the register work in 3.2.1.",
+    "noRoadmapMeasureFor": [
+     "quarterly publication of county-level medians (3.2.2 has annual peer reviews and publicly reported regional indicators, without a frequency for publication)"
+    ],
+    "thresholdRelabels": [
+     {
+      "location": "eventlog/aggregate.py aggregate(): thresholds=dict(primary_care=90, diagnostic=60, treatment=30, total=180); written to data/eventlog/county-intervals.json as threshold_days and share_within",
+      "actions": [
+       "four-timestamps",
+       "pathway-timestamps"
+      ],
+      "currentValues": {
+       "primary_care": 90,
+       "diagnostic": 60,
+       "treatment": 30,
+       "total": 180
+      },
+      "relabel_en": "Placeholder threshold, not a national target time. Cancer-specific access times are to be defined under roadmap measure 3.1.2 (five cancers, 2026–2028, p. 57), and quality targets and indicators under 3.1.4 (at least the five largest cancer groups, 2026–2028, p. 58). Replace these values when they are published.",
+      "measures": [
+       "3.1.2",
+       "3.1.4"
+      ]
+     },
+     {
+      "location": "src/analysis.mjs goal3 indicator 'treatment-within-target' and web/app.mjs 'Treatment within target times: not publicly measurable'",
+      "actions": [
+       "pathway-timestamps"
+      ],
+      "currentValues": {},
+      "relabel_en": "The target times themselves are not yet defined nationally. Roadmap measure 3.1.2 schedules cancer-specific access times for five cancers in 2026–2028, and its metric is that patients access treatment within the target times.",
+      "measures": [
+       "3.1.2"
+      ],
+      "quotes": [
+       {
+        "fi": "Mittari: Potilaat pääsevät hoitoon tavoiteaikojen puitteissa.",
+        "page": 57
+       },
+       {
+        "fi": "2026–2028: Kansalliset hoitoketjukuvaukset tehty viidestä syövästä ja syöpäkohtaiset hoitoonpääsyajat on määritetty.",
+        "page": 57
+       }
+      ]
+     }
+    ],
+    "roadmap": {
+     "title": "Kansallinen syöpästrategia 2026–2035 – Toimeenpanon tiekartta vuosille 2026–2031",
+     "titleEn": "Finland's National Cancer Strategy 2026–2035: Roadmap for implementation for 2026–2031",
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf",
+     "pdfSha256": "f9d4ed478a7531b0ee26c84f9d5df7c96137f8e192ca27efd8afc5b1c1e2ecb5",
+     "note": "Finnish quotes are verbatim from the roadmap (see manifest quoteRule). English text is the SAMA team's own reading and translation, not an official one. A mapping says which roadmap measure an action would serve; it is not an endorsement by the roadmap's authors."
+    }
+   }
+  }
+ ],
+ "turns": [
+  {
+   "seconds": 0.231,
+   "usage": {
+    "prompt_tokens": 1546,
+    "total_tokens": 1631,
+    "completion_tokens": 85,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "finish_reason": "tool_calls",
+   "n_tool_calls": 2,
+   "reasoning_chars": 0
+  },
+  {
+   "seconds": 0.371,
+   "usage": {
+    "prompt_tokens": 3449,
+    "total_tokens": 3629,
+    "completion_tokens": 180,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "finish_reason": "tool_calls",
+   "n_tool_calls": 6,
+   "reasoning_chars": 0
+  },
+  {
+   "seconds": 1.143,
+   "usage": {
+    "prompt_tokens": 9853,
+    "total_tokens": 10442,
+    "completion_tokens": 589,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "finish_reason": "stop",
+   "n_tool_calls": 0,
+   "reasoning_chars": 0
+  },
+  {
+   "seconds": 1.198,
+   "usage": {
+    "prompt_tokens": 10517,
+    "total_tokens": 11106,
+    "completion_tokens": 589,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+     "reasoning_tokens": 0
+    }
+   },
+   "finish_reason": "stop",
+   "n_tool_calls": 0,
+   "reasoning_chars": 0
+  }
+ ],
+ "final": {
+  "text": "{\n  \"county_id\": \"HVA12\",\n  \"actions\": [\n    {\n      \"action_id\": \"timed-pathways\",\n      \"action\": \"Adopt national cancer-specific pathways with maximum times per step and a single fast-track referral from primary care, following the Danish and Swedish model.\",\n      \"rationale\": \"The optimiser picked timed-pathways for South Savo wellbeing services county, with a model scenario of 7.2 deaths postponed per year (range 1.1-14.5) at an assumed cost of EUR 192,216 per year, and it stayed in the portfolio in 94% of sensitivity runs.\",\n      \"owner_role\": \"Wellbeing services county, coordinated nationally by FICAN\",\n      \"indicator\": \"Patients waiting over 6 months during the year for access to specialised health care per 10 000 inhabitants\",\n      \"roadmap_measure\": \"3.1.2\"\n    },\n    {\n      \"action_id\": \"screening-reminders\",\n      \"action\": \"Send a second kit with plain-language, multilingual instructions to non-responders; measure the gain as a stepped pilot.\",\n      \"rationale\": \"South Savo wellbeing services county's colorectal screening participation is 78.7% against the 80% target, and the expected gain is 1.33-1.33 percentage points, closing 100% of the gap at an assumed cost of EUR 51,258 per year.\",\n      \"owner_role\": \"Wellbeing services county screening unit\",\n      \"indicator\": \"Proportion of invited to colorectal cancer screening who attended, %\",\n      \"roadmap_measure\": \"1.3.1\"\n    },\n    {\n      \"action_id\": \"pathway-timestamps\",\n      \"action\": \"Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.\",\n      \"rationale\": \"This is the first step for every county, because time from referral to diagnosis and from diagnosis to first treatment is not published by county for any cancer, so the Goal 3 indicator cannot be checked from open data in South Savo wellbeing services county.\",\n      \"owner_role\": \"FICAN with THL and the Finnish Cancer Registry\",\n      \"indicator\": \"Share of new cancer cases with all four timestamps recorded\",\n      \"roadmap_measure\": \"3.2.1\"\n    }\n  ],\n  \"evidence_does_not_support\": \"The evidence does not support a guaranteed mortality effect: the timed-pathways estimate is a model scenario under stated assumptions, the Danish evidence is before/after without a control group, and no Finnish effect size exists for colorectal screening reminders.\"\n}",
+  "parsed": {
+   "kind": "plan",
+   "obj": {
+    "county_id": "HVA12",
+    "actions": [
+     {
+      "action_id": "timed-pathways",
+      "action": "Adopt national cancer-specific pathways with maximum times per step and a single fast-track referral from primary care, following the Danish and Swedish model.",
+      "rationale": "The optimiser picked timed-pathways for South Savo wellbeing services county, with a model scenario of 7.2 deaths postponed per year (range 1.1-14.5) at an assumed cost of EUR 192,216 per year, and it stayed in the portfolio in 94% of sensitivity runs.",
+      "owner_role": "Wellbeing services county, coordinated nationally by FICAN",
+      "indicator": "Patients waiting over 6 months during the year for access to specialised health care per 10 000 inhabitants",
+      "roadmap_measure": "3.1.2"
+     },
+     {
+      "action_id": "screening-reminders",
+      "action": "Send a second kit with plain-language, multilingual instructions to non-responders; measure the gain as a stepped pilot.",
+      "rationale": "South Savo wellbeing services county's colorectal screening participation is 78.7% against the 80% target, and the expected gain is 1.33-1.33 percentage points, closing 100% of the gap at an assumed cost of EUR 51,258 per year.",
+      "owner_role": "Wellbeing services county screening unit",
+      "indicator": "Proportion of invited to colorectal cancer screening who attended, %",
+      "roadmap_measure": "1.3.1"
+     },
+     {
+      "action_id": "pathway-timestamps",
+      "action": "Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.",
+      "rationale": "This is the first step for every county, because time from referral to diagnosis and from diagnosis to first treatment is not published by county for any cancer, so the Goal 3 indicator cannot be checked from open data in South Savo wellbeing services county.",
+      "owner_role": "FICAN with THL and the Finnish Cancer Registry",
+      "indicator": "Share of new cancer cases with all four timestamps recorded",
+      "roadmap_measure": "3.2.1"
+     }
+    ],
+    "evidence_does_not_support": "The evidence does not support a guaranteed mortality effect: the timed-pathways estimate is a model scenario under stated assumptions, the Danish evidence is before/after without a control group, and no Finnish effect size exists for colorectal screening reminders."
+   }
+  },
+  "errors": []
+ },
+ "messages": [
+  {
+   "role": "user",
+   "content": "Draft the action plan for county_id HVA12 (South Savo wellbeing services county)."
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "tool_calls": [
+    {
+     "id": "chatcmpl-tool-984cd6abb5e16536",
+     "type": "function",
+     "function": {
+      "name": "get_county_brief",
+      "arguments": "{\"county_id\": \"HVA12\"}"
+     }
+    },
+    {
+     "id": "chatcmpl-tool-9fba237dcfcc0e29",
+     "type": "function",
+     "function": {
+      "name": "get_portfolio",
+      "arguments": "{\"budget_meur\": 6, \"equity_weight\": 3, \"county_id\": \"HVA12\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "chatcmpl-tool-984cd6abb5e16536",
+   "name": "get_county_brief",
+   "content": "{\"county_id\":\"HVA12\",\"county_name\":\"South Savo wellbeing services county\",\"title\":\"Cancer pathway brief: South Savo wellbeing services county\",\"regionId\":\"HVA12\",\"snapshotSha256\":\"9a68651c35a2f2265fe18ccd7da8cd637ab94e80c86a866e91dba057425f5831\",\"humanApproval\":\"REQUIRED_NOT_GRANTED\",\"claims\":[{\"id\":\"HVA12-mortality\",\"kind\":\"MEASURED\",\"text\":\"In 2021-2025, age-standardised cancer mortality in South Savo wellbeing services county was 0.5% below the national level (ratio 0.995, 95% interval 0.957-1.034), about 2.2 fewer deaths a year than its age structure predicts.\",\"evidence\":[],\"sources\":[{\"label\":\"Statistics Finland: causes of death 13u5 and 11az, population 14wx\",\"url\":\"https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/\"}],\"facts\":{\"county\":\"South Savo wellbeing services county\",\"period\":\"2021-2025\",\"measure\":\"age-standardised cancer mortality ratio, county relative to Finland (1 = national level)\",\"ratio\":0.995,\"ratio_95_percent_interval\":\"0.957-1.034\",\"percent_difference_from_national_level\":0.5,\"direction\":\"below the national level\",\"deaths_per_year_compared_with_expected_from_age_structure\":\"2.2 fewer\"}},{\"id\":\"HVA12-locate\",\"kind\":\"MEASURED\",\"text\":\"No measured pathway stage shows South Savo wellbeing services county clearly worse than the country; if outcomes differ, the cause is not locatable from public data.\",\"evidence\":[],\"sources\":[],\"facts\":{\"county\":\"South Savo wellbeing services county\",\"pathway_stages_measurable_from_public_data_in_order\":[\"early detection (screening participation)\",\"first contact and primary care access\",\"referral into specialist care\"],\"stages_where_county_is_clearly_worse_than_the_country\":[],\"earliest_such_stage\":\"none\"}},{\"id\":\"HVA12-blind-spot\",\"kind\":\"MEASURED\",\"text\":\"Time from referral to diagnosis and from diagnosis to first treatment is not published by county for any cancer, so the Goal 3 indicator \\\"patients access treatment within the established target times\\\" cannot be checked from open data.\",\"evidence\":[\"fi-strategy-goal3\",\"fi-strategy-3-1-no-national-pathways\"],\"sources\":[],\"facts\":{\"statistics_not_published_by_county_for_any_cancer\":[\"time from referral to diagnosis\",\"time from diagnosis to first treatment\"],\"goal_3_indicator_that_therefore_cannot_be_checked_from_open_data\":\"patients access treatment within the established target times\"}},{\"id\":\"HVA12-action-timed-pathways\",\"kind\":\"SCENARIO\",\"text\":\"Recommended: standardised, timed cancer pathways with a fast-track referral. Under the stated assumptions this postpones about 7.2 deaths a year in South Savo wellbeing services county (range 1.1-14.5) for an assumed EUR 192,216 a year; it stayed in the portfolio in 94% of sensitivity runs.\",\"evidence\":[\"jensen-2015-cpp-interval\",\"jensen-2017-cpp-excess-hazard\",\"fi-strategy-3-1-no-national-pathways\"],\"sources\":[],\"facts\":{\"county\":\"South Savo wellbeing services county\",\"recommended_action\":\"Standardised, timed cancer pathways with a fast-track referral\",\"nature_of_estimate\":\"model scenario under stated assumptions, not a measured effect\",\"deaths_postponed_per_year_central\":7.2,\"deaths_postponed_per_year_range\":\"1.1-14.5\",\"assumed_cost_eur_per_year\":192216,\"percent_of_sensitivity_runs_in_which_action_stayed_in_portfolio\":94}},{\"id\":\"HVA12-detect-screen_colorectal\",\"kind\":\"SCENARIO\",\"text\":\"Proportion of invited to colorectal cancer screening who attended, %: 78.7% against the 80% target. Reminder and multilingual re-invitation for colorectal screening is expected to add 1.33-1.33 percentage points, closing about 100% of the gap.\",\"evidence\":[\"virtanen-2015-attendance-steps\",\"fi-strategy-goal2-screening\"],\"sources\":[{\"label\":\"THL Sotkanet: Suolistosyövän seulontaan osallistuneiden osuus kutsutuista, %\",\"url\":\"https://sotkanet.fi/sotkanet/fi/metadata/indicators/6103\"}],\"facts\":{\"county\":\"South Savo wellbeing services county\",\"indicator\":\"Proportion of invited to colorectal cancer screening who attended, %\",\"county_participation_percent\":78.7,\"national_target_percent\":80,\"proposed_action\":\"Reminder and multilingual re-invitation for colorectal screening\",\"expected_gain_percentage_points_range\":\"1.33-1.33\",\"percent_of_gap_to_target_closed_at_central_estimate\":100,\"nature_of_estimate\":\"expected gain taken from Finnish trial evidence, a scenario\"}},{\"id\":\"HVA12-enable\",\"kind\":\"MEASURED\",\"text\":\"First step for every county: Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.\",\"evidence\":[\"fi-strategy-goal3\",\"fi-strategy-3-1-no-national-pathways\"],\"sources\":[],\"facts\":{\"recommended_first_step_for_every_county\":\"Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.\",\"reason\":\"The Goal 3 indicator \\\"treatment within target times\\\" cannot be computed from open data today. Without it no county can see where its own pathway loses time.\"}}]}"
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "chatcmpl-tool-9fba237dcfcc0e29",
+   "name": "get_portfolio",
+   "content": "{\"label\":\"SCENARIO: model output under stated assumptions, not a measured effect\",\"budget_meur\":6,\"budget_eur_per_year\":6000000,\"equity_weight\":3,\"settings\":\"default (stored in app.json, with sensitivity ranges)\",\"national_total\":{\"deaths_postponed_per_year_central\":177.1,\"deaths_postponed_per_year_range\":\"38.2-351.5\",\"spent_eur_per_year\":5949776,\"share_of_benefit_in_counties_with_above_national_mortality\":0.601},\"picks_in_all_counties\":18,\"county_id\":\"HVA12\",\"county_name\":\"South Savo wellbeing services county\",\"county_picks\":[{\"county_id\":\"HVA12\",\"action_id\":\"timed-pathways\",\"cost_eur_per_year\":192216,\"deaths_postponed_per_year_central\":7.2,\"deaths_postponed_per_year_range\":\"1.1-14.5\",\"percent_of_sensitivity_runs_in_which_action_stayed\":94}],\"county_screening_actions\":[{\"action_id\":\"screening-reminders\",\"indicator\":\"Proportion of invited to colorectal cancer screening who attended, %\",\"county_participation_percent\":78.7,\"national_target_percent\":80,\"expected_gain_percentage_points_range\":\"1.33-1.33\",\"percent_of_gap_to_target_closed_at_central_estimate\":100,\"assumed_cost_eur_per_year\":51258}],\"note\":\"Screening actions are scored on participation, not mortality; they are not part of the budgeted mortality portfolio.\"}"
+  },
+  {
+   "role": "assistant",
+   "content": "",
+   "tool_calls": [
+    {
+     "id": "chatcmpl-tool-815418feef0238a5",
+     "type": "function",
+     "function": {
+      "name": "get_evidence",
+      "arguments": "{\"action_id\": \"timed-pathways\"}"
+     }
+    },
+    {
+     "id": "chatcmpl-tool-9fc0fe83b37460fe",
+     "type": "function",
+     "function": {
+      "name": "get_roadmap_measure",
+      "arguments": "{\"action_id\": \"timed-pathways\"}"
+     }
+    },
+    {
+     "id": "chatcmpl-tool-861e55536e00980f",
+     "type": "function",
+     "function": {
+      "name": "get_evidence",
+      "arguments": "{\"action_id\": \"screening-reminders\"}"
+     }
+    },
+    {
+     "id": "chatcmpl-tool-9b17439851e6e779",
+     "type": "function",
+     "function": {
+      "name": "get_roadmap_measure",
+      "arguments": "{\"action_id\": \"screening-reminders\"}"
+     }
+    },
+    {
+     "id": "chatcmpl-tool-bf6bb4b96b3947cb",
+     "type": "function",
+     "function": {
+      "name": "get_evidence",
+      "arguments": "{\"action_id\": \"pathway-timestamps\"}"
+     }
+    },
+    {
+     "id": "chatcmpl-tool-aeaab4da23e559f2",
+     "type": "function",
+     "function": {
+      "name": "get_roadmap_measure",
+      "arguments": "{\"action_id\": \"pathway-timestamps\"}"
+     }
+    }
+   ]
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "chatcmpl-tool-815418feef0238a5",
+   "name": "get_evidence",
+   "content": "{\"action_id\":\"timed-pathways\",\"title\":\"Standardised, timed cancer pathways with a fast-track referral\",\"action\":\"Adopt national cancer-specific pathways with maximum times per step and a single fast-track referral from primary care, following the Danish and Swedish model.\",\"accountable_owner\":\"Wellbeing services county, coordinated nationally by FICAN\",\"track\":\"timeliness\",\"level\":\"county\",\"pathway_stage\":\"referral\",\"mechanism\":\"One referral criterion and booked slots replace sequential queues between primary care, imaging and the specialist clinic.\",\"indicator_to_monitor\":{\"key\":\"specialist_wait_over_6m\",\"title\":\"Patients waiting over 6 months during the year for access to specialised health care per 10 000 inhabitants\",\"unit\":\"per 10 000\"},\"what_remains_unknown\":\"Danish evidence is before/after without a control group. Patients left outside the pathway waited 4 days longer, so coverage must be monitored.\",\"evidence\":[{\"id\":\"jensen-2015-cpp-interval\",\"finding\":\"After Denmark introduced standardised cancer patient pathways, the median diagnostic interval was 17 days shorter in 2010 than in 2004/05; patients not referred to a pathway waited 4 days longer.\",\"value\":-17,\"unit\":\"days, median diagnostic interval after vs before\",\"citation\":\"Jensen H, Tørring ML, Olesen F, Overgaard J, Fenger-Grøn M, Vedsted P. Diagnostic intervals before and after implementation of cancer patient pathways. BMC Cancer 2015;15:308.\",\"verified_at_source\":true,\"caveat\":\"Before/after without control group; two-tier risk for patients outside the pathway.\"},{\"id\":\"jensen-2017-cpp-excess-hazard\",\"finding\":\"Danish patients referred through a cancer patient pathway had a 1-year excess hazard ratio of 0.86 (0.73-1.01) vs patients not referred; 3-year relative survival rose from 45% to 54% across the implementation period.\",\"value\":0.86,\"unit\":\"1-year excess hazard ratio, pathway-referred vs not\",\"citation\":\"Jensen H, Tørring ML, Vedsted P. Prognostic consequences of implementing cancer patient pathways in Denmark. BMC Cancer 2017;17:627.\",\"verified_at_source\":true,\"caveat\":\"Interval includes 1; lead-time and secular-trend bias acknowledged by authors.\"},{\"id\":\"fi-strategy-3-1-no-national-pathways\",\"finding\":\"Currently no unified national system guides disease-specific care guidelines or the implementation and monitoring of care pathways; existing guidelines, pathways, targets and indicators are not coordinated nationally, which perpetuates regional inequalities in access to and effectiveness of cancer care.\",\"value\":null,\"unit\":\"finding\",\"citation\":\"National Cancer Strategy 2026-2035, sub-objective 3.1.\",\"verified_at_source\":true,\"caveat\":null}]}"
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "chatcmpl-tool-9fc0fe83b37460fe",
+   "name": "get_roadmap_measure",
+   "content": "{\"query\":\"timed-pathways\",\"actionId\":\"timed-pathways\",\"source\":\"src/recommend.mjs INTERVENTIONS\",\"fit\":\"named\",\"statement\":\"Roadmap measure 3.1.2 names this action.\",\"primaryMeasure\":{\"id\":\"3.1.2\",\"pages\":[56,57],\"heading\":{\"fi\":\"Toimenpide 3.1.2 Laaditaan syöpäkohtaiset hoitoketjukuvaukset, ja niiden pohjalta sovelletut alueelliset hoitoketjut, sekä mekanismi niiden ylläpitoon ja hallintaan\",\"page\":56},\"title_en\":\"Write cancer-specific care pathway descriptions, regional pathways adapted from them, and a mechanism to maintain and manage them\",\"keyText\":[{\"fi\":\"Kansalliset hoitoketjut kuvataan hyödyntäen pohjoismaissa kehitettyjä malleja.\",\"page\":56,\"en\":\"National pathways are described using models developed in the Nordic countries (the text names Denmark's Kræftpakkeforløb, Sweden's SVF and Norway's Pakkeforløp).\"},{\"fi\":\"Ketjuissa määritellään ja sovitaan mm. työnjaosta eri toimijoiden välillä, tavoitelluista hoitoonpääsyajoista, keskeisistä laatu- ja vaikuttavuusindikaattoreista sekä kirjaamis- ja koodistokäytännöistä.\",\"page\":56,\"en\":\"The pathways define and agree, among other things, the division of work, target access times, the key quality and effectiveness indicators, and recording and coding practices.\"}],\"owner\":{\"fi\":\"Vastuutaho: FICAN (kansallinen koordinaatio, prosessin hallinta ja tukitoiminnot sekä alueellinen käyttöönotto ja seuranta) yhteistyössä kansallisten monialaisten syöpäryhmien kanssa (hoitoketjujen sisällöt), hyvinvointialueet ja HUS (hoitoketjujen toteutus).\",\"page\":57},\"owner_en\":\"FICAN with the national multidisciplinary cancer groups (pathway content); wellbeing services counties and HUS (implementation)\",\"resource\":{\"fi\":\"Resurssi: Toteutetaan osana toimenpiteessä 3.1.1 kuvattua kokonaisresursointia.\",\"page\":57},\"schedule\":[{\"fi\":\"2026–2028: Kansalliset hoitoketjukuvaukset tehty viidestä syövästä ja syöpäkohtaiset hoitoonpääsyajat on määritetty.\",\"page\":57,\"en\":\"2026–2028: national pathway descriptions done for five cancers and cancer-specific access times defined.\"},{\"fi\":\"2029–2031: Kansalliset hoitoketjukuvaukset laadittu kaikista merkittävistä syövistä/ syöpäryhmistä.\",\"page\":57}],\"metrics\":[{\"fi\":\"Mittari: Potilaat pääsevät hoitoon tavoiteaikojen puitteissa.\",\"page\":57,\"en\":\"Patients access treatment within the target times.\"}],\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=56\"},\"relatedMeasures\":[{\"id\":\"2.5.2\",\"title_en\":\"Support a smooth transfer to specialised care by defining standardised referral criteria within national care pathways, so that patients with possible cancer symptoms who meet them are sent quickly to the diagnostic tests they need\",\"pages\":[52,53],\"owner_en\":\"FICAN (coordination and roll-out) with the national multiprofessional cancer groups\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=52\"},{\"id\":\"3.1.4\",\"title_en\":\"Define national quality and effectiveness targets and monitoring indicators so that care pathways can be monitored\",\"pages\":[58,59],\"owner_en\":\"FICAN with the national cancer diagnostics and treatment steering group (shared indicators) and the national multidisciplinary cancer groups (cancer-specific targets and indicators); THL (methodological support)\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=58\"}],\"reading_en\":\"3.1.2 writes cancer-specific national pathways on the Danish, Swedish and Norwegian models with target access times; 2.5.2 adds standardised referral criteria from primary care. Together they are this action.\",\"gap_en\":\"SAMA's action text says 'maximum times per step'. The roadmap leaves the values to 3.1.2 (five cancers in 2026–2028); SAMA proposes no values of its own.\",\"noRoadmapMeasureFor\":[],\"thresholdRelabels\":[{\"location\":\"src/recommend.mjs INTERVENTIONS timed-pathways.action ('maximum times per step')\",\"actions\":[\"timed-pathways\"],\"currentValues\":{},\"relabel_en\":\"Maximum times per step are placeholders until roadmap measure 3.1.2 defines cancer-specific access times (five cancers, 2026–2028) and 3.1.4 sets the targets and indicators. SAMA proposes no values.\",\"measures\":[\"3.1.2\",\"3.1.4\"]}],\"roadmap\":{\"title\":\"Kansallinen syöpästrategia 2026–2035 – Toimeenpanon tiekartta vuosille 2026–2031\",\"titleEn\":\"Finland's National Cancer Strategy 2026–2035: Roadmap for implementation for 2026–2031\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf\",\"pdfSha256\":\"f9d4ed478a7531b0ee26c84f9d5df7c96137f8e192ca27efd8afc5b1c1e2ecb5\",\"note\":\"Finnish quotes are verbatim from the roadmap (see manifest quoteRule). English text is the SAMA team's own reading and translation, not an official one. A mapping says which roadmap measure an action would serve; it is not an endorsement by the roadmap's authors.\"}}"
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "chatcmpl-tool-861e55536e00980f",
+   "name": "get_evidence",
+   "content": "{\"action_id\":\"screening-reminders\",\"title\":\"Reminder and multilingual re-invitation for colorectal screening\",\"action\":\"Send a second kit with plain-language, multilingual instructions to non-responders; measure the gain as a stepped pilot.\",\"accountable_owner\":\"Wellbeing services county screening unit\",\"track\":\"detection\",\"level\":\"county\",\"pathway_stage\":\"detection\",\"mechanism\":\"Transfers the reminder protocol proven in Finnish cervical screening.\",\"indicator_to_monitor\":{\"key\":\"screen_colorectal\",\"title\":\"Proportion of invited to colorectal cancer screening who attended, %\",\"unit\":\"%\"},\"what_remains_unknown\":\"No Finnish effect size exists for colorectal screening; the gain is borrowed from cervical screening and must be measured.\",\"evidence\":[{\"id\":\"virtanen-2015-attendance-steps\",\"finding\":\"In Finland, reminder letters raised cervical screening participation from 72.6% to 79.2% and adding self-sampling raised it to 82.2%.\",\"value\":9.6,\"unit\":\"percentage points (72.6% to 79.2% with reminder letters, 82.2% adding self-sampling)\",\"citation\":\"Virtanen A, et al. Improving cervical cancer screening attendance in Finland. Int J Cancer 2015;136(6):E677-E684.\",\"verified_at_source\":true,\"caveat\":null},{\"id\":\"fi-strategy-goal2-screening\",\"finding\":\"All cancer screening programmes achieve an 80% participation rate in each wellbeing services county; at least 70% of cancers are diagnosed at stages I to II.\",\"value\":80,\"unit\":\"% participation target in every wellbeing services county\",\"citation\":\"National Cancer Strategy 2026-2035, Figure 1.\",\"verified_at_source\":true,\"caveat\":null}]}"
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "chatcmpl-tool-9b17439851e6e779",
+   "name": "get_roadmap_measure",
+   "content": "{\"query\":\"screening-reminders\",\"actionId\":\"screening-reminders\",\"source\":\"src/recommend.mjs INTERVENTIONS\",\"fit\":\"serves\",\"statement\":\"Serves roadmap measure 1.3.1; the roadmap does not name this specific action.\",\"primaryMeasure\":{\"id\":\"1.3.1\",\"pages\":[33],\"heading\":{\"fi\":\"Toimenpide 1.3.1 Parannetaan eri kieliryhmiin kuuluvien väestöryhmien osallistumista rokotuksiin sekä syöpäseulontoihin kohdennetun ja yhteisölähtöisen viestinnän avulla\",\"page\":33},\"title_en\":\"Raise vaccination and cancer screening participation in different language groups through targeted, community-based communication\",\"keyText\":[{\"fi\":\"monikielistä, selkokielistä ja kulttuurisesti sensitiivistä materiaalia\",\"page\":33,\"en\":\"multilingual, plain-language and culturally sensitive material\"}],\"owner\":{\"fi\":\"Vastuutaho: Hyvinvointialueet, Helsingin kaupunki ja HUS, järjestöt, Syöpärekisteri, THL.\",\"page\":33},\"owner_en\":\"Wellbeing services counties, City of Helsinki and HUS, NGOs, Cancer Registry, THL\",\"resource\":{\"fi\":\"Arvioitu tarvittava määräraha 400 000 €.\",\"page\":33},\"schedule\":[{\"fi\":\"2026–2028: Kohderyhmän kanssa jo yhteiskehitettyjä viestintämateriaaleja seulonnoista ja rokotuksista hyödynnetään ja uutta materiaalia tuotetaan tarpeen mukaan eri kielillä.\",\"page\":33},{\"fi\":\"2029–2031: Terveydenedistämistyö julkisen sektorin ja eri kieli- ja kulttuurivähemmistöjä edustavien järjestöjen kanssa on vakiintunutta.\",\"page\":33}],\"metrics\":[{\"fi\":\"Mittari: Seulontoihin osallistumisasteen parantuminen siten, että äidinkielenään muita kieliä kuin suomea ja ruotsia puhuvan väestön osallistumisaste saavuttaa suomen- ja ruotsinkielisen väestön tason.\",\"page\":33,\"en\":\"Screening participation of people whose mother tongue is not Finnish or Swedish reaches the level of the Finnish- and Swedish-speaking population.\"}],\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=33\"},\"relatedMeasures\":[{\"id\":\"2.4.1\",\"title_en\":\"Use the screening programmes' quality manuals throughout service procurement and steering\",\"pages\":[47,48],\"owner_en\":\"National cancer screening steering group, screening programme expert groups, wellbeing services counties and the City of Helsinki, Cancer Registry\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=47\"},{\"id\":\"2.4.4\",\"title_en\":\"Secure funding for pilot studies run within the screening programme\",\"pages\":[50],\"owner_en\":\"Finnish Cancer Registry, wellbeing services counties, HUS and the City of Helsinki\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=50\"}],\"reading_en\":\"Multilingual, plain-language re-invitations are what 1.3.1 funds, and its metric is that participation of people whose mother tongue is not Finnish or Swedish reaches the level of Finnish and Swedish speakers. The stepped pilot fits 2.4.4.\",\"gap_en\":\"The roadmap names no colorectal reminder protocol and no second kit.\",\"noRoadmapMeasureFor\":[\"a second colorectal screening kit for non-responders\"],\"roadmap\":{\"title\":\"Kansallinen syöpästrategia 2026–2035 – Toimeenpanon tiekartta vuosille 2026–2031\",\"titleEn\":\"Finland's National Cancer Strategy 2026–2035: Roadmap for implementation for 2026–2031\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf\",\"pdfSha256\":\"f9d4ed478a7531b0ee26c84f9d5df7c96137f8e192ca27efd8afc5b1c1e2ecb5\",\"note\":\"Finnish quotes are verbatim from the roadmap (see manifest quoteRule). English text is the SAMA team's own reading and translation, not an official one. A mapping says which roadmap measure an action would serve; it is not an endorsement by the roadmap's authors.\"}}"
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "chatcmpl-tool-bf6bb4b96b3947cb",
+   "name": "get_evidence",
+   "content": "{\"action_id\":\"pathway-timestamps\",\"title\":\"Record four pathway timestamps for every cancer patient\",\"action\":\"Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.\",\"accountable_owner\":\"FICAN with THL and the Finnish Cancer Registry\",\"track\":\"enabling\",\"level\":\"national\",\"pathway_stage\":\"treatment\",\"mechanism\":\"The Goal 3 indicator \\\"treatment within target times\\\" cannot be computed from open data today. Without it no county can see where its own pathway loses time.\",\"indicator_to_monitor\":{\"key\":\"Share of new cancer cases with all four timestamps recorded\",\"title\":\"Share of new cancer cases with all four timestamps recorded\"},\"what_remains_unknown\":\"No health effect is modelled: this is the measurement that makes the other actions accountable.\",\"evidence\":[{\"id\":\"fi-strategy-goal3\",\"finding\":\"National Cancer Strategy 2026-2035, objective 3 'Ensuring equal and effective cancer care': five-year survival of poor-prognosis cancers reaches the Nordic level (lung +14 pp, pancreas +6 pp, liver +14 pp vs the 2023 NORDCAN level; Nordic = mean of Sweden and Norway); cancer mortality decreases by 10% (currently 13,300 deaths per year); patients access treatment within the established target times (THL Ohjaus 21/2016).\",\"value\":null,\"unit\":\"strategy indicator\",\"citation\":\"Ministry of Social Affairs and Health / FICAN. National Cancer Strategy 2026-2035. Figure 1 and section 3.\",\"verified_at_source\":true,\"caveat\":null},{\"id\":\"fi-strategy-3-1-no-national-pathways\",\"finding\":\"Currently no unified national system guides disease-specific care guidelines or the implementation and monitoring of care pathways; existing guidelines, pathways, targets and indicators are not coordinated nationally, which perpetuates regional inequalities in access to and effectiveness of cancer care.\",\"value\":null,\"unit\":\"finding\",\"citation\":\"National Cancer Strategy 2026-2035, sub-objective 3.1.\",\"verified_at_source\":true,\"caveat\":null}]}"
+  },
+  {
+   "role": "tool",
+   "tool_call_id": "chatcmpl-tool-aeaab4da23e559f2",
+   "name": "get_roadmap_measure",
+   "content": "{\"query\":\"pathway-timestamps\",\"actionId\":\"pathway-timestamps\",\"source\":\"src/recommend.mjs INTERVENTIONS\",\"fit\":\"serves\",\"statement\":\"Serves roadmap measure 3.2.1; the roadmap does not name this specific action.\",\"primaryMeasure\":{\"id\":\"3.2.1\",\"pages\":[59,60],\"heading\":{\"fi\":\"Toimenpide 3.2.1 Luodaan lainsäädännöllinen pohja THL:n Syöpärekisterin yhteyteen perustettavalle syövän hoidon laaturekisterille\",\"page\":59},\"title_en\":\"Create the legal basis for a cancer care quality register at THL's Cancer Registry\",\"keyText\":[{\"fi\":\"Perustetaan THL:n Syöpärekisterin yhteyteen kansallinen syövän hoidon laaturekisteri.\",\"page\":59,\"en\":\"A national cancer care quality register is set up at THL's Cancer Registry.\"}],\"owner\":{\"fi\":\"Vastuutaho: STM (asetusmuutos), THL/Suomen Syöpärekisteri (syövän laaturekisterin perustaminen ja ylläpito), FICAN.\",\"page\":59},\"owner_en\":\"STM (decree change), THL / Finnish Cancer Registry (establishes and maintains the register), FICAN\",\"resource\":{\"fi\":\"Arvioitu tarvittava määräraha 2 500 000 €.\",\"page\":59},\"schedule\":[{\"fi\":\"2026–2028: Laaturekisteriasetus on päivitetty koskemaan syöpäsairauksia.\",\"page\":60},{\"fi\":\"2029–2031: Syövän laaturekisteri tuottaa vähintään viiden eri syövän vuosittaiset raportit\",\"page\":60}],\"metrics\":[{\"fi\":\"Mittari: Laaturekisterin tietopohja (ml. levinneisyystieto) mahdollistaa laadun ja vaikuttavuuden luotettavan arvioinnin ja vertailun (tietopohjan kattavuus 90 %); Kliinisten syöpäilmoitusten määrä (tavoitteena 90 % tapauksista automatisoidusti vuoteen 2030 mennessä).\",\"page\":60,\"en\":\"Register data (including stage) allow reliable assessment and comparison of quality and effectiveness (coverage 90%); clinical cancer notifications (target: 90% of cases automated by 2030).\"}],\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=59\"},\"relatedMeasures\":[{\"id\":\"3.1.2\",\"title_en\":\"Write cancer-specific care pathway descriptions, regional pathways adapted from them, and a mechanism to maintain and manage them\",\"pages\":[56,57],\"owner_en\":\"FICAN with the national multidisciplinary cancer groups (pathway content); wellbeing services counties and HUS (implementation)\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=56\"},{\"id\":\"3.1.4\",\"title_en\":\"Define national quality and effectiveness targets and monitoring indicators so that care pathways can be monitored\",\"pages\":[58,59],\"owner_en\":\"FICAN with the national cancer diagnostics and treatment steering group (shared indicators) and the national multidisciplinary cancer groups (cancer-specific targets and indicators); THL (methodological support)\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=58\"},{\"id\":\"3.2.2\",\"title_en\":\"Define and start peer-development processes that compare and review quality register data systematically\",\"pages\":[60,61],\"owner_en\":\"FICAN (organises peer review and peer development), THL\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=60\"},{\"id\":\"4.1.3\",\"title_en\":\"Produce reliable evidence from the national cancer data resource for research, treatment effectiveness and real-time management\",\"pages\":[80],\"owner_en\":\"FHDS-Tieto, authorities, universities; also wellbeing services counties and HUS\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=80\"}],\"reading_en\":\"Recording first contact, referral, diagnosis and treatment dates in the national quality register is what the 3.1.2 metric 'patients access treatment within the target times' needs before it can be computed, and what 3.2.2's county benchmarking and 4.1.3's live views of treatment start delays would read.\",\"gap_en\":\"The roadmap does not list these four dates, the entry route, or quarterly county medians. Which timestamps the register holds is left to 3.1.4 and the register work in 3.2.1.\",\"noRoadmapMeasureFor\":[\"quarterly publication of county-level medians (3.2.2 has annual peer reviews and publicly reported regional indicators, without a frequency for publication)\"],\"thresholdRelabels\":[{\"location\":\"eventlog/aggregate.py aggregate(): thresholds=dict(primary_care=90, diagnostic=60, treatment=30, total=180); written to data/eventlog/county-intervals.json as threshold_days and share_within\",\"actions\":[\"four-timestamps\",\"pathway-timestamps\"],\"currentValues\":{\"primary_care\":90,\"diagnostic\":60,\"treatment\":30,\"total\":180},\"relabel_en\":\"Placeholder threshold, not a national target time. Cancer-specific access times are to be defined under roadmap measure 3.1.2 (five cancers, 2026–2028, p. 57), and quality targets and indicators under 3.1.4 (at least the five largest cancer groups, 2026–2028, p. 58). Replace these values when they are published.\",\"measures\":[\"3.1.2\",\"3.1.4\"]},{\"location\":\"src/analysis.mjs goal3 indicator 'treatment-within-target' and web/app.mjs 'Treatment within target times: not publicly measurable'\",\"actions\":[\"pathway-timestamps\"],\"currentValues\":{},\"relabel_en\":\"The target times themselves are not yet defined nationally. Roadmap measure 3.1.2 schedules cancer-specific access times for five cancers in 2026–2028, and its metric is that patients access treatment within the target times.\",\"measures\":[\"3.1.2\"],\"quotes\":[{\"fi\":\"Mittari: Potilaat pääsevät hoitoon tavoiteaikojen puitteissa.\",\"page\":57},{\"fi\":\"2026–2028: Kansalliset hoitoketjukuvaukset tehty viidestä syövästä ja syöpäkohtaiset hoitoonpääsyajat on määritetty.\",\"page\":57}]}],\"roadmap\":{\"title\":\"Kansallinen syöpästrategia 2026–2035 – Toimeenpanon tiekartta vuosille 2026–2031\",\"titleEn\":\"Finland's National Cancer Strategy 2026–2035: Roadmap for implementation for 2026–2031\",\"url\":\"https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf\",\"pdfSha256\":\"f9d4ed478a7531b0ee26c84f9d5df7c96137f8e192ca27efd8afc5b1c1e2ecb5\",\"note\":\"Finnish quotes are verbatim from the roadmap (see manifest quoteRule). English text is the SAMA team's own reading and translation, not an official one. A mapping says which roadmap measure an action would serve; it is not an endorsement by the roadmap's authors.\"}}"
+  },
+  {
+   "role": "assistant",
+   "content": "{\n  \"county_id\": \"HVA12\",\n  \"actions\": [\n    {\n      \"action_id\": \"timed-pathways\",\n      \"action\": \"Adopt national cancer-specific pathways with maximum times per step and a single fast-track referral from primary care, following the Danish and Swedish model.\",\n      \"rationale\": \"The optimiser picked timed-pathways for South Savo wellbeing services county, with a model scenario of 7.2 deaths postponed per year (range 1.1-14.5) at an assumed cost of EUR 192,216 per year, and it stayed in the portfolio in 94% of sensitivity runs.\",\n      \"owner_role\": \"Wellbeing services county, coordinated nationally by FICAN\",\n      \"indicator\": \"Patients waiting over 6 months during the year for access to specialised health care per 10 000 inhabitants\",\n      \"roadmap_measure\": \"3.1.2\"\n    },\n    {\n      \"action_id\": \"screening-reminders\",\n      \"action\": \"Send a second kit with plain-language, multilingual instructions to non-responders; measure the gain as a stepped pilot.\",\n      \"rationale\": \"South Savo wellbeing services county's colorectal screening participation is 78.7% against the 80% target, and the expected gain is 1.33-1.33 percentage points, closing 100% of the gap at an assumed cost of EUR 51,258 per year.\",\n      \"owner_role\": \"Wellbeing services county screening unit\",\n      \"indicator\": \"Proportion of invited to colorectal cancer screening who attended, %\",\n      \"roadmap_measure\": \"1.3.1\"\n    },\n    {\n      \"action_id\": \"pathway-timestamps\",\n      \"action\": \"Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.\",\n      \"rationale\": \"This is the first step for every county, because time from referral to diagnosis and from diagnosis to first treatment is not published by county for any cancer, so the Goal 3 indicator cannot be checked from open data in South Savo wellbeing services county.\",\n      \"owner_role\": \"FICAN with THL and the Finnish Cancer Registry\",\n      \"indicator\": \"Share of new cancer cases with all four timestamps recorded\",\n      \"roadmap_measure\": \"3.2.1\"\n    },\n    \"evidence_does_not_support\": \"The evidence does not support a guaranteed mortality effect: the timed-pathways estimate is a model scenario under stated assumptions, the Danish evidence is before/after without a control group, and no Finnish effect size exists for colorectal screening reminders.\"\n  ]\n}"
+  },
+  {
+   "role": "user",
+   "content": "Your answer does not follow the required format: JSON parse error: Expected ',' or ']' after array element in JSON at position 2162 (line 28 column 32). Answer again with only the JSON object described in the instructions (or only {\"refusal\": \"<one sentence>\"})."
+  },
+  {
+   "role": "assistant",
+   "content": "{\n  \"county_id\": \"HVA12\",\n  \"actions\": [\n    {\n      \"action_id\": \"timed-pathways\",\n      \"action\": \"Adopt national cancer-specific pathways with maximum times per step and a single fast-track referral from primary care, following the Danish and Swedish model.\",\n      \"rationale\": \"The optimiser picked timed-pathways for South Savo wellbeing services county, with a model scenario of 7.2 deaths postponed per year (range 1.1-14.5) at an assumed cost of EUR 192,216 per year, and it stayed in the portfolio in 94% of sensitivity runs.\",\n      \"owner_role\": \"Wellbeing services county, coordinated nationally by FICAN\",\n      \"indicator\": \"Patients waiting over 6 months during the year for access to specialised health care per 10 000 inhabitants\",\n      \"roadmap_measure\": \"3.1.2\"\n    },\n    {\n      \"action_id\": \"screening-reminders\",\n      \"action\": \"Send a second kit with plain-language, multilingual instructions to non-responders; measure the gain as a stepped pilot.\",\n      \"rationale\": \"South Savo wellbeing services county's colorectal screening participation is 78.7% against the 80% target, and the expected gain is 1.33-1.33 percentage points, closing 100% of the gap at an assumed cost of EUR 51,258 per year.\",\n      \"owner_role\": \"Wellbeing services county screening unit\",\n      \"indicator\": \"Proportion of invited to colorectal cancer screening who attended, %\",\n      \"roadmap_measure\": \"1.3.1\"\n    },\n    {\n      \"action_id\": \"pathway-timestamps\",\n      \"action\": \"Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.\",\n      \"rationale\": \"This is the first step for every county, because time from referral to diagnosis and from diagnosis to first treatment is not published by county for any cancer, so the Goal 3 indicator cannot be checked from open data in South Savo wellbeing services county.\",\n      \"owner_role\": \"FICAN with THL and the Finnish Cancer Registry\",\n      \"indicator\": \"Share of new cancer cases with all four timestamps recorded\",\n      \"roadmap_measure\": \"3.2.1\"\n    }\n  ],\n  \"evidence_does_not_support\": \"The evidence does not support a guaranteed mortality effect: the timed-pathways estimate is a model scenario under stated assumptions, the Danish evidence is before/after without a control group, and no Finnish effect size exists for colorectal screening reminders.\"\n}"
+  }
+ ],
+ "gated": {
+  "gateVersion": "v2",
+  "actions": [
+   {
+    "action_id": "timed-pathways",
+    "title": "Standardised, timed cancer pathways with a fast-track referral",
+    "roadmap_measure": {
+     "measure": "3.1.2",
+     "ok": true,
+     "expected": [
+      "3.1.2",
+      "2.5.2",
+      "3.1.4"
+     ],
+     "toolCalled": true
+    },
+    "roadmap": {
+     "id": "3.1.2",
+     "title_en": "Write cancer-specific care pathway descriptions, regional pathways adapted from them, and a mechanism to maintain and manage them",
+     "pages": [
+      56,
+      57
+     ],
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=56",
+     "fit": "named"
+    },
+    "toolsCalled": {
+     "get_evidence": true,
+     "get_roadmap_measure": true
+    },
+    "sentences": [
+     {
+      "field": "action",
+      "text": "Adopt national cancer-specific pathways with maximum times per step and a single fast-track referral from primary care, following the Danish and Swedish model.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.71,
+       "overclaim": 0.23,
+       "confidence": 0.56,
+       "model": "jev-1.14.0",
+       "cached": true,
+       "error": null,
+       "request_sha256": "5b1bd7cc8778216632d5ef2af4d5ddee70504142d7b02a40097494e53c14c43e"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     },
+     {
+      "field": "rationale",
+      "text": "The optimiser picked timed-pathways for South Savo wellbeing services county, with a model scenario of 7.2 deaths postponed per year (range 1.1-14.5) at an assumed cost of EUR 192,216 per year, and it stayed in the portfolio in 94% of sensitivity runs.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 5
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 0.99,
+       "overclaim": 0.11,
+       "confidence": 0.98,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "bdd87d02525c1b20e9b5a33ff745e3fb069249461597e100d804344d0417a5f9"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "owner_role",
+      "text": "Wellbeing services county, coordinated nationally by FICAN",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 0.93,
+       "overclaim": 0.05,
+       "confidence": 0.89,
+       "model": "jev-1.14.0",
+       "cached": true,
+       "error": null,
+       "request_sha256": "a3280343b9f63634aa100eced8aa9ac4a2accb6dd70621b786c618d39cca2cbb"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "indicator",
+      "text": "Patients waiting over 6 months during the year for access to specialised health care per 10 000 inhabitants",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 3
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.78,
+       "overclaim": 0.06,
+       "confidence": 0.67,
+       "model": "jev-1.14.0",
+       "cached": true,
+       "error": null,
+       "request_sha256": "bf6a700049428b78b42644b7c014f64f8f529a2d9d4d69bf4555151c90b9d3d8"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     }
+    ]
+   },
+   {
+    "action_id": "screening-reminders",
+    "title": "Reminder and multilingual re-invitation for colorectal screening",
+    "roadmap_measure": {
+     "measure": "1.3.1",
+     "ok": true,
+     "expected": [
+      "1.3.1",
+      "2.4.1",
+      "2.4.4"
+     ],
+     "toolCalled": true
+    },
+    "roadmap": {
+     "id": "1.3.1",
+     "title_en": "Raise vaccination and cancer screening participation in different language groups through targeted, community-based communication",
+     "pages": [
+      33
+     ],
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=33",
+     "fit": "serves"
+    },
+    "toolsCalled": {
+     "get_evidence": true,
+     "get_roadmap_measure": true
+    },
+    "sentences": [
+     {
+      "field": "action",
+      "text": "Send a second kit with plain-language, multilingual instructions to non-responders; measure the gain as a stepped pilot.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.76,
+       "overclaim": 0.15,
+       "confidence": 0.64,
+       "model": "jev-1.14.0",
+       "cached": true,
+       "error": null,
+       "request_sha256": "9fc255506f335a45441d1a34315066c485eeba248a5ccba6fa046e679a3f4df0"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     },
+     {
+      "field": "rationale",
+      "text": "South Savo wellbeing services county's colorectal screening participation is 78.7% against the 80% target, and the expected gain is 1.33-1.33 percentage points, closing 100% of the gap at an assumed cost of EUR 51,258 per year.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 6
+      },
+      "jev": {
+       "verdict": "NOT_SUPPORTED",
+       "pSupports": 0.96,
+       "overclaim": 0.58,
+       "confidence": 0.94,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "19b0f08ca8af48e722ca7ce9280fbd1eba06a49434211a5590484d890a043dcc"
+      },
+      "kept": false,
+      "reason": "JEV_NOT_SUPPORTED"
+     },
+     {
+      "field": "owner_role",
+      "text": "Wellbeing services county screening unit",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 0.83,
+       "overclaim": 0.05,
+       "confidence": 0.74,
+       "model": "jev-1.14.0",
+       "cached": true,
+       "error": null,
+       "request_sha256": "cffbde29ccba7614777a3f99fe9eb92276c98a57edff73ad8637ad85c7f9da06"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "indicator",
+      "text": "Proportion of invited to colorectal cancer screening who attended, %",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.32,
+       "overclaim": 0.08,
+       "confidence": 0.52,
+       "model": "jev-1.14.0",
+       "cached": true,
+       "error": null,
+       "request_sha256": "bc06e42f6d23702df08f0a9a78c4736d67839c2da69f39e8e8fe209eda7b4425"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     }
+    ]
+   },
+   {
+    "action_id": "pathway-timestamps",
+    "title": "Record four pathway timestamps for every cancer patient",
+    "roadmap_measure": {
+     "measure": "3.2.1",
+     "ok": true,
+     "expected": [
+      "3.2.1",
+      "3.1.2",
+      "3.1.4",
+      "3.2.2",
+      "4.1.3"
+     ],
+     "toolCalled": true
+    },
+    "roadmap": {
+     "id": "3.2.1",
+     "title_en": "Create the legal basis for a cancer care quality register at THL's Cancer Registry",
+     "pages": [
+      59,
+      60
+     ],
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=59",
+     "fit": "serves"
+    },
+    "toolsCalled": {
+     "get_evidence": true,
+     "get_roadmap_measure": true
+    },
+    "sentences": [
+     {
+      "field": "action",
+      "text": "Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 0.83,
+       "overclaim": 0.08,
+       "confidence": 0.74,
+       "model": "jev-1.14.0",
+       "cached": true,
+       "error": null,
+       "request_sha256": "7e0c64dbea5d5ffcd272e39187c740c8ac7231a02c45204112b2a6d1831454be"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "rationale",
+      "text": "This is the first step for every county, because time from referral to diagnosis and from diagnosis to first treatment is not published by county for any cancer, so the Goal 3 indicator cannot be checked from open data in South Savo wellbeing services county.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 1
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 0.97,
+       "overclaim": 0.2,
+       "confidence": 0.96,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "1a1ace835e8394cbcc661fd363efae91da3e82fc625902d4666dab81a8a324fc"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "owner_role",
+      "text": "FICAN with THL and the Finnish Cancer Registry",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 0.86,
+       "overclaim": 0.06,
+       "confidence": 0.79,
+       "model": "jev-1.14.0",
+       "cached": true,
+       "error": null,
+       "request_sha256": "a5a23b26417082efae93646aebc305e2a403ade1702e28ab7845c59cd2b62d77"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "indicator",
+      "text": "Share of new cancer cases with all four timestamps recorded",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 1
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.27,
+       "overclaim": 0.07,
+       "confidence": 0.6,
+       "model": "jev-1.14.0",
+       "cached": true,
+       "error": null,
+       "request_sha256": "77d09fa972ddbca242048627d6e531cacb3eb46c99382b317fdc4bf62654ea4f"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     }
+    ]
+   }
+  ],
+  "evidenceLimit": {
+   "field": "evidence_does_not_support",
+   "text": "The evidence does not support a guaranteed mortality effect: the timed-pathways estimate is a model scenario under stated assumptions, the Danish evidence is before/after without a control group, and no Finnish effect size exists for colorectal screening reminders.",
+   "numberCheck": {
+    "ok": true,
+    "unmatched": [],
+    "counted": 0
+   },
+   "jev": {
+    "verdict": "UNCLEAR",
+    "pSupports": 0.54,
+    "overclaim": 0.09,
+    "confidence": 0.31,
+    "model": "jev-1.14.0",
+    "cached": false,
+    "error": null,
+    "request_sha256": "ccf62fecd89a99d8bdb25c3b4f1d2c07629b244747bedcfe143f2e905825bece"
+   },
+   "kept": false,
+   "reason": "JEV_UNCLEAR"
+  },
+  "counts": {
+   "sentences": 13,
+   "kept": 6,
+   "dropped": 7,
+   "roadmapMeasureOk": 3
+  },
+  "toolCoverage": {
+   "brief": true,
+   "portfolio": true,
+   "evidenceForAll": true,
+   "roadmapForAll": true
+  }
+ },
+ "gatedV1": {
+  "gateVersion": "v1",
+  "actions": [
+   {
+    "action_id": "timed-pathways",
+    "title": "Standardised, timed cancer pathways with a fast-track referral",
+    "roadmap_measure": {
+     "measure": "3.1.2",
+     "ok": true,
+     "expected": [
+      "3.1.2",
+      "2.5.2",
+      "3.1.4"
+     ],
+     "toolCalled": true
+    },
+    "roadmap": {
+     "id": "3.1.2",
+     "title_en": "Write cancer-specific care pathway descriptions, regional pathways adapted from them, and a mechanism to maintain and manage them",
+     "pages": [
+      56,
+      57
+     ],
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=56",
+     "fit": "named"
+    },
+    "toolsCalled": {
+     "get_evidence": true,
+     "get_roadmap_measure": true
+    },
+    "sentences": [
+     {
+      "field": "action",
+      "text": "Adopt national cancer-specific pathways with maximum times per step and a single fast-track referral from primary care, following the Danish and Swedish model.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.57,
+       "overclaim": 0.25,
+       "confidence": 0.35,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "62e21a12bbe62c5cee09e71534ec59465adbf60c682321f2398157e84f3db35f"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     },
+     {
+      "field": "rationale",
+      "text": "The optimiser picked timed-pathways for South Savo wellbeing services county, with a model scenario of 7.2 deaths postponed per year (range 1.1-14.5) at an assumed cost of EUR 192,216 per year, and it stayed in the portfolio in 94% of sensitivity runs.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 5
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 1,
+       "overclaim": 0.11,
+       "confidence": 1,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "a8ecd10fe50fab4e6e19522aed953111dbe0ec5da6a0cab93be6b35d4783c18e"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "owner_role",
+      "text": "Wellbeing services county, coordinated nationally by FICAN",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 0.92,
+       "overclaim": 0.09,
+       "confidence": 0.88,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "d62c83914322f34476ab383e267cdf20b3908185b658513dce0e02dde3f7576b"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "indicator",
+      "text": "Patients waiting over 6 months during the year for access to specialised health care per 10 000 inhabitants",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 3
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.42,
+       "overclaim": 0.11,
+       "confidence": 0.35,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "d658970fc9986663cdeb632ecd6363a51e42f1bcead0d0d8c475450e11644198"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     }
+    ]
+   },
+   {
+    "action_id": "screening-reminders",
+    "title": "Reminder and multilingual re-invitation for colorectal screening",
+    "roadmap_measure": {
+     "measure": "1.3.1",
+     "ok": true,
+     "expected": [
+      "1.3.1",
+      "2.4.1",
+      "2.4.4"
+     ],
+     "toolCalled": true
+    },
+    "roadmap": {
+     "id": "1.3.1",
+     "title_en": "Raise vaccination and cancer screening participation in different language groups through targeted, community-based communication",
+     "pages": [
+      33
+     ],
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=33",
+     "fit": "serves"
+    },
+    "toolsCalled": {
+     "get_evidence": true,
+     "get_roadmap_measure": true
+    },
+    "sentences": [
+     {
+      "field": "action",
+      "text": "Send a second kit with plain-language, multilingual instructions to non-responders; measure the gain as a stepped pilot.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.45,
+       "overclaim": 0.16,
+       "confidence": 0.28,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "51f2e14931ab670dc0868c11958d4d8a619040cb63d3a9c754a38cc72abc9fd6"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     },
+     {
+      "field": "rationale",
+      "text": "South Savo wellbeing services county's colorectal screening participation is 78.7% against the 80% target, and the expected gain is 1.33-1.33 percentage points, closing 100% of the gap at an assumed cost of EUR 51,258 per year.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 6
+      },
+      "jev": {
+       "verdict": "NOT_SUPPORTED",
+       "pSupports": 0.87,
+       "overclaim": 0.74,
+       "confidence": 0.8,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "f3a6bc7548ecbffb2ea143ebba905971718bb642d423a7bcbe4a79974e73b3b8"
+      },
+      "kept": false,
+      "reason": "JEV_NOT_SUPPORTED"
+     },
+     {
+      "field": "owner_role",
+      "text": "Wellbeing services county screening unit",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.48,
+       "overclaim": 0.07,
+       "confidence": 0.26,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "7bbf5efbafc507880ead9374d2260bc36eb92ea075d89885b67c8ec4beca9e06"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     },
+     {
+      "field": "indicator",
+      "text": "Proportion of invited to colorectal cancer screening who attended, %",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.68,
+       "overclaim": 0.42,
+       "confidence": 0.52,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "18c57af630d854b6e7da3dc9623d197b61b71cab39e813933a43575402c7bb95"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     }
+    ]
+   },
+   {
+    "action_id": "pathway-timestamps",
+    "title": "Record four pathway timestamps for every cancer patient",
+    "roadmap_measure": {
+     "measure": "3.2.1",
+     "ok": true,
+     "expected": [
+      "3.2.1",
+      "3.1.2",
+      "3.1.4",
+      "3.2.2",
+      "4.1.3"
+     ],
+     "toolCalled": true
+    },
+    "roadmap": {
+     "id": "3.2.1",
+     "title_en": "Create the legal basis for a cancer care quality register at THL's Cancer Registry",
+     "pages": [
+      59,
+      60
+     ],
+     "url": "https://files.hackjunction.app/resources/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf#page=59",
+     "fit": "serves"
+    },
+    "toolsCalled": {
+     "get_evidence": true,
+     "get_roadmap_measure": true
+    },
+    "sentences": [
+     {
+      "field": "action",
+      "text": "Add first contact, referral, diagnosis and first treatment dates, plus entry route, to the national cancer quality register and publish county-level medians quarterly.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 0.96,
+       "overclaim": 0.07,
+       "confidence": 0.94,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "71d6672ddeea49c0a48f606ba1c40d376fcb898f479aeae293f2ef1ac4c609bf"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "rationale",
+      "text": "This is the first step for every county, because time from referral to diagnosis and from diagnosis to first treatment is not published by county for any cancer, so the Goal 3 indicator cannot be checked from open data in South Savo wellbeing services county.",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 1
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 0.94,
+       "overclaim": 0.29,
+       "confidence": 0.91,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "a150d6eced222901fe0ab1bb0124fde4e28be017b34022a813367f2db6450373"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "owner_role",
+      "text": "FICAN with THL and the Finnish Cancer Registry",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 0
+      },
+      "jev": {
+       "verdict": "SUPPORTED",
+       "pSupports": 0.88,
+       "overclaim": 0.06,
+       "confidence": 0.82,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "0fc938d7a9adf39f519d0d70e5f6e74c7967aa4ee2c3a2c8eb521bb69c9bc7cb"
+      },
+      "kept": true,
+      "reason": null
+     },
+     {
+      "field": "indicator",
+      "text": "Share of new cancer cases with all four timestamps recorded",
+      "numberCheck": {
+       "ok": true,
+       "unmatched": [],
+       "counted": 1
+      },
+      "jev": {
+       "verdict": "UNCLEAR",
+       "pSupports": 0.44,
+       "overclaim": 0.04,
+       "confidence": 0.33,
+       "model": "jev-1.14.0",
+       "cached": false,
+       "error": null,
+       "request_sha256": "947017b3837464d12b817bcc6f82098629800348b1aa8b8894761a30d4cd26fd"
+      },
+      "kept": false,
+      "reason": "JEV_UNCLEAR"
+     }
+    ]
+   }
+  ],
+  "evidenceLimit": {
+   "field": "evidence_does_not_support",
+   "text": "The evidence does not support a guaranteed mortality effect: the timed-pathways estimate is a model scenario under stated assumptions, the Danish evidence is before/after without a control group, and no Finnish effect size exists for colorectal screening reminders.",
+   "numberCheck": {
+    "ok": true,
+    "unmatched": [],
+    "counted": 0
+   },
+   "jev": {
+    "verdict": "UNCLEAR",
+    "pSupports": 0.54,
+    "overclaim": 0.09,
+    "confidence": 0.31,
+    "model": "jev-1.14.0",
+    "cached": true,
+    "error": null,
+    "request_sha256": "ccf62fecd89a99d8bdb25c3b4f1d2c07629b244747bedcfe143f2e905825bece"
+   },
+   "kept": false,
+   "reason": "JEV_UNCLEAR"
+  },
+  "counts": {
+   "sentences": 13,
+   "kept": 5,
+   "dropped": 8,
+   "roadmapMeasureOk": 3
+  },
+  "toolCoverage": {
+   "brief": true,
+   "portfolio": true,
+   "evidenceForAll": true,
+   "roadmapForAll": true
+  }
+ }
+}

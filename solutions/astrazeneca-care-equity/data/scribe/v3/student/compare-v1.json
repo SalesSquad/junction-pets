@@ -1,0 +1,685 @@
+{
+ "schema": "scribe-v3-student-compare-v1",
+ "synthetic": true,
+ "not_for_clinical_use": true,
+ "preregistration": {
+  "file": "data/scribe/v3/student/preregistration.json",
+  "sha256": "9e24b638229f7c4c958d4e6ef09abbf2259158c470f202743e5703ff9787849c"
+ },
+ "decoding": "unconstrained greedy, tolerant parsing (the frozen version-2 setting)",
+ "reference": {
+  "run": "A-270m-lora-r16",
+  "file": "data/scribe/v3/student/v2-selected/A-270m-lora-r16--test_nemotron+test_haiku--off.json",
+  "sha256": "5bfde4c0c46e28a9ff525b0bb3e2964b929fbaa897296b75967a551ec98753f3",
+  "summary": {
+   "test_nemotron": {
+    "note_exact_match": {
+     "k": 210,
+     "n": 500,
+     "value": 0.42,
+     "wilson95": [
+      0.37750935127740226,
+      0.4637105431964461
+     ]
+    },
+    "event_f1": 0.6752205292702486,
+    "route_accuracy": {
+     "value": 0.992,
+     "n": 500,
+     "ci95": [
+      0.9796129641658948,
+      0.9968846848199377
+     ]
+    },
+    "invalid_output": {
+     "value": 0.002,
+     "n": 500,
+     "ci95": [
+      0.00035313639455927456,
+      0.011240706705146758
+     ]
+    },
+    "by_kind": {
+     "standard": {
+      "k": 210,
+      "n": 500,
+      "value": 0.42,
+      "wilson95": [
+       0.37750935127740226,
+       0.4637105431964461
+      ]
+     }
+    }
+   },
+   "test_haiku": {
+    "note_exact_match": {
+     "k": 26,
+     "n": 200,
+     "value": 0.13,
+     "wilson95": [
+      0.0902820227966932,
+      0.18366351872248407
+     ]
+    },
+    "event_f1": 0.4129181084198385,
+    "route_accuracy": {
+     "value": 0.765,
+     "n": 200,
+     "ci95": [
+      0.7015863111723746,
+      0.8184256658476741
+     ]
+    },
+    "invalid_output": {
+     "value": 0.055,
+     "n": 200,
+     "ci95": [
+      0.03098534170345884,
+      0.0957869987723084
+     ]
+    },
+    "by_kind": {
+     "careful": {
+      "k": 1,
+      "n": 20,
+      "value": 0.05,
+      "wilson95": [
+       0.008881448800795402,
+       0.23613119344674205
+      ]
+     },
+     "no_event": {
+      "k": 0,
+      "n": 33,
+      "value": 0.0,
+      "wilson95": [
+       0.0,
+       0.10426999754245206
+      ]
+     },
+     "standard": {
+      "k": 25,
+      "n": 147,
+      "value": 0.17006802721088435,
+      "wilson95": [
+       0.11793015070055879,
+       0.23901056865893572
+      ]
+     }
+    }
+   },
+   "pooled": {
+    "note_exact_match": {
+     "k": 236,
+     "n": 700,
+     "value": 0.33714285714285713,
+     "wilson95": [
+      0.30309610458220504,
+      0.3729673083602205
+     ]
+    }
+   }
+  }
+ },
+ "comparisons": [
+  {
+   "run": "V3-270m-nemotron",
+   "what": "primary: + round-2 notes accepted by the Jev gate",
+   "file": "data/scribe/v3/student/V3-270m-nemotron/eval-test.json",
+   "sha256": "95a65add9ef76187f05592ccdb77908381da411fbcc5d8eca4d13099b384f04a",
+   "summary": {
+    "test_nemotron": {
+     "note_exact_match": {
+      "k": 209,
+      "n": 500,
+      "value": 0.418,
+      "wilson95": [
+       0.3755530480719333,
+       0.4616973437637613
+      ]
+     },
+     "event_f1": 0.6701570680628273,
+     "route_accuracy": {
+      "value": 0.998,
+      "n": 500,
+      "ci95": [
+       0.9887592932948532,
+       0.9996468636054407
+      ]
+     },
+     "invalid_output": {
+      "value": 0.002,
+      "n": 500,
+      "ci95": [
+       0.00035313639455927456,
+       0.011240706705146758
+      ]
+     },
+     "by_kind": {
+      "standard": {
+       "k": 209,
+       "n": 500,
+       "value": 0.418,
+       "wilson95": [
+        0.3755530480719333,
+        0.4616973437637613
+       ]
+      }
+     }
+    },
+    "test_haiku": {
+     "note_exact_match": {
+      "k": 58,
+      "n": 200,
+      "value": 0.29,
+      "wilson95": [
+       0.23154025607067882,
+       0.3563747810077731
+      ]
+     },
+     "event_f1": 0.5215123859191656,
+     "route_accuracy": {
+      "value": 0.965,
+      "n": 200,
+      "ci95": [
+       0.9295293884777092,
+       0.9829444579914328
+      ]
+     },
+     "invalid_output": {
+      "value": 0.0,
+      "n": 200,
+      "ci95": [
+       1.734723475976807e-18,
+       0.018845326377266575
+      ]
+     },
+     "by_kind": {
+      "careful": {
+       "k": 5,
+       "n": 20,
+       "value": 0.25,
+       "wilson95": [
+        0.11186170140766569,
+        0.468700877618744
+       ]
+      },
+      "no_event": {
+       "k": 21,
+       "n": 33,
+       "value": 0.6363636363636364,
+       "wilson95": [
+        0.466161783022664,
+        0.7781282176475764
+       ]
+      },
+      "standard": {
+       "k": 32,
+       "n": 147,
+       "value": 0.21768707482993196,
+       "wilson95": [
+        0.15862956700884095,
+        0.2911238320307265
+       ]
+      }
+     }
+    },
+    "pooled": {
+     "note_exact_match": {
+      "k": 267,
+      "n": 700,
+      "value": 0.38142857142857145,
+      "wilson95": [
+       0.3461849427247951,
+       0.4179664895052166
+      ]
+     }
+    }
+   },
+   "paired_vs_reference": {
+    "test_nemotron": {
+     "n": 500,
+     "only_new_correct": 8,
+     "only_reference_correct": 9,
+     "exact_mcnemar_p": 1.0,
+     "difference_in_exact_match": -0.002
+    },
+    "test_haiku": {
+     "n": 200,
+     "only_new_correct": 46,
+     "only_reference_correct": 14,
+     "exact_mcnemar_p": 4.223704562267977e-05,
+     "difference_in_exact_match": 0.16
+    },
+    "pooled": {
+     "n": 700,
+     "only_new_correct": 54,
+     "only_reference_correct": 23,
+     "exact_mcnemar_p": 0.0005387801699960487,
+     "difference_in_exact_match": 0.04428571428571428,
+     "holm_adjusted_p": 0.0005387801699960487
+    }
+   }
+  },
+  {
+   "run": "V3-270m-all",
+   "what": "secondary: + round-2 notes + version-2 Haiku notes",
+   "file": "data/scribe/v3/student/V3-270m-all/eval-test.json",
+   "sha256": "532fe27eb5f82f134ce2de47ff37676392cc6b56f3ffbc2fb068295b548a35d1",
+   "summary": {
+    "test_nemotron": {
+     "note_exact_match": {
+      "k": 197,
+      "n": 500,
+      "value": 0.394,
+      "wilson95": [
+       0.3521341694850665,
+       0.4374821906927827
+      ]
+     },
+     "event_f1": 0.664248286981056,
+     "route_accuracy": {
+      "value": 0.996,
+      "n": 500,
+      "ci95": [
+       0.9855342847848231,
+       0.9989023694773173
+      ]
+     },
+     "invalid_output": {
+      "value": 0.004,
+      "n": 500,
+      "ci95": [
+       0.0010976305226827934,
+       0.014465715215177033
+      ]
+     },
+     "by_kind": {
+      "standard": {
+       "k": 197,
+       "n": 500,
+       "value": 0.394,
+       "wilson95": [
+        0.3521341694850665,
+        0.4374821906927827
+       ]
+      }
+     }
+    },
+    "test_haiku": {
+     "note_exact_match": {
+      "k": 80,
+      "n": 200,
+      "value": 0.4,
+      "wilson95": [
+       0.33460578566807336,
+       0.46916327960737997
+      ]
+     },
+     "event_f1": 0.6144430844553244,
+     "route_accuracy": {
+      "value": 0.995,
+      "n": 200,
+      "ci95": [
+       0.9722262956021069,
+       0.9991168312843989
+      ]
+     },
+     "invalid_output": {
+      "value": 0.0,
+      "n": 200,
+      "ci95": [
+       1.734723475976807e-18,
+       0.018845326377266575
+      ]
+     },
+     "by_kind": {
+      "careful": {
+       "k": 6,
+       "n": 20,
+       "value": 0.3,
+       "wilson95": [
+        0.1454772448676043,
+        0.5189728183535235
+       ]
+      },
+      "no_event": {
+       "k": 15,
+       "n": 33,
+       "value": 0.45454545454545453,
+       "wilson95": [
+        0.29842938513876116,
+        0.6201406146378254
+       ]
+      },
+      "standard": {
+       "k": 59,
+       "n": 147,
+       "value": 0.4013605442176871,
+       "wilson95": [
+        0.325608668259825,
+        0.48213649526002395
+       ]
+      }
+     }
+    },
+    "pooled": {
+     "note_exact_match": {
+      "k": 277,
+      "n": 700,
+      "value": 0.39571428571428574,
+      "wilson95": [
+       0.3601527431931636,
+       0.43241417912961777
+      ]
+     }
+    }
+   },
+   "paired_vs_reference": {
+    "test_nemotron": {
+     "n": 500,
+     "only_new_correct": 4,
+     "only_reference_correct": 17,
+     "exact_mcnemar_p": 0.007197380065917969,
+     "difference_in_exact_match": -0.026
+    },
+    "test_haiku": {
+     "n": 200,
+     "only_new_correct": 59,
+     "only_reference_correct": 5,
+     "exact_mcnemar_p": 9.002816938122327e-13,
+     "difference_in_exact_match": 0.27
+    },
+    "pooled": {
+     "n": 700,
+     "only_new_correct": 63,
+     "only_reference_correct": 22,
+     "exact_mcnemar_p": 9.811984308900493e-06,
+     "difference_in_exact_match": 0.05857142857142857,
+     "holm_adjusted_p": 1.9623968617800986e-05
+    }
+   }
+  },
+  {
+   "run": "C-270m-all-v2data",
+   "what": "secondary: version-2 data with the Haiku notes",
+   "file": "data/scribe/v3/student/C-270m-all-v2data/eval-test.json",
+   "sha256": "f7fc832d63c7b901615289f2a701aaa4c975966e5ea8aef1515707e82228005a",
+   "summary": {
+    "test_nemotron": {
+     "note_exact_match": {
+      "k": 210,
+      "n": 500,
+      "value": 0.42,
+      "wilson95": [
+       0.37750935127740226,
+       0.4637105431964461
+      ]
+     },
+     "event_f1": 0.6728073688426112,
+     "route_accuracy": {
+      "value": 0.998,
+      "n": 500,
+      "ci95": [
+       0.9887592932948532,
+       0.9996468636054407
+      ]
+     },
+     "invalid_output": {
+      "value": 0.002,
+      "n": 500,
+      "ci95": [
+       0.00035313639455927456,
+       0.011240706705146758
+      ]
+     },
+     "by_kind": {
+      "standard": {
+       "k": 210,
+       "n": 500,
+       "value": 0.42,
+       "wilson95": [
+        0.37750935127740226,
+        0.4637105431964461
+       ]
+      }
+     }
+    },
+    "test_haiku": {
+     "note_exact_match": {
+      "k": 95,
+      "n": 200,
+      "value": 0.475,
+      "wilson95": [
+       0.4069162264657108,
+       0.5440260398531525
+      ]
+     },
+     "event_f1": 0.6409937888198758,
+     "route_accuracy": {
+      "value": 0.99,
+      "n": 200,
+      "ci95": [
+       0.9642782382838231,
+       0.9972533418664555
+      ]
+     },
+     "invalid_output": {
+      "value": 0.005,
+      "n": 200,
+      "ci95": [
+       0.0008831687156009814,
+       0.02777370439789293
+      ]
+     },
+     "by_kind": {
+      "careful": {
+       "k": 4,
+       "n": 20,
+       "value": 0.2,
+       "wilson95": [
+        0.08065766257979806,
+        0.41601743225189364
+       ]
+      },
+      "no_event": {
+       "k": 21,
+       "n": 33,
+       "value": 0.6363636363636364,
+       "wilson95": [
+        0.466161783022664,
+        0.7781282176475764
+       ]
+      },
+      "standard": {
+       "k": 70,
+       "n": 147,
+       "value": 0.47619047619047616,
+       "wilson95": [
+        0.39709333889246473,
+        0.5565003212674989
+       ]
+      }
+     }
+    },
+    "pooled": {
+     "note_exact_match": {
+      "k": 305,
+      "n": 700,
+      "value": 0.4357142857142857,
+      "wilson95": [
+       0.3994314277828744,
+       0.47269886679966217
+      ]
+     }
+    }
+   },
+   "paired_vs_reference": {
+    "test_nemotron": {
+     "n": 500,
+     "only_new_correct": 6,
+     "only_reference_correct": 6,
+     "exact_mcnemar_p": 1.0,
+     "difference_in_exact_match": 0.0
+    },
+    "test_haiku": {
+     "n": 200,
+     "only_new_correct": 69,
+     "only_reference_correct": 0,
+     "exact_mcnemar_p": 3.3881317890172014e-21,
+     "difference_in_exact_match": 0.345
+    },
+    "pooled": {
+     "n": 700,
+     "only_new_correct": 75,
+     "only_reference_correct": 6,
+     "exact_mcnemar_p": 2.91096598559025e-16,
+     "difference_in_exact_match": 0.09857142857142857,
+     "holm_adjusted_p": 8.7328979567707505e-16
+    }
+   }
+  }
+ ],
+ "posthoc": [
+  {
+   "run": "S-1b-lora-r16",
+   "what": "size ladder, Gemma 3 1B: evaluated on test because it beat the reference on validation (pre-registered rule p < 0.05)",
+   "file": "data/scribe/v3/student/S-1b-lora-r16/eval-test.json",
+   "sha256": "c3737e513a3a4170e00ce1c712cc75df35a1cd14f318a05e9adb4c5f5d66f69f",
+   "summary": {
+    "test_nemotron": {
+     "note_exact_match": {
+      "k": 216,
+      "n": 500,
+      "value": 0.432,
+      "wilson95": [
+       0.3892622537365845,
+       0.47577465656618667
+      ]
+     },
+     "event_f1": 0.6810897435897436,
+     "route_accuracy": {
+      "value": 0.994,
+      "n": 500,
+      "ci95": [
+       0.9825097478959467,
+       0.9979574037280398
+      ]
+     },
+     "invalid_output": {
+      "value": 0.006,
+      "n": 500,
+      "ci95": [
+       0.0020425962719602363,
+       0.01749025210405338
+      ]
+     },
+     "by_kind": {
+      "standard": {
+       "k": 216,
+       "n": 500,
+       "value": 0.432,
+       "wilson95": [
+        0.3892622537365845,
+        0.47577465656618667
+       ]
+      }
+     }
+    },
+    "test_haiku": {
+     "note_exact_match": {
+      "k": 54,
+      "n": 200,
+      "value": 0.27,
+      "wilson95": [
+       0.21323449814685846,
+       0.33543435198668425
+      ]
+     },
+     "event_f1": 0.5402160864345739,
+     "route_accuracy": {
+      "value": 0.845,
+      "n": 200,
+      "ci95": [
+       0.7883930940765792,
+       0.8886036307231068
+      ]
+     },
+     "invalid_output": {
+      "value": 0.065,
+      "n": 200,
+      "ci95": [
+       0.03837635464915299,
+       0.10801907929906895
+      ]
+     },
+     "by_kind": {
+      "careful": {
+       "k": 3,
+       "n": 20,
+       "value": 0.15,
+       "wilson95": [
+        0.052368745896216595,
+        0.36041886474075696
+       ]
+      },
+      "no_event": {
+       "k": 0,
+       "n": 33,
+       "value": 0.0,
+       "wilson95": [
+        0.0,
+        0.10426999754245206
+       ]
+      },
+      "standard": {
+       "k": 51,
+       "n": 147,
+       "value": 0.3469387755102041,
+       "wilson95": [
+        0.2747757422812195,
+        0.4268977873185461
+       ]
+      }
+     }
+    },
+    "pooled": {
+     "note_exact_match": {
+      "k": 270,
+      "n": 700,
+      "value": 0.38571428571428573,
+      "wilson95": [
+       0.35037188059659485,
+       0.4223041986612478
+      ]
+     }
+    }
+   },
+   "paired_vs_reference": {
+    "test_nemotron": {
+     "n": 500,
+     "only_new_correct": 12,
+     "only_reference_correct": 6,
+     "exact_mcnemar_p": 0.237884521484375,
+     "difference_in_exact_match": 0.012
+    },
+    "test_haiku": {
+     "n": 200,
+     "only_new_correct": 34,
+     "only_reference_correct": 6,
+     "exact_mcnemar_p": 8.364584573428147e-06,
+     "difference_in_exact_match": 0.14
+    },
+    "pooled": {
+     "n": 700,
+     "only_new_correct": 46,
+     "only_reference_correct": 12,
+     "exact_mcnemar_p": 8.219663963332513e-06,
+     "difference_in_exact_match": 0.04857142857142857
+    }
+   }
+  }
+ ],
+ "missing": [],
+ "multiplicity": "Holm over the 3 pre-registered comparisons that were run (pooled endpoint)"
+}

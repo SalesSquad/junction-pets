@@ -1,0 +1,115 @@
+{
+ "synthetic": true,
+ "written_by": "scribe/provenance.py",
+ "base_model": {
+  "repository": "mlx-community/gemma-3-1b-it-bf16",
+  "snapshot": "60444cd9d4be58ce6995614c6551b4d8db047483",
+  "snapshot_source": "runs/train.jsonl, step local_fallback_setup",
+  "upstream_repository": "google/gemma-3-1b-it",
+  "licence_tag": "gemma",
+  "converted_with": "mlx-lm 0.21.6 (as stated on the model card)",
+  "weights_file": "model.safetensors",
+  "weights_bytes": 2603791060,
+  "weights_bytes_in_run_log": 2603791060,
+  "weights_sha256": "8fdc602dfc5169e03d379baa2f5c4e239d92dee8685263c6f975e889356c9969",
+  "sha256_computed": "by scribe/provenance.py on 2026-11-14 from the cached snapshot (scribe/artifacts/hf-cache, git-ignored)",
+  "source_of_card_fields": "README.md of the cached snapshot"
+ },
+ "framework": {
+  "mlx": "0.32.4",
+  "mlx_lm": "0.32.2",
+  "source": "runs/train.jsonl, step local_fallback_setup"
+ },
+ "planned_model": {
+  "repository": "unsloth/gemma-3-4b-it",
+  "snapshot": "bf46152c47f5dd20b896357cb51abc4c03b8ee8c",
+  "libraries_installed_on_gpu_box": {
+   "torch": "2.15.0",
+   "transformers": "5.23.0",
+   "peft": "0.21.3",
+   "accelerate": "1.15.0"
+  },
+  "training_executed": false,
+  "why": "the GPU box stopped answering after set-up and came back with a changed SSH host key (runs/train.jsonl)",
+  "version1_script_compatible_with_those_libraries": false,
+  "keywords_rejected": [
+   "warmup_ratio"
+  ],
+  "compatibility_check": "data/scribe/cuda-path-check-v1.json (scribe/check_cuda_path.py)",
+  "superseded_by": "scribe/v2, which pins the library versions and uses integer warm-up steps"
+ },
+ "terms": {
+  "gemma_terms_of_use": "https://ai.google.dev/gemma/terms",
+  "gemma_prohibited_use_policy": "https://ai.google.dev/gemma/prohibited_use_policy",
+  "prohibited_use_policy_read_utc": "2026-11-14T18:40:00Z",
+  "relevant_restriction": "The prohibited-use policy lists making automated decisions in domains that affect individual rights or well-being, and names healthcare among them. Letting an extraction enter a record without a person confirming it would fall under that. The adapter is a derivative of Gemma and is subject to the same terms.",
+  "terms_of_use_page": "not opened at integration; linked for the reader",
+  "source": "carried over from the previous provenance file: pages opened by the integrator on 2026-11-14, not re-opened by this script"
+ },
+ "teacher": {
+  "model_id": "nemotron-3.5-super-vl",
+  "calls": {
+   "nemotron-3.5-super-vl": {
+    "calls": 4476,
+    "first_utc": "2026-11-14T15:50:44.033241+00:00",
+    "last_utc": "2026-11-14T16:05:10.847589+00:00",
+    "status": {
+     "ok": 4476
+    },
+    "cost_usd_logged": 0
+   }
+  },
+  "models_discovered": [
+   "nemotron-3.5-super-vl"
+  ],
+  "version": "not logged: each teacher call records the model id only",
+  "endpoint": "OpenAI-compatible endpoint of the Verda inference service; the base URL came from the environment and is not in the run log; GET /models discovery in data/scribe/models.json",
+  "endpoint_host": "containers.datacrunch.io",
+  "endpoint_host_source": "recorded by the integrator; not in runs/scribe.jsonl",
+  "price": "not logged: cost_usd is null in every teacher call",
+  "terms": "not recorded"
+ },
+ "verifier": {
+  "service": "TypeSafe System One (https://api.typesafe.ai/v1/systemone)",
+  "model_alias_requested": "jev-latest",
+  "calls": 7194,
+  "calls_by_alias": {
+   "jev-latest": {
+    "calls": 7194,
+    "first_utc": "2026-11-14T15:51:56.637512+00:00",
+    "last_utc": "2026-11-14T16:05:16.379979+00:00",
+    "status": {
+     "ok": 7194
+    },
+    "cost_usd_logged": 7194
+   }
+  },
+  "resolved_version": "not captured: the 7,194 verifier calls of the dataset build logged only the alias",
+  "same_day_versions_recorded_elsewhere": [
+   {
+    "file": "data/claim-check/eval-v1.json",
+    "model": "jev-1.14.0",
+    "at_utc": "2026-11-14T14:57:26.627Z"
+   },
+   {
+    "file": "data/narratives/fi-v1.json",
+    "model": "jev-1.14.0",
+    "at_utc": "2026-11-14T15:08:35.600Z"
+   }
+  ],
+  "same_day_reference": "data/claim-check/eval-v1.json recorded jev-1.14.0 at 2026-11-14T14:57:26.627Z; data/narratives/fi-v1.json recorded jev-1.14.0 at 2026-11-14T15:08:35.600Z. Both are before the first verifier call of the dataset build (2026-11-14T15:51:56.637512+00:00); that the build resolved to the same version is likely but was not recorded",
+  "next_time": "request a pinned version and store the model field of each response"
+ },
+ "independent_writer": {
+  "helper_call": "mcp__haiku__haiku_ask x15 (sequential; effort low; json_schema additionalProperties false)",
+  "model": "claude-haiku-5.5 through the local Haiku helper",
+  "model_source": "recorded by the integrator; the run log names the helper, not a model version",
+  "calls_file": "data/scribe/train-artifacts/haiku-calls.json",
+  "calls": 15
+ },
+ "cost": {
+  "typesafe_cost_usd_in_dataset_card": 0.287565516,
+  "how": "computed, not billed: 6,846,798 tokens x USD 0.042 per million tokens",
+  "price_source": "the project owner's stated price (scribe/README.md); no invoice was read"
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "frozen": true,
+ "frozen_utc": "2026-11-14T19:08:08Z",
+ "synthetic": true,
+ "purpose": "Pre-registration of the round-2 student comparison, written before any of these runs had a validation or test result.",
+ "decoding": "off",
+ "decoding_rationale": "same as the frozen version-2 selection (data/scribe/v3/student/v2-selected/selection-frozen.json)",
+ "reference": {
+  "run": "A-270m-lora-r16",
+  "config_id": "5bc648b1983f",
+  "train_rows": "1,716 Nemotron round-1 notes"
+ },
+ "primary": {
+  "run": "V3-270m-nemotron",
+  "change": "training data only: Nemotron round 1 plus the round-2 notes accepted by the Jev gate; same configuration, seed and 324 optimisation steps; max_length guard raised from 1024 to 1536 because one long round-2 note has 1,050 tokens (a guard, not a truncation)",
+  "endpoint": "note-level exact match on test_nemotron and test_haiku pooled, paired exact McNemar against the reference"
+ },
+ "secondary": [
+  {
+   "run": "V3-270m-all",
+   "change": "as primary plus the version-2 Haiku training notes (train_data nemotron+haiku)"
+  },
+  {
+   "run": "C-270m-all-v2data",
+   "change": "version-2 data with the Haiku training notes (the Stage C data arm the ablation dropped for time)"
+  }
+ ],
+ "multiplicity": "Holm over the three comparisons with the reference",
+ "size_ladder": "S-1b and S-4b (control LoRA r16) are scored on validation only; one is evaluated on test once only if it beats the reference on validation with exact McNemar p < 0.05",
+ "test_reads": "each listed run is evaluated on the test splits exactly once"
+}

@@ -1,0 +1,75 @@
+{
+ "id": "89ad25f0a88ed01f03ade858ddb4692676c91505ee43f7648905eba1a432ec90",
+ "curriculum": "terse",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Lähetekirje. Pot. tullut syöpäpolulle yksityisen terveydenhuollon kautta. Oireet alkoivat 4.1.2025. Yleisl. arvio helmikuussa 2025. Lähete vastaanotettu 17. huhtikuuta 2025. Syöpädiagnoosi vahvistettu 23. toukokuuta 2025. Syntymäaika 10.9.1990. Seuraava kontr. 10.11.2025 ei ole vielä toteutunut. Vointi hyvä, kotona pärjää, ohjeistettu.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 38,
+    "v1_ok": false
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-01-04",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-02-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-04-17",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2025-05-23",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 1034,
+      "total_tokens": 1189,
+      "completion_tokens": 155,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.83
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 744,
+      "total_tokens": 868,
+      "completion_tokens": 124,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.2
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:35:01+00:00"
+}

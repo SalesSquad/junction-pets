@@ -14,8 +14,8 @@ import { mulberry32, normalCdf, normalSampler, quantile, round, sum } from './st
 export const ASSUMPTIONS = {
   hrPer4Weeks: { value: 1.06, low: 1.0, high: 1.13, label: 'Mortality hazard ratio per 4 weeks of delay', basis: 'Hanna 2020 measured this for delay of treatment (1.06 surgery, up to 1.13 adjuvant colorectal). Applying it to days saved before diagnosis is an assumption; the lower bound 1.00 means no effect.', evidence: ['hanna-2020-surgery-colon', 'hanna-2020-surgery-breast', 'hanna-2020-surgery-lung', 'hanna-2020-adjuvant-colorectal'] },
   symptomaticPrimaryCareShare: { value: 0.5, low: 0.3, high: 0.7, label: 'Share of cancer deaths in patients who entered through symptoms and primary care', basis: 'Planning assumption; not available from open data.', evidence: [] },
-  fastRouteShare: { value: 0.45, low: 0.3, high: 0.6, label: 'Share of primary-care-route patients using private or occupational care', basis: 'Kuitunen 2026 cohort: 39 private/occupational vs 48 public primary care patients. Scaled by each county\'s private-referral share relative to the national value.', evidence: ['kuitunen-2026-route-means'] },
-  routeGapDays: { value: 84, low: 51, high: 84, label: 'Mean symptom-to-treatment difference, public minus private/occupational route (days)', basis: 'Kuitunen 2026: means 207 vs 123 days (medians 127 vs 76). One cancer type (DLBCL), used as a transferable prior.', evidence: ['kuitunen-2026-route-means', 'kuitunen-2026-route-medians'] },
+  fastRouteShare: { value: 0.45, low: 0.3, high: 0.6, label: 'Share of primary-care-route patients using private or occupational care', basis: 'Kuitunen J 2026 cohort: 39 private/occupational vs 48 public primary-care-appointment patients. Scaled by each county\'s private-referral share relative to the national value.', evidence: ['kuitunen-2026-route-means'] },
+  routeGapDays: { value: 84, low: 51, high: 84, label: 'Mean symptom-to-treatment difference, public minus private/occupational route (days)', basis: 'Kuitunen J 2026: the paper reports medians of 127 vs 76 days (48 vs 39 patients, p = 0.027) and means of 201 vs 126 (a 75-day difference). The 84-day central value is read from Figure 1 (means 207 vs 123); the range runs down to the 51-day median difference. One cancer type (DLBCL), used as a transferable prior.', evidence: ['kuitunen-2026-route-means', 'kuitunen-2026-route-medians'] },
   routeGapClosed: { value: 0.5, low: 0.25, high: 0.75, label: 'Share of the route gap an equal fast lane closes', basis: 'Scenario parameter. No trial measures this in Finland.', evidence: [] },
   pathwayDays: { value: 17, low: 15, high: 19, label: 'Days removed from the diagnostic interval by standardised timed pathways', basis: 'Denmark, before vs after cancer patient pathways (Jensen 2015).', evidence: ['jensen-2015-cpp-interval'] },
   navigationHr: { value: 1.51, low: 1.23, high: 1.84, label: 'Rate ratio of reaching diagnosis for navigated patients already delayed over 90 days', basis: 'Freund 2014, US safety-net populations.', evidence: ['freund-2014-navigation'] },
@@ -52,7 +52,7 @@ export const INTERVENTIONS = [
     title: 'The same fast lane in public primary care that occupational care already gives',
     action: 'Same-week physician assessment and direct-access diagnostics for red-flag symptoms in public health centres, regardless of employment or insurance.',
     owner: 'Wellbeing services county primary care', strategyMeasure: 'Sub-objective 3.1 (equal, timely treatment)',
-    mechanism: 'In the Finnish DLBCL cohort the public route took a mean 207 days from symptom to treatment against 123 days through private or occupational care; most of the difference arises before the specialist visit.',
+    mechanism: 'In a Finnish lymphoma (DLBCL) cohort the median from first symptom to treatment was 127 days through a public primary-care appointment (48 patients) against 76 days through private or occupational care (39 patients), p = 0.027; Figure 1 of the paper shows most of the difference arising before the specialist visit.',
     metric: 'gp_wait_over_7d', evidence: ['kuitunen-2026-route-means', 'kuitunen-2026-route-medians', 'tokola-2025-dlbcl-pfs'],
     unknown: 'The route gap is observational and from one cancer type. How much of it a fast lane closes is a scenario parameter, not a measured effect.',
   },
@@ -68,7 +68,7 @@ export const INTERVENTIONS = [
   {
     id: 'ldct-pilot', track: 'timeliness', level: 'county', stage: 'detection',
     title: 'Targeted low-dose CT lung screening pilot',
-    action: 'Invite current and former heavy smokers aged 50-74 to low-dose CT screening, starting where age-standardised lung cancer mortality is highest.',
+    action: 'Join the national lung screening pilot (roadmap 2.3.4) and propose its expansion by lung mortality (C32-C34, incl. larynx); close every follow-up the scans create.',
     owner: 'Wellbeing services county with the national screening steering group', strategyMeasure: 'Sub-objective 2.3 (screening programmes) and the Goal 3 lung survival target',
     mechanism: 'Finnish five-year lung cancer survival is far below Sweden and Norway; screening shifts diagnoses to operable stages.',
     metric: 'smr_lung', evidence: ['nelson-2020-ldct', 'fi-strategy-goal3'],
@@ -162,8 +162,10 @@ export function regionFacts(analysis) {
   });
 }
 
-// Public route, first contact to treatment: mean 207 - 72 = 135 days (Kuitunen 2026). With the
-// log-sd implied by that paper's mean/median ratio (0.96) the median is 135 / exp(0.96^2 / 2) = 85 days.
+// Public route, first contact to treatment: mean 207 - 72 = 135 days (Kuitunen 2026). The log-sd
+// 0.96 is a modelling choice, close to the 0.99 that the paper's public-route mean/median ratio
+// (207/127) implies for the whole pathway; it is not derived from the paper. With it the median
+// is 135 / exp(0.96^2 / 2) = 85 days.
 export const PUBLIC_WORKUP = { median: 85, sigma: 0.96, stallAfterDays: 90 };
 const STALLED = tailDaysBeyond(PUBLIC_WORKUP.stallAfterDays, PUBLIC_WORKUP.median, PUBLIC_WORKUP.sigma);
 

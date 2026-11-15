@@ -1,0 +1,134 @@
+{
+ "id": "020cc8946654076a904a334180900753adfcfa9cb76ca0f427f39336faed4cd0",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on tullut syöpäpolulle yksityisen terveydenhuollon kautta. Lähettävä lääkäri on lähettänyt lähetteen erikoissairaanhoitoon 50 viikkoa sitten. Syöpädiagnoosi on vahvistettu marraskuussa 2024. Moniammatillinen hoitopäätös on tehty 9. joulukuuta 2024. Syöpähoito on aloitettu 70 päivää sitten. Syntymäaika on 4.2.1985. Aiempi syöpään liittymätön rokotuskäynti on ollut 23.10.2023. Potilas voi tällä hetkellä kohtuullisesti ja selviytyy kotona. Tilanteesta on annettu neuvontaa.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:56 outside 60-140"
+    ],
+    "words": 56,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 863,
+      "total_tokens": 1057,
+      "completion_tokens": 194,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.24
+    }
+   ],
+   "repair_request": [
+    "The note has 56 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas on tullut syöpäpolulle yksityisen terveydenhuollon kautta. Lähettävä lääkäri on lähettänyt lähetteen erikoissairaanhoitoon 50 viikkoa sitten. Syöpädiagnoosi on vahvistettu marraskuussa 2024. Moniammatillinen hoitopäätös on tehty 9. joulukuuta 2024. Syöpähoito on aloitettu 70 päivää sitten. Syntymäaika on 4.2.1985. Aiempi syöpään liittymätön rokotuskäynti on ollut 23.10.2023. Potilas voi tällä hetkellä kohtuullisesti ja selviytyy kotona. Tilanteesta on annettu neuvontaa. Potilaan toimintakyky on säilynyt melko hyvänä. Oireita on hoidettu oireenmukaisesti. Seuranta jatkuu sovitun suunnitelman mukaisesti. Potilas on tietoinen hoidon etenemisestä. Kotona pärjääminen onnistuu tuen avulla. Henkinen jaksaminen on vaihdellut. Keskustelutukea on tarjottu.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 88,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "REFERRAL_SENT",
+       "date": "2024-04-09",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "REFERRAL_SENT",
+       "date": "2024-03-27",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "TREATMENT_START",
+       "date": "2025-01-14",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "TREATMENT_START",
+       "date": "2024-12-15",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2024-03-27",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2024-11-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2024-12-09",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2024-12-15",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1137,
+      "total_tokens": 1432,
+      "completion_tokens": 295,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.25
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 883,
+      "total_tokens": 998,
+      "completion_tokens": 115,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.51
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:56+00:00"
+}

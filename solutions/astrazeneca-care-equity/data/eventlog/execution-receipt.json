@@ -1,0 +1,83 @@
+{
+  "synthetic": true,
+  "summary": {
+    "episodes": 20000,
+    "events": 177958,
+    "county_partitions": 23,
+    "chronology_violations": 0,
+    "sample_valid": true,
+    "grid_cells": 960,
+    "replications": 1000,
+    "early_warning_rows": 48,
+    "extraction_rows": 144,
+    "sd_log_duration": {
+      "primary_care": 0.9383148072597545,
+      "diagnostic": 0.9772927883504056,
+      "treatment": 0.80349934533705
+    },
+    "sample_size_check_replications": 200000,
+    "largest_gap_at_per_interval_n_known_sd": 0.0031825404362083587,
+    "largest_gap_at_per_interval_n_detector": 0.04310838199913236,
+    "largest_power_gap_day_precision_complete": 0.05566494119493881,
+    "largest_absolute_power_gap": 0.1577238635497568,
+    "max_familywise_fpr_any_layout": 0.066,
+    "false_flag_within_planned_looks_single_look_threshold": 0.34,
+    "false_flag_within_planned_looks_looks_in_family": 0.033,
+    "max_single_county_null_month_precision_among_tested": 0.002185,
+    "measured_extraction_wrong_date_share": {
+      "v2_270m_nemotron_notes": 0.31655844155844154,
+      "v2_270m_haiku_notes": 0.39322033898305087,
+      "v1_1b_nemotron_notes": 0.32954545454545453
+    },
+    "measured_extraction_min_localisation_smallest_county": 0.09,
+    "measured_extraction_localisation_confirmed_smallest_county": 0.997,
+    "measured_extraction_county_only_null_rate": 1.0,
+    "fake_inequality_county_text_country_structured": {
+      "as_is": 1.0,
+      "resolver": 0.003,
+      "as_is_with_extras": 1.0,
+      "resolver_with_extras": 0.002
+    },
+    "fake_inequality_county_haiku_like_country_nemotron_like": {
+      "as_is": 0.018,
+      "resolver": 0.004,
+      "as_is_with_extras": 0.015,
+      "resolver_with_extras": 0.004
+    },
+    "fake_inequality_extra_events_modelled": true,
+    "interval_extraction_agreement_beyond_3_se": 0,
+    "unit_tests_passed": 38
+  },
+  "source_sha256": {
+    "eventlog/__init__.py": "7d3092b42e9072abdd8555586f3ca8be83bbfc985d342378a9aabcb697b0eab3",
+    "eventlog/aggregate.py": "e76b29163d8cfb98f21e59ef2683cb263f4abb45da77a1ef09d2400097f64a92",
+    "eventlog/audit.py": "c9b645f12d953d558b75dda388ac0d0bd72d323b98ea38e9f3ba7ca2e5ffd351",
+    "eventlog/design_study.py": "14cb6fa26459b8fd8b08acc6cc29834ea1300df540f4dff73b9223e156b1cb2d",
+    "eventlog/detect.py": "95c3f669774794eb7abd91678afea6cdabc726fcdfc25e80a4eacc5f5c959244",
+    "eventlog/extraction_intervals.py": "3ac9eba4e7c47397b8d8c486c9e9a3a6dc23f9af9a2ca5f87fa57952954f9627",
+    "eventlog/intervals.py": "00ca1715404f891745a1036ae794d4ae8bc1a85a1239ec20964a1b1f3e28da06",
+    "eventlog/log.py": "20a351250e61b958ddf003a4219449e109cc32be552dff1bbea159f680cc8fc1",
+    "eventlog/parquet_io.py": "db9a59133059cb616bf5843040d0ab2347e4edfa14823c46eb8f1944a1568b6f",
+    "eventlog/power.py": "8542b451cd38efb1b82ed4e8ce2f50d5e9fdb52a784e4e8fbf5bd85e178eab83",
+    "eventlog/run_all.py": "800ea30b5396f445592de5468aa2a697616ea31effcc105b33a8d0043732de59",
+    "eventlog/schema.py": "ac05707903384217a17eceadc539c04e3f68b0069eafcb7332465d5540e6307b",
+    "eventlog/simulate.py": "c8ab2644a5722737c40f5d766c1ddb4e3c5018c2f26aa6dfc668cf1229a26fc5",
+    "eventlog/validate.py": "f75218d2b8d44959b8d940531506638c20f2bebe896dd79e5e14dc164a309b36",
+    "eventlog/tests/test_eventlog.py": "5d1345f004c5b9cbc8a7ab58c113cde9f609fe5581c0f33396656d648199adb7",
+    "DATA_COLLECTION.md": "eb0fe039372138326344c4c25ac6738aab220c1c30705c05060b1f5f7ca1b679",
+    "data/snapshot/public-v1.json": "9a68651c35a2f2265fe18ccd7da8cd637ab94e80c86a866e91dba057425f5831",
+    "data/eventlog/design-study-v1.json": "073806c8abeadf8e3aac8c5ecda0629607ba252ce2b7b90af8c21ed5d462c380"
+  },
+  "tests_output": "test_administrative_censor (test_eventlog.EventlogTests.test_administrative_censor) ... ok\ntest_bad_enum (test_eventlog.EventlogTests.test_bad_enum) ... ok\ntest_cohort_values_come_from_the_evidence_table (test_eventlog.EventlogTests.test_cohort_values_come_from_the_evidence_table) ... ok\ntest_county_layout_and_segments (test_eventlog.EventlogTests.test_county_layout_and_segments) ... ok\ntest_d2_structural_d3_localisation (test_eventlog.EventlogTests.test_d2_structural_d3_localisation) ... ok\ntest_derive_needs_one_start_and_one_end (test_eventlog.EventlogTests.test_derive_needs_one_start_and_one_end) ... ok\ntest_document_and_results_match_study (test_eventlog.EventlogTests.test_document_and_results_match_study) ... ok\ntest_duplicate (test_eventlog.EventlogTests.test_duplicate) ... ok\ntest_empirical_null (test_eventlog.EventlogTests.test_empirical_null)\nA small county with no slowdown: any of its three tests may reject in at most ... ok\ntest_extra_events_make_intervals_underivable (test_eventlog.EventlogTests.test_extra_events_make_intervals_underivable) ... ok\ntest_flag_mode_for_real_records (test_eventlog.EventlogTests.test_flag_mode_for_real_records)\nThe pathway order is the simulator's convention. For real records a reversed pair is ... ok\ntest_formula_examples (test_eventlog.EventlogTests.test_formula_examples) ... ok\ntest_impossible_date (test_eventlog.EventlogTests.test_impossible_date) ... ok\ntest_interval_profiles_reproduce_the_diagnosis (test_eventlog.EventlogTests.test_interval_profiles_reproduce_the_diagnosis) ... ok\ntest_interval_summaries (test_eventlog.EventlogTests.test_interval_summaries) ... ok\ntest_invalid_physical_schema_returns_report (test_eventlog.EventlogTests.test_invalid_physical_schema_returns_report) ... ok\ntest_measured_date_errors_enter_observation (test_eventlog.EventlogTests.test_measured_date_errors_enter_observation) ... ok\ntest_measured_error_profiles_reproduce_the_scribe_metrics (test_eventlog.EventlogTests.test_measured_error_profiles_reproduce_the_scribe_metrics) ... ok\ntest_minimum_testable_episodes (test_eventlog.EventlogTests.test_minimum_testable_episodes) ... ok\ntest_missing_not_censoring (test_eventlog.EventlogTests.test_missing_not_censoring) ... ok\ntest_month_precision_pairs_are_not_tested (test_eventlog.EventlogTests.test_month_precision_pairs_are_not_tested) ... ok\ntest_month_precision_single_county_null (test_eventlog.EventlogTests.test_month_precision_single_county_null) ... ok\ntest_one_pathway_order (test_eventlog.EventlogTests.test_one_pathway_order) ... ok\ntest_per_interval_sample_sizes_match_simulation (test_eventlog.EventlogTests.test_per_interval_sample_sizes_match_simulation)\nThe per-interval n is the idealised formula with the measured SD. ... ok\ntest_plant_scales_only_its_interval (test_eventlog.EventlogTests.test_plant_scales_only_its_interval) ... ok\ntest_repeated_looks_inflate_and_family_correction_holds (test_eventlog.EventlogTests.test_repeated_looks_inflate_and_family_correction_holds) ... ok\ntest_reproducible (test_eventlog.EventlogTests.test_reproducible) ... ok\ntest_rest_of_country_sample_size (test_eventlog.EventlogTests.test_rest_of_country_sample_size) ... ok\ntest_reversed (test_eventlog.EventlogTests.test_reversed) ... ok\ntest_roundtrip (test_eventlog.EventlogTests.test_roundtrip) ... ok\ntest_slowdown_estimator (test_eventlog.EventlogTests.test_slowdown_estimator) ... ok\ntest_t_quantile_and_looks_widen_the_threshold (test_eventlog.EventlogTests.test_t_quantile_and_looks_widen_the_threshold) ... ok\ntest_timing_rules (test_eventlog.EventlogTests.test_timing_rules) ... ok\ntest_validator_uses_the_new_order (test_eventlog.EventlogTests.test_validator_uses_the_new_order) ... ok\ntest_written_sample_has_zero_chronology_violations (test_eventlog.EventlogTests.test_written_sample_has_zero_chronology_violations) ... ok\ntest_zero_chronology_violations_in_validated_sample (test_eventlog.EventlogTests.test_zero_chronology_violations_in_validated_sample) ... ok\ntest_zero_chronology_violations_latent_and_whole_days (test_eventlog.EventlogTests.test_zero_chronology_violations_latent_and_whole_days) ... ok\ntest_zero_day_interval_logged_as_half_day (test_eventlog.EventlogTests.test_zero_day_interval_logged_as_half_day) ... ok\n\n----------------------------------------------------------------------\nRan 38 tests in 63.989s\n\nOK\n",
+  "limits": [
+    "All data are simulated under stated assumptions; nothing is a Finnish observation and nothing is for clinical use.",
+    "The sample-size formula is a normal approximation with the measured per-interval log-SD; the detector estimates the variance in each county and uses t quantiles, and the measured departure at the tabulated n is reported, not removed.",
+    "Month-precision dates are not used by the test; the formula counts them out of n. No interval-censored analysis is done.",
+    "Repeated looks are handled by a Bonferroni bound over the planned looks, not by a calibrated sequential boundary. Cancer-site strata are not in the family.",
+    "The simulator matches the published step means but not the published median of the whole pathway; real intervals may be more spread.",
+    "The per-interval SDs depend on the assumed route shares and step distributions, and county sizes on an assumed national case count; real data will give other values.",
+    "The measured extraction experiment uses the scribe adapters' per-event errors on synthetic, model-labelled notes, drawn independently per date; it is not a measurement on clinical text.",
+    "The interval extraction experiment draws within-note interval errors of the current adapter, as is and with the code date resolver, measured on 700 synthetic, model-labelled test notes that had been read before; extra predicted events are modelled as collisions that make an interval underivable, not as substitutes for missing true events.",
+    "No git operations."
+  ]
+}

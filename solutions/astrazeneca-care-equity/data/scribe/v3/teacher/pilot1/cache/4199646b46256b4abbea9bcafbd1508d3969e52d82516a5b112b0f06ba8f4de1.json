@@ -1,0 +1,164 @@
+{
+ "id": "4199646b46256b4abbea9bcafbd1508d3969e52d82516a5b112b0f06ba8f4de1",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on tullut syöpäpolulle seulonnan kautta. Ensimmäinen yhteydenotto terveydenhuoltoon tapahtui 40 viikkoa sitten, ja se vastattiin seulontayksikön ajanvarauksessa. Lääkärin arvio, jossa seulontayksikön lääkäri tutki ja arvioi potilaan, tehtiin 178 päivää sitten. Moniammatillinen tiimi teki hoitopäätöksen elokuussa 2025. Seuraava kontrolliaika on varattu 10.2.2026, mutta se on vielä toteutumaton. Syntymäaika on 28.7.1961. Potilas voi tällä hetkellä kohtuullisesti, selviytyy kotona ja pystyy liikkumaan itsenäisesti. Potilaalle on annettu neuvontaa ja tukea.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 67,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "FIRST_CONTACT",
+       "date": "2025-04-07",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "FIRST_CONTACT",
+       "date": "2025-04-04",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-04-04",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-07-18",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-08-01",
+       "precision": "MONTH"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 851,
+      "total_tokens": 1064,
+      "completion_tokens": 213,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.02
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 801,
+      "total_tokens": 895,
+      "completion_tokens": 94,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.11
+    }
+   ],
+   "repair_request": [
+    "An independent reader dated 'ensimmäinen yhteydenotto terveydenhuoltoon' to 2025-04-04 (DAY) instead of '40 viikkoa sitten' (= 2025-04-07, DAY). Put that date string directly with that fact and no other date near it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas on tullut syöpäpolulle seulonnan kautta. Ensimmäinen yhteydenotto terveydenhuoltoon tapahtui 40 viikkoa sitten, ja se vastattiin seulontayksikön ajanvarauksessa. Lääkärin arvio, jossa seulontayksikön lääkäri tutki ja arvioi potilaan, tehtiin 178 päivää sitten. Moniammatillinen tiimi teki hoitopäätöksen elokuussa 2025. Seuraava kontrolliaika on varattu 10.2.2026, mutta se on vielä toteutumaton. Syntymäaika on 28.7.1961. Potilas voi tällä hetkellä kohtuullisesti, selviytyy kotona ja pystyy liikkumaan itsenäisesti. Potilaalle on annettu neuvontaa ja tukea.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 67,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "FIRST_CONTACT",
+       "date": "2025-04-07",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "FIRST_CONTACT",
+       "date": "2025-04-05",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-04-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-07-18",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-08-01",
+       "precision": "MONTH"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1201,
+      "total_tokens": 1414,
+      "completion_tokens": 213,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.93
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 801,
+      "total_tokens": 895,
+      "completion_tokens": 94,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.52
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:35:01+00:00"
+}

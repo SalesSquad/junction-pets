@@ -1,0 +1,4799 @@
+{
+ "schema": "sama-scribe-demo-outputs-v1",
+ "synthetic": true,
+ "label": "Precomputed fallback for POST /api/scribe: the persistent CPU worker's output on the 20 SYNTHETIC demo notes, with the two-reader rule applied from Nemotron's stored answers. A person confirms every event.",
+ "generated_utc": "2026-11-14T22:34:11Z",
+ "provenance": {
+  "synthetic_training_data": true,
+  "base_model": {
+   "repo": "unsloth/gemma-3-270m-it",
+   "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+  },
+  "adapter": {
+   "run": "C-270m-all-v2data",
+   "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+   "format": "PEFT LoRA r16",
+   "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+  },
+  "decoding": {
+   "strategy": "greedy",
+   "max_new_tokens": 134,
+   "device": "cpu",
+   "dtype": "float32",
+   "lora_merged": true,
+   "threads": 8,
+   "batch_size": 1,
+   "prompt": "scribe/prompts.py messages (v1, absolute format)",
+   "stop_token_ids": [
+    1,
+    106
+   ]
+  },
+  "resolver": {
+   "rule": "scribe-v3-relative-resolver-v1",
+   "arm": "A'",
+   "frozen": true,
+   "lexicon": "fi-relative-lexicon-v1",
+   "freeze_file": "data/scribe/v4/resolver/freeze.json",
+   "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+  },
+  "versions": {
+   "python": "3.12.13",
+   "torch": "2.15.0",
+   "transformers": "5.23.0",
+   "peft": "0.21.3"
+  },
+  "gpu": null,
+  "load_seconds": 3.992,
+  "warm_up_seconds": 1.389
+ },
+ "results": {
+  "demo-01": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-01",
+    "note_date": "2026-07-04",
+    "note_text": "Pot. on tullut syöpäpolulle seulonnan kautta. Ensimmäinen yhteydenotto terveydenhuoltoon oli 21.8.2025. Lähetys lähetettiin 9.1.2026. Erikoislääkärikäynti oli kolme viikkoa sitten. Potilaan yleistila on vakaa ja toimintakyky säilynyt. Arjessa selviytyminen sujuu itsenäisesti. Oireita ei ole ilmennyt. Potilaalle on annettu yleistä neuvontaa oireiden seurannasta. Lisätietoa tarjotaan tarvittaessa. Seuranta jatkuu suunnitellusti. Kontrolli on vasta tulevaisuudessa. Potilas on tietoinen jatkotoimenpiteistä. Keskustelu oli rauhallista ja asiallista. Potilas ymmärsi annetut ohjeet. Merkintä kirjataan potilastietojärjestelmään. Tapahtumat liittyvät nimenomaan syöpäpolkuun."
+   },
+   "highlights": [
+    {
+     "start": 93,
+     "end": 102,
+     "phrase": "21.8.2025",
+     "kind": "absolute",
+     "date": "2025-08-21",
+     "precision": "DAY"
+    },
+    {
+     "start": 124,
+     "end": 132,
+     "phrase": "9.1.2026",
+     "kind": "absolute",
+     "date": "2026-01-09",
+     "precision": "DAY"
+    },
+    {
+     "start": 159,
+     "end": 179,
+     "phrase": "kolme viikkoa sitten",
+     "kind": "relative",
+     "date": "2026-06-13",
+     "precision": "DAY",
+     "days_before_note": 21,
+     "source": "lexicon"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2025-08-21\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_SENT\",\"date\":\"2026-01-09\",\"precision\":\"DAY\"},{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2026-02-11\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-08-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2026-01-09",
+       "precision": "DAY"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2026-02-11",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2025-08-21",
+      "precision": "DAY",
+      "model_date": "2025-08-21",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "21.8.2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 93,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2026-01-09",
+      "precision": "DAY",
+      "model_date": "2026-01-09",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "9.1.2026",
+      "phrase_kind": "absolute",
+      "phrase_start": 124,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2026-06-13",
+      "precision": "DAY",
+      "model_date": "2026-02-11",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "kolme viikkoa sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 159,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-08-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2026-01-09",
+       "precision": "DAY"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2026-06-13",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 2,
+      "type": "SPECIALIST_VISIT",
+      "from_date": "2026-02-11",
+      "from_precision": "DAY",
+      "to_date": "2026-06-13",
+      "to_precision": "DAY",
+      "phrase": "kolme viikkoa sitten",
+      "source": "lexicon"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "needs editing",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 6.497,
+    "total_seconds": 6.576,
+    "prompt_tokens": 424,
+    "new_tokens": 84,
+    "stopped": true,
+    "load_average_1m": 23.79,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:32:44Z",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2025-08-21",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2026-01-09",
+      "precision": "DAY"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2026-06-13",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-01",
+    "source_split": "val",
+    "source_id": "00011f568b68899c49305a797851166102221011b9de19275341f5a182dbeaf1",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "code-rewritten",
+    "rewritten_by_code": true,
+    "rewrite_kind": "number_word_kolme",
+    "rewrite": {
+     "event_type": "SPECIALIST_VISIT",
+     "from_phrase": "5 viikkoa sitten",
+     "to_phrase": "kolme viikkoa sitten",
+     "from_date": "2026-05-30",
+     "to_date": "2026-06-13"
+    }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "second reader not run offline",
+    "source": null,
+    "available": false,
+    "prediction": null,
+    "agrees": null
+   },
+   "review_reason": "second reader not run offline"
+  },
+  "demo-02": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-02",
+    "note_date": "2026-07-26",
+    "note_text": "Pot. on syntynyt 17.4.1994. Syöpäpolun tuloreitti on työterveyshuolto. Lähete on lähetetty eilen. Seuraava kontrolli on 25.8.2026. Potilaan yleistila on vakaa. Toimintakyky säilyy melko hyvin. Arjessa selviytyminen sujuu. Yt. on tyydyttävä. Anamneesissa ei uusia oireita. Pkli on rauhallinen. Potilasta on neuvottu lepoa ja ravintoa koskien. Seuranta jatkuu suunnitellusti. Tuleva kontrolli on tärkeä. Potilas ymmärtää tilanteen. Neuvonta on selkeää. Voinnin seuranta jatkuu."
+   },
+   "highlights": [
+    {
+     "start": 17,
+     "end": 26,
+     "phrase": "17.4.1994",
+     "kind": "absolute",
+     "date": "1994-04-17",
+     "precision": "DAY"
+    },
+    {
+     "start": 91,
+     "end": 96,
+     "phrase": "eilen",
+     "kind": "relative",
+     "date": "2026-07-25",
+     "precision": "DAY",
+     "days_before_note": 1,
+     "source": "lexicon"
+    },
+    {
+     "start": 120,
+     "end": 129,
+     "phrase": "25.8.2026",
+     "kind": "absolute",
+     "date": "2026-08-25",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"OCCUPATIONAL\",\"events\":[{\"type\":\"REFERRAL_SENT\",\"date\":\"2026-02-05\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2026-02-05",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2026-07-25",
+      "precision": "DAY",
+      "model_date": "2026-02-05",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "eilen",
+      "phrase_kind": "relative",
+      "phrase_start": 91,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2026-07-25",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 0,
+      "type": "REFERRAL_SENT",
+      "from_date": "2026-02-05",
+      "from_precision": "DAY",
+      "to_date": "2026-07-25",
+      "to_precision": "DAY",
+      "phrase": "eilen",
+      "source": "lexicon"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "needs editing",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 2.813,
+    "total_seconds": 2.839,
+    "prompt_tokens": 367,
+    "new_tokens": 37,
+    "stopped": true,
+    "load_average_1m": 22.31,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:32:51Z",
+   "answer_key": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2026-07-25",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-02",
+    "source_split": "val",
+    "source_id": "d1adc4394e989faf645aee5e32d2555a5dba5cb4fbfb7956f02f744d99875978",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "code-rewritten",
+    "rewritten_by_code": true,
+    "rewrite_kind": "eilen",
+    "rewrite": {
+     "event_type": "REFERRAL_SENT",
+     "from_phrase": "73 päivää sitten",
+     "to_phrase": "eilen",
+     "from_date": "2026-05-14",
+     "to_date": "2026-07-25"
+    }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "second reader not run offline",
+    "source": null,
+    "available": false,
+    "prediction": null,
+    "agrees": null
+   },
+   "review_reason": "second reader not run offline"
+  },
+  "demo-03": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-03",
+    "note_date": "2024-04-22",
+    "note_text": "Pot. oireet alkoivat 16. heinäkuuta 2023. Lääkärin arvio tehtiin syyskuussa 2023. Syöpädiagnoosi vahvistettiin 70 päivää sitten. Syöpähoito aloitettiin viisi viikkoa sitten. Syöpäpolun tuloreitti on päivystys. Pot. vointi on tällä hetkellä vakaa. Toimintakyky säilyy hyvin. Arjessa selviytyminen sujuu ilman suurempia rajoituksia. Pot. on saanut neuvontaa hoito-ohjeista. Liikkuminen on mahdollista kotona. Ruokahalu on tyydyttävä. Uni on rauhallista. Kipua ei ole merkittävästi. Mieli on tasapainoinen. Seuranta jatkuu suunnitellusti. Pot. ymmärtää hoitosuunnitelman. Neuvontaa on annettu oireiden seurannasta. Pot. voi ottaa yhteyttä tarvittaessa. Tila on stabiili. Hoito etenee odotetusti. Pot. on motivoitunut. Kuntoutus on käynnissä."
+   },
+   "highlights": [
+    {
+     "start": 21,
+     "end": 40,
+     "phrase": "16. heinäkuuta 2023",
+     "kind": "absolute",
+     "date": "2023-07-16",
+     "precision": "DAY"
+    },
+    {
+     "start": 65,
+     "end": 80,
+     "phrase": "syyskuussa 2023",
+     "kind": "absolute",
+     "date": "2023-09-01",
+     "precision": "MONTH"
+    },
+    {
+     "start": 111,
+     "end": 127,
+     "phrase": "70 päivää sitten",
+     "kind": "relative",
+     "date": "2024-02-12",
+     "precision": "DAY",
+     "days_before_note": 70,
+     "source": "digits"
+    },
+    {
+     "start": 152,
+     "end": 172,
+     "phrase": "viisi viikkoa sitten",
+     "kind": "relative",
+     "date": "2024-03-18",
+     "precision": "DAY",
+     "days_before_note": 35,
+     "source": "lexicon"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"EMERGENCY\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2023-07-16\",\"precision\":\"DAY\"},{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2023-09-01\",\"precision\":\"MONTH\"},{\"type\":\"DIAGNOSIS\",\"date\":\"2024-01-24\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2024-03-05\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "EMERGENCY",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-07-16",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-09-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2024-01-24",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2024-03-05",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "EMERGENCY",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2023-07-16",
+      "precision": "DAY",
+      "model_date": "2023-07-16",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "16. heinäkuuta 2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 21,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2023-09-01",
+      "precision": "MONTH",
+      "model_date": "2023-09-01",
+      "model_precision": "MONTH",
+      "date_computed_by_code": false,
+      "phrase": "syyskuussa 2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 65,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "DIAGNOSIS",
+      "date": "2024-02-12",
+      "precision": "DAY",
+      "model_date": "2024-01-24",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "70 päivää sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 111,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2024-03-18",
+      "precision": "DAY",
+      "model_date": "2024-03-05",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "viisi viikkoa sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 152,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "EMERGENCY",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-07-16",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-09-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2024-02-12",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2024-03-18",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 2,
+      "type": "DIAGNOSIS",
+      "from_date": "2024-01-24",
+      "from_precision": "DAY",
+      "to_date": "2024-02-12",
+      "to_precision": "DAY",
+      "phrase": "70 päivää sitten",
+      "source": "digits"
+     },
+     {
+      "index": 3,
+      "type": "TREATMENT_START",
+      "from_date": "2024-03-05",
+      "from_precision": "DAY",
+      "to_date": "2024-03-18",
+      "to_precision": "DAY",
+      "phrase": "viisi viikkoa sitten",
+      "source": "lexicon"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "needs editing",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 6.366,
+    "total_seconds": 6.414,
+    "prompt_tokens": 458,
+    "new_tokens": 117,
+    "stopped": true,
+    "load_average_1m": 23.41,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:01Z",
+   "answer_key": {
+    "entry_route": "EMERGENCY",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2023-07-16",
+      "precision": "DAY"
+     },
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2023-09-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "DIAGNOSIS",
+      "date": "2024-02-12",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2024-03-18",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-03",
+    "source_split": "val",
+    "source_id": "4ddbae2767e89b39babbc6917fb041000f51cbbbf8dc6bb527526b58952c2486",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "code-rewritten",
+    "rewritten_by_code": true,
+    "rewrite_kind": "number_word_digit",
+    "rewrite": {
+     "event_type": "TREATMENT_START",
+     "from_phrase": "5 viikkoa sitten",
+     "to_phrase": "viisi viikkoa sitten",
+     "from_date": "2024-03-18",
+     "to_date": "2024-03-18"
+    }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "second reader not run offline",
+    "source": null,
+    "available": false,
+    "prediction": null,
+    "agrees": null
+   },
+   "review_reason": "second reader not run offline"
+  },
+  "demo-04": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-04",
+    "note_date": "2024-03-02",
+    "note_text": "Syöpäpolun tuloreitti on yksityinen terveydenhuolto. Pot. sai lääkärin arvion toukokuussa 2023. Lähetteen vastaanottaminen tapahtui 29.6.2023. Moniammatillinen hoitopäätös tehtiin 25 viikkoa sitten. Syöpähoidon aloitus oli 18.11.2023. Potilaan yleistila on vakaa. Toimintakyky säilyy hyvin. Arjessa selviytyminen sujuu. Potilas on saanut yleisneuvontaa. Oireita seurataan säännöllisesti. Hoitosuunnitelma on ajantasainen. Potilas ymmärtää hoidon vaiheet. Kuntoutus etenee suunnitellusti. Liikkuminen onnistuu omatoimisesti. Ravitsemus on riittävää. Uni on palauttavaa. Henkinen tuki on saatavilla. Seuranta jatkuu sovitusti. Potilas on motivoitunut. Neuvontaa annetaan jatkossakin. Kaikki asiat on käyty läpi."
+   },
+   "highlights": [
+    {
+     "start": 78,
+     "end": 94,
+     "phrase": "toukokuussa 2023",
+     "kind": "absolute",
+     "date": "2023-05-01",
+     "precision": "MONTH"
+    },
+    {
+     "start": 132,
+     "end": 141,
+     "phrase": "29.6.2023",
+     "kind": "absolute",
+     "date": "2023-06-29",
+     "precision": "DAY"
+    },
+    {
+     "start": 180,
+     "end": 197,
+     "phrase": "25 viikkoa sitten",
+     "kind": "relative",
+     "date": "2023-09-09",
+     "precision": "DAY",
+     "days_before_note": 175,
+     "source": "digits"
+    },
+    {
+     "start": 223,
+     "end": 233,
+     "phrase": "18.11.2023",
+     "kind": "absolute",
+     "date": "2023-11-18",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"PRIVATE\",\"events\":[{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2023-05-01\",\"precision\":\"MONTH\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2023-06-29\",\"precision\":\"DAY\"},{\"type\":\"MDT_DECISION\",\"date\":\"2023-10-08\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2023-11-18\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-05-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-06-29",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2023-10-08",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2023-11-18",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "PRIVATE",
+    "events": [
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2023-05-01",
+      "precision": "MONTH",
+      "model_date": "2023-05-01",
+      "model_precision": "MONTH",
+      "date_computed_by_code": false,
+      "phrase": "toukokuussa 2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 78,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2023-06-29",
+      "precision": "DAY",
+      "model_date": "2023-06-29",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "29.6.2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 132,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "MDT_DECISION",
+      "date": "2023-09-09",
+      "precision": "DAY",
+      "model_date": "2023-10-08",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "25 viikkoa sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 180,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2023-11-18",
+      "precision": "DAY",
+      "model_date": "2023-11-18",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "18.11.2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 223,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-05-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-06-29",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2023-09-09",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2023-11-18",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 2,
+      "type": "MDT_DECISION",
+      "from_date": "2023-10-08",
+      "from_precision": "DAY",
+      "to_date": "2023-09-09",
+      "to_precision": "DAY",
+      "phrase": "25 viikkoa sitten",
+      "source": "digits"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 6.05,
+    "total_seconds": 6.216,
+    "prompt_tokens": 448,
+    "new_tokens": 111,
+    "stopped": true,
+    "load_average_1m": 25.9,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:13Z",
+   "answer_key": {
+    "entry_route": "PRIVATE",
+    "events": [
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2023-05-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2023-06-29",
+      "precision": "DAY"
+     },
+     {
+      "type": "MDT_DECISION",
+      "date": "2023-09-09",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2023-11-18",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-04",
+    "source_split": "val",
+    "source_id": "ed1f490db8086513d71cb9736487b00a16a3584039f8a97bc77343e8917f36dc",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-05-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-06-29",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2023-09-09",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2023-11-18",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-05": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-05",
+    "note_date": "2024-04-20",
+    "note_text": "Pot. on hakeutunut hoitoon ensimmäisen kerran 12.7.2023. Erikoislääkärikäynti toteutettiin 23. syyskuuta 2023. Moniammatillinen hoitopäätös tehtiin 15 viikkoa sitten. Syöpäpolun tuloreitti on työterveyshuolto. Potilaan yleinen vointi on tällä hetkellä vakaa. Toimintakyky säilyy jokapäiväisissä askareissa melko hyvin. Arjessa selviytyminen sujuu tavanomaisesti. Potilaalle on annettu yleistä neuvontaa oireiden seurannasta. Lepo ja ravinto tukevat toipumista. Liikuntaa suositellaan kohtuudella. Henkinen tuki on saatavilla tarvittaessa. Seuranta jatkuu sovitun suunnitelman mukaisesti. Uusia oireita tulee raportoida viipymättä. Lääkehoitoa noudatetaan ohjeen mukaan. Kontrollikäyntejä aikataulutetaan tarpeen mukaan. Yhteistyö eri tahojen välillä on sujuvaa. Potilas ymmärtää hoitosuunnitelman keskeiset kohdat. Terveydentilaa arvioidaan säännöllisesti. Kaikki toimenpiteet etenevät suunnitellusti."
+   },
+   "highlights": [
+    {
+     "start": 46,
+     "end": 55,
+     "phrase": "12.7.2023",
+     "kind": "absolute",
+     "date": "2023-07-12",
+     "precision": "DAY"
+    },
+    {
+     "start": 91,
+     "end": 109,
+     "phrase": "23. syyskuuta 2023",
+     "kind": "absolute",
+     "date": "2023-09-23",
+     "precision": "DAY"
+    },
+    {
+     "start": 148,
+     "end": 165,
+     "phrase": "15 viikkoa sitten",
+     "kind": "relative",
+     "date": "2024-01-06",
+     "precision": "DAY",
+     "days_before_note": 105,
+     "source": "digits"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"OCCUPATIONAL\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2023-07-12\",\"precision\":\"DAY\"},{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2023-09-23\",\"precision\":\"DAY\"},{\"type\":\"MDT_DECISION\",\"date\":\"2023-11-08\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-07-12",
+       "precision": "DAY"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2023-09-23",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2023-11-08",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2023-07-12",
+      "precision": "DAY",
+      "model_date": "2023-07-12",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "12.7.2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 46,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2023-09-23",
+      "precision": "DAY",
+      "model_date": "2023-09-23",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "23. syyskuuta 2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 91,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "MDT_DECISION",
+      "date": "2024-01-06",
+      "precision": "DAY",
+      "model_date": "2023-11-08",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "15 viikkoa sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 148,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-07-12",
+       "precision": "DAY"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2023-09-23",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2024-01-06",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 2,
+      "type": "MDT_DECISION",
+      "from_date": "2023-11-08",
+      "from_precision": "DAY",
+      "to_date": "2024-01-06",
+      "to_precision": "DAY",
+      "phrase": "15 viikkoa sitten",
+      "source": "digits"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 4.341,
+    "total_seconds": 4.368,
+    "prompt_tokens": 505,
+    "new_tokens": 86,
+    "stopped": true,
+    "load_average_1m": 24.94,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:17Z",
+   "answer_key": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2023-07-12",
+      "precision": "DAY"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2023-09-23",
+      "precision": "DAY"
+     },
+     {
+      "type": "MDT_DECISION",
+      "date": "2024-01-06",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-05",
+    "source_split": "val",
+    "source_id": "baf6905960a95ab8177787ca9d94bfd5b63d5d263a597d37981dab0b3d8241c1",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-07-12",
+       "precision": "DAY"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2023-09-23",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2024-01-06",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-06": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-06",
+    "note_date": "2025-12-09",
+    "note_text": "Pot. oireet alkoivat 30 viikkoa sitten. Syöpäpolun tuloreitti on seulonta. Syöpähoito aloitettiin 4.11.2025. Potilaan vointi on tällä hetkellä vakaa. Toimintakyky säilyy melko hyvin. Arjessa selviytyminen sujuu tuen avulla. Yleinen neuvonta on annettu. Potilas ymmärtää hoitosuunnitelman. Oireita seurataan tarkasti. Lääkitystä käytetään ohjeen mukaan. Liikunta on suositeltavaa. Ravitsemus on tärkeää. Lepo ja unta tulee riittävästi. Stressinhallinta on osa hoitoa. Potilas voi ottaa yhteyttä tarvittaessa. Seuranta jatkuu suunnitelman mukaan. Tulevat kontrollit ovat tärkeitä. Potilas on motivoitunut hoitoon. Tuki on saatavilla. Hoitosuhde on avoin."
+   },
+   "highlights": [
+    {
+     "start": 21,
+     "end": 38,
+     "phrase": "30 viikkoa sitten",
+     "kind": "relative",
+     "date": "2025-05-13",
+     "precision": "DAY",
+     "days_before_note": 210,
+     "source": "digits"
+    },
+    {
+     "start": 98,
+     "end": 107,
+     "phrase": "4.11.2025",
+     "kind": "absolute",
+     "date": "2025-11-04",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2025-01-12\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2025-11-04\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-01-12",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2025-11-04",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2025-05-13",
+      "precision": "DAY",
+      "model_date": "2025-01-12",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "30 viikkoa sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 21,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2025-11-04",
+      "precision": "DAY",
+      "model_date": "2025-11-04",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "4.11.2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 98,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-05-13",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2025-11-04",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 0,
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "from_date": "2025-01-12",
+      "from_precision": "DAY",
+      "to_date": "2025-05-13",
+      "to_precision": "DAY",
+      "phrase": "30 viikkoa sitten",
+      "source": "digits"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 4.685,
+    "total_seconds": 4.705,
+    "prompt_tokens": 412,
+    "new_tokens": 66,
+    "stopped": true,
+    "load_average_1m": 24.71,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:22Z",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2025-05-13",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2025-11-04",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-06",
+    "source_split": "val",
+    "source_id": "b32e0cafd605a4be5d63f85d336326bcfb73de09b87f27ab17f6d1c26b7e7705",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-05-13",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2025-11-04",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-07": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-07",
+    "note_date": "2024-12-26",
+    "note_text": "Pot. oireet alkoivat 21.3.2024. Ensimmäinen yhteydenotto terveydenhuoltoon oli 142 päivää sitten. Syöpäpolun tuloreitti on seulonta. Tila on vakaa. Toimintakyky on säilynyt hyvänä. Arjessa selviytyminen sujuu normaalisti. Potilas on saanut yleistietoa sairaudesta. Neuvonta koski oireiden seurantaa. Elämäntapoihin liittyviä suosituksia annettiin. Lääkitystä ei ole aloitettu. Kontrolli on suunniteltu. Seuranta jatkuu sovitusti. Potilas ymmärtää suunnitelman. Kysymyksiä ei tullut esille. Seuraava arvio tehdään myöhemmin. Vointi on hyvä. Toimintakyky riittää arkeen. Neuvonta jatkuu tarvittaessa. Tila on stabiili. Seuranta on tärkeää."
+   },
+   "highlights": [
+    {
+     "start": 21,
+     "end": 30,
+     "phrase": "21.3.2024",
+     "kind": "absolute",
+     "date": "2024-03-21",
+     "precision": "DAY"
+    },
+    {
+     "start": 79,
+     "end": 96,
+     "phrase": "142 päivää sitten",
+     "kind": "relative",
+     "date": "2024-08-06",
+     "precision": "DAY",
+     "days_before_note": 142,
+     "source": "digits"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2024-03-21\",\"precision\":\"DAY\"},{\"type\":\"FIRST_CONTACT\",\"date\":\"2024-05-05\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2024-03-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2024-05-05",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2024-03-21",
+      "precision": "DAY",
+      "model_date": "2024-03-21",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "21.3.2024",
+      "phrase_kind": "absolute",
+      "phrase_start": 21,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2024-08-06",
+      "precision": "DAY",
+      "model_date": "2024-05-05",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "142 päivää sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 79,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2024-03-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2024-08-06",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 1,
+      "type": "FIRST_CONTACT",
+      "from_date": "2024-05-05",
+      "from_precision": "DAY",
+      "to_date": "2024-08-06",
+      "to_precision": "DAY",
+      "phrase": "142 päivää sitten",
+      "source": "digits"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 4.221,
+    "total_seconds": 4.251,
+    "prompt_tokens": 413,
+    "new_tokens": 64,
+    "stopped": true,
+    "load_average_1m": 25.77,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:26Z",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2024-03-21",
+      "precision": "DAY"
+     },
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2024-08-06",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-07",
+    "source_split": "val",
+    "source_id": "fd3990925903777656c13484c979dbe43b03c899c12bc02c048f36eacb4c342d",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2024-03-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2024-08-06",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-08": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-08",
+    "note_date": "2026-03-29",
+    "note_text": "Potilas saapui seulontatietojen perusteella tehtyyn yhteydenottoon. Oireet alkoivat 315 päivää sitten. Lähete lähetettiin 31.8.2025. Syöpähoito aloitettiin helmikuussa 2026. Potilas kertoo vointinsa olevan tällä hetkellä vakaa. Toimintakyky säilyy arjen toiminnoissa osittain. Arjessa selviytyminen sujuu tuen avulla. Yleinen neuvonta sisältää lepoa ja nesteytyksen ylläpitoa. Potilas on saanut ohjeita oireiden seurantaan. Yhteydenottoja on suositeltava tarvittaessa. Potilas ymmärtää annetut neuvot. Seuranta jatkuu suunnitellusti. Tila on kliinisesti hallinnassa. Potilas voi liikkua kodissaan itsenäisesti. Ravinto on riittävää. Unen laatu on vaihdellut. Mieliala on tasainen. Hoitosuunnitelma on selkeä. Potilas sitoutuu ohjeisiin. Tilan arviointi jatkuu."
+   },
+   "highlights": [
+    {
+     "start": 84,
+     "end": 101,
+     "phrase": "315 päivää sitten",
+     "kind": "relative",
+     "date": "2025-05-18",
+     "precision": "DAY",
+     "days_before_note": 315,
+     "source": "digits"
+    },
+    {
+     "start": 122,
+     "end": 131,
+     "phrase": "31.8.2025",
+     "kind": "absolute",
+     "date": "2025-08-31",
+     "precision": "DAY"
+    },
+    {
+     "start": 156,
+     "end": 172,
+     "phrase": "helmikuussa 2026",
+     "kind": "absolute",
+     "date": "2026-02-01",
+     "precision": "MONTH"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2025-04-03\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_SENT\",\"date\":\"2025-08-31\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2026-02-01\",\"precision\":\"MONTH\"}]}",
+    "parsed": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-04-03",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2025-08-31",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-02-01",
+       "precision": "MONTH"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2025-05-18",
+      "precision": "DAY",
+      "model_date": "2025-04-03",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "315 päivää sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 84,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2025-08-31",
+      "precision": "DAY",
+      "model_date": "2025-08-31",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "31.8.2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 122,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-02-01",
+      "precision": "MONTH",
+      "model_date": "2026-02-01",
+      "model_precision": "MONTH",
+      "date_computed_by_code": false,
+      "phrase": "helmikuussa 2026",
+      "phrase_kind": "absolute",
+      "phrase_start": 156,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-05-18",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2025-08-31",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-02-01",
+       "precision": "MONTH"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 0,
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "from_date": "2025-04-03",
+      "from_precision": "DAY",
+      "to_date": "2025-05-18",
+      "to_precision": "DAY",
+      "phrase": "315 päivää sitten",
+      "source": "digits"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 4.842,
+    "total_seconds": 4.864,
+    "prompt_tokens": 454,
+    "new_tokens": 90,
+    "stopped": true,
+    "load_average_1m": 25.77,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:31Z",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2025-05-18",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2025-08-31",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-02-01",
+      "precision": "MONTH"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-08",
+    "source_split": "val",
+    "source_id": "5b9081da483e2a2dec3c17408337f676d67f326b843ad0767bda9385ec0ba6e5",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-05-18",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2025-08-31",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-02-01",
+       "precision": "MONTH"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-09": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-09",
+    "note_date": "2024-01-30",
+    "note_text": "Pot. on ohjattu yksityisen terveydenhuollon tuloreitiltä syöpäpolulle. Oireet alkoivat 280 päivää sitten. Lääkärin arvio tehtiin 5. elokuuta 2023. Lähete lähetettiin 18.11.2023 ja vastaanotettiin 26.12.2023. Aiempi syöpään liittymätön rokotuskäynti oli 1.4.2022. Syntymäaika on 25.4.1982. Potilaan yleistila on vakaa. Toimintakyky säilyy melko hyvänä. Arjessa selviytyminen onnistuu itsenäisesti. Potilaalle on annettu neuvontaa oireiden seurannasta. Lisäksi on keskusteltu jatkotutkimusten tarpeesta. Potilas ymmärtää ohjeet hyvin. Tilaa tarkkaillaan jatkossa. Seuranta on tärkeää. Potilas on motivoitunut hoitoon. Neuvonta on tarjolla jatkuvasti."
+   },
+   "highlights": [
+    {
+     "start": 87,
+     "end": 104,
+     "phrase": "280 päivää sitten",
+     "kind": "relative",
+     "date": "2023-04-25",
+     "precision": "DAY",
+     "days_before_note": 280,
+     "source": "digits"
+    },
+    {
+     "start": 129,
+     "end": 145,
+     "phrase": "5. elokuuta 2023",
+     "kind": "absolute",
+     "date": "2023-08-05",
+     "precision": "DAY"
+    },
+    {
+     "start": 166,
+     "end": 176,
+     "phrase": "18.11.2023",
+     "kind": "absolute",
+     "date": "2023-11-18",
+     "precision": "DAY"
+    },
+    {
+     "start": 196,
+     "end": 206,
+     "phrase": "26.12.2023",
+     "kind": "absolute",
+     "date": "2023-12-26",
+     "precision": "DAY"
+    },
+    {
+     "start": 253,
+     "end": 261,
+     "phrase": "1.4.2022",
+     "kind": "absolute",
+     "date": "2022-04-01",
+     "precision": "DAY"
+    },
+    {
+     "start": 278,
+     "end": 287,
+     "phrase": "25.4.1982",
+     "kind": "absolute",
+     "date": "1982-04-25",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"PRIVATE\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2023-02-17\",\"precision\":\"DAY\"},{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2023-08-05\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_SENT\",\"date\":\"2023-11-18\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2023-12-26\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-02-17",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-08-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2023-11-18",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-12-26",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "PRIVATE",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2023-04-25",
+      "precision": "DAY",
+      "model_date": "2023-02-17",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "280 päivää sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 87,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2023-08-05",
+      "precision": "DAY",
+      "model_date": "2023-08-05",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "5. elokuuta 2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 129,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2023-11-18",
+      "precision": "DAY",
+      "model_date": "2023-11-18",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "18.11.2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 166,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2023-12-26",
+      "precision": "DAY",
+      "model_date": "2023-12-26",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "26.12.2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 196,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-04-25",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-08-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2023-11-18",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-12-26",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 0,
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "from_date": "2023-02-17",
+      "from_precision": "DAY",
+      "to_date": "2023-04-25",
+      "to_precision": "DAY",
+      "phrase": "280 päivää sitten",
+      "source": "digits"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 4.677,
+    "total_seconds": 4.692,
+    "prompt_tokens": 445,
+    "new_tokens": 114,
+    "stopped": true,
+    "load_average_1m": 24.83,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:36Z",
+   "answer_key": {
+    "entry_route": "PRIVATE",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2023-04-25",
+      "precision": "DAY"
+     },
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2023-08-05",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2023-11-18",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2023-12-26",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-09",
+    "source_split": "val",
+    "source_id": "b58de4d5d85ddecea0fda7c58d6bd9fba35032494bd237957ba14b20ff170e3b",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-04-25",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-08-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2023-11-18",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-12-26",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-10": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-10",
+    "note_date": "2026-08-31",
+    "note_text": "Pot. on ohjattu syöpäpolulle yksityisen terveydenhuollon kautta. Moniammatillinen hoitopäätös tehtiin 15.9.2025. Syöpähoito aloitettiin 9. maaliskuuta 2026. Anamneesissa kuvataan yleistä vointia ja toimintakykyä. Tila on vakaa. Pkl on rajoitettu, mutta arjessa selviytyminen onnistuu. Yt. sisältää päivittäisiä toimintoja. Pot. saa tukea kotona. Neuvonta koskee oireiden seurantaa ja hoitoon sitoutumista. Liikuntaa suositellaan maltillisesti. Ravitsemus on tärkeää. Lepo ja unenlaatu huomioidaan. Lääkehoitoa noudatetaan ohjeiden mukaan. Seuranta jatkuu suunnitelman mukaisesti. Pot. on tietoinen hoidon etenemisestä. Kysymyksiin vastataan vastaanotolla. Tavoitteena on elämänlaadun säilyttäminen."
+   },
+   "highlights": [
+    {
+     "start": 102,
+     "end": 111,
+     "phrase": "15.9.2025",
+     "kind": "absolute",
+     "date": "2025-09-15",
+     "precision": "DAY"
+    },
+    {
+     "start": 136,
+     "end": 155,
+     "phrase": "9. maaliskuuta 2026",
+     "kind": "absolute",
+     "date": "2026-03-09",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"PRIVATE\",\"events\":[{\"type\":\"MDT_DECISION\",\"date\":\"2025-09-15\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2026-03-09\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-09-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-03-09",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "PRIVATE",
+    "events": [
+     {
+      "type": "MDT_DECISION",
+      "date": "2025-09-15",
+      "precision": "DAY",
+      "model_date": "2025-09-15",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "15.9.2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 102,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-03-09",
+      "precision": "DAY",
+      "model_date": "2026-03-09",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "9. maaliskuuta 2026",
+      "phrase_kind": "absolute",
+      "phrase_start": 136,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-09-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-03-09",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 2.071,
+    "total_seconds": 2.088,
+    "prompt_tokens": 433,
+    "new_tokens": 61,
+    "stopped": true,
+    "load_average_1m": 23.32,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:38Z",
+   "answer_key": {
+    "entry_route": "PRIVATE",
+    "events": [
+     {
+      "type": "MDT_DECISION",
+      "date": "2025-09-15",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-03-09",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-10",
+    "source_split": "val",
+    "source_id": "4577c21c903e215050021e29b7433f5bda2c5a9e1125d6829617110d0ebf2dd6",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/no-relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-09-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-03-09",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-11": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-11",
+    "note_date": "2024-08-08",
+    "note_text": "Pot. otti ensi kerran yhteyttä terveydenhuoltoon 5.12.2023. Lääkäri arvioi tilanteen 9.1.2024. Syöpäpolun tuloreitti on seulonta. Pot. voi tällä hetkellä kohtuullisesti. Toimintakyky on säilynyt lähes ennallaan. Arjessa selviytyminen sujuu itsenäisesti. Oireet ovat lieviä ja hallittavissa. Yleinen neuvonta on annettu potilaalle. Neuvonta koski elintapoja ja oireiden seurantaa. Potilas sai ohjeita milloin hakeutua hoitoon. Tulevaisuudessa on suunniteltu kontrollikäynti. Kontrolli on vasta tulevaisuudessa. Potilas ymmärsi annetut ohjeet hyvin. Kliininen tilanne on vakaa. Seuranta jatkuu sovitun suunnitelman mukaisesti. Potilas on sitoutunut hoitosuunnitelmaan. Oireita ei ole ilmaantunut lisää. Voinnin seuranta on tärkeää. Potilas voi ottaa yhteyttä tarvittaessa. Neuvonta jatkuu tarvittaessa myöhemminkin."
+   },
+   "highlights": [
+    {
+     "start": 49,
+     "end": 58,
+     "phrase": "5.12.2023",
+     "kind": "absolute",
+     "date": "2023-12-05",
+     "precision": "DAY"
+    },
+    {
+     "start": 85,
+     "end": 93,
+     "phrase": "9.1.2024",
+     "kind": "absolute",
+     "date": "2024-01-09",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2023-12-05\",\"precision\":\"DAY\"},{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2024-01-09\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-12-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-01-09",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2023-12-05",
+      "precision": "DAY",
+      "model_date": "2023-12-05",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "5.12.2023",
+      "phrase_kind": "absolute",
+      "phrase_start": 49,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2024-01-09",
+      "precision": "DAY",
+      "model_date": "2024-01-09",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "9.1.2024",
+      "phrase_kind": "absolute",
+      "phrase_start": 85,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-12-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-01-09",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 3.324,
+    "total_seconds": 3.338,
+    "prompt_tokens": 468,
+    "new_tokens": 61,
+    "stopped": true,
+    "load_average_1m": 22.73,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:41Z",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2023-12-05",
+      "precision": "DAY"
+     },
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2024-01-09",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-11",
+    "source_split": "val",
+    "source_id": "dbadd1bcf911a36ceb7151212db98acb4e665ea6f56f1b079019c6d590a11248",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/no-relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-12-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-01-09",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-12": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-12",
+    "note_date": "2025-04-21",
+    "note_text": "Pot. soitti sairaanhoitajalle. Pot. kertoi vointinsa olevan vakaa ja toimintakyky säilyneen hyvänä arjessa. Pot. pystyy selviytymään päivittäisistä toiminnoista itsenäisesti. Syöpäpolun tuloreitti on seulonta. Erikoislääkärikäynti oli 5.5.2024. Syöpädiagnoosi vahvistettiin kesäkuussa 2024. Syöpähoito aloitettiin 10. helmikuuta 2025. Seuraava kontrolli on 20.5.2025. Hoitaja neuvoi potilasta seuraamaan oireita ja ottamaan yhteyttä tarvittaessa. Pot. sai ohjeita lepoon ja ravitsemukseen. Neuvonta sisälsi myös liikunnan merkityksen korostamisen. Pot. ymmärsi annetut ohjeet hyvin. Seuranta jatkuu suunnitellusti."
+   },
+   "highlights": [
+    {
+     "start": 235,
+     "end": 243,
+     "phrase": "5.5.2024",
+     "kind": "absolute",
+     "date": "2024-05-05",
+     "precision": "DAY"
+    },
+    {
+     "start": 274,
+     "end": 289,
+     "phrase": "kesäkuussa 2024",
+     "kind": "absolute",
+     "date": "2024-06-01",
+     "precision": "MONTH"
+    },
+    {
+     "start": 314,
+     "end": 333,
+     "phrase": "10. helmikuuta 2025",
+     "kind": "absolute",
+     "date": "2025-02-10",
+     "precision": "DAY"
+    },
+    {
+     "start": 357,
+     "end": 366,
+     "phrase": "20.5.2025",
+     "kind": "absolute",
+     "date": "2025-05-20",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2024-05-05\",\"precision\":\"DAY\"},{\"type\":\"DIAGNOSIS\",\"date\":\"2024-06-01\",\"precision\":\"MONTH\"},{\"type\":\"TREATMENT_START\",\"date\":\"2025-02-10\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2024-05-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2024-06-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2025-02-10",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2024-05-05",
+      "precision": "DAY",
+      "model_date": "2024-05-05",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "5.5.2024",
+      "phrase_kind": "absolute",
+      "phrase_start": 235,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "DIAGNOSIS",
+      "date": "2024-06-01",
+      "precision": "MONTH",
+      "model_date": "2024-06-01",
+      "model_precision": "MONTH",
+      "date_computed_by_code": false,
+      "phrase": "kesäkuussa 2024",
+      "phrase_kind": "absolute",
+      "phrase_start": 274,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2025-02-10",
+      "precision": "DAY",
+      "model_date": "2025-02-10",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "10. helmikuuta 2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 314,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2024-05-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2024-06-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2025-02-10",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 3.196,
+    "total_seconds": 3.208,
+    "prompt_tokens": 412,
+    "new_tokens": 86,
+    "stopped": true,
+    "load_average_1m": 22.73,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:45Z",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2024-05-05",
+      "precision": "DAY"
+     },
+     {
+      "type": "DIAGNOSIS",
+      "date": "2024-06-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2025-02-10",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-12",
+    "source_split": "val",
+    "source_id": "b31180e72e589afb2780b057d5ce212c0f432750c9c0a4cec859ba3963f3606a",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/no-relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2024-05-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2024-06-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2025-02-10",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-13": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-13",
+    "note_date": "2026-11-29",
+    "note_text": "Potilas on tullut vastaanotolle seulonnan tuloreitillä. Ensimmäinen yhteydenotto terveydenhuoltoon tapahtui 21.2. Lähetteen vastaanottaminen tapahtui kesäkuussa 2026. Erikoislääkärikäynti oli 10.7. Syöpähoidon aloitus tapahtui 16. elokuuta 2026. Kaikki luetellut faktat liittyvät syöpäpolkuun. Potilaan yleistila on vakaa. Toimintakyky säilyy hyväksi. Arjessa selviytyminen sujuu itsenäisesti. Potilas pystyy hoitamaan päivittäisiä askareitaan. Liikkuminen on normaalia. Uni on riittävää. Ruokahalu on säilynyt. Potilaalle on annettu yleistä neuvontaa terveellisistä elintavoista. Liikunnan merkitys on korostettu. Tupakoinnin välttämistä on suositeltu. Alkoholin käyttöä on rajoitettava. Seurannan tärkeys on selitetty. Potilas ymmärtää ohjeet. Seuraava kontrolli on vasta tulevaisuudessa. Oireita ei ole ilmennyt. Mieli on levollinen. Potilas on motivoitunut hoitoon."
+   },
+   "highlights": [
+    {
+     "start": 108,
+     "end": 113,
+     "phrase": "21.2.",
+     "kind": "absolute",
+     "date": "2026-02-21",
+     "precision": "DAY"
+    },
+    {
+     "start": 150,
+     "end": 165,
+     "phrase": "kesäkuussa 2026",
+     "kind": "absolute",
+     "date": "2026-06-01",
+     "precision": "MONTH"
+    },
+    {
+     "start": 192,
+     "end": 197,
+     "phrase": "10.7.",
+     "kind": "absolute",
+     "date": "2026-07-10",
+     "precision": "DAY"
+    },
+    {
+     "start": 227,
+     "end": 244,
+     "phrase": "16. elokuuta 2026",
+     "kind": "absolute",
+     "date": "2026-08-16",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2026-02-21\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2026-06-01\",\"precision\":\"MONTH\"},{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2026-07-10\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2026-08-16\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-02-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-06-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2026-07-10",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-08-16",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2026-02-21",
+      "precision": "DAY",
+      "model_date": "2026-02-21",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "21.2.",
+      "phrase_kind": "absolute",
+      "phrase_start": 108,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2026-06-01",
+      "precision": "MONTH",
+      "model_date": "2026-06-01",
+      "model_precision": "MONTH",
+      "date_computed_by_code": false,
+      "phrase": "kesäkuussa 2026",
+      "phrase_kind": "absolute",
+      "phrase_start": 150,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2026-07-10",
+      "precision": "DAY",
+      "model_date": "2026-07-10",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "10.7.",
+      "phrase_kind": "absolute",
+      "phrase_start": 192,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-08-16",
+      "precision": "DAY",
+      "model_date": "2026-08-16",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "16. elokuuta 2026",
+      "phrase_kind": "absolute",
+      "phrase_start": 227,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-02-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-06-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2026-07-10",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-08-16",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 4.186,
+    "total_seconds": 4.199,
+    "prompt_tokens": 485,
+    "new_tokens": 109,
+    "stopped": true,
+    "load_average_1m": 22.36,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:49Z",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2026-02-21",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2026-06-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2026-07-10",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-08-16",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-13",
+    "source_split": "val",
+    "source_id": "820f133e8d35720cbc5e2e749ba8a6878d5093b3c185506bcde5e77d18a4013f",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/no-relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-02-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-06-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2026-07-10",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-08-16",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-14": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-14",
+    "note_date": "2025-11-15",
+    "note_text": "Potilas on saapunut työterveyshuollon lähetteen kautta. Lähete vastaanotettiin 15.3.2025. Syöpädiagnoosi vahvistettiin 19. huhtikuuta 2025. Potilaan yleinen vointi on tällä hetkellä vakaa. Toimintakyky säilyy pääosin hyvänä. Arjessa selviytyminen sujuu tavanomaisesti. Potilas on saanut neuvontaa sairaudesta ja sen hoidosta. Neuvonta on sisältänyt elämäntapoihin liittyviä suosituksia. Potilas ymmärtää hoitosuunnitelman perusteet. Seurannan tarve arvioidaan jatkossa. Potilas voi ottaa yhteyttä tarvittaessa. Terveydentilaa tarkkaillaan säännöllisesti. Potilas kokee pärjäävänsä päivittäisissä toiminnoissa. Neuvonta on tuonut selkeyttä tilanteeseen. Potilas on sitoutunut annettuihin ohjeisiin. Voinnin kehittymistä seurataan huolellisesti. Potilas voi jatkaa työssäkäyntiä rajoitusten puitteissa. Yleinen neuvonta on ollut hyödyllistä. Potilaan resurssit ovat riittävät. Seuranta jatkuu sovitusti."
+   },
+   "highlights": [
+    {
+     "start": 79,
+     "end": 88,
+     "phrase": "15.3.2025",
+     "kind": "absolute",
+     "date": "2025-03-15",
+     "precision": "DAY"
+    },
+    {
+     "start": 119,
+     "end": 138,
+     "phrase": "19. huhtikuuta 2025",
+     "kind": "absolute",
+     "date": "2025-04-19",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"OCCUPATIONAL\",\"events\":[{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2025-03-15\",\"precision\":\"DAY\"},{\"type\":\"DIAGNOSIS\",\"date\":\"2025-04-19\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-03-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2025-04-19",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2025-03-15",
+      "precision": "DAY",
+      "model_date": "2025-03-15",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "15.3.2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 79,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "DIAGNOSIS",
+      "date": "2025-04-19",
+      "precision": "DAY",
+      "model_date": "2025-04-19",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "19. huhtikuuta 2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 119,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-03-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2025-04-19",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 2.543,
+    "total_seconds": 2.556,
+    "prompt_tokens": 497,
+    "new_tokens": 61,
+    "stopped": true,
+    "load_average_1m": 21.85,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:51Z",
+   "answer_key": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2025-03-15",
+      "precision": "DAY"
+     },
+     {
+      "type": "DIAGNOSIS",
+      "date": "2025-04-19",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-14",
+    "source_split": "val",
+    "source_id": "5e16fca272b00145bee374f61cca3a32f313385dc927e4c39003f52657036dcb",
+    "writer": "nemotron",
+    "kind": "standard",
+    "stratum": "nemotron/standard/no-relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-03-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2025-04-19",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-15": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-15",
+    "note_date": "2026-04-08",
+    "note_text": "Päivystyksen kautta asia lähti liikkeelle, kun pot. otti ensimmäisen kerran yhteyttä heinäkuussa 2025. Päivystyksen hoitaja vastasi, eikä lääkäri tutkinut potilasta tuolloin. Lähete saapui erikoissairaanhoidon yksikköön elokuussa 2025 ja kirjattiin vastaanotetuksi. Pot. kävi kirurgin vastaanotolla erikoissairaanhoidossa 30 viikkoa sitten. Moniammatillinen kokous teki hoitopäätöksen 22.12.2025. Pot. kertoo jaksavansa kotona kohtuullisesti, ja ruokahalu on vaihdellut. Hän kävelee lyhyitä matkoja ja jaksaa tehdä kevyitä kotitöitä. Puoliso on tukena, ja mieliala on ajoittain huolestunut. Kontrolliaika on varattu 14.5.2026, ja pot. kysyi, voiko kutsun saada kirjeenä. Pyydettiin ilmoittamaan, jos väsymys lisääntyy."
+   },
+   "highlights": [
+    {
+     "start": 85,
+     "end": 101,
+     "phrase": "heinäkuussa 2025",
+     "kind": "absolute",
+     "date": "2025-07-01",
+     "precision": "MONTH"
+    },
+    {
+     "start": 220,
+     "end": 234,
+     "phrase": "elokuussa 2025",
+     "kind": "absolute",
+     "date": "2025-08-01",
+     "precision": "MONTH"
+    },
+    {
+     "start": 322,
+     "end": 339,
+     "phrase": "30 viikkoa sitten",
+     "kind": "relative",
+     "date": "2025-09-10",
+     "precision": "DAY",
+     "days_before_note": 210,
+     "source": "digits"
+    },
+    {
+     "start": 385,
+     "end": 395,
+     "phrase": "22.12.2025",
+     "kind": "absolute",
+     "date": "2025-12-22",
+     "precision": "DAY"
+    },
+    {
+     "start": 616,
+     "end": 625,
+     "phrase": "14.5.2026",
+     "kind": "absolute",
+     "date": "2026-05-14",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"EMERGENCY\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2025-07-01\",\"precision\":\"MONTH\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2025-08-01\",\"precision\":\"MONTH\"},{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2025-10-16\",\"precision\":\"DAY\"},{\"type\":\"MDT_DECISION\",\"date\":\"2025-12-22\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "EMERGENCY",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-07-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-08-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2025-10-16",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-12-22",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "EMERGENCY",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2025-07-01",
+      "precision": "MONTH",
+      "model_date": "2025-07-01",
+      "model_precision": "MONTH",
+      "date_computed_by_code": false,
+      "phrase": "heinäkuussa 2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 85,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2025-08-01",
+      "precision": "MONTH",
+      "model_date": "2025-08-01",
+      "model_precision": "MONTH",
+      "date_computed_by_code": false,
+      "phrase": "elokuussa 2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 220,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2025-09-10",
+      "precision": "DAY",
+      "model_date": "2025-10-16",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "30 viikkoa sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 322,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "MDT_DECISION",
+      "date": "2025-12-22",
+      "precision": "DAY",
+      "model_date": "2025-12-22",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "22.12.2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 385,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "EMERGENCY",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-07-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-08-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2025-09-10",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-12-22",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 2,
+      "type": "SPECIALIST_VISIT",
+      "from_date": "2025-10-16",
+      "from_precision": "DAY",
+      "to_date": "2025-09-10",
+      "to_precision": "DAY",
+      "phrase": "30 viikkoa sitten",
+      "source": "digits"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 4.385,
+    "total_seconds": 4.4,
+    "prompt_tokens": 448,
+    "new_tokens": 110,
+    "stopped": true,
+    "load_average_1m": 21.85,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:56Z",
+   "answer_key": {
+    "entry_route": "EMERGENCY",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2025-07-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2025-08-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2025-09-10",
+      "precision": "DAY"
+     },
+     {
+      "type": "MDT_DECISION",
+      "date": "2025-12-22",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-15",
+    "source_split": "val",
+    "source_id": "eebf870eb563a425d9a94513e2b1212ce5db7eed87a5a7da5965ddd7f26f59f6",
+    "writer": "haiku",
+    "kind": "standard",
+    "stratum": "haiku/standard/relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "EMERGENCY",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-07-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-08-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2025-09-10",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-12-22",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-16": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-16",
+    "note_date": "2025-01-19",
+    "note_text": "Pot. ohjautui syöpäpolulle julkisen perusterveydenhuollon kautta. Lähete lähti erikoissairaanhoitoon 3.2.2024. Lähete kirjattiin saapuneeksi keskussairaalaan 245 päivää sitten, ja asiasta on kerrottu pot:lle. Vanhassa rokotuskäynnissä 20.11.2022 ei ole yhteyttä asiaan. Pot. s. 21.10.1948. Pot. kertoo kuntoutuvansa kotona, ja väsymys on vähentynyt. Ruokahalu on hyvä ja paino pysyy. Pot. kävelee lyhyitä matkoja. Puoliso käy kaupassa ja auttaa kotitöissä. Pot. kysyi, miten kuntoutusta jatketaan kotona, ja neuvottiin lisäämään liikuntaa vähitellen. Mielialassa on ollut huolta, mutta pot. puhuu siitä avoimesti. Pot. kiittää kaikesta tuesta."
+   },
+   "highlights": [
+    {
+     "start": 101,
+     "end": 109,
+     "phrase": "3.2.2024",
+     "kind": "absolute",
+     "date": "2024-02-03",
+     "precision": "DAY"
+    },
+    {
+     "start": 158,
+     "end": 175,
+     "phrase": "245 päivää sitten",
+     "kind": "relative",
+     "date": "2024-05-19",
+     "precision": "DAY",
+     "days_before_note": 245,
+     "source": "digits"
+    },
+    {
+     "start": 235,
+     "end": 245,
+     "phrase": "20.11.2022",
+     "kind": "absolute",
+     "date": "2022-11-20",
+     "precision": "DAY"
+    },
+    {
+     "start": 278,
+     "end": 288,
+     "phrase": "21.10.1948",
+     "kind": "absolute",
+     "date": "1948-10-21",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"PUBLIC_PRIMARY\",\"events\":[{\"type\":\"REFERRAL_SENT\",\"date\":\"2024-02-03\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2024-05-17\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "PUBLIC_PRIMARY",
+     "events": [
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2024-02-03",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2024-05-17",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "PUBLIC_PRIMARY",
+    "events": [
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2024-02-03",
+      "precision": "DAY",
+      "model_date": "2024-02-03",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "3.2.2024",
+      "phrase_kind": "absolute",
+      "phrase_start": 101,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2024-05-19",
+      "precision": "DAY",
+      "model_date": "2024-05-17",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "245 päivää sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 158,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "PUBLIC_PRIMARY",
+     "events": [
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2024-02-03",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2024-05-19",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 1,
+      "type": "REFERRAL_RECEIVED",
+      "from_date": "2024-05-17",
+      "from_precision": "DAY",
+      "to_date": "2024-05-19",
+      "to_precision": "DAY",
+      "phrase": "245 päivää sitten",
+      "source": "digits"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 3.165,
+    "total_seconds": 3.18,
+    "prompt_tokens": 426,
+    "new_tokens": 61,
+    "stopped": true,
+    "load_average_1m": 21.3,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:33:59Z",
+   "answer_key": {
+    "entry_route": "PUBLIC_PRIMARY",
+    "events": [
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2024-02-03",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2024-05-19",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-16",
+    "source_split": "val",
+    "source_id": "c3aca52d3bfbf224a0bc293e9308504e546712b84ff182f35869a1e791958081",
+    "writer": "haiku",
+    "kind": "standard",
+    "stratum": "haiku/standard/relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "PUBLIC_PRIMARY",
+     "events": [
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2024-02-03",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2024-05-19",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-17": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-17",
+    "note_date": "2026-10-08",
+    "note_text": "Seulonnan kautta alkanut selvittely eteni hoitopäätökseen. Moniammatillinen kokous teki hoitopäätöksen 31.12.2025. Pot. on syntynyt 4.1.1946. Rokotuskirjauksessa on 30.5.2025 merkintä, joka ei liity asiaan. Pot. kertoo, että yleiskunto on kohtuullinen ja arki sujuu omin voimin. Ruokahalu on riittävä ja uni on tullut paremmin. Pot. käy kävelyllä lähimetsässä ja pitää yhteyttä sukulaisiin puhelimitse. Puoliso on mukana kotitöissä. Pot. kysyi, miten jatkossa tiedotetaan, ja häntä neuvottiin pitämään yhteystiedot ajan tasalla. Pot. kiitti ohjeista. Yhteenvedon ote toimitetaan potilaalle."
+   },
+   "highlights": [
+    {
+     "start": 103,
+     "end": 113,
+     "phrase": "31.12.2025",
+     "kind": "absolute",
+     "date": "2025-12-31",
+     "precision": "DAY"
+    },
+    {
+     "start": 132,
+     "end": 140,
+     "phrase": "4.1.1946",
+     "kind": "absolute",
+     "date": "1946-01-04",
+     "precision": "DAY"
+    },
+    {
+     "start": 165,
+     "end": 174,
+     "phrase": "30.5.2025",
+     "kind": "absolute",
+     "date": "2025-05-30",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"MDT_DECISION\",\"date\":\"2025-12-31\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-12-31",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "MDT_DECISION",
+      "date": "2025-12-31",
+      "precision": "DAY",
+      "model_date": "2025-12-31",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "31.12.2025",
+      "phrase_kind": "absolute",
+      "phrase_start": 103,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-12-31",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 2.256,
+    "total_seconds": 2.271,
+    "prompt_tokens": 409,
+    "new_tokens": 37,
+    "stopped": true,
+    "load_average_1m": 21.3,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:34:01Z",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "MDT_DECISION",
+      "date": "2025-12-31",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-17",
+    "source_split": "val",
+    "source_id": "4d359ce1691c6d2927e085c3a53d3a99b603bccbc32e79410a8c4633d51be5db",
+    "writer": "haiku",
+    "kind": "standard",
+    "stratum": "haiku/standard/no-relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-12-31",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-18": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-18",
+    "note_date": "2026-10-05",
+    "note_text": "Yhteenvetona pot. ohjattiin jatkotutkimuksiin seulonnan perusteella. Seulontayksikön hoitaja vastasi pot:n ensimmäiseen yhteydenottoon 17. toukokuuta 2026, eikä lääkäri tutkinut silloin. Syöpähoito alkoi 19.6.2026, ja hoitoon liittyvät ohjeet on käyty läpi kirjallisesti. Pot. syntynyt 7.12.1954. Seuraava kontrolli on varattu 23.12.2026. Pot. kertoo pärjäävänsä kotona, väsymys on ajoittain painava ja ruokahalu on vaihdellut. Puoliso on tukena kaupassa ja kotitöissä. Mielialaa on ollut vaikea pitää yllä, mutta pot. on ottanut yhteyttä tarvittaessa ja kertoo mieluummin etukäteen. Hän kiittää joustavuudesta."
+   },
+   "highlights": [
+    {
+     "start": 135,
+     "end": 154,
+     "phrase": "17. toukokuuta 2026",
+     "kind": "absolute",
+     "date": "2026-05-17",
+     "precision": "DAY"
+    },
+    {
+     "start": 204,
+     "end": 213,
+     "phrase": "19.6.2026",
+     "kind": "absolute",
+     "date": "2026-06-19",
+     "precision": "DAY"
+    },
+    {
+     "start": 286,
+     "end": 295,
+     "phrase": "7.12.1954",
+     "kind": "absolute",
+     "date": "1954-12-07",
+     "precision": "DAY"
+    },
+    {
+     "start": 327,
+     "end": 337,
+     "phrase": "23.12.2026",
+     "kind": "absolute",
+     "date": "2026-12-23",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2026-05-17\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2026-06-19\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-05-17",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-06-19",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2026-05-17",
+      "precision": "DAY",
+      "model_date": "2026-05-17",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "17. toukokuuta 2026",
+      "phrase_kind": "absolute",
+      "phrase_start": 135,
+      "status": "proposed; a person confirms every event"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-06-19",
+      "precision": "DAY",
+      "model_date": "2026-06-19",
+      "model_precision": "DAY",
+      "date_computed_by_code": false,
+      "phrase": "19.6.2026",
+      "phrase_kind": "absolute",
+      "phrase_start": 204,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-05-17",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-06-19",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "pre-filled for one-click confirmation",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 2.338,
+    "total_seconds": 2.351,
+    "prompt_tokens": 420,
+    "new_tokens": 60,
+    "stopped": true,
+    "load_average_1m": 20.55,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:34:04Z",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2026-05-17",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-06-19",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": true,
+   "demo": {
+    "demo_id": "demo-18",
+    "source_split": "val",
+    "source_id": "cafc6f3fc0ec4db03b2466b9c712e001ba3670a5266cf9f2435e82237d7dc2e2",
+    "writer": "haiku",
+    "kind": "standard",
+    "stratum": "haiku/standard/no-relative",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-05-17",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-06-19",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
+  },
+  "demo-19": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-19",
+    "note_date": "2025-04-10",
+    "note_text": "Pot. kävi yksityisen terveydenhuollon vastaanotolla kyynärpään vaivan vuoksi. Tenniskyynärpään oireiden alun pot. kertoo alkaneen 12 päivää sitten, kun kädellä tehtiin toistuvia työliikkeitä. Edellinen, jo toteutunut käynti saman vaivan vuoksi oli 18.11.2022, ja silloin ohjeeksi annettiin lepoa sekä venyttelyä. Pot. kertoo kivun olevan lievää ja pahimman kuormituksen tulevan rasittavista liikkeistä. Kipulääkettä ei ole tarvittu. Kotona pot. jatkaa liikkumista kevyesti ja välttää tärkeän käsivarren ylikuormitusta. Pot. kysyi, voiko raskasta kantamista jatkaa, ja häntä neuvottiin keventämään kuormaa. Pot. kiitti neuvoista ja toivoo, että vaiva helpottaa itsestään."
+   },
+   "highlights": [
+    {
+     "start": 130,
+     "end": 146,
+     "phrase": "12 päivää sitten",
+     "kind": "relative",
+     "date": "2025-03-29",
+     "precision": "DAY",
+     "days_before_note": 12,
+     "source": "digits"
+    },
+    {
+     "start": 248,
+     "end": 258,
+     "phrase": "18.11.2022",
+     "kind": "absolute",
+     "date": "2022-11-18",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"PRIVATE\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2025-01-25\",\"precision\":\"DAY\"}]}",
+    "parsed": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-01-25",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "PRIVATE",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2025-03-29",
+      "precision": "DAY",
+      "model_date": "2025-01-25",
+      "model_precision": "DAY",
+      "date_computed_by_code": true,
+      "phrase": "12 päivää sitten",
+      "phrase_kind": "relative",
+      "phrase_start": 130,
+      "status": "proposed; a person confirms every event"
+     }
+    ],
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-03-29",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [
+     {
+      "index": 0,
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "from_date": "2025-01-25",
+      "from_precision": "DAY",
+      "to_date": "2025-03-29",
+      "to_precision": "DAY",
+      "phrase": "12 päivää sitten",
+      "source": "digits"
+     }
+    ],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "needs editing",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 2.355,
+    "total_seconds": 2.404,
+    "prompt_tokens": 416,
+    "new_tokens": 40,
+    "stopped": true,
+    "load_average_1m": 20.55,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:34:06Z",
+   "answer_key": {
+    "entry_route": "PRIVATE",
+    "events": []
+   },
+   "exact_match_with_answer_key": false,
+   "demo": {
+    "demo_id": "demo-19",
+    "source_split": "val",
+    "source_id": "08607e33ad1a9c5a8efcb859b866f6b8ef675ad92d2d00ff4f75c9be566719e7",
+    "writer": "haiku",
+    "kind": "no_event",
+    "stratum": "haiku/no_event/any",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": []
+    },
+    "agrees": false
+   },
+   "review_reason": "readers disagree"
+  },
+  "demo-20": {
+   "schema": "sama-scribe-demo-v1",
+   "synthetic_note": true,
+   "note": {
+    "id": "demo-20",
+    "note_date": "2025-07-10",
+    "note_text": "Työterveyshuollosta alkanut syöpäpolku eteni, ja pot. kävi onkologin vastaanotolla esh:ssa 20. maaliskuuta 2025. Vastaanoton teki hoitava erikoislääkäri, ja sen jälkeen asiat on käyty läpi pot:n kanssa. Pot. kertoo vointinsa olevan kohtuullinen ja jaksavansa töissä osittain. Ruokahalu on hyvä ja unta tulee kohtuullisesti. Puoliso tukee ja auttaa kotitöissä. Rokotushistoriassa on influenssarokotus 9. helmikuuta 2023, mikä ei liity nykyiseen asiaan. Pot. kysyi, miten työpaikalle voi kertoa tilanteesta, ja neuvoja annettiin. Pot. toivoo kirjallista tietoa jatkosta."
+   },
+   "highlights": [
+    {
+     "start": 91,
+     "end": 111,
+     "phrase": "20. maaliskuuta 2025",
+     "kind": "absolute",
+     "date": "2025-03-20",
+     "precision": "DAY"
+    },
+    {
+     "start": 400,
+     "end": 418,
+     "phrase": "9. helmikuuta 2023",
+     "kind": "absolute",
+     "date": "2023-02-09",
+     "precision": "DAY"
+    }
+   ],
+   "model": {
+    "raw": "{\"entry_route\":\"OCCUPATIONAL\",\"events\":[]}",
+    "parsed": {
+     "entry_route": "OCCUPATIONAL",
+     "events": []
+    },
+    "errors": []
+   },
+   "resolved": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [],
+    "prediction": {
+     "entry_route": "OCCUPATIONAL",
+     "events": []
+    }
+   },
+   "date_resolution": {
+    "rule": "scribe-v3-relative-resolver-v1",
+    "arm": "A'",
+    "changes": [],
+    "needs_person": []
+   },
+   "flags": [],
+   "errors": [],
+   "review": "needs editing",
+   "person_confirms": "a person confirms every event",
+   "timing": {
+    "generate_seconds": 0.721,
+    "total_seconds": 0.797,
+    "prompt_tokens": 386,
+    "new_tokens": 13,
+    "stopped": true,
+    "load_average_1m": 20.59,
+    "cpu_count": 18
+   },
+   "provenance": {
+    "synthetic_training_data": true,
+    "base_model": {
+     "repo": "unsloth/gemma-3-270m-it",
+     "revision": "23cf460f6bb16954176b3ddcc8d4f250501458a9"
+    },
+    "adapter": {
+     "run": "C-270m-all-v2data",
+     "path": "scribe/v3/artifacts/C-270m-all-v2data/adapter",
+     "format": "PEFT LoRA r16",
+     "sha256": "d9a8b83af48256d3ded59d09f900a64577636d3c91a3ccc9a5de30ea2f46ba03"
+    },
+    "decoding": {
+     "strategy": "greedy",
+     "max_new_tokens": 134,
+     "device": "cpu",
+     "dtype": "float32",
+     "lora_merged": true,
+     "threads": 8,
+     "batch_size": 1,
+     "prompt": "scribe/prompts.py messages (v1, absolute format)",
+     "stop_token_ids": [
+      1,
+      106
+     ]
+    },
+    "resolver": {
+     "rule": "scribe-v3-relative-resolver-v1",
+     "arm": "A'",
+     "frozen": true,
+     "lexicon": "fi-relative-lexicon-v1",
+     "freeze_file": "data/scribe/v4/resolver/freeze.json",
+     "reason": "frozen arm A' (digits plus the Finnish lexicon); hashes match the freeze record"
+    },
+    "versions": {
+     "python": "3.12.13",
+     "torch": "2.15.0",
+     "transformers": "5.23.0",
+     "peft": "0.21.3"
+    },
+    "gpu": null,
+    "load_seconds": 3.992,
+    "warm_up_seconds": 1.389
+   },
+   "generated_utc": "2026-11-14T22:34:07Z",
+   "answer_key": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2025-03-20",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "exact_match_with_answer_key": false,
+   "demo": {
+    "demo_id": "demo-20",
+    "source_split": "val",
+    "source_id": "31c849a1bbf64300e2bb2dd6bec85b28898d215fb285400a42b10e22480007d2",
+    "writer": "haiku",
+    "kind": "careful",
+    "stratum": "haiku/careful/any",
+    "rewritten_by_code": false,
+    "rewrite_kind": null,
+    "rewrite": null
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2025-03-20",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": false
+   },
+   "review_reason": "readers disagree"
+  }
+ },
+ "two_reader": {
+  "rule": "pre-filled for one-click confirmation only when the Gemma answer (after the code resolver) is usable with no flag and equals the stored Nemotron v3 answer for the same SYNTHETIC note; otherwise needs editing; a person confirms every event",
+  "second_reader_file": "data/scribe/nemotron/val-v3.jsonl",
+  "notes": 20,
+  "pre_filled": 15,
+  "pre_filled_wrong": 0,
+  "needs_editing": 5,
+  "reasons": {
+   "both readers agree exactly": 15,
+   "readers disagree": 2,
+   "second reader not run offline": 3
+  },
+  "wrong_notes": {
+   "demo-19": "needs editing",
+   "demo-20": "needs editing"
+  },
+  "generated_utc": "2026-11-15T00:35:26Z"
+ }
+}

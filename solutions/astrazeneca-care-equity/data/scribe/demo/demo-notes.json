@@ -1,0 +1,1033 @@
+{
+ "schema": "sama-scribe-demo-notes-v1",
+ "synthetic": true,
+ "label": "SYNTHETIC notes written by language models (Nemotron 3.5 Super VL, Claude Haiku) from sampled answer keys; 3 of them rewritten by code. Not patient data.",
+ "generated_utc": "2026-11-14T21:55:41Z",
+ "selection_rule": {
+  "split": "validation only (val_nemotron + val_haiku, 310 notes); no test note is used",
+  "excluded": "the first 20 validation notes, used to choose CPU float32 with merged LoRA weights",
+  "order": "sha256('sama-demo-v1:' + note id), ascending, within each stratum",
+  "rewrites": [
+   "kolme viikkoa sitten: first standard note with a once-occurring 'N viikkoa sitten' (N > 3) on its unique latest event; the phrase becomes 'kolme viikkoa sitten' and that event's key date note_date - 21",
+   "eilen: first standard note with a once-occurring 'N päivää sitten' (N > 1) on its unique latest event; the phrase becomes 'eilen' and that event's key date note_date - 1",
+   "number word: first standard note with a once-occurring event phrase 'N päivää/viikkoa sitten', N in 2..6; the digit becomes the Finnish number word, the date stays",
+   "gate (code): the new phrase occurs once, resolver arm A' places it on the key date, arm A (digits only) does not see it"
+  ],
+  "strata": [
+   {
+    "writer": "nemotron",
+    "kind": "standard",
+    "digit_relative_phrase": true,
+    "count": 6
+   },
+   {
+    "writer": "nemotron",
+    "kind": "standard",
+    "digit_relative_phrase": false,
+    "count": 5
+   },
+   {
+    "writer": "haiku",
+    "kind": "standard",
+    "digit_relative_phrase": true,
+    "count": 2
+   },
+   {
+    "writer": "haiku",
+    "kind": "standard",
+    "digit_relative_phrase": false,
+    "count": 2
+   },
+   {
+    "writer": "haiku",
+    "kind": "no_event",
+    "digit_relative_phrase": null,
+    "count": 1
+   },
+   {
+    "writer": "haiku",
+    "kind": "careful",
+    "digit_relative_phrase": null,
+    "count": 1
+   }
+  ],
+  "never_looked_at": "any model output (CPU or CUDA) when choosing notes"
+ },
+ "sources": {
+  "val_nemotron": {
+   "rows": 250,
+   "source": "data_tools.load_split('val_nemotron')"
+  },
+  "val_haiku": {
+   "rows": 60,
+   "source": "data_tools.load_split('val_haiku')"
+  }
+ },
+ "probe_ids": [
+  "08477fda7b7777da6a9179edfd524f56419dae12933ba01e87df1c8f1a7a20f1",
+  "f354870d8fa29408d25ec6851b094e7b87ab6d7706cae748ac16490441cbea71",
+  "2065a870943c6141e3f146a03e0ad2572e2b07f3c19e795b335f10c6b7ea2129",
+  "0dba1ae7689792bd03d2c8395dda0209ab2d20bcd1f1fe7cb44d3a510bf97082",
+  "b697adb83340fb7124cfff29b063f9d54927309ee0eff6044f59b5585bddf499",
+  "04194349585764a0ae1e074bfc636503259c1a9a3fabe7ae27acc1e10911d816",
+  "a2a504e11c03197c26f874c14079b0826e495e48a7791fb2b7a8b768d94c895b",
+  "4b65005236a2a60b6bc223d95395518172de956af32127cb6e7f4dea87e45817",
+  "261a3ed9a008765bcc58aaea27ae6eb15c0176915b641d28f2fadc30c032b6c0",
+  "ccd52c230ee3b266191d668f229fbd594f41db0780a2c8972f1b002ea544bc4a",
+  "4285b4df16103f5bf246a975c4a1787f4e58c83364aa38d0591721a0e9630fe8",
+  "35a204aa37e25f190703ca2a9f8b84b27799ee780f80702994c41b108a417614",
+  "8a199152b1a88589c60ee42f51bfc4130d40bcc2895ef1265b2f45f285714e52",
+  "d3c362fd8ccd65b25f8ad02a99bbfbdb05b45daa4916321dd0519f6a3fd81999",
+  "4a2e45f3d01690cf606677c1eb3a3d445dfe2af0ebf418334a498e2ac14016aa",
+  "1188b981d406c105b1da14b58aec4d66f9f43ca6bc356d4eaa498300fb5d95cf",
+  "99b882e32274013a77bbd44d7517e15236ab4370752fca62b5f49ae74d1a3725",
+  "7cf9e8146d8bc9b030efe2a6ddb1fa8fd26dc4a9af20ba4305d8d36fb0c3794d",
+  "aa9571863b6cc25a9f52c98394ba9b0ef332e41921b0e36db12f8b3cb23bcf2f",
+  "6fcb0fb6db0e91067241311989b43f74698f46e6f10627df1acff14a756db2e6"
+ ],
+ "notes": [
+  {
+   "demo_id": "demo-01",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "00011f568b68899c49305a797851166102221011b9de19275341f5a182dbeaf1",
+   "source_index": 167,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "hoitajan puhelinmerkintä",
+   "stratum": "code-rewritten",
+   "date_forms": [
+    "numeric",
+    "numeric",
+    "weeks"
+   ],
+   "note_date": "2026-07-04",
+   "note_text": "Pot. on tullut syöpäpolulle seulonnan kautta. Ensimmäinen yhteydenotto terveydenhuoltoon oli 21.8.2025. Lähetys lähetettiin 9.1.2026. Erikoislääkärikäynti oli kolme viikkoa sitten. Potilaan yleistila on vakaa ja toimintakyky säilynyt. Arjessa selviytyminen sujuu itsenäisesti. Oireita ei ole ilmennyt. Potilaalle on annettu yleistä neuvontaa oireiden seurannasta. Lisätietoa tarjotaan tarvittaessa. Seuranta jatkuu suunnitellusti. Kontrolli on vasta tulevaisuudessa. Potilas on tietoinen jatkotoimenpiteistä. Keskustelu oli rauhallista ja asiallista. Potilas ymmärsi annetut ohjeet. Merkintä kirjataan potilastietojärjestelmään. Tapahtumat liittyvät nimenomaan syöpäpolkuun.",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2025-08-21",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2026-01-09",
+      "precision": "DAY"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2026-06-13",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": true,
+   "rewrite_kind": "number_word_kolme",
+   "rewrite": {
+    "event_type": "SPECIALIST_VISIT",
+    "from_phrase": "5 viikkoa sitten",
+    "to_phrase": "kolme viikkoa sitten",
+    "from_date": "2026-05-30",
+    "to_date": "2026-06-13"
+   },
+   "rewrite_gate": {
+    "phrase_present_once": true,
+    "arm_A_prime_resolves_to_key": true,
+    "arm_A_resolves": false
+   },
+   "source_note_text": "Pot. on tullut syöpäpolulle seulonnan kautta. Ensimmäinen yhteydenotto terveydenhuoltoon oli 21.8.2025. Lähetys lähetettiin 9.1.2026. Erikoislääkärikäynti oli 5 viikkoa sitten. Potilaan yleistila on vakaa ja toimintakyky säilynyt. Arjessa selviytyminen sujuu itsenäisesti. Oireita ei ole ilmennyt. Potilaalle on annettu yleistä neuvontaa oireiden seurannasta. Lisätietoa tarjotaan tarvittaessa. Seuranta jatkuu suunnitellusti. Kontrolli on vasta tulevaisuudessa. Potilas on tietoinen jatkotoimenpiteistä. Keskustelu oli rauhallista ja asiallista. Potilas ymmärsi annetut ohjeet. Merkintä kirjataan potilastietojärjestelmään. Tapahtumat liittyvät nimenomaan syöpäpolkuun.",
+   "cuda": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2025-08-21\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_SENT\",\"date\":\"2026-01-09\",\"precision\":\"DAY\"},{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2026-02-11\",\"precision\":\"DAY\"}]}",
+    "same_text": false,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-02",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "d1adc4394e989faf645aee5e32d2555a5dba5cb4fbfb7956f02f744d99875978",
+   "source_index": 61,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "käyntimerkintä",
+   "stratum": "code-rewritten",
+   "date_forms": [
+    "days"
+   ],
+   "note_date": "2026-07-26",
+   "note_text": "Pot. on syntynyt 17.4.1994. Syöpäpolun tuloreitti on työterveyshuolto. Lähete on lähetetty eilen. Seuraava kontrolli on 25.8.2026. Potilaan yleistila on vakaa. Toimintakyky säilyy melko hyvin. Arjessa selviytyminen sujuu. Yt. on tyydyttävä. Anamneesissa ei uusia oireita. Pkli on rauhallinen. Potilasta on neuvottu lepoa ja ravintoa koskien. Seuranta jatkuu suunnitellusti. Tuleva kontrolli on tärkeä. Potilas ymmärtää tilanteen. Neuvonta on selkeää. Voinnin seuranta jatkuu.",
+   "answer_key": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2026-07-25",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": true,
+   "rewrite_kind": "eilen",
+   "rewrite": {
+    "event_type": "REFERRAL_SENT",
+    "from_phrase": "73 päivää sitten",
+    "to_phrase": "eilen",
+    "from_date": "2026-05-14",
+    "to_date": "2026-07-25"
+   },
+   "rewrite_gate": {
+    "phrase_present_once": true,
+    "arm_A_prime_resolves_to_key": true,
+    "arm_A_resolves": false
+   },
+   "source_note_text": "Pot. on syntynyt 17.4.1994. Syöpäpolun tuloreitti on työterveyshuolto. Lähete on lähetetty 73 päivää sitten. Seuraava kontrolli on 25.8.2026. Potilaan yleistila on vakaa. Toimintakyky säilyy melko hyvin. Arjessa selviytyminen sujuu. Yt. on tyydyttävä. Anamneesissa ei uusia oireita. Pkli on rauhallinen. Potilasta on neuvottu lepoa ja ravintoa koskien. Seuranta jatkuu suunnitellusti. Tuleva kontrolli on tärkeä. Potilas ymmärtää tilanteen. Neuvonta on selkeää. Voinnin seuranta jatkuu.",
+   "cuda": {
+    "raw": "{\"entry_route\":\"OCCUPATIONAL\",\"events\":[{\"type\":\"REFERRAL_SENT\",\"date\":\"2025-08-15\",\"precision\":\"DAY\"}]}",
+    "same_text": false,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-03",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "4ddbae2767e89b39babbc6917fb041000f51cbbbf8dc6bb527526b58952c2486",
+   "source_index": 236,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "loppulausunnon ote",
+   "stratum": "code-rewritten",
+   "date_forms": [
+    "long",
+    "month",
+    "days",
+    "weeks"
+   ],
+   "note_date": "2024-04-22",
+   "note_text": "Pot. oireet alkoivat 16. heinäkuuta 2023. Lääkärin arvio tehtiin syyskuussa 2023. Syöpädiagnoosi vahvistettiin 70 päivää sitten. Syöpähoito aloitettiin viisi viikkoa sitten. Syöpäpolun tuloreitti on päivystys. Pot. vointi on tällä hetkellä vakaa. Toimintakyky säilyy hyvin. Arjessa selviytyminen sujuu ilman suurempia rajoituksia. Pot. on saanut neuvontaa hoito-ohjeista. Liikkuminen on mahdollista kotona. Ruokahalu on tyydyttävä. Uni on rauhallista. Kipua ei ole merkittävästi. Mieli on tasapainoinen. Seuranta jatkuu suunnitellusti. Pot. ymmärtää hoitosuunnitelman. Neuvontaa on annettu oireiden seurannasta. Pot. voi ottaa yhteyttä tarvittaessa. Tila on stabiili. Hoito etenee odotetusti. Pot. on motivoitunut. Kuntoutus on käynnissä.",
+   "answer_key": {
+    "entry_route": "EMERGENCY",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2023-07-16",
+      "precision": "DAY"
+     },
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2023-09-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "DIAGNOSIS",
+      "date": "2024-02-12",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2024-03-18",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": true,
+   "rewrite_kind": "number_word_digit",
+   "rewrite": {
+    "event_type": "TREATMENT_START",
+    "from_phrase": "5 viikkoa sitten",
+    "to_phrase": "viisi viikkoa sitten",
+    "from_date": "2024-03-18",
+    "to_date": "2024-03-18"
+   },
+   "rewrite_gate": {
+    "phrase_present_once": true,
+    "arm_A_prime_resolves_to_key": true,
+    "arm_A_resolves": false
+   },
+   "source_note_text": "Pot. oireet alkoivat 16. heinäkuuta 2023. Lääkärin arvio tehtiin syyskuussa 2023. Syöpädiagnoosi vahvistettiin 70 päivää sitten. Syöpähoito aloitettiin 5 viikkoa sitten. Syöpäpolun tuloreitti on päivystys. Pot. vointi on tällä hetkellä vakaa. Toimintakyky säilyy hyvin. Arjessa selviytyminen sujuu ilman suurempia rajoituksia. Pot. on saanut neuvontaa hoito-ohjeista. Liikkuminen on mahdollista kotona. Ruokahalu on tyydyttävä. Uni on rauhallista. Kipua ei ole merkittävästi. Mieli on tasapainoinen. Seuranta jatkuu suunnitellusti. Pot. ymmärtää hoitosuunnitelman. Neuvontaa on annettu oireiden seurannasta. Pot. voi ottaa yhteyttä tarvittaessa. Tila on stabiili. Hoito etenee odotetusti. Pot. on motivoitunut. Kuntoutus on käynnissä.",
+   "cuda": {
+    "raw": "{\"entry_route\":\"EMERGENCY\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2023-07-16\",\"precision\":\"DAY\"},{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2023-09-01\",\"precision\":\"MONTH\"},{\"type\":\"DIAGNOSIS\",\"date\":\"2024-01-24\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2024-02-05\",\"precision\":\"DAY\"}]}",
+    "same_text": false,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-04",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "ed1f490db8086513d71cb9736487b00a16a3584039f8a97bc77343e8917f36dc",
+   "source_index": 243,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "lähetekirje",
+   "stratum": "nemotron/standard/relative",
+   "date_forms": [
+    "month",
+    "numeric",
+    "weeks",
+    "numeric"
+   ],
+   "note_date": "2024-03-02",
+   "note_text": "Syöpäpolun tuloreitti on yksityinen terveydenhuolto. Pot. sai lääkärin arvion toukokuussa 2023. Lähetteen vastaanottaminen tapahtui 29.6.2023. Moniammatillinen hoitopäätös tehtiin 25 viikkoa sitten. Syöpähoidon aloitus oli 18.11.2023. Potilaan yleistila on vakaa. Toimintakyky säilyy hyvin. Arjessa selviytyminen sujuu. Potilas on saanut yleisneuvontaa. Oireita seurataan säännöllisesti. Hoitosuunnitelma on ajantasainen. Potilas ymmärtää hoidon vaiheet. Kuntoutus etenee suunnitellusti. Liikkuminen onnistuu omatoimisesti. Ravitsemus on riittävää. Uni on palauttavaa. Henkinen tuki on saatavilla. Seuranta jatkuu sovitusti. Potilas on motivoitunut. Neuvontaa annetaan jatkossakin. Kaikki asiat on käyty läpi.",
+   "answer_key": {
+    "entry_route": "PRIVATE",
+    "events": [
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2023-05-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2023-06-29",
+      "precision": "DAY"
+     },
+     {
+      "type": "MDT_DECISION",
+      "date": "2023-09-09",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2023-11-18",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"PRIVATE\",\"events\":[{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2023-05-01\",\"precision\":\"MONTH\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2023-06-29\",\"precision\":\"DAY\"},{\"type\":\"MDT_DECISION\",\"date\":\"2023-10-08\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2023-11-18\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-05",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "baf6905960a95ab8177787ca9d94bfd5b63d5d263a597d37981dab0b3d8241c1",
+   "source_index": 238,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "lähetekirje",
+   "stratum": "nemotron/standard/relative",
+   "date_forms": [
+    "numeric",
+    "long",
+    "weeks"
+   ],
+   "note_date": "2024-04-20",
+   "note_text": "Pot. on hakeutunut hoitoon ensimmäisen kerran 12.7.2023. Erikoislääkärikäynti toteutettiin 23. syyskuuta 2023. Moniammatillinen hoitopäätös tehtiin 15 viikkoa sitten. Syöpäpolun tuloreitti on työterveyshuolto. Potilaan yleinen vointi on tällä hetkellä vakaa. Toimintakyky säilyy jokapäiväisissä askareissa melko hyvin. Arjessa selviytyminen sujuu tavanomaisesti. Potilaalle on annettu yleistä neuvontaa oireiden seurannasta. Lepo ja ravinto tukevat toipumista. Liikuntaa suositellaan kohtuudella. Henkinen tuki on saatavilla tarvittaessa. Seuranta jatkuu sovitun suunnitelman mukaisesti. Uusia oireita tulee raportoida viipymättä. Lääkehoitoa noudatetaan ohjeen mukaan. Kontrollikäyntejä aikataulutetaan tarpeen mukaan. Yhteistyö eri tahojen välillä on sujuvaa. Potilas ymmärtää hoitosuunnitelman keskeiset kohdat. Terveydentilaa arvioidaan säännöllisesti. Kaikki toimenpiteet etenevät suunnitellusti.",
+   "answer_key": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2023-07-12",
+      "precision": "DAY"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2023-09-23",
+      "precision": "DAY"
+     },
+     {
+      "type": "MDT_DECISION",
+      "date": "2024-01-06",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"OCCUPATIONAL\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2023-07-12\",\"precision\":\"DAY\"},{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2023-09-23\",\"precision\":\"DAY\"},{\"type\":\"MDT_DECISION\",\"date\":\"2023-11-08\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-06",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "b32e0cafd605a4be5d63f85d336326bcfb73de09b87f27ab17f6d1c26b7e7705",
+   "source_index": 62,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "hoitajan puhelinmerkintä",
+   "stratum": "nemotron/standard/relative",
+   "date_forms": [
+    "weeks",
+    "numeric"
+   ],
+   "note_date": "2025-12-09",
+   "note_text": "Pot. oireet alkoivat 30 viikkoa sitten. Syöpäpolun tuloreitti on seulonta. Syöpähoito aloitettiin 4.11.2025. Potilaan vointi on tällä hetkellä vakaa. Toimintakyky säilyy melko hyvin. Arjessa selviytyminen sujuu tuen avulla. Yleinen neuvonta on annettu. Potilas ymmärtää hoitosuunnitelman. Oireita seurataan tarkasti. Lääkitystä käytetään ohjeen mukaan. Liikunta on suositeltavaa. Ravitsemus on tärkeää. Lepo ja unta tulee riittävästi. Stressinhallinta on osa hoitoa. Potilas voi ottaa yhteyttä tarvittaessa. Seuranta jatkuu suunnitelman mukaan. Tulevat kontrollit ovat tärkeitä. Potilas on motivoitunut hoitoon. Tuki on saatavilla. Hoitosuhde on avoin.",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2025-05-13",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2025-11-04",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2025-01-12\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2025-11-04\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-07",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "fd3990925903777656c13484c979dbe43b03c899c12bc02c048f36eacb4c342d",
+   "source_index": 107,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "käyntimerkintä",
+   "stratum": "nemotron/standard/relative",
+   "date_forms": [
+    "numeric",
+    "days"
+   ],
+   "note_date": "2024-12-26",
+   "note_text": "Pot. oireet alkoivat 21.3.2024. Ensimmäinen yhteydenotto terveydenhuoltoon oli 142 päivää sitten. Syöpäpolun tuloreitti on seulonta. Tila on vakaa. Toimintakyky on säilynyt hyvänä. Arjessa selviytyminen sujuu normaalisti. Potilas on saanut yleistietoa sairaudesta. Neuvonta koski oireiden seurantaa. Elämäntapoihin liittyviä suosituksia annettiin. Lääkitystä ei ole aloitettu. Kontrolli on suunniteltu. Seuranta jatkuu sovitusti. Potilas ymmärtää suunnitelman. Kysymyksiä ei tullut esille. Seuraava arvio tehdään myöhemmin. Vointi on hyvä. Toimintakyky riittää arkeen. Neuvonta jatkuu tarvittaessa. Tila on stabiili. Seuranta on tärkeää.",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2024-03-21",
+      "precision": "DAY"
+     },
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2024-08-06",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2024-03-21\",\"precision\":\"DAY\"},{\"type\":\"FIRST_CONTACT\",\"date\":\"2024-05-05\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-08",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "5b9081da483e2a2dec3c17408337f676d67f326b843ad0767bda9385ec0ba6e5",
+   "source_index": 21,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "hoitajan puhelinmerkintä",
+   "stratum": "nemotron/standard/relative",
+   "date_forms": [
+    "days",
+    "numeric",
+    "month"
+   ],
+   "note_date": "2026-03-29",
+   "note_text": "Potilas saapui seulontatietojen perusteella tehtyyn yhteydenottoon. Oireet alkoivat 315 päivää sitten. Lähete lähetettiin 31.8.2025. Syöpähoito aloitettiin helmikuussa 2026. Potilas kertoo vointinsa olevan tällä hetkellä vakaa. Toimintakyky säilyy arjen toiminnoissa osittain. Arjessa selviytyminen sujuu tuen avulla. Yleinen neuvonta sisältää lepoa ja nesteytyksen ylläpitoa. Potilas on saanut ohjeita oireiden seurantaan. Yhteydenottoja on suositeltava tarvittaessa. Potilas ymmärtää annetut neuvot. Seuranta jatkuu suunnitellusti. Tila on kliinisesti hallinnassa. Potilas voi liikkua kodissaan itsenäisesti. Ravinto on riittävää. Unen laatu on vaihdellut. Mieliala on tasainen. Hoitosuunnitelma on selkeä. Potilas sitoutuu ohjeisiin. Tilan arviointi jatkuu.",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2025-05-18",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2025-08-31",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-02-01",
+      "precision": "MONTH"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2025-04-03\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_SENT\",\"date\":\"2025-08-31\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2026-02-01\",\"precision\":\"MONTH\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-09",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "b58de4d5d85ddecea0fda7c58d6bd9fba35032494bd237957ba14b20ff170e3b",
+   "source_index": 74,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "lähetekirje",
+   "stratum": "nemotron/standard/relative",
+   "date_forms": [
+    "days",
+    "long",
+    "numeric",
+    "numeric"
+   ],
+   "note_date": "2024-01-30",
+   "note_text": "Pot. on ohjattu yksityisen terveydenhuollon tuloreitiltä syöpäpolulle. Oireet alkoivat 280 päivää sitten. Lääkärin arvio tehtiin 5. elokuuta 2023. Lähete lähetettiin 18.11.2023 ja vastaanotettiin 26.12.2023. Aiempi syöpään liittymätön rokotuskäynti oli 1.4.2022. Syntymäaika on 25.4.1982. Potilaan yleistila on vakaa. Toimintakyky säilyy melko hyvänä. Arjessa selviytyminen onnistuu itsenäisesti. Potilaalle on annettu neuvontaa oireiden seurannasta. Lisäksi on keskusteltu jatkotutkimusten tarpeesta. Potilas ymmärtää ohjeet hyvin. Tilaa tarkkaillaan jatkossa. Seuranta on tärkeää. Potilas on motivoitunut hoitoon. Neuvonta on tarjolla jatkuvasti.",
+   "answer_key": {
+    "entry_route": "PRIVATE",
+    "events": [
+     {
+      "type": "SYMPTOM_ONSET_REPORTED",
+      "date": "2023-04-25",
+      "precision": "DAY"
+     },
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2023-08-05",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2023-11-18",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2023-12-26",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"PRIVATE\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2023-02-15\",\"precision\":\"DAY\"},{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2023-08-05\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_SENT\",\"date\":\"2023-11-18\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2023-12-26\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-10",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "4577c21c903e215050021e29b7433f5bda2c5a9e1125d6829617110d0ebf2dd6",
+   "source_index": 113,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "lähetekirje",
+   "stratum": "nemotron/standard/no-relative",
+   "date_forms": [
+    "numeric",
+    "long"
+   ],
+   "note_date": "2026-08-31",
+   "note_text": "Pot. on ohjattu syöpäpolulle yksityisen terveydenhuollon kautta. Moniammatillinen hoitopäätös tehtiin 15.9.2025. Syöpähoito aloitettiin 9. maaliskuuta 2026. Anamneesissa kuvataan yleistä vointia ja toimintakykyä. Tila on vakaa. Pkl on rajoitettu, mutta arjessa selviytyminen onnistuu. Yt. sisältää päivittäisiä toimintoja. Pot. saa tukea kotona. Neuvonta koskee oireiden seurantaa ja hoitoon sitoutumista. Liikuntaa suositellaan maltillisesti. Ravitsemus on tärkeää. Lepo ja unenlaatu huomioidaan. Lääkehoitoa noudatetaan ohjeiden mukaan. Seuranta jatkuu suunnitelman mukaisesti. Pot. on tietoinen hoidon etenemisestä. Kysymyksiin vastataan vastaanotolla. Tavoitteena on elämänlaadun säilyttäminen.",
+   "answer_key": {
+    "entry_route": "PRIVATE",
+    "events": [
+     {
+      "type": "MDT_DECISION",
+      "date": "2025-09-15",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-03-09",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"PRIVATE\",\"events\":[{\"type\":\"MDT_DECISION\",\"date\":\"2025-09-15\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2026-03-09\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-11",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "dbadd1bcf911a36ceb7151212db98acb4e665ea6f56f1b079019c6d590a11248",
+   "source_index": 221,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "loppulausunnon ote",
+   "stratum": "nemotron/standard/no-relative",
+   "date_forms": [
+    "numeric",
+    "numeric"
+   ],
+   "note_date": "2024-08-08",
+   "note_text": "Pot. otti ensi kerran yhteyttä terveydenhuoltoon 5.12.2023. Lääkäri arvioi tilanteen 9.1.2024. Syöpäpolun tuloreitti on seulonta. Pot. voi tällä hetkellä kohtuullisesti. Toimintakyky on säilynyt lähes ennallaan. Arjessa selviytyminen sujuu itsenäisesti. Oireet ovat lieviä ja hallittavissa. Yleinen neuvonta on annettu potilaalle. Neuvonta koski elintapoja ja oireiden seurantaa. Potilas sai ohjeita milloin hakeutua hoitoon. Tulevaisuudessa on suunniteltu kontrollikäynti. Kontrolli on vasta tulevaisuudessa. Potilas ymmärsi annetut ohjeet hyvin. Kliininen tilanne on vakaa. Seuranta jatkuu sovitun suunnitelman mukaisesti. Potilas on sitoutunut hoitosuunnitelmaan. Oireita ei ole ilmaantunut lisää. Voinnin seuranta on tärkeää. Potilas voi ottaa yhteyttä tarvittaessa. Neuvonta jatkuu tarvittaessa myöhemminkin.",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2023-12-05",
+      "precision": "DAY"
+     },
+     {
+      "type": "PHYSICIAN_ASSESSMENT",
+      "date": "2024-01-09",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2023-12-05\",\"precision\":\"DAY\"},{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":\"2024-01-09\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-12",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "b31180e72e589afb2780b057d5ce212c0f432750c9c0a4cec859ba3963f3606a",
+   "source_index": 160,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "hoitajan puhelinmerkintä",
+   "stratum": "nemotron/standard/no-relative",
+   "date_forms": [
+    "numeric",
+    "month",
+    "long"
+   ],
+   "note_date": "2025-04-21",
+   "note_text": "Pot. soitti sairaanhoitajalle. Pot. kertoi vointinsa olevan vakaa ja toimintakyky säilyneen hyvänä arjessa. Pot. pystyy selviytymään päivittäisistä toiminnoista itsenäisesti. Syöpäpolun tuloreitti on seulonta. Erikoislääkärikäynti oli 5.5.2024. Syöpädiagnoosi vahvistettiin kesäkuussa 2024. Syöpähoito aloitettiin 10. helmikuuta 2025. Seuraava kontrolli on 20.5.2025. Hoitaja neuvoi potilasta seuraamaan oireita ja ottamaan yhteyttä tarvittaessa. Pot. sai ohjeita lepoon ja ravitsemukseen. Neuvonta sisälsi myös liikunnan merkityksen korostamisen. Pot. ymmärsi annetut ohjeet hyvin. Seuranta jatkuu suunnitellusti.",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2024-05-05",
+      "precision": "DAY"
+     },
+     {
+      "type": "DIAGNOSIS",
+      "date": "2024-06-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2025-02-10",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2024-05-05\",\"precision\":\"DAY\"},{\"type\":\"DIAGNOSIS\",\"date\":\"2024-06-01\",\"precision\":\"MONTH\"},{\"type\":\"TREATMENT_START\",\"date\":\"2025-02-10\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-13",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "820f133e8d35720cbc5e2e749ba8a6878d5093b3c185506bcde5e77d18a4013f",
+   "source_index": 51,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "käyntimerkintä",
+   "stratum": "nemotron/standard/no-relative",
+   "date_forms": [
+    "no_year",
+    "month",
+    "no_year",
+    "long"
+   ],
+   "note_date": "2026-11-29",
+   "note_text": "Potilas on tullut vastaanotolle seulonnan tuloreitillä. Ensimmäinen yhteydenotto terveydenhuoltoon tapahtui 21.2. Lähetteen vastaanottaminen tapahtui kesäkuussa 2026. Erikoislääkärikäynti oli 10.7. Syöpähoidon aloitus tapahtui 16. elokuuta 2026. Kaikki luetellut faktat liittyvät syöpäpolkuun. Potilaan yleistila on vakaa. Toimintakyky säilyy hyväksi. Arjessa selviytyminen sujuu itsenäisesti. Potilas pystyy hoitamaan päivittäisiä askareitaan. Liikkuminen on normaalia. Uni on riittävää. Ruokahalu on säilynyt. Potilaalle on annettu yleistä neuvontaa terveellisistä elintavoista. Liikunnan merkitys on korostettu. Tupakoinnin välttämistä on suositeltu. Alkoholin käyttöä on rajoitettava. Seurannan tärkeys on selitetty. Potilas ymmärtää ohjeet. Seuraava kontrolli on vasta tulevaisuudessa. Oireita ei ole ilmennyt. Mieli on levollinen. Potilas on motivoitunut hoitoon.",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2026-02-21",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2026-06-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2026-07-10",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-08-16",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2026-02-21\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2026-06-01\",\"precision\":\"MONTH\"},{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2026-07-10\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2026-08-16\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-14",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "5e16fca272b00145bee374f61cca3a32f313385dc927e4c39003f52657036dcb",
+   "source_index": 25,
+   "writer": "nemotron",
+   "kind": "standard",
+   "style": "loppulausunnon ote",
+   "stratum": "nemotron/standard/no-relative",
+   "date_forms": [
+    "numeric",
+    "long"
+   ],
+   "note_date": "2025-11-15",
+   "note_text": "Potilas on saapunut työterveyshuollon lähetteen kautta. Lähete vastaanotettiin 15.3.2025. Syöpädiagnoosi vahvistettiin 19. huhtikuuta 2025. Potilaan yleinen vointi on tällä hetkellä vakaa. Toimintakyky säilyy pääosin hyvänä. Arjessa selviytyminen sujuu tavanomaisesti. Potilas on saanut neuvontaa sairaudesta ja sen hoidosta. Neuvonta on sisältänyt elämäntapoihin liittyviä suosituksia. Potilas ymmärtää hoitosuunnitelman perusteet. Seurannan tarve arvioidaan jatkossa. Potilas voi ottaa yhteyttä tarvittaessa. Terveydentilaa tarkkaillaan säännöllisesti. Potilas kokee pärjäävänsä päivittäisissä toiminnoissa. Neuvonta on tuonut selkeyttä tilanteeseen. Potilas on sitoutunut annettuihin ohjeisiin. Voinnin kehittymistä seurataan huolellisesti. Potilas voi jatkaa työssäkäyntiä rajoitusten puitteissa. Yleinen neuvonta on ollut hyödyllistä. Potilaan resurssit ovat riittävät. Seuranta jatkuu sovitusti.",
+   "answer_key": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2025-03-15",
+      "precision": "DAY"
+     },
+     {
+      "type": "DIAGNOSIS",
+      "date": "2025-04-19",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"OCCUPATIONAL\",\"events\":[{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2025-03-15\",\"precision\":\"DAY\"},{\"type\":\"DIAGNOSIS\",\"date\":\"2025-04-19\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-15",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "eebf870eb563a425d9a94513e2b1212ce5db7eed87a5a7da5965ddd7f26f59f6",
+   "source_index": 305,
+   "writer": "haiku",
+   "kind": "standard",
+   "style": "käyntimerkintä",
+   "stratum": "haiku/standard/relative",
+   "date_forms": [
+    "month",
+    "month",
+    "weeks",
+    "numeric"
+   ],
+   "note_date": "2026-04-08",
+   "note_text": "Päivystyksen kautta asia lähti liikkeelle, kun pot. otti ensimmäisen kerran yhteyttä heinäkuussa 2025. Päivystyksen hoitaja vastasi, eikä lääkäri tutkinut potilasta tuolloin. Lähete saapui erikoissairaanhoidon yksikköön elokuussa 2025 ja kirjattiin vastaanotetuksi. Pot. kävi kirurgin vastaanotolla erikoissairaanhoidossa 30 viikkoa sitten. Moniammatillinen kokous teki hoitopäätöksen 22.12.2025. Pot. kertoo jaksavansa kotona kohtuullisesti, ja ruokahalu on vaihdellut. Hän kävelee lyhyitä matkoja ja jaksaa tehdä kevyitä kotitöitä. Puoliso on tukena, ja mieliala on ajoittain huolestunut. Kontrolliaika on varattu 14.5.2026, ja pot. kysyi, voiko kutsun saada kirjeenä. Pyydettiin ilmoittamaan, jos väsymys lisääntyy.",
+   "answer_key": {
+    "entry_route": "EMERGENCY",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2025-07-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2025-08-01",
+      "precision": "MONTH"
+     },
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2025-09-10",
+      "precision": "DAY"
+     },
+     {
+      "type": "MDT_DECISION",
+      "date": "2025-12-22",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"EMERGENCY\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2025-07-01\",\"precision\":\"MONTH\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2025-08-01\",\"precision\":\"MONTH\"},{\"type\":\"SPECIALIST_VISIT\",\"date\":\"2025-10-14\",\"precision\":\"DAY\"},{\"type\":\"MDT_DECISION\",\"date\":\"2025-12-22\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-16",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "c3aca52d3bfbf224a0bc293e9308504e546712b84ff182f35869a1e791958081",
+   "source_index": 295,
+   "writer": "haiku",
+   "kind": "standard",
+   "style": "lähetekirje",
+   "stratum": "haiku/standard/relative",
+   "date_forms": [
+    "numeric",
+    "days"
+   ],
+   "note_date": "2025-01-19",
+   "note_text": "Pot. ohjautui syöpäpolulle julkisen perusterveydenhuollon kautta. Lähete lähti erikoissairaanhoitoon 3.2.2024. Lähete kirjattiin saapuneeksi keskussairaalaan 245 päivää sitten, ja asiasta on kerrottu pot:lle. Vanhassa rokotuskäynnissä 20.11.2022 ei ole yhteyttä asiaan. Pot. s. 21.10.1948. Pot. kertoo kuntoutuvansa kotona, ja väsymys on vähentynyt. Ruokahalu on hyvä ja paino pysyy. Pot. kävelee lyhyitä matkoja. Puoliso käy kaupassa ja auttaa kotitöissä. Pot. kysyi, miten kuntoutusta jatketaan kotona, ja neuvottiin lisäämään liikuntaa vähitellen. Mielialassa on ollut huolta, mutta pot. puhuu siitä avoimesti. Pot. kiittää kaikesta tuesta.",
+   "answer_key": {
+    "entry_route": "PUBLIC_PRIMARY",
+    "events": [
+     {
+      "type": "REFERRAL_SENT",
+      "date": "2024-02-03",
+      "precision": "DAY"
+     },
+     {
+      "type": "REFERRAL_RECEIVED",
+      "date": "2024-05-19",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"PUBLIC_PRIMARY\",\"events\":[{\"type\":\"REFERRAL_SENT\",\"date\":\"2024-02-03\",\"precision\":\"DAY\"},{\"type\":\"REFERRAL_RECEIVED\",\"date\":\"2024-05-17\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-17",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "4d359ce1691c6d2927e085c3a53d3a99b603bccbc32e79410a8c4633d51be5db",
+   "source_index": 265,
+   "writer": "haiku",
+   "kind": "standard",
+   "style": "loppulausunnon ote",
+   "stratum": "haiku/standard/no-relative",
+   "date_forms": [
+    "numeric"
+   ],
+   "note_date": "2026-10-08",
+   "note_text": "Seulonnan kautta alkanut selvittely eteni hoitopäätökseen. Moniammatillinen kokous teki hoitopäätöksen 31.12.2025. Pot. on syntynyt 4.1.1946. Rokotuskirjauksessa on 30.5.2025 merkintä, joka ei liity asiaan. Pot. kertoo, että yleiskunto on kohtuullinen ja arki sujuu omin voimin. Ruokahalu on riittävä ja uni on tullut paremmin. Pot. käy kävelyllä lähimetsässä ja pitää yhteyttä sukulaisiin puhelimitse. Puoliso on mukana kotitöissä. Pot. kysyi, miten jatkossa tiedotetaan, ja häntä neuvottiin pitämään yhteystiedot ajan tasalla. Pot. kiitti ohjeista. Yhteenvedon ote toimitetaan potilaalle.",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "MDT_DECISION",
+      "date": "2025-12-31",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"MDT_DECISION\",\"date\":\"2025-12-31\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-18",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "cafc6f3fc0ec4db03b2466b9c712e001ba3670a5266cf9f2435e82237d7dc2e2",
+   "source_index": 296,
+   "writer": "haiku",
+   "kind": "standard",
+   "style": "loppulausunnon ote",
+   "stratum": "haiku/standard/no-relative",
+   "date_forms": [
+    "long",
+    "numeric"
+   ],
+   "note_date": "2026-10-05",
+   "note_text": "Yhteenvetona pot. ohjattiin jatkotutkimuksiin seulonnan perusteella. Seulontayksikön hoitaja vastasi pot:n ensimmäiseen yhteydenottoon 17. toukokuuta 2026, eikä lääkäri tutkinut silloin. Syöpähoito alkoi 19.6.2026, ja hoitoon liittyvät ohjeet on käyty läpi kirjallisesti. Pot. syntynyt 7.12.1954. Seuraava kontrolli on varattu 23.12.2026. Pot. kertoo pärjäävänsä kotona, väsymys on ajoittain painava ja ruokahalu on vaihdellut. Puoliso on tukena kaupassa ja kotitöissä. Mielialaa on ollut vaikea pitää yllä, mutta pot. on ottanut yhteyttä tarvittaessa ja kertoo mieluummin etukäteen. Hän kiittää joustavuudesta.",
+   "answer_key": {
+    "entry_route": "SCREENING",
+    "events": [
+     {
+      "type": "FIRST_CONTACT",
+      "date": "2026-05-17",
+      "precision": "DAY"
+     },
+     {
+      "type": "TREATMENT_START",
+      "date": "2026-06-19",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"FIRST_CONTACT\",\"date\":\"2026-05-17\",\"precision\":\"DAY\"},{\"type\":\"TREATMENT_START\",\"date\":\"2026-06-19\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-19",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "08607e33ad1a9c5a8efcb859b866f6b8ef675ad92d2d00ff4f75c9be566719e7",
+   "source_index": 250,
+   "writer": "haiku",
+   "kind": "no_event",
+   "style": "käyntimerkintä",
+   "stratum": "haiku/no_event/any",
+   "date_forms": [],
+   "note_date": "2025-04-10",
+   "note_text": "Pot. kävi yksityisen terveydenhuollon vastaanotolla kyynärpään vaivan vuoksi. Tenniskyynärpään oireiden alun pot. kertoo alkaneen 12 päivää sitten, kun kädellä tehtiin toistuvia työliikkeitä. Edellinen, jo toteutunut käynti saman vaivan vuoksi oli 18.11.2022, ja silloin ohjeeksi annettiin lepoa sekä venyttelyä. Pot. kertoo kivun olevan lievää ja pahimman kuormituksen tulevan rasittavista liikkeistä. Kipulääkettä ei ole tarvittu. Kotona pot. jatkaa liikkumista kevyesti ja välttää tärkeän käsivarren ylikuormitusta. Pot. kysyi, voiko raskasta kantamista jatkaa, ja häntä neuvottiin keventämään kuormaa. Pot. kiitti neuvoista ja toivoo, että vaiva helpottaa itsestään.",
+   "answer_key": {
+    "entry_route": "PRIVATE",
+    "events": []
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"PRIVATE\",\"events\":[{\"type\":\"SYMPTOM_ONSET_REPORTED\",\"date\":\"2025-01-25\",\"precision\":\"DAY\"}]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  },
+  {
+   "demo_id": "demo-20",
+   "synthetic": true,
+   "source_split": "val",
+   "source_id": "31c849a1bbf64300e2bb2dd6bec85b28898d215fb285400a42b10e22480007d2",
+   "source_index": 257,
+   "writer": "haiku",
+   "kind": "careful",
+   "style": "käyntimerkintä",
+   "stratum": "haiku/careful/any",
+   "date_forms": [
+    "long"
+   ],
+   "note_date": "2025-07-10",
+   "note_text": "Työterveyshuollosta alkanut syöpäpolku eteni, ja pot. kävi onkologin vastaanotolla esh:ssa 20. maaliskuuta 2025. Vastaanoton teki hoitava erikoislääkäri, ja sen jälkeen asiat on käyty läpi pot:n kanssa. Pot. kertoo vointinsa olevan kohtuullinen ja jaksavansa töissä osittain. Ruokahalu on hyvä ja unta tulee kohtuullisesti. Puoliso tukee ja auttaa kotitöissä. Rokotushistoriassa on influenssarokotus 9. helmikuuta 2023, mikä ei liity nykyiseen asiaan. Pot. kysyi, miten työpaikalle voi kertoa tilanteesta, ja neuvoja annettiin. Pot. toivoo kirjallista tietoa jatkosta.",
+   "answer_key": {
+    "entry_route": "OCCUPATIONAL",
+    "events": [
+     {
+      "type": "SPECIALIST_VISIT",
+      "date": "2025-03-20",
+      "precision": "DAY"
+     }
+    ]
+   },
+   "rewritten_by_code": false,
+   "rewrite_kind": null,
+   "rewrite": null,
+   "rewrite_gate": null,
+   "source_note_text": null,
+   "cuda": {
+    "raw": "{\"entry_route\":\"OCCUPATIONAL\",\"events\":[]}",
+    "same_text": true,
+    "file": "data/scribe/v3/student/C-270m-all-v2data/val-records.json",
+    "note": "A100 bfloat16, batch 16, greedy; for a rewritten note this is the output for the unrewritten source text"
+   }
+  }
+ ],
+ "person_confirms": "a person confirms every event"
+}

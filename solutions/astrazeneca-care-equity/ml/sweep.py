@@ -51,7 +51,7 @@ def run(a):
     grid=json.loads(Path(a.grid).read_text()) if a.grid else default_grid(a.panel,a.extended_panel)
     if not grid: raise ValueError('empty grid')
     allowed={'panel','window','d_model','layers','heads','lr','dropout','mask_rate'}
-    configs=[]; valpred={}; data=None
+    configs=[]; valpred={}; data=None; candidate_support={}
     for i,overrides in enumerate(grid):
         if set(overrides)-allowed: raise ValueError('unsupported config fields')
         c=copy.copy(a)
@@ -60,25 +60,27 @@ def run(a):
         c.panel=str(Path(c.panel).resolve()); c.artifacts=str(root/f'config-{i:02d}')
         Path(c.artifacts).mkdir(parents=True,exist_ok=True)
         p,x,years,targets,cats=load(c.panel)
-        w,y,m=windows(x,years,targets,[t for t in years if t<=2020],window=c.window)
-        y[np.array([t+2>2021 for _,t in m]),:,1]=np.nan
-        vw,vy,vm=windows(x,years,targets,[2021],window=c.window,include_empty=True)
+        w,y,m=split_windows(x,years,targets,'train',window=c.window)
+        vw,vy,vm=split_windows(x,years,targets,'validation',window=c.window,include_empty=True)
         identity=([u['id'] for u in p['units']], [p['indicators'][k]['key'] for k in targets],vm)
         if data is None:
             data=(identity,vy)
         elif identity!=data[0] or not np.array_equal(vy,data[1],equal_nan=True):
             raise ValueError('panels must have identical units, targets, validation labels and origins')
         bundle=fit(w,y,m,vw,vy,vm,cats,targets,c)
+        support=support_by_target(p,targets,training_support(w,y,targets))
+        candidate_support[f'config-{i:02d}']=support
+        bundle.update(split=split_manifest(years),panelSha256=hashlib.sha256(Path(c.panel).read_bytes()).hexdigest(),trainingSupport=support)
         torch.save(bundle,Path(c.artifacts)/'backtest.pt')
         valpred[f'config-{i:02d}']=predict(bundle,vw,vm,cats,targets,c.device)
         configs.append(c)
-        save(Path(c.artifacts)/'configuration.json',dict(configuration=vars(c),panelSha256=hashlib.sha256(Path(c.panel).read_bytes()).hexdigest()))
+        save(Path(c.artifacts)/'configuration.json',dict(configuration=vars(c),panelSha256=hashlib.sha256(Path(c.panel).read_bytes()).hexdigest(),trainingSupport=support))
     # Baselines use the unchanged base panel, eight-year window and same target cells.
     b=copy.copy(a); b.window=8
     p,x,years,targets,cats=load(b.panel)
-    w,y,m=windows(x,years,targets,[t for t in years if t<=2020])
-    y[np.array([t+2>2021 for _,t in m]),:,1]=np.nan
-    vw,vy,vm=windows(x,years,targets,[2021],include_empty=True)
+    w,y,m=split_windows(x,years,targets,'train')
+    vw,vy,vm=split_windows(x,years,targets,'validation',include_empty=True)
+    base_support=support_by_target(p,targets,training_support(w,y,targets))
     if ([u['id'] for u in p['units']],[p['indicators'][k]['key'] for k in targets],vm)!=data[0] or not np.array_equal(vy,data[1],equal_nan=True):
         raise ValueError('base panel target alignment differs')
     ridge=fit_ridge(w,y,targets)
@@ -91,21 +93,25 @@ def run(a):
         key=p['indicators'][k]['key']
         validation[key]={name:{f'h{h+1}':score(pred[:,j,h],vy[:,j,h],common[:,j,h]) for h in range(2)} for name,pred in valpred.items()}
         scores={name:aggregate(hs) for name,hs in validation[key].items()}
+        for name in scores:
+            if name=='ridge' or name.startswith('config-'):
+                counts=base_support[key] if name=='ridge' else candidate_support[name][key]
+                if any(counts[h]<=0 for h in ('h1','h2') if validation[key][name][h]['n']>0): scores[name]=None
         winners[key]=select_validation(scores)
         transformer_winners[key]=select_validation({name:s for name,s in scores.items() if name.startswith('config-')})
         baseline_winners[key]=select_validation({name:s for name,s in scores.items() if name in METHODS[1:]})
     # Persist the selection before loading any test windows.
-    result=dict(basePanelSha256=hashlib.sha256(Path(a.panel).read_bytes()).hexdigest(),createdAt=datetime.now(timezone.utc).isoformat(),configuration=vars(a),
+    result=dict(split=split_manifest(years),trainingSupport=base_support,basePanelSha256=hashlib.sha256(Path(a.panel).read_bytes()).hexdigest(),createdAt=datetime.now(timezone.utc).isoformat(),configuration=vars(a),
                 configs={f'config-{i:02d}':json.loads((Path(c.artifacts)/'configuration.json').read_text()) for i,c in enumerate(configs)},
                 validation=validation,chosen=winners,bestTransformer=transformer_winners,
                 bestBaseline=baseline_winners,
                 selection='Lowest pooled validation MAE over both horizons and all units; baseline-first stable ties.',
-                limits=['Validation h2 and test h1 overlap in calendar year 2023.',
+                limits=['Training targets end in 2021; validation targets 2022–2023 and test targets 2024–2025 are disjoint. Missing horizons remain unavailable.',
                         'Seed spread is max-minus-min single-seed test MAE, not a confidence interval.',
                         f'{len(grid)} configs share one validation origin; selection can overfit validation.'])
     save(root/'selection.json',result)
     # Only the validation-best transformer per indicator receives a test score.
-    tw,ty,tm=windows(x,years,targets,[2022,2023],include_empty=True)
+    tw,ty,tm=split_windows(x,years,targets,'test',include_empty=True)
     test_base={name:baseline(tw,targets,name,ridge)[...,None]+offsets[name] for name in METHODS[1:]}
     result['test']={}; result['verdicts']={}
     for j,k in enumerate(targets):
@@ -115,7 +121,7 @@ def run(a):
         if winner:
             c=configs[int(winner.split('-')[1])]
             cp,cx,cy,ct,cc=load(c.panel)
-            ctw,cty,ctm=windows(cx,cy,ct,[2022,2023],window=c.window,include_empty=True)
+            ctw,cty,ctm=split_windows(cx,cy,ct,'test',window=c.window,include_empty=True)
             if ctm!=tm or not np.array_equal(cty,ty,equal_nan=True): raise ValueError('test panel alignment differs')
             bundle=torch.load(Path(c.artifacts)/'backtest.pt',weights_only=False,map_location='cpu')
             predictions[winner]=predict(bundle,ctw,ctm,cc,ct,c.device)[:,j]

@@ -1,0 +1,53 @@
+{
+ "synthetic": true,
+ "arms": {
+  "A-270m-abs": {
+   "format": "absolute",
+   "prompt": "scribe/prompts.py messages(row)",
+   "resolution": "scribe/v3/resolve.py repair(prediction, note_text, note_date, \"A'\") after canonicalise",
+   "mlx_base": "mlx-community/gemma-3-270m-it-bf16",
+   "mlx_base_path": "scribe/v4/artifacts/hf-cache/hub/models--mlx-community--gemma-3-270m-it-bf16/snapshots/c806ef3a4ed971bd75aaee3346e0fef808512f03",
+   "mlx_adapter": "scribe/v4/artifacts/A-270m-abs/adapter",
+   "mlx_adapter_sha256": "326f255e4dc19a20ed0bc70cffe093f3b88960a3a1dc043cc08bd6f76a2322f0",
+   "peft_base": "unsloth/gemma-3-270m-it",
+   "peft_adapter": "scribe/v4/artifacts/A-270m-abs/peft",
+   "peft_adapter_sha256": "a91fdd4dc7c2161b92600ee53977cd9f5a8d4e0c6764e4556981cec45b104d1e",
+   "converter": "serve/convert_mlx_adapter.py",
+   "training": "scribe/v4/artifacts/A-270m-abs/train-result.json"
+  },
+  "B-270m-expr-aug": {
+   "format": "expression",
+   "prompt": "scribe/v2/data_tools.py expression_messages(row)",
+   "resolution": "scribe/v2/data_tools.py resolve_expression(output, note_date)",
+   "mlx_base": "mlx-community/gemma-3-270m-it-bf16",
+   "mlx_base_path": "scribe/v4/artifacts/hf-cache/hub/models--mlx-community--gemma-3-270m-it-bf16/snapshots/c806ef3a4ed971bd75aaee3346e0fef808512f03",
+   "mlx_adapter": "scribe/v4/artifacts/B-270m-expr-aug/adapter",
+   "mlx_adapter_sha256": "64b94f1615c798d022bec546579c179641acdc26a4c9c06eda3b02200ac3b160",
+   "peft_base": "unsloth/gemma-3-270m-it",
+   "peft_adapter": "scribe/v4/artifacts/B-270m-expr-aug/peft",
+   "peft_adapter_sha256": "46eba8a84be5066616bf310eb2c0dda53a014b5f3fe5390493c9f4a3c5720f1d",
+   "converter": "serve/convert_mlx_adapter.py",
+   "training": "scribe/v4/artifacts/B-270m-expr-aug/train-result.json"
+  },
+  "C-1b-expr-aug": {
+   "format": "expression",
+   "prompt": "scribe/v2/data_tools.py expression_messages(row)",
+   "resolution": "scribe/v2/data_tools.py resolve_expression(output, note_date)",
+   "mlx_base": "mlx-community/gemma-3-1b-it-bf16",
+   "mlx_base_path": "scribe/artifacts/hf-cache/hub/models--mlx-community--gemma-3-1b-it-bf16/snapshots/60444cd9d4be58ce6995614c6551b4d8db047483",
+   "mlx_adapter": "scribe/v4/artifacts/C-1b-expr-aug/adapter",
+   "mlx_adapter_sha256": "76522a4972a842b9b78592a3e0190a5f0fff488b70a813f887aec935ee6d3b30",
+   "peft_base": "unsloth/gemma-3-1b-it",
+   "peft_adapter": "scribe/v4/artifacts/C-1b-expr-aug/peft",
+   "peft_adapter_sha256": "d867c6b898f36e8e1d00c0259d12104ccf5e7f90f0e924c367e89bf892563b0d",
+   "converter": "serve/convert_mlx_adapter.py",
+   "training": "scribe/v4/artifacts/C-1b-expr-aug/train-result.json"
+  }
+ },
+ "how_to_load": {
+  "mlx": "scribe/artifacts/mlx-venv/bin/python scribe/mlx2/infer.py --base <270m|1b> --format <format> --adapter scribe/v4/artifacts/<arm>/adapter --input <rows.parquet|jsonl> --output <out.jsonl>; then scribe/mlx2/score.py-style resolution (see 'resolution').",
+  "peft": "transformers AutoModelForCausalLM.from_pretrained(<peft_base>) + peft PeftModel.from_pretrained(model, 'scribe/v4/artifacts/<arm>/peft'); chat template of the base tokenizer, add_generation_prompt=True, greedy.",
+  "offline_base": "The local MLX base snapshot directory (mlx_base_path) also loads in transformers as Gemma3ForCausalLM; peft_parity.py used it for the 1B arm because unsloth/gemma-3-1b-it is not cached here (data/scribe/v4/mlx/parity/).",
+  "note": "The MLX base snapshots are mlx-community bf16 conversions of the same Gemma 3 weights as the PEFT base ids; Gemma Terms of Use apply. Every output is a proposal a person confirms."
+ }
+}

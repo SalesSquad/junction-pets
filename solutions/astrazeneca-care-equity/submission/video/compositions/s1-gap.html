@@ -1,0 +1,335 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+        }
+        /* Part T: title */
+        .t-left {
+          position: absolute;
+          left: 96px;
+          top: 210px;
+          width: 860px;
+        }
+        .t-word {
+          font-family: var(--serif);
+          font-size: 230px;
+          line-height: 0.9;
+          letter-spacing: -0.03em;
+          color: var(--ink);
+          margin: 26px 0 30px;
+        }
+        .t-promise {
+          font-family: var(--serif);
+          font-size: 50px;
+          line-height: 1.22;
+          color: var(--ink);
+        }
+        .t-frame {
+          left: 1010px;
+          top: 230px;
+          width: 820px;
+        }
+        /* Part A: survival */
+        .a-left {
+          position: absolute;
+          left: 96px;
+          top: 140px;
+          width: 800px;
+        }
+        .a-left .chip {
+          margin-top: 18px;
+        }
+        .stat {
+          margin-top: 34px;
+        }
+        .stat-label {
+          font-family: var(--sans);
+          font-size: 32px;
+          color: var(--muted);
+        }
+        .stat-num {
+          font-family: var(--serif);
+          font-size: 180px;
+          line-height: 0.95;
+          letter-spacing: -0.02em;
+          display: inline-block;
+          transform-origin: left bottom;
+        }
+        .stat-num small {
+          font-size: 0.5em;
+          margin-left: 6px;
+        }
+        #s1-fi {
+          color: var(--amber);
+        }
+        #s1-bm {
+          color: var(--teal);
+        }
+        .gapline {
+          margin-top: 22px;
+          font-family: var(--sans);
+          font-size: 32px;
+          font-weight: 700;
+          color: var(--ink);
+        }
+        .chart {
+          position: absolute;
+          left: 940px;
+          top: 170px;
+          width: 884px;
+          height: 640px;
+          background: #fff;
+          border: 2px solid var(--line);
+          padding: 26px 22px 10px;
+        }
+        .chart h4 {
+          font-family: var(--sans);
+          font-size: 26px;
+          font-weight: 700;
+          color: var(--ink);
+          margin: 0 0 4px 12px;
+        }
+        .chart svg {
+          display: block;
+          width: 840px;
+          height: 560px;
+        }
+        .chart text {
+          font-family: var(--mono);
+          font-size: 20px;
+          fill: var(--muted);
+        }
+        .chart .lab {
+          font-family: var(--sans);
+          font-size: 24px;
+          font-weight: 700;
+          paint-order: stroke;
+          stroke: #fff;
+          stroke-width: 8px;
+          stroke-linejoin: round;
+        }
+        .gl {
+          stroke: var(--line);
+          stroke-width: 2;
+        }
+        .ln {
+          fill: none;
+          stroke-width: 6;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        /* Part B: found by chance */
+        .b-left {
+          position: absolute;
+          left: 96px;
+          top: 190px;
+          width: 830px;
+        }
+        .quote {
+          font-family: var(--serif);
+          font-style: italic;
+          font-size: 64px;
+          line-height: 1.18;
+          color: var(--ink);
+          margin-top: 26px;
+        }
+        .attrib {
+          margin-top: 22px;
+          font-family: var(--sans);
+          font-size: 26px;
+          color: var(--muted);
+          line-height: 1.35;
+        }
+        .decides {
+          margin-top: 54px;
+          font-family: var(--serif);
+          font-size: 64px;
+          line-height: 1.1;
+          color: var(--teal);
+        }
+        .under {
+          display: block;
+          width: 760px;
+          height: 6px;
+          background: var(--amber);
+          margin-top: 12px;
+          transform-origin: left center;
+        }
+        .b-frame {
+          left: 1000px;
+          top: 130px;
+          width: 824px;
+          height: 600px;
+        }
+        .b-tag {
+          position: absolute;
+          left: 1000px;
+          top: 750px;
+          width: 824px;
+          font-family: var(--sans);
+          font-size: 25px;
+          line-height: 1.3;
+          color: var(--ink);
+        }
+        .b-tag small {
+          display: block;
+          margin-top: 6px;
+          font-size: 23px;
+          color: var(--muted);
+        }
+      </style>
+
+      <div id="root" data-composition-id="s1-gap" data-width="1920" data-height="1080">
+        <!-- T: title -->
+        <div class="part" id="s1-t">
+          <div class="t-left">
+            <div class="eyebrow">Junction 2026 · Equal Care Across Finland</div>
+            <div class="t-word" id="s1-word">SAMA</div>
+            <div class="t-promise" id="s1-promise">
+              The same cancer pathway for everyone: wherever they live, whoever they are, however they
+              enter care.
+            </div>
+          </div>
+          <div class="frame t-frame" id="s1-tframe">
+            <div class="bar"><i></i><i></i><i></i><span>SAMA · research demo</span></div>
+            <img src="assets/shots/hero.png" alt="SAMA start page" />
+          </div>
+        </div>
+
+        <!-- A: lung survival -->
+        <div class="part" id="s1-a">
+          <div class="a-left">
+            <div class="eyebrow">Lung cancer · men · five-year relative survival</div>
+            <span class="chip">Published · NORDCAN 2020–2024</span>
+            <div class="stat" id="s1-stat-fi">
+              <div class="stat-label">Finland</div>
+              <div class="stat-num" id="s1-fi"><span id="s1-fi-n">17.9</span><small>%</small></div>
+            </div>
+            <div class="stat" id="s1-stat-bm">
+              <div class="stat-label">Sweden–Norway average</div>
+              <div class="stat-num" id="s1-bm"><span id="s1-bm-n">31.1</span><small>%</small></div>
+            </div>
+            <div class="gapline" id="s1-gapline">Finland is 13.2 percentage points behind.</div>
+          </div>
+          <div class="chart" id="s1-chart">
+            <h4>Five-year relative survival, lung cancer, men (%)</h4>
+            <svg viewBox="0 0 840 560" id="s1-svg">
+              <line class="gl" x1="70" x2="840" y1="368.6" y2="368.6" />
+              <line class="gl" x1="70" x2="840" y1="237.1" y2="237.1" />
+              <line class="gl" x1="70" x2="840" y1="105.7" y2="105.7" />
+              <line class="gl" x1="70" x2="840" y1="500" y2="500" style="stroke: var(--muted)" />
+              <text x="56" y="375" text-anchor="end">10</text>
+              <text x="56" y="244" text-anchor="end">20</text>
+              <text x="56" y="112" text-anchor="end">30</text>
+              <text x="70" y="540" text-anchor="start">1980–84</text>
+              <text x="455" y="540" text-anchor="middle">2000–04</text>
+              <text x="840" y="540" text-anchor="end">2020–24</text>
+              <path id="s1-ln-bm" class="ln" stroke="#075d59" pathLength="1" d="" />
+              <path id="s1-ln-fi" class="ln" stroke="#8a5006" pathLength="1" d="" />
+              <circle id="s1-dot-bm" cx="840" cy="91.3" r="11" fill="#075d59" />
+              <circle id="s1-dot-fi" cx="840" cy="264.7" r="11" fill="#8a5006" />
+              <text id="s1-lab-bm" class="lab" x="822" y="64" text-anchor="end" style="fill: #075d59">Sweden–Norway 31.1</text>
+              <text id="s1-lab-fi" class="lab" x="822" y="392" text-anchor="end" style="fill: #8a5006">Finland 17.9</text>
+            </svg>
+          </div>
+          <div class="src">
+            Source: NORDCAN (IARC), five-year relative survival, 2020–2024 and earlier periods;
+            web/data/app.json → analysis.goal3, indicator nordic-survival, lung, men.
+          </div>
+        </div>
+
+        <!-- B: found by chance -->
+        <div class="part" id="s1-b">
+          <div class="b-left">
+            <div class="eyebrow">How curable lung cancer is found</div>
+            <div class="quote" id="s1-quote">
+              Curable cases are mostly found by chance, on scans taken for something else.
+            </div>
+            <div class="attrib" id="s1-attrib">
+              Paraphrased from Finland’s national lung cancer programme 2026–2035 (Filha, preprint,
+              May 2026).
+            </div>
+            <div class="decides" id="s1-decides">
+              What happens next decides how early treatment starts.<span class="under" id="s1-under"></span>
+            </div>
+          </div>
+          <div class="frame b-frame" id="s1-bframe">
+            <div class="bar"><i></i><i></i><i></i><span>SAMA · 01 The geography of care</span></div>
+            <img src="assets/shots/gapmap.png" alt="SAMA map of the 23 areas" />
+          </div>
+          <div class="b-tag" id="s1-btag">
+            <span class="chip">Measured</span>&nbsp; SAMA maps all 23 areas from public data.
+            <small>Cancer mortality, not care quality; the top areas are too close to rank.</small>
+          </div>
+          <div class="src">
+            Sources: submission/evidence-v2.json → filha-2026-found-by-chance; area count:
+            web/data/app.json → analysis.regions (23); no rank: data/roadmap/mapping-v1.json → pilotCard.snapshotEvidence.
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (function () {
+          // NORDCAN history, web/data/app.json analysis.goal3 nordic-survival lung/male .history
+          const FI = [9.4, 10.1, 8.3, 9.6, 9.8, 10.2, 12.7, 17.4, 17.9];
+          const BM = [8.4, 8.8, 9.3, 10.4, 11.3, 13.9, 18, 25.6, 31.1];
+          const X = (i) => 70 + i * 96.25;
+          const Y = (v) => 500 - (v * 460) / 35;
+          const d = (arr) => arr.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
+          document.getElementById("s1-ln-fi").setAttribute("d", d(FI));
+          document.getElementById("s1-ln-bm").setAttribute("d", d(BM));
+
+          window.__timelines = window.__timelines || {};
+          const tl = gsap.timeline({ paused: true });
+
+          // ---- T: title (0 - 3.3)
+          tl.fromTo("#s1-t .eyebrow", { autoAlpha: 1, x: -30 }, { autoAlpha: 1, x: 0, duration: 0.5, ease: "power3.out" }, 0);
+          tl.fromTo("#s1-word", { autoAlpha: 1, y: 30 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: "expo.out" }, 0);
+          tl.fromTo("#s1-promise", { autoAlpha: 1, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.7, ease: "power2.out" }, 0);
+          tl.fromTo("#s1-tframe", { autoAlpha: 1, x: 40, rotation: 1 }, { autoAlpha: 1, x: 0, rotation: 0, duration: 0.9, ease: "power3.out" }, 0);
+          tl.fromTo("#s1-tframe img", { y: 0 }, { y: -60, duration: 2.6, ease: "sine.inOut" }, 0.6);
+          tl.to("#s1-t", { autoAlpha: 0, y: -40, duration: 0.4, ease: "power2.in" }, 3.0);
+
+          // ---- A: survival (3.3 - 9.7)
+          tl.fromTo("#s1-a .eyebrow, #s1-a .chip", { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "power2.out", stagger: 0.08 }, 3.35);
+          tl.fromTo("#s1-chart", { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" }, 3.4);
+          tl.fromTo("#s1-stat-fi", { autoAlpha: 0, x: -40 }, { autoAlpha: 1, x: 0, duration: 0.5, ease: "back.out(1.4)" }, 3.7);
+          tl.fromTo("#s1-fi", { scale: 0.7 }, { scale: 1, duration: 1.6, ease: "power2.out" }, 3.8);
+          tl.fromTo("#s1-ln-fi", { strokeDashoffset: 1, strokeDasharray: 1 }, { strokeDashoffset: 0, strokeDasharray: 1, duration: 2.2, ease: "power1.inOut" }, 3.9);
+          tl.fromTo("#s1-dot-fi, #s1-lab-fi", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, 6.0);
+
+          tl.fromTo("#s1-stat-bm", { autoAlpha: 0, x: -40 }, { autoAlpha: 1, x: 0, duration: 0.5, ease: "back.out(1.4)" }, 6.7);
+          tl.fromTo("#s1-bm", { scale: 0.7 }, { scale: 1, duration: 1.6, ease: "power2.out" }, 6.8);
+          tl.fromTo("#s1-ln-bm", { strokeDashoffset: 1, strokeDasharray: 1 }, { strokeDashoffset: 0, strokeDasharray: 1, duration: 2.0, ease: "power1.inOut" }, 6.8);
+          tl.fromTo("#s1-dot-bm, #s1-lab-bm", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, 8.7);
+          tl.fromTo("#s1-gapline", { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" }, 8.6);
+          tl.fromTo("#s1-a .src", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, 3.8);
+          tl.to("#s1-a", { autoAlpha: 0, y: -30, duration: 0.4, ease: "power2.in" }, 9.35);
+
+          // ---- B: found by chance (9.75 - 19.5)
+          tl.fromTo("#s1-b .eyebrow", { autoAlpha: 0, x: -30 }, { autoAlpha: 1, x: 0, duration: 0.45, ease: "power3.out" }, 9.8);
+          tl.fromTo("#s1-quote", { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: "power3.out" }, 9.9);
+          tl.fromTo("#s1-attrib", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5 }, 10.6);
+          tl.fromTo("#s1-bframe", { autoAlpha: 0, x: 90 }, { autoAlpha: 1, x: 0, duration: 0.9, ease: "expo.out" }, 10.2);
+          tl.fromTo("#s1-bframe img", { scale: 1, y: 0 }, { scale: 1.08, y: -20, duration: 9, ease: "sine.inOut", transformOrigin: "30% 30%" }, 10.2);
+          tl.fromTo("#s1-btag", { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.4 }, 11.4);
+          tl.fromTo("#s1-b .src", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, 10.6);
+          tl.fromTo("#s1-decides", { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" }, 16.3);
+          tl.fromTo("#s1-under", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power2.inOut" }, 16.8);
+          tl.to("#s1-b", { autoAlpha: 0, duration: 0.35, ease: "power1.in" }, 19.1);
+
+          window.__timelines["s1-gap"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

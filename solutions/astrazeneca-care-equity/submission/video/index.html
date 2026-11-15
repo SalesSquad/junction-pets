@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "SAMA Serif"; src: local("Charter Roman"), local("Charter-Roman"), local("Charter"); font-weight: 400; font-style: normal; }
+      @font-face { font-family: "SAMA Serif"; src: local("Charter Bold"), local("Charter-Bold"); font-weight: 700; font-style: normal; }
+      @font-face { font-family: "SAMA Serif"; src: local("Charter Italic"), local("Charter-Italic"); font-weight: 400; font-style: italic; }
+      @font-face { font-family: "SAMA Sans"; src: local("Helvetica Neue"), local("HelveticaNeue"); font-weight: 400; font-style: normal; }
+      @font-face { font-family: "SAMA Sans"; src: local("Helvetica Neue Bold"), local("HelveticaNeue-Bold"); font-weight: 700; font-style: normal; }
+      @font-face { font-family: "SAMA Mono"; src: local("Menlo Regular"), local("Menlo-Regular"); font-weight: 400; font-style: normal; }
+      @font-face { font-family: "SAMA Mono"; src: local("Menlo Bold"), local("Menlo-Bold"); font-weight: 700; font-style: normal; }
+      /* SAMA video design tokens: the product's own palette (web/styles.css), scaled for video. */
+      :root {
+        --paper: #fafaf6;
+        --ink: #172c2b;
+        --teal: #075d59;
+        --muted: #536762;
+        --line: #c8d1ca;
+        --amber: #8a5006;
+        --red: #a23630;
+        --wash: #eef2eb;
+        /* Local system faces only (the render runs in this Mac's Chrome): Charter has lining
+           figures for the big numbers; Helvetica Neue and Menlo ship with macOS. */
+        --serif: "SAMA Serif", Charter, Georgia, serif;
+        --sans: "SAMA Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        --mono: "SAMA Mono", Menlo, monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+      body {
+        font-family: var(--sans);
+        color: var(--ink);
+        font-variant-numeric: lining-nums tabular-nums;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      /* ---------- shared scene vocabulary (used inside every sub-composition) ---------- */
+      .part {
+        position: absolute;
+        inset: 0;
+      }
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--teal);
+      }
+      .serif {
+        font-family: var(--serif);
+        font-variant-numeric: lining-nums tabular-nums;
+      }
+      .chip {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        line-height: 1;
+        text-transform: uppercase;
+        padding: 7px 10px 6px;
+        border: 2px solid var(--teal);
+        color: var(--teal);
+        background: var(--paper);
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      .chip.syn {
+        border-color: var(--amber);
+        color: var(--amber);
+      }
+      .chip.ph {
+        border-style: dashed;
+        border-color: var(--muted);
+        color: var(--muted);
+      }
+      .chip.draft {
+        border-color: var(--ink);
+        color: var(--ink);
+      }
+      .src {
+        position: absolute;
+        left: 96px;
+        right: 96px;
+        top: 852px;
+        font-family: var(--mono);
+        font-size: 19px;
+        line-height: 1.35;
+        color: var(--muted);
+      }
+      .frame {
+        position: absolute;
+        background: #fff;
+        border: 2px solid var(--line);
+        box-shadow: 0 30px 60px rgba(23, 44, 43, 0.16);
+        overflow: hidden;
+      }
+      .frame .bar {
+        height: 40px;
+        background: var(--wash);
+        border-bottom: 2px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 16px;
+        font-family: var(--mono);
+        font-size: 18px;
+        color: var(--muted);
+      }
+      .frame .bar i {
+        display: block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--line);
+      }
+      .frame .bar span {
+        margin-left: 12px;
+      }
+      .frame img {
+        display: block;
+        width: 100%;
+      }
+
+      /* ---------- persistent background ---------- */
+      #bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      #bg-grid {
+        position: absolute;
+        inset: -120px;
+        background-image:
+          linear-gradient(rgba(200, 209, 202, 0.45) 2px, transparent 2px),
+          linear-gradient(90deg, rgba(200, 209, 202, 0.45) 2px, transparent 2px);
+        background-size: 120px 120px;
+      }
+      #bg-glow {
+        position: absolute;
+        width: 1500px;
+        height: 1500px;
+        left: 900px;
+        top: -500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(7, 93, 89, 0.16) 0%, rgba(7, 93, 89, 0) 65%);
+      }
+      #bg-glow2 {
+        position: absolute;
+        width: 1100px;
+        height: 1100px;
+        left: -400px;
+        top: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(138, 80, 6, 0.12) 0%, rgba(138, 80, 6, 0) 65%);
+      }
+
+      /* ---------- chrome: brand line + progress ---------- */
+      #chrome {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      #brand {
+        position: absolute;
+        left: 96px;
+        top: 38px;
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+      }
+      #brand b {
+        font-family: var(--serif);
+        font-weight: 700;
+        font-size: 34px;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+      #brand span {
+        font-family: var(--mono);
+        font-size: 19px;
+        color: var(--muted);
+        letter-spacing: 0.06em;
+      }
+      #chapters {
+        position: absolute;
+        right: 96px;
+        top: 44px;
+        width: 900px;
+        height: 30px;
+      }
+      #chapters div {
+        position: absolute;
+        right: 0;
+        top: 0;
+        font-family: var(--mono);
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      #progress {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 6px;
+        background: var(--teal);
+        transform-origin: left center;
+      }
+
+      /* ---------- burned-in captions ---------- */
+      #captions {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 912px;
+        height: 132px;
+      }
+      .cue {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        width: 1640px;
+        margin-left: -820px;
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 40px;
+        background: rgba(23, 44, 43, 0.94);
+        color: var(--paper);
+        font-family: var(--sans);
+        font-weight: 400;
+        font-size: 38px;
+        line-height: 1.3;
+        text-align: center;
+        opacity: 0;
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="119"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="bg" class="clip" data-start="0" data-duration="119" data-track-index="0">
+        <div id="bg-grid"></div>
+        <div id="bg-glow"></div>
+        <div id="bg-glow2"></div>
+      </div>
+
+      <div
+        id="s1-gap"
+        data-composition-id="s1-gap"
+        data-composition-src="compositions/s1-gap.html"
+        data-start="0"
+        data-duration="19.5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="s2-who"
+        data-composition-id="s2-who"
+        data-composition-src="compositions/s2-who.html"
+        data-start="19.5"
+        data-duration="23.5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="s3-clock"
+        data-composition-id="s3-clock"
+        data-composition-src="compositions/s3-clock.html"
+        data-start="43"
+        data-duration="29.5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="s4-list"
+        data-composition-id="s4-list"
+        data-composition-src="compositions/s4-list.html"
+        data-start="72.5"
+        data-duration="22.5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="s5-ask"
+        data-composition-id="s5-ask"
+        data-composition-src="compositions/s5-ask.html"
+        data-start="95"
+        data-duration="20.5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <div
+        id="s6-end"
+        data-composition-id="s6-end"
+        data-composition-src="compositions/s6-end.html"
+        data-start="115.5"
+        data-duration="3.5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <div id="chrome" class="clip" data-start="0" data-duration="115.5" data-track-index="5">
+        <div id="progress"></div>
+        <div id="brand"><b>SAMA</b><span>The Care Equity Navigator · research demo</span></div>
+        <div id="chapters">
+          <div id="ch1">01 · The gap</div>
+          <div id="ch2">02 · Who, how and where</div>
+          <div id="ch3">03 · Measure it where it can be seen</div>
+          <div id="ch4">04 · Close the loop</div>
+          <div id="ch5">05 · The plan and the ask</div>
+        </div>
+      </div>
+
+      <div id="captions" class="clip" data-start="0" data-duration="119" data-track-index="6"></div>
+
+      <!-- Voice-over slot: a silent 119 s AAC track. Replace assets/voiceover-slot.m4a with the
+           recorded voice (see VOICEOVER.md) and re-render, or swap the audio with ffmpeg. -->
+      <audio
+        id="vo-slot"
+        src="assets/voiceover-slot.m4a"
+        data-start="0"
+        data-duration="119"
+        data-track-index="9"
+        data-volume="1"
+      ></audio>
+    </div>
+
+    <script>
+      // Caption cues: generated by tools/cues.mjs (verbatim lines from submission/VIDEO_SCRIPT.md).
+      const CUES = /*CUES*/ [{"seg":"s1","start":0.3,"end":6.72,"text":"In Finland, five years after a lung cancer diagnosis, relative survival for men is 17.9 percent."},{"seg":"s1","start":6.72,"end":9.52,"text":"The Sweden and Norway average is 31.1."},{"seg":"s1","start":9.52,"end":15.94,"text":"Finland's lung programme says curable cases are mostly found by chance, on scans for something else."},{"seg":"s1","start":15.94,"end":19.15,"text":"What happens next decides how early treatment starts."},{"seg":"s2","start":19.8,"end":23.19,"text":"Where you live is not the main gap."},{"seg":"s2","start":23.19,"end":26.15,"text":"Survival does not differ significantly between regions."},{"seg":"s2","start":26.15,"end":30.8,"text":"It does differ by education, and by how you enter care."},{"seg":"s2","start":30.8,"end":39.69,"text":"In one Finnish lymphoma study, the median from first symptom to treatment was 127 days through a public health centre appointment,"},{"seg":"s2","start":39.69,"end":42.65,"text":"and 76 through occupational or private care."},{"seg":"s3","start":43.3,"end":47.71,"text":"The OECD reports a six-week target from suspected-cancer referral to treatment."},{"seg":"s3","start":47.71,"end":52.52,"text":"The law allows up to six months after the need is established."},{"seg":"s3","start":52.52,"end":59.73,"text":"No county can show whether it meets either, and stage is recorded for only 42 percent of cancers."},{"seg":"s3","start":59.73,"end":64.14,"text":"SAMA asks for two dates and an end reason per patient."},{"seg":"s3","start":64.14,"end":68.14,"text":"On synthetic data, NVIDIA FLARE computed each county's figures locally."},{"seg":"s3","start":68.14,"end":72.15,"text":"A county is compared only when it can see itself."},{"seg":"s4","start":72.8,"end":74.42,"text":"Measuring is not enough."},{"seg":"s4","start":74.42,"end":79.68,"text":"Since June, a county may identify patients whose care does not follow recommendations;"},{"seg":"s4","start":79.68,"end":82.51,"text":"whether that covers pathway timing is unconfirmed."},{"seg":"s4","start":82.51,"end":87.77,"text":"SAMA turns that into a nurse's list of overdue referrals, lung follow-ups first."},{"seg":"s4","start":87.77,"end":94.65,"text":"Gemma reads the note on an ordinary computer, code counts the days, a nurse confirms and calls."},{"seg":"s5","start":95.3,"end":99.35,"text":"Nemotron drafts each county's plan, and code checks every number."},{"seg":"s5","start":99.35,"end":104.62,"text":"Our ask: Satakunta, lung follow-up first, a 2027 pilot with no new money."},{"seg":"s5","start":104.62,"end":109.88,"text":"The county owns it; in the pilot, no patient data leaves the county."},{"seg":"s5","start":109.88,"end":115.15,"text":"The same pathway, wherever they live, whoever they are, however they enter care."}] /*END CUES*/;
+
+      window.__timelines = window.__timelines || {};
+      const capRoot = document.getElementById("captions");
+      CUES.forEach((c, i) => {
+        const el = document.createElement("div");
+        el.className = "cue";
+        el.id = "cue-" + i;
+        el.textContent = c.text;
+        capRoot.appendChild(el);
+      });
+
+      const tl = gsap.timeline({ paused: true });
+
+      // Background: slow ambient drift (finite, seek-safe).
+      tl.fromTo("#bg-grid", { x: 0, y: 0 }, { x: -120, y: -60, duration: 119, ease: "none" }, 0);
+      tl.fromTo("#bg-glow", { x: 0, y: 0, scale: 1 }, { x: -260, y: 120, scale: 1.12, duration: 119, ease: "sine.inOut" }, 0);
+      tl.fromTo("#bg-glow2", { x: 0, y: 0, scale: 1 }, { x: 220, y: -160, scale: 0.92, duration: 119, ease: "sine.inOut" }, 0);
+
+      // Progress line across the spoken part.
+      tl.fromTo("#progress", { scaleX: 0 }, { scaleX: 1, duration: 115.5, ease: "none" }, 0);
+
+      // Brand line and chapter labels.
+      tl.fromTo("#brand", { autoAlpha: 0, y: -12 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, 3.2);
+      const chapters = [
+        ["#ch1", 3.2, 19.5],
+        ["#ch2", 19.5, 43],
+        ["#ch3", 43, 72.5],
+        ["#ch4", 72.5, 95],
+        ["#ch5", 95, 115.5],
+      ];
+      chapters.forEach(([sel, a, b]) => {
+        tl.fromTo(sel, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "power2.out" }, a + 0.15);
+        tl.to(sel, { autoAlpha: 0, y: -14, duration: 0.3, ease: "power2.in" }, b - 0.35);
+      });
+
+      // Captions: each cue fades in at its start and out at its end.
+      CUES.forEach((c, i) => {
+        const sel = "#cue-" + i;
+        tl.fromTo(sel, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12, ease: "none" }, c.start);
+        tl.to(sel, { autoAlpha: 0, duration: 0.12, ease: "none" }, Math.max(c.start + 0.2, c.end - 0.12));
+      });
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

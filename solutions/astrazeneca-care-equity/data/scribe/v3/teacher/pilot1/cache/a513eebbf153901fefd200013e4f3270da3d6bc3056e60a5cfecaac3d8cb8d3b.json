@@ -1,0 +1,111 @@
+{
+ "id": "a513eebbf153901fefd200013e4f3270da3d6bc3056e60a5cfecaac3d8cb8d3b",
+ "curriculum": "careful",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Työterveyslääkäri tutki ja arvioi potilasta 18 viikkoa sitten ja lähetti lähetteen erikoissairaanhoitoon 11.10.2023. Aiempi rokotuskäynti, joka ei liity syöpään, oli 17.9.2021. Erikoislääkärin vastaanottoaika on varattu 23. huhtikuuta 2024, mutta potilas ei ole vielä käynyt erikoislääkärillä. Syöpäpolun tuloreitti on työterveyshuolto. Potilas kertoo voivansa kohtuullisesti, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Ohjattu ottamaan yhteyttä, jos oireet muuttuvat.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:56 outside 60-140"
+    ],
+    "words": 56,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 955,
+      "total_tokens": 1145,
+      "completion_tokens": 190,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.9
+    }
+   ],
+   "repair_request": [
+    "The note has 56 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Työterveyslääkäri tutki ja arvioi potilasta 18 viikkoa sitten ja lähetti lähetteen erikoissairaanhoitoon 11.10.2023. Aiempi rokotuskäynti, joka ei liity syöpään, oli 17.9.2021. Erikoislääkärin vastaanottoaika on varattu 23. huhtikuuta 2024, mutta potilas ei ole vielä käynyt erikoislääkärillä. Syöpäpolun tuloreitti on työterveyshuolto. Potilas kertoo voivansa kohtuullisesti ja toimintakyky on säilynyt. Kotona pärjääminen sujuu hyvin, eikä uusia oireita ole ilmennyt. Potilaalle on annettu ohje ottaa yhteyttä, jos oireet muuttuvat tai huolestuttavia muutoksia ilmenee. Seuranta jatkuu sovitun suunnitelman mukaisesti.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 74,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-10-05",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-09-28",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-09-28",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2023-10-11",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1225,
+      "total_tokens": 1459,
+      "completion_tokens": 234,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.03
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 822,
+      "total_tokens": 892,
+      "completion_tokens": 70,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.35
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:59+00:00"
+}

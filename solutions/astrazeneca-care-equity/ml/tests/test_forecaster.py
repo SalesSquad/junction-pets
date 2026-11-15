@@ -19,8 +19,10 @@ class Tests(unittest.TestCase):
     def test_probability(self):
         q=np.array([1,2,3,4,5]); self.assertEqual(probability(q,3),.5); self.assertTrue(np.all(np.diff([probability(q,t) for t in range(7)])>=0))
     def test_smoke(self):
+        # Deterministic pre-validation variation gives non-degenerate interval evidence.
+        # Perfect linear drift is covered separately as an abstention case.
         with tempfile.TemporaryDirectory(dir=ROOT/'tests') as d:
-            d=Path(d); years=list(range(2000,2026)); p=dict(units=[dict(id='HVA01',category='HYVINVOINTIALUE',name='Toy')],indicators=[dict(id=1,key='screen_breast',isTarget=True)],years=years,values={'1':{'HVA01':{str(y):50+(y-2000)*.5 for y in years}}},manifest=[])
+            d=Path(d); years=list(range(2000,2026)); p=dict(units=[dict(id='HVA01',category='HYVINVOINTIALUE',name='Toy')],indicators=[dict(id=1,key='screen_breast',isTarget=True)],years=years,values={'1':{'HVA01':{str(y):50+(y-2000)*.5+((y-2000)%3)*.35 for y in years}}},manifest=[])
             save(d/'panel.json',p)
             for script in ['train_forecaster.py','evaluate.py','export_forecasts.py']:
                 subprocess.run([sys.executable,str(ROOT/script),'--smoke','--panel',str(d/'panel.json'),'--artifacts',str(d/'artifacts'),'--out',str(d/'forecast.json')],check=True,capture_output=True)

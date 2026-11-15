@@ -1,0 +1,75 @@
+{
+ "id": "dfe91b46fc160458b2f1d17f4247aa65e30e34ab16a719ae441436368e020672",
+ "curriculum": "terse",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Syöpäpolun tuloreitti seulonta. Oireiden alku 29.8.2024. Ensimmäinen yhteydenotto terveysasemaan 245 päivää sitten. Lääkärin arvio 1.5. Moniammatillinen hoitopäätös 10 viikkoa sitten. Kontrolliaika 4.10.2025. Aiempi rokotuskäynti 8.3.2024. Pot. voi hyvin, kotona pärjää hyvin, ohjeistettu.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 32,
+    "v1_ok": false
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2024-08-29",
+       "precision": "DAY"
+      },
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2024-12-14",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-05-01",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-06-07",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 1026,
+      "total_tokens": 1158,
+      "completion_tokens": 132,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.57
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 720,
+      "total_tokens": 842,
+      "completion_tokens": 122,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.49
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:50+00:00"
+}

@@ -1,0 +1,102 @@
+{
+ "id": "0eeec8b495552d9768b00400e19468dc4dcaa644890a569c65924ea395d14c85",
+ "curriculum": "careful",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas hakeutui työterveyshuoltoon oireiden vuoksi, jotka alkoivat toukokuussa 2024. Työterveyslääkäri tutki ja arvioi potilaan 17.6. ja lähetti lähetteen erikoissairaanhoitoon 10 viikkoa sitten. Aiempi rokotuskäynti, joka ei liity syöpäepäilyyn, oli 2.7.2022. Potilas kertoo voivansa tällä hetkellä kohtuullisesti, ja toimintakyky on säilynyt. Kotona pärjääminen sujuu. Potilaalle on annettu yleistä neuvontaa ja tukea odotusaikana.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:51 outside 60-140"
+    ],
+    "words": 51,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 935,
+      "total_tokens": 1108,
+      "completion_tokens": 173,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.44
+    }
+   ],
+   "repair_request": [
+    "The note has 51 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas hakeutui työterveyshuoltoon oireiden vuoksi, jotka alkoivat toukokuussa 2024. Työterveyslääkäri tutki ja arvioi potilaan 17.6. ja lähetti lähetteen erikoissairaanhoitoon 10 viikkoa sitten. Aiempi rokotuskäynti, joka ei liity syöpäepäilyyn, oli 2.7.2022. Potilas kertoo voivansa tällä hetkellä kohtuullisesti, ja toimintakyky on säilynyt melko hyvin. Kotona pärjääminen sujuu ilman suurempia vaikeuksia. Potilaalle on annettu yleistä neuvontaa ja tukea odotusaikana. Potilas on ollut yhteydessä työterveyshuoltoon tarvittaessa, ja jatkoseuranta sovitaan tarpeen mukaan. Potilaan yleiskunto on vakaa, ja hän pystyy hoitamaan päivittäisiä askareitaan itsenäisesti.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 78,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2024-05-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-06-17",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2024-06-22",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1188,
+      "total_tokens": 1436,
+      "completion_tokens": 248,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.37
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 836,
+      "total_tokens": 936,
+      "completion_tokens": 100,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.71
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:57+00:00"
+}

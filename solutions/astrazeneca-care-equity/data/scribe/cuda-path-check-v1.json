@@ -1,0 +1,78 @@
+{
+ "synthetic_project": true,
+ "checked_utc": "2026-11-14T19:19:35Z",
+ "question": "would scribe/train_lora.py (version 1) construct its TrainingArguments under the transformers version installed on the GPU box",
+ "script": "scribe/train_lora.py",
+ "training_arguments_calls": [
+  {
+   "line": 184,
+   "keywords": [
+    "output_dir",
+    "learning_rate",
+    "lr_scheduler_type",
+    "warmup_ratio",
+    "num_train_epochs",
+    "per_device_train_batch_size",
+    "per_device_eval_batch_size",
+    "gradient_accumulation_steps",
+    "bf16",
+    "max_grad_norm",
+    "eval_strategy",
+    "eval_steps",
+    "save_strategy",
+    "logging_steps",
+    "report_to",
+    "seed",
+    "data_seed",
+    "gradient_checkpointing",
+    "gradient_checkpointing_kwargs",
+    "remove_unused_columns"
+   ]
+  }
+ ],
+ "transformers_here": "5.23.0",
+ "interpreter": "scribe/artifacts/mlx-venv/bin/python",
+ "transformers_on_gpu_box": "5.23.0",
+ "gpu_box_versions_from_run_log": {
+  "torch": "2.15.0",
+  "transformers": "5.23.0",
+  "peft": "0.21.3",
+  "accelerate": "1.15.0"
+ },
+ "same_version_as_gpu_box": true,
+ "keywords_rejected": [
+  "warmup_ratio"
+ ],
+ "would_construct": false,
+ "run_gpu_sh_unpinned_packages": [
+  "accelerate",
+  "peft",
+  "torch",
+  "transformers"
+ ],
+ "gpu_steps_in_run_log": [
+  {
+   "ts": "2026-11-14T16:33:10Z",
+   "step": "gpu_setup",
+   "status": "ok"
+  },
+  {
+   "ts": "2026-11-14T16:33:10Z",
+   "step": "gpu_unreachable",
+   "status": "error"
+  },
+  {
+   "ts": "2026-11-14T17:02:12Z",
+   "step": "gpu_unreachable",
+   "status": "error"
+  },
+  {
+   "ts": "2026-11-14T17:02:12Z",
+   "step": "gpu_host_key_changed",
+   "status": "error"
+  }
+ ],
+ "gpu_host_key_changed_action": "not connected; changed key not accepted; /root/scribe (venv, model cache, dataset copy) presumed lost; 4B CUDA training not run",
+ "training_attempt_on_gpu_box_logged": false,
+ "superseded_by": "scribe/v2 (run_gpu.sh pins torch, transformers, peft and accelerate; train.py uses integer warm-up steps)"
+}

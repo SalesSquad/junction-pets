@@ -1,0 +1,443 @@
+{
+ "schemaVersion": "scribe-gate-v1",
+ "generated": "2026-11-14T18:57:52+00:00",
+ "synthetic": true,
+ "candidates_file": "data/scribe/v3/teacher/candidates.jsonl",
+ "candidates_sha256": "009b78400e14fec86c0549a775164d17c5519b0ab5608185185834e06599229e",
+ "policy": {
+  "file": "data/scribe/v3/judges/policy.json",
+  "sha256": "1758293e10c8d76e58d73bbd4c964a369136fb6a15e9329b7edfa2d36d27d14c",
+  "rule": "jev",
+  "jev_question_set": "v2",
+  "thresholds": {
+   "jev": {
+    "event_min": 0.3,
+    "unlisted_max": 0.6,
+    "route_min": 0.0
+   },
+   "decisions": {
+    "event_min": 0.2,
+    "unlisted_max": 1.01,
+    "route_min": 0.0
+   }
+  }
+ },
+ "order": "SHA-256('scribe-v3-gate|' + id), ascending, over the candidates that passed the code check",
+ "definitions": {
+  "code_check_pass": "kept note passed the round-2 code check (teacher's flag code_check.passed)",
+  "readback_consistent": "denominator = code-check passes; the teacher's blind read-back equals the answer key",
+  "judge_accepted": "denominator = pairs the judge answered without an error",
+  "rule": "accepted_of_judged: denominator = code-check passes the rule's judge answered; accepted_of_candidates: denominator = all candidates of the curriculum",
+  "readback_vs_rule": "rows judged by the rule only",
+  "jev_vs_decisions": "pairs answered by both judges; Decisions was asked for a prefix of the fixed order only"
+ },
+ "overall": {
+  "candidates": 1600,
+  "code_check_pass": {
+   "numerator": 1589,
+   "denominator": 1600,
+   "rate": 0.9931
+  },
+  "readback_consistent": {
+   "numerator": 1465,
+   "denominator": 1589,
+   "rate": 0.922
+  },
+  "jev": {
+   "asked": 1589,
+   "answered": 1589,
+   "errors": 0,
+   "accepted": {
+    "numerator": 1506,
+    "denominator": 1589,
+    "rate": 0.9478
+   }
+  },
+  "decisions": {
+   "asked": 369,
+   "answered": 368,
+   "errors": 1,
+   "accepted": {
+    "numerator": 269,
+    "denominator": 368,
+    "rate": 0.731
+   }
+  },
+  "rule": {
+   "judged": 1589,
+   "not_judged": 0,
+   "accepted_of_judged": {
+    "numerator": 1506,
+    "denominator": 1589,
+    "rate": 0.9478
+   },
+   "accepted_of_candidates": {
+    "numerator": 1506,
+    "denominator": 1600,
+    "rate": 0.9413
+   }
+  },
+  "readback_vs_rule": {
+   "readback_consistent_rule_accept": 1395,
+   "readback_consistent_rule_reject": 70,
+   "readback_inconsistent_rule_accept": 111,
+   "readback_inconsistent_rule_reject": 13,
+   "n": 1589
+  },
+  "jev_vs_decisions": {
+   "both_accept": 262,
+   "jev_accept_decisions_reject": 82,
+   "jev_reject_decisions_accept": 7,
+   "both_reject": 17,
+   "n": 368
+  }
+ },
+ "per_curriculum": {
+  "hard_standard": {
+   "candidates": 480,
+   "code_check_pass": {
+    "numerator": 479,
+    "denominator": 480,
+    "rate": 0.9979
+   },
+   "readback_consistent": {
+    "numerator": 473,
+    "denominator": 479,
+    "rate": 0.9875
+   },
+   "jev": {
+    "asked": 479,
+    "answered": 479,
+    "errors": 0,
+    "accepted": {
+     "numerator": 468,
+     "denominator": 479,
+     "rate": 0.977
+    }
+   },
+   "decisions": {
+    "asked": 111,
+    "answered": 111,
+    "errors": 0,
+    "accepted": {
+     "numerator": 89,
+     "denominator": 111,
+     "rate": 0.8018
+    }
+   },
+   "rule": {
+    "judged": 479,
+    "not_judged": 0,
+    "accepted_of_judged": {
+     "numerator": 468,
+     "denominator": 479,
+     "rate": 0.977
+    },
+    "accepted_of_candidates": {
+     "numerator": 468,
+     "denominator": 480,
+     "rate": 0.975
+    }
+   },
+   "readback_vs_rule": {
+    "readback_consistent_rule_accept": 465,
+    "readback_consistent_rule_reject": 8,
+    "readback_inconsistent_rule_accept": 3,
+    "readback_inconsistent_rule_reject": 3,
+    "n": 479
+   },
+   "jev_vs_decisions": {
+    "both_accept": 88,
+    "jev_accept_decisions_reject": 20,
+    "jev_reject_decisions_accept": 1,
+    "both_reject": 2,
+    "n": 111
+   }
+  },
+  "careful": {
+   "candidates": 400,
+   "code_check_pass": {
+    "numerator": 400,
+    "denominator": 400,
+    "rate": 1.0
+   },
+   "readback_consistent": {
+    "numerator": 385,
+    "denominator": 400,
+    "rate": 0.9625
+   },
+   "jev": {
+    "asked": 400,
+    "answered": 400,
+    "errors": 0,
+    "accepted": {
+     "numerator": 382,
+     "denominator": 400,
+     "rate": 0.955
+    }
+   },
+   "decisions": {
+    "asked": 93,
+    "answered": 93,
+    "errors": 0,
+    "accepted": {
+     "numerator": 65,
+     "denominator": 93,
+     "rate": 0.6989
+    }
+   },
+   "rule": {
+    "judged": 400,
+    "not_judged": 0,
+    "accepted_of_judged": {
+     "numerator": 382,
+     "denominator": 400,
+     "rate": 0.955
+    },
+    "accepted_of_candidates": {
+     "numerator": 382,
+     "denominator": 400,
+     "rate": 0.955
+    }
+   },
+   "readback_vs_rule": {
+    "readback_consistent_rule_accept": 369,
+    "readback_consistent_rule_reject": 16,
+    "readback_inconsistent_rule_accept": 13,
+    "readback_inconsistent_rule_reject": 2,
+    "n": 400
+   },
+   "jev_vs_decisions": {
+    "both_accept": 61,
+    "jev_accept_decisions_reject": 24,
+    "jev_reject_decisions_accept": 4,
+    "both_reject": 4,
+    "n": 93
+   }
+  },
+  "no_event": {
+   "candidates": 240,
+   "code_check_pass": {
+    "numerator": 238,
+    "denominator": 240,
+    "rate": 0.9917
+   },
+   "readback_consistent": {
+    "numerator": 170,
+    "denominator": 238,
+    "rate": 0.7143
+   },
+   "jev": {
+    "asked": 238,
+    "answered": 238,
+    "errors": 0,
+    "accepted": {
+     "numerator": 236,
+     "denominator": 238,
+     "rate": 0.9916
+    }
+   },
+   "decisions": {
+    "asked": 51,
+    "answered": 50,
+    "errors": 1,
+    "accepted": {
+     "numerator": 50,
+     "denominator": 50,
+     "rate": 1.0
+    }
+   },
+   "rule": {
+    "judged": 238,
+    "not_judged": 0,
+    "accepted_of_judged": {
+     "numerator": 236,
+     "denominator": 238,
+     "rate": 0.9916
+    },
+    "accepted_of_candidates": {
+     "numerator": 236,
+     "denominator": 240,
+     "rate": 0.9833
+    }
+   },
+   "readback_vs_rule": {
+    "readback_consistent_rule_accept": 169,
+    "readback_consistent_rule_reject": 1,
+    "readback_inconsistent_rule_accept": 67,
+    "readback_inconsistent_rule_reject": 1,
+    "n": 238
+   },
+   "jev_vs_decisions": {
+    "both_accept": 50,
+    "jev_accept_decisions_reject": 0,
+    "jev_reject_decisions_accept": 0,
+    "both_reject": 0,
+    "n": 50
+   }
+  },
+  "long_multi_visit": {
+   "candidates": 240,
+   "code_check_pass": {
+    "numerator": 233,
+    "denominator": 240,
+    "rate": 0.9708
+   },
+   "readback_consistent": {
+    "numerator": 219,
+    "denominator": 233,
+    "rate": 0.9399
+   },
+   "jev": {
+    "asked": 233,
+    "answered": 233,
+    "errors": 0,
+    "accepted": {
+     "numerator": 199,
+     "denominator": 233,
+     "rate": 0.8541
+    }
+   },
+   "decisions": {
+    "asked": 55,
+    "answered": 55,
+    "errors": 0,
+    "accepted": {
+     "numerator": 20,
+     "denominator": 55,
+     "rate": 0.3636
+    }
+   },
+   "rule": {
+    "judged": 233,
+    "not_judged": 0,
+    "accepted_of_judged": {
+     "numerator": 199,
+     "denominator": 233,
+     "rate": 0.8541
+    },
+    "accepted_of_candidates": {
+     "numerator": 199,
+     "denominator": 240,
+     "rate": 0.8292
+    }
+   },
+   "readback_vs_rule": {
+    "readback_consistent_rule_accept": 188,
+    "readback_consistent_rule_reject": 31,
+    "readback_inconsistent_rule_accept": 11,
+    "readback_inconsistent_rule_reject": 3,
+    "n": 233
+   },
+   "jev_vs_decisions": {
+    "both_accept": 20,
+    "jev_accept_decisions_reject": 27,
+    "jev_reject_decisions_accept": 0,
+    "both_reject": 8,
+    "n": 55
+   }
+  },
+  "terse": {
+   "candidates": 240,
+   "code_check_pass": {
+    "numerator": 239,
+    "denominator": 240,
+    "rate": 0.9958
+   },
+   "readback_consistent": {
+    "numerator": 218,
+    "denominator": 239,
+    "rate": 0.9121
+   },
+   "jev": {
+    "asked": 239,
+    "answered": 239,
+    "errors": 0,
+    "accepted": {
+     "numerator": 221,
+     "denominator": 239,
+     "rate": 0.9247
+    }
+   },
+   "decisions": {
+    "asked": 59,
+    "answered": 59,
+    "errors": 0,
+    "accepted": {
+     "numerator": 45,
+     "denominator": 59,
+     "rate": 0.7627
+    }
+   },
+   "rule": {
+    "judged": 239,
+    "not_judged": 0,
+    "accepted_of_judged": {
+     "numerator": 221,
+     "denominator": 239,
+     "rate": 0.9247
+    },
+    "accepted_of_candidates": {
+     "numerator": 221,
+     "denominator": 240,
+     "rate": 0.9208
+    }
+   },
+   "readback_vs_rule": {
+    "readback_consistent_rule_accept": 204,
+    "readback_consistent_rule_reject": 14,
+    "readback_inconsistent_rule_accept": 17,
+    "readback_inconsistent_rule_reject": 4,
+    "n": 239
+   },
+   "jev_vs_decisions": {
+    "both_accept": 43,
+    "jev_accept_decisions_reject": 11,
+    "jev_reject_decisions_accept": 2,
+    "both_reject": 3,
+    "n": 59
+   }
+  }
+ },
+ "tokens": {
+  "jev": {
+   "answered": 1589,
+   "input_tokens": 2221893,
+   "output_tokens": 222076,
+   "tokens": 2443969,
+   "ledger_tokens_at_step_start": 1640514,
+   "ledger_tokens_now": 4084483,
+   "ledger_tokens_this_step": 2443969,
+   "ledger_requests_this_step": 1589,
+   "ledger_failed_attempts_this_step": 0,
+   "ledger_tokens_reserved_for_failed_attempts_this_step": 0,
+   "errors": {},
+   "usd_per_million_tokens": 0.042,
+   "usd_this_step": 0.10264669800000001,
+   "usd_ledger_total": 0.17154828600000002
+  },
+  "decisions": {
+   "answered": 368,
+   "input_tokens": 574896,
+   "output_tokens": 0,
+   "tokens": 574896,
+   "ledger_tokens_at_step_start": 463588,
+   "ledger_tokens_now": 1038484,
+   "ledger_tokens_this_step": 574896,
+   "ledger_requests_this_step": 369,
+   "ledger_failed_attempts_this_step": 1,
+   "ledger_tokens_reserved_for_failed_attempts_this_step": 3000,
+   "errors": {
+    "ValueError: refusal on route": 1
+   },
+   "usd_per_million_input_tokens_uncached": 0.1,
+   "usd_this_step": 0.0574896,
+   "usd_note": "list-rate figure, not a bill: ledger tokens of this step x USD 0.10 per million uncached input tokens (Decisions guide, opened 2026-11-14 through a summarising fetch; output tokens are not charged). Cache discounts, regional premiums and long-context multipliers are not applied, and the one refused request has no recorded usage (3,000 tokens stay reserved for it in the ledger)."
+  }
+ },
+ "caveats": [
+  "The judges' benchmark (data/scribe/v3/judges/benchmark-v1.json) used notes with 2-8 events and no no_event, terse or long notes; the thresholds are not calibrated for those curricula.",
+  "For a no_event note the rule reduces to: unlisted < unlisted_max and the chosen route equals the claimed one.",
+  "Decisions is not part of the rule; it was asked with the v1 questions for the first rows of the fixed order."
+ ]
+}

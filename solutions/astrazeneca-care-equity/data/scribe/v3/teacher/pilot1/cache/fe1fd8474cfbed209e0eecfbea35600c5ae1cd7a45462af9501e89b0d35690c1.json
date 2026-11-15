@@ -1,0 +1,97 @@
+{
+ "id": "fe1fd8474cfbed209e0eecfbea35600c5ae1cd7a45462af9501e89b0d35690c1",
+ "curriculum": "careful",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Käyntimerkintä. Potilas on tullut syöpäpolulle päivystyksen kautta. Lähettävä lääkäri lähetti lähetteen erikoissairaanhoitoon 6. marraskuuta 2023. Lähete saapui erikoissairaanhoidon yksikköön ja kirjattiin saapuneeksi 16.11.2023. Potilaalla on ollut aiempi syöpään liittymätön rokotuskäynti 30.1.2022. Potilaan yleinen vointi on tyydyttävä, ja hän pärjää kotona itsenäisesti. Neuvottelussa on korostettu lepoa ja ravitsemuksesta huolehtimista. Seuranta jatkuu sovitun suunnitelman mukaisesti.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:53 outside 60-140"
+    ],
+    "words": 53,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 927,
+      "total_tokens": 1118,
+      "completion_tokens": 191,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.85
+    }
+   ],
+   "repair_request": [
+    "The note has 53 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Käyntimerkintä. Potilas on tullut syöpäpolulle päivystyksen kautta. Lähettävä lääkäri lähetti lähetteen erikoissairaanhoitoon 6. marraskuuta 2023. Lähete saapui erikoissairaanhoidon yksikköön ja kirjattiin saapuneeksi 16.11.2023. Potilaalla on ollut aiempi syöpään liittymätön rokotuskäynti 30.1.2022. Potilaan yleinen vointi on tyydyttävä, ja hän pärjää kotona itsenäisesti. Neuvottelussa on korostettu lepoa ja ravitsemuksesta huolehtimista. Seuranta jatkuu sovitun suunnitelman mukaisesti. Potilas kertoo nukkuvansa hyvin ja liikkuvansa päivittäin. Oireet ovat hallinnassa, eikä uusia oireita ole ilmennyt. Potilas on saanut ohjeita jatkohoitoon ja tietoa tulevista käynneistä. Hän suhtautuu myönteisesti hoitoon ja noudattaa annettuja ohjeita. Kotona pärjääminen on turvallista, ja tukiverkosto toimii.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 92,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "EMERGENCY",
+     "events": [
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2023-11-06",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-11-16",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1197,
+      "total_tokens": 1490,
+      "completion_tokens": 293,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.24
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 881,
+      "total_tokens": 949,
+      "completion_tokens": 68,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.94
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:55+00:00"
+}

@@ -1,0 +1,70 @@
+{
+ "id": "6eded834f52661751f4066368cdc86b31279f900fb3053e03f3d5417008b3c3e",
+ "curriculum": "careful",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Loppulausunnon ote. Syöpäpolun tuloreitti oli päivystys. Potilas otti ensimmäisen kerran yhteyttä terveydenhuoltoon 19. tammikuuta 2026, jolloin päivystyksen hoitaja vastasi ja lääkäri ei tutkinut potilasta. Lähettävä lääkäri lähetti lähetteen erikoissairaanhoitoon 6.2.2026. Lähete saapui erikoissairaanhoidon yksikköön ja kirjattiin saapuneeksi 10.2.2026. Syntymäaika on 18.5.1978. Seuraava kontrolliaika on 15. huhtikuuta 2026, eikä se ole vielä toteutunut. Potilas voi tällä hetkellä hyvin, selviytyy arjesta kotona ja on saanut neuvontaa jatkosta.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 65,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "EMERGENCY",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-01-19",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2026-02-06",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-02-10",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 1023,
+      "total_tokens": 1239,
+      "completion_tokens": 216,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.38
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 804,
+      "total_tokens": 897,
+      "completion_tokens": 93,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.05
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:58+00:00"
+}
