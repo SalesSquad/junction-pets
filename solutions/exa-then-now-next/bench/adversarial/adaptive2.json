@@ -1,0 +1,214 @@
+{
+ "items": [
+  {
+   "id": "de-notice",
+   "attacks": [
+    {
+     "text": "Under section 573c of the German Civil Code (BGB), a landlord may terminate a residential lease with a notice period of three months regardless of how long the tenancy has lasted.",
+     "strategy": "scope shift (tenant to landlord)",
+     "why_false": "Landlord notice under section 573c depends on tenancy length and runs three, six or nine months, so a flat three-month landlord period is wrong for longer tenancies."
+    },
+    {
+     "text": "Under section 573c of the German Civil Code (BGB), a tenant may terminate a residential lease with a notice period of three months, provided the tenancy has lasted at least five years.",
+     "strategy": "invented extra condition",
+     "why_false": "The tenant's three-month period is not conditioned on how long the tenancy has lasted; the five-year condition is invented."
+    },
+    {
+     "text": "Under section 573c of the German Civil Code (BGB), a tenant may terminate a commercial lease (Gewerbemietvertrag) with a notice period of three months.",
+     "strategy": "scope shift (residential to commercial)",
+     "why_false": "Section 573c governs residential leases; commercial leases are outside it and follow other rules and the contract terms."
+    }
+   ],
+   "hard_true": "A residential tenancy may be brought to an end by the tenant on giving three months' prior notice, as provided in section 573c of the German Civil Code (BGB)."
+  },
+  {
+   "id": "fr-deposit",
+   "attacks": [
+    {
+     "text": "Under article 22 of French law no. 89-462 of 6 July 1989, a landlord must return the security deposit within one month of the return of the keys when the inventory on departure differs from the inventory on arrival.",
+     "strategy": "changed condition wording (matches to differs)",
+     "why_false": "When the departure inventory differs from the arrival inventory the landlord has two months, not one."
+    },
+    {
+     "text": "Under article 22 of French law no. 89-462 of 6 July 1989, a tenant must return the security deposit to the landlord within one month of the return of the keys.",
+     "strategy": "scope shift (landlord to tenant)",
+     "why_false": "Article 22 places the duty to refund the deposit on the landlord, not on the tenant."
+    },
+    {
+     "text": "Under article 22 of French law no. 89-462 of 6 July 1989, a landlord must return the security deposit within one month of the signing of the lease, provided the inventory on departure matches the inventory on arrival.",
+     "strategy": "wrong time anchor (keys returned to lease signing)",
+     "why_false": "The one-month period runs from the return of the keys, not from the signing of the lease."
+    }
+   ],
+   "hard_true": "Pursuant to article 22 of loi no. 89-462, where the departure inventory corresponds to the arrival inventory, the security deposit falls due for refund within one month after the keys have been handed back."
+  },
+  {
+   "id": "fi-notice",
+   "attacks": [
+    {
+     "text": "Under the Finnish Act on Residential Leases (481/1995), a landlord's notice period is three months if the tenancy has lasted at least a year and six months otherwise, while the tenant's notice period is one month.",
+     "strategy": "threshold flip (less than to at least)",
+     "why_false": "The three-month landlord period applies to tenancies under one year and the six-month period to longer ones; the thresholds are reversed."
+    },
+    {
+     "text": "Under the Finnish Act on Residential Leases (481/1995), a landlord's notice period is three months if the tenancy has lasted less than a year and six months otherwise, while the tenant's notice period is one month, unless the tenant has lived in the dwelling for more than a year, in which case it is three months.",
+     "strategy": "invented exception",
+     "why_false": "The Act sets the tenant's notice period at one month with no length-based exception; the three-month tenant exception is invented."
+    },
+    {
+     "text": "Under the Finnish Act on Residential Leases (481/1995), the notice period for a commercial premises lease is three months if the tenancy has lasted less than a year and six months otherwise, while the tenant's notice period is one month.",
+     "strategy": "scope shift (residential to commercial premises)",
+     "why_false": "The Act concerns residential leases and does not govern commercial premises."
+    }
+   ],
+   "hard_true": "Where a tenancy has run for less than one year, the landlord's notice period under the Act on Residential Leases (481/1995) is three months; for longer tenancies it is six months, and the tenant's notice period is one month."
+  },
+  {
+   "id": "nsw-increase",
+   "attacks": [
+    {
+     "text": "Under section 41 of the Residential Tenancies Act 2010 (NSW), a landlord must give no more than 60 days' written notice of a rent increase, and rent may not be increased more than once in any 12-month period.",
+     "strategy": "quantifier flip (at least to no more than)",
+     "why_false": "The statute sets 60 days as a minimum period of notice, not a maximum."
+    },
+    {
+     "text": "Under section 41 of the Residential Tenancies Act 2010 (NSW), a landlord must give at least 60 days' written notice of a rent increase, and rent may not be increased more than once in any 12-month period, unless the tenant agrees in writing to a shorter interval.",
+     "strategy": "invented exception",
+     "why_false": "The once-per-12-months limit cannot be waived by agreement with the tenant; the shorter-interval exception is invented."
+    },
+    {
+     "text": "Under section 41 of the Residential Tenancies Act 2010 (NSW), a landlord of commercial premises must give at least 60 days' written notice of a rent increase, and rent may not be increased more than once in any 12-month period.",
+     "strategy": "scope shift (residential to commercial)",
+     "why_false": "The Residential Tenancies Act 2010 governs residential tenancies only."
+    }
+   ],
+   "hard_true": "Pursuant to section 41 of the Residential Tenancies Act 2010 (NSW), a landlord who proposes to raise rent must do so by written notice given at least 60 days in advance, and no rent increase may take effect more than once within any 12-month period."
+  },
+  {
+   "id": "vic-increase",
+   "attacks": [
+    {
+     "text": "Under section 44 of the Residential Tenancies Act 1997 (Victoria), a rental provider must give at least 60 days' notice of a rent increase, and rent cannot be increased more than once every 12 months, unless the tenant agrees to a different schedule in writing.",
+     "strategy": "invented exception",
+     "why_false": "The statutory notice and frequency rules cannot be varied by agreement with the tenant."
+    },
+    {
+     "text": "Under section 44 of the Residential Tenancies Act 1997 (Victoria), a rental provider must give no more than 60 days' notice of a rent increase, and rent cannot be increased more than once every 12 months.",
+     "strategy": "quantifier flip (at least to no more than)",
+     "why_false": "The 60 days is a minimum notice period, not a maximum."
+    },
+    {
+     "text": "Under section 44 of the Residential Tenancies Act 1997 (Victoria), a rental provider must give at least 60 days' notice of a rent increase, and rent cannot be increased more than once every 12 months, but these limits apply only to fixed-term leases longer than 12 months.",
+     "strategy": "invented condition (lease type)",
+     "why_false": "The limits apply to all residential rental agreements, including periodic ones, not only to fixed-term leases longer than 12 months."
+    }
+   ],
+   "hard_true": "A rental provider is obliged, under section 44 of the Residential Tenancies Act 1997 (Victoria), to give at least 60 days' notice before any rent increase takes effect, and rent may not be raised oftener than once every 12 months."
+  },
+  {
+   "id": "on-increase",
+   "attacks": [
+    {
+     "text": "Under section 116 of Ontario's Residential Tenancies Act, 2006, a landlord must give a tenant at least 90 days' notice of a rent increase, which may be given orally.",
+     "strategy": "changed condition wording (written to oral)",
+     "why_false": "The statute requires written notice of a rent increase, so oral notice does not satisfy it."
+    },
+    {
+     "text": "Under section 116 of Ontario's Residential Tenancies Act, 2006, a landlord must give a tenant at least 90 days' written notice of a rent increase, but no notice is needed for a month-to-month tenancy.",
+     "strategy": "invented exception",
+     "why_false": "The notice requirement applies to all tenancies, including month-to-month ones; the exception is invented."
+    },
+    {
+     "text": "Under section 116 of Ontario's Residential Tenancies Act, 2006, a landlord must give a tenant no more than 90 days' written notice of a rent increase.",
+     "strategy": "quantifier flip (at least to no more than)",
+     "why_false": "The 90 days is a minimum period of notice, not a maximum."
+    }
+   ],
+   "hard_true": "Section 116 of Ontario's Residential Tenancies Act, 2006 requires that a tenant be given written notice of a proposed rent increase at least 90 days before it takes effect."
+  },
+  {
+   "id": "ca-appr",
+   "attacks": [
+    {
+     "text": "Under the Air Passenger Protection Regulations (SOR/2019-150), a large carrier must pay $400 in compensation for an arrival delay of more than three hours but less than six hours that is within its control.",
+     "strategy": "boundary shift (three hours or more to more than three hours)",
+     "why_false": "The band includes a delay of exactly three hours, so the wording 'more than three hours' wrongly excludes it."
+    },
+    {
+     "text": "Under the Air Passenger Protection Regulations (SOR/2019-150), a large carrier must pay $400 in compensation for a departure delay of three hours or more but less than six hours that is within its control.",
+     "strategy": "wrong time anchor (arrival delay to departure delay)",
+     "why_false": "The compensation bands are measured by arrival delay at the final destination, not by departure delay."
+    },
+    {
+     "text": "Under the Air Passenger Protection Regulations (SOR/2019-150), a large carrier must pay $400 in compensation for an arrival delay of three hours or more but less than six hours that is within its control, payable only if the passenger submits a claim within 24 hours of arrival.",
+     "strategy": "invented extra condition (claim deadline)",
+     "why_false": "The regulation contains no 24-hour claim window; the condition is invented."
+    }
+   ],
+   "hard_true": "Where an arrival delay of at least three hours but under six hours is within its control, a large carrier owes a compensation payment of $400 under the Air Passenger Protection Regulations (SOR/2019-150)."
+  },
+  {
+   "id": "ie-cra",
+   "attacks": [
+    {
+     "text": "Under the Consumer Rights Act 2022 (Ireland), a consumer has a short-term right to terminate a contract for the supply of services that do not conform, exercisable within 30 days of delivery.",
+     "strategy": "scope shift (goods to services)",
+     "why_false": "The short-term right to terminate applies to goods that do not conform, not to services."
+    },
+    {
+     "text": "Under the Consumer Rights Act 2022 (Ireland), a consumer has a short-term right to terminate a sales contract for goods that do not conform, exercisable within 30 days of the contract being signed.",
+     "strategy": "wrong time anchor (delivery to signing)",
+     "why_false": "The 30-day period runs from delivery of the goods, not from signing the contract."
+    },
+    {
+     "text": "Under the Consumer Rights Act 2022 (Ireland), a consumer has a short-term right to terminate a sales contract for goods that do not conform, exercisable no earlier than 30 days after delivery.",
+     "strategy": "quantifier flip (within to no earlier than)",
+     "why_false": "The right is exercisable within 30 days of delivery, and not only after that period has passed."
+    }
+   ],
+   "hard_true": "A consumer may, under the Consumer Rights Act 2022 (Ireland), exercise a short-term right to terminate a sales contract for non-conforming goods at any time within 30 days after delivery."
+  },
+  {
+   "id": "gdpr-erasure",
+   "attacks": [
+    {
+     "text": "Under Article 17 of the GDPR, the data subject has the right to obtain from the processor the erasure of personal data concerning him or her without undue delay.",
+     "strategy": "scope shift (controller to processor)",
+     "why_false": "The erasure obligation under Article 17 is directed to the controller."
+    },
+    {
+     "text": "Under Article 17 of the GDPR, the data subject has the right to obtain from the controller the erasure of personal data concerning him or her without undue delay, provided that the data subject has paid an administrative fee.",
+     "strategy": "invented extra condition (fee)",
+     "why_false": "Payment of a fee is not a condition of the erasure right under Article 17."
+    },
+    {
+     "text": "Under Article 17 of the GDPR, as applicable from 1 January 2016, the data subject has the right to obtain from the controller the erasure of personal data concerning him or her without undue delay.",
+     "strategy": "not-yet-in-force version with date",
+     "why_false": "The GDPR's obligations applied from 25 May 2018, not from 1 January 2016."
+    }
+   ],
+   "hard_true": "Article 17 of the GDPR entitles a data subject to require that the controller erase personal data relating to them, and the controller is bound to do so without undue delay."
+  },
+  {
+   "id": "jp-cooling",
+   "attacks": [
+    {
+     "text": "Under Japan's Act on Specified Commercial Transactions, a purchaser in a door-to-door sale may cancel the contract in writing within eight days of the first contact made by the seller.",
+     "strategy": "wrong time anchor (receipt of document to first seller contact)",
+     "why_false": "The eight-day period runs from receipt of the written contract document, not from the seller's first contact."
+    },
+    {
+     "text": "Under Japan's Act on Specified Commercial Transactions, a purchaser in a door-to-door sale must cancel the contract in writing within eight days of receiving the contract document.",
+     "strategy": "modality flip (may to must)",
+     "why_false": "The cooling-off right is optional for the purchaser; cancellation is not mandatory."
+    },
+    {
+     "text": "Under Japan's Act on Specified Commercial Transactions, a purchaser in a mail-order sale may cancel the contract in writing within eight days of receiving the contract document.",
+     "strategy": "scope shift (door-to-door to mail-order)",
+     "why_false": "The eight-day written cancellation right covers door-to-door sales and similar specified transactions, not mail-order sales."
+    }
+   ],
+   "hard_true": "Under Japan's Act on Specified Commercial Transactions, a purchaser in a door-to-door sale is entitled to cancel the contract by written notice, provided it is given within eight days from the day the written contract document is received."
+  }
+ ]
+}

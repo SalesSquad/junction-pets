@@ -1,0 +1,1109 @@
+{
+ "items": 1200,
+ "k": 5,
+ "items_by_language": {
+  "Finnish": 274,
+  "German": 258,
+  "English": 668
+ },
+ "items_by_jurisdiction": {
+  "US": 1186,
+  "UK": 12,
+  "EU": 2
+ },
+ "query_model": "mlx-community/embeddinggemma-300m-bf16",
+ "query_runtime": "mlx",
+ "query_prefix": "task: search result | query: ",
+ "query_seconds": 4.2,
+ "queries_cut_at_max_tokens": 0,
+ "judging": "section = same CFR title and section; part = same title and part (a section hit counts); catalog rows outside the item's edition year are excluded; the 14 UK/EU items are misses for catalog and BM25",
+ "caveat": "The situations were written from clauses of the gold provisions, taken from the dataset the catalog is built from. The catalog is a closed set of about 6,000 provisions that always contains the answer; Exa searches the open web.",
+ "arms": {
+  "exa": {
+   "all": {
+    "n": 1200,
+    "section@1": "198/1200 (16.5 %)",
+    "section@1_ci95": [
+     14.5,
+     18.7
+    ],
+    "section@5": "311/1200 (25.9 %)",
+    "section@5_ci95": [
+     23.5,
+     28.5
+    ],
+    "part@5": "516/1200 (43.0 %)",
+    "part@5_ci95": [
+     40.2,
+     45.8
+    ]
+   },
+   "English": {
+    "n": 668,
+    "section@1": "175/668 (26.2 %)",
+    "section@1_ci95": [
+     23.0,
+     29.7
+    ],
+    "section@5": "261/668 (39.1 %)",
+    "section@5_ci95": [
+     35.4,
+     42.8
+    ],
+    "part@5": "423/668 (63.3 %)",
+    "part@5_ci95": [
+     59.6,
+     66.9
+    ]
+   },
+   "German": {
+    "n": 258,
+    "section@1": "17/258 (6.6 %)",
+    "section@1_ci95": [
+     4.2,
+     10.3
+    ],
+    "section@5": "39/258 (15.1 %)",
+    "section@5_ci95": [
+     11.3,
+     20.0
+    ],
+    "part@5": "70/258 (27.1 %)",
+    "part@5_ci95": [
+     22.1,
+     32.9
+    ]
+   },
+   "Finnish": {
+    "n": 274,
+    "section@1": "6/274 (2.2 %)",
+    "section@1_ci95": [
+     1.0,
+     4.7
+    ],
+    "section@5": "11/274 (4.0 %)",
+    "section@5_ci95": [
+     2.3,
+     7.0
+    ],
+    "part@5": "23/274 (8.4 %)",
+    "part@5_ci95": [
+     5.7,
+     12.3
+    ]
+   },
+   "US only": {
+    "n": 1186,
+    "section@1": "196/1186 (16.5 %)",
+    "section@1_ci95": [
+     14.5,
+     18.7
+    ],
+    "section@5": "308/1186 (26.0 %)",
+    "section@5_ci95": [
+     23.6,
+     28.5
+    ],
+    "part@5": "510/1186 (43.0 %)",
+    "part@5_ci95": [
+     40.2,
+     45.8
+    ]
+   }
+  },
+  "catalog[clauses1200]": {
+   "all": {
+    "n": 1200,
+    "section@1": "526/1200 (43.8 %)",
+    "section@1_ci95": [
+     41.1,
+     46.7
+    ],
+    "section@5": "796/1200 (66.3 %)",
+    "section@5_ci95": [
+     63.6,
+     69.0
+    ],
+    "part@5": "895/1200 (74.6 %)",
+    "part@5_ci95": [
+     72.0,
+     77.0
+    ]
+   },
+   "English": {
+    "n": 668,
+    "section@1": "355/668 (53.1 %)",
+    "section@1_ci95": [
+     49.4,
+     56.9
+    ],
+    "section@5": "507/668 (75.9 %)",
+    "section@5_ci95": [
+     72.5,
+     79.0
+    ],
+    "part@5": "558/668 (83.5 %)",
+    "part@5_ci95": [
+     80.5,
+     86.2
+    ]
+   },
+   "German": {
+    "n": 258,
+    "section@1": "103/258 (39.9 %)",
+    "section@1_ci95": [
+     34.1,
+     46.0
+    ],
+    "section@5": "166/258 (64.3 %)",
+    "section@5_ci95": [
+     58.3,
+     69.9
+    ],
+    "part@5": "189/258 (73.3 %)",
+    "part@5_ci95": [
+     67.5,
+     78.3
+    ]
+   },
+   "Finnish": {
+    "n": 274,
+    "section@1": "68/274 (24.8 %)",
+    "section@1_ci95": [
+     20.1,
+     30.3
+    ],
+    "section@5": "123/274 (44.9 %)",
+    "section@5_ci95": [
+     39.1,
+     50.8
+    ],
+    "part@5": "148/274 (54.0 %)",
+    "part@5_ci95": [
+     48.1,
+     59.8
+    ]
+   },
+   "US only": {
+    "n": 1186,
+    "section@1": "526/1186 (44.4 %)",
+    "section@1_ci95": [
+     41.5,
+     47.2
+    ],
+    "section@5": "796/1186 (67.1 %)",
+    "section@5_ci95": [
+     64.4,
+     69.7
+    ],
+    "part@5": "895/1186 (75.5 %)",
+    "part@5_ci95": [
+     72.9,
+     77.8
+    ]
+   }
+  },
+  "catalog[clauses1200] or exa (10 candidates)": {
+   "all": {
+    "n": 1200,
+    "section@1": null,
+    "section@5": "830/1200 (69.2 %)",
+    "section@5_ci95": [
+     66.5,
+     71.7
+    ],
+    "part@5": "935/1200 (77.9 %)",
+    "part@5_ci95": [
+     75.5,
+     80.2
+    ]
+   },
+   "English": {
+    "n": 668,
+    "section@1": null,
+    "section@5": "537/668 (80.4 %)",
+    "section@5_ci95": [
+     77.2,
+     83.2
+    ],
+    "part@5": "588/668 (88.0 %)",
+    "part@5_ci95": [
+     85.3,
+     90.3
+    ]
+   },
+   "German": {
+    "n": 258,
+    "section@1": null,
+    "section@5": "168/258 (65.1 %)",
+    "section@5_ci95": [
+     59.1,
+     70.7
+    ],
+    "part@5": "194/258 (75.2 %)",
+    "part@5_ci95": [
+     69.6,
+     80.1
+    ]
+   },
+   "Finnish": {
+    "n": 274,
+    "section@1": null,
+    "section@5": "125/274 (45.6 %)",
+    "section@5_ci95": [
+     39.8,
+     51.5
+    ],
+    "part@5": "153/274 (55.8 %)",
+    "part@5_ci95": [
+     49.9,
+     61.6
+    ]
+   },
+   "US only": {
+    "n": 1186,
+    "section@1": null,
+    "section@5": "827/1186 (69.7 %)",
+    "section@5_ci95": [
+     67.1,
+     72.3
+    ],
+    "part@5": "929/1186 (78.3 %)",
+    "part@5_ci95": [
+     75.9,
+     80.6
+    ]
+   }
+  },
+  "bm25[clauses1200]": {
+   "all": {
+    "n": 1200,
+    "section@1": "381/1200 (31.8 %)",
+    "section@1_ci95": [
+     29.2,
+     34.4
+    ],
+    "section@5": "540/1200 (45.0 %)",
+    "section@5_ci95": [
+     42.2,
+     47.8
+    ],
+    "part@5": "646/1200 (53.8 %)",
+    "part@5_ci95": [
+     51.0,
+     56.6
+    ]
+   },
+   "English": {
+    "n": 668,
+    "section@1": "346/668 (51.8 %)",
+    "section@1_ci95": [
+     48.0,
+     55.6
+    ],
+    "section@5": "475/668 (71.1 %)",
+    "section@5_ci95": [
+     67.6,
+     74.4
+    ],
+    "part@5": "539/668 (80.7 %)",
+    "part@5_ci95": [
+     77.5,
+     83.5
+    ]
+   },
+   "German": {
+    "n": 258,
+    "section@1": "18/258 (7.0 %)",
+    "section@1_ci95": [
+     4.5,
+     10.8
+    ],
+    "section@5": "39/258 (15.1 %)",
+    "section@5_ci95": [
+     11.3,
+     20.0
+    ],
+    "part@5": "68/258 (26.4 %)",
+    "part@5_ci95": [
+     21.4,
+     32.1
+    ]
+   },
+   "Finnish": {
+    "n": 274,
+    "section@1": "17/274 (6.2 %)",
+    "section@1_ci95": [
+     3.9,
+     9.7
+    ],
+    "section@5": "26/274 (9.5 %)",
+    "section@5_ci95": [
+     6.6,
+     13.5
+    ],
+    "part@5": "39/274 (14.2 %)",
+    "part@5_ci95": [
+     10.6,
+     18.9
+    ]
+   },
+   "US only": {
+    "n": 1186,
+    "section@1": "381/1186 (32.1 %)",
+    "section@1_ci95": [
+     29.5,
+     34.8
+    ],
+    "section@5": "540/1186 (45.5 %)",
+    "section@5_ci95": [
+     42.7,
+     48.4
+    ],
+    "part@5": "646/1186 (54.5 %)",
+    "part@5_ci95": [
+     51.6,
+     57.3
+    ]
+   }
+  },
+  "catalog[clauses1200] 256-d": {
+   "all": {
+    "n": 1200,
+    "section@1": "459/1200 (38.2 %)",
+    "section@1_ci95": [
+     35.5,
+     41.0
+    ],
+    "section@5": "732/1200 (61.0 %)",
+    "section@5_ci95": [
+     58.2,
+     63.7
+    ],
+    "part@5": "837/1200 (69.8 %)",
+    "part@5_ci95": [
+     67.1,
+     72.3
+    ]
+   },
+   "English": {
+    "n": 668,
+    "section@1": "321/668 (48.1 %)",
+    "section@1_ci95": [
+     44.3,
+     51.8
+    ],
+    "section@5": "468/668 (70.1 %)",
+    "section@5_ci95": [
+     66.5,
+     73.4
+    ],
+    "part@5": "525/668 (78.6 %)",
+    "part@5_ci95": [
+     75.3,
+     81.5
+    ]
+   },
+   "German": {
+    "n": 258,
+    "section@1": "77/258 (29.8 %)",
+    "section@1_ci95": [
+     24.6,
+     35.7
+    ],
+    "section@5": "153/258 (59.3 %)",
+    "section@5_ci95": [
+     53.2,
+     65.1
+    ],
+    "part@5": "178/258 (69.0 %)",
+    "part@5_ci95": [
+     63.1,
+     74.3
+    ]
+   },
+   "Finnish": {
+    "n": 274,
+    "section@1": "61/274 (22.3 %)",
+    "section@1_ci95": [
+     17.7,
+     27.6
+    ],
+    "section@5": "111/274 (40.5 %)",
+    "section@5_ci95": [
+     34.9,
+     46.4
+    ],
+    "part@5": "134/274 (48.9 %)",
+    "part@5_ci95": [
+     43.0,
+     54.8
+    ]
+   },
+   "US only": {
+    "n": 1186,
+    "section@1": "459/1186 (38.7 %)",
+    "section@1_ci95": [
+     36.0,
+     41.5
+    ],
+    "section@5": "732/1186 (61.7 %)",
+    "section@5_ci95": [
+     58.9,
+     64.4
+    ],
+    "part@5": "837/1186 (70.6 %)",
+    "part@5_ci95": [
+     67.9,
+     73.1
+    ]
+   }
+  },
+  "catalog[heading60]": {
+   "all": {
+    "n": 1200,
+    "section@1": "351/1200 (29.2 %)",
+    "section@1_ci95": [
+     26.7,
+     31.9
+    ],
+    "section@5": "635/1200 (52.9 %)",
+    "section@5_ci95": [
+     50.1,
+     55.7
+    ],
+    "part@5": "815/1200 (67.9 %)",
+    "part@5_ci95": [
+     65.2,
+     70.5
+    ]
+   },
+   "English": {
+    "n": 668,
+    "section@1": "241/668 (36.1 %)",
+    "section@1_ci95": [
+     32.5,
+     39.8
+    ],
+    "section@5": "407/668 (60.9 %)",
+    "section@5_ci95": [
+     57.2,
+     64.6
+    ],
+    "part@5": "502/668 (75.1 %)",
+    "part@5_ci95": [
+     71.7,
+     78.3
+    ]
+   },
+   "German": {
+    "n": 258,
+    "section@1": "60/258 (23.3 %)",
+    "section@1_ci95": [
+     18.5,
+     28.8
+    ],
+    "section@5": "133/258 (51.6 %)",
+    "section@5_ci95": [
+     45.5,
+     57.6
+    ],
+    "part@5": "178/258 (69.0 %)",
+    "part@5_ci95": [
+     63.1,
+     74.3
+    ]
+   },
+   "Finnish": {
+    "n": 274,
+    "section@1": "50/274 (18.2 %)",
+    "section@1_ci95": [
+     14.1,
+     23.3
+    ],
+    "section@5": "95/274 (34.7 %)",
+    "section@5_ci95": [
+     29.3,
+     40.5
+    ],
+    "part@5": "135/274 (49.3 %)",
+    "part@5_ci95": [
+     43.4,
+     55.2
+    ]
+   },
+   "US only": {
+    "n": 1186,
+    "section@1": "351/1186 (29.6 %)",
+    "section@1_ci95": [
+     27.1,
+     32.3
+    ],
+    "section@5": "635/1186 (53.5 %)",
+    "section@5_ci95": [
+     50.7,
+     56.4
+    ],
+    "part@5": "815/1186 (68.7 %)",
+    "part@5_ci95": [
+     66.0,
+     71.3
+    ]
+   }
+  },
+  "catalog[heading60] or exa (10 candidates)": {
+   "all": {
+    "n": 1200,
+    "section@1": null,
+    "section@5": "711/1200 (59.2 %)",
+    "section@5_ci95": [
+     56.4,
+     62.0
+    ],
+    "part@5": "885/1200 (73.8 %)",
+    "part@5_ci95": [
+     71.2,
+     76.2
+    ]
+   },
+   "English": {
+    "n": 668,
+    "section@1": null,
+    "section@5": "475/668 (71.1 %)",
+    "section@5_ci95": [
+     67.6,
+     74.4
+    ],
+    "part@5": "560/668 (83.8 %)",
+    "part@5_ci95": [
+     80.8,
+     86.4
+    ]
+   },
+   "German": {
+    "n": 258,
+    "section@1": null,
+    "section@5": "139/258 (53.9 %)",
+    "section@5_ci95": [
+     47.8,
+     59.9
+    ],
+    "part@5": "186/258 (72.1 %)",
+    "part@5_ci95": [
+     66.3,
+     77.2
+    ]
+   },
+   "Finnish": {
+    "n": 274,
+    "section@1": null,
+    "section@5": "97/274 (35.4 %)",
+    "section@5_ci95": [
+     30.0,
+     41.2
+    ],
+    "part@5": "139/274 (50.7 %)",
+    "part@5_ci95": [
+     44.8,
+     56.6
+    ]
+   },
+   "US only": {
+    "n": 1186,
+    "section@1": null,
+    "section@5": "708/1186 (59.7 %)",
+    "section@5_ci95": [
+     56.9,
+     62.5
+    ],
+    "part@5": "879/1186 (74.1 %)",
+    "part@5_ci95": [
+     71.5,
+     76.5
+    ]
+   }
+  },
+  "bm25[heading60]": {
+   "all": {
+    "n": 1200,
+    "section@1": "230/1200 (19.2 %)",
+    "section@1_ci95": [
+     17.0,
+     21.5
+    ],
+    "section@5": "384/1200 (32.0 %)",
+    "section@5_ci95": [
+     29.4,
+     34.7
+    ],
+    "part@5": "570/1200 (47.5 %)",
+    "part@5_ci95": [
+     44.7,
+     50.3
+    ]
+   },
+   "English": {
+    "n": 668,
+    "section@1": "209/668 (31.3 %)",
+    "section@1_ci95": [
+     27.9,
+     34.9
+    ],
+    "section@5": "338/668 (50.6 %)",
+    "section@5_ci95": [
+     46.8,
+     54.4
+    ],
+    "part@5": "464/668 (69.5 %)",
+    "part@5_ci95": [
+     65.9,
+     72.8
+    ]
+   },
+   "German": {
+    "n": 258,
+    "section@1": "9/258 (3.5 %)",
+    "section@1_ci95": [
+     1.8,
+     6.5
+    ],
+    "section@5": "27/258 (10.5 %)",
+    "section@5_ci95": [
+     7.3,
+     14.8
+    ],
+    "part@5": "60/258 (23.3 %)",
+    "part@5_ci95": [
+     18.5,
+     28.8
+    ]
+   },
+   "Finnish": {
+    "n": 274,
+    "section@1": "12/274 (4.4 %)",
+    "section@1_ci95": [
+     2.5,
+     7.5
+    ],
+    "section@5": "19/274 (6.9 %)",
+    "section@5_ci95": [
+     4.5,
+     10.6
+    ],
+    "part@5": "46/274 (16.8 %)",
+    "part@5_ci95": [
+     12.8,
+     21.7
+    ]
+   },
+   "US only": {
+    "n": 1186,
+    "section@1": "230/1186 (19.4 %)",
+    "section@1_ci95": [
+     17.2,
+     21.7
+    ],
+    "section@5": "384/1186 (32.4 %)",
+    "section@5_ci95": [
+     29.8,
+     35.1
+    ],
+    "part@5": "570/1186 (48.1 %)",
+    "part@5_ci95": [
+     45.2,
+     50.9
+    ]
+   }
+  },
+  "catalog[heading60] 256-d": {
+   "all": {
+    "n": 1200,
+    "section@1": "318/1200 (26.5 %)",
+    "section@1_ci95": [
+     24.1,
+     29.1
+    ],
+    "section@5": "550/1200 (45.8 %)",
+    "section@5_ci95": [
+     43.0,
+     48.7
+    ],
+    "part@5": "750/1200 (62.5 %)",
+    "part@5_ci95": [
+     59.7,
+     65.2
+    ]
+   },
+   "English": {
+    "n": 668,
+    "section@1": "231/668 (34.6 %)",
+    "section@1_ci95": [
+     31.1,
+     38.3
+    ],
+    "section@5": "359/668 (53.7 %)",
+    "section@5_ci95": [
+     50.0,
+     57.5
+    ],
+    "part@5": "467/668 (69.9 %)",
+    "part@5_ci95": [
+     66.3,
+     73.3
+    ]
+   },
+   "German": {
+    "n": 258,
+    "section@1": "46/258 (17.8 %)",
+    "section@1_ci95": [
+     13.6,
+     23.0
+    ],
+    "section@5": "109/258 (42.2 %)",
+    "section@5_ci95": [
+     36.4,
+     48.3
+    ],
+    "part@5": "162/258 (62.8 %)",
+    "part@5_ci95": [
+     56.7,
+     68.5
+    ]
+   },
+   "Finnish": {
+    "n": 274,
+    "section@1": "41/274 (15.0 %)",
+    "section@1_ci95": [
+     11.2,
+     19.7
+    ],
+    "section@5": "82/274 (29.9 %)",
+    "section@5_ci95": [
+     24.8,
+     35.6
+    ],
+    "part@5": "121/274 (44.2 %)",
+    "part@5_ci95": [
+     38.4,
+     50.1
+    ]
+   },
+   "US only": {
+    "n": 1186,
+    "section@1": "318/1186 (26.8 %)",
+    "section@1_ci95": [
+     24.4,
+     29.4
+    ],
+    "section@5": "550/1186 (46.4 %)",
+    "section@5_ci95": [
+     43.6,
+     49.2
+    ],
+    "part@5": "750/1186 (63.2 %)",
+    "part@5_ci95": [
+     60.5,
+     65.9
+    ]
+   }
+  }
+ },
+ "paired_section_at_k": {
+  "catalog[clauses1200] vs exa": {
+   "all": {
+    "n": 1200,
+    "both": 277,
+    "catalog_only": 519,
+    "exa_only": 34,
+    "neither": 370,
+    "mcnemar_exact_p": 1.56e-112
+   },
+   "English": {
+    "n": 668,
+    "both": 231,
+    "catalog_only": 276,
+    "exa_only": 30,
+    "neither": 131,
+    "mcnemar_exact_p": 5.56e-51
+   },
+   "German": {
+    "n": 258,
+    "both": 37,
+    "catalog_only": 129,
+    "exa_only": 2,
+    "neither": 90,
+    "mcnemar_exact_p": 6.35e-36
+   },
+   "Finnish": {
+    "n": 274,
+    "both": 9,
+    "catalog_only": 114,
+    "exa_only": 2,
+    "neither": 149,
+    "mcnemar_exact_p": 1.63e-31
+   },
+   "US only": {
+    "n": 1186,
+    "both": 277,
+    "catalog_only": 519,
+    "exa_only": 31,
+    "neither": 359,
+    "mcnemar_exact_p": 2.65e-115
+   }
+  },
+  "catalog[clauses1200] vs bm25[clauses1200]": {
+   "all": {
+    "n": 1200,
+    "both": 488,
+    "catalog_only": 308,
+    "bm25_only": 52,
+    "neither": 352,
+    "mcnemar_exact_p": 2.23e-45
+   },
+   "English": {
+    "n": 668,
+    "both": 431,
+    "catalog_only": 76,
+    "bm25_only": 44,
+    "neither": 117,
+    "mcnemar_exact_p": 0.00446
+   },
+   "German": {
+    "n": 258,
+    "both": 34,
+    "catalog_only": 132,
+    "bm25_only": 5,
+    "neither": 87,
+    "mcnemar_exact_p": 4.45e-33
+   },
+   "Finnish": {
+    "n": 274,
+    "both": 23,
+    "catalog_only": 100,
+    "bm25_only": 3,
+    "neither": 148,
+    "mcnemar_exact_p": 3.59e-26
+   },
+   "US only": {
+    "n": 1186,
+    "both": 488,
+    "catalog_only": 308,
+    "bm25_only": 52,
+    "neither": 338,
+    "mcnemar_exact_p": 2.23e-45
+   }
+  },
+  "catalog[heading60] vs exa": {
+   "all": {
+    "n": 1200,
+    "both": 235,
+    "catalog_only": 400,
+    "exa_only": 76,
+    "neither": 489,
+    "mcnemar_exact_p": 3.75e-54
+   },
+   "English": {
+    "n": 668,
+    "both": 193,
+    "catalog_only": 214,
+    "exa_only": 68,
+    "neither": 193,
+    "mcnemar_exact_p": 9.31e-19
+   },
+   "German": {
+    "n": 258,
+    "both": 33,
+    "catalog_only": 100,
+    "exa_only": 6,
+    "neither": 119,
+    "mcnemar_exact_p": 4.47e-23
+   },
+   "Finnish": {
+    "n": 274,
+    "both": 9,
+    "catalog_only": 86,
+    "exa_only": 2,
+    "neither": 177,
+    "mcnemar_exact_p": 2.53e-23
+   },
+   "US only": {
+    "n": 1186,
+    "both": 235,
+    "catalog_only": 400,
+    "exa_only": 73,
+    "neither": 478,
+    "mcnemar_exact_p": 1.17e-55
+   }
+  },
+  "catalog[heading60] vs bm25[heading60]": {
+   "all": {
+    "n": 1200,
+    "both": 334,
+    "catalog_only": 301,
+    "bm25_only": 50,
+    "neither": 515,
+    "mcnemar_exact_p": 8.08e-45
+   },
+   "English": {
+    "n": 668,
+    "both": 294,
+    "catalog_only": 113,
+    "bm25_only": 44,
+    "neither": 217,
+    "mcnemar_exact_p": 3.49e-08
+   },
+   "German": {
+    "n": 258,
+    "both": 24,
+    "catalog_only": 109,
+    "bm25_only": 3,
+    "neither": 122,
+    "mcnemar_exact_p": 9.02e-29
+   },
+   "Finnish": {
+    "n": 274,
+    "both": 16,
+    "catalog_only": 79,
+    "bm25_only": 3,
+    "neither": 176,
+    "mcnemar_exact_p": 3.8e-20
+   },
+   "US only": {
+    "n": 1186,
+    "both": 334,
+    "catalog_only": 301,
+    "bm25_only": 50,
+    "neither": 501,
+    "mcnemar_exact_p": 8.08e-45
+   }
+  }
+ },
+ "diagnostics": {
+  "catalog[clauses1200]": {
+   "rows": 5924,
+   "search_ms_per_item_numpy": 0.16,
+   "gold_provision_in_catalog_in_its_year": "1185/1186 (99.9 %)",
+   "candidates_per_item_after_year_filter": {
+    "median": 3518,
+    "min": 601
+   },
+   "section_recall_at": {
+    "1": "526/1186 (44.4 %)",
+    "3": "715/1186 (60.3 %)",
+    "5": "796/1186 (67.1 %)",
+    "10": "892/1186 (75.2 %)",
+    "20": "966/1186 (81.5 %)",
+    "50": "1063/1186 (89.6 %)"
+   },
+   "by_title_section_at_k": {
+    "12": {
+     "catalog": "277/472 (58.7 %)",
+     "exa": "103/472 (21.8 %)"
+    },
+    "14": {
+     "catalog": "80/102 (78.4 %)",
+     "exa": "36/102 (35.3 %)"
+    },
+    "16": {
+     "catalog": "54/65 (83.1 %)",
+     "exa": "19/65 (29.2 %)"
+    },
+    "20": {
+     "catalog": "100/140 (71.4 %)",
+     "exa": "34/140 (24.3 %)"
+    },
+    "29": {
+     "catalog": "130/182 (71.4 %)",
+     "exa": "41/182 (22.5 %)"
+    },
+    "49": {
+     "catalog": "155/225 (68.9 %)",
+     "exa": "75/225 (33.3 %)"
+    }
+   },
+   "by_text_age_section_at_k": {
+    "same edition": {
+     "catalog": "395/566 (69.8 %)",
+     "exa": "150/566 (26.5 %)"
+    },
+    "1-5 years older": {
+     "catalog": "63/91 (69.2 %)",
+     "exa": "14/91 (15.4 %)"
+    },
+    "6-15 years older": {
+     "catalog": "124/201 (61.7 %)",
+     "exa": "46/201 (22.9 %)"
+    },
+    "16+ years older": {
+     "catalog": "214/328 (65.2 %)",
+     "exa": "98/328 (29.9 %)"
+    }
+   }
+  },
+  "catalog[heading60]": {
+   "rows": 5924,
+   "search_ms_per_item_numpy": 0.15,
+   "gold_provision_in_catalog_in_its_year": "1185/1186 (99.9 %)",
+   "candidates_per_item_after_year_filter": {
+    "median": 3518,
+    "min": 601
+   },
+   "section_recall_at": {
+    "1": "351/1186 (29.6 %)",
+    "3": "547/1186 (46.1 %)",
+    "5": "635/1186 (53.5 %)",
+    "10": "728/1186 (61.4 %)",
+    "20": "818/1186 (69.0 %)",
+    "50": "932/1186 (78.6 %)"
+   },
+   "by_title_section_at_k": {
+    "12": {
+     "catalog": "217/472 (46.0 %)",
+     "exa": "103/472 (21.8 %)"
+    },
+    "14": {
+     "catalog": "63/102 (61.8 %)",
+     "exa": "36/102 (35.3 %)"
+    },
+    "16": {
+     "catalog": "45/65 (69.2 %)",
+     "exa": "19/65 (29.2 %)"
+    },
+    "20": {
+     "catalog": "84/140 (60.0 %)",
+     "exa": "34/140 (24.3 %)"
+    },
+    "29": {
+     "catalog": "95/182 (52.2 %)",
+     "exa": "41/182 (22.5 %)"
+    },
+    "49": {
+     "catalog": "131/225 (58.2 %)",
+     "exa": "75/225 (33.3 %)"
+    }
+   },
+   "by_text_age_section_at_k": {
+    "same edition": {
+     "catalog": "315/566 (55.7 %)",
+     "exa": "150/566 (26.5 %)"
+    },
+    "1-5 years older": {
+     "catalog": "49/91 (53.8 %)",
+     "exa": "14/91 (15.4 %)"
+    },
+    "6-15 years older": {
+     "catalog": "97/201 (48.3 %)",
+     "exa": "46/201 (22.9 %)"
+    },
+    "16+ years older": {
+     "catalog": "174/328 (53.0 %)",
+     "exa": "98/328 (29.9 %)"
+    }
+   }
+  }
+ },
+ "peak_memory_gb": {
+  "phys_footprint_peak": 1.678,
+  "mlx_peak_gb": 1.173
+ }
+}
