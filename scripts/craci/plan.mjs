@@ -50,7 +50,7 @@ export const WORKLOADS = Object.freeze([
   'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision', 'lens-hb-scene8-ood', 'lens-hb-six-feedback', 'lens-six-unknown-ml',
   'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab',
   'rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-mujoco-v12-pilot', 'rokoko-mujoco-v13-causal', 'rokoko-mujoco-v13-pilot', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos',
-  'rokoko-r-tournament',
+  'rokoko-r-tournament', 'hf-open3d-ml',
 ]);
 
 function choose(value, choices, label) {
@@ -182,6 +182,19 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
         override !== 'faec266d6d3a44af3a564f46e0778209c1dc3af1')
       throw new Error('V13 pilot requires exact prospective source_sha');
     add(workload, override, {qualification: 'product-source'});
+  } else if (workload === 'hf-open3d-ml') {
+    if (override && override !== harnessSha) throw new Error('Open 3D study requires exact harness source');
+    if (when.getTime() >= Date.parse(WINDOW_END) - 300 * 60 * 1000)
+      throw new Error('Open 3D campaign requires five hours before the credit deadline');
+    // Three pilot cells (fold 0/ridge) run first. These 42 are the rest.
+    for (const line of ['v2d', 'g1', 'robo']) {
+      for (let fold = 0; fold < 5; fold++) {
+        for (const method of ['ridge', 'trees', 'mlp']) {
+          if (fold === 0 && method === 'ridge') continue;
+          add(`open3d-${line}-${fold}-${method}`, harnessSha, {line, fold, method});
+        }
+      }
+    }
   } else if (workload === 'immune-tournament') {
     if (override && override !== harnessSha) throw new Error('Immune source must match pinned harness SHA');
     for (let index = 0; index < 4; index++) {
@@ -226,8 +239,8 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     }
   }
   return {schemaVersion: 1, workload, harnessSha, selectedAt: when.toISOString(), windowEnd: WINDOW_END,
-    sourceOverride: override || null, maxParallel: ['lens-hb-six-feedback','lens-six-unknown-ml'].includes(workload) ? Math.min(4,include.length) : ['meta-r-hardshift-2x','lens-six-ml'].includes(workload) ? Math.min(6, include.length) : Math.min(8, include.length),
-    jobCount: workload === 'cache-proof' ? 2 : include.length, matrix: {include}};
+    sourceOverride: override || null, maxParallel: ['lens-hb-six-feedback','lens-six-unknown-ml'].includes(workload) ? Math.min(4,include.length) : ['meta-r-hardshift-2x','lens-six-ml','hf-open3d-ml'].includes(workload) ? Math.min(6, include.length) : Math.min(8, include.length),
+    jobCount: workload === 'cache-proof' ? 2 : workload === 'hf-open3d-ml' ? include.length + 5 : include.length, matrix: {include}};
 }
 
 async function main() {

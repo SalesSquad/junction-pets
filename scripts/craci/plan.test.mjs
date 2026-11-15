@@ -38,7 +38,7 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
     const input = {workload};
     // Main's frozen Meta R / Lens workloads pin their own harness and reject overrides.
     const harnessPinned = workload.startsWith('meta-r-') || workload.startsWith('lens-') ||
-      workload === 'rokoko-r-tournament';
+      ['rokoko-r-tournament', 'hf-open3d-ml'].includes(workload);
     if (!harnessPinned && !['tieto-sponsor', 'immune-tournament', 'chaos-lab',
          'portfolio-browser', 'new-products-browser'].includes(workload)) {
       input.source_sha = candidate;
@@ -49,7 +49,7 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
       input.source_sha = 'faec266d6d3a44af3a564f46e0778209c1dc3af1';
     if (['portfolio-browser', 'new-products-browser'].includes(workload)) input.product = 'all';
     const plan = resolvePlan(input, context);
-    const cap = workload === 'meta-r-hardshift-2x' ? 24 : 12;
+    const cap = workload === 'hf-open3d-ml' ? 47 : workload === 'meta-r-hardshift-2x' ? 24 : 12;
     if (workload === 'meta-r-hardshift-2x') assert.equal(plan.jobCount, 24);
     assert.ok(plan.jobCount >= 1 && plan.jobCount <= cap);
     assert.ok(plan.maxParallel >= 1 && plan.maxParallel <= 8);
@@ -57,6 +57,23 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
     for (const row of plan.matrix.include) assert.match(row.source_sha, /^[a-f0-9]{40}$/);
   }
   assert.throws(() => resolvePlan({workload: 'meta-browser', browser: 'firefox'}, context), /Chromium/);
+});
+test('open 3D study has three pilot cells and 42 distinct bounded remaining cells', () => {
+  const plan = resolvePlan({workload:'hf-open3d-ml'}, context);
+  assert.equal(plan.jobCount, 47);
+  assert.equal(plan.maxParallel, 6);
+  assert.equal(plan.matrix.include.length, 42);
+  for (const line of ['v2d', 'g1', 'robo']) {
+    const cells = plan.matrix.include.filter(cell => cell.line === line);
+    assert.equal(cells.length, 14);
+    assert.ok(cells.every(cell => cell.source_sha === harnessSha));
+    assert.ok(!cells.some(cell => cell.fold === 0 && cell.method === 'ridge'));
+    assert.equal(new Set(cells.map(cell => `${cell.fold}:${cell.method}`)).size, 14);
+  }
+  assert.throws(() => resolvePlan({workload:'hf-open3d-ml', source_sha:candidate}, context),
+    /exact harness source/);
+  assert.throws(() => resolvePlan({workload:'hf-open3d-ml'},
+    {...context, now:'2026-11-15T12:00:00Z'}), /five hours/);
 });
 test('eight fresh real-image R/metadata lanes are unique and fail closed', () => {
   const all = resolvePlan({workload:'lens-r8-meta', lane_slice:'all'}, context);
