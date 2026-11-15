@@ -57,10 +57,11 @@ def run(source,output):
     source=Path(source); output=Path(output); data=json.loads(source.read_text())
     assert data["features"]==FEATURES
     rows=data["records"]
-    if len(rows)!=100 or len({r["case"] for r in rows})!=100: raise ValueError("Unexpected corpus")
+    if len(rows)!=100 or len({r["case"] for r in rows})!=100 or collections.Counter(r["label"] for r in rows)!={0:49,1:51}: raise ValueError("Unexpected corpus")
     for r in rows:
         if r["label"] not in (0,1) or len(r["x"])!=len(FEATURES) or not all(math.isfinite(x) for x in r["x"]): raise ValueError("Invalid record")
     parts=split_records(rows)
+    if [len(v) for v in parts.values()]!=[59,19,22]: raise ValueError("Unexpected frozen split")
     split_hash=hashlib.sha256(json.dumps({k:sorted(r["case"] for r in v) for k,v in parts.items()},sort_keys=True).encode()).hexdigest()
     models={}
     # Model fitting and threshold choice finish before any test scores are evaluated.
