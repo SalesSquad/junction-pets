@@ -1,0 +1,250 @@
+{
+  "schema": "signal-desk-len-evaluation-v1",
+  "protocol_sha256": "7fc6c833e797358496365776a6123a1d391486d8e85471f7b4ae6cc5d55e3e50",
+  "source": {
+    "url": "https://cse.buffalo.edu/~erdem/small_encoder_final.tar",
+    "sha256": "aaa1fdc13f5ee581b4006f024c0753871b652debbe31f97958082399729b1c75",
+    "bytes": 5792081920,
+    "extracted_at": "2026-11-15T02:13:55Z"
+  },
+  "feature_artifact_sha256": "82259e7fae48c50c98edba291ec5bcfa82c20aaf988565f5c9f3836a7576165f",
+  "evaluator_sha256": "88d78cd2513bee0300b2cacd673877052b4cc00c850eef1698ea36e951580cf5",
+  "extractor_sha256": "8bc94c6eb1f3d3678a3f02b4f3873d3ec7100a72cdd0cc27c1cb2b6fbd7a3518",
+  "split_sha256": "48d0790e8918e77bb220b3a42bae73c82eb8a15b0c37c9f2ce1e4cb7bee0f528",
+  "release_graphs": 104,
+  "unique_graphs": 103,
+  "byte_identical_duplicates_removed": 1,
+  "label_basis": "provisional released filename campaign/noncampaign annotations; original label index not supplied",
+  "counts": {
+    "train": {
+      "n": 61,
+      "campaign": 31,
+      "organic": 30
+    },
+    "calibration": {
+      "n": 20,
+      "campaign": 10,
+      "organic": 10
+    },
+    "test": {
+      "n": 22,
+      "campaign": 11,
+      "organic": 11
+    }
+  },
+  "calibration": {
+    "size_only": {
+      "threshold": 0.3798542994607817,
+      "metrics": {
+        "tp": 10,
+        "fp": 1,
+        "tn": 9,
+        "fn": 0,
+        "n": 20,
+        "accuracy": 0.95,
+        "precision": 0.9090909090909091,
+        "recall": 1.0,
+        "false_positive_rate": 0.1,
+        "balanced_accuracy": 0.95,
+        "accuracy_wilson95": [
+          0.763868806553258,
+          0.9911185511992047
+        ],
+        "precision_wilson95": [
+          0.6226415635484043,
+          0.9837678271141151
+        ],
+        "recall_wilson95": [
+          0.7224672001371107,
+          0.9999999999999999
+        ],
+        "fpr_wilson95": [
+          0.017876213095072896,
+          0.4041500267952385
+        ]
+      }
+    },
+    "topology": {
+      "threshold": 0.31775982337783204,
+      "metrics": {
+        "tp": 9,
+        "fp": 0,
+        "tn": 10,
+        "fn": 1,
+        "n": 20,
+        "accuracy": 0.95,
+        "precision": 1.0,
+        "recall": 0.9,
+        "false_positive_rate": 0.0,
+        "balanced_accuracy": 0.95,
+        "accuracy_wilson95": [
+          0.763868806553258,
+          0.9911185511992047
+        ],
+        "precision_wilson95": [
+          0.7008549515804559,
+          1
+        ],
+        "recall_wilson95": [
+          0.5958499732047615,
+          0.9821237869049271
+        ],
+        "fpr_wilson95": [
+          0,
+          0.2775327998628892
+        ]
+      }
+    }
+  },
+  "held_out": {
+    "majority": {
+      "tp": 11,
+      "fp": 11,
+      "tn": 0,
+      "fn": 0,
+      "n": 22,
+      "accuracy": 0.5,
+      "precision": 0.5,
+      "recall": 1.0,
+      "false_positive_rate": 1.0,
+      "balanced_accuracy": 0.5,
+      "accuracy_wilson95": [
+        0.3072210627372502,
+        0.6927789372627497
+      ],
+      "precision_wilson95": [
+        0.3072210627372502,
+        0.6927789372627497
+      ],
+      "recall_wilson95": [
+        0.7411670330319684,
+        1
+      ],
+      "fpr_wilson95": [
+        0.7411670330319684,
+        1
+      ]
+    },
+    "size_only": {
+      "tp": 11,
+      "fp": 6,
+      "tn": 5,
+      "fn": 0,
+      "n": 22,
+      "accuracy": 0.7272727272727273,
+      "precision": 0.6470588235294118,
+      "recall": 1.0,
+      "false_positive_rate": 0.5454545454545454,
+      "balanced_accuracy": 0.7272727272727273,
+      "accuracy_wilson95": [
+        0.5184826598759762,
+        0.8684923971201053
+      ],
+      "precision_wilson95": [
+        0.41300363485218694,
+        0.8269027960275627
+      ],
+      "recall_wilson95": [
+        0.7411670330319684,
+        1
+      ],
+      "fpr_wilson95": [
+        0.280091537409322,
+        0.7872872837754024
+      ]
+    },
+    "size_only_fixed_0_5": {
+      "tp": 11,
+      "fp": 3,
+      "tn": 8,
+      "fn": 0,
+      "n": 22,
+      "accuracy": 0.8636363636363636,
+      "precision": 0.7857142857142857,
+      "recall": 1.0,
+      "false_positive_rate": 0.2727272727272727,
+      "balanced_accuracy": 0.8636363636363636,
+      "accuracy_wilson95": [
+        0.6666501283342828,
+        0.9525099628594474
+      ],
+      "precision_wilson95": [
+        0.524107694133997,
+        0.9242861328730683
+      ],
+      "recall_wilson95": [
+        0.7411670330319684,
+        1
+      ],
+      "fpr_wilson95": [
+        0.09746059290024889,
+        0.5656453011761291
+      ]
+    },
+    "topology": {
+      "tp": 11,
+      "fp": 3,
+      "tn": 8,
+      "fn": 0,
+      "n": 22,
+      "accuracy": 0.8636363636363636,
+      "precision": 0.7857142857142857,
+      "recall": 1.0,
+      "false_positive_rate": 0.2727272727272727,
+      "balanced_accuracy": 0.8636363636363636,
+      "accuracy_wilson95": [
+        0.6666501283342828,
+        0.9525099628594474
+      ],
+      "precision_wilson95": [
+        0.524107694133997,
+        0.9242861328730683
+      ],
+      "recall_wilson95": [
+        0.7411670330319684,
+        1
+      ],
+      "fpr_wilson95": [
+        0.09746059290024889,
+        0.5656453011761291
+      ]
+    },
+    "topology_fixed_0_5": {
+      "tp": 10,
+      "fp": 1,
+      "tn": 10,
+      "fn": 1,
+      "n": 22,
+      "accuracy": 0.9090909090909091,
+      "precision": 0.9090909090909091,
+      "recall": 0.9090909090909091,
+      "false_positive_rate": 0.09090909090909091,
+      "balanced_accuracy": 0.9090909090909091,
+      "accuracy_wilson95": [
+        0.7218505315839417,
+        0.9747045710090046
+      ],
+      "precision_wilson95": [
+        0.6226415635484043,
+        0.9837678271141151
+      ],
+      "recall_wilson95": [
+        0.6226415635484043,
+        0.9837678271141151
+      ],
+      "fpr_wilson95": [
+        0.016232172885884855,
+        0.37735843645159567
+      ]
+    }
+  },
+  "limits": [
+    "One frozen split of the actual released 104-graph archive; source paper says 100. No field-generalization estimate.",
+    "Provisional released filename labels; separate original gold-label index absent. Target is not deception, bots, factuality or malicious intent.",
+    "Only active edge endpoints count; isolates and all text/account fields excluded.",
+    "Collection, selection and graph-size biases; actors may recur across trends.",
+    "Wilson intervals are descriptive at graph level; unknown cross-graph dependence.",
+    "Scores are uncalibrated model outputs, not probabilities. No automatic enforcement."
+  ],
+  "model_sha256": "b10920235873cc5fde2d0777ed539c3721663763c495d93f2268b83a2122b39e"
+}

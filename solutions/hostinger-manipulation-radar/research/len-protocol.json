@@ -1,0 +1,17 @@
+{
+  "version": "len-small-graph-screen-v1",
+  "source": "https://cse.buffalo.edu/~erdem/small_encoder_final.tar",
+  "license": "CC-BY, as explicitly stated by authors in ICWSM 2025 paper",
+  "unit": "one released trend engagement graph",
+  "target": "source campaign vs non-campaign annotation; not bot identity, truth or malicious intent",
+  "selection": "all JSON graphs in released LEN-small tar; no selection by model result",
+  "split": "stratified by source class, rank by sha256(signal-desk-len-small-v1|source-relative-name), 60/20/remainder percent train/calibration/test; test labels only used for final fixed evaluation",
+  "features": "public interaction topology only; no titles, text, bios, account labels, political subtype or original identifiers",
+  "preprocessing": "training-only feature means/scales; no per-edge split; all records from each trend stay together",
+  "model": "L2 logistic regression, fixed lr=.05, 3000 iterations, lambda=.1; class-weighted training; scores not calibrated probabilities",
+  "comparison": "majority-class training baseline and size-only logistic baseline on identical split",
+  "threshold": "select on calibration only: maximize recall subject to empirical FPR<=.10; if no positive thresholds qualify, abstain rather than tune on test",
+  "uncertainty": "Wilson 95% descriptive intervals at graph-level; small corpus and collection/graph-size biases; actor overlap across trends unknown",
+  "privacy": "do not persist raw graph text/account fields or send any records to external models; local stream parsing, retain only source hashes and numeric topology; publish aggregate metrics only",
+  "runtime": "candidate separate from v2 post-coaction lab; no claim to improve prior v1 synthetic intent metrics"
+}

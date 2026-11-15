@@ -18,6 +18,7 @@ const files=new Map([
 for(const [dir,names] of Object.entries({traffic:['index.html','app.mjs','core.mjs','style.css'],text:['index.html','app.mjs','style.css'],coordination:['index.html','app.mjs']})) {
  for(const name of names)files.set('/'+dir+'/'+name,[dir+'/'+name,name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript']);
 }
+for(const [name,type] of Object.entries({'index.html':'text/html','app.mjs':'text/javascript','core.mjs':'text/javascript','model.json':'application/json','evaluation.json':'application/json'}))files.set('/graph/'+name,['graph/'+name,type]);
 const headers={
  'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer',
  'Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'",
