@@ -16,6 +16,7 @@ try{
   byId('metrics').append(row);
  }
  const t=report.held_out.topology,ci=t.fpr_wilson95;
+ byId('qualification').textContent=t.false_positive_rate>.10?'Held-out false alarms exceed the 10% calibration target. Research only; no production qualification.':'This small benchmark does not establish production qualification.';
  byId('uncertainty').textContent='Topology candidate: '+t.tp+' campaigns detected, '+t.fn+' missed; '+t.fp+' organic trends flagged, '+t.tn+' left unflagged. Descriptive 95% false-alarm interval: '+pct(ci[0])+'–'+pct(ci[1])+'. Graph overlap may make this interval optimistic.';
  byId('source').textContent='Source archive SHA-256: '+report.source.sha256;
  byId('analyze').disabled=false;

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Re-fetch one source member in RAM and compare Python with shipped JS."""
-import argparse, hashlib, json, subprocess, tarfile, urllib.request
+import argparse, hashlib, json, re, subprocess, tarfile, urllib.request
 from pathlib import Path
 from evaluate_len import score
 from extract_len import SOURCE
@@ -38,7 +38,9 @@ console.log(JSON.stringify({features:graphFeatures({edges:input.edges}),result:g
     result=subprocess.run(["node","--input-type=module","-e",javascript,str(Path(core).resolve())],
                           input=json.dumps({"edges":edges,"model":model}),capture_output=True,text=True,timeout=30)
     del edges
-    if result.returncode:raise ValueError("Shipped runtime rejected the verification graph")
+    if result.returncode:
+        errors=[line[:240] for line in result.stderr.splitlines() if re.match(r"^[A-Za-z]*Error(?::| \[)",line)]
+        raise ValueError("Shipped runtime rejected verification: "+("; ".join(errors) or "child failed without a safe diagnostic"))
     runtime=json.loads(result.stdout)
     feature_error=max(abs(a-b) for a,b in zip(expected["x"],runtime["features"]["x"]))
     expected_score=score(model,expected); score_error=abs(expected_score-runtime["result"]["score"])
@@ -46,6 +48,7 @@ console.log(JSON.stringify({features:graphFeatures({edges:input.edges}),result:g
     if (expected_score>=model["threshold"])!=runtime["result"]["review"]:raise ValueError("Review decision mismatch")
     receipt={"kind":"one-real-source-graph-runtime-parity","member_sha256":expected["source_sha256"],
              "core_sha256":hashlib.sha256(Path(core).read_bytes()).hexdigest(),
+             "verifier_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
              "model_sha256":hashlib.sha256(Path(model_path).read_bytes()).hexdigest(),
              "max_feature_absolute_error":feature_error,"score_absolute_error":score_error,
              "active_nodes":runtime["features"]["nodes"],"edges":runtime["features"]["edges"],
