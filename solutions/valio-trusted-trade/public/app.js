@@ -4,7 +4,7 @@ const elements = Object.fromEntries([
   'exception-card', 'exception-title', 'exception-status', 'exception-amounts',
   'exception-before', 'exception-after', 'exception-delta', 'exception-constraints',
   'exception-validity', 'approve-exception', 'reject-exception', 'refresh-review',
-  'review-source-id', 'snapshot-summary',
+  'review-source-id', 'snapshot-summary', 'cost-products', 'cost-delivery', 'cost-tax',
   'request-text', 'budget', 'find', 'quote-placeholder', 'quote-content',
   'quote-status', 'quote-id', 'items', 'quote-total', 'policy-title',
   'policy-explanation', 'policy-panel', 'approve', 'reject', 'order',
@@ -68,7 +68,7 @@ const renderReview = () => {
   const exception = Boolean(quote?.budgetException);
   const blocked = !quote;
   elements['exception-title'].textContent = exception ? 'Review a budget exception' :
-    diagnosis.outcome === 'STOCK_SHORTFALL' ? 'Compatible stock is missing' : 'This exceeds the buying policy';
+    diagnosis.outcome === 'STOCK_SHORTFALL' ? 'Compatible stock is missing' : diagnosis.outcome === 'PACKING_CONSTRAINT' ? 'Whole packs cannot fill this exact quantity' : 'This exceeds the buying policy';
   elements['exception-status'].textContent = state.dirty ? 'Your request changed. Get a fresh offer before deciding.' :
     state.expired ? 'This offer expired. Get a fresh offer and review it again.' :
     state.stale ? 'Source information changed. This offer can no longer be approved.' :
@@ -121,12 +121,15 @@ const render = () => {
   elements.replay.disabled = state.busy || !o;
   elements['export-body'].disabled = state.busy;
   elements['quote-total'].textContent = money(q.totalCents);
+  elements['cost-products'].textContent = money(q.costBreakdown.subtotalCents);
+  elements['cost-delivery'].textContent = money(q.costBreakdown.deliveryFeeCents);
+  elements['cost-tax'].textContent = money(q.costBreakdown.taxCents);
   elements.items.replaceChildren();
   for (const line of q.lines) {
     const wrapper = addNode('div', '', 'line-item');
     const details = addNode('div', '');
     details.append(addNode('b', `${line.quantityLitres.toLocaleString('en-FI')} L · ${line.name}`));
-    details.append(addNode('small', `${line.sku} · ${money(line.unitPriceCents)} / L · catalog v${line.stockVersion}`));
+    details.append(addNode('small', `${line.sku} · ${line.packs} whole pack(s) × ${line.packLitres} L · ${money(line.unitPriceCents)} / L · catalog v${line.stockVersion}`));
     wrapper.append(details, addNode('strong', money(line.totalCents)));
     elements.items.append(wrapper);
   }

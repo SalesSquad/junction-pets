@@ -1,6 +1,40 @@
-# Trusted Trade · external buyer agent ↔ synthetic wholesaler
+# Trusted Trade · autonomous procurement with proof-carrying Kättely
 
-**Independent Junction 2026 prototype. Not a Valio Aimo product or endorsement.** Every supplier, buyer, catalog fact, price, stock count, approval and order is **SYNTHETIC / NONCOMMERCIAL**. Localhost HTTP is real; supplier commerce is simulated. Zero dependencies, credentials, payments or external provider writes.
+## Frontier v3 — Mission Control (14 November 2026)
+
+The new **[Frontier runbook](./FRONTIER_RUNBOOK.md)** is the main competition demo guide. Run `npm start` and open **http://127.0.0.1:4177/mission** for the responsive procurement command center; snapshot-bound review stays at **/** (also **/classic**). All actors, catalog items, prices, risk/emission figures, approvals, signatures' identities and simulated orders are synthetic.
+
+The new independent buyer is `npm run demo:frontier -- shock --decision=approve` (or `happy`, `replay`, `refusal`, `reject`). It compares a two-family portfolio, applies real policy/stock constraints, proves the supplier offer and the browser/agent-held buyer mandate with **independent Ed25519 private keys**, recovers after fictional stock disruption, and independently verifies a SHA-256 hash-linked in-memory audit. This is not production Kättely, AP2, Valio Aimo API integration or identity authentication. **40 targeted tests** passed on the Mac, and the new desktop + mobile Chromium workflow was exercised end-to-end. The legacy single-family agent remains available below.
+
+---
+
+**Independent Junction 2026 prototype. Not a Valio Aimo product or endorsement.** Every supplier, buyer, catalog fact, price, stock count, approval and order is **SYNTHETIC / NONCOMMERCIAL**. Localhost HTTP is real; supplier commerce is simulated. The HTTP demo needs no npm runtime dependencies or credentials. Payments use fictional cents; no external provider writes occur. Optional PostgreSQL labs and OCR have separate local prerequisites.
+
+## Integrated prototype
+
+The portfolio, independently signed demo mandates, separate payment approval,
+refundable balanced ledger, OCR/barcode observations, read-only pgvector adapter
+and PostgreSQL recovery labs now share this source tree. The HTTP demo remains
+in memory; the PostgreSQL lab is a separate executor, not HTTP restart durability.
+The wallet and journal are deliberately shared public single-buyer fixtures.
+Order/payment writes remain bound to the creating demo session.
+
+Both single-family review and portfolio planning enforce explicit whole-pack
+sizes and minimum order packs. Unknown pack facts fail closed; the invented
+catalog explicitly uses 1 L packs/minimum 1. Inexact quantities require a revised
+request, never silent overdelivery. Delivery scans count ordered packs and show
+litres separately. Policy delivery fees and synthetic tax basis points enter the
+full total once per basket, the approval delta and the signed v3 financial body.
+Default fee/tax are zero; these are not actual supplier freight or VAT tariffs.
+
+For browser qualification, run `node tests/approval-card.browser.mjs` and
+`node tests/mission.browser.mjs` with an available Playwright installation.
+The second script uses local Tesseract on a generated recipe; it requires no
+camera, customer photo, provider account or commerce permission.
+
+The sponsor resource portal returned HTTP 403 from the authorized Mac on
+15 November. Its sandbox schema/authentication have therefore not been verified;
+no sponsor credentials, API field guesses or external ordering are included.
 
 ## Snapshot-bound review and budget exceptions
 
@@ -81,7 +115,7 @@ Discover `GET /.well-known/trusted-trade`; follow `openapi` to `/openapi.json` a
 - `POST /api/quotes/:id/approval`: `buyerId`, `decision: approve|reject`, optional synthetic `approver` label. URL ID is authoritative. Decision is single-use and expiry/source versions are checked.
 - `POST /api/orders`: **only** `buyerId`, `quoteId`, `idempotencyKey`. Client quantities, price or authority are rejected, including on replay. The server rechecks approval, expiry, stock, price and versions; one quote produces at most one simulated order. Key conflicts refuse.
 - `POST /api/orders/:id/cancel`: owning session + buyer; restocks once. `POST /api/demo/reprice`: capability + `sku`, `priceCents`; deliberately synthetic source mutation.
-- `GET /api/quotes/:id/body`: `{mode:"SYNTHETIC",signature:"UNSIGNED",body:{...}}`. Body uses stable `kattely.procurement.quote.v1` fields, Unix-second issue/expiry, supplier `supplier-demo`, audience `https://supplier-demo.invalid`, EUR and quantity × cents recomputed per line. **No signer, signature, delegation proof or cryptographic verification.** Separate Kättely work may consume this body later; there is no repository dependency.
+- `GET /api/quotes/:id/body`: `{mode:"SYNTHETIC",signature:"UNSIGNED",body:{...}}`. Body uses stable `kattely.procurement.quote.v3` fields, Unix-second issue/expiry, supplier `supplier-demo`, audience `https://supplier-demo.invalid`, EUR and quantity × cents recomputed per line. This endpoint exports an unsigned body; the portfolio offer/mandate exchange signs its digest with independent, self-attested Ed25519 demo keys. This is not a production Kättely/AP2 identity or receipt.
 
 [src/supplier-port.mjs](src/supplier-port.mjs) remains an optional read-only future-provider adapter with external order writes disabled. The runnable supplier is the local synthetic HTTP service above; no live-provider wiring is implied.
 
@@ -93,6 +127,6 @@ npm test
 
 The original 22 tests retain their assertions (HTTP helpers now obtain the required synthetic capability). Seven additional focused tests cover forged/mismatched capabilities, altered order terms, replay conflicts, rejected/unapproved orders, competing stock, stale prices, injected-clock expiry, typed needs and cent-exact interoperability. One launches separate buyer Node processes against actual localhost HTTP servers for six scenarios; no sleeps or printed fake results. No monorepo suite or Actions changes.
 
-Not commercially qualified: real buyer authentication/approver separation, durable transactional stock and idempotency, signed evidence, revocation, taxes/freight and real delivery calendars. Capabilities and all state reset on restart; reads are intentionally public synthetic data. Any local user can request a demo identity; this is **not production access control**. No browser/device usability claim follows from Node tests. Mobile/keyboard behavior needs browser review.
+Not commercially qualified: real buyer authentication/approver separation, durable HTTP transactional stock/idempotency, authenticated supplier evidence, revocation, real taxes/freight and delivery calendars. The separate PostgreSQL lab is not wired into HTTP storage. Capabilities and all state reset on restart; reads are intentionally public synthetic data. Any local user can request a demo identity; this is **not production access control**. No browser/device usability claim follows from Node tests. Mobile/keyboard behavior needs browser review.
 
 Source: [official challenge brief #327](https://hackjunction.app/participate/45/challenges/327), mirrored in the repository's `docs/challenge-research/official-briefs.md`; external-agent lookup → fixed-price inquiry/order → buyer permissions and approvals. **Sponsor integration remains unverified and disconnected.** Next priorities: sponsor-confirmed sandbox schema, authenticated scoped authority and durable reconciliation, under separate authorization. No deployment, commercial order or spending is authorized here.
