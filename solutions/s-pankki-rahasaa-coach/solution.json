@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "s-pankki-rahasaa-coach",
+  "title": "Rahasää — S-Pankki money coach (router + chaos lab)",
+  "objective": "Answer a customer's money questions from their own synthetic banking data with deterministic, receipted figures; route questions cheaply with a local Gemma model and prove safety with a red-team chaos lab.",
+  "baseCommit": "f01ae169627b483a4348e4f2d2f633c280fc92a5",
+  "challengeSlugs": [
+    "s-pankki"
+  ],
+  "agentIds": [
+    "junction.s-pankki"
+  ],
+  "stage": "building",
+  "ownedPaths": [
+    "solutions/s-pankki-rahasaa-coach/"
+  ],
+  "capabilityUses": [
+    {
+      "agentId": "junction.s-pankki",
+      "capabilityId": "challenge-design",
+      "purpose": "Use sponsor challenge research for the coach's scope and safety boundaries; no runtime peer execution is claimed.",
+      "status": "planned"
+    }
+  ]
+}
