@@ -123,3 +123,16 @@ existing code. Existing `apps/`, `services/`, `pets/` and pending PRs stay at th
 current paths and under their current owners. Several solutions may reuse the
 same declared expertise through existing contracts. See
 [the workspace guide](docs/SOLUTION_WORKSPACES.md).
+
+## User-authorized companion contacts — 15 November 2026
+
+The shared plugin producer includes one contact workflow in all 34 generated
+skills. Discover the existing Chibi host catalog, prepare a task with
+`chibi_pet_prepare_contact`, then send the preserved recipient draft once via
+`chibi_pet_message`. A pending/unknown outcome only uses `chibi_pet_history`
+with the original identifiers and exact message. Only a user-authorized task
+is shared; no private history, memory or recursive dispatch is attached.
+Routing labels do not authenticate a source agent or issue grants. The private
+Chibi gateway owns execution, identity and budget. Missing tools produce an
+honest collection-link fallback. Generated plugin versions are the source pet
+version plus one patch for this integration revision; pet content is unchanged.
