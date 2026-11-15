@@ -111,6 +111,6 @@ A bounded follow-up review of only the repair commit (errors/state, two parallel
 reviewers, 180 seconds each) returned **timeouts with no findings text**. This
 is an unavailable advisory follow-up, not an independent final-source pass.
 The four completed original reviews and explicit dispositions above are retained;
-the repaired source was integrator-read and its 30 focused checks passed.
+the repaired source was author-read and its 30 focused checks passed.
 Recorded real MCP captures also normalized successfully through the repaired
 code at their actual historical observation time (not presented as a new fetch).
