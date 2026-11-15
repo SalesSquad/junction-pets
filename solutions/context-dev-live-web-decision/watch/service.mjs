@@ -49,5 +49,5 @@ export class WatchService {
     }finally{this.ticking=false;}
   }
   async settle(){await Promise.allSettled([...this.running.values()].map(v=>v.task));}
-  close(){return this.closing??=(async()=>{this.stopped=true;if(this.timer)clearInterval(this.timer);for(const run of this.running.values())run.controller.abort();await this.settle();this.store.close();})();}
+  close(){return this.closing??=(async()=>{this.stopped=true;if(this.timer)clearInterval(this.timer);for(const run of this.running.values())run.controller.abort();await this.settle();await this.store.close();})();}
 }

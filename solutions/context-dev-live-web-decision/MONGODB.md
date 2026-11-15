@@ -14,10 +14,12 @@ remains zero-dependency (the `mongodb` driver is imported dynamically only when 
 
 ## Setup
 1. Create a free Atlas cluster, a database user, and allow your server's IP in Network Access.
-2. `cd solutions/context-dev-live-web-decision && npm i mongodb`
+2. `cd solutions/context-dev-live-web-decision && npm i --no-save mongodb` (installs the driver locally;
+   the repo itself keeps zero dependencies)
 3. Export `MONGODB_URI` (server env only; never logged, never sent to the browser). Optional:
    `MONGODB_DB` (default `supplypulse`).
-4. Wire it in (see below), then start the server as usual.
+4. Start the server as usual (`node server.mjs`). With `MONGODB_URI` set, `server.mjs` opens the Atlas
+   store and hands it to the watch service; without it, the local SQLite store is used.
 
 ## How it works
 `MongoWatchStore extends WatchStore`. The existing interface is synchronous, so the store keeps the

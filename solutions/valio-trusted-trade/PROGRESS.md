@@ -23,7 +23,7 @@
 
 ## In flight separately
 
-- PR #301 (`codex/j26-valio-identity-20261115`) covers identity work. It edits README.md, mcp/, src/ and openapi.yaml, and is not part of this docs change.
+- PR #301 (host buyer identity and exact human consent) merged to main on 15 November 2026 as `2c71caf`; see BUYER_IDENTITY.md.
 
 ## Not integrated
 
