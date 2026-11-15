@@ -1,36 +1,44 @@
 // Offline synthetic declarations only. No hardware or provider operations.
+import {types} from 'node:util';
+
 const invalid = () => { throw new Error('invalid declaration'); };
 
+const boardPin = {id: null, modes: [null]};
+const sensorPin = {pin: null, mode: null, currentMa: null};
+const shape = {
+  board: {voltageMv: null, powerLimitMa: null, pinLimitMa: null,
+    totalPinLimitMa: null, pinCount: null, pins: [boardPin]},
+  sensors: [{id: null, voltageMv: null, currentMa: null, ground: null,
+    pinCount: null, pins: [sensorPin]}],
+};
+
 // Copy descriptor values before calculation. Never invoke input accessors,
-// iterators, conversion hooks or overridden collection methods.
-function snapshot(value, depth = 0, seen = new Set()) {
-  if (depth > 10) invalid();
+// proxy traps, iterators, conversion hooks or overridden collection methods.
+// Budget logical occurrences, including repeated references, across the request.
+function snapshot(value, expected, budget = {values: 4096, properties: 8192}, depth = 0, seen = new Set()) {
+  if (--budget.values < 0 || depth > 10 || types.isProxy(value)) invalid();
+  if (expected !== null && (value === null || typeof value !== 'object')) invalid();
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
   if (typeof value === 'number') { if (!Number.isFinite(value)) invalid(); return value; }
-  if (typeof value !== 'object' || seen.has(value)) invalid();
+  if (typeof value !== 'object' || expected === null || seen.has(value)) invalid();
   const array = Array.isArray(value), proto = Object.getPrototypeOf(value);
+  if (array !== Array.isArray(expected)) invalid();
   if (array ? proto !== Array.prototype : proto !== Object.prototype && proto !== null) invalid();
-  const descriptors = Object.getOwnPropertyDescriptors(value);
-  const keys = Reflect.ownKeys(descriptors);
-  if (keys.some(k => typeof k !== 'string')) invalid();
-  for (const k of keys) if (!Object.hasOwn(descriptors[k], 'value')) invalid();
-  seen.add(value);
-  let result;
+  const keys = Reflect.ownKeys(value);
+  if ((budget.properties -= keys.length) < 0 || keys.some(k => typeof k !== 'string')) invalid();
+  // Check shape before reading any property descriptor or descending into data.
   if (array) {
-    const length = descriptors.length.value;
+    const length = Object.getOwnPropertyDescriptor(value, 'length').value;
     if (!Number.isInteger(length) || length > 100 || keys.length !== length + 1) invalid();
-    result = [];
-    for (let i = 0; i < length; i++) {
-      if (!Object.hasOwn(descriptors, String(i)) || !descriptors[i].enumerable) invalid();
-      result.push(snapshot(descriptors[i].value, depth + 1, seen));
-    }
-  } else {
-    if (keys.length > 20) invalid();
-    result = Object.create(null);
-    for (const k of keys) {
-      if (!descriptors[k].enumerable) invalid();
-      result[k] = snapshot(descriptors[k].value, depth + 1, seen);
-    }
+    for (let i = 0; i < length; i++) if (!Object.hasOwn(value, String(i))) invalid();
+  } else if (keys.length !== Object.keys(expected).length || keys.some(k => !Object.hasOwn(expected, k))) invalid();
+  seen.add(value);
+  const result = array ? [] : Object.create(null);
+  for (const k of keys) {
+    if (array && k === 'length') continue;
+    const descriptor = Object.getOwnPropertyDescriptor(value, k);
+    if (!Object.hasOwn(descriptor, 'value') || !descriptor.enumerable) invalid();
+    result[k] = snapshot(descriptor.value, array ? expected[0] : expected[k], budget, depth + 1, seen);
   }
   seen.delete(value);
   return result;
@@ -55,7 +63,7 @@ export function reviewCompatibility(input) {
       'Transient loads, tolerances, thermal behavior and real device behavior are outside this model.'],
   };
   try {
-    const x = snapshot(input);
+    const x = snapshot(input, shape);
     record(x, ['board', 'sensors']);
     const b = x.board;
     record(b, ['voltageMv', 'powerLimitMa', 'pinLimitMa', 'totalPinLimitMa', 'pinCount', 'pins']);

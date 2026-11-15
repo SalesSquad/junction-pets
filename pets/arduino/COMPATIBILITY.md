@@ -9,15 +9,21 @@ keys are shown in the example; unknown keys are rejected. Records may use the
 ordinary Object prototype or null prototype. Arrays must be dense ordinary
 arrays with only indexed enumerable data properties and their length. Accessors,
 hooks, symbols, functions, cycles, unsupported prototypes and nonfinite numbers
-are rejected without calling input methods or getters. JavaScript Proxies are
-outside the documented plain-data contract; do not pass executable objects.
-Use parsed JSON for the supported interchange path.
+are rejected without calling input methods or getters. Node's `util.types.isProxy`
+rejects transparent, trapping and revoked Proxies before reflection, at every
+visited structural position. Unknown record keys are rejected before reading
+property descriptors or traversing child values. Use parsed JSON for interchange.
 
 All electrical values are integer **millivolts** (`voltageMv`, positive) or
 **milliamps** (`*Ma`, nonnegative), at most 1,000,000,000. No implicit conversions,
 alternative units or fractional values. `pinCount` must equal the nonempty pin
 array length. Arrays have at most 100 entries, nesting at most 10, records at most
-20 keys. IDs are 1–40 ASCII letters, digits or hyphens. Board pin IDs and sensor
+20 keys. A shared request budget allows at most 4096 visited values (root and
+scalars included) and 8192 own properties (array length included); repeated
+references consume the budget on each visit. Exhaustion yields `invalid` and no
+totals. Limits bound recursive validation and copying; enumerating an already
+allocated object's own keys still costs work proportional to its key count.
+IDs are 1–40 ASCII letters, digits or hyphens. Board pin IDs and sensor
 IDs must be unique. Modes are exactly `input`, `output`, `analog-input`, expressed
 from the board's perspective. Board mode lists contain no duplicates. A pin can
 be allocated only once across all sensors; shared buses are outside this slice.
