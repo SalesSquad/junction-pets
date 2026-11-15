@@ -50,8 +50,8 @@ failure receipt was retained. The corrected run uses Ubuntu-only APT sources.
   IDs, sizes and provider-reported SHA-256 values. All 48 ZIPs were separately
   copied to the execution workspace, totaling 122,877,180 bytes, and matched
   those reported digests. A local tar bundle containing all 48 ZIPs, the
-  index, summary, audit and verifier has SHA-256
-  `b2867a329d27bc62aca9607274df052fa9ad94e1099512cd5627a3be0f4c3bdc`.
+  index, summary, audit, verifier and two sample fold models has SHA-256
+  `f91b835b396df825d056e8ac065c63291ae79a10a79b52bbe2fcbf7fa20ec40c`.
   GitHub's original artifacts expire on 22 November 2026. A workspace copy is
   not an asserted iCloud or cross-device backup.
 - The [offline audit](audit-43672442214.json) verified 47 source-bound
@@ -67,6 +67,12 @@ failure receipt was retained. The corrected run uses Ubuntu-only APT sources.
 Reproduce the offline audit with the pinned NumPy/scikit-learn versions and
 `scripts/craci/verify_hf_open3d_43672442214.py`, passing the 48 downloaded ZIPs,
 the artifact index and optionally the independently prepared local features.
+To reassemble one selected cell, use `scripts/craci/hf_open3d_extract_model.py`;
+it verifies the outer artifact, receipt, inner parts and model hash without
+deserializing it. Each output is the model from that fold, trained on that
+fold's training groups; it is not a final fit on all available data. The
+result is a joblib/pickle file and should be loaded only when the artifact
+source is trusted.
 The existing collector calls these generic registry records `synthetic-test`;
 the observed source data are the public real recordings identified above, and
 the collector label is not a provider attestation.
