@@ -38,3 +38,15 @@ workflow. The runtime cutoff still refuses work if the scheduler is delayed,
 but initial runner allocation precedes that guard; this is not a provider hard
 spending cap. This change neither extends the credit window nor authorizes
 cash charges. See [the original controls](CRACI.md#continuing-use-and-stop).
+
+## Baseline registration repairs
+
+The first automatic execution found six existing workspace directories missing
+the required manifest and entrypoint files. Their registrations now point to
+their existing README and retain building status and current product owners.
+The AstraZeneca manifest now uses the actual catalog slug `astrazeneca` and has
+its missing scope entrypoint. Stoa's manifest had labeled a nonexistent agent
+capability as implemented; that invalid agent-use association is removed.
+Stoa's product implementation and actual sponsor-DXF evidence are untouched;
+workspace capability references cannot serve as implementation receipts.
+Validators and test assertions remain unchanged.
