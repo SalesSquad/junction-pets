@@ -34,6 +34,19 @@ def seed_sha(first,last):
                          separators=(",",":"),allow_nan=False).encode()).hexdigest()
 
 
+def bound_plan_object(plan):
+    """Never trust externally supplied cohort/plan metadata without proof."""
+    require(type(plan) is dict,"V12_FROZEN_PLAN_OBJECT_REQUIRED")
+    try:
+        canonical=(json.dumps(plan,sort_keys=True,indent=2,ensure_ascii=False,
+                              allow_nan=False)+"\n").encode()
+    except (TypeError,ValueError) as exc:
+        raise ValueError("V12_NONCANONICAL_PROSPECTIVE_PLAN") from exc
+    require(hashlib.sha256(canonical).hexdigest()==PLAN_SHA256,
+            "V12_FROZEN_PROSPECTIVE_PLAN_OBJECT_SHA_CHANGED")
+    return plan
+
+
 def verified_plan(path):
     p=Path(path)
     require(p.is_file() and not p.is_symlink() and p.stat().st_nlink==1,
@@ -41,7 +54,7 @@ def verified_plan(path):
     raw=p.read_bytes()
     require(hashlib.sha256(raw).hexdigest()==PLAN_SHA256,
             "V12_PROSPECTIVE_PLAN_SHA_CHANGED")
-    plan=json.loads(raw)
+    plan=bound_plan_object(json.loads(raw))
     require(plan["frozenModelSha256"]==MODEL_SHA256 and
         plan["pilotTrainSeedRangeInclusive"]==[518000,518511] and
         plan["pilotAll512ScanSeedsSha256"]==seed_sha(518000,518511) and
@@ -62,6 +75,7 @@ def verified_plan(path):
 
 def derive_cohort(all_512_initial_public_worlds,plan,stage):
     """Never trust a list of hand-selected seeds from an external producer."""
+    plan=bound_plan_object(plan)
     require(stage in ("pilot","followup"),"V12_UNKNOWN_COHORT_STAGE")
     if stage=="pilot":
         first,last=plan["pilotTrainSeedRangeInclusive"]
@@ -91,9 +105,12 @@ def derive_cohort(all_512_initial_public_worlds,plan,stage):
     return sorted([*near,*clear],key=lambda w:w["seed"])
 
 
-def paired_physical_goal_readout(trials,cohort,stage):
-    """Preliminary original-physics result; independent qualifier still required."""
+def paired_physical_goal_readout(trials,cohort,stage,*,all_512_initial_public_worlds,plan):
+    """Preliminary physics; rederive 512-world cohort, not producer selection."""
     require(stage in ("pilot","followup"),"V12_UNKNOWN_PHYSICAL_COHORT_STAGE")
+    independently_derived=derive_cohort(all_512_initial_public_worlds,plan,stage)
+    require(cohort==independently_derived,
+            "V12_UNTRUSTED_PRODUCER_COHORT_NOT_REDERIVED_FROM_FROZEN_FULL_SCAN")
     arms=PILOT_ARMS if stage=="pilot" else FOLLOWUP_ARMS
     expected={w["seed"]:w["world_hash"] for w in cohort}
     require(len(expected)==(48 if stage=="pilot" else 160),
