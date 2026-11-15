@@ -34,7 +34,7 @@ test('the bridge refuses executed actions, unknown operations, low-risk deletes 
 });
 
 test('v2 responses validate with governance and refuse a LIVE handoff label', () => {
-  const v2 = { ...base, risks_and_side_effects: ['rebalance'], governance: { owner_role: 'platform owner', approvals_needed: ['DPO'], data_classification: 'special_category' }, peer_handoffs: [] };
+  const v2 = { ...base, risks_and_side_effects: ['rebalance'], governance: { owner_role: 'platform owner', approvals_needed: ['DPO'], data_classification: 'special_category' }, peer_handoffs: [], untrusted_instructions: [] };
   assert.deepEqual(validateResponse(v2), []);
   const live = { ...v2, peer_handoffs: [{ actor: 'a', recipient: 'b', capability: 'c', approved_context: 'd', expiry: 'e', budget: 'f', receipt_label: 'LIVE' }] };
   assert.ok(validateResponse(live).some(e => /LIVE/.test(e)));
