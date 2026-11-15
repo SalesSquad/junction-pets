@@ -4,6 +4,9 @@
  * No calls to Valio or a production purchasing system are made.
  */
 
+import { createHash, randomUUID } from 'node:crypto';
+import { diagnoseProcurement } from './procurement-diagnostics.mjs';
+
 export const FIXTURE_CATALOG = Object.freeze([
   { sku: 'DEMO-LF-1', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 780, priceCents: 174, deliverBy: '2026-11-16', certification: 'Finnish origin · fictional', version: 1 },
   { sku: 'DEMO-LF-2', name: 'Lactose-free dairy milk · 1 L', family: 'dairy-milk', lactoseFree: true, unitsAvailable: 900, priceCents: 189, deliverBy: '2026-11-16', certification: 'Animal welfare · fictional', version: 1 },
@@ -90,6 +93,8 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
   const catalog = new Map(initialCatalog.map((item) => [item.sku, { ...item }]));
   const quotes = new Map();
   const orders = new Map();
+  const reviews = new Map();
+  const sourceEpoch = randomUUID();
   const idempotency = new Map();
   const audit = [];
   let serial = 0;
@@ -100,6 +105,23 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     return receipt;
   };
   const catalogList = () => [...catalog.values()].map((x) => ({ ...x }));
+  // Synchronous local reads form one coherent source snapshot. The hash is a
+  // revision identifier, not a supplier signature or verified identity.
+  const captureSnapshot = (requested) => {
+    const products = catalogList().filter((p) => p.family === requested.family)
+      .sort((a, b) => a.sku < b.sku ? -1 : a.sku > b.sku ? 1 : 0);
+    const constraints = { family: requested.family, quantityLitres: requested.quantityLitres,
+      lactoseFree: requested.lactoseFree, deliverBy: requested.deliverBy };
+    const terms = { products, policy: { ...policy }, constraints };
+    return { ...terms, id: 'S-' + sourceEpoch + '-' +
+      createHash('sha256').update(JSON.stringify(terms)).digest('hex'),
+      observedAtMs: clock(), mode: 'INVENTED_FIXTURE', stockReserved: false };
+  };
+  const getReview = (reviewId) => {
+    const review = reviews.get(reviewId);
+    if (!review) throw new TradeError('REVIEW_NOT_FOUND', 'This review does not exist.', 404);
+    return review;
+  };
   const getQuote = (quoteId) => {
     const q = quotes.get(quoteId);
     if (!q) throw new TradeError('QUOTE_NOT_FOUND', 'This quote does not exist.', 404);
@@ -111,12 +133,13 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     return o;
   };
 
-  const requestQuote = ({ buyerId, requestText, need, budgetCents = policy.perOrderBudgetCents } = {}) => {
+  const buildQuote = ({ buyerId, requestText, need, budgetCents = policy.perOrderBudgetCents } = {}, reviewId = null) => {
     if (buyerId !== policy.buyerId) throw new TradeError('BUYER_NOT_FOUND', 'Only the fictional demo buyer is available.', 403);
     safeWhole(budgetCents, 1, policy.perOrderBudgetCents, 'Maximum budget');
     if (need !== undefined && requestText !== undefined) throw new TradeError('INVALID_NEED', 'Use typed need OR legacy text, never both.');
     const requested = need !== undefined ? validateBuyingNeed(need) : parseBuyerRequest(requestText);
-    const suitable = catalogList().filter((x) => x.family === requested.family && (!requested.lactoseFree || x.lactoseFree) && x.deliverBy <= requested.deliverBy);
+    const sourceSnapshot = captureSnapshot(requested);
+    const suitable = sourceSnapshot.products.filter((x) => x.family === requested.family && (!requested.lactoseFree || x.lactoseFree) && x.deliverBy <= requested.deliverBy);
     suitable.sort((a, b) => a.priceCents - b.priceCents || a.sku.localeCompare(b.sku));
     let remaining = requested.quantityLitres;
     const lines = [];
@@ -133,12 +156,12 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
       throw new TradeError('INSUFFICIENT_AVAILABILITY', `Cannot deliver ${requested.quantityLitres} L by ${requested.deliverBy}: ${remaining} L unavailable.`, 409, { missingLitres: remaining, viableLines: lines });
     }
     const totalCents = lines.reduce((sum, item) => sum + item.totalCents, 0);
-    if (totalCents > budgetCents) {
+    if (totalCents > budgetCents && (!reviewId || totalCents > policy.perOrderBudgetCents)) {
       record('QUOTE_REFUSED', { reason: 'BUDGET_EXCEEDED', totalCents, budgetCents });
       throw new TradeError('BUDGET_EXCEEDED', 'Fixed-price basket exceeds the declared buyer budget.', 409, { totalCents, budgetCents, lines });
     }
     const quoteId = nextId('Q');
-    const approvalRequired = totalCents > policy.autoCommitLimitCents;
+    const approvalRequired = totalCents > policy.autoCommitLimitCents || Boolean(reviewId && totalCents > budgetCents);
     const quote = {
       id: quoteId,
       buyerId,
@@ -146,11 +169,18 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
       lines,
       totalCents,
       budgetCents,
+      reviewId,
+      snapshotId: sourceSnapshot.id,
+      sourceSnapshot,
+      budgetException: totalCents > budgetCents ? {
+        originalBudgetCents: budgetCents, proposedBudgetCents: totalCents,
+        additionalCents: totalCents - budgetCents, scope: 'THIS_QUOTE_ONLY',
+      } : null,
       approvalRequired,
       approval: null,
       status: approvalRequired ? 'AWAITING_HUMAN_APPROVAL' : 'AUTO_COMMIT_ELIGIBLE',
-      createdAtMs: clock(),
-      expiresAtMs: clock() + policy.quoteLifetimeMs,
+      createdAtMs: sourceSnapshot.observedAtMs,
+      expiresAtMs: sourceSnapshot.observedAtMs + policy.quoteLifetimeMs,
       orderId: null,
       provider: 'INVENTED_LOCAL_CATALOG',
       explanation: 'Lowest unit price first among exact-family, dietary and delivery matches; split only when cheaper SKU stock is exhausted. No substitution. Prices are synthetic net cents; stock is checked, not reserved.',
@@ -160,8 +190,32 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     return structuredClone(quote);
   };
 
+  const requestQuote = (args) => buildQuote(args);
+  const requestReview = ({ buyerId, requestText, need, budgetCents = policy.perOrderBudgetCents } = {}) => {
+    if (buyerId !== policy.buyerId) throw new TradeError('BUYER_NOT_FOUND', 'Only the fictional demo buyer is available.', 403);
+    safeWhole(budgetCents, 1, policy.perOrderBudgetCents, 'Maximum budget');
+    if (need !== undefined && requestText !== undefined) throw new TradeError('INVALID_NEED', 'Use typed need OR legacy text, never both.');
+    const requested = need !== undefined ? validateBuyingNeed(need) : parseBuyerRequest(requestText);
+    const source = captureSnapshot(requested);
+    const diagnosis = diagnoseProcurement({ catalog: source.products,
+      requirements: [source.constraints], budgetCents, policyBudgetCents: source.policy.perOrderBudgetCents });
+    const reviewId = nextId('R');
+    const quote = ['FEASIBLE_AT_SNAPSHOT', 'BUDGET_REVIEW_NEEDED'].includes(diagnosis.outcome)
+      ? buildQuote({ buyerId, need: source.constraints, budgetCents }, reviewId) : null;
+    const review = { id: reviewId, buyerId, snapshotId: quote?.snapshotId ?? source.id,
+      sourceSnapshot: quote?.sourceSnapshot ?? source, requested: source.constraints,
+      originalBudgetCents: budgetCents, diagnosis, quoteId: quote?.id ?? null,
+      status: quote?.status ?? 'BLOCKED', expiresAtMs: quote?.expiresAtMs ?? source.observedAtMs + policy.quoteLifetimeMs };
+    reviews.set(review.id, review);
+    record('REVIEW_CREATED', { reviewId, snapshotId: review.snapshotId, quoteId: review.quoteId, outcome: diagnosis.outcome });
+    return { review: structuredClone(review), quote };
+  };
+
   const assertFresh = (q) => {
     if (clock() >= q.expiresAtMs) throw new TradeError('QUOTE_EXPIRED', 'Quote expired; request new fixed prices and stock.', 409);
+    if (q.snapshotId !== captureSnapshot(q.requested).id) {
+      throw new TradeError('QUOTE_STALE', 'Source prices, stock or policy changed. Obtain a fresh quote and decision.', 409);
+    }
     for (const line of q.lines) {
       const current = catalog.get(line.sku);
       if (!current || current.version !== line.stockVersion || current.priceCents !== line.unitPriceCents || current.unitsAvailable < line.quantityLitres) {
@@ -170,19 +224,39 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     }
   };
 
-  const decideApproval = ({ quoteId, decision, buyerId, approver = 'Fictional buyer' }) => {
+  const recordDecision = ({ quoteId, decision, buyerId, approver = 'Fictional buyer', boundReviewId = null }) => {
     const q = getQuote(quoteId);
     if (buyerId !== q.buyerId) throw new TradeError('BUYER_MISMATCH', 'Approval must match the original buyer.', 403);
+    if (q.reviewId && q.reviewId !== boundReviewId) {
+      throw new TradeError('REVIEW_CONFIRMATION_REQUIRED', 'Confirm the exact review, quote and snapshot before deciding.', 403);
+    }
     if (q.orderId) throw new TradeError('ALREADY_COMMITTED', 'The quote has already been used.', 409);
     assertFresh(q);
     if (!['approve', 'reject'].includes(decision)) throw new TradeError('INVALID_DECISION', 'Choose approve or reject.');
     if (typeof approver !== 'string' || !approver.trim() || approver.length > 80) throw new TradeError('INVALID_APPROVER', 'Provide a short fictional reviewer label.');
     if (q.approval) throw new TradeError('ALREADY_DECIDED', 'Decision already recorded; make a fresh quote.', 409);
     if (q.status !== 'AWAITING_HUMAN_APPROVAL') throw new TradeError('NO_APPROVAL_NEEDED', 'This quote does not request a human approval.', 409);
-    q.approval = { decision, approver: approver.trim(), at: new Date(clock()).toISOString(), simulatedIdentity: true };
+    q.approval = { decision, approver: approver.trim(), at: new Date(clock()).toISOString(), simulatedIdentity: true,
+      quoteId: q.id, snapshotId: q.snapshotId, reviewId: q.reviewId, totalCents: q.totalCents,
+      additionalBudgetCents: q.budgetException?.additionalCents ?? 0 };
     q.status = decision === 'approve' ? 'APPROVED' : 'REJECTED';
-    record('HUMAN_DECISION_SIMULATED', { quoteId: q.id, decision, approver: q.approval.approver });
+    record('HUMAN_DECISION_SIMULATED', { quoteId: q.id, decision, approver: q.approval.approver, snapshotId: q.snapshotId, reviewId: q.reviewId, additionalBudgetCents: q.approval.additionalBudgetCents });
     return structuredClone(q);
+  };
+
+  const decideApproval = (args) => recordDecision({ ...args, boundReviewId: null });
+  const decideReview = ({ reviewId, buyerId, decision, snapshotId, quoteId, ...extra } = {}) => {
+    if (Object.keys(extra).length) throw new TradeError('INVALID_REVIEW_DECISION', 'Only the displayed review and source identifiers may be confirmed.');
+    const review = getReview(reviewId);
+    if (review.buyerId !== buyerId) throw new TradeError('BUYER_MISMATCH', 'Review belongs to another buyer.', 403);
+    if (!review.quoteId) throw new TradeError('REVIEW_BLOCKED', 'Missing stock or policy limits cannot be approved here.', 409);
+    if (snapshotId !== review.snapshotId || quoteId !== review.quoteId) {
+      throw new TradeError('REVIEW_MISMATCH', 'Decision does not match the displayed quote and source snapshot.', 409);
+    }
+    const quote = recordDecision({ quoteId, buyerId, decision, boundReviewId: review.id,
+      approver: 'Review card demo buyer (UNAUTHENTICATED)' });
+    review.status = quote.status;
+    return { review: structuredClone(review), quote };
   };
 
   const commitOrder = ({ quoteId, buyerId, idempotencyKey, ...extra } = {}) => {
@@ -203,6 +277,10 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     if (q.status === 'REJECTED') throw new TradeError('APPROVAL_REJECTED', 'The buyer refused the quote.', 403);
     if (q.approvalRequired && q.status !== 'APPROVED') throw new TradeError('APPROVAL_REQUIRED', 'A human buyer decision is required before order commitment.', 403);
     if (!q.approvalRequired && q.status !== 'AUTO_COMMIT_ELIGIBLE') throw new TradeError('QUOTE_STATE_INVALID', 'The quote cannot be committed.', 409);
+    if (q.reviewId && q.approvalRequired && (q.approval?.reviewId !== q.reviewId ||
+        q.approval?.snapshotId !== q.snapshotId || q.approval?.quoteId !== q.id || q.approval?.totalCents !== q.totalCents)) {
+      throw new TradeError('REVIEW_CONFIRMATION_REQUIRED', 'The approved decision must match these exact terms.', 403);
+    }
     assertFresh(q);
     for (const line of q.lines) {
       const item = catalog.get(line.sku);
@@ -214,6 +292,8 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
       id: orderId,
       buyerId,
       quoteId,
+      snapshotId: q.snapshotId,
+      reviewId: q.reviewId,
       lines: structuredClone(q.lines),
       totalCents: q.totalCents,
       status: 'SIMULATED_COMMITTED',
@@ -258,6 +338,8 @@ export function createTradeService({ initialCatalog = FIXTURE_CATALOG, policy = 
     catalog: catalogList,
     policy: () => ({ ...policy, provider: 'FIXTURE_ONLY', approverAuthentication: 'NOT_IMPLEMENTED' }),
     requestQuote,
+    requestReview,
+    decideReview,
     quote: (id) => structuredClone(getQuote(id)),
     approve: decideApproval,
     order: (id) => structuredClone(getOrder(id)),

@@ -2,6 +2,21 @@
 
 **Independent Junction 2026 prototype. Not a Valio Aimo product or endorsement.** Every supplier, buyer, catalog fact, price, stock count, approval and order is **SYNTHETIC / NONCOMMERCIAL**. Localhost HTTP is real; supplier commerce is simulated. Zero dependencies, credentials, payments or external provider writes.
 
+## Snapshot-bound review and budget exceptions
+
+The existing browser workflow now obtains diagnosis, relevant product facts,
+policy and fixed-price proposal from one coherent server source snapshot.
+Select the EUR 1400 budget to review the exact EUR 373 exception for the
+unchanged 1000 L milk fixture. The card retains the original quantity, family,
+diet and date, confirms the exact quote/source identifiers, and grants no
+general budget increase. Changed facts or expired terms require a new offer
+and new decision; missing stock and the policy ceiling cannot be approved away.
+Stock is checked, not reserved. Everything remains synthetic and unauthenticated.
+
+See [procurement diagnostics and review contracts](PROCUREMENT_DIAGNOSTICS.md).
+The original independent buyer CLI and strict over-budget refusal remain
+available unchanged; the browser opts into the explicit quote-only review flow.
+
 ## Run the independent agent
 
 Node 22+. Terminal 1:
