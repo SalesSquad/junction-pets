@@ -35,7 +35,7 @@ INPUT_SHA = "47a015b6cf7f2ef10ff246fbf325e3f63459aa277d8ab3bd4bd6f61b4e0ce25f"
 ARCHIVE_SHA = "5d68feb39f2b3b718af2c18dfaa9bd7947b44b7d7c6af15dfc6acf4964a4bd73"
 COMMON_SHA = "19dfaa66ef8c7b80e0c173ea338ff6478caa176f5bbdb98dbab5e1560381c891"
 IMAGE = "docker.io/nvidia/cuda@sha256:0eee3094c71518ad31d011a594ae6ed6de72959ee07e318cb31cffe71690e90c"
-SCALING = {"max_replica_count": 1, "queue_message_ttl_seconds": 3000, "deadline_seconds": 3600}
+SCALING = {"max_replica_count": 1, "queue_message_ttl_seconds": 3000, "deadline_seconds": 3300}
 MAX_HOURLY_USD = 2.22
 MAX_ESTIMATE_USD = 3.0
 MAX_ARCHIVE_BYTES = 512 * 1024 * 1024
@@ -87,6 +87,8 @@ class Run:
         self.result_key = self.object_prefix + "/result.json"
         self.s3 = None
         self.result_route = None
+        self.status_route = None
+        self.last_inference_status = None
 
     def phase(self, state, **extra):
         row = {"job_id": self.args.job_id, "state": state, "observed_unix": time.time(), **extra}
@@ -221,14 +223,21 @@ class Run:
             "allocation_cap_usd": MAX_ESTIMATE_USD, "balance_before_usd": float(balance["amount"]),
             "existing_bucket": a.bucket, "artifact_key": self.artifact_key, "result_key": self.result_key,
             "new_credentials": False, "raw_inputs_published": False})
-        self.phase("admitted", maximum_compute_estimate_usd=estimate, provider_deadline_seconds=3600)
+        self.phase("admitted", maximum_compute_estimate_usd=estimate, provider_deadline_seconds=SCALING["deadline_seconds"])
 
     def create_once(self):
         a = self.args
+        budget_start = time.time()
         config = {"job_id": a.job_id, "bootstrap_sha256": sha(a.bootstrap),
                   "output_host": "objects.eu-north-3.verda.storage",
                   "output_path": "/" + a.bucket + "/" + self.artifact_key,
-                  "result_path": "/" + a.bucket + "/" + self.result_key}
+                  "result_path": "/" + a.bucket + "/" + self.result_key,
+                  "deadline_unix": budget_start + SCALING["deadline_seconds"],
+                  "request_deadline_unix": budget_start + min(SCALING["deadline_seconds"], SCALING["queue_message_ttl_seconds"])}
+        write(self.c / "worker-budget.json", {"job_id": a.job_id, "deadline_unix": config["deadline_unix"],
+            "request_deadline_unix": config["request_deadline_unix"],
+            "provider_deadline_seconds": SCALING["deadline_seconds"], "queue_ttl_seconds": SCALING["queue_message_ttl_seconds"],
+            "maximum_work_seconds": 3000, "export_reserve_seconds": 300, "capability_expiry_seconds": 7200})
         worker = base64.b64encode(a.worker.read_bytes()).decode()
         launcher = ("import base64,hashlib\nfrom pathlib import Path\n"
                     + "raw=base64.b64decode(" + repr(worker) + ")\n"
@@ -297,22 +306,62 @@ class Run:
         require(status in (0, 200, 202, 409), "batch_request_rejected_http_" + str(status))
         origin = urllib.parse.urlsplit(self.endpoint)
         result_path = "/result/" + a.job_id
+        status_path = "/status/" + a.job_id
+        if isinstance(response, dict) and response.get("Id"):
+            require(response["Id"] == a.job_id, "inference_identity_mismatch")
         if isinstance(response, dict) and response.get("ResultPath"):
             require(response["ResultPath"] == result_path, "result_route_mismatch")
+        if isinstance(response, dict) and response.get("StatusPath"):
+            require(response["StatusPath"] == status_path, "status_route_mismatch")
         self.result_route = urllib.parse.urlunsplit(("https", origin.netloc, result_path, "", ""))
+        self.status_route = urllib.parse.urlunsplit(("https", origin.netloc, status_path, "", ""))
         # A lost response is not a second submission. The independently scoped
         # result object and provider job identity are the recovery path.
         self.phase("batch_submitted_once", http_status=status)
 
     def provider_failure(self):
-        # This documented result route reads the cached response; calling a
-        # batch deployment's application GET routes would create another job.
-        status, value, _ = self.common.request(self.result_route, headers={
-            "Authorization": "Bearer " + self.inference_key, "X-Inference-Id": self.args.job_id}, timeout=15)
-        if isinstance(value, dict) and value.get("schema") == "meta_r8_batch_failure_v1":
-            write(self.c / "worker-failure.json", {k: value[k] for k in
-                ("schema", "job_id", "error_type", "error_code", "qualification") if k in value})
-            raise RuntimeError("worker_failed_before_export")
+        # Only the documented status route observes terminal provider failures;
+        # /result can remain 404 when the app itself returned 404. Neither this
+        # read nor a read-only transport failure can submit another inference.
+        try:
+            status, value, _ = self.common.request(self.status_route, headers={
+                "Authorization": "Bearer " + self.inference_key, "X-Inference-Id": self.args.job_id}, timeout=15)
+        except (urllib.error.URLError, TimeoutError, OSError):
+            self.phase("inference_status_unavailable", http_status=0)
+            return
+        if (status != 200 or not isinstance(value, dict)
+                or "Id" not in value or "Status" not in value):
+            self.phase("inference_status_unavailable", http_status=status)
+            return
+        require(value.get("Id") == self.args.job_id, "inference_status_identity_mismatch")
+        state = value.get("Status")
+        require(isinstance(state, str) and re.fullmatch(r"[A-Za-z_]{1,40}", state), "invalid_inference_status")
+        receipt = {"job_id": self.args.job_id, "inference_id": value["Id"], "status": state,
+                   "http_status": status, "observed_unix": time.time()}
+        pod = value.get("PodName")
+        if isinstance(pod, str) and re.fullmatch(re.escape(self.args.job_id) + r"-[a-z0-9-]{1,100}", pod):
+            receipt["pod_name"] = pod
+        error = value.get("Error")
+        if isinstance(error, dict):
+            message = error.get("Message")
+            if isinstance(message, str):
+                # Preserve the observed provider error without permitting an
+                # arbitrary error body to echo headers or signed capabilities.
+                match = re.fullmatch(r"inference returned non-200 status code ([1-5][0-9]{2})", message)
+                if match:
+                    receipt.update(error_message=message, application_http_status=int(match[1]))
+                else:
+                    receipt.update(error_message_omitted=True,
+                                   error_message_sha256=hashlib.sha256(message.encode()).hexdigest())
+        with (self.c / "inference-status.jsonl").open("a") as f:
+            f.write(json.dumps(receipt, sort_keys=True, allow_nan=False) + "\n")
+            f.flush()
+        if state != self.last_inference_status:
+            self.phase("inference_status", inference_status=state)
+            self.last_inference_status = state
+        if state == "Error":
+            write(self.c / "provider-failure.json", receipt)
+            raise RuntimeError("provider_inference_error")
 
     def download_artifact(self, value):
         size, expected = value["artifact_bytes"], value["artifact_sha256"]
@@ -381,7 +430,7 @@ class Run:
             except TRANSIENT_S3:
                 errors += 1
                 self.phase("transient_output_read", failures=errors)
-            if time.monotonic() - last_result_read >= 60:
+            if time.monotonic() - last_result_read >= 30:
                 self.provider_failure()
                 last_result_read = time.monotonic()
             time.sleep(15)
@@ -389,7 +438,7 @@ class Run:
 
     def cleanup(self):
         outcome = {"job_id": self.args.job_id, "pause_attempted": False, "paused_verified": False,
-                   "provider_deadline_seconds": 3600, "provider_deadline_verified": self.created,
+                   "provider_deadline_seconds": SCALING["deadline_seconds"], "provider_deadline_verified": self.created,
                    "objects_deleted": False, "volumes_deleted": False}
         if not self.create_attempted:
             outcome["no_deployment_created"] = True

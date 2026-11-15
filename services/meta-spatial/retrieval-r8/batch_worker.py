@@ -3,7 +3,8 @@
 
 The deployment supplies CONFIG. The request contains no labels or account keys;
 its only upload capability is a short-lived PUT URL for one task-owned object.
-The provider, not this process, enforces the replica's 3600-second deadline.
+The provider enforces the replica's 3300-second deadline; the worker separately
+budgets cold start and export time against an earlier absolute deadline.
 """
 from __future__ import annotations
 
@@ -29,6 +30,27 @@ MAX_BODY = 16 * 1024 * 1024
 MAX_ARTIFACT = 512 * 1024 * 1024
 LOCK = threading.Lock()
 STARTED = False
+
+
+def event(name, **fields):
+    # A plain-text prefix prevents the platform's JSON parser from discarding
+    # records that do not contain its special _msg field. Never pass requests.
+    print("R8_EVENT " + json.dumps({"event": name, **fields}, sort_keys=True, allow_nan=False), flush=True)
+
+
+def request_route(target):
+    """Only the exact task's root/run aliases; no arbitrary proxy paths."""
+    routes = {"/": "root", "/run": "run", "/" + CONFIG["job_id"]: "job_root",
+              "/" + CONFIG["job_id"] + "/run": "job_run"}
+    return routes.get(target)
+
+
+def request_diagnostic(method, target):
+    # Unknown paths can themselves contain a capability; log only their shape.
+    route = request_route(target)
+    event("request", method=method, route=route or "unknown",
+          path=target if route else "[unrecognized path omitted]",
+          query_present="?" in target, path_length=len(target.split("?", 1)[0]))
 
 
 def require(ok, reason):
@@ -104,30 +126,48 @@ def admit(packet):
     return packet["artifact_put_url"], packet["result_put_url"]
 
 
-def upload(path, url, content_type):
+def upload(path, url, content_type, deadline):
     last_error = None
     for attempt in range(2):
+        remaining = deadline - time.time() - 5
+        require(remaining > 0, "artifact_upload_budget_exhausted")
         try:
             with path.open("rb") as data:
                 request = urllib.request.Request(url, data=data, method="PUT", headers={
                     "Content-Type": content_type, "Content-Length": str(path.stat().st_size)
                 })
-                with urllib.request.build_opener(NoRedirect).open(request, timeout=120) as response:
+                with urllib.request.build_opener(NoRedirect).open(request, timeout=min(120, remaining)) as response:
                     require(response.status in (200, 201), "artifact_upload_status")
                     response.read(1024)
             return
         except Exception as error:
             last_error = type(error).__name__
-            if attempt == 0:
+            if attempt == 0 and deadline - time.time() > 7:
                 time.sleep(2)
+            else:
+                break
     raise RuntimeError("artifact_upload_failed:" + str(last_error))
 
 
 def execute(put_url, result_url):
     started = time.monotonic()
+    # The absolute bound is set before deployment creation, conservatively
+    # charging all image-pull/queue/bootstrap time to this finite work budget.
+    # Keep five minutes for packaging and both bounded uploads.
+    effective_deadline = min(CONFIG["deadline_unix"], CONFIG["request_deadline_unix"])
+    work_seconds = min(3000, int(effective_deadline - time.time() - 300 - 15))
+    require(work_seconds > 0, "worker_budget_exhausted_before_start")
+    # Socket timeouts do not bound cumulative transfer time or tar/hash work.
+    # One monotonic timer covers the complete task through both exports, even
+    # if a slow peer keeps resetting socket timeouts. The provider remains the
+    # independent outer bound; no additional process or replica is launched.
+    deadline_timer = threading.Timer(max(0, effective_deadline - time.time() - 2), lambda: os._exit(124))
+    deadline_timer.daemon = True
+    deadline_timer.start()
+    event("execution_started", work_seconds=work_seconds, export_reserve_seconds=300)
     with (ROOT / "gpu-run.log").open("x") as log:
         p = subprocess.Popen([
-            "timeout", "--signal=TERM", "--kill-after=15", "3000s", "bash", str(ROOT / "bootstrap.sh")
+            "timeout", "--signal=TERM", "--kill-after=15", str(work_seconds) + "s", "bash", str(ROOT / "bootstrap.sh")
         ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
         for line in p.stdout:
             log.write(line)
@@ -138,7 +178,7 @@ def execute(put_url, result_url):
                 try:
                     value = json.loads(line)
                     if set(value) <= {"stage", "observed_images", "expected_images", "torch", "cuda", "gpu", "capability"}:
-                        print(json.dumps(value, sort_keys=True), flush=True)
+                        event("runtime_progress", **value)
                 except (ValueError, TypeError):
                     pass
         p.wait()
@@ -155,7 +195,7 @@ def execute(put_url, result_url):
     artifact_sha = sha(artifact)
     # The URL and its signature are never written to disk, logs or the result.
     # PUT retries, if transport fails, address the same object with identical bytes.
-    upload(artifact, put_url, "application/gzip")
+    upload(artifact, put_url, "application/gzip", effective_deadline)
     result = {"schema": "meta_r8_batch_result_v1", **completion,
               "artifact_sha256": artifact_sha, "artifact_bytes": artifact.stat().st_size,
               "artifact_uploaded": True, "qualification": False}
@@ -166,8 +206,9 @@ def execute(put_url, result_url):
                       extraction_summary_sha256=sha(summary))
     result_file = ROOT / "result.json"
     write_json(result_file, result)
-    upload(result_file, result_url, "application/json")
-    print(json.dumps(result, sort_keys=True), flush=True)
+    upload(result_file, result_url, "application/json", effective_deadline)
+    event("result_uploaded", **result)
+    deadline_timer.cancel()
     return result
 
 
@@ -188,12 +229,17 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/health":
             self.respond(200, {"ready": True, "job_id": CONFIG["job_id"]})
         else:
+            request_diagnostic("GET", self.path)
             self.respond(404, {"error": "unknown_path"})
 
     def do_POST(self):
         global STARTED
-        if self.path != "/run":
-            self.respond(404, {"error": "unknown_path"})
+        request_diagnostic("POST", self.path)
+        if request_route(self.path) is None:
+            try:
+                self.respond(404, {"error": "unknown_path"})
+            finally:
+                threading.Timer(2, lambda: os._exit(1)).start()
             return
         with LOCK:
             if STARTED:
@@ -210,6 +256,7 @@ class Handler(BaseHTTPRequestHandler):
             packet = json.loads(raw)
             put_url, result_url = admit(packet)
             packet.clear()
+            event("request_admitted", job_id=CONFIG["job_id"], source_commit=SOURCE, input_sha256=INPUT_SHA)
             result = execute(put_url, result_url)
             del put_url, result_url
             exit_code = 0 if result["exit_code"] == 0 else 1
@@ -221,7 +268,7 @@ class Handler(BaseHTTPRequestHandler):
             message = str(error)
             if len(message) <= 120 and all(c in "abcdefghijklmnopqrstuvwxyz0123456789_:.-" for c in message):
                 safe["error_code"] = message
-            print(json.dumps(safe), flush=True)
+            event("worker_failed", **safe)
             try:
                 self.respond(500, safe)
             except (BrokenPipeError, ConnectionResetError):
@@ -232,6 +279,11 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     os.umask(0o077)
-    require(set(CONFIG) == {"job_id", "bootstrap_sha256", "output_host", "output_path", "result_path"}, "invalid_deployment_config")
-    print(json.dumps({"ready": True, "job_id": CONFIG["job_id"], "worker_sha256": sha(__file__)}), flush=True)
+    require(set(CONFIG) == {"job_id", "bootstrap_sha256", "output_host", "output_path", "result_path", "deadline_unix", "request_deadline_unix"}, "invalid_deployment_config")
+    require(type(CONFIG["deadline_unix"]) in (int, float) and 0 < CONFIG["deadline_unix"] - time.time() <= 3300,
+            "invalid_worker_deadline")
+    require(type(CONFIG["request_deadline_unix"]) in (int, float)
+            and 0 < CONFIG["request_deadline_unix"] - time.time() <= 3000
+            and CONFIG["request_deadline_unix"] <= CONFIG["deadline_unix"], "invalid_request_deadline")
+    event("ready", ready=True, job_id=CONFIG["job_id"], worker_sha256=sha(__file__))
     ThreadingHTTPServer(("0.0.0.0", 8000), Handler).serve_forever()
