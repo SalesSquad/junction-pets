@@ -17,8 +17,8 @@ Done 2026-11-15: **speculative card** — `POST /api/customers/:id/peek` returns
 question, shown as "Pikavastaus – valmentaja tarkentaa" until the coach's reply replaces it
 ([SalesSquad/spankki-coach#96](https://github.com/SalesSquad/spankki-coach/pull/96), `4eb0c564`; 457 pass / 0 fail).
 
-Done 2026-11-15: **router capacity** — the router server skipped no stale work (answered 8 requests a minute under
-load); now it drops requests past 1.2 s. One Mac mini instance answers 100 % of 4 req/s within the API timeout, two
+Done 2026-11-15: **router capacity** — under load the router server spent its time on requests the API had already
+given up on (8 answers a minute); now it drops requests older than 1.2 s. One Mac mini instance answers 100 % of 4 req/s within the API timeout, two
 answer 100 % of 6 req/s, a third on the same GPU makes it worse
 ([SalesSquad/spankki-coach#97](https://github.com/SalesSquad/spankki-coach/pull/97), `5daae68b`).
 
