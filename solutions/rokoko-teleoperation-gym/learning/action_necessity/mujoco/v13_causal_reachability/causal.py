@@ -97,7 +97,8 @@ def checked_env_state(env,observation):
 
 
 def replay_actions(env_factory,world_signature,seed,original_trace,source_world_hash,prefix_count,
-                   additional_actions=(),tail=False,deadline=None):
+                   additional_actions=(),tail=False,deadline=None,
+                   on_step=None,branch_id=None):
     """Reset and EXACT-replay source prefix; then execute legal interventions.
 
     No MuJoCo/Python state shallow copies; common-random-number experiments
@@ -107,6 +108,7 @@ def replay_actions(env_factory,world_signature,seed,original_trace,source_world_
     require(0<=prefix_count<len(original_trace) and
             prefix_count+len(additional_actions)<=MAX_ORIGINAL_OPTIONS,
             "V13_FINITE_PREFIX_AND_OPTION_BUDGET")
+    require(on_step is None or callable(on_step),"V13_EXECUTED_OPTION_JOURNAL_REQUIRED")
     env=env_factory(max_options=MAX_ORIGINAL_OPTIONS)
     observation=env.reset(seed=seed,ood=False)
     expected_world=original_trace[0]["observation"]
@@ -148,6 +150,23 @@ def replay_actions(env_factory,world_signature,seed,original_trace,source_world_
                   "dwell_ticks_cumulative":max_dwell,
                   "success_info":bool(info["success"]),
                   "next_observation":next_obs}
+        # Persist every completed original physical *option*, including all
+        # replayed-prefix options, before testing exact source equality and
+        # before attempting another option. If a later option times out or
+        # raises, the host retains an explicitly INCOMPLETE branch journal.
+        # No unobserved fraction of a currently running env.step is invented.
+        if on_step is not None:
+            event={"schema":SCHEMA+".option-journal.v1",
+                   "branchId":branch_id,"seed":seed,
+                   "sourceWorldHash":original_world_hash,
+                   "forkOptionIndexZeroBased":prefix_count,
+                   "optionIndexZeroBased":len(trace),
+                   "phase":"ORIGINAL_PREFIX" if expected_step is not None else "COUNTERFACTUAL",
+                   "transition":new_step,
+                   "transitionSha256":hashlib.sha256(canonical(new_step)).hexdigest(),
+                   "sourceOnlyUnattestedExecution":True,
+                   "physicsQualificationPending":True}
+            on_step(event)
         if expected_step is not None:
             require(new_step["next_observation"]==expected_step["next_observation"] and
                     new_step["reward"]==expected_step["reward"] and
@@ -205,7 +224,7 @@ def replay_actions(env_factory,world_signature,seed,original_trace,source_world_
                  env.dwell>=ORIGINAL_GOAL_TICKS and env.contacts>0)
     require(not success or status=="ORIGINAL_PHYSICS_TERMINAL",
             "V13_PHYSICS_SUCCESS_WITHOUT_ORIGINAL_TERMINAL")
-    return {"schema":SCHEMA+".branch","seed":seed,
+    return {"schema":SCHEMA+".branch","seed":seed,"branchId":branch_id,
       "sourceWorldHash":original_world_hash,"forkOptionIndexZeroBased":prefix_count,
       "exactOriginalPrefixReplayed":True,"decisionPublic18D":fork_obs,
       "decisionOriginalMask7":fork_mask,"actions":actions,
@@ -216,7 +235,8 @@ def replay_actions(env_factory,world_signature,seed,original_trace,source_world_
       "actualGoalSuccess250Tick":success,"actualUnsafe":bool(last and last["unsafe"]),
       "lastOriginalPhysicsErrorMeters":None if last is None else float(last["error"]),
       "lastPublicGoalErrorMeters":public_goal_distance(o),
-      "status":status,"newRealMuJoCoExecuted":True,
+      "status":status,"newRealMuJoCoExecuted":False,
+      "sourceOnlyUnattestedExecution":True,"physicsQualificationPending":True,
       "trainingOnly":True,"modelPromotionAuthorized":False}
 
 
@@ -230,21 +250,30 @@ def _rank_partial(branch):
 def run_budgeted_diagnostic(source,env_factory,world_signature,*,
          max_depth=MAX_DEPTH,beam_width=BEAM_WIDTH,
          max_world_branches=MAX_WORLD_BRANCHES,deadline=None,
-         on_branch=None):
+         on_branch=None,on_step=None):
     """Return complete TRAIN-only diagnostics and exact original raw branches.
 
-    Caller owns IO/retention/hosted runner. An optional append-only on_branch
-    journal callback is invoked with each *complete* actual replay immediately,
-    before another branch is attempted, to retain partial source if a later
-    replay throws. A failing journal callback propagates and must hard-stop
-    the hosted runner, never silently skip an executed branch. The callback's
-    return is ignored; it cannot alter the action search. No dispatch occurs.
+    Caller owns IO/retention/hosted runner. Both on_step and on_branch are
+    required: on_step is invoked synchronously after each complete physical
+    option (even prefix replay) before the next option / source equality
+    check; on_branch follows each complete replay. Both must append+fsync a
+    lossless journal, or raise to hard-stop. Their returns cannot alter search.
+    The producer cannot independently attest its injected env_factory is real
+    MuJoCo; only an independently source-verified hosted harness may do so.
     """
     require(max_depth==MAX_DEPTH and beam_width==BEAM_WIDTH and
             max_world_branches==MAX_WORLD_BRANCHES and
             callable(env_factory) and callable(world_signature) and
-            (on_branch is None or callable(on_branch)),
+            callable(on_branch) and callable(on_step),
             "V13_PREREGISTERED_FINITE_DIAGNOSTIC_BUDGET_REQUIRED")
+    now=time.monotonic()
+    require(deadline is None or
+            (type(deadline) in (int,float) and math.isfinite(deadline) and now<deadline),
+            "V13_FINITE_MONOTONIC_DEADLINE_OR_DEFAULT_REQUIRED")
+    # The caller cannot extend the hard internal 1200-second science budget.
+    # The default is also bounded, even if no hosted deadline was supplied.
+    deadline=min(now+MAX_RUNTIME_SECONDS,
+                 deadline if deadline is not None else now+MAX_RUNTIME_SECONDS)
     require(source["sourceSha"]==forensic.SOURCE_HEAD and
             source["fullTransitionsSha256"]==forensic.RAW_SHAS["full_transitions.jsonl.gz"] and
             source["independentReplayQualified"] is True,
@@ -279,8 +308,10 @@ def run_budgeted_diagnostic(source,env_factory,world_signature,*,
             nonlocal total,world_budget
             require(world_budget<MAX_WORLD_BRANCHES and total<MAX_TOTAL_BRANCHES,
                     "V13_CAUSAL_BRANCH_BUDGET_HARD_STOP")
+            branch_id=f"v13-seen-train-{seed}-{world_budget:02d}"
             state=replay_actions(env_factory,world_signature,seed,trace,
-                 expected_world_hash,fork_idx,controls,tail=tail,deadline=deadline)
+                 expected_world_hash,fork_idx,controls,tail=tail,deadline=deadline,
+                 on_step=on_step,branch_id=branch_id)
             total+=1;world_budget+=1
             world_branches.append(state)
             if on_branch is not None:
