@@ -36,6 +36,7 @@ function readJSON(req) {
 export function createServer({env=process.env,services=createServices({env})}={}) {
  const send=(res,status,data,method)=>{res.writeHead(status,{...headers,'Content-Type':'application/json; charset=utf-8'});res.end(method==='HEAD'?undefined:JSON.stringify(data));};
  if(env.SIGNAL_DEPLOYMENT_PROVIDER==='hostinger'&&!/^https:\/\/[a-z0-9.-]+(?::\d+)?$/.test(env.SIGNAL_PUBLIC_ORIGIN||''))throw new Error('Hostinger deployment requires an exact HTTPS SIGNAL_PUBLIC_ORIGIN.');
+ if(services.status().aiRouter!=='NOT_CONFIGURED'&&!env.SIGNAL_PUBLIC_ORIGIN)throw new Error('Configured AI credentials require an exact SIGNAL_PUBLIC_ORIGIN, including local development.');
  const server=http.createServer(async(req,res)=>{
   try {
    if(req.url==='/api/interpret'&&req.method==='POST') {
@@ -50,6 +51,7 @@ export function createServer({env=process.env,services=createServices({env})}={}
     send(res,200,await services.interpret(body),req.method);return;
    }
    if(!['GET','HEAD'].includes(req.method)){res.writeHead(405,{...headers,Allow:req.url==='/api/interpret'?'POST':'GET, HEAD'});res.end();return;}
+   if(req.url==='/api/ready'){const state=await services.readiness();send(res,state.ready?200:503,state,req.method);return;}
    if(req.url==='/api/status'){send(res,200,{...services.status(),sourceRevision:/^[a-f0-9]{40}$/.test(env.SIGNAL_SOURCE_REVISION||'')?env.SIGNAL_SOURCE_REVISION:null},req.method);return;}
    if(req.url==='/api/evaluation-v2'){send(res,200,evaluateV2(),req.method);return;}
    if(req.url==='/api/benchmark'){const [existing,ood]=await Promise.all([benchmark(),stressAggregate()]);send(res,200,{...existing,robustness:ood},req.method);return;}

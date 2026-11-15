@@ -1,4 +1,4 @@
-import {open, readFile, rename, mkdir, unlink} from 'node:fs/promises';
+import {open, readFile, rename, mkdir, unlink, access} from 'node:fs/promises';
 import {dirname} from 'node:path';
 export class ServiceError extends Error {
   constructor(status, code) { super(code); this.status=status; this.code=code; }
@@ -80,5 +80,9 @@ export function createServices({env=process.env,fetchImpl=fetch,clock=()=>new Da
       return {mode:'LIVE_AI_ADVICE',provider:'Hostinger AI Router',model:safe(model,120),...validateInterpretation(parsed,text),warning:'Model advice with exact-quote checks; no verified truth, identity or intent verdict.'};
     } finally {busy=false;}
   }
-  return {status,interpret};
+  async function readiness(){
+    if(!configured)return {ready:true,ai:'NOT_CONFIGURED'};
+    try{await mkdir(dirname(quotaPath),{recursive:true,mode:0o700});await access(dirname(quotaPath),2);return {ready:true,ai:'CONFIGURED_NOT_PROBED'};}catch{return {ready:false,ai:'STATE_NOT_WRITABLE'};}
+  }
+  return {status,interpret,readiness};
 }

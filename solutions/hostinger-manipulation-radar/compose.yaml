@@ -1,7 +1,12 @@
 name: signal-desk
 services:
   signal-desk:
-    build: .
+    image: signal-desk:${SIGNAL_SOURCE_REVISION:?Set exact source revision}
+    pull_policy: never
+    build:
+      context: .
+      args:
+        SIGNAL_SOURCE_REVISION: ${SIGNAL_SOURCE_REVISION:?Set exact source revision}
     restart: unless-stopped
     init: true
     read_only: true

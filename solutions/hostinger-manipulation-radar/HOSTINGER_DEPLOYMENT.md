@@ -54,3 +54,11 @@ Only an exact configured same-origin JSON POST can use the hosted AI route. Miss
 No provider calls, coupon redemption, external data acquisition or public URL are established by this document.
 
 The public AI route is intentionally unauthenticated: Origin prevents browser cross-origin use, not scripted clients. The persistent shared allowance is the primary abuse/spend boundary. It limits request attempts, not currency or per-user entitlement; a host clock and volume integrity are trusted. Never refund unknown executions or automatically retry them.
+
+## Health, existing ingress and rollback
+
+The deployment helper waits up to 90 seconds for the app's Docker health check; it does not report a public URL as live. /api/ready checks state-directory writability when AI is configured, without contacting a model or consuming a quota reservation. A separate public URL and bounded real AI request remain necessary. A failed health gate may leave a failed candidate container for operator diagnosis; this is not an automatic rollback promise.
+
+The helper refuses a new Caddy when loopback 80/443 are occupied by another service. Existing Signal Desk Caddy can be updated in place; --app-only starts only the app and preserves a separately managed Hermes/Traefik ingress. Verify the latter's actual routing separately.
+
+Each built image is tagged signal-desk:<source revision> and the previous image is retained. For an operator-authorized rollback, use the previously verified source/environment revision and run node deploy.mjs --apply --no-build (add --app-only for existing ingress); the helper refuses an absent local image and waits for health. Preserve the quota volume across forward and rollback deployments. No rollback or image build was executed on the owner Mac because its disk reserve was insufficient.
