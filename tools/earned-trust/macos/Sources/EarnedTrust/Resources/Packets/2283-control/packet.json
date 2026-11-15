@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "packetId": "tieto-2283-control",
+  "title": "Counterexample: a green build",
+  "generatedAt": "2026-11-14T23:17:08.915832+00:00",
+  "source": {
+    "repository": "https://github.com/te-industry-tech-office/junction26-messagepack-csharp",
+    "baseSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+    "headSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+    "issueId": "2283",
+    "issueURL": "https://github.com/MessagePack-CSharp/MessagePack-CSharp/issues/2283",
+    "branch": "ju26-issue-2283"
+  },
+  "requirement": {
+    "id": "MP-2283",
+    "summary": "A consuming assembly receives a generated resolver for a generic value type defined in an external assembly.",
+    "details": "A deliberate unsupported inference for the demo: both generated-code compilations succeed, but the base analyzer/generator crashes and its resolver is absent. The review desk must refuse the claim that compiler success alone proves the fix."
+  },
+  "checks": [
+    {
+      "id": "compilation-control",
+      "title": "Generated-code compilation succeeds on both versions",
+      "requirementId": "MP-2283",
+      "kind": "differential",
+      "evidence": "observed",
+      "baseOutcome": "pass",
+      "headOutcome": "pass",
+      "baseSourceSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+      "headSourceSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+      "baseHarnessSha256": "96961b0d0267a9988aef04e278bcf2eba715c18a5667224f752e199619304327",
+      "headHarnessSha256": "96961b0d0267a9988aef04e278bcf2eba715c18a5667224f752e199619304327",
+      "baseLog": "evidence/base/observation.json",
+      "headLog": "evidence/head/observation.json",
+      "baseLogSha256": "334c8d43594764b0871a7a3312e2b6123c3fae1d83b24e7c29cd22611a4d94d3",
+      "headLogSha256": "f4da43f392d90f3a2e891fb4917ae3ffb5b3834156e76363ebae8563cac1268c",
+      "limitations": [
+        "This check reads the actual generatedCodeCompiles sub-observation, which is true on both revisions.",
+        "The full base probe still fails: AD0001/CS8785 and missing resolver. A green compiler alone misses the bug.",
+        "The attached claim is deliberately unsupported so the refusal is visible. These are real observations, not invented test outcomes."
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "unsupported-compilation-assurance",
+      "title": "Both compilations pass, therefore the fix is proven",
+      "requirementId": "MP-2283",
+      "kind": "fix",
+      "checkIds": [
+        "compilation-control"
+      ],
+      "paths": [
+        "src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "role": "documentation",
+      "additions": 5,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "doc/analyzers/MsgPack004.md",
+      "role": "documentation",
+      "additions": 5,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs",
+      "role": "source",
+      "additions": 26,
+      "deletions": 3,
+      "group": "Implementation"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.Tests/GenericsFormatterTests.cs",
+      "role": "test",
+      "additions": 189,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    }
+  ],
+  "provenance": {
+    "toolchain": "SDK 9.0.100; .NET 8 runtime; Roslyn 4.12; Linux; frozen two-assembly probe",
+    "origin": "local-execution-control",
+    "note": "Same frozen experiment on exact official base/head. Raw local receipt SHA-256: cb9164598c280eafdbc677c8ad68030a1579b6a0d489add6faab5d06f1052e8e. Hashes verify local bytes, not runner identity."
+  },
+  "limitations": [
+    "This is an adversarial control over the same official change, not a fifth organizer issue.",
+    "The behavioral claim covers one frozen #2283 reproduction, not every valid type shape or other issue.",
+    "The SDK/compiler compatibility overlay is explicit; no original-environment or production qualification is implied.",
+    "Imported evidence remains a declared local record; matching hashes do not authenticate a runner or person.",
+    "The application records local review decisions and performs no merge, release or model inference."
+  ]
+}

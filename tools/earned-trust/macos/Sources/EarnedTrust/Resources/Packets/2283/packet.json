@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "packetId": "tieto-2283",
+  "title": "Metadata generics without crashes",
+  "generatedAt": "2026-11-14T23:17:08.915832+00:00",
+  "source": {
+    "repository": "https://github.com/te-industry-tech-office/junction26-messagepack-csharp",
+    "baseSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+    "headSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+    "issueId": "2283",
+    "issueURL": "https://github.com/MessagePack-CSharp/MessagePack-CSharp/issues/2283",
+    "branch": "ju26-issue-2283"
+  },
+  "requirement": {
+    "id": "MP-2283",
+    "summary": "A consuming assembly receives a generated resolver for a generic value type defined in an external assembly.",
+    "details": "Require both no analyzer/generator crash and the expected generated consumer resolver. A normal build succeeding alone is insufficient."
+  },
+  "checks": [
+    {
+      "id": "diff-2283",
+      "title": "Pinned change inventory",
+      "requirementId": "MP-2283",
+      "kind": "structural",
+      "evidence": "observed",
+      "baseOutcome": "notRun",
+      "headOutcome": "notRun",
+      "baseSourceSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+      "headSourceSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+      "baseHarnessSha256": null,
+      "headHarnessSha256": null,
+      "baseLog": null,
+      "headLog": null,
+      "baseLogSha256": null,
+      "headLogSha256": null,
+      "limitations": [
+        "File classification is source inspection, not behavioral or coverage-tool execution."
+      ]
+    },
+    {
+      "id": "frozen-2283",
+      "title": "Frozen external-assembly generator check",
+      "requirementId": "MP-2283",
+      "kind": "differential",
+      "evidence": "observed",
+      "baseOutcome": "fail",
+      "headOutcome": "pass",
+      "baseSourceSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+      "headSourceSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+      "baseHarnessSha256": "96961b0d0267a9988aef04e278bcf2eba715c18a5667224f752e199619304327",
+      "headHarnessSha256": "96961b0d0267a9988aef04e278bcf2eba715c18a5667224f752e199619304327",
+      "baseLog": "evidence/base/observation.json",
+      "headLog": "evidence/head/observation.json",
+      "baseLogSha256": "334c8d43594764b0871a7a3312e2b6123c3fae1d83b24e7c29cd22611a4d94d3",
+      "headLogSha256": "f4da43f392d90f3a2e891fb4917ae3ffb5b3834156e76363ebae8563cac1268c",
+      "limitations": [
+        "Base: fail; diagnostics AD0001, CS8785; expected resolver present: False.",
+        "Head: pass; diagnostics none; expected resolver present: True.",
+        "One frozen input in a disclosed SDK 9.0.100 / net8.0 Linux compatibility experiment.",
+        "The original SDK 8 pin and original Windows/.NET 10 issue environment were not executed in this experiment.",
+        "Generated consumer compilation is checked; serialization round-trip behavior is outside this probe.",
+        "Local logs and their digests are preserved; this is not a signed or independently authenticated runner attestation."
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "fix-2283",
+      "title": "The supplied patch resolves the reproduced metadata-generic generator failure",
+      "requirementId": "MP-2283",
+      "kind": "fix",
+      "checkIds": [
+        "frozen-2283"
+      ],
+      "paths": [
+        "src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs"
+      ]
+    },
+    {
+      "id": "inventory-2283",
+      "title": "Changed paths are bound to the official source revisions",
+      "requirementId": "MP-2283",
+      "kind": "structural",
+      "checkIds": [
+        "diff-2283"
+      ],
+      "paths": [
+        "README.md",
+        "doc/analyzers/MsgPack004.md",
+        "src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs",
+        "tests/MessagePack.SourceGenerator.Tests/GenericsFormatterTests.cs"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "role": "documentation",
+      "additions": 5,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "doc/analyzers/MsgPack004.md",
+      "role": "documentation",
+      "additions": 5,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs",
+      "role": "source",
+      "additions": 26,
+      "deletions": 3,
+      "group": "Implementation"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.Tests/GenericsFormatterTests.cs",
+      "role": "test",
+      "additions": 189,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    }
+  ],
+  "provenance": {
+    "toolchain": "SDK 9.0.100; .NET 8 runtime; Roslyn 4.12; Linux; frozen two-assembly probe",
+    "origin": "local-execution",
+    "note": "Same frozen experiment on exact official base/head. Raw local receipt SHA-256: cb9164598c280eafdbc677c8ad68030a1579b6a0d489add6faab5d06f1052e8e. Hashes verify local bytes, not runner identity."
+  },
+  "limitations": [
+    "The behavioral claim covers one frozen #2283 reproduction, not every valid type shape or other issue.",
+    "The SDK/compiler compatibility overlay is explicit; no original-environment or production qualification is implied.",
+    "Imported evidence remains a declared local record; matching hashes do not authenticate a runner or person.",
+    "The application records local review decisions and performs no merge, release or model inference."
+  ]
+}

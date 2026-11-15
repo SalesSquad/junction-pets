@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "packetId": "tieto-2129",
+  "title": "Formatters across assembly boundaries",
+  "generatedAt": "2026-11-14T23:13:41Z",
+  "source": {
+    "repository": "https://github.com/te-industry-tech-office/junction26-messagepack-csharp",
+    "baseSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+    "headSha": "083afd994c1c9a994cb2cd5aa0b6ad805a621457",
+    "issueId": "2129",
+    "issueURL": "https://github.com/MessagePack-CSharp/MessagePack-CSharp/issues/2129",
+    "branch": "ju26-issue-2129"
+  },
+  "requirement": {
+    "id": "MP-2129",
+    "summary": "Generate a formatter for an external type without making the external assembly depend on MessagePack.",
+    "details": "Review the public feature contract, accessible members, surrogate mapping, wire compatibility and documented unsupported shapes. This is a larger semantic change despite its smaller file count."
+  },
+  "checks": [
+    {
+      "id": "diff-2129",
+      "title": "Pinned change inventory",
+      "requirementId": "MP-2129",
+      "kind": "structural",
+      "evidence": "observed",
+      "baseOutcome": "notRun",
+      "headOutcome": "notRun",
+      "baseSourceSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+      "headSourceSha": "083afd994c1c9a994cb2cd5aa0b6ad805a621457",
+      "baseHarnessSha256": null,
+      "headHarnessSha256": null,
+      "baseLog": null,
+      "headLog": null,
+      "baseLogSha256": null,
+      "headLogSha256": null,
+      "limitations": [
+        "File classification is source inspection, not behavioral or coverage-tool execution."
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "inventory-2129",
+      "title": "Changed paths are bound to the official source revisions",
+      "requirementId": "MP-2129",
+      "kind": "structural",
+      "checkIds": [
+        "diff-2129"
+      ],
+      "paths": [
+        "README.md",
+        "doc/analyzers/MsgPack019.md",
+        "doc/analyzers/MsgPack020.md",
+        "doc/analyzers/MsgPack021.md",
+        "doc/analyzers/MsgPack022.md",
+        "doc/analyzers/index.md",
+        "src/MessagePack.Annotations/Attributes.cs",
+        "src/MessagePack.SourceGenerator/AnalyzerReleases.Unshipped.md",
+        "src/MessagePack.SourceGenerator/Analyzers/MsgPack00xMessagePackAnalyzer.cs",
+        "src/MessagePack.SourceGenerator/CodeAnalysis/GeneratedFormatterCollector.cs",
+        "src/MessagePack.SourceGenerator/CodeAnalysis/GeneratedFormatterRequest.cs",
+        "src/MessagePack.SourceGenerator/CodeAnalysis/ObjectSerializationInfo.cs",
+        "src/MessagePack.SourceGenerator/GeneratorUtilities.cs",
+        "src/MessagePack.SourceGenerator/MessagePackGenerator.cs",
+        "src/MessagePack.SourceGenerator/Transforms/FormatterTemplate.cs",
+        "src/MessagePack.SourceGenerator/Transforms/FormatterTemplate.tt",
+        "src/MessagePack.SourceGenerator/Transforms/StringKey/StringKeyFormatterTemplate.cs",
+        "src/MessagePack.SourceGenerator/Transforms/StringKey/StringKeyFormatterTemplate.tt",
+        "src/MessagePack.SourceGenerator/Utils/Constants.cs",
+        "tests/MessagePack.SourceGenerator.ExecutionTests/GeneratedFormatterForExternalTypes.cs",
+        "tests/MessagePack.SourceGenerator.ExecutionTests/GeneratedFormatterForExternalTypesTests.cs",
+        "tests/MessagePack.SourceGenerator.ExecutionTests/MessagePack.SourceGenerator.ExecutionTests.csproj",
+        "tests/MessagePack.SourceGenerator.ExternalTypes/ExternalPerson.cs",
+        "tests/MessagePack.SourceGenerator.ExternalTypes/ExternalPoint.cs",
+        "tests/MessagePack.SourceGenerator.ExternalTypes/ExternalWidget.cs",
+        "tests/MessagePack.SourceGenerator.ExternalTypes/MessagePack.SourceGenerator.ExternalTypes.csproj",
+        "tests/MessagePack.SourceGenerator.MapModeExecutionTests/MessagePack.SourceGenerator.MapModeExecutionTests.csproj",
+        "tests/MessagePack.SourceGenerator.Tests/GeneratedMessagePackFormatterTests.cs"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "role": "documentation",
+      "additions": 52,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "doc/analyzers/MsgPack019.md",
+      "role": "documentation",
+      "additions": 26,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "doc/analyzers/MsgPack020.md",
+      "role": "documentation",
+      "additions": 23,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "doc/analyzers/MsgPack021.md",
+      "role": "documentation",
+      "additions": 23,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "doc/analyzers/MsgPack022.md",
+      "role": "documentation",
+      "additions": 31,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "doc/analyzers/index.md",
+      "role": "documentation",
+      "additions": 4,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "src/MessagePack.Annotations/Attributes.cs",
+      "role": "source",
+      "additions": 36,
+      "deletions": 0,
+      "group": "Implementation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/AnalyzerReleases.Unshipped.md",
+      "role": "documentation",
+      "additions": 4,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/Analyzers/MsgPack00xMessagePackAnalyzer.cs",
+      "role": "source",
+      "additions": 45,
+      "deletions": 1,
+      "group": "Implementation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/CodeAnalysis/GeneratedFormatterCollector.cs",
+      "role": "source",
+      "additions": 300,
+      "deletions": 0,
+      "group": "Implementation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/CodeAnalysis/GeneratedFormatterRequest.cs",
+      "role": "source",
+      "additions": 13,
+      "deletions": 0,
+      "group": "Implementation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/CodeAnalysis/ObjectSerializationInfo.cs",
+      "role": "source",
+      "additions": 7,
+      "deletions": 0,
+      "group": "Implementation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/GeneratorUtilities.cs",
+      "role": "source",
+      "additions": 3,
+      "deletions": 0,
+      "group": "Implementation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/MessagePackGenerator.cs",
+      "role": "source",
+      "additions": 36,
+      "deletions": 3,
+      "group": "Implementation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/Transforms/FormatterTemplate.cs",
+      "role": "source",
+      "additions": 3,
+      "deletions": 1,
+      "group": "Generator templates and transforms"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/Transforms/FormatterTemplate.tt",
+      "role": "source",
+      "additions": 1,
+      "deletions": 1,
+      "group": "Generator templates and transforms"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/Transforms/StringKey/StringKeyFormatterTemplate.cs",
+      "role": "source",
+      "additions": 3,
+      "deletions": 1,
+      "group": "Generator templates and transforms"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/Transforms/StringKey/StringKeyFormatterTemplate.tt",
+      "role": "source",
+      "additions": 1,
+      "deletions": 1,
+      "group": "Generator templates and transforms"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/Utils/Constants.cs",
+      "role": "source",
+      "additions": 2,
+      "deletions": 0,
+      "group": "Implementation"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.ExecutionTests/GeneratedFormatterForExternalTypes.cs",
+      "role": "test",
+      "additions": 50,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.ExecutionTests/GeneratedFormatterForExternalTypesTests.cs",
+      "role": "test",
+      "additions": 95,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.ExecutionTests/MessagePack.SourceGenerator.ExecutionTests.csproj",
+      "role": "test",
+      "additions": 5,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.ExternalTypes/ExternalPerson.cs",
+      "role": "test",
+      "additions": 15,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.ExternalTypes/ExternalPoint.cs",
+      "role": "test",
+      "additions": 12,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.ExternalTypes/ExternalWidget.cs",
+      "role": "test",
+      "additions": 15,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.ExternalTypes/MessagePack.SourceGenerator.ExternalTypes.csproj",
+      "role": "test",
+      "additions": 17,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.MapModeExecutionTests/MessagePack.SourceGenerator.MapModeExecutionTests.csproj",
+      "role": "test",
+      "additions": 2,
+      "deletions": 1,
+      "group": "Behavior and generator tests"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.Tests/GeneratedMessagePackFormatterTests.cs",
+      "role": "test",
+      "additions": 210,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    }
+  ],
+  "provenance": {
+    "toolchain": "git diff --no-renames --numstat -z",
+    "origin": "structural-inspection",
+    "note": "Official AI-authored changes are supplied by the organizer; this review desk and evidence collector are our contribution."
+  },
+  "limitations": [
+    "No behavioral qualification is inferred from source inspection.",
+    "Local hashes establish byte integrity, not runner identity, truthful outcomes or human authentication.",
+    "No model inference, merge, release or external approval is performed by this application."
+  ]
+}
