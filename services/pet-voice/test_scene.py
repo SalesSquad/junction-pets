@@ -163,6 +163,28 @@ class Quality(unittest.TestCase):
         self.assertIn("Lately you keep starting lines with: interesting. Start differently.", p)
 
 
+class VoiceSamples(unittest.TestCase):
+    def test_thumbs_down_on_a_designed_voice_falls_back_until_redesign(self):
+        import tempfile
+        import listen
+        with tempfile.TemporaryDirectory() as d:
+            orig = (listen.TASTE_FILE, scene.TASTE_FILE, scene.DESIGNED_FILE)
+            listen.TASTE_FILE = scene.TASTE_FILE = Path(d) / "taste.json"
+            scene.DESIGNED_FILE = Path(d) / "designed.json"
+            try:
+                scene.DESIGNED_FILE.write_text(json.dumps({"voices": {"rokoko": {"id": "voice_x", "createdAt": "2026-11-15T00:00:00Z"}}}))
+                self.assertEqual(scene.voice_for("rokoko"), "voice_x")
+                t = listen.ingest([{"id": "sample-rokoko", "choice": "down", "note": "liian tasainen"}], {}, {})
+                self.assertEqual(t["voiceRating"]["rokoko"], "down")
+                self.assertEqual(t["pets"]["rokoko"]["voiceNotes"], ["liian tasainen"])
+                self.assertEqual(t["notes"], [])                       # a voice note is not a writing note
+                self.assertEqual(scene.voice_for("rokoko"), pv.load_voices()["rokoko"]["voice"])
+                scene.DESIGNED_FILE.write_text(json.dumps({"voices": {"rokoko": {"id": "voice_y", "createdAt": "2099-01-01T00:00:00Z"}}}))
+                self.assertEqual(scene.voice_for("rokoko"), "voice_y")  # redesigned after the rating
+            finally:
+                listen.TASTE_FILE, scene.TASTE_FILE, scene.DESIGNED_FILE = orig
+
+
 class Taste(unittest.TestCase):
     def test_ratings_become_taste_and_steer_voice(self):
         import tempfile
