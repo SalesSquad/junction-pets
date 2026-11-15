@@ -118,10 +118,11 @@ not 180 new captures or independently executed commands**.
 See `evidence.json` for local execution/check outcomes and source/log digests.
 Actual Mini CPU diagnostics run nine scenarios × `[23,31]`. Default native
 capture failed with `mujoco.cgl.cgl.CGLError: invalid CoreGraphics connection` in
-this restricted executor. A full newly rendered 18-episode run remains blocked
-on an authorized working native graphics context. No OS permissions were changed.
-All logs/artifacts stay in the task's Mini Operations directory, outside Git;
-no iCloud persistence is claimed.
+this restricted executor. At that earlier run, full native rendering was blocked.
+The later 18-episode integration continuation is recorded in [RECOVERY.md](RECOVERY.md).
+No OS permissions were changed.
+The earlier logs/artifacts stay in the task's Mini Operations directory, outside Git;
+the continuation's temporary output location is in RECOVERY.md. No iCloud persistence is claimed.
 
 `historical.json` reuses existing `[7,11,19]` evidence without rerunning or
 relabeling it: 1,962 baseline post-fault command changes versus zero while
