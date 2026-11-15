@@ -14,7 +14,8 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     const apps = await exportApps(output);
     const catalog = JSON.parse(await readFile(join(output, 'catalog.json'), 'utf8'));
     assert.deepEqual(catalog.apps, apps);
-    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker','junction-aalto-university','junction-hostinger','junction-cala','junction-context-dev','junction-stoa','junction-mariadb','junction-astrazeneca','junction-valio-aimo']));
+    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-aalto-university','junction-hostinger','junction-cala','junction-context-dev','junction-stoa','junction-mariadb','junction-astrazeneca','junction-valio-aimo']));
+    assert.equal(apps.find(app=>app.path==='/apps/banker/index.html').petSlug,'junction-s-pankki');
     assert.equal(apps.filter(app=>app.petSlug==='junction-intel').length,2);
     assert.equal(apps.filter(app=>app.petSlug==='junction-valio-aimo').length,2);
     const aimoApp=apps.find(app=>app.path.includes('/aimo-trade/'));

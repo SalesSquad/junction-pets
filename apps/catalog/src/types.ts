@@ -9,6 +9,7 @@ export type Pet = {
   sourceEvidence:{roster:string;roleVerified:boolean;notes:string};
   availability:{content:string;runtime:string;companyEndorsed:boolean};
   specialCapabilities?:SpecialCapability[];
+  browserApps?:Array<{name:string;path:string}>;
 };
 export type SpecialCapability = {id:string;title:string;description:string;service:string;requiresConnection:boolean;status:'source-only'|'offline-demo'|'needs-host-connection';run?:string};
 export type Catalogue = {schemaVersion:1;collection:{id:string;title:string;sourceRevision:string;contentSha256:string};pets:Pet[]};
