@@ -202,7 +202,9 @@ def verify_reassembled(published, manifest):
 
 def _publish(private, collector, status, sources, proofs, identity):
     private = safe_root(private)
-    collector = Path(collector).absolute()
+    # Canonicalize existing parent aliases (/var -> /private/var on macOS) and
+    # symlinks *before* enforcing source/collector directory separation.
+    collector = Path(collector).resolve(strict=False)
     require(not collector.exists() and
             not collector.is_relative_to(private) and
             not private.is_relative_to(collector),

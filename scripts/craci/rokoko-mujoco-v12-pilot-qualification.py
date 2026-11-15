@@ -248,8 +248,10 @@ def run_pilot_originals(source_root, private, model, plan, policy, protocol,
                                         "transitions": trace}).decode() + "\n")
                     if arm == ARMS[0]:
                         baseline = row
-                    elif arm == ARMS[1] and baseline is not None and safe_goal(baseline) and not safe_goal(row):
-                        stop_reason = "CANDIDATE_LOST_ACTUAL_FROZEN_V5_GOAL"
+                    elif arm in (ARMS[1], ARMS[2]) and baseline is not None and safe_goal(baseline) and not safe_goal(row):
+                        stop_reason = ("CANDIDATE_LOST_ACTUAL_FROZEN_V5_GOAL"
+                                       if arm == ARMS[1] else
+                                       "TRAIN_ONLY_RIGHT4_LOST_ACTUAL_FROZEN_V5_GOAL")
                     if row["unsafe"]:
                         stop_reason = "OBSERVED_UNSAFE_ACTUAL_MUJOCO_COST"
                     if arm == ARMS[2]:
@@ -534,7 +536,9 @@ def main():
     unsafe = (readout["candidateUnsafeWorldSeeds"] +
               readout["explorationOnlyUnsafeWorldSeeds"])
     novel = readout["candidateNovelSafeGoalWorldSeeds"]
-    stop = bool(lost or unsafe or not novel or
+    exploration_lost = readout["explorationOnlyLostV5GoalWorldSeeds"]
+    stop = bool(lost or unsafe or exploration_lost or
+                readout["hardStopNoFurtherPhysics"] or not novel or
                 replay["untrained_right4_actual_legal_executions"] == 0)
     science = ("STOP_UNSAFE_LOST_ZERO_NOVEL_OR_NO_ACTUAL_RIGHT4_DATA" if stop else
                "TRAIN_ONLY_SCIENCE_HYPOTHESIS_REQUIRES_NEW_REVIEW")

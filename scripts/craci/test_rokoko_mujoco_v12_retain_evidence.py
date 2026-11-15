@@ -200,6 +200,16 @@ class V12RetentionTests(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError, "NEW_SEPARATE_PRIVATE"):
                 pack.publish_early_stop(original, original / "collector")
 
+    def test_symlinked_alias_to_private_root_cannot_hide_collector_inside_it(self):
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            original = incomplete_fixture(base)
+            alias = base / "private-alias"
+            alias.symlink_to(original, target_is_directory=True)
+            with self.assertRaisesRegex(AssertionError, "NEW_SEPARATE_PRIVATE"):
+                pack.publish_early_stop(original, alias / "collector")
+            self.assertFalse((original / "collector").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
