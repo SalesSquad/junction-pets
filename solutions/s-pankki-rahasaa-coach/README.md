@@ -21,7 +21,7 @@ Non-goals for this slice: real customer data, production deployment, payments.
 ## Source
 
 The implementation lives in the private repository [SalesSquad/spankki-coach](https://github.com/SalesSquad/spankki-coach) and is not copied here.
-Pinned source: main `12acbc5af307cc605850c50ca791884b32ea64e4` (2026-11-15). See [architecture](ARCHITECTURE.md) and [progress](PROGRESS.md).
+Pinned source: main `4eb0c564c25a4f80cd9c77e03635cb2f0cbd6bbf` (2026-11-15). See [architecture](ARCHITECTURE.md) and [progress](PROGRESS.md).
 
 ## Results (measured, synthetic dataset)
 
@@ -36,7 +36,8 @@ Pinned source: main `12acbc5af307cc605850c50ca791884b32ea64e4` (2026-11-15). See
 | TF-IDF + logistic regression | 384 | CPU baseline |
 
 **Edge answers** (card-only, no model call): 29 % of questions, −34 % cost, but a Sonnet judge preferred Haiku's
-answer in 93.6 % → not shipped; proposal is a speculative card shown while the model answers.
+answer in 93.6 % → not shipped. Instead the router's card is shown at once as a **speculative card** while the coach
+answers (PR #96).
 
 **Chaos lab** — 20 Haiku red-team attackers × 3 conversations × 4 real coach turns (240 turns), Haiku grader, Sonnet
 confirmer: swarm 1 found 7 (5 harness artefacts, 1 real bug — a future period answered "0 €", fixed, 1 prompt
@@ -53,5 +54,5 @@ and [progress](PROGRESS.md). Code changes go to the source repository; this work
 
 - User-visible outcome: `npm run dev:api` in the source repository, then `POST /api/customers/:id/chat` returns a
   grounded answer with receipts (needs Anthropic credentials).
-- Decisive test: `npm run check` in the source repository at `12acbc5af307cc605850c50ca791884b32ea64e4` → 454 pass / 0 fail (local CI, PR #95).
+- Decisive test: `npm run check` in the source repository at `4eb0c564c25a4f80cd9c77e03635cb2f0cbd6bbf` → 457 pass / 0 fail (local CI, PR #96).
 - Demo/submission material: not yet prepared.
