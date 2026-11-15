@@ -20,7 +20,9 @@ for (let i = 0; i < 100; i++) {
     return { operation: op, target: pick(TARGETS), parameters: params, reason: pick(['lag', 'cost', 'DPO request', 'käyttäjä pyysi']), risk: HIGH.has(op) ? 'high' : pick(['low', 'medium', 'high']), reversible: r() < 0.5, owner_role: pick(['platform owner', 'data protection officer']), rollback: pick(['revert plan', 'restore from backup', 'none possible']) }; });
   const response = { answer: 'a', facts: [], assumptions: [], action_proposals: proposals, executed_actions: [], next_check: 'n' };
   const ctx = { adoptionId: `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`, agentVersionId: '00000000-0000-4000-8000-0000000000aa', authorityRevision: String(1 + (i % 9)), conversationId: `conv-${i}`, chibi: 'junction.aiven' };
-  const pending = toPendingActions(response, ctx);
+  // Synthetic vector input: this is not an authorized intent in a real host.
+  const trustedUserIntents = proposals.map(({ operation, target, parameters }) => ({ operation, target, parameters }));
+  const pending = toPendingActions(response, ctx, { trustedUserIntents });
   vectors.push({ i, input: { response, ctx }, canonicalProposals: proposals.map(p => canonical({ ...p, adoption_id: ctx.adoptionId, agent_version_id: ctx.agentVersionId, authority_revision: ctx.authorityRevision })), canonicalPayloads: proposals.map(p => canonical({ operation: p.operation, target: p.target, parameters: p.parameters })), expected: pending.map(p => ({ id: p.id, proposal_hash: p.proposal_hash, payload_hash: p.payload_hash, idempotency_key: p.idempotency_key, title: p.title })) });
 }
 const out = JSON.stringify({ schemaVersion: 1, canonicalization: 'RFC 8785 (JCS)', hash: 'sha256 hex of UTF-8 canonical JSON', idempotencyKey: '<conversationId>:<proposal index>:<proposal_hash[0..12]>', id: 'act_<proposal_hash[0..16]>', vectors }, null, 1) + '\n';

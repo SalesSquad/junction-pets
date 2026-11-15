@@ -73,6 +73,25 @@ export function toPendingActions(response, ctx, opts = {}) {
   for (const field of ['adoptionId', 'agentVersionId', 'authorityRevision', 'conversationId', 'chibi']) {
     if (!ctx || typeof ctx[field] !== 'string' || !ctx[field].trim()) throw new TypeError(`missing host context: ${field}`);
   }
+  // The host supplies these exact intents from the user's own request, never from a
+  // model answer or an attachment. They are not execution grants or approvals.
+  // Text-based injection detection is only a heuristic and is not this boundary.
+  if (response.action_proposals.length) {
+    const intents = opts.trustedUserIntents;
+    const invalid = !Array.isArray(intents) || !isSafeJson(intents) || intents.some(intent =>
+      !intent || typeof intent !== 'object' || Array.isArray(intent) ||
+      Object.keys(intent).length !== 3 || !Object.hasOwn(intent, 'operation') ||
+      !Object.hasOwn(intent, 'target') || !Object.hasOwn(intent, 'parameters') ||
+      !OPS.has(intent.operation) || typeof intent.target !== 'string' || !intent.target.trim() ||
+      !intent.parameters || typeof intent.parameters !== 'object' || Array.isArray(intent.parameters));
+    if (invalid) throw new TypeError('trusted user intent required for every proposal');
+    const allowed = new Set(intents.map(intent => canonical(intent)));
+    for (const p of response.action_proposals) {
+      if (!allowed.has(canonical({ operation: p.operation, target: p.target, parameters: p.parameters }))) {
+        throw new TypeError('proposal does not match a trusted user intent');
+      }
+    }
+  }
   return response.action_proposals.map((p, i) => {
     const payload = canonical({ operation: p.operation, target: p.target, parameters: p.parameters });
     const proposal = canonical({ ...p, adoption_id: ctx.adoptionId, agent_version_id: ctx.agentVersionId, authority_revision: ctx.authorityRevision });

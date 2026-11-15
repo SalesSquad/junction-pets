@@ -53,7 +53,7 @@
     },
     "action_proposals": {
       "type": "array",
-      "description": "Changes the user asked for. Never executed by the companion; each becomes a Chibi pending action that a human approves or declines.",
+      "description": "Changes the user explicitly asked for. Never executed by the companion; the host may create a pending human decision only after matching trusted user intent and policy.",
       "items": {
         "type": "object",
         "additionalProperties": false,

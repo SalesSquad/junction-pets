@@ -8,6 +8,8 @@ const draft = { answer: 'Scale it up.', facts: [], assumptions: [], action_propo
 const issues = lintResponse(draft, request);
 const repaired = { ...draft, action_proposals: [{ operation: 'service_update_plan', target: 'orders-kafka', parameters: { plan: 'business-8' }, reason: 'Lag after cause check', risk: 'medium', reversible: true, owner_role: 'platform owner', rollback: 'Downgrade to the previous plan' }], risks_and_side_effects: ['Higher cost; verify on current Aiven pricing'] };
 const ctx = { adoptionId: '00000000-0000-4000-8000-000000000001', agentVersionId: '00000000-0000-4000-8000-000000000002', authorityRevision: '1', conversationId: 'demo', chibi: 'any.pet' };
-const [pending] = toPendingActions(repaired, ctx);
+// Fixture represents a host-parsed user request, not an intent derived from model output.
+const trustedUserIntents = [{ operation: 'service_update_plan', target: 'orders-kafka', parameters: { plan: 'business-8' } }];
+const [pending] = toPendingActions(repaired, ctx, { trustedUserIntents });
 const flight = compare(runBaseline(), await runFlightRecorder(memoryAdapter()));
 console.log(JSON.stringify({ lintIssuesBeforeRepair: issues, lintIssuesAfterRepair: lintResponse(repaired, request), pendingAction: { id: pending.id, title: pending.title, state: pending.state, risk: pending.risk }, humanDecision: decisionFor(pending, 'approve'), flightRecorder: { baseline: flight.baseline, recorder: { executed: flight.recorder.executed, duplicates: flight.recorder.duplicates, lost: flight.recorder.lost, replayNewEffects: flight.recorder.replayNewEffects } } }, null, 2));

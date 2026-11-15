@@ -31,17 +31,21 @@ export function escalationReasons(response, request, issuesAfterRepair, { escala
 export async function answerWithCascade({ request, attachments = [], claude, small = 'haiku', large = 'sonnet', escalateSensitive = false, toolHeavy = false }) {
   const prompt = composeTurn(request, attachments);
   let cost = 0, route = small;
-  let a = await claude(small, prompt, ALL, RESPONSE_SCHEMA_V2); cost += a.cost ?? 0;
+  const call = async (...args) => { try { return await claude(...args) ?? {}; } catch { return {}; } };
+  const recordCost = result => { if (Number.isFinite(result?.cost) && result.cost >= 0) cost += result.cost; };
+  let a = await call(small, prompt, ALL, RESPONSE_SCHEMA_V2); recordCost(a);
   if (!a.data) return { error: a.error ?? 'no structured output', route, cost };
-  let issues = lintResponse(a.data, request, attachments);
+  let issues = lintResponse(a.data, request, attachments, { schema: RESPONSE_SCHEMA_V2 });
   if (issues.length) {
-    const fix = await claude(small, `${prompt}\n\n---\nYour previous typed response was:\n${JSON.stringify(a.data)}\n\nAutomatic checks found these issues:\n${issues.map(i => '- ' + i).join('\n')}\n\nReturn a corrected, complete typed response.`, ALL, RESPONSE_SCHEMA_V2);
-    cost += fix.cost ?? 0;
-    if (fix.data) { a = fix; route = `${small}+repair`; issues = lintResponse(a.data, request, attachments); }
+    const fix = await call(small, `${prompt}\n\n---\nThe previous response failed checks and is omitted.\nAutomatic checks found these issues:\n${issues.map(i => '- ' + i).join('\n')}\n\nReturn a corrected, complete typed response.`, ALL, RESPONSE_SCHEMA_V2);
+    recordCost(fix);
+    if (fix.data) { a = fix; route = `${small}+repair`; issues = lintResponse(a.data, request, attachments, { schema: RESPONSE_SCHEMA_V2 }); }
   }
-  const reasons = escalationReasons(a.data, request, issues, { escalateSensitive, toolHeavy });
+  const reasons = escalationReasons(issues.length ? null : a.data, request, issues, { escalateSensitive, toolHeavy });
   if (!reasons.length) return { response: a.data, route, reasons, cost };
-  const big = await claude(large, prompt, systemFor(request).system, RESPONSE_SCHEMA_V2); cost += big.cost ?? 0;
-  if (!big.data) return { response: a.data, route: `${route} (escalation failed)`, reasons, cost };
+  const big = await call(large, prompt, systemFor(request).system, RESPONSE_SCHEMA_V2); recordCost(big);
+  if (!big?.data) return { error: 'escalation failed', route: large, reasons, cost };
+  const bigIssues = lintResponse(big.data, request, attachments, { schema: RESPONSE_SCHEMA_V2 });
+  if (bigIssues.length) return { error: 'escalated response failed validation', route: large, reasons, issues: bigIssues, cost };
   return { response: big.data, route: large, reasons, cost };
 }

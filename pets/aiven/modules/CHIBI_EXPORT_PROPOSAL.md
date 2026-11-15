@@ -48,8 +48,10 @@ current validator rejects any persona key other than `system_prompt` and
 1. The provider returns `response.v2` via structured output. The host validates it.
    `solutions/aiven-decision-bridge/bridge.mjs` is the reference: non-empty
    `executed_actions`, a LIVE handoff label or a non-official source fails closed.
-2. Each `action_proposal` becomes a `PendingAction`. The canonical proposal and
-   payload hashes, plus the idempotency key, map to `chibi-store` `action_decisions`.
+2. The host first matches each proposal's exact operation, target and parameters
+   to an independently supplied intent from the user's own explicit request, then
+   applies its policy. Eligible proposals may become a `PendingAction`; the
+   canonical hashes and idempotency key map to `chibi-store` `action_decisions`.
 3. A human approves or declines with `ActionDecisionBinding`
    (`proposal_hash`, `version`, `authority_revision`). Only then may the gateway run
    the operation, under its own policy.
@@ -65,5 +67,6 @@ RESULTS-20261114-astra.md, rounds 5–6):
 | A: all modules + v2 | 70 % / 0.900 | 65 % / 0.863 |
 | B: routed modules + v2 | 63 % / 0.908 | 75 % / 0.925 |
 
-**Recommendation: adopt A now** (no host change, the largest jump for both models).
-**Plan B** for Sonnet-class models, where routing adds a further 10 points.
+These are historical developer measurements, not a host qualification. The later
+injection evaluation did not meet its 95% target. Keep the integration disabled
+until the changed model path and actual host trust boundary have been evaluated.

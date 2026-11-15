@@ -27,3 +27,43 @@ test('sensitive data stays on haiku by default; opt-in and tool-heavy requests e
   assert.deepEqual(escalationReasons(resp({ action_proposals: [{ risk: 'high' }] }), 'x', [], { escalateSensitive: true }), ['high-risk proposal']);
   assert.deepEqual(escalationReasons(resp(), 'x', [], { toolHeavy: true }), ['tool-heavy request']);
 });
+
+test('a failed escalation never returns a response that failed checks', async () => {
+  const f = fake((model) => model === 'sonnet' ? null : resp());
+  const r = await answerWithCascade({ request: 'Scale pg to business-8', claude: f.claude });
+  assert.equal(r.response, undefined);
+  assert.match(r.error, /escalation/i);
+  assert.deepEqual(f.calls, ['haiku', 'haiku', 'sonnet']);
+});
+
+test('an escalation response must pass the same checks before it is returned', async () => {
+  const f = fake((model) => model === 'sonnet' ? resp({ executed_actions: ['delete'] }) : resp());
+  const r = await answerWithCascade({ request: 'Inspect services', toolHeavy: true, claude: f.claude });
+  assert.equal(r.response, undefined);
+  assert.match(r.error, /validation/i);
+});
+
+test('a required escalation cannot silently fall back when the larger model fails', async () => {
+  const f = fake((model) => model === 'sonnet' ? null : resp());
+  const r = await answerWithCascade({ request: 'Inspect services', toolHeavy: true, claude: f.claude });
+  assert.equal(r.response, undefined);
+  assert.match(r.error, /escalation/i);
+});
+
+test('a thrown transport error or malformed model output cannot escape as an answer', async () => {
+  const f = fake((model) => model === 'sonnet' ? ['not an object'] : resp());
+  const r = await answerWithCascade({ request: 'Inspect services', toolHeavy: true, claude: f.claude });
+  assert.equal(r.response, undefined);
+  assert.match(r.error, /validation/i);
+  const failed = await answerWithCascade({ request: 'Inspect services', claude: async () => { throw Error('backend unavailable'); } });
+  assert.equal(failed.response, undefined);
+  assert.match(failed.error, /no structured output/i);
+});
+
+test('a malformed response with getters is never serialized during repair', async () => {
+  const invalid = {}; Object.defineProperty(invalid, 'answer', { enumerable: true, get() { throw Error('getter executed'); } });
+  const f = fake((model, n) => n === 1 ? invalid : resp());
+  const r = await answerWithCascade({ request: 'Inspect services', claude: f.claude });
+  assert.equal(r.route, 'haiku+repair');
+  assert.equal(r.response.answer, 'ok');
+});
