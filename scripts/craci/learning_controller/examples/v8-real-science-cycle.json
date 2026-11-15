@@ -1,0 +1,223 @@
+{
+  "schema": "junction.craci.learning-controller.v1.evidence-cycle",
+  "workId": "J26-CRACI-SELF-IMPROVING-LOOP-20261114",
+  "input": {
+    "githubRun": 43645486985,
+    "sourceSha": "87c91de52cef5c3e745115f737abc4ab8d654a32",
+    "harnessSha": "251f003b56b9eea1aff79568ad351f615acaee20",
+    "rawSha256": {
+      "training": "af84ec8c6552383e29b8a8dd18ef237c8e3dfd3080729b16f445239618327965",
+      "transitions": "cbaeacd5a7a2a46a30e6b63afeb12614552da032b68e78a6a90fa7d75c49101a",
+      "manifest": "08915667f14bdbeed191b457cb3576fde55180aaedc1499614f9f81db41238c5",
+      "qualification": "1215cbbaf9807830121c396f8348065b7c6451ee5436e697b2258d0622e24f59",
+      "replay": "af11a65aa2599973830df743b02ab6838622e7c1ee0ff26061f3ca305fbd95bf",
+      "readout": "852947f49dd8c9533a2e3fdd1d375a9a4fb0f002dd9e6b73027c58cc6b27d457",
+      "receipt": "59e200ce7570157f643174b9f0d8dce8a9c47fdf99aa5080afaab8b7da337e6f"
+    },
+    "datasetSha256": "217bf81618cb6641dd106540b5dbc9f2ae7bd89d232684b7675d59479bc7ad4c",
+    "sourceReportedReceiptRunId": "craci.43645486985.1.0627c4e23e4a1296"
+  },
+  "originalEvidenceRecheck": {
+    "episodes": 640,
+    "optionTransitions": 29923,
+    "allSevenActionMasksLegal": true,
+    "publicObservations18D": true,
+    "scannedWorlds": 365,
+    "selectedNearWorlds": 128,
+    "selectedClearWorlds": 32,
+    "selectionFromPublicInitialObservation": true,
+    "sourceReceiptState": "success-but-source-reported",
+    "independentQualification": "TRAIN-only positive replay, no held-out certification"
+  },
+  "observation": {
+    "strategyMetrics": {
+      "frozen_v5": {
+        "worlds": 160,
+        "goals": 29,
+        "nearGoals": 9,
+        "clearGoals": 20,
+        "unsafe": 0,
+        "nearReopenAfterAnySide": 65,
+        "nearReopenAfterLateral25": 4,
+        "nearLateral25": 16,
+        "nearDwell": 0
+      },
+      "frozen_v6": {
+        "worlds": 160,
+        "goals": 22,
+        "nearGoals": 2,
+        "clearGoals": 20,
+        "unsafe": 0,
+        "nearReopenAfterAnySide": 90,
+        "nearReopenAfterLateral25": 8,
+        "nearLateral25": 28,
+        "nearDwell": 0
+      },
+      "repeat_left": {
+        "worlds": 160,
+        "goals": 0,
+        "nearGoals": 0,
+        "clearGoals": 0,
+        "unsafe": 0,
+        "nearReopenAfterAnySide": 94,
+        "nearReopenAfterLateral25": 50,
+        "nearLateral25": 87,
+        "nearDwell": 0
+      },
+      "v8_hierarchical": {
+        "worlds": 160,
+        "goals": 1,
+        "nearGoals": 0,
+        "clearGoals": 1,
+        "unsafe": 0,
+        "nearReopenAfterAnySide": 108,
+        "nearReopenAfterLateral25": 55,
+        "nearLateral25": 84,
+        "nearDwell": 0
+      }
+    },
+    "paired": {
+      "baseline": "frozen_v5",
+      "candidate": "v8_hierarchical",
+      "worlds": 160,
+      "nearWorlds": 128,
+      "clearWorlds": 32,
+      "baselineSafeGoals": 29,
+      "candidateSafeGoals": 1,
+      "preservedBaselineGoalSeeds": [
+        513041
+      ],
+      "lostBaselineGoalSeeds": [
+        513000,
+        513001,
+        513004,
+        513006,
+        513007,
+        513011,
+        513016,
+        513017,
+        513018,
+        513020,
+        513024,
+        513025,
+        513026,
+        513029,
+        513030,
+        513032,
+        513034,
+        513035,
+        513038,
+        513039,
+        513044,
+        513158,
+        513175,
+        513180,
+        513243,
+        513278,
+        513295,
+        513306
+      ],
+      "novelGoalSeedsVsBaseline": [],
+      "nearLostFrozenUnionSeeds": [
+        513011,
+        513035,
+        513158,
+        513175,
+        513180,
+        513243,
+        513278,
+        513295,
+        513306
+      ],
+      "nearNovelGoalSeedsVsFrozen": [],
+      "newlyUnsafeWorldSeeds": [],
+      "unsafeWithAllReadoutControlsSafeSeeds": []
+    },
+    "scienceVerdict": "NO_GO_LOST_FROZEN_GOALS",
+    "modelPromotionAuthorized": false,
+    "qualificationScope": "REAL_PAIRED_TRAIN_ONLY_NOT_DEV_TEST_OR_DEPLOYMENT"
+  },
+  "next": {
+    "schema": "junction.craci.learning-controller.v1.next-cycle-advisory",
+    "sourceEvidence": {
+      "sourceCommit": "87c91de52cef5c3e745115f737abc4ab8d654a32",
+      "trainingSha256": "af84ec8c6552383e29b8a8dd18ef237c8e3dfd3080729b16f445239618327965",
+      "transitionArchiveSha256": "cbaeacd5a7a2a46a30e6b63afeb12614552da032b68e78a6a90fa7d75c49101a",
+      "qualifiedRunId": "craci.43645486985.1.0627c4e23e4a1296",
+      "level": "source-reported-plus-independent-source-replay"
+    },
+    "failureSignal": {
+      "verdict": "NO_GO_LOST_FROZEN_GOALS",
+      "lostBaselineGoalWorlds": 28,
+      "nearLostFrozenGoalWorlds": 9,
+      "candidateForwardReopenedNearWorlds": 108,
+      "candidateStrictLateral25ThenReopen": 55,
+      "candidateSafeNearGoals": 0,
+      "failureHypothesis": "goal_completion_after_safe_reopening"
+    },
+    "observedTeacherSelection": {
+      "seedIds": [
+        513011,
+        513035,
+        513158,
+        513175,
+        513180,
+        513243,
+        513278,
+        513295,
+        513306
+      ],
+      "source": "original same-world frozen V5/V6 winning TRAIN observations",
+      "labels": "only actual observed actions of successful frozen controls; NOT counterfactual action labels",
+      "candidateFailureRowsMayChangeSamplingWeights": true
+    },
+    "proposedProspective": {
+      "candidateCommit": "58c972e58575f022f2e97f09612f7c7fb244d4cb",
+      "candidateWeightsSha": "3a926fdd80bc5bfe069ba4ab50792aaed760d81480eb68a80b6e087beec71f3d",
+      "candidateStrategyId": "v10_candidate",
+      "incumbentStrategyId": "v8_hierarchical",
+      "nextTrainSeedStart": 515000,
+      "seedScanRangeInclusive": [
+        515000,
+        515511
+      ],
+      "seedScanSha256": "65380387109d8321420d6b198a1c702a5fa6dc1688c55d93caf5375593f2744e",
+      "initialObservationOnlySelection": {
+        "nearWorldsTarget": 128,
+        "clearWorldsTarget": 32,
+        "noClaimsAboutFutureWorldClassification": true
+      },
+      "pairedStrategies": [
+        "frozen_v5",
+        "frozen_v6",
+        "repeat_left",
+        "v8_hierarchical",
+        "v10_candidate"
+      ],
+      "maxEpisodesIfWorldTargetsMet": 800,
+      "rawCapturePreflight": {
+        "summaryCaptureLimitBytes": 19922944,
+        "nextActualSummaryBytes": "unknown_until_generated",
+        "mustUseReviewedLosslessChunkingIfOverLimit": true,
+        "mustVerifyExactRawEpisodeCountAndTransitionTotalsAfterReassembly": true,
+        "noSilentTruncationOrLossyFiltering": true
+      },
+      "mustPreserveExactWorldPairing": true,
+      "prereqs": [
+        "independent code review",
+        "source-pinned CRACI workflow",
+        "fresh provider credit meter",
+        "owner-approved admission under active window"
+      ],
+      "noHeldoutDevTestOod": true,
+      "dispatchAuthorized": false
+    },
+    "nextLearningCriterion": "Preserve every frozen-V5 goal world, reduce newly unsafe worlds to zero, and gain at least one truly new paired safe goal before independent model review.",
+    "modelPromotionAuthorized": false,
+    "automaticallyTrainModel": false,
+    "automaticallyDispatch": false,
+    "qualifiedFutureGain": false
+  },
+  "activationState": "ADVISORY_NO_DISPATCH_NO_MODEL_PROMOTION",
+  "note": "Deterministic feedback from historical real MuJoCo TRAIN bytes. This compiler does not execute a new training or physics experiment."
+}
