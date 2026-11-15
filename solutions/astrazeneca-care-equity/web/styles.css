@@ -54,3 +54,10 @@ thead th{hyphens:manual}
 @media print{.decision-card{border:0;padding:0}.decision-card details{break-inside:avoid}.decision-card a:after{content:' (' attr(href) ')';font-size:8pt}.decision-card .decision-evidence{grid-template-columns:1fr 1fr 1fr}.decision-topline .review-tag{color:black}.decision-card .registry-context{grid-template-columns:1fr}.decision-card .context-card{break-inside:avoid}}
 /* Live second reader (15 Nov): Nemotron's own answer under the scribe demo verdict */
 .scribe-try .second-note{margin:6px 0 0}.second-call{border-left:3px solid var(--teal);padding:4px 0 4px 16px;margin:14px 0}.second-call h4{margin:0 0 6px}.second-call[data-served="none"],.second-call[data-served="stored"]{border-left-color:var(--line)}.second-call .large-claim{font-size:1rem;margin:10px 0 0}
+
+/* Jury view (?jury): only the sections of the demo click path; the full report is one link away. */
+.jury-only{display:none}
+.jury .jury-only{display:block;margin:20px 0 0;padding:10px 14px;border-left:4px solid var(--teal);background:var(--wash);font-size:.9rem}
+.jury #county,.jury #goal,.jury #insight,.jury #brief,.jury #collect,.jury #evidence,.jury .tracks-intro,.jury #scribe-content,.jury details.scenario-model,.jury #process-headline{display:none}
+.jury nav a[href="#county"],.jury nav a[href="#goal"],.jury nav a[href="#insight"],.jury nav a[href="#brief"],.jury nav a[href="#collect"],.jury nav a[href="#evidence"]{display:none}
+.jury .chip:not(.synthetic){opacity:.55}

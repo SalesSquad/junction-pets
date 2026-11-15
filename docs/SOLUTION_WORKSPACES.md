@@ -88,6 +88,6 @@ still contain TODOs: the first developer task replaces them with a testable slic
 > return a draft PR with source-bound evidence and the next executable task.
 
 The workspace works with any authorized developer executor that can read this
-private GitHub repository. It is portable source/tooling, not a newly provisioned
+GitHub repository. It is portable source/tooling, not a newly provisioned
 always-on cloud service. Cloud capacity, runtime collaboration and hardware
 qualification remain separate observed gates.

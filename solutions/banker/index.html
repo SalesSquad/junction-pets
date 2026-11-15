@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="fi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Banker – Junction-demo</title><link rel="stylesheet" href="styles.css"></head>
+<body><main><header><span class="eyebrow">JUNCTION · BANKER</span><h1>Raha-asiat yhdellä silmäyksellä</h1><p>Tämä on kuvitteellinen, selaimessa toimiva demo. Se ei ole yhteydessä pankkiin eikä siirrä rahaa.</p></header>
+<section class="balance"><span>Cayman Island Bank · leikkitili</span><strong id="balance">0,00 €</strong><small>Demo · ei oikea pankkitili</small></section>
+<div class="grid"><section><h2>Tilin tapahtumat</h2><p class="muted">Kuvitteelliset AI-palvelujen laskut. Laskuja ei ole maksettu.</p><ul id="invoices"></ul></section>
+<section><h2>Maksupyyntö</h2><p>Toinen agentti voi ehdottaa maksua. Tässä demossa voit kokeilla hyväksyntänäkymää ilman rahansiirtoa.</p><label>Saaja <input id="recipient" value="AI Studio (demo)" maxlength="80"></label><label>Summa euroina <input id="amount" type="number" min="0.01" step="0.01" value="10.00"></label><button id="request">Näytä hyväksyntä</button><p id="result" role="status"></p></section></div>
+<section><h2>Bankerin oikeudet</h2><p class="muted">Nämä valinnat ovat vain tämän avoimen demon näkymätilaa. Ne eivät anna oikeuksia pankkiin tai muille agenteille.</p><label class="check"><input type="checkbox" checked> Näytä demotilit</label><label class="check"><input type="checkbox"> Vastaanota agenttien maksupyyntöjä (demo)</label><label class="check"><input id="voice" type="checkbox"> Ääni-ilmoitus hyväksyntäpyynnöstä (selaimen ääni)</label></section>
+<dialog id="approval"><h2>Hyväksy demopyyntö?</h2><p id="summary"></p><p>Vain simulaatio: oikeaa maksua ei lähetetä.</p><div class="actions"><button id="cancel" class="secondary">Hylkää</button><button id="approve">Hyväksy demo</button></div></dialog>
+</main><script type="module" src="app.mjs"></script></body></html>

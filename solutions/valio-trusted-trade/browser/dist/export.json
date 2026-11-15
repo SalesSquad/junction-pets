@@ -1,0 +1,130 @@
+{
+  "format": 1,
+  "app": "valio-aimo-browser-local",
+  "scope": "BROWSER_LOCAL_SYNTHETIC",
+  "inputs": [
+    {
+      "path": "browser/app.css",
+      "sha256": "f6dd56c603259f5d19a3591bdf3613d1cd86009549717fafdd96bac239a02bbf"
+    },
+    {
+      "path": "browser/app.mjs",
+      "sha256": "d7ece02272ca801ecb014c5ece6127915afa7caf20dbc9c957146af2db531100"
+    },
+    {
+      "path": "browser/assert.mjs",
+      "sha256": "f7754217898a02b9093a9e3fc19af60207f2dc440a978755e9f33912f0cadb1c"
+    },
+    {
+      "path": "browser/build.mjs",
+      "sha256": "50037d949c152b1319d3686e7369cb2882d424eb17f91dbd7bac909e13718822"
+    },
+    {
+      "path": "browser/crypto.mjs",
+      "sha256": "8f2315ce1b3a43d672ee687bb008a17940005e87a7ffee1d2fc56cb276f0115b"
+    },
+    {
+      "path": "browser/globals.mjs",
+      "sha256": "cbabd1da772abc34f76673f979ae0843dbc51c23409bb15b574daf04275fc0d5"
+    },
+    {
+      "path": "browser/index.html",
+      "sha256": "031fcd96b13ed545f238f5d836eefc4f6601a400f5bad9c555812b11c41bf7f7"
+    },
+    {
+      "path": "browser/package-lock.json",
+      "sha256": "059c90d4f31bbb70daf254d8add82bb79327364fca5f8f061a302f5b9b66a34e"
+    },
+    {
+      "path": "browser/package.json",
+      "sha256": "56fad0616fc583838553bdfc3803acf9abe7a3346343468425e0d7d45ce445f6"
+    },
+    {
+      "path": "browser/process-disabled.mjs",
+      "sha256": "4b64f659f634019ed118d3b5142caed01198f0c79fa8269bb86484b717c9863f"
+    },
+    {
+      "path": "browser/runtime.mjs",
+      "sha256": "0630174d027e86973bf37532079d7dc692dce721867255cf1ed55f60c7031515"
+    },
+    {
+      "path": "browser/verify.mjs",
+      "sha256": "c2754d4c6296a1042d7658b968ae687f532d1de5884dfe5e508023a35c666076"
+    },
+    {
+      "path": "src/buyer-terms.mjs",
+      "sha256": "402fdc78b61b246430e92746af06d1617c4cb348d24003f9d3fdaf0e799afc94"
+    },
+    {
+      "path": "src/core.mjs",
+      "sha256": "6a8287064645ac5228619661b157dfcbd8415fba34417b33ccf306f8294e2b8e"
+    },
+    {
+      "path": "src/procurement-diagnostics.mjs",
+      "sha256": "d7091a2bb2b36ba8082e32b1b6945d715739ef242b4a4cb29e96272c3fe6e41e"
+    },
+    {
+      "path": "src/procurement-planner.mjs",
+      "sha256": "bfa73890604786f41f5255625c49664e655de3d618cf5c4cdcf8345651377511"
+    },
+    {
+      "path": "src/purchase-units.mjs",
+      "sha256": "09013fd212ee910dade6e08ccb0fa58c004d46a1657e30f7dd7b364a5736ebd6"
+    },
+    {
+      "path": "src/scanning.mjs",
+      "sha256": "3b4cf614cbae1ae4c13fa29360069aa81f0b4e9b5816cac64c2fe0ecb01ccfbc"
+    },
+    {
+      "path": "src/settlement.mjs",
+      "sha256": "40c9c1a3bc8c60aa5495ba5bc6721b7dadc50691acb5022deb72fba2d8faeb54"
+    },
+    {
+      "path": "src/trust-envelope.mjs",
+      "sha256": "e197ba326ee5be7bcbfbe31e1ebe9c18e5f23906c36f4f5149a19bddabfb0519"
+    }
+  ],
+  "assets": [
+    {
+      "path": "index.html",
+      "bytes": 9368,
+      "sha256": "031fcd96b13ed545f238f5d836eefc4f6601a400f5bad9c555812b11c41bf7f7"
+    },
+    {
+      "path": "app.js",
+      "bytes": 125852,
+      "sha256": "ddc9558f217e1254cfddce41dfd0d8983ea16ffd129bcf7849c557f184314810"
+    },
+    {
+      "path": "app.css",
+      "bytes": 10354,
+      "sha256": "f6dd56c603259f5d19a3591bdf3613d1cd86009549717fafdd96bac239a02bbf"
+    },
+    {
+      "path": "NOTICE.txt",
+      "bytes": 2382,
+      "sha256": "d5e912db07266c98101cf907088b370003966e900719e531c5c7b9e51d91e533"
+    }
+  ],
+  "libraries": [
+    {
+      "name": "@noble/curves",
+      "version": "2.4.0",
+      "license": "MIT"
+    },
+    {
+      "name": "@noble/hashes",
+      "version": "2.4.0",
+      "license": "MIT"
+    }
+  ],
+  "crypto": "NOBLE_ED25519_SHA256_AND_NONEXTRACTABLE_WEBCRYPTO_BUYER_KEY",
+  "unsupported": [
+    "server OCR",
+    "pgvector",
+    "MCP transport",
+    "host JWT identity",
+    "real supplier orders",
+    "real payments"
+  ]
+}

@@ -13,7 +13,7 @@ npm test     # checks, no install and no keys needed
 npm start    # then open http://127.0.0.1:4179 (default PORT in web/serve.mjs); the page uses stored outputs
 ```
 
-Optional live Gemma (laptop CPU): see `submission/DEMO_SCRIPT.md`. Optional live Nemotron ("Ask Nemotron live" button): see `submission/DEMO_SCRIPT.md`, step 7.
+Jury view: http://127.0.0.1:4179/?jury shows only the demo path. Optional live Gemma (laptop CPU): see `submission/DEMO_SCRIPT.md`. Optional live Nemotron ("Ask Nemotron live" button): see `submission/DEMO_SCRIPT.md`, step 7.
 
 Links: [deck (PDF)](submission/deck/SAMA-deck.pdf) | [demo script](submission/DEMO_SCRIPT.md) | [Q&A](submission/QA.md) | [video source](submission/video/) (the rendered MP4 is kept out of git; rebuild it from that folder)
 
@@ -378,7 +378,8 @@ The `engine.mjs` guardrail module and its 14 tests were written earlier in the e
 on invented fixtures (`fixtures/regions.json`, still labelled synthetic). Everything else here was
 built during Junction 2026; the supporting tracks use simulated people, model-written notes and a
 public laboratory benchmark, never patient data. Built with Claude Code and Codex CLI. Runtime
-services of the product are TypeSafe System One (claim check) and Claude Haiku (Finnish summaries).
+services of the product are TypeSafe System One (claim check) and Claude Haiku (Finnish summaries). The
+video's narration is a synthetic voice (ElevenLabs), generated from `submission/VIDEO_SCRIPT.md`.
 The supporting tracks also used NVIDIA Nemotron on Verda (teacher), TypeSafe Jev and OpenAI
 Decisions (judges), Claude Haiku (second writer and auditor), Gemma 3 (student) and Evo 2
 (genomics). GPU work ran on Verda; the A100 that ran the version-2 scribe runs, the vLLM smoke test

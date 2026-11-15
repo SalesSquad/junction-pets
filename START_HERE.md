@@ -1,11 +1,13 @@
 # Start here — Junction company agents
 
-Canonical source: **SalesSquad/junction-pets**, private repository. This is the
+Canonical source: **SalesSquad/junction-pets**, public repository. This is the
 common entrypoint for a new Codex, Claude or other authorized developer agent.
 Use [the machine-readable index](docs/AGENT_SOURCE_INDEX.json) to select one of
 the 34 packages and discover source provenance. For live implementation and PR
 state, read GitHub's current main HEAD and PRs, then follow
 [the sync contract](docs/SPACE_SYNC_CONTRACT.md).
+
+Use [the repository map](docs/REPOSITORY_MAP.md) for current source associations between pets, plugins, solutions and browser apps. It is generated from manifests, not from dated PR snapshots.
 
 ## Develop a product or solution
 

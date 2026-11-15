@@ -1,13 +1,13 @@
 {
  "schema": "junction.pet-voice.learned/v1",
- "updatedAt": "2026-11-14T21:55:11Z",
- "runs": 3,
- "turns": 74,
- "turnsOk": 74,
+ "updatedAt": "2026-11-15T06:32:17Z",
+ "runs": 4,
+ "turns": 78,
+ "turnsOk": 78,
  "modelOrder": {
   "tts": [
-   "gemini-2.5-flash-preview-tts",
    "live:gemini-2.5-flash-native-audio-latest",
+   "gemini-2.5-flash-preview-tts",
    "gemini-3.8-flash-lite-tts",
    "gemini-3.1-flash-tts-preview",
    "gemini-3.8-flash-tts"
@@ -19,6 +19,13 @@
  },
  "modelStats": {
   "tts": {
+   "live:gemini-2.5-flash-native-audio-latest": {
+    "ok": 40,
+    "hardFail": 0,
+    "p50LatencyS": 14.91,
+    "meanFidelity": 0.874,
+    "fidelitySamples": 40
+   },
    "gemini-3.8-flash-tts": {
     "ok": 14,
     "hardFail": 22,
@@ -46,24 +53,17 @@
     "p50LatencyS": 8.39,
     "meanFidelity": 1.0,
     "fidelitySamples": 0
-   },
-   "live:gemini-2.5-flash-native-audio-latest": {
-    "ok": 36,
-    "hardFail": 0,
-    "p50LatencyS": 15.41,
-    "meanFidelity": 0.859,
-    "fidelitySamples": 36
    }
   },
   "mind": {
    "gemini-3.5-flash-lite": {
-    "ok": 71,
+    "ok": 75,
     "hardFail": 0,
-    "p50LatencyS": 3.02,
-    "namedNextRate": 0.899,
-    "namedNextSamples": 69,
-    "languageKeptRate": 0.942,
-    "languageKeptSamples": 69
+    "p50LatencyS": 2.97,
+    "namedNextRate": 0.9,
+    "namedNextSamples": 70,
+    "languageKeptRate": 0.944,
+    "languageKeptSamples": 72
    },
    "gemini-3.5-flash": {
     "ok": 3,
@@ -89,12 +89,16 @@
    "n": 2,
    "rate": 1.0
   },
+  "en": {
+   "n": 1,
+   "rate": 1.0
+  },
   "en-GB": {
    "n": 4,
    "rate": 1.0
   },
   "en-US": {
-   "n": 16,
+   "n": 18,
    "rate": 1.0
   },
   "es-ES": {
@@ -157,11 +161,11 @@
   "gemini-3.8-flash-tts": "2026-11-15T08:13:06Z"
  },
  "ttsVariant": {
+  "live:gemini-2.5-flash-native-audio-latest": "live-recite",
   "gemini-3.8-flash-tts": "speech_metadata+voice",
   "gemini-3.8-flash-lite-tts": "speech_metadata+voice",
   "gemini-3.1-flash-tts-preview": "legacy-style-prefix",
-  "gemini-2.5-flash-preview-tts": "legacy-style-prefix",
-  "live:gemini-2.5-flash-native-audio-latest": "live-recite"
+  "gemini-2.5-flash-preview-tts": "legacy-style-prefix"
  },
  "voiceLanguage": {
   "Achernar|hi-IN": {
@@ -206,11 +210,17 @@
    "n": 2,
    "mean": 0.9972
   },
+  "Autonoe|en": {
+   "voice": "Autonoe",
+   "language": "en",
+   "n": 1,
+   "mean": 1.0
+  },
   "Autonoe|en-US": {
    "voice": "Autonoe",
    "language": "en-US",
-   "n": 2,
-   "mean": 0.9991
+   "n": 3,
+   "mean": 0.9959
   },
   "Callirrhoe|ko-KR": {
    "voice": "Callirrhoe",
@@ -251,8 +261,8 @@
   "Gacrux|en-US": {
    "voice": "Gacrux",
    "language": "en-US",
-   "n": 2,
-   "mean": 0.9981
+   "n": 3,
+   "mean": 0.9988
   },
   "Iapetus|fi-FI": {
    "voice": "Iapetus",
@@ -382,13 +392,17 @@
    "n": 2,
    "mean": 0.9487
   },
+  "en": {
+   "n": 1,
+   "mean": 1.0
+  },
   "en-GB": {
    "n": 4,
    "mean": 1.0
   },
   "en-US": {
-   "n": 16,
-   "mean": 0.9985
+   "n": 18,
+   "mean": 0.9981
   },
   "es-ES": {
    "n": 2,
@@ -450,8 +464,8 @@
   "tts gemini-2.5-flash-preview-tts 400 INVALID_ARGUMENT": 8,
   "tts gemini-3.8-flash-lite-tts 429 RESOURCE_EXHAUSTED per-day": 7,
   "tts gemini-3.1-flash-tts-preview 429 RESOURCE_EXHAUSTED per-day": 4,
+  "tts live:gemini-2.5-flash-native-audio-latest 200 LOW_FIDELITY": 3,
   "tts gemini-2.5-flash-preview-tts 429 RESOURCE_EXHAUSTED": 2,
-  "tts live:gemini-2.5-flash-native-audio-latest 200 LOW_FIDELITY": 2,
   "tts gemini-3.8-flash-tts 429 RESOURCE_EXHAUSTED": 1,
   "tts gemini-3.1-flash-tts-preview 429 RESOURCE_EXHAUSTED": 1,
   "tts gemini-2.5-flash-preview-tts 429 RESOURCE_EXHAUSTED per-day": 1,

@@ -53,6 +53,29 @@ DEFAULT_TTS_MODELS = ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts", "gemi
                       "live:gemini-2.5-flash-native-audio-latest", "live:gemini-3.8-live", "live:gemini-3.1-flash-live-preview",
                       "openai:gpt-4o-mini-tts"]
 EXHAUSTED: set[str] = set()  # models that returned a per-day quota error in this process
+# --gemini-only (or PET_VOICE_GEMINI_ONLY=1): no `openai:` model is ever tried, so a demo provably uses Gemini alone.
+# When every Gemini route is exhausted the run fails with GEMINI_ONLY_EXHAUSTED instead of silently paying for OpenAI.
+GEMINI_ONLY = {"on": False}
+
+
+def gemini_only() -> bool:
+    return GEMINI_ONLY["on"] or os.environ.get("PET_VOICE_GEMINI_ONLY", "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def set_gemini_only(on: bool = True) -> None:
+    GEMINI_ONLY["on"] = on
+    if on:
+        os.environ["PET_VOICE_GEMINI_ONLY"] = "1"
+
+
+def route_filter(models: list[str]) -> list[str]:
+    """Drop every `openai:` model when gemini-only is on; otherwise return the order unchanged."""
+    return [m for m in models if not m.startswith("openai:")] if gemini_only() else list(models)
+
+
+def gemini_only_failure(what: str) -> "ProviderError":
+    return ProviderError(0, "GEMINI_ONLY_EXHAUSTED", f"--gemini-only: every Gemini {what} route failed or is exhausted; "
+                         "OpenAI fallback is disabled, so this run stops here (wait for quota reset or drop --gemini-only)")
 # Listening/answering: 3.5-flash follows the "address the next pet" instruction best; 3.8-flash stalled >2 min
 # on this JSON+audio request on 2026-11-14 (kept last so `learn` can re-promote it if it recovers).
 DEFAULT_MIND_MODELS = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash", "openai:gpt-5.4-mini"]
@@ -207,6 +230,8 @@ def openai_voice_for(name: str, gender: str | None = None) -> str:
 
 
 def openai_post(path: str, timeout: float = 90, payload: dict | None = None, multipart: tuple[dict, tuple[str, bytes, str]] | None = None) -> bytes:
+    if gemini_only():
+        raise ProviderError(0, "GEMINI_ONLY", "OpenAI call blocked by --gemini-only")
     key = read_openai_key()
     if not key:
         raise ProviderError(0, "NO_KEY", "OpenAI fallback disabled: no key")
@@ -544,7 +569,7 @@ def live_speak(text: str, voice: str, style: str, key: str, model: str, timeout:
 def speak(text: str, voice: str, style: str, key: str, models: list[str], log: list, prefer: dict | None = None,
           openai_voice: str | None = None) -> dict:
     """Synthesize `text`; walk models and request variants until one returns audio."""
-    for model in models:
+    for model in route_filter(models):
         if model in EXHAUSTED:
             continue
         if model.startswith("openai:"):
@@ -595,6 +620,8 @@ def speak(text: str, voice: str, style: str, key: str, models: list[str], log: l
                 if e.status == 400:
                     continue          # request shape not accepted by this model: try next variant
                 break                 # quota, outage, timeout, no audio: next model
+    if gemini_only():
+        raise gemini_only_failure("TTS")
     raise ProviderError(0, "TTS_UNAVAILABLE", "no TTS model produced audio")
 
 
@@ -625,7 +652,7 @@ def think(system: str, prompt: str, audio: bytes | None, key: str, models: list[
     # A spoken one-liner needs little reasoning; low thinking keeps latency conversational.
     low = json.loads(json.dumps(base))
     low["generationConfig"]["thinkingConfig"] = {"thinkingLevel": "low"}
-    for model in models:
+    for model in route_filter(models):
         if model in EXHAUSTED:
             continue
         if model.startswith("openai:"):
@@ -653,6 +680,8 @@ def think(system: str, prompt: str, audio: bytes | None, key: str, models: list[
                     bodies.pop(0)      # model rejects thinkingLevel: retry without it
                     continue
                 break                  # quota, outage (503 after retries), timeout, 4xx: next model
+    if gemini_only():
+        raise gemini_only_failure("text/audio-understanding")
     raise ProviderError(0, "MIND_UNAVAILABLE", "no text model produced a reply")
 
 
@@ -678,13 +707,13 @@ def load_learned() -> dict:
 def model_order(learned: dict, kind: str, defaults: list[str], override: list[str] | None) -> list[str]:
     """Learned order first, then untried defaults; models still in a learned per-day cooldown go last."""
     if override:
-        return override
+        return route_filter(override)
     learned_order = (learned.get("modelOrder") or {}).get(kind) or []
     order = learned_order + [m for m in defaults if m not in learned_order]
     cooling = {m for m, until in (learned.get("cooldownUntil") or {}).items() if until > now()}
     ordered = [m for m in order if m not in cooling] + [m for m in order if m in cooling]
     # Paid fallback stays last whatever learning says: Gemini (free, the hackathon's API) is always tried first.
-    return [m for m in ordered if not m.startswith("openai:")] + [m for m in ordered if m.startswith("openai:")]
+    return route_filter([m for m in ordered if not m.startswith("openai:")] + [m for m in ordered if m.startswith("openai:")])
 
 
 def adapt_voice(learned: dict, voice: str, language: str, threshold: float = 0.75, min_samples: int = 2) -> tuple[str, str | None]:
@@ -872,7 +901,7 @@ def finalize(run_dir: Path, turns: list[dict], *, write_evidence: bool, icloud: 
     evidence = {"schema": "junction.pet-voice.relay/v1", "runId": run_id, "kind": meta["kind"], "startedAt": meta["startedAt"],
                 "finishedAt": now(), "host": os.uname().nodename, "source": {"repository": "SalesSquad/junction-pets",
                 "commit": commit, "petsDirty": dirty}, "languageMode": meta["languageMode"], "speakers": meta["speakers"],
-                "summary": summary, "turns": [{k: v for k, v in t.items()} for t in turns],
+                "geminiOnly": gemini_only(), "summary": summary, "turns": [{k: v for k, v in t.items()} for t in turns],
                 "limitations": ["Synthetic companion dialogue generated live with Gemini on the owner's MBP; not a Chibi-authorized transport.",
                                 "heardAccuracy compares the speaker's intended text with the listener model's transcript (char similarity), "
                                 "a proxy for intelligibility, not a human rating.",
@@ -1185,6 +1214,9 @@ def _run(speakers: list[str], kind: str, args) -> int:
     evidence = finalize(run_dir, turns, write_evidence=not args.no_evidence, icloud=not args.no_icloud)
     if not args.no_evidence and not args.no_learn:
         cmd_learn(argparse.Namespace(no_registry=args.no_registry))
+    for t in turns:
+        if (t.get("error") or {}).get("code") == "GEMINI_ONLY_EXHAUSTED":
+            print(f"ERROR turn {t['turn']}: {t['error']['message']}", file=sys.stderr)
     print(json.dumps({"runId": rid, "runDir": str(run_dir), "icloud": evidence.get("icloud"), **evidence["summary"]}, ensure_ascii=False, indent=1))
     if args.play and shutil.which("afplay") and (run_dir / "conversation.wav").exists():
         subprocess.run(["afplay", str(run_dir / "conversation.wav")], check=False)
@@ -1205,6 +1237,9 @@ def cmd_relay(args) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    GO = dict(action="store_true", default=argparse.SUPPRESS,
+              help="Gemini only: never call OpenAI (also PET_VOICE_GEMINI_ONLY=1); fail clearly if Gemini routes are exhausted")
+    ap.add_argument("--gemini-only", **{**GO, "default": False})
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("status", help="profiles, key presence (never the value), learned model order").set_defaults(fn=cmd_status)
     s = sub.add_parser("say", help="one pet speaks")
@@ -1227,7 +1262,11 @@ def main(argv: list[str] | None = None) -> int:
         p.set_defaults(fn=fn)
     lp = sub.add_parser("learn", help="rebuild learned scores, LESSONS.md and registry records from evidence/")
     lp.add_argument("--no-registry", action="store_true"); lp.set_defaults(fn=cmd_learn)
+    for sp in sub.choices.values():
+        sp.add_argument("--gemini-only", **GO)
     args = ap.parse_args(argv)
+    if args.gemini_only:
+        set_gemini_only()
     return args.fn(args)
 
 
