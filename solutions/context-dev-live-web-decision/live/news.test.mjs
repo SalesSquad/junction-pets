@@ -75,3 +75,9 @@ test('HTTP: news reaches the browser JSON without the key',async()=>{
     assert(!JSON.stringify(body).includes('synthetic-secret'));assert.equal((await fetch(base+'/live/news-client.mjs')).status,404);
   }finally{await new Promise(r=>server.close(r));}
 });
+test('service: never more than two Context.dev requests in flight (live key is concurrency-limited to 2)',async()=>{
+  let inFlight=0,peak=0;const track=async fn=>{inFlight++;peak=Math.max(peak,inFlight);await new Promise(r=>setTimeout(r,5));try{return await fn();}finally{inFlight--;}};
+  const service=createLiveService({apiKey:'test',captureFile:'/nonexistent-supplypulse-test',now:()=>now,
+    news:id=>track(async()=>newsPublic(envelope([]),{sourceId:id,receivedAt:stamp})),scrape:id=>track(async()=>capture(id,id==='gigantti'?'109':'110'))});
+  const r=await service.refresh();assert.equal(r.errors.length,0);assert.equal(peak,2);assert.deepEqual(r.news.map(n=>n.status),['NO_RECENT_NEWS','NO_RECENT_NEWS']);
+});

@@ -901,7 +901,7 @@ def finalize(run_dir: Path, turns: list[dict], *, write_evidence: bool, icloud: 
     evidence = {"schema": "junction.pet-voice.relay/v1", "runId": run_id, "kind": meta["kind"], "startedAt": meta["startedAt"],
                 "finishedAt": now(), "host": os.uname().nodename, "source": {"repository": "SalesSquad/junction-pets",
                 "commit": commit, "petsDirty": dirty}, "languageMode": meta["languageMode"], "speakers": meta["speakers"],
-                "summary": summary, "turns": [{k: v for k, v in t.items()} for t in turns],
+                "geminiOnly": gemini_only(), "summary": summary, "turns": [{k: v for k, v in t.items()} for t in turns],
                 "limitations": ["Synthetic companion dialogue generated live with Gemini on the owner's MBP; not a Chibi-authorized transport.",
                                 "heardAccuracy compares the speaker's intended text with the listener model's transcript (char similarity), "
                                 "a proxy for intelligibility, not a human rating.",

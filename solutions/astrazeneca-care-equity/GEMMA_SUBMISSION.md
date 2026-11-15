@@ -2,6 +2,9 @@
 
 All paths are relative to `solutions/astrazeneca-care-equity/`. Every note is SYNTHETIC (written by a language model); nothing here is a clinical claim or a medical device (`serve/README.md`).
 
+## The pitch in one line
+Gemma is not entered as the best reader. It is the **cheap, local first reader in a two-reader check**: Gemma 3 1B reads every note on the machine, a second reader (Nemotron) reads it independently, code computes the dates, and a field is pre-filled only when both agree. That pre-fills 684 of 700 test notes with 4 wrong and 220 of 308 stress notes with 3 wrong, while Gemma's own confidence alone would pre-fill all 308 stress notes with 85 wrong (`scribe/v4/RESULTS.md`). Everything the readers disagree on goes to a person.
+
 ## Problem
 Finnish county cancer-pathway delays can only be compared fairly if event dates are reliable. Many dates sit in free-text notes ("lähete lähetettiin kolme viikkoa sitten"). A scribe that misreads them manufactures fake county inequality: a county read by the raw scribe is flagged in 1.000 of 1,000 no-difference simulations, 0.003 with code-resolved dates (`DATA_COLLECTION.md` section 4; `README.md` track 1).
 

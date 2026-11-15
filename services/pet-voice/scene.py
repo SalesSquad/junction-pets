@@ -798,7 +798,8 @@ def run_scene(scene_id: str, *, audio: bool, run_id: str, use_critic: bool = Tru
             turn.update({"status": "failed", "error": e.record("n/a")})
         tf.write_text(json.dumps(turn, ensure_ascii=False, indent=1))
         print(f"[{i:02d}] {turn['status']:6} {p['name']:<12} {d['move']:<16} {turn.get('text', '')[:80]}"
-              + (f"  ⚠ {turn['problems']}" if turn.get("problems") else ""), flush=True)
+              + (f"  ⚠ {turn['problems']}" if turn.get("problems") else "")
+              + (f"  ✖ {turn['error'].get('code')}: {turn['error'].get('message', '')[:160]}" if turn.get("error") else ""), flush=True)
         if turn["status"] != "ok":
             break
         history.append(turn)
