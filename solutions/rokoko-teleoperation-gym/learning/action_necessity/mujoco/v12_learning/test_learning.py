@@ -225,7 +225,10 @@ class V12ActualEvidenceContractTest(unittest.TestCase):
                     else seed==candidate_novel
                 )
                 trials.append({"seed":seed,"world_hash":w["world_hash"],
-                    "strategy":arm,"success":wins,"unsafe":False,"abstained":False})
+                    "strategy":arm,"success":wins,"unsafe":False,"abstained":False,
+                    "dwell_ticks_final":250 if wins else 0,
+                    "contacts":1 if wins else 0,
+                    "final_error":0.005 if wins else 0.2})
         receipt=protocol.paired_physical_goal_readout(trials,cohort,"pilot",
             all_512_initial_public_worlds=scans,plan=self.plan)
         self.assertEqual(receipt["candidateNovelSafeGoalWorldSeeds"],[candidate_novel])
@@ -248,7 +251,10 @@ class V12ActualEvidenceContractTest(unittest.TestCase):
                 wins=seed==base_winner or (
                     arm=="v12_phase_dwell_supported_actions" and seed==novel)
                 rows.append({"seed":seed,"world_hash":w["world_hash"],
-                    "strategy":arm,"success":wins,"unsafe":False,"abstained":False})
+                    "strategy":arm,"success":wins,"unsafe":False,"abstained":False,
+                    "dwell_ticks_final":250 if wins else 0,
+                    "contacts":1 if wins else 0,
+                    "final_error":0.005 if wins else 0.2})
         receipt=protocol.paired_physical_goal_readout(rows,cohort,"pilot",
             all_512_initial_public_worlds=scans,plan=self.plan)
         self.assertEqual(receipt["candidateNovelSafeGoalWorldSeeds"],[novel])
