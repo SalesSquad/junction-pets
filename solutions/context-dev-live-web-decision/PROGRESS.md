@@ -1,14 +1,18 @@
-# SupplyPulse / Live Web Decision Room continuation
+# SupplyPulse — current state (15 November 2026)
 
-Stage: building. Existing source was registered against main
-`94b9a1ed127dc70d70c7927fa528f5d3530df3ea` on 15 November 2026 after the
-monorepo validator found the required workspace metadata missing.
+Stage: building, submission-ready pending one live news run.
 
-See the existing [README.md](README.md), product evidence and current owning
-PR for actual results and the next product acceptance dependency. Registration
-adds no test, model, live-provider, hardware, deployment or submission claim.
-The existing product writer and Portfolio PR Recovery retain their roles.
+- Live comparison (scrape, 2 pinned retailers): working; live run recorded in
+  [LIVE_EVIDENCE.md](LIVE_EVIDENCE.md).
+- Product watches (search, map, scrape, answers): working; live run recorded in
+  [watch/EVIDENCE.md](watch/EVIDENCE.md).
+- New: retailer news via Context.dev `POST /v1/news/search` (`live/news-client.mjs`),
+  shown per retailer card and as a verdict note; advisory, ranking unchanged,
+  15-minute news TTL, same server-side key handling. Fixture-tested only
+  (`live/news.test.mjs`); **no live run yet**.
+- Submission note: [SUBMISSION.md](SUBMISSION.md).
+- Focused checks: `node --test engine.test.mjs live/live.test.mjs live/news.test.mjs provider/provider.test.mjs watch/watch.test.mjs`
+  → 66/66 pass (synthetic transports only).
 
-Next integration action: preserve current product work and run the unchanged
-monorepo validator against the registration commit. Product development
-continues from its actual source and existing owner, without a new QA worker.
+Next action: owner runs one refresh with `CONTEXT_DEV_API_KEY` set and records
+the two news request IDs in LIVE_EVIDENCE.md before submitting.

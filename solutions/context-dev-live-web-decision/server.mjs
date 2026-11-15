@@ -72,6 +72,6 @@ const server=http.createServer(async(req,res)=>{
   const [file,type]=files[req.url];try{const data=await readFile(new URL(file,import.meta.url));res.writeHead(200,{'Content-Type':type+'; charset=utf-8'});res.end(req.method==='HEAD'?undefined:data);}catch{res.writeHead(500);res.end();}
 });server.on('listening',()=>{if(options.enableWatchScheduler)getWatches().startScheduler();});server.on('close',()=>{watches?.close().catch(()=>{});});return server;}
 if(process.argv[1]===fileURLToPath(import.meta.url)){
-  const port=Number(process.env.PORT??4173);const server=createServer({enableWatchScheduler:true});server.listen(port,'127.0.0.1',()=>console.log(`SupplyPulse http://127.0.0.1:${port} · product watches /watches/ · synthetic controls /replay`));
+  const port=Number(process.env.PORT??4173);const store=process.env.MONGODB_URI?await (await import('./watch/store-mongo.mjs')).openMongoWatchStore():undefined;const server=createServer({enableWatchScheduler:true,watchOptions:store?{store}:{}});server.listen(port,'127.0.0.1',()=>console.log(`SupplyPulse http://127.0.0.1:${port} · product watches /watches/ · synthetic controls /replay`));
   for(const event of ['SIGINT','SIGTERM'])process.once(event,()=>server.close());
 }
