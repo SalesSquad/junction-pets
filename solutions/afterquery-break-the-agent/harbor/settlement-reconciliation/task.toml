@@ -1,0 +1,30 @@
+schema_version = "1.4"
+# Copy only the agent's finished answer and observed input into the fresh verifier.
+# Never copy/execute any agent-authored program in the verifier environment.
+artifacts = ["/app/output", "/app/data/orders.json"]
+
+[task]
+name = "one-man-raid/afterquery-settlement-reconciliation"
+description = "Reconcile 38 synthetic payment orders from uncertain and conflicting event logs without unsafe payment claims."
+authors = [{ name = "One Man Raid" }]
+keywords = ["python", "agent-evaluation", "settlement", "provenance", "static-artifact"]
+
+[environment]
+cpus = 2
+memory_mb = 2048
+storage_mb = 4096
+build_timeout_sec = 300.0
+network_mode = "no-network"
+
+[agent]
+timeout_sec = 900.0
+
+[verifier]
+timeout_sec = 120.0
+environment_mode = "separate"
+
+[metadata]
+author_name = "One Man Raid"
+difficulty = "hard"
+category = "software_engineering"
+tags = ["python", "payments", "idempotency", "evidence", "agent-evaluation"]
