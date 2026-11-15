@@ -183,3 +183,7 @@ Sponsor lookup accepts only numeric catalog IDs (1–12 digits); never submit pe
 ## Buyer identity and supplier-order connection
 
 Optional host-authenticated mode verifies pinned-issuer JWTs, current operator buyer/workspace grants and separate exact host-signed human decisions before every protected effect/replay. Anonymous demo minting is disabled in this mode; core commerce stays synthetic. See [BUYER_IDENTITY.md](BUYER_IDENTITY.md) for configuration, custody, client integration and actual qualification limits. [VALIO_ORDER_CONNECTION.md](VALIO_ORDER_CONNECTION.md) records the fresh six-operation challenge schema and the still-unverified production order contract; owned committed receipts can be read as an explicitly non-sendable internal handoff.
+
+## Run the complete local simulation
+
+`npm --prefix identity ci --ignore-scripts` then `npm run demo:simulation` opens a dedicated loopback laboratory on port 4188. Its button executes seven real local scenarios: purchase/refund, signed rejection, price drift, revoked reviewer, two lost ACKs with restart, shortage without substitution, and expiry. Identities and trade are explicitly scripted fixtures. See [simulation/README.md](simulation/README.md); `npm run simulation:check` executes the same flows through the HTTP boundary.
