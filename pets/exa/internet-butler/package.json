@@ -13,7 +13,7 @@
     "dev:relay": "node relay/server.mjs",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "test": "node --test test/",
+    "test": "node --test \"test/*.test.ts\" \"test/*.test.mjs\"",
     "bench:decisions": "node bench/eval_decisions.mjs",
     "bench:live": "sh scripts/with-exa-key.sh sh -c 'node bench/run3.mjs && node bench/warrant-demo.mjs'",
     "dev:live": "sh scripts/with-exa-key.sh node scripts/dev.mjs",
