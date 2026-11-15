@@ -1,5 +1,8 @@
 # Open 3D and video: source-pinned CPU research campaign
 
+[The completed 45-cell CRACI result and independent evidence audit](RESULTS.md)
+are recorded separately.
+
 This is a research workload, not a robot controller, physical safety
 qualification, new MuJoCo result, or model release. It is independent of the
 existing V13 causal unsafe STOP and does not alter its admission gates.
