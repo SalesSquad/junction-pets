@@ -1,0 +1,19 @@
+{
+  "name": "valio-aimo-browser-local-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser-only synthetic procurement app reusing the original trade domain",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node checks/assert.mjs && node checks/browser.mjs"
+  },
+  "dependencies": {
+    "@noble/curves": "2.4.0",
+    "@noble/hashes": "2.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "playwright": "1.65.1"
+  }
+}

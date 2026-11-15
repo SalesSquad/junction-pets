@@ -24,6 +24,18 @@ content policy in the embedded page. Adaptations fail if their source anchors
 change. ProofMatch's service worker is scoped to its own app directory. The
 original localhost servers and their response headers are not included.
 
+Stoa's DXF parser and conservative evidence-bound question engine run inside
+the browser and keep imported drawings in tab memory. Room-label counts,
+validated room areas and unit outlines are supported; unsupported object counts
+are refused. Chronicle Witness runs its original comparison engine
+on the bundled synthetic fixture only; it has no live Wikipedia or MariaDB
+connection. Both embedded pages block outgoing connections.
+SAMA includes its existing public-data snapshot and synthetic, precomputed
+scribe examples; live model calls and online claim verification are disabled.
+Trusted Trade's browser planner uses its original portfolio and pack-allocation
+engines with the existing fictional catalog. It cannot approve, order or pay;
+the server-side trade and approval workflow remains a separate local service.
+
 RoundLens's embedded client has changed paths, so its downloaded artifact uses
 `roundlens.shortlist.embedded.v1`: `upstreamProductSourceDigest` names the
 original package, and `embeddedClientDigest` identifies the adapted client.
@@ -44,3 +56,12 @@ the owner's Mac. It does not embed or export its server, SQLite state or key;
 the page explicitly identifies that runtime requirement. The earlier synthetic
 replay remains a separate secondary app. Registration must be consumed through
 Chibi's source-pinned browser-app sync before it appears in the deployed Site.
+
+Valio Aimo's `junction-valio-aimo` app is produced by
+`solutions/valio-trusted-trade/browser/build.mjs`. It runs the existing
+procurement, quote, approval, cryptographic proof, settlement and audit domain
+in the browser with synthetic data. Rebuild its declared browser assets through
+that producer when the shared domain changes. The original Node/SQLite service,
+host JWT adapter, MCP bridge and HTTP simulation lab remain in the solution;
+their runtime and real supplier integration are not provided by this static
+bundle.

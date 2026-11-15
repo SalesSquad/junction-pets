@@ -1,5 +1,17 @@
 # Trusted Trade · autonomous procurement with proof-carrying Kättely
 
+## Companion App
+
+The shared Junction companion App catalog registers this product as
+`junction-valio-aimo`. Its portable entry is
+`/apps/aimo-trade/browser/dist/index.html`; private Chibi imports the exact
+Junction commit through its existing browser-app sync producer. See
+[browser/README.md](browser/README.md) for the build and browser-local runtime.
+This App uses the existing trade domain with synthetic data. The Node/SQLite,
+host identity, MCP and HTTP simulation commands below retain their full
+server-backed implementation and separate runtime requirements.
+
+
 ## Frontier v3 — Mission Control (14 November 2026)
 
 The new **[Frontier runbook](./FRONTIER_RUNBOOK.md)** is the main competition demo guide. Run `npm start` and open **http://127.0.0.1:4177/mission** for the responsive procurement command center; snapshot-bound review stays at **/** (also **/classic**). All actors, catalog items, prices, risk/emission figures, approvals, signatures' identities and simulated orders are synthetic.
