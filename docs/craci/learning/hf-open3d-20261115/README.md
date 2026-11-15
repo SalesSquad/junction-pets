@@ -91,3 +91,10 @@ model per line ran with group-disjoint splits. The V2D Ridge pilot produced
 a negative developmental observation, not a CRACI result. The other two
 smoke runs establish that their code paths execute, not that any model
 generalizes. Local preflight is not a CRACI receipt.
+
+The first hosted attempt [#43672290377](https://github.com/SalesSquad/junction-pets/actions/runs/43672290377)
+failed during system dependency installation before any dataset download or
+training. The runner's default APT configuration also queried a Microsoft
+repository blocked by the network policy. The source now uses only the
+existing Ubuntu APT sources when installing FFmpeg. The failed attempt's
+incomplete receipt remains in artifact 14144387856.
