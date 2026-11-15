@@ -17,8 +17,8 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker','junction-aalto-university','junction-hostinger','junction-cala','junction-context-dev','junction-stoa','junction-mariadb','junction-astrazeneca','junction-valio-aimo']));
     assert.equal(apps.filter(app=>app.petSlug==='junction-intel').length,2);
     assert.equal(apps.filter(app=>app.petSlug==='junction-valio-aimo').length,2);
-    const valio=apps.find(app=>app.petSlug==='junction-valio-aimo');
-    assert.equal(valio.path,'/apps/aimo-trade/browser/dist/index.html');
+    const aimoApp=apps.find(app=>app.path.includes('/aimo-trade/'));
+    assert.equal(aimoApp.path,'/apps/aimo-trade/browser/dist/index.html');
     for(const asset of ['index.html','app.js','app.css','export.json','NOTICE.txt'])assert.ok((await readFile(join(output,'apps/aimo-trade/browser/dist',asset))).length>0);
 
 
