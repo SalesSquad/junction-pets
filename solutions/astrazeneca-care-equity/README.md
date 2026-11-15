@@ -128,13 +128,26 @@ was read from).
    portfolio model, labelled as an upper-bound SCENARIO. Every action names its roadmap measure id
    (`src/roadmap.mjs`). After the pilot card: the safety-net worklist (`#safety-net`, follows the
    selected county) and the FLARE comparability gate (`#comparability-gate`), both SYNTHETIC.
-4. **County plan draft**: the stored Nemotron 3.5 Super VL drafts (`data/planner/plans-v1.json`),
-   labelled "Draft for a planner, drafted by Nemotron 3.5 Super VL; numbers checked"; draft input on
-   public data, not an assessment.
-5. **Analyst brief**, then the two SYNTHETIC tracks; the scribe section opens with the Gemma demo
+4. **The insight** (section 06, SYNTHETIC simulation, `app.json` `insight` from
+   `data/eventlog/design-study-v1.json` `measured_interval_extraction`): extraction errors manufacture
+   fake county inequality. With no real difference anywhere, a county of 500 pathways whose dates are
+   read from notes by the scribe as it was, against a country with structured dates, is flagged as
+   slower in 1.000 of 1,000 runs; with the code date resolver in 0.003, the same as with every event
+   confirmed by a person (0.003). Writing style alone (county notes like Haiku's, country like
+   Nemotron's): 0.018 as is, 0.004 with the resolver.
+5. **County plan draft** (section 07): a summary bundled in `app.json` `planner` (what was checked,
+   prompt v1 164 against prompt v2 255 of 299 sentences kept, 10 of 10 off-limits requests with no
+   plan (the model refused 9; the 10th is stopped by a county guard added after seeing prompt v1's
+   answers to these same prompts, post hoc; without it, 9 of 10), the image-input test 13 of 20 against 19 of 20 from text, "tested, not good enough yet"),
+   then the stored Nemotron 3.5 Super VL drafts (`data/planner/plans-v1.json`), labelled "Draft for a
+   planner, drafted by Nemotron 3.5 Super VL; numbers checked". The build re-runs every stored tool
+   call on the current data (`src/build.mjs` `plannerToolCheck`): 20 of 23 areas get identical tool
+   outputs; HVA05, HVA06 and HVA91 do not, and their drafts carry a "read with care" note.
+6. **Analyst brief**, then the two SYNTHETIC tracks; the scribe section opens with the Gemma demo
    (`POST /api/scribe`; the stored CPU outputs in `data/scribe/demo/` are shown first and used when
-   the route is unavailable).
-6. The Evo 2 benchmark is not on this page: it is a separate research appendix (`/research.html`).
+   the route is unavailable), then "Gemma reads, code counts" (below), with the earlier versions,
+   the teacher and the judges folded into one collapsed block.
+7. The Evo 2 benchmark is not on this page: it is a separate research appendix (`/research.html`).
 
 ## Supporting tracks (below the product, never feeding it)
 
@@ -156,9 +169,33 @@ adapter, teacher-written notes), a 500-episode county locates a planted 30% slow
 while the rest of the country uses structured fields is flagged in 100% of runs when nothing is wrong.
 Simulated people under stated assumptions; not Finnish patients.
 
-**2. Pathway scribe: Gemma on synthetic notes** (SYNTHETIC; `TRAINING.md`, `scribe/TEACHING.md`).
-A small Gemma model with a LoRA adapter proposes dated pathway events from a Finnish note, and a
-person confirms each one. Every note was written by a language model.
+**2. Pathway scribe: Gemma reads, code counts** (SYNTHETIC; `TRAINING.md`, `scribe/TEACHING.md`,
+`scribe/v4/RESULTS.md`). A small Gemma model with a LoRA adapter reads a Finnish note and copies each
+date phrase; code computes the date; a second reader checks; a person confirms every event. Every
+note was written by a language model, and the scribe reads Finnish notes only.
+- Gemma alone does the date arithmetic badly: 2/367 test notes with a relative date exactly right
+  (`runs/diagnose/diagnose-v1.json`). The frozen code date resolver (`scribe/v3/resolve.py`, frozen
+  21:37:24 UTC) on the same stored outputs: 289/310 validation and 651/700 test notes (post hoc; from
+  134 and 305), 0 notes made worse (`data/scribe/v4/resolver/reproduce-v1.json`).
+- Frozen, preregistered stress set of 308 notes with phrasings no training note used
+  (`data/scribe/v4/eval/results-v1.json`): the preregistered criterion for the expression-format arm
+  B is not met (11/143 on held-out phrasings against 0/143 for the lexicon rule A', p = 0.00098; B
+  73/87 on standard phrasings). The 1B expression arm C got 95/143, Nemotron 120/143 (optimistic:
+  it wrote these notes). Vague phrases: A' sends 29/29 to a person; B invents a precise date for
+  17/29.
+- Nemotron 3.5 Super VL as second reader (`data/scribe/nemotron/reader-v1.json`), one change at a
+  time on validation: absolute dates 192/310, copy-the-phrase with code arithmetic 282/310, plus
+  validation and grounding 290/310, plus thinking 304/310; the selected version read the test notes
+  once: 690/700.
+- Two readers, one person, evaluated offline on stored outputs: a note is pre-filled for one-click
+  confirmation only when the code-resolved Gemma answer and Nemotron agree. Chosen on validation
+  only (arm C plus agreement): 684/700 test notes pre-filled with 4 wrong (test set read before;
+  post hoc), 220/308 stress notes with 3 wrong; the earlier rule
+  pre-filled 263 with 7 wrong. Everything else needs editing, and a person confirms every note.
+  The scribe demo applies the same rule to Nemotron's stored answers for its SYNTHETIC notes with
+  the 270M product adapter (`C-270m-all-v2data`; 651/700 test notes with that adapter, post hoc):
+  15 of 20 demo notes pre-filled, 0 wrong; free text and notes rewritten by code have no second
+  answer and need editing. The page calls no hosted model.
 - Version-2 ablation on one A100 (`data/scribe/v2/ablation-v1.json`): selected Gemma 3 270M LoRA r16
   (validation exact match 36.1%, n = 310); test exact match 42.0% on 500 teacher-written (Nemotron)
   notes and 13.0% on 200 notes by a different writer (Haiku). The 1B and 4B sizes and every later
@@ -201,7 +238,7 @@ or informs any clinical choice.
 ## Run it
 
 ```bash
-npm test            # 113 tests: statistics, real-data analysis, optimiser, evidence binding, guardrails, roadmap, planner, page panels, safety net and gate, supporting tracks
+npm test            # 122 tests: statistics, real-data analysis, optimiser, evidence binding, guardrails, roadmap, planner, page panels, safety net and gate, insight, scribe lanes, supporting tracks
 npm run data        # refetch the public snapshot (THL Sotkanet, Statistics Finland, NORDCAN)
 npm run build       # analysis + recommendations + supporting tracks -> web/data/app.json
 npm start           # http://127.0.0.1:4179

@@ -1,5 +1,61 @@
 # Progress
 
+## NVIDIA lanes integrated (15 November 2026, from 00:00 UTC)
+
+Written by the lane integrator (log `runs/integrate-lanes.jsonl`). Nothing was committed or pushed. No
+model, MLX or torch process was started by this step; no hosted endpoint was called.
+
+**Added to the page** (the ship-wave panels, mount points, imports and section order are unchanged;
+the new section is inserted between them):
+
+| Section | What | Data in `app.json` | Source file |
+| --- | --- | --- | --- |
+| 06 `#insight` | Extraction errors manufacture fake county inequality (SYNTHETIC simulation) | `insight` | `data/eventlog/design-study-v1.json` (`measured_interval_extraction`, `findings`) |
+| 07 `#plan` | Planner summary above the drafts: checks, prompt v1 against v2, off-limits, image-input test, and a re-run of every stored tool call on the current build | `planner` (`toolCheck` from `src/build.mjs`) | `data/planner/plans-v1.json`, `data/planner/vision/vision-6b-v1.json`, `data/planner/raw-v2/` |
+| 10 `#scribe` | "Gemma reads, code counts": Gemma alone, the frozen resolver, the preregistered stress result, the system table, vague phrases, the two-reader cascade, the Nemotron reader ladder; the earlier versions folded into one block | `scribe.gemmaAlone`, `scribe.resolver`, `scribe.evaluation`, `scribe.reader` | `runs/diagnose/diagnose-v1.json`, `data/scribe/v4/resolver/reproduce-v1.json`, `data/scribe/v4/eval/results-v1.json`, `data/scribe/nemotron/reader-v1.json` |
+
+Roadmap measure ids on every action, the Satakunta pilot card, the safety-net worklist, the FLARE
+comparability gate and the Gemma demo route were already on the page from the ship wave and were
+kept as they were.
+
+**What ran (lane results, read from their files).**
+- Gemma alone: 2/367 test notes with a relative date exactly right. Frozen code resolver on the same
+  outputs: 289/310 validation, 651/700 test (post hoc), 0 notes made worse.
+- Stress set: 308 SYNTHETIC notes, frozen and preregistered at 21:57:19 UTC. Preregistered criterion
+  for the expression arm B **not met** (11/143 against 0/143 for the lexicon rule A', p = 0.00098; B
+  73/87 on standard phrasings). Arm C (Gemma 3 1B, expression format) 95/143; Nemotron 120/143
+  (optimistic: it wrote the notes). Vague phrases: A' 29/29 to a person; B invents a date for 17/29.
+- Two-reader cascade, chosen on validation only (arm C plus agreement): 684/700 test notes pre-filled
+  for one-click confirmation with 4 wrong (test set read before; post hoc); 220/308 stress notes with 3 wrong. A person confirms every
+  note.
+- Nemotron reader ladder on validation: 192, 282, 287, 290, 304 of 310; test once: 690/700.
+- County planner: 255 of 299 sentences kept, 0 kept sentences with an unmatched number, 10/10
+  off-limits requests with no plan (the model refused 9; the 10th is stopped by a county guard
+  added after seeing prompt v1's answers to these same prompts, post hoc; without it, 9 of 10); image input 13/20 against 19/20 from text, "tested, not good
+  enough yet". Re-running the stored tool calls on this build: 20 of 23 areas identical; HVA05,
+  HVA06 (county brief) and HVA91 changed, and the page says "read with care" for them.
+- Insight: no real difference, county read from notes against a structured country: flagged in
+  1.000 of 1,000 runs as is, 0.003 with the resolver (0.003 with every event confirmed).
+
+**Failed or not done.**
+- The preregistered success criterion for arm B failed; the deck and write-up say so.
+- The live CPU route `POST /api/scribe` was not run by this step: the Mac had 16.1 of 17.4 GB swap in
+  use at 00:13 UTC, so the route was checked with `"mode":"precomputed"` only. Lane C measured the live
+  route earlier (median 4.84 s per note under load, `data/scribe/demo/http-timing.json`).
+- The agreement rule is now applied in the scribe demo (`serve/demo/engine.py` `apply_second_reader`,
+  `web/serve.mjs`) from Nemotron's stored answers only: 15 of 20 demo notes pre-filled, 0 wrong; free
+  text and the 3 notes rewritten by code need editing. It is not wired into `scribe/v3/cascade.py`, and
+  no hosted model is called from the page.
+- The planner drafts were not re-drafted on the current build; three areas' tool outputs changed.
+- `submission/VERDA_DISCORD.md` keeps `[SUMMARY LINK]` for the owner, who decides where to publish.
+
+**Synthetic.** Every note, every scribe figure, the insight, the safety net and the gate's clock are
+SYNTHETIC. The planner read public aggregate data only.
+
+**Unverified.** Nothing here was tested on real clinical notes. The Nemotron price on the event
+endpoint is not known (cost recorded as null). The 700 test notes were read before tonight. The stress
+set was written by Nemotron, so Nemotron's own score on it is optimistic.
+
 ## Ship wave 23:00-02:00 UTC (14-15 November 2026)
 
 Written 23:20 UTC by the ship-integrate step (Lane C; log `runs/ship-integrate.jsonl`). Nothing was
@@ -133,8 +189,8 @@ scribe v2 100, data v2 20, serve 114, ops 36 OK (`runs/training-md.jsonl`).
 - V3-270m-all lost on Nemotron-written notes (39.4% against 42.0%, p 0.007), with the most rows for
   the same 324 steps; the cause was not tested (`data/scribe/v3/student/compare-v1.json`).
 - Cascade: at the 5% target the student's own threshold gave 10.4% error on test; at the 10% target
-  every signal's test error was above 10%. A judge did not let measurably more notes skip review at
-  5% (`data/scribe/v3/summary-v1.json` `cascade.verdict`).
+  every signal's test error was above 10%. A judge did not let measurably more notes be pre-filled for
+  one-click confirmation at 5% (a person confirms every note either way) (`data/scribe/v3/summary-v1.json` `cascade.verdict`).
 - Evo 2: partial run (time budget) with a 4,096 bp window instead of 8,192 (memory cap); the window
   was chosen after an interim look (`data/genomics/brca1-evo2-v1.json`).
 - An open-weight summary writer (Qwen3-32B-AWQ on vLLM) failed at start-up; nothing from it is used

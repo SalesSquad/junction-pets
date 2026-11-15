@@ -356,8 +356,8 @@ is code-only and DO #3 is deck slides by default.
     roadmap 3.2.1 quality register project, whose variable set is being fixed by the end of 2027,
     for stage and route.
   - Coverage before comparison: SAMA's simulation flags a county whose dates come from text in 1.000
-    of runs with no real slowdown, and 0.001 with the code resolver
-    (`runs/diagnose/interval-impact-v1.json`, SYNTHETIC).
+    of runs with no real slowdown, and 0.003 with the code resolver
+    (`data/eventlog/design-study-v1.json`, `measured_interval_extraction`, SYNTHETIC).
   - Add one "how" line from the same feed: the share of cancers first seen in emergency care, by
     county, route and education. Internationally 24.0%-42.5% of diagnoses across 14 jurisdictions
     (including Denmark and Norway) came through emergency presentation, with higher 12-month

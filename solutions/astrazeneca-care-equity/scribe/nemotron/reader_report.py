@@ -157,7 +157,7 @@ def paired(a_outs, b_outs, subset=None):
         gained=only_b,
         lost=only_a,
         change_points=round(100 * (sum(b[i] for i in ids) - sum(a[i] for i in ids)) / len(ids), 1) if ids else None,
-        mcnemar_exact_p=round(mcnemar(only_a, only_b), 6),
+        mcnemar_exact_p=float(f"{mcnemar(only_a, only_b):.3g}"),  # 3 significant digits: tiny p stays > 0
     )
 
 

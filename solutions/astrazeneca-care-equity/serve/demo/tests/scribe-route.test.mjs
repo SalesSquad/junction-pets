@@ -125,3 +125,52 @@ test('stored outputs and the payload never use banned wording', () => {
   const text = JSON.stringify(outputs).toLowerCase() + JSON.stringify(notes).toLowerCase();
   for (const word of BANNED) assert.ok(!text.includes(word), word);
 });
+
+test('two-reader rule: stored demo outputs are pre-filled only when Gemma and the stored Nemotron answer agree', () => {
+  const byId = Object.fromEntries(notes.notes.map((n) => [n.demo_id, n]));
+  for (const [id, r] of Object.entries(outputs.results)) {
+    assert.ok(r.second_reader, id);
+    if (byId[id].rewritten_by_code) { assert.equal(r.second_reader.available, false, id); assert.equal(r.review, 'needs editing', id); }
+    if (r.review === 'pre-filled for one-click confirmation') {
+      assert.equal(r.second_reader.agrees, true, id);
+      assert.deepEqual(r.second_reader.prediction, r.resolved.prediction, id);
+    }
+  }
+  // the two demo notes whose Gemma answer is wrong (an invented event, a missed event) need editing
+  for (const id of ['demo-19', 'demo-20']) {
+    assert.equal(outputs.results[id].exact_match_with_answer_key, false, id);
+    assert.equal(outputs.results[id].review, 'needs editing', id);
+    assert.equal(outputs.results[id].review_reason, 'readers disagree', id);
+  }
+  assert.equal(outputs.two_reader.pre_filled_wrong, 0);
+  const html = scribeDemoHtml({served: 'precomputed', result: outputs.results['demo-19']});
+  assert.match(html, /Needs editing\. A person confirms every event\./);
+  assert.match(html, /Second reader, Nemotron 3\.5 Super VL: a different answer from Gemma/);
+});
+
+test('two-reader rule on the live path: free text needs editing; a demo note uses the stored second answer', async () => {
+  const s = await startServer({SAMA_SCRIBE_PYTHON: process.execPath, SAMA_SCRIBE_WORKER: fake});
+  try {
+    const a = await s.post({note_text: 'Lähete lähetettiin eilen.', note_date: '2025-03-10'});
+    assert.equal(a.body.result.review, 'needs editing'); // the fake worker's single-reader answer says pre-filled
+    assert.equal(a.body.result.single_reader_review, 'pre-filled for one-click confirmation');
+    assert.equal(a.body.result.review_reason, 'second reader not run offline');
+    assert.equal(a.body.result.second_reader.available, false);
+    const b = await s.post({demo_id: 'demo-19'}); // fake answer {SCREENING, []}; the stored Nemotron answer differs
+    assert.equal(b.body.result.second_reader.available, true);
+    assert.deepEqual(b.body.result.second_reader.prediction, outputs.results['demo-19'].second_reader.prediction);
+    assert.equal(b.body.result.review, b.body.result.second_reader.agrees ? 'pre-filled for one-click confirmation' : 'needs editing');
+    const c = await s.post({demo_id: 'demo-01'}); // rewritten by code: never read by the second reader
+    assert.equal(c.body.result.review, 'needs editing');
+    assert.equal(c.body.result.second_reader.available, false);
+  } finally { await s.stop(); }
+});
+
+test('the server serves only the data files the page reads', async () => {
+  const s = await startServer({SAMA_SCRIBE_LIVE: '0'});
+  try {
+    const get = (p) => fetch(`http://127.0.0.1:${s.port}${p}`).then((r) => r.status);
+    for (const p of ['/data/app.json', '/data/planner/plans-v1.json', '/data/scribe/demo/demo-notes.json', '/data/scribe/demo/demo-outputs.json']) assert.equal(await get(p), 200, p);
+    for (const p of ['/data/scribe/v4/mlx/validation-v1.json', '/data/planner/jev-ledger.json', '/data/scribe/v3/audit/audit-v1.json', '/data/scribe/nemotron/val-v3.jsonl']) assert.equal(await get(p), 404, p);
+  } finally { await s.stop(); }
+});

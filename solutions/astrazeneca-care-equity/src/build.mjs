@@ -4,13 +4,32 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { analyse } from './analysis.mjs';
 import { recommend } from './recommend.mjs';
-import { buildTracks } from './tracks.mjs';
-import { getPilotCard, getRoadmapMeasure, getThresholdRelabels, listActionIds, ROADMAP } from './roadmap.mjs';
+import { readdirSync } from 'node:fs';
+import { buildTracks, FILES } from './tracks.mjs';
+import { getPilotCard, getRoadmapMeasure, getThresholdRelabels, listActionIds, ROADMAP, ROADMAP_PROBLEM } from './roadmap.mjs';
+import { makeTools } from './planner/tools.mjs';
+
+// The Nemotron drafts were written from tool outputs of an earlier build. Re-run every stored tool call of
+// every county on this build and record which counties' tool outputs are no longer identical, so the page
+// can say "read with care" for exactly those counties. Code only; no model is called.
+export function plannerToolCheck(app, dir = FILES.plannerRaw) {
+  const root = new URL(`../${dir}/`, import.meta.url);
+  if (!existsSync(root)) return { checked: false, reason: `stored tool calls missing: ${dir}` };
+  const tools = makeTools(JSON.parse(JSON.stringify(app)));
+  const counties = readdirSync(root).filter((f) => f.endsWith('.json')).map((f) => JSON.parse(readFileSync(new URL(f, root), 'utf8'))).filter((r) => r.kind === 'county');
+  const changed = [];
+  for (const r of counties) {
+    const differ = [...new Set(r.toolCalls.filter((c) => JSON.stringify(tools.call(c.name, c.args)) !== JSON.stringify(c.output)).map((c) => c.name))];
+    if (differ.length) changed.push({ county: r.countyId, tools: differ });
+  }
+  return { checked: true, dir, counties: counties.length, identical: counties.length - changed.length, changed: changed.sort((a, b) => (a.county < b.county ? -1 : 1)) };
+}
 
 // The roadmap measure each action serves (data/roadmap/mapping-v1.json via src/roadmap.mjs), the pilot card
 // and the threshold relabels, so the page can show measure ids without reading files in the browser.
 const brief = (m) => (m ? { id: m.id, title_en: m.title_en, pages: m.pages, owner_en: m.owner_en, url: m.url } : null);
 export function buildRoadmap() {
+  if (!ROADMAP) return null; // ROADMAP_PROBLEM is reported in trackProblems by buildApp
   const actions = Object.fromEntries(listActionIds().map((id) => {
     const r = getRoadmapMeasure(id);
     return [id, { fit: r.fit, statement: r.statement, primary: brief(r.primaryMeasure), related: r.relatedMeasures.map(brief), noRoadmapMeasureFor: r.noRoadmapMeasureFor ?? null }];
@@ -47,7 +66,7 @@ export function buildApp() {
   if (missing.length || unverifiedCited.length) {
     throw new Error(`evidence binding failed: missing=${missing.join(',')} unverified=${unverifiedCited.join(',')}`);
   }
-  return {
+  const app = {
     schemaVersion: 'care-equity-app-v1',
     builtAt: new Date().toISOString(),
     provenance: {
@@ -64,6 +83,9 @@ export function buildApp() {
     // in section 05; they too are display-only and never change a county figure or a recommendation.
     ...buildTracks(analysis.regions),
   };
+  if (!app.roadmap) app.trackProblems = [...(app.trackProblems || []), { track: 'roadmap', problem: ROADMAP_PROBLEM || 'roadmap not available' }];
+  if (app.planner) app.planner.toolCheck = plannerToolCheck(app);
+  return app;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -73,7 +95,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const r = app.recommendation;
   console.log(JSON.stringify({
     out: 'web/data/app.json', regions: app.analysis.regions.length, evidenceRows: app.evidence.length, forecast: !!app.forecast, claimCheck: !!app.claimCheck, narratives: app.narratives ? Object.keys(app.narratives.counties).length : 0,
-    tracks: { eventLog: !!app.eventLog, scribe: !!app.scribe, genomics: app.genomics ? app.genomics.status : false, safetyNet: !!app.safetyNet, flareGate: !!app.flareGate, problems: app.trackProblems },
+    tracks: { eventLog: !!app.eventLog, insight: !!app.insight, scribe: !!app.scribe, scribeEvaluation: !!app.scribe?.evaluation, reader: !!app.scribe?.reader,
+      planner: app.planner ? { vision: !!app.planner.vision, toolOutputsIdentical: app.planner.toolCheck?.identical ?? null, changed: (app.planner.toolCheck?.changed || []).map((c) => c.county) } : false,
+      genomics: app.genomics ? app.genomics.status : false, safetyNet: !!app.safetyNet, flareGate: !!app.flareGate, problems: app.trackProblems },
     portfolio: { budget: r.budget, picks: r.portfolio.picks.length, deathsPostponed: r.portfolio.deathsPostponed, range: [r.portfolio.low, r.portfolio.high] },
   }));
 }

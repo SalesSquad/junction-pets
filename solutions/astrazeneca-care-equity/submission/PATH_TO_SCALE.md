@@ -38,7 +38,7 @@ placeholders.
 | 2b | Same adapter on a laptop CPU behind the product's `POST /api/scribe` | run (18 of 20 demo notes exact, median 4.8 s per note over HTTP) | `data/scribe/demo/http-timing.json` |
 | 2c | Same adapter inside the hospital network, air-gapped, as NVIDIA Model-Free NIM with our LoRA | design, not deployed | [Model-Free NIM](https://docs.nvidia.com/nim/large-language-models/latest/deployment/model-free-nim.html), [LoRA in NIM](https://docs.nvidia.com/nim/large-language-models/latest/advanced-use-cases/finetune-lora.html), [air-gap deployment](https://docs.nvidia.com/nim/large-language-models/latest/deployment/air-gap-deployment.html) |
 | 3 | Code date resolver, arm A' (Finnish lexicon), frozen and hashed | run (inside `serve/client.py`; reproduces 289/310 validation and 651/700 test exactly) | `data/scribe/v4/resolver/reproduce-v1.json`, `data/scribe/v4/resolver/freeze.json` |
-| 4a | Nemotron 3.5 Super VL second reader on the hosted event endpoint | run on SYNTHETIC notes (690/700 test notes exact; with Gemma 651/700 pre-filled, 4 wrong) | `data/scribe/nemotron/reader-v1.json`, `data/scribe/nemotron/cascade-agreement-v1.json` |
+| 4a | Nemotron 3.5 Super VL second reader on the hosted event endpoint | run on SYNTHETIC notes (690/700 test notes exact; with the 270M product adapter 651/700 pre-filled, 4 wrong, offline and post hoc; the scribe demo applies the rule to its stored answers) | `data/scribe/nemotron/reader-v1.json`, `data/scribe/nemotron/cascade-agreement-v1.json` |
 | 4b | Nemotron second reader self-hosted in a county-controlled or Finnish-hosted environment; otherwise the step is done by a person | design, not deployed | [NVFP4 model card](https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4) |
 | 5 | Person confirms every event: pre-filled for one-click confirmation, or "needs editing" | design, not deployed in any clinical system; shown in the demo | `data/roadmap/mapping-v1.json` (`pilotCard.humanReview_en`) |
 | 6 | Pathway Clock fields in county records: two dates, end reason, residence, route; four optional events | design, not deployed (format and sample sizes run in simulation on SYNTHETIC people) | `submission/PATHWAY_CLOCK.md`, `data/eventlog/design-study-v1.json` |
@@ -61,8 +61,8 @@ placeholders.
   treatment interval) to see a 20% slowdown at 80% power (SYNTHETIC simulation). At an assumed 37,000
   cases a year, 5 of 23 counties reach that within a quarter and 20 of 23 within a year.
 - **Equal errors everywhere.** A county read from text while others use structured fields is flagged
-  in 1.000 of simulated runs with no real slowdown, and 0.001 with the code resolver
-  (`runs/diagnose/interval-impact-v1.json`). Scaling to new counties means checking error rates per
+  in 1.000 of simulated runs with no real slowdown, and 0.003 with the code resolver
+  (`data/eventlog/design-study-v1.json`). Scaling to new counties means checking error rates per
   county and per writing style, and comparing only areas that can see themselves.
 - **First real step:** Satakunta, every overdue suspected-cancer referral, lung follow-up first, a
   2027 pilot with no new capital cost (`submission/ZERO_EURO_2027.md`).

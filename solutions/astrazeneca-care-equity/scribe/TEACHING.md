@@ -153,7 +153,7 @@ Judge score = the lowest event probability x (1 - the unlisted-event probability
 route. Thresholds were set on the 310 validation notes only (asserted in code) and applied to the 700 test notes. They are
 empirical, not guarantees.
 
-| target, signal | skip review (700 test notes) | error among skipped | of them on Haiku-written notes |
+| target, signal | pre-filled for one-click confirmation (700 test notes) | error among pre-filled | of them on Haiku-written notes |
 |---|---|---|---|
 | 5%, student confidence | 270 (0.3857) | 28/270 (0.1037) | 21/61 wrong |
 | 5%, Jev score | 263 (0.3757) | 7/263 (0.0266) | 3/55 wrong |
@@ -164,7 +164,7 @@ empirical, not guarantees.
 
 [cascade-v1.json `test.all_notes`.]
 
-- More notes skipping review? At 5%, no: the differences are within noise (Jev -1.0 points, paired bootstrap -3.1 to +1.1).
+- More notes pre-filled for one-click confirmation? At 5%, no: the differences are within noise (Jev -1.0 points, paired bootstrap -3.1 to +1.1).
   At 10%, Jev adds 3.1 points and student + Jev 4.0. That is outside test-sampling noise but within noise once the
   thresholds are re-chosen on resampled validation notes (-2.4 to +6.7 and -0.9 to +6.0 points) [`pipeline_bootstrap`].
 - What the judge changed is the error. The student's own 5% threshold gave 0.1037 on test and 21/61 wrong on Haiku-written
@@ -172,7 +172,7 @@ empirical, not guarantees.
   the thresholds are re-chosen (-10.8 to +1.5). At 10% every signal's test error was above the target.
 - Ranking over all coverages (area under the risk-coverage curve, lower is better): student 0.2689, Jev 0.2545, student +
   Jev 0.2529, best possible 0.2514. Jev minus student is -0.0144 (paired bootstrap -0.0210 to -0.0083).
-- Decisions let fewer notes skip review than the student on its subset (5%: 23/93 vs 41/93), and adding it to student +
+- Decisions let fewer notes be pre-filled for one-click confirmation than the student on its subset (5%: 23/93 vs 41/93), and adding it to student +
   Jev did not add coverage (5%: 33/93 vs 41/93; 10%: 43/93 vs 44/93) [`test.decisions_subset`].
 - Jev cost USD 0.057 per 1,000 notes with latency p50 0.198 s and p95 0.355 s; Decisions USD 0.1319 at the list rate,
   0.254 s and 0.735 s [`judges`]. This step used 1,367,355 TypeSafe tokens (USD 0.0574) and 245,314 OpenAI tokens.

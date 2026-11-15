@@ -53,3 +53,20 @@ Totals recorded in files: TypeSafe USD 0.5758 over the three scribe ledgers
 USD 0.1284 at the list rate (`data/scribe/v3/judges/usage-openai.json`, `data/scribe/v3/summary-v1.json`);
 Haiku USD 0.070736 and USD 0.049846 recorded, the rest not recorded; Nemotron 8,542 requests, not
 priced. No total project cost exists.
+
+## 14-15 November, NVIDIA lanes (UTC; appended by the lane integrator)
+
+| Time | Run | Host | Cost | Result |
+| --- | --- | --- | --- | --- |
+| 21:30-21:41 | Lane C step 2: roadmap PDF pinned, 9/9 actions mapped to measures, 117/117 quotes on their page (`runs/laneC-step2.jsonl`) | MacBook Pro | 0 | `data/roadmap/mapping-v1.json` |
+| 21:32-21:46 | Lane B step 4: Nemotron reader v0-v3 on 310 validation notes, v3 once on 700 test notes (690/700); 2,602 requests (`runs/laneB-step4.jsonl`) | MacBook Pro → Verda event endpoint | Nemotron not priced; Jev 0 | `data/scribe/nemotron/reader-v1.json` |
+| 21:37-21:43 | Lane A step 1: resolver ported and frozen (21:37:24), arm A' lexicon; 289/310 and 651/700 reproduced (`runs/laneA-step1.jsonl`) | MacBook Pro | 0 | `data/scribe/v4/resolver/reproduce-v1.json` |
+| 21:46-22:36 | Lane C step 7: Gemma 3 270M + adapter on CPU behind `POST /api/scribe`, 20 SYNTHETIC demo notes (`runs/laneC-step7.jsonl`) | MacBook Pro | 0 | `data/scribe/demo/` |
+| 21:48-21:59 | Lane C step 9: NVIDIA FLARE 2.9.1 federated statistics, 23 simulated sites; 92/92 cells equal (`runs/laneC-step9.jsonl`) | MacBook Pro | 0 | `data/flare/equivalence-*.json` |
+| 21:50-23:39 | Lane A step 3: MLX arms A, B, C trained and validated (293, 290, 304 of 310) (`runs/laneA-step3.jsonl`) | MacBook Pro (MLX) | 0 | `data/scribe/v4/mlx/validation-v1.json` |
+| 21:54-21:57 | Lane A step 5: stress set, 426 Nemotron requests, 308 notes accepted, frozen 21:57:19 (`runs/laneA-step5.jsonl`) | MacBook Pro → Verda event endpoint, TypeSafe | Jev USD 0.017441; Nemotron not priced | `data/scribe/stress/` |
+| 21:55-22:11 | Lane B steps 6 and 6b: county planner, 181 requests, 255/299 sentences kept; image input 13/20 (`runs/laneB-step6.jsonl`) | MacBook Pro → Verda event endpoint, TypeSafe | Jev USD 0.134 (`data/planner/jev-ledger.json`); Nemotron not priced | `data/planner/plans-v1.json`, `data/planner/vision/vision-6b-v1.json` |
+| 21:58-22:31 | Lane A step 1b: event-log study rerun with measured interval errors; fake-inequality finding (`runs/laneA-step1b.jsonl`) | MacBook Pro | 0 | `data/eventlog/design-study-v1.json` |
+| 22:06-22:09 | Lane C step 10: submission drafts and `submission/check_numbers.py` (`runs/laneC-step10.jsonl`) | MacBook Pro | 0 | `submission/` |
+| 23:46-00:00 | Lane A step 8: every system scored once on the stress set; cascade recalibrated on validation; 468 Nemotron requests (`runs/laneA-step8.jsonl`) | MacBook Pro (MLX) → Verda event endpoint | Jev 0; Nemotron not priced | `data/scribe/v4/eval/results-v1.json` |
+| 00:00-00:30 | lane integration: `insight`, `planner`, `scribe.gemmaAlone/resolver/evaluation/reader` bundled into `app.json`; section 06 added; submission placeholders filled (`runs/integrate-lanes.jsonl`) | MacBook Pro | 0 (local) | `web/data/app.json`, `submission/` |

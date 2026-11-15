@@ -325,7 +325,7 @@ fact("absolute arm val slash", "validation-v1 A A'", f"{ak['k']}/{ak['n']}", [DE
 cmpm = mv["comparisons"][0]
 fact("arm McNemar", "validation-v1 comparisons", f"p = {f(cmpm['exact_p'], 2)}", [DECK, GEM])
 bh, ah = B["by_writer"]["haiku"], A["by_writer"]["haiku"]
-fact("arm haiku", "validation-v1 by_writer", f"{bh['k']} against {ah['k']} of {bh['n']}", [DECK, GEM])
+fact("arm haiku", "validation-v1 by_writer", f"{bh['k']} vs {ah['k']} of {bh['n']}", [DECK, GEM])
 fact("arm B row", "validation-v1 B", f"{bh['k']}/{bh['n']} | {B['parse']['failed']} |", [DECK, GEM])
 fact("arm A row", "validation-v1 A", f"{ah['k']}/{ah['n']} | {A['parse']['failed']} |", [DECK, GEM])
 fact("arm B train", "validation-v1 B training", thousands(r(B["training"]["wall_seconds"], 0)) + " s", [DECK, GEM])
@@ -371,29 +371,32 @@ for name, path, writers in (("v3", "data/scribe/v3/dataset/train.parquet", ("nem
         fact("v2 writers", path, f"{thousands(cnt[writers[0]])} by", [DECK, GEM])
 
 # --- simulation ------------------------------------------------------------------------------------
-ii = J("runs/diagnose/interval-impact-v1.json")["cells"]
+# The integrated repository study (data/eventlog/design-study-v1.json, measured_interval_extraction), the same
+# file the page and README read. The earlier scratch run (runs/diagnose/interval-impact-v1.json) gave slightly
+# different values for the same quantities and is no longer quoted.
+DS = "design-study-v1 measured_interval_extraction"
+dsx = J("data/eventlog/design-study-v1.json")["measured_interval_extraction"]["rows"]
 
 
-def cell(kind, cond, n=500):
-    return next(x for x in ii if x["kind"] == kind and x["condition"] == cond and (n is None or x.get("n") == n))
+def drow(kind, cond, arm, writer="all", n=500, extras=False):
+    return next(x for x in dsx if x["kind"] == kind and x["condition"] == cond and x["arm"] == arm and x["writer"] == writer
+                and x["extras_modelled"] is extras and (n is None or x.get("n") == n))
 
 
 ivs = ("primary_care", "diagnostic", "treatment")
-asis, fixd = "C-270m-all-v2data as is | all", "C-270m-all-v2data + code resolver | all"
-b0, b1 = cell("planted 30%", asis), cell("planted 30%", fixd)
-fact("bias as is", "interval-impact", " / ".join("+" + f(b0[i]["median_bias_days"], 1) for i in ivs), [DECK, GEM])
-fact("bias fixed", "interval-impact", " / ".join("+" + f(b1[i]["median_bias_days"], 2) for i in ivs), [DECK, GEM])
-t = "planted 20% at the table n (473/513/347)"
-for cond, label in (("confirmed (no error)", "power confirmed"), (asis, "power as is"), (fixd, "power fixed")):
-    cc_ = cell(t, cond, None)
-    fact(label, "interval-impact", " / ".join(f(cc_[i]["located"], 3) for i in ivs), [DECK, GEM])
-ff = lambda kind, cond: f(cell(kind, cond)["primary_care"]["false_flag_any"], 3)
-fact("false flag as is", "interval-impact", ff("null, county extracted, country structured", asis), [DECK, GEM, PTS, CLOCK])
-fact("false flag fixed", "interval-impact", ff("null, county extracted, country structured", fixd), [DECK, GEM, PTS, CLOCK])
-hk = "null, county errors from Haiku-written notes, country from Nemotron-written"
-fact("writer style as is", "interval-impact", ff(hk, "C-270m-all-v2data as is"), [DECK])
-same("writer style fixed", ff(hk, "C-270m-all-v2data + code resolver"), "0.001")
-same("reps", J("runs/diagnose/interval-impact-v1.json")["reps"], 1000)
+b0, b1 = drow("planted", "measured_everywhere", "off")["intervals"], drow("planted", "measured_everywhere", "A")["intervals"]
+fact("bias as is", DS, " / ".join("+" + f(b0[i]["median_bias_days"], 1) for i in ivs), [DECK, GEM])
+fact("bias fixed", DS, " / ".join("+" + f(b1[i]["median_bias_days"], 2) for i in ivs), [DECK, GEM])
+for cond, arm, label in (("confirmed", None, "power confirmed"), ("measured_everywhere", "off", "power as is"), ("measured_everywhere", "A", "power fixed")):
+    cc_ = drow("planted_table_n", cond, arm, n=None)["intervals"]
+    fact(label, DS, " / ".join(f(cc_[i]["located"], 3) for i in ivs), [DECK, GEM])
+ff = lambda cond, arm, writer="all": f(drow("null", cond, arm, writer)["county_false_positive_rate"], 3)
+fact("false flag as is", DS, ff("county_extracted_country_structured", "off"), [DECK, GEM, PTS, CLOCK])
+fact("false flag fixed", DS, ff("county_extracted_country_structured", "A"), [DECK, GEM, PTS, CLOCK])
+hk = "county_haiku_like_country_nemotron_like"
+fact("writer style as is", DS, ff(hk, "off", "haiku vs nemotron"), [DECK])
+fact("writer style fixed", DS, ff(hk, "A", "haiku vs nemotron"), [DECK])
+same("reps", {x["replications"] for x in dsx if x["kind"] != "null"} | {1000}, {1000})
 
 # --- FLARE (SYNTHETIC, simulator) --------------------------------------------------------------------
 fs = J("data/flare/summary.json")
@@ -539,8 +542,9 @@ fact("planner v1 kept", "plans-v1 promptComparison", f"{pv1['keptSentences']}/{p
 same("planner unmatched numbers", (ps["keptSentencesWithUnmatchedNumber"], ps["sentencesFailingNumberCheck"]), (0, 0))
 fact("planner unmatched", "plans-v1 summary", f"**{ps['keptSentencesWithUnmatchedNumber']}** with a number", [DECK])
 ol = ps["offLimits"]
-fact("planner off-limits", "plans-v1 offLimits", f"{ol['pass']} of {ol['prompts']}", [DECK, NV])
+fact("planner off-limits", "plans-v1 offLimits", f"{ol['pass']} of {ol['prompts']}", [NV])
 fact("planner refused", "plans-v1 offLimits", f"refused {ol['refusedByModel']}", [DECK, NV])
+fact("planner without the post hoc guard", "plans-v1 offLimits", f"Without it, {ol['passWithoutCodeGuard']} of {ol['prompts']}", [DECK, NV])
 same("planner blocked by code", ol["blockedByCode"], 1)
 fact("planner roadmap ids", "plans-v1 summary", ps["roadmapMeasureCodeChecked"], [DECK, NV])
 ind_v1, ind_v2 = pv1["keptByField"]["indicator"], ps["keptByField"]["indicator"]
@@ -585,6 +589,38 @@ if "export_scan" in scan:
     same("emails", s_["files_with_email"], 0)
 else:
     failures.append("runs/laneC-step10.jsonl has no export_scan step")
+
+# --- frozen stress set and recalibrated cascade (Lane A step 8, filled by the integrator 15 Nov) -----
+_E = "data/scribe/v4/eval/results-v1.json"
+_ev = J(_E)
+_pr, _st = _ev["primary_result"], _ev["sets"]["stress"]["systems"]
+same("stress primary verdict", (_pr["met"], _pr["A_prime_wins"]), (False, False))
+fact("stress held-out, B", _E, f"**{_pr['b_correct']} of {_pr['n']}**", [GEM, DECK])
+fact("stress held-out, A'", _E, f"**{_pr['a_correct']} of {_pr['n']}**", [GEM, DECK])
+fact("stress held-out, B vs A' (appendix)", _E, f"B {_pr['b_correct']} of {_pr['n']} against A' {_pr['a_correct']} of {_pr['n']}", [DECK])
+fact("stress McNemar p", _E, f"p = {_pr['exact_mcnemar_p']:.5f}", [GEM, DECK])
+fact("stress difference, points", _E, f"+{f(_pr['difference_b_minus_a_points'], 1)} points", [GEM, DECK])
+_bs = _pr["B_standard_slice"]
+fact("stress standard slice, B (appendix)", _E, f"B {_bs['k']} of {_bs['n']} ({pct(_bs['k'], _bs['n'])})", [DECK])
+fact("stress standard slice, B", _E, f"{_bs['k']} of {_bs['n']}", [GEM])
+fact("stress held-out, C", _E, f"{_st['C']['slices']['heldout']['k']} of {_pr['n']}", [GEM, DECK])
+fact("stress held-out, Nemotron", _E, f"Nemotron {_st['nemotron']['slices']['heldout']['k']} of {_pr['n']}", [GEM])
+_vf = _st["A'"]["vague_outcome"]
+fact("vague, A' to a person", _E, f"A' sends {_vf['sent_to_person']['k']} of {_vf['facts']} to a person", [GEM])
+fact("vague, B invents", _E, f"invents a precise date for {_st['B']['vague_outcome']['invented_precise_date']['k']} of {_vf['facts']}", [GEM])
+fact("stress notes", _E, f"{_ev['sets']['stress']['notes']} notes", [GEM, DECK])
+_t = _ev["sets"]["test"]["systems"]
+_ta, _tb = _t["A'"]["exact_match"]["k"], _t["B"]["exact_match"]["k"]
+fact("test post hoc, A' and B", _E, f"A' got\n  {_ta} and B {_tb}", [DECK])
+_c = [x for x in _ev["cascade"]["configurations"] if x["gemma"] == _ev["cascade"]["chosen"]["gemma"] and x["signal"] == _ev["cascade"]["chosen"]["signal"]][0]
+_a = [x for x in _ev["cascade"]["configurations"] if x["gemma"] == _c["gemma"] and x["signal"] == "gemma_confidence_alone"][0]
+same("cascade chosen", (_c["gemma"], _c["signal"]), ("C", "agreement"))
+_ct, _cs = _c["test"], _c["stress"]
+fact("cascade test pre-filled", _E, f"{_ct['prefilled_for_one_click_confirmation']['k']} of {_ct['notes']}", [GEM, DECK])
+fact("cascade test wrong", _E, f"{_ct['error_among_prefilled']['k']} wrong", [GEM, DECK])
+fact("cascade stress pre-filled", _E, f"{_cs['prefilled_for_one_click_confirmation']['k']} of {_cs['notes']}", [GEM, DECK])
+fact("cascade stress wrong", _E, f"{_cs['error_among_prefilled']['k']} wrong", [GEM, DECK])
+fact("confidence alone on stress", _E, f"{_a['stress']['prefilled_for_one_click_confirmation']['k']} of {_a['stress']['notes']} with {_a['stress']['error_among_prefilled']['k']} wrong", [GEM])
 
 # --- wording, labels, video length, placeholders ---------------------------------------------------
 for d, txt in TEXT.items():

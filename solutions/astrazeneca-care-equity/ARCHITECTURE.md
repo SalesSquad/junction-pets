@@ -180,9 +180,10 @@ use the same number of optimisation steps, so a larger training set means fewer 
 **Teaching loop and cascade.** Round 2 of the teacher targets weak spots by curriculum (hard
 standard notes, careful notes, notes without events, long multi-visit notes, terse notes). A judge
 benchmark plants one error in a note's claimed answer and measures how often each judge catches it
-and how often it rejects a clean pair, on a held-out half. At inference, a cascade lets a note skip
-the person only when a score (student confidence, Jev score, or a logistic combination) passes a
-threshold chosen on validation notes only for a target error; test notes never reach a fit or a
+and how often it rejects a clean pair, on a held-out half. At inference, a cascade pre-fills a note for
+one-click confirmation only when a score (student confidence, Jev score, or a logistic combination)
+passes a threshold chosen on validation notes only for a target error; a person still confirms every
+note, and every other note is marked as needing editing; test notes never reach a fit or a
 threshold (`scribe/v3/cascade.py` raises if they do). Differences are paired bootstrap intervals,
 also with the thresholds re-chosen on resampled validation notes.
 
@@ -191,6 +192,57 @@ completions with optional structured outputs (JSON schema), a bearer-key guard o
 `/health`, and a client that sends every note to human review unless a calibrated threshold exists.
 The smoke test measured validity, exact match and latency on 100 held-out notes and compared each
 answer with the offline evaluation of the same adapter.
+
+## Gemma reads, code counts; Nemotron reads and plans (added 15 November)
+
+The plan in `NVIDIA_OPTIONS.md` section 3 ran in three lanes; the integrator bundles their result
+files into `app.json` with the same rules as the other tracks (required fields, absent file named in
+`app.trackProblems`, every figure copied, none typed).
+
+```
+runs/diagnose/diagnose-v1.json ─────────────── scribe.gemmaAlone   (Gemma alone on relative dates)
+scribe/v3/resolve.py + lexicon.py (frozen, sha256 in data/scribe/v4/resolver/freeze.json)
+  ─ reproduce ─ data/scribe/v4/resolver/reproduce-v1.json ─ scribe.resolver
+  ─ serve/client.py (default arm A'), scribe/v3/cascade.py (--resolve)
+scribe/mlx2 (MLX arms A, B, C on this Mac) ─ data/scribe/v4/mlx/validation-v1.json
+scribe/stress (Nemotron writes, code gate, Jev gate; frozen + preregistered) ─ data/scribe/stress/
+scribe/v4/eval8.py (each system scored once; cascade thresholds on validation only)
+  ─ data/scribe/v4/eval/results-v1.json ─ scribe.evaluation
+scribe/nemotron/reader.py (v0 ... v3, one change at a time) ─ data/scribe/nemotron/reader-v1.json ─ scribe.reader
+src/planner (4 SAMA tools, number check, Jev gate, off-limits guard) ─ data/planner/plans-v1.json ─ planner
+src/planner/vision_6b.py ─ data/planner/vision/vision-6b-v1.json ─ planner.vision
+eventlog/extraction_intervals.py ─ data/eventlog/design-study-v1.json (measured_interval_extraction) ─ insight
+serve/demo (Gemma 3 270M + adapter on CPU, resolver A') ─ POST /api/scribe in web/serve.mjs
+flare/ (NVIDIA FLARE 2.9.1 simulator, 23 SYNTHETIC sites) ─ data/flare/ ─ flareGate
+```
+
+**Resolver.** Gemma copies the date phrase it read; code computes the date from the note date. The
+rule (`scribe-v3-relative-resolver-v1`) was frozen and hashed before the stress set existed. Arm A
+resolves digits only; arm A' adds a small Finnish lexicon and sends vague phrases ("pari viikkoa
+sitten", "viime kuussa") to a person instead of guessing.
+
+**Evaluation.** Arms were selected on validation notes only. The 700 test notes had been read before,
+so their figures are post hoc. The stress set (new phrasings: number words seven to twelve,
+"toissapäivänä", vague phrases) was frozen with a preregistration before any system read it, and
+each system read it once. `src/tracks.mjs` refuses to bundle the evaluation unless its own hash
+checks passed (`verify.all_ok`).
+
+**Two readers, one person.** A note is pre-filled for one-click confirmation only when the
+code-resolved Gemma answer and the Nemotron reader agree exactly; otherwise it needs editing. The
+configuration was chosen on validation notes only (`scribe/v3/cascade.py` leak guard). A person
+confirms every note either way.
+
+**County planner.** Nemotron 3.5 Super VL calls four SAMA tools (`get_county_brief`,
+`get_portfolio`, `get_evidence`, `get_roadmap_measure`) and drafts a plan per area. Code drops every
+sentence with a number that is not in a tool output of the same run; TypeSafe Jev drops unfaithful or
+overclaiming sentences; nothing is repaired. The page fetches the full drafts; `app.json` carries the
+summary. Because the drafts were written on an earlier build, `src/build.mjs` (`plannerToolCheck`)
+re-runs every stored tool call on the current build and names the areas whose tool outputs changed;
+the page shows a "read with care" note for exactly those.
+
+**Insight.** `eventlog/extraction_intervals.py` feeds the scribe's measured within-note interval
+errors (as is, and with resolver arm A) into the repository's county detector. `buildInsight` looks
+up each row it shows by its labels and fails the build if one is missing.
 
 ## Supporting track 3: Evo 2 on BRCA1 (RESEARCH)
 

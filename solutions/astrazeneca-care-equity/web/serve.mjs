@@ -2,7 +2,9 @@ import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
+import {applySecondReader} from './scribe-demo.mjs';
 const web=fileURLToPath(new URL('./',import.meta.url)), root=path.dirname(web);
+const ROOT_DATA=new Set(['/data/planner/plans-v1.json','/data/scribe/demo/demo-notes.json','/data/scribe/demo/demo-outputs.json']);
 const csp="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
 // POST /api/scribe helper. One persistent local CPU process (serve/demo/worker.py: Gemma 3 270M + LoRA adapter, then the
 // frozen date resolver), started on the first request and reused; the precomputed SYNTHETIC demo outputs in
@@ -39,10 +41,17 @@ async function scribeLive(note){
  });
 }
 if(process.env.SAMA_SCRIBE_PRELOAD==='1')scribeWorker().catch(()=>{});
+// Second reader: Nemotron 3.5 Super VL's stored v3 answers on the SYNTHETIC validation notes (data/scribe/nemotron/
+// val-v3.jsonl). The page never calls a hosted model; free text and notes rewritten by code have no second answer, so
+// they need editing (two-reader rule in web/scribe-demo.mjs applySecondReader, same as serve/demo/engine.py).
+const SECOND_FILE='data/scribe/nemotron/val-v3.jsonl';
+const SECOND_HOW='stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it';
+async function readSecond(){try{const m=new Map();for(const line of (await readFile(path.join(root,SECOND_FILE),'utf8')).split('\n'))if(line.trim()){const r=JSON.parse(line);m.set(r.id,r.prediction??null);}return m;}catch{return new Map();}}
+const secondFor=(demo)=>demo&&!demo.rewritten_by_code&&scribe.data.second.has(demo.source_id)?{available:true,prediction:scribe.data.second.get(demo.source_id),how:SECOND_HOW,source:SECOND_FILE}:null;
 async function scribeRoute(body){
  if(!body||typeof body!=='object'||Array.isArray(body))return [{error:'body must be a JSON object'},400];
  const mode=body.mode??'live';if(mode!=='live'&&mode!=='precomputed')return [{error:'mode must be "live" or "precomputed"'},400];
- if(!scribe.data){const read=(f)=>readFile(path.join(root,'data','scribe','demo',f),'utf8').then(JSON.parse).catch(()=>null);scribe.data={notes:await read('demo-notes.json'),outputs:await read('demo-outputs.json')};}
+ if(!scribe.data){const read=(f)=>readFile(path.join(root,'data','scribe','demo',f),'utf8').then(JSON.parse).catch(()=>null);scribe.data={notes:await read('demo-notes.json'),outputs:await read('demo-outputs.json'),second:await readSecond()};}
  let note,demo=null;
  if(body.demo_id!==undefined){
   demo=typeof body.demo_id==='string'&&/^demo-\d{2}$/.test(body.demo_id)?(scribe.data.notes?.notes??[]).find((n)=>n.demo_id===body.demo_id):null;
@@ -59,7 +68,7 @@ async function scribeRoute(body){
  if(mode==='precomputed')return fallback('precomputed output requested');
  const started=Date.now();
  try{
-  const result=await scribeLive(note);
+  const result=applySecondReader(await scribeLive(note),secondFor(demo));
   if(demo){
    const same=(a,b)=>!!a&&!!b&&a.entry_route===b.entry_route&&a.events.length===b.events.length&&a.events.every((e,i)=>e.type===b.events[i].type&&e.date===b.events[i].date&&e.precision===b.events[i].precision);
    result.answer_key=demo.answer_key;result.exact_match_with_answer_key=same(result.resolved?.prediction,demo.answer_key);
@@ -89,7 +98,8 @@ const server=http.createServer(async(req,res)=>{
  if(p.includes('..')||p.includes('\\')||p.includes('\0'))return json({error:'Forbidden'},403);
  let base=web, relative=p==='/'?'index.html':p.slice(1);
  if(p.startsWith('/src/')){if(!/^\/src\/[\w-]+\.mjs$/.test(p))return json({error:'Forbidden'},403);base=root;}
- if(p.startsWith('/data/')&&!['/data/app.json','/data/counties.geo.json'].includes(p)){if(!p.endsWith('.json'))return json({error:'Forbidden'},403);base=root;}
+ // /data/: an allowlist of the files the page reads. Other result files stay off the network (some carry local paths).
+ if(p.startsWith('/data/')&&!['/data/app.json','/data/counties.geo.json'].includes(p)){if(!ROOT_DATA.has(p))return json({error:'Not found'},404);base=root;}
  const file=path.resolve(base,relative);if(!file.startsWith(base+path.sep)&&!file.startsWith(base))return json({error:'Forbidden'},403);
  const content=await readFile(file);res.writeHead(200,{'Content-Type':({'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.json':'application/json','.svg':'image/svg+xml'})[path.extname(file)]||'application/octet-stream'});res.end(req.method==='HEAD'?undefined:content);
  }catch(e){json({error:e.code==='ENOENT'?'Not found':'Request failed'},e.code==='ENOENT'?404:400);}

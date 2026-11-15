@@ -8,8 +8,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { buildApp } from '../src/build.mjs';
-import { buildAblation, buildEventLog, buildGenomics, buildServing, buildStudents, buildTeaching, buildTracks, FILES, oneClickWording, RESEARCH, SYNTHETIC } from '../src/tracks.mjs';
-import { chip, dataPlanHtml, genomicsHtml, pilotHtml, processHtml, roadmapLine, routeDisclosure, scribeHtml, whoHtml } from '../web/tracks.mjs';
+import { buildAblation, buildEvaluation, buildEventLog, buildGemmaAlone, buildGenomics, buildInsight, buildPlanner, buildPlannerVision, buildReader, buildResolver, buildServing, buildStudents, buildTeaching, buildTracks, FILES, oneClickWording, RESEARCH, SYNTHETIC } from '../src/tracks.mjs';
+import { chip, dataPlanHtml, genomicsHtml, insightHtml, pilotHtml, plannerSummaryHtml, processHtml, roadmapLine, routeDisclosure, scribeHtml, whoHtml } from '../web/tracks.mjs';
 
 const url = (p) => new URL(p, import.meta.url);
 const has = (p) => existsSync(url(`../${p}`));
@@ -198,7 +198,7 @@ test('scribe history: version 1 is kept, marked superseded, and still equals its
   }
   assert.ok(h.examples.every((x) => x.synthetic === true && /haiku/i.test(x.writer)));
   const html = scribeHtml(app);
-  const hist = html.indexOf('<h3>History</h3>'), now = html.indexOf('Where the scribe stands now');
+  const hist = html.indexOf('<h3>History</h3>'), now = html.indexOf('Where the scribe stood before the code date resolver');
   assert.ok(now >= 0 && hist > now, 'the current headline comes first and version 1 is shown below it as history');
   assert.match(html.slice(hist), /superseded/); assert.match(html.slice(hist), /<details/);
 });
@@ -249,15 +249,15 @@ test('an absent file leaves its part out and names the reason in trackProblems',
   assert.ok(t.scribe && t.scribe.teaching === null && t.scribe.students);
   assert.deepEqual(t.trackProblems, [{ track: 'scribe.teaching', problem: `source file missing: ${none}` }]);
   assert.match(scribeHtml({ scribe: t.scribe, trackProblems: t.trackProblems }), /Parts left out of this build: scribe.teaching/);
-  const all = buildTracks([], { eventLog: none, ablation: none, compare: none, smokeGuided: none, teaching: none, scribeEval: none, genomics: none });
-  assert.ok(!('eventLog' in all) && !('scribe' in all) && !('genomics' in all));
-  assert.deepEqual(all.trackProblems.map((p) => p.track).sort(), ['eventLog', 'genomics', 'scribe', 'scribe.ablation', 'scribe.history', 'scribe.serving', 'scribe.students', 'scribe.teaching']);
+  const all = buildTracks([], { eventLog: none, ablation: none, compare: none, smokeGuided: none, teaching: none, scribeEval: none, genomics: none, diagnose: none, resolver: none, evaluation: none, reader: none });
+  assert.ok(!('eventLog' in all) && !('scribe' in all) && !('genomics' in all) && !('insight' in all));
+  assert.deepEqual(all.trackProblems.map((p) => p.track).sort(), ['eventLog', 'genomics', 'insight', 'scribe', 'scribe.ablation', 'scribe.evaluation', 'scribe.gemmaAlone', 'scribe.history', 'scribe.reader', 'scribe.resolver', 'scribe.serving', 'scribe.students', 'scribe.teaching']);
   for (const [render, key] of [[dataPlanHtml, 'eventLog'], [scribeHtml, 'scribe'], [genomicsHtml, 'genomics']]) assert.match(render({ trackProblems: all.trackProblems }), new RegExp(`missing-label[^<]*${key}`));
 });
 
 test('the app file on disk carries the same tracks as a fresh build', { skip: !has('web/data/app.json') }, () => {
   const disk = read('web/data/app.json');
-  for (const k of ['eventLog', 'scribe', 'genomics', 'safetyNet', 'flareGate']) assert.deepEqual(disk[k], JSON.parse(JSON.stringify(app[k] ?? null)) ?? undefined, `web/data/app.json is stale for ${k}: run node src/build.mjs`);
+  for (const k of ['eventLog', 'insight', 'scribe', 'planner', 'genomics', 'safetyNet', 'flareGate']) assert.deepEqual(disk[k], JSON.parse(JSON.stringify(app[k] ?? null)) ?? undefined, `web/data/app.json is stale for ${k}: run node src/build.mjs`);
   assert.deepEqual(disk.trackProblems, app.trackProblems);
 });
 
@@ -267,11 +267,11 @@ test('the side tracks do not touch the analysis or the recommendations', () => {
   assert.ok(app.analysis.regions.length === 23 && app.recommendation.portfolio.picks.length > 0);
   if (disk) assert.deepEqual(disk.recommendation.portfolio, JSON.parse(JSON.stringify(app.recommendation.portfolio)));
   const cited = JSON.stringify(app.recommendation) + JSON.stringify(app.analysis.goal3);
-  assert.ok(!/eventLog|scribe|genomics|evo2|gemma|safetyNet|flareGate/i.test(cited), 'no recommendation is derived from synthetic or research-only tracks');
+  assert.ok(!/eventLog|scribe|genomics|evo2|gemma|safetyNet|flareGate|insight|planner|nemotron/i.test(cited), 'no recommendation is derived from synthetic, research-only or drafted tracks');
 });
 
 // ------------------------------------------------------------------ page
-const sections = [['The data to collect', dataPlanHtml, 'SYNTHETIC', 'eventLog'], ['Pathway scribe', scribeHtml, 'SYNTHETIC', 'scribe'], ['Same variant, same answer', genomicsHtml, 'RESEARCH', 'genomics']];
+const sections = [['The data to collect', dataPlanHtml, 'SYNTHETIC', 'eventLog'], ['Pathway scribe', scribeHtml, 'SYNTHETIC', 'scribe'], ['Same variant, same answer', genomicsHtml, 'RESEARCH', 'genomics'], ['The insight', insightHtml, 'SYNTHETIC', 'insight']];
 for (const [title, render, kind, key] of sections) {
   test(`page section "${title}": every data number sits in a block that carries the ${kind} chip`, { skip: !app[key] }, () => {
     const html = render(clone(app));
@@ -324,7 +324,7 @@ test('page sections show failures instead of hiding them', () => {
 
 test('the page shell keeps the main product first, then the two synthetic tracks; the research benchmark lives on its own appendix page', () => {
   const html = text('../web/index.html'), css = text('../web/styles.css'), appJs = text('../web/app.mjs'), research = text('../web/research.html');
-  const order = ['gap', 'who', 'county', 'goal', 'action', 'plan', 'brief', 'collect', 'scribe', 'evidence'].map((s) => html.indexOf(`<section id="${s}"`));
+  const order = ['gap', 'who', 'county', 'goal', 'action', 'insight', 'plan', 'brief', 'collect', 'scribe', 'evidence'].map((s) => html.indexOf(`<section id="${s}"`));
   assert.ok(order.every((i) => i > 0) && order.every((v, i) => !i || v > order[i - 1]), 'section order');
   assert.ok(html.indexOf('class="tracks-intro"') > html.indexOf('<section id="brief"') && html.indexOf('class="tracks-intro"') < html.indexOf('<section id="collect"'), 'the tracks are introduced as supporting, after the product');
   assert.ok(html.indexOf('<section id="who"') === html.indexOf('</section>', html.indexOf('<section id="gap"')) + '</section>\n'.length, 'the who, how and where panel comes directly after the map');
@@ -399,4 +399,122 @@ test('every action carries its roadmap measure id, and the pilot card is Satakun
     for (const body of [card, whoHtml(clone(app)), processHtml(clone(app)), text('../web/index.html'), text('../web/app.mjs')]) assert.ok(!body.toLowerCase().includes(w), w);
   }
   assert.ok(!/low-dose CT screening, starting where/.test(JSON.stringify(app.recommendation.interventions)), 'the lung action joins the existing pilot');
+});
+
+// ------------------------------------------------------------------ lanes of NVIDIA_OPTIONS.md section 3 (integrated 15 November)
+const WORDING = ['auto-confirmed', 'skips review', 'skip review', 'clinically accurate', 'works on real notes', 'hospital-grade'];
+const drop = (obj, path) => { const o = clone(obj), ks = path.split('.'), last = ks.pop(); let x = o; for (const k of ks) x = x[k]; delete x[last]; return o; };
+
+test('insight: the fake-inequality figures equal the design-study rows they are looked up from', { skip: !has(FILES.eventLog) }, () => {
+  const study = read(FILES.eventLog), i = app.insight, mx = study.measured_interval_extraction;
+  assert.equal(i.source.sha256, sha256(FILES.eventLog)); assert.equal(i.statement, SYNTHETIC);
+  assert.ok(study.findings.includes(i.finding) && i.finding.startsWith(i.headline));
+  const nul = (cond, arm, writer, extras) => mx.rows.find((r) => r.kind === 'null' && r.condition === cond && r.arm === arm && r.writer === writer && r.extras_modelled === extras).county_false_positive_rate;
+  assert.equal(i.falseFlag.countyTextCountryStructured.asIs.rate, nul('county_extracted_country_structured', 'off', 'all', false));
+  assert.equal(i.falseFlag.countyTextCountryStructured.resolver.rate, nul('county_extracted_country_structured', 'A', 'all', false));
+  assert.equal(i.falseFlag.countyTextCountryStructured.resolverExtras.rate, nul('county_extracted_country_structured', 'A', 'all', true));
+  assert.equal(i.falseFlag.writerStyle.asIs.rate, nul('county_haiku_like_country_nemotron_like', 'off', 'haiku vs nemotron', false));
+  assert.equal(i.falseFlag.writerStyle.resolver.rate, nul('county_haiku_like_country_nemotron_like', 'A', 'haiku vs nemotron', false));
+  assert.equal(i.falseFlag.confirmed.rate, nul('confirmed', null, null, false));
+  // the finding sentence carries the same rates the table shows
+  for (const v of [i.falseFlag.countyTextCountryStructured.asIs.rate, i.falseFlag.countyTextCountryStructured.resolver.rate, i.falseFlag.writerStyle.asIs.rate, i.falseFlag.writerStyle.resolver.rate]) assert.ok(i.finding.includes(v.toFixed(3)), v);
+  for (const r of i.located) {
+    const src = mx.rows.find((x) => x.kind === 'planted' && x.condition === r.condition && x.arm === r.arm && x.writer === 'all' && !x.extras_modelled && x.n === i.countyEpisodes);
+    for (const k of ['primary_care', 'diagnostic', 'treatment']) assert.equal(r.intervals[k].located, src.intervals[k].located);
+  }
+  assert.deepEqual(i.noteExactMatch.test.resolver, mx.note_exact_match.test.resolver);
+  assert.throws(() => buildInsight(drop(study, 'measured_interval_extraction.rows')), /required field "measured_interval_extraction.rows" is missing/);
+  const noFinding = clone(study); noFinding.findings = noFinding.findings.filter((f) => !f.startsWith('Extraction errors manufacture'));
+  assert.throws(() => buildInsight(noFinding), /fake-inequality finding is missing/);
+  const noRow = clone(study); noRow.measured_interval_extraction.rows = noRow.measured_interval_extraction.rows.filter((r) => !(r.kind === 'null' && r.arm === 'A'));
+  assert.throws(() => buildInsight(noRow), /has no null row/);
+  const html = insightHtml(clone(app));
+  assert.match(html, /manufacture fake county inequality/);
+  for (const w of WORDING) assert.ok(!html.toLowerCase().includes(w), w);
+});
+
+test('scribe, Gemma reads, code counts: adapter alone, resolver, stress evaluation and reader equal their result files', { skip: !has(FILES.evaluation) || !has(FILES.resolver) || !has(FILES.reader) || !has(FILES.diagnose) }, () => {
+  const s = app.scribe, res = read(FILES.evaluation), rep = read(FILES.resolver), rd = read(FILES.reader), dg = read(FILES.diagnose);
+  assert.deepEqual(s.gemmaAlone.withRelativeDate, dg.runs['C-270m-all-v2data'].test.by_has_relative.True);
+  assert.equal(s.resolver.test.after.k, rep.primary.test.k); assert.equal(s.resolver.test.before.k, rep.primary.test.before.k);
+  assert.equal(s.resolver.validation.after.k, rep.primary.validation.k); assert.equal(s.resolver.notesMadeWorse, rep.notes_made_worse_arm_A_all_runs);
+  const ev = s.evaluation, pr = res.primary_result;
+  assert.equal(ev.source.sha256, sha256(FILES.evaluation));
+  assert.deepEqual([ev.primary.aCorrect, ev.primary.bCorrect, ev.primary.n, ev.primary.p, ev.primary.met, ev.primary.headline], [pr.a_correct, pr.b_correct, pr.n, pr.exact_mcnemar_p, pr.met, pr.headline]);
+  for (const setName of ['val', 'test', 'stress']) for (const [k, v] of Object.entries(res.sets[setName].systems)) assert.deepEqual(ev.sets[setName].systems[k].exact, v.exact_match, `${setName} ${k}`);
+  for (const k of ["A'", 'B', 'C', 'nemotron']) {
+    assert.deepEqual(ev.sets.stress.systems[k].slices.heldout, res.sets.stress.systems[k].slices.heldout);
+    assert.deepEqual(ev.sets.stress.systems[k].vague.sent_to_person, res.sets.stress.systems[k].vague_outcome.sent_to_person);
+  }
+  const chosen = res.cascade.configurations.find((c) => c.gemma === res.cascade.chosen.gemma && c.signal === res.cascade.chosen.signal);
+  const mine = ev.cascade.configurations.find((c) => c.gemma === ev.cascade.chosen.gemma && c.signal === ev.cascade.chosen.signal);
+  assert.deepEqual(mine.test.prefilled, chosen.test.prefilled_for_one_click_confirmation); assert.deepEqual(mine.test.wrong, chosen.test.error_among_prefilled);
+  assert.deepEqual(mine.stress.prefilled, chosen.stress.prefilled_for_one_click_confirmation);
+  assert.equal(ev.cascade.baseline.prefilled, res.cascade.baseline_today.prefilled);
+  assert.equal(s.reader.selected, rd.selected_by_rule); assert.deepEqual(s.reader.test.exact, rd.test.exact_match);
+  for (const x of s.reader.ladder) assert.equal(x.after, rd.validation_ladder[x.step].after);
+  for (const v of s.reader.versions) assert.deepEqual(v.exact, rd.validation[v.id].exact_match);
+  // loud failures
+  assert.throws(() => buildEvaluation(drop(res, 'primary_result.met')), /required field "primary_result.met" is missing/);
+  const bad = clone(res); bad.verify.all_ok = false;
+  assert.throws(() => buildEvaluation(bad), /hash checks before scoring did not all pass/);
+  const noChoice = clone(res); noChoice.cascade.chosen.signal = 'nothing';
+  assert.throws(() => buildEvaluation(noChoice), /chosen cascade configuration/);
+  assert.throws(() => buildReader(drop(rd, 'validation_ladder')), /required field "validation_ladder" is missing/);
+  assert.throws(() => buildResolver(drop(rep, 'primary.test.before')), /required field "primary.test.before" is missing/);
+  assert.throws(() => buildGemmaAlone(drop(dg, 'runs.C-270m-all-v2data.test.by_has_relative')), /by_has_relative/);
+  // the page
+  const html = scribeHtml(clone(app));
+  assert.match(html, /Gemma reads, code counts/); assert.match(html, /preregistered/i); assert.match(html, /pre-filled for one-click confirmation/);
+  assert.ok(html.includes(`<span class="n">${ev.primary.bCorrect}</span>/<span class="n">${ev.primary.n}</span>`), 'the primary result is on the page');
+  assert.ok(html.indexOf('Gemma reads, code counts') < html.indexOf('How the scribe got here'), 'the new result leads; the earlier versions follow');
+  for (const w of WORDING) assert.ok(!html.toLowerCase().includes(w), w);
+});
+
+test('scribe: without the stress evaluation the section says so and labels the resolver figure post hoc', { skip: !has(FILES.resolver) }, () => {
+  const none = 'data/does-not-exist.json';
+  const t = buildTracks(app.analysis.regions, { evaluation: none });
+  assert.equal(t.scribe.evaluation, null);
+  assert.deepEqual(t.trackProblems, [{ track: 'scribe.evaluation', problem: `source file missing: ${none}` }]);
+  const html = scribeHtml({ scribe: t.scribe, trackProblems: t.trackProblems });
+  assert.match(html, /Parts left out of this build: scribe.evaluation/); assert.match(html, /not in this build/); assert.match(html, /post hoc/);
+});
+
+test('planner: the summary in app.json equals plans-v1.json, the tool re-check is complete, and the panel labels every number', { skip: !has(FILES.planner) }, () => {
+  const plans = read(FILES.planner), p = app.planner;
+  assert.equal(p.source.sha256, sha256(FILES.planner)); assert.equal(p.label, plans.label);
+  assert.equal(p.summary.keptSentences, plans.summary.keptSentences); assert.equal(p.summary.keptSentencesWithUnmatchedNumber, 0);
+  assert.equal(p.summary.promptComparison.v1.keptSentences, plans.summary.promptComparison.v1.keptSentences);
+  assert.deepEqual(p.summary.offLimits, { prompts: plans.summary.offLimits.prompts, pass: plans.summary.offLimits.pass, passWithoutCodeGuard: plans.summary.offLimits.passWithoutCodeGuard, refusedByModel: plans.summary.offLimits.refusedByModel, blockedByCode: plans.summary.offLimits.blockedByCode });
+  assert.deepEqual(p.countyIds.sort(), Object.keys(plans.counties).sort());
+  if (p.toolCheck.checked) {
+    assert.equal(p.toolCheck.identical + p.toolCheck.changed.length, p.toolCheck.counties);
+    assert.equal(p.toolCheck.counties, Object.keys(plans.counties).length);
+  }
+  if (has(FILES.plannerVision)) { const v = read(FILES.plannerVision); assert.equal(p.vision.imageExact, v.summary.image_exact); assert.equal(p.vision.verdict, v.summary.verdict); }
+  assert.throws(() => buildPlanner(drop(plans, 'summary.promptComparison')), /required field "summary.promptComparison.v1.keptSentences" is missing/);
+  if (has(FILES.plannerVision)) assert.throws(() => buildPlannerVision(drop(read(FILES.plannerVision), 'summary.verdict')), /summary.verdict/);
+  const html = plannerSummaryHtml(clone(app));
+  assert.ok(!/undefined|NaN|\[object Object\]/.test(html));
+  const nums = numbersWithScope(html);
+  assert.ok(nums.length >= 20, `expected many data numbers, found ${nums.length}`);
+  assert.equal(nums.filter((x) => !x.scope || !x.scope.chips.has(x.scope.kind)).length, 0, 'every number sits in a block that carries its own chip');
+  for (const c of p.toolCheck.changed || []) assert.ok(html.includes(`<code>${c.county}</code>`), c.county);
+  for (const w of WORDING) assert.ok(!html.toLowerCase().includes(w), w);
+  // absent files: the planner, then only its image test
+  const none = 'data/does-not-exist.json';
+  const t = buildTracks(app.analysis.regions, { planner: none });
+  assert.ok(!('planner' in t)); assert.deepEqual(t.trackProblems, [{ track: 'planner', problem: `source file missing: ${none}` }]);
+  assert.match(plannerSummaryHtml({ trackProblems: t.trackProblems }), /missing-label[^<]*planner/);
+  const u = buildTracks(app.analysis.regions, { plannerVision: none });
+  assert.equal(u.planner.vision, null); assert.deepEqual(u.trackProblems, [{ track: 'planner.vision', problem: `source file missing: ${none}` }]);
+});
+
+test('page shell: the insight sits between the product actions and the Nemotron plan; app.mjs renders it and the planner summary', () => {
+  const html = text('../web/index.html'), appJs = text('../web/app.mjs');
+  assert.ok(html.indexOf('<section id="insight"') > html.indexOf('<section id="action"') && html.indexOf('<section id="insight"') < html.indexOf('<section id="plan"'));
+  assert.match(html, /<div id="insight-content"><\/div>/); assert.match(html, /<div id="planner-summary"><\/div>/);
+  assert.ok(html.slice(html.indexOf('<nav'), html.indexOf('</nav>')).includes('href="#insight"'));
+  assert.match(appJs, /\['insight-content',insightHtml\]/); assert.match(appJs, /\['planner-summary',plannerSummaryHtml\]/);
+  assert.match(appJs, /toolCheck\?\.changed/);
 });

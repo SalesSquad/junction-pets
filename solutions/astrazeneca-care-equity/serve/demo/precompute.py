@@ -16,6 +16,9 @@ web/serve.mjs, so every number here goes through the process the demo uses.
   compare-val  run the worker on all 310 validation notes; write data/scribe/demo/cpu-vs-cuda-val310.json.
   http-timing  start node web/serve.mjs (SAMA_SCRIBE_PRELOAD=1) and POST every demo note to /api/scribe; write
                data/scribe/demo/http-timing.json.
+  second-reader  apply the two-reader rule to demo-outputs.json from Nemotron's stored v3 answers on the same SYNTHETIC
+               validation notes (data/scribe/nemotron/val-v3.jsonl). No model, no network. Notes rewritten by code and
+               free text were never read by the second reader, so they need editing.
 
 Stored CUDA outputs: data/scribe/v3/student/C-270m-all-v2data/val-records.json (A100, bfloat16, batch 16, greedy).
 Every step appends one line to runs/laneC-step7.jsonl. No network, no hosted endpoint, no cost.
@@ -393,6 +396,7 @@ def cmd_run(args):
         "results": results,
     }
     save(OUTPUTS, outputs)
+    cmd_second_reader(args)  # the two-reader rule on the stored answers (no model, no network)
     comparison = {
         "schema": "sama-scribe-demo-cpu-vs-cuda-v1",
         "synthetic": True,
@@ -434,6 +438,44 @@ def cmd_run(args):
     log("precompute", "scribe/.venv/bin/python serve/demo/precompute.py run", inputs=[rel(NOTES), rel(CUDA_RECORDS), "serve/demo/worker.py"],
         outputs=[rel(OUTPUTS), rel(COMPARE)], metrics=m)
     print(json.dumps(m, indent=1))
+
+
+def cmd_second_reader(args):
+    """Add the two-reader rule to the stored demo outputs. No model, no network: reads demo-outputs.json, demo-notes.json
+    and Nemotron's stored v3 answers (data/scribe/nemotron/val-v3.jsonl), keeps every first-reader field and raw, and
+    sets review = pre-filled only when the two answers agree exactly. Notes rewritten by code were never read by the
+    second reader, so they need editing."""
+    doc = json.loads(OUTPUTS.read_text(encoding="utf-8"))
+    notes = {n["demo_id"]: n for n in json.loads(NOTES.read_text(encoding="utf-8"))["notes"]}
+    second = engine.load_second_reader()
+    source = rel(engine.SECOND_READER_FILE)
+    per = {}
+    for demo_id, result in doc["results"].items():
+        note = notes[demo_id]
+        available = (not note["rewritten_by_code"]) and note["source_id"] in second
+        engine.apply_second_reader(result, second.get(note["source_id"]), available, source=source)
+        per[demo_id] = {"review": result["review"], "reason": result["review_reason"],
+                        "exact_match_with_answer_key": result["exact_match_with_answer_key"]}
+    pre = [d for d, p in per.items() if p["review"] == engine.PREFILLED]
+    summary = {
+        "rule": "pre-filled for one-click confirmation only when the Gemma answer (after the code resolver) is usable with "
+                "no flag and equals the stored Nemotron v3 answer for the same SYNTHETIC note; otherwise needs editing; "
+                "a person confirms every event",
+        "second_reader_file": source,
+        "notes": len(per),
+        "pre_filled": len(pre),
+        "pre_filled_wrong": sum(not per[d]["exact_match_with_answer_key"] for d in pre),
+        "needs_editing": len(per) - len(pre),
+        "reasons": {r: sum(p["reason"] == r for p in per.values()) for r in sorted({p["reason"] for p in per.values()})},
+        "wrong_notes": {d: per[d]["review"] for d in per if not per[d]["exact_match_with_answer_key"]},
+        "generated_utc": now(),
+    }
+    doc["two_reader"] = summary
+    doc["label"] = ("Precomputed fallback for POST /api/scribe: the persistent CPU worker's output on the 20 SYNTHETIC demo "
+                    "notes, with the two-reader rule applied from Nemotron's stored answers. A person confirms every event.")
+    save(OUTPUTS, doc)
+    print(json.dumps(summary, indent=1, ensure_ascii=False))
+    return summary
 
 
 def _source_key(note):
@@ -584,8 +626,10 @@ def main(argv=None):
     p.add_argument("--limit", type=int, default=0)
     p = sub.add_parser("http-timing")
     p.add_argument("--threads", type=int, default=None)
+    sub.add_parser("second-reader")
     args = parser.parse_args(argv)
-    {"select": cmd_select, "run": cmd_run, "compare-val": cmd_compare_val, "http-timing": cmd_http_timing}[args.cmd](args)
+    {"select": cmd_select, "run": cmd_run, "compare-val": cmd_compare_val, "http-timing": cmd_http_timing,
+     "second-reader": cmd_second_reader}[args.cmd](args)
 
 
 if __name__ == "__main__":
