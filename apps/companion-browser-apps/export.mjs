@@ -130,6 +130,10 @@ export async function exportApps(output) {
   await mkdir(target);
   const exported = [];
   for (const app of catalog.apps) {
+    if (app.solution === 'valio-trusted-trade' && app.directory === 'aimo-trade') {
+      const {verifyBrowserBuild} = await import('../../solutions/valio-trusted-trade/browser/verify.mjs');
+      await verifyBrowserBuild();
+    }
     for (const file of app.files) {
       const bytes = await readFile(join(root, app.source ?? join('solutions', app.solution), file));
       const dest = join(target, 'apps', app.directory, file);
@@ -184,6 +188,11 @@ export async function exportApps(output) {
       const meta=join(target,'apps',app.directory,'source-meta.mjs');
       const original=await readFile(meta,'utf8');
       await writeFile(meta,`${original}\nexport const EMBEDDED_CLIENT_DIGEST = '${digest}';\n`);
+    }
+    // Verify the bytes actually copied, including their exported manifest.
+    if (app.solution === 'valio-trusted-trade' && app.directory === 'aimo-trade') {
+      const {verifyBrowserBuild} = await import('../../solutions/valio-trusted-trade/browser/verify.mjs');
+      await verifyBrowserBuild({distRoot:join(target,'apps',app.directory,'browser/dist')});
     }
     exported.push({petSlug:app.petSlug,name:app.name,path:`/apps/${app.directory}/${app.entry}`,solution:app.solution});
   }

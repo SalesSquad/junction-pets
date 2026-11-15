@@ -49,3 +49,12 @@ required local asset, with no secrets or private data. Server-backed solutions
 need their actual runtime and deployment before they can be listed as runnable
 here. Never infer an app URL from a repository, company website or localhost
 port. Keep synthetic/demo boundaries visible and retain upstream provenance.
+
+Valio Aimo's `junction-valio-aimo` app is produced by
+`solutions/valio-trusted-trade/browser/build.mjs`. It runs the existing
+procurement, quote, approval, cryptographic proof, settlement and audit domain
+in the browser with synthetic data. Rebuild its declared browser assets through
+that producer when the shared domain changes. The original Node/SQLite service,
+host JWT adapter, MCP bridge and HTTP simulation lab remain in the solution;
+their runtime and real supplier integration are not provided by this static
+bundle.
