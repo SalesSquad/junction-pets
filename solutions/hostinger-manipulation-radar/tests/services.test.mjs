@@ -4,7 +4,7 @@ import {mkdtemp,readFile,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createServices,validateInterpretation} from '../services.mjs';
-import {preflight,portOccupied} from '../deploy.mjs';
+import {preflight,portOccupied,safeComposeEnvironment} from '../deploy.mjs';
 import {createServer} from '../server.mjs';
 const material='Act now before it is too late. We have not published the supporting evidence.';
 const env={HOSTINGER_AI_ROUTER_KEY:'DUMMY_HOSTINGER_KEY',HOSTINGER_AI_MODEL:'demo-model',SIGNAL_MAX_AI_REQUESTS:'1'};
@@ -70,3 +70,17 @@ test('deployment preflight rejects readable env files and mismatched origins wit
 test('credentialed local server also requires an explicit origin',()=>{assert.throws(()=>createServer({env:{...env}}),/exact SIGNAL_PUBLIC_ORIGIN/);});
 test('readiness checks writable state without a provider request or quota consumption',async t=>{const quotaPath=await setup(t);let calls=0;const s=createServices({env,quotaPath,fetchImpl:async()=>{calls++;return response();}});assert.equal((await s.readiness()).ready,true);assert.equal(calls,0);await assert.rejects(readFile(quotaPath),{code:'ENOENT'});});
 test('readiness refuses a non-directory state parent and port check detects a live listener',async t=>{const quota=await setup(t);await writeFile(quota,'not a directory');const s=createServices({env,quotaPath:quota+'/counter.json'});assert.equal((await s.readiness()).ready,false);const {createServer:netServer}=await import('node:net');const server=netServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>new Promise(resolve=>server.close(resolve)));assert.equal(await portOccupied(server.address().port),true);});
+
+test('Compose override/duplicate env keys fail closed and inherited overrides are stripped',async t=>{
+ const quota=await setup(t),folder=quota.slice(0,quota.lastIndexOf('/')),path=join(folder,'.env');
+ const good='SIGNAL_DOMAIN=demo.example.test\nSIGNAL_PUBLIC_ORIGIN=https://demo.example.test\nSIGNAL_DEPLOYMENT_PROVIDER=hostinger\nSIGNAL_SOURCE_REVISION='+('a'.repeat(40))+'\n';
+ await writeFile(path,good+'COMPOSE_FILE=/tmp/rogue.yml\n',{mode:0o600});
+ await assert.rejects(preflight(folder),/Unsupported or duplicate environment key/);
+ await writeFile(path,good+'SIGNAL_DOMAIN=other.example.test\n');
+ await assert.rejects(preflight(folder),/Unsupported or duplicate environment key/);
+ await writeFile(path,good);assert.equal((await preflight(folder)).aiConfigured,false);
+ const parent={COMPOSE_FILE:'/tmp/rogue.yaml',COMPOSE_PROJECT_NAME:'rogue',COMPOSE_PROFILES:'override',DOCKER_CONTEXT:'existing-operator-context',PATH:'/usr/bin'};
+ const clean=safeComposeEnvironment(parent);
+ assert.deepEqual(clean,{DOCKER_CONTEXT:'existing-operator-context',PATH:'/usr/bin'});
+ assert.equal(parent.COMPOSE_FILE,'/tmp/rogue.yaml');
+});
