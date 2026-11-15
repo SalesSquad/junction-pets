@@ -4,7 +4,7 @@
 // The host (not the model) selects modules from the user's message with the
 // trigger patterns, composes core + selected modules as the system prompt, asks
 // the provider for structured output with responseSchema, validates the response,
-// and turns action_proposals into PendingActions for a human decision.
+// and may turn a proposal into a PendingAction only after trusted-intent and policy checks.
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { MODULES, selectModules } from './router.mjs';

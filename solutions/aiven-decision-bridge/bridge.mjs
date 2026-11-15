@@ -40,7 +40,7 @@ export const canonical = v => Array.isArray(v) ? `[${v.map(canonical).join(',')}
   : v && typeof v === 'object' ? `{${Object.keys(v).sort().map(k => `${JSON.stringify(k)}:${canonical(v[k])}`).join(',')}}` : JSON.stringify(v);
 const sha = s => createHash('sha256').update(s).digest('hex');
 
-export function validateResponse(r, schema) {
+export function validateResponse(r, schema, { officialHosts = ['aiven.io'] } = {}) {
   const errors = [];
   if (!r || typeof r !== 'object' || Array.isArray(r) || !isSafeJson(r)) return ['response must be a bounded JSON object'];
   schema ??= Object.hasOwn(r, 'governance') ? RESPONSE_SCHEMA_V2 : RESPONSE_SCHEMA;
@@ -61,16 +61,36 @@ export function validateResponse(r, schema) {
     if (HIGH_RISK.has(p.operation) && p.risk !== 'high') errors.push(`proposal ${i}: ${p.operation} must be high risk`);
     if (typeof p.reversible !== 'boolean') errors.push(`proposal ${i}: reversible must be boolean`);
   }
-  for (const f of Array.isArray(r.facts) ? r.facts : []) if (f && typeof f === 'object' && f.source_url !== null && !/^https:\/\/aiven\.io\//.test(f.source_url ?? '')) errors.push(`non-official source ${f.source_url}`);
+  // Facts cite only the companion's own official hosts (Aiven: aiven.io; other pets pass theirs).
+  for (const f of Array.isArray(r.facts) ? r.facts : []) { if (!f || typeof f !== 'object' || f.source_url === null) continue; let host = ''; try { const u = new URL(f.source_url); host = u.protocol === 'https:' ? u.hostname : ''; } catch {} if (!officialHosts.some(h => host === h || host.endsWith('.' + h))) errors.push(`non-official source ${f.source_url}`); }
   return errors;
 }
 
 // One Chibi PendingAction per proposal. Identity/authority values come from the host.
-export function toPendingActions(response, ctx) {
-  const errors = validateResponse(response);
+export function toPendingActions(response, ctx, opts = {}) {
+  const errors = validateResponse(response, undefined, opts);
   if (errors.length) throw new TypeError('invalid companion response: ' + errors.join('; '));
   for (const field of ['adoptionId', 'agentVersionId', 'authorityRevision', 'conversationId', 'chibi']) {
     if (!ctx || typeof ctx[field] !== 'string' || !ctx[field].trim()) throw new TypeError(`missing host context: ${field}`);
+  }
+  // The host supplies these exact intents from the user's own request, never from a
+  // model answer or an attachment. They are not execution grants or approvals.
+  // Text-based injection detection is only a heuristic and is not this boundary.
+  if (response.action_proposals.length) {
+    const intents = opts.trustedUserIntents;
+    const invalid = !Array.isArray(intents) || !isSafeJson(intents) || intents.some(intent =>
+      !intent || typeof intent !== 'object' || Array.isArray(intent) ||
+      Object.keys(intent).length !== 3 || !Object.hasOwn(intent, 'operation') ||
+      !Object.hasOwn(intent, 'target') || !Object.hasOwn(intent, 'parameters') ||
+      !OPS.has(intent.operation) || typeof intent.target !== 'string' || !intent.target.trim() ||
+      !intent.parameters || typeof intent.parameters !== 'object' || Array.isArray(intent.parameters));
+    if (invalid) throw new TypeError('trusted user intent required for every proposal');
+    const allowed = new Set(intents.map(intent => canonical(intent)));
+    for (const p of response.action_proposals) {
+      if (!allowed.has(canonical({ operation: p.operation, target: p.target, parameters: p.parameters }))) {
+        throw new TypeError('proposal does not match a trusted user intent');
+      }
+    }
   }
   return response.action_proposals.map((p, i) => {
     const payload = canonical({ operation: p.operation, target: p.target, parameters: p.parameters });
