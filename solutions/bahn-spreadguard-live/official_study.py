@@ -72,11 +72,11 @@ def export_world(client: Client, world_id: str, output: Path, seed: str,
             "score": bundle["score"], "event_count": len(bundle["events"])}
 
 
-def resolve_configuration(args: argparse.Namespace) -> None:
+def resolve_configuration(args: argparse.Namespace, *, use_environment_model: bool = True) -> None:
     """Freeze effective environment defaults before any sponsor mutation."""
     from reliability_experiment import DEFAULT_LATE_THRESHOLD, _threshold, load_model
 
-    args.model = args.model or os.getenv("SPREAD_RELIABILITY_MODEL") or None
+    args.model = args.model or (os.getenv("SPREAD_RELIABILITY_MODEL") if use_environment_model else None) or None
     model = load_model(args.model) if args.model else None
     if args.policy == "learned" and model is None:
         raise ValueError("learned policy requires --model")
@@ -89,6 +89,24 @@ def resolve_configuration(args: argparse.Namespace) -> None:
                                     model.threshold if model else DEFAULT_LATE_THRESHOLD)
     if os.getenv("SPREAD_GUARD_POLICY", "risk_budget") != "risk_budget":
         raise ValueError("reliability ablations require the frozen risk_budget fee policy")
+
+
+def freeze_entry(args: argparse.Namespace, source: dict) -> dict:
+    return {"files_sha256": source["files_sha256"],
+            "model_sha256": source["model_sha256"], "late_threshold": args.late_threshold}
+
+
+def validate_freeze(args: argparse.Namespace, source: dict) -> str | None:
+    path = getattr(args, "freeze_manifest", None)
+    if not path:
+        return None
+    raw = Path(path).read_bytes()
+    manifest = json.loads(raw)
+    if manifest.get("schemaVersion") != 1 \
+            or manifest.get("source_sha") != source["source_sha"] \
+            or manifest.get("policies", {}).get(args.policy) != freeze_entry(args, source):
+        raise ValueError("Run differs from the campaign's frozen source/model/threshold")
+    return hashlib.sha256(raw).hexdigest()
 
 
 def run_practice(args: argparse.Namespace) -> None:
@@ -111,9 +129,11 @@ def _run_practice_locked(args: argparse.Namespace) -> None:
     receipt_path = output / "run.json"
     feature_path = output / "decision_features.jsonl"
     source = provenance(args.model)
+    freeze_digest = validate_freeze(args, source)
     config = {"seed_group": args.seed, "policy": args.policy,
               "partition": args.partition, "model_sha256": source["model_sha256"],
-              "files_sha256": source["files_sha256"], "late_threshold": args.late_threshold}
+              "files_sha256": source["files_sha256"], "late_threshold": args.late_threshold,
+              "freeze_manifest_sha256": freeze_digest}
     prior = read_json(receipt_path) if receipt_path.exists() else None
     if prior and prior["config"] != config:
         raise ValueError("Existing run receipt configuration differs; choose a new output directory")
@@ -184,6 +204,8 @@ def _run_practice_locked(args: argparse.Namespace) -> None:
                 desk.handle(event)
                 max_decision_ms = max(max_decision_ms, (time.perf_counter() - before) * 1000)
                 handled += 1
+        if provenance(args.model) != source or validate_freeze(args, source) != freeze_digest:
+            raise ValueError("Source, model or freeze manifest changed during the run; result is not frozen evidence")
         evidence = export_world(client, world.id, output, args.seed, args.policy, source)
         prior.update(state="completed", evidence=evidence, elapsed_seconds=time.monotonic() - elapsed,
                      events_handled=handled, max_handler_ms=max_decision_ms,
@@ -214,6 +236,7 @@ def main() -> None:
     run.add_argument("--output", required=True)
     run.add_argument("--model")
     run.add_argument("--late-threshold", type=float, default=None)
+    run.add_argument("--freeze-manifest", help="Campaign-owned per-policy source/model/threshold manifest")
     args = parser.parse_args()
     if args.command == "export":
         print(json.dumps(export_world(Client(), args.world, Path(args.output), args.seed, args.policy), sort_keys=True))

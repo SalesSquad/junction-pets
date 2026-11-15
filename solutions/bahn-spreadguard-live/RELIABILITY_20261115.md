@@ -15,13 +15,29 @@ service/volume/margin tradeoff, not a free improvement. The worst learned-policy
 world was **95.88%**. Development results cannot establish a 98–99% guarantee
 on a new world.
 
-The primary candidate for the untouched five-seed comparison is the learned
+The first primary candidate for the untouched five-seed comparison was the learned
 policy with threshold **0.05**, chosen to retain a cushion above the requested
 98% aggregate service target. The fitted model is frozen; the blind worlds are
 not used for fitting, threshold selection, or parser changes.
 
-**Blind qualification and the conditional fork experiment: pending at this
-checkpoint.** Replace this paragraph only with their actual recorded outcomes.
+**Version 1 missed the target on five untouched paired seeds.** It delivered
+1,082/1,108 = **97.65%**, versus baseline 1,326/1,401 = **94.65%**. Gross margin
+fell from **€33,397.43 to €26,070.09** (−21.94%), with 293 fewer won orders.
+Worst-world service improved from 90.87% to 96.08%, but only one of five candidate
+worlds reached 98%. Its paired-seed descriptive 95% interval for aggregate
+service is **96.98–98.31%**. Improvement is supported; 98–99% qualification is not.
+
+After that failure, a separate safety version at threshold **0.02** was evaluated
+on the original six development seeds, without refitting the model. It produced
+696/702 = **99.15%**, worst world 97.27%, with **€15,716.68** margin. That rejects
+45.20% of baseline won volume and loses 53.17% of baseline margin on development.
+Its five fresh confirmation seeds are declared in
+`reliability_plan_20261115_safety.json`; version 1's blind results remain intact
+and are not reused as fresh confirmation. This is an adaptive second version,
+not one prespecified experiment with a global 95% guarantee.
+
+**Version 2 confirmation and the conditional fork experiment: pending at this
+checkpoint.**
 
 ## Official development experiments
 
@@ -39,6 +55,7 @@ groups here, so their figures are explicitly developmental.
 | Trust pricing | 1,240 / 1,288 | 96.27% | 94.62% | €34,457.01 |
 | Learned risk ≤0.05 | 986 / 1,001 | 98.50% | 95.88% | €25,234.52 |
 | Learned risk ≤0.075 | 1,078 / 1,100 | 98.00% | 96.46% | €28,972.32 |
+| Safety version, learned risk ≤0.02 | 696 / 702 | 99.15% | 97.27% | €15,716.68 |
 
 The 0.075 threshold was an additional, adaptive **development** experiment
 after the large margin cost of 0.05 became visible. It is not a blind result.
@@ -91,8 +108,8 @@ Independent review subsequently found a separate downstream safety defect:
 `Manual gearbox, not before 16:00.` could recognize the gearbox while silently
 leaving the clock unconsumed. Clearing the original note then removed the
 baseline pickup bound. The v2 live notes trial is retained as **pre-fix
-experimental evidence and is not promoted**. The final parser/adapter must
-retain baseline behavior for unconsumed timing. A dedicated regression checks
+experimental evidence and is not promoted**. The repaired parser v3 retains
+baseline behavior for unconsumed timing. A dedicated regression checks
 both the actual posted window and quote slack.
 
 The opt-in `NotesDesk` initially applies only fully supported readiness,
@@ -135,7 +152,10 @@ figures therefore require the separate untouched comparison below.
 hash, decision-time feature rows and world IDs. It exposes practice and
 read-only export commands. `reliability_campaign.py` bounds concurrency to
 three workers and enforces the predeclared source/model/threshold freeze for
-blind campaigns. A world-creation intent is durable before the request;
+blind campaigns. Each child validates the campaign manifest before creating or
+resuming a world, rechecks source at the end, and the campaign checks its returned
+receipt. Effective model/threshold defaults become explicit child arguments;
+conflicting environment overrides are removed. A world-creation intent is durable before the request;
 uncertain creation requires reconciliation instead of silent recreation.
 
 `evidence_dataset.py` reconciles labels with exact official won/on-time
