@@ -21,7 +21,8 @@ Candidates choose actions only from current original 7-mask and public18D; publi
 - **Selection**: only 36 known V5 *failed* V12 TRAIN worlds; 12 V5 winners remain untouched. These seen worlds may inform a *TRAIN diagnostic*, never unbiased performance estimates. First causal fork: the first original live, mask-legal early ABSTAIN (26) or fixed prefix index5 before documented option17 deadman release (10).
 - **Interventions**: original-shield legal 7-option actions, maximum depth3; deterministic public-only heuristic beam width2; deterministic full continuation up to original 60 options for finite witness attempts. At most20 branches per world,720 total, and1200 seconds recommended host deadline. No fishing/repeated winner selection.
 - **Proof**: one fully recorded branch with actual original `info.success`, contacts>0, dwell>=250, no unsafe => `WITNESS` for that one *seen TRAIN* world. Otherwise `NONE_REACHABLE_WITHIN_FINITE_BUDGET`, **never** universal impossibility. Any observed unsafe immediately stops the diagnostic, retains complete partial evidence; no threshold relaxation. A deadline is incomplete, not negative.
-- **Retention**: the callable `on_branch(branch)` is invoked synchronously after **each complete real replay** before any further branch, so a hosted append-only fsynced journal can preserve earlier evidence even if later replay fails. The callback cannot influence selection; if journal writing fails, the run fails closed. Host must preserve incomplete/unsafe output and original per-option branch traces; never label incomplete as 720/720 or qualified.
+- **Retention**: **both** `on_step(event)` and `on_branch(branch)` are mandatory for the bounded orchestrator. The first is called synchronously after every *completed original physical option step* (including repeated original prefix options), before comparing source post-step or attempting the next step; the second after each complete candidate branch. A hosted append-only fsynced journal retains fully executed options even when deadline, physics drift or another exception interrupts an incomplete branch. No unattested fractions of an interrupted in-progress `env.step` are manufactured. Callback returns cannot influence selection; journal write failures propagate and hard-stop. Host must preserve incomplete/unsafe output; never label incomplete as 720/720 or independently qualified. An **internal 1200-second monotonic cap is enforced even if the caller omits a deadline**, and shorter external deadlines take precedence.
+- **Attestation**: the generic product accepts caller-injected `env_factory` (which may be synthetic). It **always** emits `newRealMuJoCoExecuted=false`, `sourceOnlyUnattestedExecution=true` and `physicsQualificationPending=true`; only a separate pinned original MuJoCo 3.3.7 hosted harness with full independent real physics replay/source receipts can make a true-physics claim.
 
 ### Python callable ABI for an independently reviewed hosted harness
 
@@ -35,18 +36,20 @@ diagnosis = forensic.source_failure_diagnosis(source)
 # Independently verified original source checkout (MuJoCo==3.3.7):
 # env_factory=original physics.MovingContactEnv
 # world_signature=original original v7 _world_signature
-# The callback appends each branch immediately to a lossless private journal.
+# Both callbacks append each complete executed option and each completed branch
+# immediately to separate lossless, privately retained source-bound journals.
 readout = causal.run_budgeted_diagnostic(
     source, env_factory, world_signature,
     max_depth=3, beam_width=2, max_world_branches=20,
-    deadline=monotonic_deadline, on_branch=append_and_fsync_branch,
+    deadline=monotonic_deadline, on_step=append_and_fsync_option,
+    on_branch=append_and_fsync_branch,
 )
 # Retain: source/qualification hashes + manifest.json,
 # diagnostic-readout.json, branch/full_transitions.jsonl.gz and its SHA256.
 # STOP if status != TRAIN_ONLY_DIAGNOSTIC_COMPLETE, or unsafe / incomplete.
 ```
 
-`source` is a dict with `rows[(seed,strategy)]`, `traces[(seed,strategy)]`, `training`, exact `sourceSha`, exact `fullTransitionsSha256` and qualified provenance. Each callback branch includes `seed`, `sourceWorldHash`, fork index, original public decision18D/mask7, full actual per-option `trace`, canonical `traceSha256`, actual `contacts`, `dwell`, goal250/unsafe and completion status. Journal should be SHA-bound and atomically retained; the host owns the runner/workflow and must independently re-execute raw traces before asserting any physical witness.
+`source` is a dict with `rows[(seed,strategy)]`, `traces[(seed,strategy)]`, `training`, exact `sourceSha`, exact `fullTransitionsSha256` and independently certified provenance. Every option-journal event has stable `branchId` (e.g. `v13-seen-train-518000-00`), `seed`, `optionIndexZeroBased`, `phase` (`ORIGINAL_PREFIX` or `COUNTERFACTUAL`), `sourceWorldHash`, exact transition fields and canonical `transitionSha256`. Each complete branch has the same `branchId`, original public decision18D/mask7, full option `trace`, canonical `traceSha256`, actual `contacts`, `dwell`, goal250/unsafe and completion status — but **only as caller-source-reported**. Both journals must be SHA-bound and atomically retained; the host owns independently replaying original physics before attesting any physical witness.
 
 ### Reproduce *existing* source-only verification (no physics or spend)
 
