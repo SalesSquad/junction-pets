@@ -64,6 +64,14 @@ _Updated 2026-11-14T21:55:11Z from 3 run(s), 74/74 turns ok._
   what the blind judge complained about: Rokoko trekvart/hofterne, NVIDIA thousand/threads,
   MariaDB minns/datum, Atech kettle. Callbacks: one per pet per scene, a note retires after two.
   Live effect not yet measured — every text model was daily-capped by 02:00. (2026-11-15)
+- **Voice design works while TTS is capped.** At 02:00, with every TTS model in its daily
+  cooldown, `POST /v1beta/voices` still made all 34 voices (~17 s each, 13 s sample each).
+  Two descriptions were refused ("Generated voice prompt was flagged by safety policies"):
+  AfterQuery's "mischievous edge … barely holding back a laugh" and Cala's "charming,
+  conspiratorial". Plain wording ("playful, close to laughing", "friendly, lightly teasing")
+  passed first time. The free tier gives each TTS model only ~10–15 calls a day, so the
+  designed voice's own model goes first and Live (separate quota) voices fixed transcripts
+  for listening tests: 40 lines, fidelity 0.99. (2026-11-15)
 - **Free text quota ≈ 8 scenes a night.** A 12-turn scene costs ~45 Gemini text calls
   (director, writer, critic, memory). After ~8 scenes 3.5-flash-lite and then 3.5-flash hit
   their daily caps (reset ≈ 08:00 UTC). Iterate on text in small batches, judge with Haiku, and
