@@ -24,12 +24,48 @@ class DigestReader:
     def __init__(self,raw): self.raw=raw; self.sha=hashlib.sha256(); self.bytes=0
     def read(self,n=-1):
         b=self.raw.read(n); self.sha.update(b); self.bytes+=len(b); return b
+class RangeStream:
+    """Bounded parallel reads; preserves exact archive byte order and digest."""
+    def __init__(self,url,total,workers=8,chunk=4*1024*1024):
+        import concurrent.futures
+        self.url=url; self.total=total; self.chunk=chunk
+        self.pool=concurrent.futures.ThreadPoolExecutor(max_workers=workers)
+        self.pending=collections.deque();self.next=0;self.buffer=b"";self.closed=False
+        for _ in range(workers): self.enqueue()
+    def enqueue(self):
+        if self.next>=self.total:return
+        start=self.next;end=min(self.total,start+self.chunk)-1;self.next=end+1
+        self.pending.append(self.pool.submit(self.fetch,start,end))
+    def fetch(self,start,end):
+        req=urllib.request.Request(self.url,headers={"Range":f"bytes={start}-{end}","User-Agent":"SignalDesk-LEN-research/1.0"})
+        with urllib.request.urlopen(req,timeout=90) as response:
+            if response.status!=206 or response.headers.get("Content-Range")!=f"bytes {start}-{end}/{self.total}":
+                raise ValueError("Source does not honor exact public byte ranges")
+            data=response.read(end-start+2)
+            if len(data)!=end-start+1:raise ValueError("Incomplete source range")
+            return data
+    def read(self,n=-1):
+        if n<0: n=self.total
+        parts=[];left=n
+        while left:
+            if not self.buffer:
+                if not self.pending: break
+                self.buffer=self.pending.popleft().result();self.enqueue()
+            take=min(left,len(self.buffer));parts.append(self.buffer[:take]);self.buffer=self.buffer[take:];left-=take
+        return b"".join(parts)
+    def close(self):
+        if not self.closed:self.pool.shutdown(wait=True,cancel_futures=True);self.closed=True
+    def __enter__(self):return self
+    def __exit__(self,*args):self.close()
+
 def extract(output):
     output=Path(output); output.parent.mkdir(parents=True,exist_ok=True)
     start=time.monotonic(); records=[]
     req=urllib.request.Request(SOURCE,headers={"User-Agent":"SignalDesk-LEN-research/1.0"})
-    with urllib.request.urlopen(req,timeout=90) as response:
-        expected=int(response.headers["Content-Length"]); raw=DigestReader(response)
+    with urllib.request.urlopen(urllib.request.Request(SOURCE,method="HEAD"),timeout=30) as response:
+        expected=int(response.headers["Content-Length"])
+    with RangeStream(SOURCE,expected) as ranges:
+        raw=DigestReader(ranges)
         with tarfile.open(fileobj=raw,mode="r|",bufsize=262144) as archive:
             for member in archive:
                 if member.isdir(): continue
