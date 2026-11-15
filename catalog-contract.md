@@ -45,7 +45,15 @@ No pet is an official company representative. Company references identify the
 subject of an independently created companion. An event QR is a public routing
 URL to the canonical Chibi product page; it is never a bearer grant or login token.
 
-Writer ownership: company-content worker owns `pets/` and
-`evidence/company-roster.json`; UI worker owns `apps/catalog/` and `design/`;
-coordinator owns schemas, shared tooling, package manifests, generated outputs,
-release bundles, adapters and integration. Do not alter another writer's files.
+A package may additionally contain a scoped source helper, exact contract and
+invented example with `tests/pet-<company>.test.mjs`. These are source-only
+artifacts, not automatically exposed runtime or plugin tools. The four required
+content files and six authored model eval cases retain their existing format.
+
+Writer ownership: one expressly assigned company writer owns only its
+`pets/<company>/**`, named company test and three generated plugin outputs.
+The integrator owns `evidence/company-roster.json`, schemas, shared producers,
+package/lock files, cross-company exports, adapters and private progress ledger.
+UI owners work only in explicitly assigned `apps/catalog/`/`design/` paths.
+Root and ops AGENTS.md define current development authority; do not infer broad
+write access from a runtime persona or an older whole-pets role assignment.

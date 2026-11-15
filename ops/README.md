@@ -1,5 +1,21 @@
 # Junction Mission Control: developer control plane
 
+## Start with the current finite-task handoff
+
+`node scripts/ops-development-progress.mjs --pet <company>` reads the private
+accepted-task register at [development-progress.json](development-progress.json).
+It preserves the original author HEAD, executor, tests, independent review,
+integration and one proposed—not started—continuation for each company.
+Run `node scripts/ops-development-progress.mjs --check` for actual local scope
+drift; the final `npm run verify:source` includes it. This is not a dispatcher
+or authenticated Cloud-state query. Read the [reader contract](../docs/DEVELOPER_CONTINUITY.md)
+and [current development map](../docs/DEVELOPMENT_SYSTEM.md).
+
+The provisioning and registration observations below are historical evidence.
+They remain separate from accepted source work and actual current provider access.
+
+## Historical environment declarations and snapshot flow
+
 The 34 files in environments/ declare pet-specific Codex Cloud environments.
 All 34 now contain their independently read-back **Pro / Legacy** provider IDs
 and declared `ready` state. The exact settings observations from
@@ -34,11 +50,16 @@ The ordinary data flow is:
    and asks an independent reviewer to check external provider evidence.
    This generator never upgrades an untrusted receipt to hosted certification.
 
-node scripts/ops-work.mjs status prints an executable work queue.
+node scripts/ops-work.mjs status prints a local work-queue snapshot; it does not
+launch workers or prove that a proposal is running.
 
-The local source SHA is emitted only for a clean Git worktree. A dirty or
-reconstructed worktree cannot be presented as a canonical GitHub source
-revision. The hosted PR HEAD must be checked independently.
+The local source SHA is emitted only for a clean Git worktree and is labelled
+local-Git-only. An unverified reconstruction, a different same-tree local commit
+or a dirty checkout cannot stand in for canonical GitHub source. Independently
+resolve the hosted PR HEAD. If transfer limitations require reconstruction,
+verify the original raw commit hash, tree, modes and all available file bytes
+against that authenticated source and disclose preserved missing assets.
+Even exact source agreement does not become hosted/signed CI or browser acceptance.
 
 node scripts/ops-work.mjs claim --pet junction-aiven --agent junction-dev-aiven --work junction.aiven.cloud-bootstrap --source <exact-GitHub-SHA>
 acquires a local lease under ignored dist/ops-claims. Use release --pet
