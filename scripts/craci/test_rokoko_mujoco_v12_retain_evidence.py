@@ -121,6 +121,44 @@ class V12RetentionTests(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError, "COMPLETE_EXACT_ORIGINALS"):
                 pack.publish_qualified(original, base / "collector")
 
+    def test_final_144th_unsafe_episode_preserves_complete_raw_as_incomplete_stop(self):
+        """Original safety STOP on the last arm must not destroy all evidence."""
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            original = incomplete_fixture(base)
+            arms = ("frozen_v5", "v12_phase_dwell_supported_actions",
+                    "v12_right_side_action4_exploration_train_only")
+            rows = []
+            with gzip.open(original / "full_transitions.jsonl.gz", "wt",
+                           encoding="utf8") as out:
+                for index in range(144):
+                    row = {"seed": 518000 + index // 3,
+                           "strategy": arms[index % 3],
+                           "full_transition_count": 1}
+                    rows.append(row)
+                    out.write(json.dumps({"seed": row["seed"],
+                                          "strategy": row["strategy"],
+                                          "transitions": [{"mask": [1, 0, 0, 0, 0, 0, 0],
+                                                           "action": 0}]}) + "\n")
+            partial = json.loads((original / "partial_training.json").read_text())
+            partial["stop_reason"] = "OBSERVED_UNSAFE_ACTUAL_MUJOCO_COST"
+            partial["real_completed_episodes"] = 144
+            partial["raw_real_option_transitions"] = 144
+            partial["complete_real_trial_rows"] = rows
+            save(original / "partial_training.json", partial)
+            stop = json.loads((original / "early_stop.json").read_text())
+            stop["reason"] = partial["stop_reason"]
+            stop["completed_episodes"] = 144
+            stop["raw_sha256"] = {n: pack.sha(original / n) for n in pack.PARTIAL_SOURCES}
+            save(original / "early_stop.json", stop)
+            collector = base / "collector"
+            report = pack.publish_early_stop(original, collector)
+            self.assertEqual(report["exact_source_sha"], "b" * 40)
+            receipt = json.loads((collector / "retention-manifest.json").read_text())
+            self.assertEqual(receipt["status"], "INCOMPLETE_STOP")
+            self.assertFalse((collector / "independent-qualification.json").exists())
+            self.assertEqual(len(receipt["sources"]), 2)
+
     def test_partial_dropped_raw_trace_is_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
             base = Path(folder)
