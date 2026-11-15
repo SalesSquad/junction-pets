@@ -1,0 +1,983 @@
+{
+ "research:verda-serverless": {
+  "summary": "Read-only research done; nothing created or run. The requested nemotron-3-5-super-vl-b300 deployment does not exist in this account (describe returns 404 NOT_FOUND). Three paused 'junction-cuda-*' deployments exist and show the shape instead. The CLI supports a full recipe (public or vccr.io image, env vars, scale to zero, pause, delete). It has no flag for attaching volumes. Only the default 500 GiB scratch disk at /data is attached, so model files must come from the image or be downloaded to /data at startup. Gemma-3-4B LoRA via vLLM was not tested, so the merged-weights fallback is the safe route.",
+  "facts": [
+   {
+    "claim": "Requested nemotron deployment exists",
+    "value": "No. 'verda --agent container describe nemotron-3-5-super-vl-b300 -o json' returned NOT_FOUND 404. 'container list' shows 3 deployments, all junction-cuda-*, status paused.",
+    "source_url": "local: verda container list/describe",
+    "verified": true
+   },
+   {
+    "claim": "Shape of the existing junction-cuda-final-20261114-16f8c5 deployment",
+    "value": "image docker.io/library/python@sha256:2986c55f... (public, no registry creds); compute H100 x1, not spot; exposed port 8000; healthcheck enabled, port 8000, path /health; entrypoint override python3 -u -c plus inline code; env list empty; volume mount type scratch at /data; scaling min 1 / max 1, scale_down delay 15s, scale_up delay 0s, request TTL 120s, concurrency 1, queue_load trigger threshold 1, cpu and gpu triggers off; status paused; endpoint https://containers.datacrunch.io/<name>/",
+    "source_url": "local: verda --agent container describe junction-cuda-final-20261114-16f8c5 -o json",
+    "verified": true
+   },
+   {
+    "claim": "Create flags",
+    "value": "--name (immutable URL slug) --image (specific tag, ':latest' rejected) --compute <name> --compute-size N --port (default 80) --healthcheck-path (default /health) --healthcheck-port --healthcheck-off --env KEY=VALUE --env-secret KEY=SECRET_NAME --secret-mount SECRET:PATH --registry-creds <name> (empty = public) --min-replicas (0 = scale to zero) --max-replicas (default 3) --concurrency (default 1) --queue-preset instant|balanced|cost-saver|custom --queue-load --scale-up-delay --scale-down-delay (default 5m) --request-ttl (default 5m) --spot --cmd --entrypoint --yes (required in agent mode). There is no volume or SFS flag.",
+    "source_url": "local: verda container create --help",
+    "verified": true
+   },
+   {
+    "claim": "Scale, pause, resume, delete, status commands",
+    "value": "'container scale <name> --min-replicas N --max-replicas M --yes --wait'; 'container pause <name>'; 'container resume <name>'; 'container delete <name> --yes'; 'container replicas <name>'; also restart and purge-queue. Raising min-replicas keeps replicas running and billed with no traffic.",
+    "source_url": "local: verda container scale/pause/delete --help",
+    "verified": true
+   },
+   {
+    "claim": "Idle billing",
+    "value": "Billed per minute in which a replica processed any usage, including spin-up and spin-down, shown in 10-minute aggregates. With min-replicas 0 the page says there are no idle charges, but the first request after idle has a cold start (no timings published). Replicas held by min-replicas >= 1 are billed. The page does not say what a paused deployment costs; its scratch storage is not described as billed or free.",
+    "source_url": "https://docs.verda.com/containers/overview/index.md ; https://www.verda.com/serverless-containers",
+    "verified": true
+   },
+   {
+    "claim": "Endpoint exposure and auth",
+    "value": "Base URL https://containers.datacrunch.io/<name>/ (docs also show containers.verda.com). vLLM serves OpenAI-compatible /v1/chat/completions and /v1/models on the exposed port. Authentication is 'Authorization: Bearer <Inference API Key>', created in the console under Credentials -> Inference API Keys. This is the same VERDA_INFERENCE_KEY that scribe/generate.py already sends as a Bearer header. The Verda API/CLI credentials do not call the endpoint.",
+    "source_url": "https://docs.verda.com/containers/tutorials/deploy-with-vllm-quick/index.md",
+    "verified": true
+   },
+   {
+    "claim": "vLLM reference deployment on Verda",
+    "value": "image docker.io/vllm/vllm-openai tag v0.29.0 (docs suggestion, check its CUDA against the R580 driver); port 8000; health /health; CMD args '--model <hf id> --gpu-memory-utilization 0.9 --model-loader-extra-config {\"enable_multithread_load\": true}'; env HF_TOKEN for gated models (Gemma needs the licence accepted on Hugging Face).",
+    "source_url": "https://docs.verda.com/containers/tutorials/deploy-with-vllm-quick/index.md",
+    "verified": true
+   },
+   {
+    "claim": "Storage",
+    "value": "Every deployment gets a 500 GiB scratch disk mounted at /data (changeable), shared by all replicas and kept across scale-to-zero. Shared filesystems (SFS) can also be attached per deployment and shared with VMs, but 'verda container create --help' has no flag for volumes, so SFS attachment needs the console or API. Model files can therefore come from the image, or be downloaded to /data (e.g. HF_HOME=/data/hf) on first start, or be fetched from Hugging Face at start.",
+    "source_url": "https://docs.verda.com/containers/storage/index.md ; local: describe output",
+    "verified": true
+   },
+   {
+    "claim": "Registry push and credentials",
+    "value": "Registry is vccr.io. Credentials come from the console (project -> Credentials -> Create credentials, docker login style, 30-day default expiry) and are saved with 'verda registry configure' (--paste or --username + --password-stdin) into ~/.verda/credentials. Local status: configured, endpoint vccr.io, project id 83576535-d84a-44a7-a5a8-55193f42667e, expires 2026-11-20 (6 days). Push with 'verda registry push <local-image> [--repo --tag]' (sources: Docker daemon, OCI dir, or tar) or 'verda registry copy <src>'; docker CLI login via 'verda registry configure-docker'. A private image needs a registry-credentials object named for --registry-creds. Whether the CLI can create that object is not shown by container create --help, so it may need the console. 'registry ls' currently returns registry_repo_not_found (404, empty or misconfigured Harbor).",
+    "source_url": "local: verda registry --help, registry show -o json, registry ls",
+    "verified": true
+   },
+   {
+    "claim": "Hourly serverless price of GPUs (CLI catalog serverless_price, per GPU-hour)",
+    "value": "Cheapest in the CLI catalog: RTX 6000 Ada 48 GB $1.767 (spot $0.883), then A100 40GB $1.869, L40S 48 GB $2.22 (spot $1.11), A100 80GB $2.625, RTX PRO 6000 $3.12, H100 $5.765. The public serverless page lists only L40S $2.22 as its cheapest GPU (RTX PRO 6000 $3.12, H100 $5.765), and these figures match the CLI. All of the first four fit a 4B model (about 8 GB in bf16). The container --compute name strings are not enumerated by the CLI (the help example uses RTX4500Ada; the existing deployment uses H100), so the exact name for RTX6000Ada or L40S is unverified. The serverless price of RTX4500Ada was not found.",
+    "source_url": "local: verda --agent instance-types --gpu -o json ; https://www.verda.com/serverless-containers",
+    "verified": true
+   },
+   {
+    "claim": "Adapter training config in repo",
+    "value": "scribe/train_lora.py: base unsloth/gemma-3-4b-it (fallback 1b), LoRA r=16, alpha=32, default output data/scribe/adapter-v1, Gemma3ForConditionalGeneration for gemma3. vLLM needs --max-lora-rank >= 16.",
+    "source_url": "local: scribe/train_lora.py",
+    "verified": true
+   }
+  ],
+  "recipe": "NOT EXECUTED. Nothing below has been run, and flags are taken from the --help output except where marked UNVERIFIED.\n\nTwo ways to carry the model:\n(A) Public image 'docker.io/vllm/vllm-openai:v0.29.0' (exact CUDA/driver and Gemma3 LoRA support UNVERIFIED), with the base model fetched from Hugging Face at start and the adapter either fetched from a private HF repo or baked into a small vccr.io image layered on top.\n(B) Merge the LoRA into the base on the training box, bake merged weights into a vccr.io image, and serve without --enable-lora. This is the safest route because vLLM LoRA support for Gemma3 multimodal (Gemma3ForConditionalGeneration) is untested.\n\n0. Load env and register the registry, without printing keys:\n  set -a; . ~/.config/typesafe/env; . ~/.config/verda-inference/env; set +a\n  verda --agent registry show -o json   # expires 2026-11-20; refresh from console if needed\n\n1. Option A, no registry (adapter in a private HF repo):\n  verda --agent container create --name sama-scribe-gemma --image docker.io/vllm/vllm-openai:v0.29.0 \\\n    --compute <RTX6000Ada|L40S: confirm exact name in the console> --compute-size 1 \\\n    --port 8000 --healthcheck-path /health --healthcheck-port 8000 \\\n    --env HF_HOME=/data/hf --env HF_TOKEN=<via --env-secret HF_TOKEN=hf-token-secret instead of plain env> \\\n    --cmd --model --cmd unsloth/gemma-3-4b-it --cmd --enable-lora --cmd --max-lora-rank --cmd 16 \\\n    --cmd --lora-modules --cmd 'scribe=<HF adapter repo or /data/adapter-v1>' \\\n    --cmd --max-model-len --cmd 4096 --cmd --gpu-memory-utilization --cmd 0.9 \\\n    --min-replicas 0 --max-replicas 1 --concurrency 4 --queue-preset cost-saver \\\n    --scale-down-delay 5m --request-ttl 10m --yes\n  (--cmd/--entrypoint args depend on how the image ENTRYPOINT works; vLLM's image uses ENTRYPOINT vllm serve, so the first positional arg may need to be the model.) UNVERIFIED.\n\n2. Option B, push a private image to vccr.io (needs Docker):\n  docker build -t sama-scribe-gemma:v1 .   # FROM vllm/vllm-openai:v0.29.0, COPY merged-model /models/scribe\n  verda registry configure-docker\n  verda --agent registry push sama-scribe-gemma:v1 -o json\n  verda --agent registry tags sama-scribe-gemma -o json\n  Then create the registry-credentials object in the console (name e.g. vccr-sama) and add to create:\n  --image vccr.io/83576535-d84a-44a7-a5a8-55193f42667e/sama-scribe-gemma:v1 --registry-creds vccr-sama --cmd --model --cmd /models/scribe\n\n3. Test (OpenAI-compatible, Bearer = inference key):\n  curl -sS https://containers.datacrunch.io/sama-scribe-gemma/v1/models -H \"Authorization: Bearer $VERDA_INFERENCE_KEY\"\n  curl -sS https://containers.datacrunch.io/sama-scribe-gemma/v1/chat/completions -H \"Authorization: Bearer $VERDA_INFERENCE_KEY\" -H 'Content-Type: application/json' -d '{\"model\":\"scribe\",\"messages\":[{\"role\":\"user\",\"content\":\"<synthetic note>\"}],\"temperature\":0,\"max_tokens\":384}'\n  verda --agent container replicas sama-scribe-gemma -o json\n  First request after idle will incur a cold start (several minutes while weights load).\n\n4. Pause and resume:\n  verda --agent container pause sama-scribe-gemma\n  verda --agent container resume sama-scribe-gemma\n  # alternatively to idle: verda --agent container scale sama-scribe-gemma --min-replicas 0 --yes --wait\n\n5. Delete:\n  verda --agent container delete sama-scribe-gemma --yes\n  verda --agent registry delete sama-scribe-gemma:v1 --yes   # only if pushed\n\nBatch runner script idea (also NOT written): loop over data/scribe/eval-v1.json, POST to /v1/chat/completions with scribe/prompts.py prompt, temperature 0, max_tokens 384, log each call to runs/<name>.jsonl; keep concurrency at or below the --concurrency value.",
+  "open_risks": [
+   "The nemotron-3-5-super-vl-b300 deployment named in the task does not exist in this account (404), so its shape could not be summarised. Only the three junction-cuda-* deployments were described.",
+   "The valid --compute name strings are not listed by the CLI. Which name maps to RTX 6000 Ada or L40S, and whether those are offered in the serverless pool, is unverified. The CLI catalog price of $1.767/h for RTX 6000 Ada may not be available for containers. The public page lists L40S at $2.22/h as the cheapest.",
+   "vLLM LoRA support for Gemma-3 multimodal (Gemma3ForConditionalGeneration, trained with Unsloth) and the v0.29.0 tag against Verda's R580 driver are unverified. Fallback is merging the adapter into the base weights.",
+   "CLI create has no volume or SFS flag and no verified way to create the registry-credentials object. Those may need the console or API. Private images need that object before --registry-creds works.",
+   "Registry credentials expire on 2026-11-20, and 'verda registry ls' returned a 404 from Harbor, so a registry push has not been proven to work.",
+   "What a paused deployment or its retained scratch disk costs is not documented. Cold-start time is not published.",
+   "Gemma terms: the base model is gated on Hugging Face, so the licence must be accepted and HF_TOKEN supplied through --env-secret.",
+   "An earlier web search snippet quoted different serverless prices ($3.575 for H100). The CLI catalog and verda.com agree on $5.765, so those were used.",
+   "Docs describe the endpoint host both as containers.datacrunch.io (CLI output) and containers.verda.com (docs). Use the endpoint_base_url returned by 'container describe'."
+  ]
+ },
+ "research:decoding-risk": {
+  "summary": "Read-only research done, nothing written to the repo or cloud. The repo-log instruction conflicts with \"write nothing in the repo\", so my one executed step is logged in the scratchpad at /private/tmp/claude-501/sc/run.jsonl. (A) Plain Transformers has no schema-guided decoding; its only constraint hook is PrefixConstrainedLogitsProcessor, so you need a library. For serving, vLLM structured_outputs is the right route. Outlines 1.x and lm-format-enforcer cover the in-process Transformers case. (B) Conformal risk control (CRC) controls an expectation of a monotone loss. Selective risk P(error | accepted) is a ratio and is not what CRC's Theorem 1 covers. The Learn-then-Test (LTT) paper handles exactly this case (its Sec 3.2) with an exact binomial-tail p-value and fixed-sequence testing. Use LTT for the auto-accept threshold. A synthetic sanity run of my code was consistent with the guarantee.",
+  "facts": [
+   {
+    "claim": "vLLM structured outputs API (server): response_format json_schema, or extra_body structured_outputs with keys json, regex, choice, grammar, structural_tag",
+    "value": "extra_body={\"structured_outputs\":{\"json\": schema}}",
+    "source_url": "https://docs.vllm.ai/en/latest/features/structured_outputs/",
+    "verified": true
+   },
+   {
+    "claim": "vLLM offline API",
+    "value": "LLM(...); SamplingParams(structured_outputs=StructuredOutputsParams(json=schema)); backend via structured_outputs_config={'backend':'auto'}; server flag --structured-outputs-config.backend <name>; default auto",
+    "source_url": "https://docs.vllm.ai/en/latest/features/structured_outputs/",
+    "verified": true
+   },
+   {
+    "claim": "Old guided_json / guided_regex / guided_choice / guided_grammar / guided_decoding_backend fields were removed in vLLM v0.12.0; migrate to structured_outputs",
+    "value": "removed v0.12.0",
+    "source_url": "https://docs.vllm.ai/en/latest/features/structured_outputs/",
+    "verified": true
+   },
+   {
+    "claim": "vLLM backends: xgrammar, guidance, outlines; lm-format-enforcer deprecated from v0.33.0 (opt-in in v0.34.0, removed in v0.35.0)",
+    "value": "lm-format-enforcer is being removed from vLLM",
+    "source_url": "https://docs.vllm.ai/en/latest/features/structured_outputs/",
+    "verified": true
+   },
+   {
+    "claim": "vLLM caveats: regex dialect differs by backend (Rust-style for xgrammar/guidance/outlines, Python re for lm-format-enforcer); switching backend can change output; describe the schema in the prompt too",
+    "value": "see source",
+    "source_url": "https://docs.vllm.ai/en/latest/features/structured_outputs/",
+    "verified": true
+   },
+   {
+    "claim": "vLLM's xgrammar backend rejects (before compiling) schemas with: multipleOf on numbers; uniqueItems/contains/minContains/maxContains on arrays; string format not in STRING_SUPPORTED_FORMATS; string with both pattern and length bounds; some propertyNames/patternProperties combinations; allOf with 2+ entries",
+    "value": "has_xgrammar_unsupported_json_features. The STRING_SUPPORTED_FORMATS contents were NOT shown on the page and are unverified.",
+    "source_url": "https://docs.vllm.ai/en/latest/api/vllm/v1/structured_output/backend_xgrammar/",
+    "verified": true
+   },
+   {
+    "claim": "Third-party XGrammar 0.1.29 compatibility test (2026-01-09) marks pattern, enum, const, additionalProperties as 'unsound' (test case failed); the page is published by dottxt, a competing vendor (dotjson)",
+    "value": "treat as a warning only: test pattern/enum behaviour yourself on your schema",
+    "source_url": "https://blog.dottxt.ai/json-schema-comparison.html",
+    "verified": true
+   },
+   {
+    "claim": "Transformers has no native JSON-schema/grammar decoding in the part of the generation_utils page I read (first 100k of 185k chars); only PrefixConstrainedLogitsProcessor(prefix_allowed_tokens_fn(batch_id, input_ids)->list[int], num_beams)",
+    "value": "remaining 85k chars unread, so absence in the unread part is not ruled out",
+    "source_url": "https://huggingface.co/docs/transformers/main/en/internal/generation_utils",
+    "verified": false
+   },
+   {
+    "claim": "Outlines 1.x with Transformers: outlines.from_transformers(AutoModelForCausalLM, AutoTokenizer); model(prompt, output_type=..., max_new_tokens=...); output types are Pydantic/dataclass/TypedDict, JsonSchema(dict_or_str), Regex(pattern), Literal/Enum/Choice. Always set max_new_tokens (default 20 truncates). Result is a string, so validate with model_validate_json",
+    "value": "API as documented",
+    "source_url": "https://dottxt-ai.github.io/outlines/latest/features/models/transformers/",
+    "verified": true
+   },
+   {
+    "claim": "Outlines JsonSchema takes whitespace_pattern (default None) and ensure_ascii (default True); the docs page does not list unsupported schema keywords or say whether JSON-schema 'pattern' or 'format: date' is honoured",
+    "value": "unverified. Safer to use Regex or enum types for dates, or to test",
+    "source_url": "https://dottxt-ai.github.io/outlines/latest/features/core/output_types/",
+    "verified": true
+   },
+   {
+    "claim": "lm-format-enforcer: JsonSchemaParser(schema) + build_transformers_prefix_allowed_tokens_fn(tokenizer, parser) passed as prefix_allowed_tokens_fn. Limitations: regex via interegular is incomplete; guarantees format only and can increase hallucination; env knobs LMFE_MAX_CONSECUTIVE_WHITESPACES=12, LMFE_STRICT_JSON_FIELD_ORDER=False, LMFE_MAX_JSON_ARRAY_LENGTH=20, LMFE_DEFAULT_ALPHABET",
+    "value": "README does not state JSON-schema pattern support",
+    "source_url": "https://github.com/noamgat/lm-format-enforcer",
+    "verified": true
+   },
+   {
+    "claim": "Constrained decoding can distort the model's distribution so grammar-valid outputs are lower quality (Grammar-Aligned Decoding)",
+    "value": "qualitative, from the abstract only",
+    "source_url": "https://arxiv.org/abs/2405.21047",
+    "verified": true
+   },
+   {
+    "claim": "CRC (Angelopoulos, Bates, Fisch, Lei, Schuster): lambda_hat = inf{lambda : n/(n+1)*Rhat_n(lambda) + B/(n+1) <= alpha}, set to lambda_max if empty. Theorem 1 needs losses non-increasing in lambda, right-continuous, L_i(lambda_max) <= alpha, sup L <= B, exchangeable. Result: E[L_{n+1}(lambda_hat)] <= alpha. Theorem 2 (iid, continuous): E >= alpha - 2B/(n+1)",
+    "value": "expectation guarantee, not high-probability",
+    "source_url": "https://arxiv.org/pdf/2208.02814",
+    "verified": true
+   },
+   {
+    "claim": "CRC for non-monotone losses: Corollary 1 uses the monotonised loss Ltilde_i(lambda)=sup_{lambda'>=lambda} L_i(lambda') and keeps the guarantee, but is only powerful if the loss is near-monotone",
+    "value": "selective risk (a ratio) is non-monotone, so use LTT",
+    "source_url": "https://arxiv.org/pdf/2208.02814",
+    "verified": true
+   },
+   {
+    "claim": "LTT (Angelopoulos, Bates, Candes, Jordan, Lei): Theorem 1 gives P(sup_{lambda in Lambdahat} R(lambda) <= alpha) >= 1-delta for any FWER-delta-controlling procedure on valid p-values for H_lambda: R(lambda)>alpha. HB p-value p=min(exp(-n h1(Rhat ^ alpha, alpha)), e*P(Bin(n,alpha) <= ceil(n Rhat))), h1(a,b)=a log(a/b)+(1-a) log((1-a)/(1-b)). Bonferroni: p <= delta/|Lambda|. Fixed sequence: scan lambdas in a data-independent order and stop at the first p > delta",
+    "value": "formulas as in the paper",
+    "source_url": "https://arxiv.org/pdf/2110.01052",
+    "verified": true
+   },
+   {
+    "claim": "LTT Sec 3.2 selective classification: risk = P(T(X)!=Y | T(X)!=empty); the empirical risk is computed only among the n(T) points passing the threshold; for a binary loss use the exact binomial tail (HB without the factor e)",
+    "value": "exactly the auto-accept case",
+    "source_url": "https://arxiv.org/pdf/2110.01052",
+    "verified": true
+   },
+   {
+    "claim": "My synthetic sanity run of the LTT fixed-sequence binomial-tail procedure (alpha=0.05, delta=0.1, n=1000, 1000 trials, grid 0.95 down to 0.305 step 0.005, error prob 1-conf^0.5, seed 0, true risk from a 2M-sample draw)",
+    "value": "violation_rate 0.03 over all 1000 trials (conditional on non-abstain, 30/494); no threshold found in 506 trials; mean auto-accept fraction 0.159 where a threshold existed; p<=delta equivalent to CP-upper<=alpha in 1 tested case. Synthetic only, not evidence about Gemma",
+    "source_url": "file:///private/tmp/claude-501/sc/run.jsonl",
+    "verified": true
+   }
+  ],
+  "recipe": "## A. Constrained decoding for the scribe\n\nOutput shape: {\"entry_route\": enum(5), \"events\": [{\"type\": enum(9), \"date\": \"YYYY-MM-DD\", \"precision\": \"DAY\"|\"MONTH\"}]}.\n\nSchema (JSON Schema, draft 2020-12 subset):\n{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"entry_route\",\"events\"],\n \"properties\":{\"entry_route\":{\"enum\":ROUTES},\n  \"events\":{\"type\":\"array\",\"maxItems\":8,\"items\":{\"type\":\"object\",\"additionalProperties\":false,\n   \"required\":[\"type\",\"date\",\"precision\"],\n   \"properties\":{\"type\":{\"enum\":TYPES},\"date\":{\"type\":\"string\",\"pattern\":\"^20(2[3-6])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$\"},\"precision\":{\"enum\":[\"DAY\",\"MONTH\"]}}}}}}\n\nTake ROUTES and TYPES from scribe/sample.py.\n\nChoice of engine:\n1. Serving (Verda or any vLLM box): use vLLM structured_outputs. Run `vllm serve <gemma + merged LoRA or --enable-lora> --structured-outputs-config.backend auto`. In the request use response_format={\"type\":\"json_schema\",\"json_schema\":{\"name\":\"scribe\",\"schema\":SCHEMA}} or extra_body={\"structured_outputs\":{\"json\":SCHEMA}}. Do not use the old guided_json field (removed in v0.12.0).\n2. In-process eval with Transformers:\n   import outlines; m=outlines.from_transformers(model, tok)\n   out=m(prompt, output_type=JsonSchema(SCHEMA), max_new_tokens=300)  # always set max_new_tokens\n   Then json.loads(out) and run it through scribe.prompts.canonicalise.\n   Fallback: lm-format-enforcer via JsonSchemaParser(SCHEMA) and build_transformers_prefix_allowed_tokens_fn(tok, parser), passed to generate(prefix_allowed_tokens_fn=...).\n3. Calendar-validity (31 February, MONTH precision with day != 01) cannot be enforced by a regex that stays readable. Keep canonicalise() as a post-check and send failures to human review.\n\nPitfalls to test, not assume:\n- Whether `pattern` is enforced for each backend and version. The dottxt page flags XGrammar pattern/enum as 'unsound' in its own test, and vLLM rejects pattern combined with length bounds on xgrammar. Use pattern without minLength/maxLength, or enum. Run one adversarial unit test per backend: generate 200 outputs and count regex violations. Do this before trusting the schema.\n- Constraints distort the model distribution (Grammar-Aligned Decoding). Train the adapter on the exact same canonical JSON text it will emit, with the same key order and no code fences. Evaluate constrained and unconstrained decoding side by side.\n- Describe the schema in the prompt as well. Use the same compact separators in training and decoding, or set whitespace_pattern in Outlines.\n- Constrained decoding makes the JSON valid, not correct. Use it only for syntax and enums, and treat the confidence score as separate.\n\n## B. Selective prediction with risk control\n\nSetting: calibration set of n exchangeable items. Each item i has a confidence s_i in [0,1] and an error indicator e_i in {0,1}. Define an item as an error if the whole canonical JSON differs from gold (or per-event; fix this before looking at the data). The rule is \"auto-accept if s >= lambda\". Confidence options: sequence probability, min event-date token probability, or Jev/teacher agreement. Hold the confidence definition and calibration set fixed. Target: P(error | accepted) <= alpha with probability >= 1-delta over the calibration draw.\n\nWhy not plain CRC: with L_i(lambda)=e_i*1[s_i>=lambda], CRC (lambda_hat = inf{lambda: n/(n+1)*Rhat + B/(n+1) <= alpha}, B=1) is valid but controls the joint rate P(accept and error) in expectation. It does not control the rate among accepted items, and it gives no 1-delta guarantee. Use CRC only if the owner wants the \"fraction of all notes silently wrong\" budget.\n\nLTT procedure for selective error (paper Sec 3.2):\n1. Grid Lambda = descending thresholds lam_1 > lam_2 > ..., fixed before seeing the calibration labels. Start at a lam_1 where n_acc >= ceil(log(delta)/log(1-alpha)). For alpha=.05, delta=.1 this is 45 items.\n2. For each lam: n_lam = #{s_i>=lam}, k_lam = #{s_i>=lam and e_i=1}.\n3. p_lam = P(Bin(n_lam, alpha) <= k_lam) = binom.cdf(k_lam, n_lam, alpha). This is the exact binomial tail, which is the Hoeffding-Bentkus p-value without its factor e. The HB form min(exp(-n_lam*h1(min(Rhat,alpha),alpha)), e*binom.cdf(...)) is only needed for non-binary losses. p_lam <= delta is equivalent to the one-sided Clopper-Pearson upper bound beta.ppf(1-delta, k+1, n-k) <= alpha.\n4. Fixed-sequence testing: walk lam_1, lam_2, ...; accept lam_j while p_lam_j <= delta; stop at the first failure (single start; for multi-start use delta/|J|). lambda_hat = the last accepted (smallest) lam. If lam_1 fails, auto-accept nothing (send everything to review).\n5. Guarantee: P(R(lambda_hat) <= alpha) >= 1-delta with R(lam)=P(e=1 | s>=lam), assuming exchangeable calibration and deployment data. Bonferroni alternative: accept all lam with p <= delta/|Lambda|, then choose the smallest. It is less powerful.\n\nPseudo-code:\nfrom scipy.stats import binom\ndef ltt_threshold(s, e, alpha, delta, grid_desc):\n    lam_hat=None\n    for lam in grid_desc:\n        m = s>=lam; n=m.sum()\n        if n==0: continue\n        if binom.cdf(e[m].sum(), n, alpha) <= delta: lam_hat=lam\n        else: break\n    return lam_hat   # None -> review everything\n\nCRC pseudo-code (joint-risk variant):\ndef crc_threshold(s, e, alpha, B=1.0, grid_asc):\n    for lam in grid_asc:               # smallest lam with adjusted risk <= alpha\n        loss = e*(s>=lam)\n        if len(s)/(len(s)+1)*loss.mean() + B/(len(s)+1) <= alpha: return lam\n    return grid_asc[-1]\n\nPractical notes:\n- Use a calibration split disjoint from the LoRA train and validation sets, and disjoint at the whole-episode level (dataset-v1 already assigns episodes to splits). The held-out test split is for reporting realised risk. It is not for choosing lambda.\n- Data is synthetic Nemotron-written Finnish; label-audit-v1 shows strict same-model disagreement. Errors measured against noisy labels bound label-relative risk only. Say so, and do not claim clinical safety. Exchangeability with real Finnish notes is an assumption that is unverified.\n- Report: n, alpha, delta, lambda_hat, n_acc, k_acc, Clopper-Pearson upper bound at lambda_hat, and auto-accept fraction. If no lambda passes, report a truthful 'no threshold found'.\n- Optional upgrade with more data: add a second threshold per event type with a delta/K union bound.",
+  "open_risks": [
+   "I did not read the unread 85k characters of the Transformers generation_utils page, so the claim that Transformers has no native schema decoding rests on the part I did read and on the page's description of prefix_allowed_tokens_fn. Check the installed version's docs before relying on it.",
+   "Whether `pattern` and `enum` are actually enforced (the dottxt test flags them as 'unsound' for XGrammar 0.1.29), and what vLLM's STRING_SUPPORTED_FORMATS contains, are not verified at source. The dottxt page is from a competing vendor. Run a per-backend violation test on your schema.",
+   "The Outlines docs do not state whether JSON-schema `pattern` or `format: date` is honoured, and I did not read lm-format-enforcer's code on this. Treat date-pattern enforcement as untested for both.",
+   "The vLLM, Outlines and XGrammar pages show a moving target (vLLM removed the guided_* fields in v0.12.0 and lm-format-enforcer is being removed). Pin versions in the GPU venv and re-test.",
+   "I did not run Gemma, vLLM, Outlines or any GPU; none of this reflects measured Gemma behaviour. I ran only a synthetic LTT sanity simulation (30 violations in 1000 trials at delta=0.1, with no threshold found in 506). It shows the code is consistent with the guarantee. It says nothing about the real extractor.",
+   "The LTT/CRC guarantees need exchangeable calibration and deployment data. Synthetic Nemotron notes with noisy same-model labels likely differ from real Finnish notes, so a threshold chosen on them gives label-relative risk only, not clinical safety.",
+   "With small calibration sets the procedure may find no feasible threshold. At alpha=0.05 and delta=0.1 you need at least 45 accepted items with zero errors just to certify the first grid point, and far more if errors exist.",
+   "CRC's guarantee is in expectation over the calibration draw and it controls the joint accept-and-error rate. It is not the conditional error among accepted items and not a 1-delta guarantee. Do not mix the two when reporting.",
+   "I did not open the Hoeffding-Bentkus source paper (Bates et al.) or the Clopper-Pearson equivalence in text. The equivalence rests on standard binomial/beta duality and one numeric check. The HB p-value formula itself is verified from the LTT paper.",
+   "I did not use Haiku batching: the work was a small number of source reads and the verification run, so a batch would have added no value."
+  ]
+ },
+ "research:lora-practice": {
+  "summary": "Read-only research finished; nothing was trained, no GPU or cloud resource was touched, no git command was run and nothing was written in the repo. Every figure below comes from a source opened today (2026-11-14) or from code executed locally on CPU.\n\nWhat changed since older Gemma/LoRA recipes: the current stack is PEFT 0.21.3, Transformers 5.23.0 and TRL 1.18.0. Gemma 4 has existed since 2026-03-31 (Apache 2.0) and Google's own fine-tuning guides now target it; the Gemma 3 guidance was verified from the last Gemma-3 revision of Google's notebook (cookbook commit a2d15e8730).\n\n(1) Sizes. Gemma 3 text-capable sizes are 270M and 1B (text only) and 4B, 12B, 27B (text + image). Ungated mirrors unsloth/gemma-3-{270m,1b,4b,12b,27b}-it all return config.json with HTTP 200 without a token (Google's originals return 401, gated 'manual'). Parameter counts: 268,098,176 / 999,885,952 / 4,300,079,472 / 12,187,325,040 / 27,432,406,640. Licence is the Gemma Terms of Use, not Apache.\n\n(2) PEFT. rsLoRA is use_rslora=True (0.8.0), DoRA is use_dora=True (0.9.0), initialisations go through init_lora_weights ('pissa', 'pissa_niter_N', 'olora', 'eva' + EvaConfig, 'loftq' + LoftQConfig), LoRA+ is peft.optimizers.create_loraplus_optimizer (0.13.0). All were instantiated and stepped on tiny random Gemma 3 models under 0.21.3.\n\n(3) Pitfalls, three of which hit the existing version-1 scripts (not edited, owned by the other workflow):\n- scribe/train_lora.py passes warmup_ratio, which raises TypeError on Transformers 5.23.0, and scribe/run_gpu.sh installs transformers unpinned.\n- The v1 label mask never supervises <end_of_turn> (0 of 1,716 train rows), so the adapter is never trained to stop.\n- A suffix list such as ['q_proj', ...] also attaches adapters to the SigLIP vision tower of the 4B+ models; they receive no gradient on text input.\nAlso verified: the 'train with eager attention' advice is obsolete (warning removed in Transformers 4.57), bf16 is required (fp16 overflows), the template has no system role and already emits <bos>, and 936 of 1,716 train rows exceed the 512-token max_length used in Google's guides.\n\n(4) Evidence. No source opened ranks these methods for a ~1.7k-example extraction task. In PEFT's own benchmark (Llama-3.2-3B, one seed) rank-64 rsLoRA scored 0.5133 against 0.4784 for rank-32 LoRA and 0.4693 for DoRA, and DoRA took 1.26x the training time. Targeting MLP as well as attention is the most consistently supported choice. LoRA+ reports 1-2%, which is below what 250 validation notes can resolve.\n\n(5) Plan. 60 minutes on one 40 GB GPU in bf16 without quantisation: size screen over 270M (full fine-tune and LoRA), 1B and 4B, then one-factor method arms on the chosen size, selection on validation only, test touched once. Time caps are decisions; throughput was not measured, so the plan calibrates from the first 20 steps.\n\nRun log and evidence files are in the scratchpad rather than the repo, because this task said to write nothing in the repo: /private/tmp/claude-501/-Users-mikaelervamaa-Library-Application-Support-Claude-scratch-workspaces-5d672b86-628a-4541-8274-071bf0a9e008-6b216046-ec1a-4b9a-9976-dd851f37ac44-scratch-2026-11-14-099cd6/0881be11-baf2-48a2-9868-60cfd5b0055a/scratchpad/runs/gemma-lora-research.jsonl (the scratchpad can be cleared by a reboot; copy it if it must be kept).",
+  "facts": [
+   {
+    "claim": "Gemma 3 release dates and sizes",
+    "value": "1B, 4B, 12B, 27B released 2025-03-10; 270M released 2025-08-14; Gemma 3n E2B/E4B released 2025-06-26",
+    "source_url": "https://ai.google.dev/gemma/docs/releases",
+    "verified": true
+   },
+   {
+    "claim": "Which Gemma 3 sizes are text-only",
+    "value": "270M and 1B are text-only (config model_type gemma3_text, Gemma3ForCausalLM, 32K context); 4B/12B/27B are text+image (model_type gemma3, Gemma3ForConditionalGeneration, 128K context)",
+    "source_url": "https://unsloth.ai/docs/models/tutorials/gemma-3-how-to-run-and-fine-tune.md",
+    "verified": true
+   },
+   {
+    "claim": "Ungated mirror for 270M",
+    "value": "unsloth/gemma-3-270m-it: config.json HTTP 200 without token, gated=False, 268,098,176 parameters (BF16), weights 536,223,056 bytes, revision 23cf460f6bb16954176b3ddcc8d4f250501458a9. unsloth/gemma-3-270m (pretrained) config also HTTP 200",
+    "source_url": "https://huggingface.co/api/models/unsloth/gemma-3-270m-it",
+    "verified": true
+   },
+   {
+    "claim": "Ungated mirror for 1B",
+    "value": "unsloth/gemma-3-1b-it: config.json HTTP 200 without token, gated=False, 999,885,952 parameters, weights 1,999,811,208 bytes, revision 5b11413a10db4e486ef16a20101fd028f8f2499c",
+    "source_url": "https://huggingface.co/api/models/unsloth/gemma-3-1b-it",
+    "verified": true
+   },
+   {
+    "claim": "Ungated mirror for 4B",
+    "value": "unsloth/gemma-3-4b-it: config.json HTTP 200 without token, gated=False, 4,300,079,472 parameters (text decoder 3,879,895,040 computed from config; remaining 420,184,432 are vision tower, projector and norms), weights 8,600,277,880 bytes, revision bf46152c47f5dd20b896357cb51abc4c03b8ee8c",
+    "source_url": "https://huggingface.co/api/models/unsloth/gemma-3-4b-it",
+    "verified": true
+   },
+   {
+    "claim": "Ungated mirror for 12B",
+    "value": "unsloth/gemma-3-12b-it: config.json HTTP 200 without token, gated=False, 12,187,325,040 parameters, weights 24,374,793,024 bytes (22.7 GiB)",
+    "source_url": "https://huggingface.co/api/models/unsloth/gemma-3-12b-it",
+    "verified": true
+   },
+   {
+    "claim": "Ungated mirror for 27B",
+    "value": "unsloth/gemma-3-27b-it: config.json HTTP 200 without token, gated=False, 27,432,406,640 parameters, weights 54,864,980,440 bytes (51.1 GiB, does not fit a 40 GB GPU in bf16)",
+    "source_url": "https://huggingface.co/api/models/unsloth/gemma-3-27b-it",
+    "verified": true
+   },
+   {
+    "claim": "Google's original repositories are gated",
+    "value": "google/gemma-3-270m-it, -1b-it, -4b-it: config.json HTTP 401 without token; API reports gated='manual', license 'gemma'; parameter counts identical to the mirrors",
+    "source_url": "https://huggingface.co/api/models/google/gemma-3-270m-it",
+    "verified": true
+   },
+   {
+    "claim": "Composition of the 270M model",
+    "value": "Google: 170 million embedding parameters and 100 million transformer parameters. Computed from the mirror config: embedding 167,772,160 (62.6% of the total) and 100,270,080 in the seven projection families",
+    "source_url": "https://developers.googleblog.com/en/introducing-gemma-3-270m/",
+    "verified": true
+   },
+   {
+    "claim": "Google's stated purpose of the 270M model",
+    "value": "Designed for task-specific fine-tuning; named uses include entity extraction and unstructured-to-structured text processing; Google's guide for it is a full fine-tune",
+    "source_url": "https://developers.googleblog.com/en/introducing-gemma-3-270m/",
+    "verified": true
+   },
+   {
+    "claim": "Licence terms for Gemma 3",
+    "value": "Gemma Terms of Use, last modified 2026-04-01, appendix lists Gemma 3 and Gemma 3n. Redistribution of the model or Model Derivatives requires passing on the use restrictions, a copy of the agreement, notices on modified files and a Notice text file. Google claims no rights in outputs. Model Derivatives include modifications and works based on Gemma",
+    "source_url": "https://ai.google.dev/gemma/terms",
+    "verified": true
+   },
+   {
+    "claim": "Prohibited Use Policy items relevant to a clinical-text tool",
+    "value": "Lists automated decisions in domains affecting individual rights or well-being including healthcare, misleading claims of expertise in health, and unlicensed practice of medical professions",
+    "source_url": "https://ai.google.dev/gemma/prohibited_use_policy",
+    "verified": true
+   },
+   {
+    "claim": "Gemma 3n mirrors",
+    "value": "unsloth/gemma-3n-E2B-it (safetensors total 5,976,833,472) and unsloth/gemma-3n-E4B-it (8,387,373,392): config.json HTTP 200 without token, model_type gemma3n with vision and audio encoders",
+    "source_url": "https://huggingface.co/api/models/unsloth/gemma-3n-E2B-it",
+    "verified": true
+   },
+   {
+    "claim": "Gemma 4 exists and Google's documentation moved",
+    "value": "Gemma 4 released 2026-03-31 (E2B, E4B, 31B, 26B A4B) and 12B on 2026-06-03, licence Apache 2.0, native system role. ai.google.dev Gemma docs carry a deprecation banner pointing to gemma.ai. google/gemma-4-E2B-it is ungated (config HTTP 200 without token)",
+    "source_url": "https://ai.google.dev/gemma/docs/core",
+    "verified": true
+   },
+   {
+    "claim": "Current library versions",
+    "value": "peft 0.21.3 (2026-11-13), transformers 5.23.0 (2026-11-13), trl 1.18.0 (2026-11-13), accelerate 1.15.0, bitsandbytes 0.50.2, unsloth 2026.11.4, vllm 0.33.0. PEFT below 0.18.0 is incompatible with Transformers v5",
+    "source_url": "https://pypi.org/pypi/peft/json",
+    "verified": true
+   },
+   {
+    "claim": "rsLoRA in PEFT",
+    "value": "LoraConfig(use_rslora=True): scaling becomes lora_alpha/sqrt(r) instead of lora_alpha/r. Added in PEFT v0.8.0. Executed: r=16 alpha=16 gives scaling 4.0; r=64 alpha=16 gives 2.0. At a fixed rank it is exactly a rescale of alpha by sqrt(r)",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/src/peft/tuners/lora/config.py",
+    "verified": true
+   },
+   {
+    "claim": "DoRA in PEFT",
+    "value": "LoraConfig(use_dora=True). Added in v0.9.0 for non-quantised linear layers; bitsandbytes-quantised and Conv2d layers in v0.10.0. Rejected together with lora_bias=True (ValueError, executed). Docs: improves LoRA especially at low ranks, bigger overhead, merge for inference; unmerged DoRA without caching needed 139% more inference time than LoRA on Llama-3.1-8B",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/docs/source/package_reference/lora_variant_dora.md",
+    "verified": true
+   },
+   {
+    "claim": "Alternative initialisations in PEFT 0.21.3",
+    "value": "init_lora_weights accepts True, False, 'gaussian', 'eva', 'olora', 'pissa', 'pissa_niter_[n]', 'corda', 'loftq', 'orthogonal', 'mica' (plus LoRA-GA through lora_ga_config). First releases: LoftQ v0.7.0, PiSSA v0.11.0, OLoRA v0.12.0, EVA v0.14.0, CorDA v0.15.0, LoRA-GA v0.19.0",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/src/peft/tuners/lora/config.py",
+    "verified": true
+   },
+   {
+    "claim": "EVA usage",
+    "value": "LoraConfig(init_lora_weights='eva', eva_config=EvaConfig(rho=2.0)); get_peft_model(model, cfg, low_cpu_mem_usage=True); initialize_lora_eva_weights(peft_model, dataloader). EvaConfig defaults: rho 2.0, tau 0.99, use_label_mask True. Executed on a tiny model: ranks were redistributed (12 rank_pattern entries). Does not modify base weights",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/docs/source/package_reference/lora.md",
+    "verified": true
+   },
+   {
+    "claim": "PiSSA and OLoRA usage and caveat",
+    "value": "init_lora_weights='pissa' (full SVD, minutes) or 'pissa_niter_4' (fast SVD, seconds); init_lora_weights='olora'. Both mutate the base weights; save_pretrained has path_initial_model_for_weight_conversion to convert back to a plain LoRA (argument present in 0.21.3, executed check)",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/docs/source/package_reference/lora.md",
+    "verified": true
+   },
+   {
+    "claim": "LoftQ usage",
+    "value": "LoraConfig(init_lora_weights='loftq', loftq_config=LoftQConfig(loftq_bits=4, loftq_iter=1)) on a NON-quantised model (needs scipy; ImportError without it, executed), or replace_lora_weights_loftq(peft_model) on a bitsandbytes model. Only relevant when the base is quantised",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/docs/source/developer_guides/quantization.md",
+    "verified": true
+   },
+   {
+    "claim": "LoRA+ optimiser in PEFT",
+    "value": "from peft.optimizers import create_loraplus_optimizer; create_loraplus_optimizer(model, optimizer_cls, *, lr, loraplus_lr_ratio, loraplus_weight_decay=0.0, loraplus_lr_embedding=1e-6). Added in v0.13.0. Docstring: ratio >= 1 and lower the base lr by about 2x; docs example lr=5e-5, ratio=16. Executed: lr 1e-4 and ratio 16 give A group 1e-4 and B group 1.6e-3; works with Trainer(optimizers=(opt, None))",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/src/peft/optimizers/loraplus.py",
+    "verified": true
+   },
+   {
+    "claim": "DoRA combined with LoRA+",
+    "value": "The LoRA+ grouping rule ('lora_B' in name or param.ndim == 1) puts every DoRA magnitude vector into the high-learning-rate group; executed: all 14 magnitude vectors got lr 0.0016 = 16 x base",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/src/peft/optimizers/loraplus.py",
+    "verified": true
+   },
+   {
+    "claim": "PEFT default target modules for Gemma 3",
+    "value": "gemma3_text defaults to ['q_proj','v_proj'] only; there is no default for the multimodal 'gemma3' type, so LoraConfig without target_modules raises ValueError on 4B+ (both executed)",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/src/peft/utils/constants.py",
+    "verified": true
+   },
+   {
+    "claim": "Suffix target lists also hit the vision tower on 4B+",
+    "value": "SigLIP attention also has q_proj/k_proj/v_proj. Executed on a tiny multimodal Gemma 3: the 7-suffix list created 20 adapters of which 6 in the vision tower (no gradient on text input); target_modules='all-linear' put 15 of 29 in the vision tower; the language-model regex in the recipe created 14, none in the vision tower",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/src/peft/tuners/tuners_utils.py",
+    "verified": true
+   },
+   {
+    "claim": "LoRA trainable parameter counts for r=16 on all seven language-model projections",
+    "value": "270M: 3,796,992 (1.42% of the model); 1B: 13,045,760 (1.30%); 4B: 29,802,496 (0.69%). Computed from the mirror configs",
+    "source_url": "https://huggingface.co/unsloth/gemma-3-1b-it/resolve/main/config.json",
+    "verified": true
+   },
+   {
+    "claim": "Eager-attention advice for Gemma 3 training is obsolete",
+    "value": "Transformers 4.50.0 to 4.56.2 log 'strongly recommended to train Gemma3 models with the eager attention implementation'; removed by PR #40744 merged 2025-09-08; absent in 4.57.1 and 5.23.0 (grep counts 1,1,1,1,1,1,0,0). The current model page uses attn_implementation='sdpa'",
+    "source_url": "https://github.com/huggingface/transformers/pull/40744",
+    "verified": true
+   },
+   {
+    "claim": "Google's Gemma 3 QLoRA guide settings (last Gemma 3 revision, 2026-02-04)",
+    "value": "attn_implementation='eager' (comment: flash_attention_2 on Ampere or newer), bf16 if GPU capability >= 8 else fp16, 4-bit nf4 double quant, base google/gemma-3-1b-pt with the -it tokenizer, LoraConfig(r=16, lora_alpha=16, lora_dropout=0.05, target_modules='all-linear', modules_to_save=['lm_head','embed_tokens']), lr 2e-4 constant, max_grad_norm 0.3, warmup_ratio 0.03, 3 epochs, max_seq_length 512, add_special_tokens False, stop ids = eos + <end_of_turn>",
+    "source_url": "https://raw.githubusercontent.com/google-gemma/cookbook/a2d15e8730/docs/core/huggingface_text_finetune_qlora.ipynb",
+    "verified": true
+   },
+   {
+    "claim": "Google's current QLoRA guide targets Gemma 4",
+    "value": "Model ids google/gemma-4-E2B ... 31B; requires transformers>=5.10.1 and peft>=0.19.0; LoraConfig(r=16, lora_alpha=16, lora_dropout=0.05, modules_to_save=['lm_head','embed_tokens'], ensure_weight_tying=True) with no target_modules; prompt/completion dataset format so the loss is computed on the completion only; lr 2e-4 constant",
+    "source_url": "https://ai.google.dev/gemma/docs/core/huggingface_text_finetune_qlora",
+    "verified": true
+   },
+   {
+    "claim": "Google's 270M guide is a full fine-tune",
+    "value": "Model list google/gemma-3-270m-it up to 27b-it; learning_rate 5e-5, 5 epochs, batch 4, max_length 512, gradient_checkpointing False, adamw_torch_fused, constant schedule; states that overfitting is useful when the goal is to restrict output to specific data formats",
+    "source_url": "https://ai.google.dev/gemma/docs/core/huggingface_text_full_finetune",
+    "verified": true
+   },
+   {
+    "claim": "Precision pitfall",
+    "value": "With float16, Gemma 3 activations and gradients become infinity (T4, RTX 20x, V100); bf16 GPUs are unaffected. Mirror configs store bfloat16",
+    "source_url": "https://unsloth.ai/docs/models/tutorials/gemma-3-how-to-run-and-fine-tune.md",
+    "verified": true
+   },
+   {
+    "claim": "Chat template and turn tokens",
+    "value": "Turns are <start_of_turn>user|model ... <end_of_turn>\\n; there is no system role, system text goes into the first user turn. Executed with the mirror template: the system message is folded into the user turn, 'assistant' is rendered as 'model', content is trimmed, the text after the answer is exactly '<end_of_turn>\\n'",
+    "source_url": "https://ai.google.dev/gemma/docs/core/prompt-structure",
+    "verified": true
+   },
+   {
+    "claim": "Double BOS pitfall",
+    "value": "The template already emits <bos>. Executed with transformers 5.23.0: tokenising the templated text with add_special_tokens=False gives 1 <bos>, with add_special_tokens=True gives 2. Unsloth strips it with removeprefix('<bos>'); TRL tokenises with add_special_tokens=False",
+    "source_url": "https://raw.githubusercontent.com/huggingface/trl/v1.18.0/trl/trainer/sft_trainer.py",
+    "verified": true
+   },
+   {
+    "claim": "Special tokens and padding side in the mirrors",
+    "value": "bos <bos>=2, pad <pad>=0, <start_of_turn>=105, <end_of_turn>=106, <eos>=1; mirror tokenizer_config sets eos_token to <end_of_turn> and padding_side 'left'; generation_config eos_token_id [1,106], do_sample true, top_k 64, top_p 0.95. tokenizer.json is byte-identical across the 270M, 1B and 4B mirrors (same etag, 33,384,568 bytes)",
+    "source_url": "https://huggingface.co/unsloth/gemma-3-1b-it/resolve/main/tokenizer_config.json",
+    "verified": true
+   },
+   {
+    "claim": "Which modules to target",
+    "value": "Unsloth: target q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj, strongly advises against dropping any; r 16 or 32, alpha = r or 2r, dropout 0, lr 2e-4, 1-3 epochs, effective batch 16. PEFT docs: QLoRA-style all linear layers can match full fine-tuning",
+    "source_url": "https://unsloth.ai/docs/get-started/fine-tuning-llms-guide/lora-hyperparameters-guide.md",
+    "verified": true
+   },
+   {
+    "claim": "Unsloth Gemma 3 notebook settings",
+    "value": "270M: 16-bit, r=128, lora_alpha=128, seven modules, dropout 0, lr 5e-5, batch 4, train_on_responses_only. 4B: 4-bit, r=8, lora_alpha=8, finetune_vision_layers False, lr 2e-4, batch 2 x accumulation 4",
+    "source_url": "https://raw.githubusercontent.com/unslothai/notebooks/main/nb/Gemma3_(270M).ipynb",
+    "verified": true
+   },
+   {
+    "claim": "Cost of Google's modules_to_save on an -it base",
+    "value": "embed_tokens alone is 167,772,160 (270M), 301,989,888 (1B), 671,252,480 (4B) parameters. Google uses it because it trains a pretrained (-pt) base with the -it tokenizer; vLLM rejects adapters with modules_to_save other than classifier heads",
+    "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/main/vllm/lora/peft_helper.py",
+    "verified": true
+   },
+   {
+    "claim": "Loss masking to the answer",
+    "value": "TRL builds the completion mask as everything after the prompt, so the closing <end_of_turn> is supervised; Unsloth uses train_on_responses_only(instruction_part='<start_of_turn>user\\n', response_part='<start_of_turn>model\\n') for Gemma 2/3/3n",
+    "source_url": "https://raw.githubusercontent.com/huggingface/trl/v1.18.0/trl/trainer/sft_trainer.py",
+    "verified": true
+   },
+   {
+    "claim": "The v1 label mask never supervises the stop token",
+    "value": "Reproducing the rule in scribe/train_lora.py with the real tokenizer: <end_of_turn> is inside the label mask in 0 of 1,716 train, 0 of 250 val and 0 of 500 test rows. With the mask extended by len('<end_of_turn>'), 1,716 of 1,716 rows end on <end_of_turn> and decode to exactly target_json",
+    "source_url": "file:///private/tmp/claude-501/-Users-mikaelervamaa-Library-Application-Support-Claude-scratch-workspaces-5d672b86-628a-4541-8274-071bf0a9e008-6b216046-ec1a-4b9a-9976-dd851f37ac44-scratch-2026-11-14-099cd6/0881be11-baf2-48a2-9868-60cfd5b0055a/scratchpad/runs/mask_check.json",
+    "verified": true
+   },
+   {
+    "claim": "Token lengths of dataset-v1 under the Gemma 3 template",
+    "value": "Train (1,716 rows): min 408, median 518, p95 582, max 686 tokens, 887,017 tokens per epoch; 936 rows exceed 512, 2 exceed 640, 0 exceed 768. Val max 603 (129,299 tokens), test max 639. Answer incl. <end_of_turn>: 34-118 tokens, 129,547 in train (14.6% of tokens). System prompt 158 tokens",
+    "source_url": "file:///private/tmp/claude-501/-Users-mikaelervamaa-Library-Application-Support-Claude-scratch-workspaces-5d672b86-628a-4541-8274-071bf0a9e008-6b216046-ec1a-4b9a-9976-dd851f37ac44-scratch-2026-11-14-099cd6/0881be11-baf2-48a2-9868-60cfd5b0055a/scratchpad/runs/toklen.json",
+    "verified": true
+   },
+   {
+    "claim": "Transformers 5 API changes that break older scripts",
+    "value": "warmup_ratio no longer exists in training_args.py (0 occurrences in v5.23.0, 15 in v4.57.1); executed: TrainingArguments(warmup_ratio=0.05) raises TypeError, warmup_steps=0.05 is accepted as a ratio (17 of 324 steps). torch_dtype is deprecated in favour of dtype. Default optimiser is adamw_torch_fused. scribe/train_lora.py uses warmup_ratio=0.05 and scribe/run_gpu.sh installs transformers unpinned",
+    "source_url": "https://raw.githubusercontent.com/huggingface/transformers/v5.23.0/src/transformers/training_args.py",
+    "verified": true
+   },
+   {
+    "claim": "Model class selection",
+    "value": "AutoModelForCausalLM maps gemma3_text to Gemma3ForCausalLM and gemma3 to Gemma3ForConditionalGeneration in Transformers 5.23.0. Executed on a tiny random multimodal model: text-only forward and backward with labels works without pixel_values",
+    "source_url": "https://raw.githubusercontent.com/huggingface/transformers/v5.23.0/src/transformers/models/auto/modeling_auto.py",
+    "verified": true
+   },
+   {
+    "claim": "rsLoRA paper claim (abstract)",
+    "value": "Dividing by rank slows learning at higher ranks; scaling by sqrt(rank) lets larger ranks trade training compute for better performance. The claim concerns higher ranks, not low rank",
+    "source_url": "https://arxiv.org/abs/2312.03732",
+    "verified": true
+   },
+   {
+    "claim": "DoRA paper claim (abstract)",
+    "value": "Decomposes weights into magnitude and direction, LoRA on direction; consistently outperforms LoRA on LLaMA, LLaVA and VL-BART with no extra inference cost after merging",
+    "source_url": "https://arxiv.org/abs/2402.09353",
+    "verified": true
+   },
+   {
+    "claim": "LoRA+ paper claim (abstract)",
+    "value": "Different learning rates for A and B with a well-chosen ratio; 1-2% improvement and up to about 2x faster fine-tuning at the same compute; motivated by large-width models",
+    "source_url": "https://arxiv.org/abs/2402.12354",
+    "verified": true
+   },
+   {
+    "claim": "PiSSA, OLoRA and EVA paper claims (abstracts)",
+    "value": "PiSSA: principal-component init, faster convergence, e.g. 72.86% vs 67.7% on GSM8K with Mistral-7B. OLoRA: QR orthonormal init, faster convergence and better results than LoRA. EVA: activation-variance init with adaptive ranks, highest average score among initialisation schemes",
+    "source_url": "https://arxiv.org/abs/2404.02948",
+    "verified": true
+   },
+   {
+    "claim": "LoftQ and QLoRA paper claims (abstracts)",
+    "value": "LoftQ: quantisation-aware init that closes the gap for quantised bases, strongest at 2-bit and mixed 2/4-bit. QLoRA: 4-bit NF4 base with LoRA preserves 16-bit fine-tuning performance. Both address memory, which is not the constraint for <=4B on 40 GB",
+    "source_url": "https://arxiv.org/abs/2310.08659",
+    "verified": true
+   },
+   {
+    "claim": "Independent method comparison by the PEFT maintainers",
+    "value": "MetaMathQA, Llama-3.2-3B, 5,000 steps, batch 4, lr 1e-4, one seed, NVIDIA L40S, peft 0.19.2.dev0. Test accuracy: LoRA r32 q/v 0.4784; DoRA r32 0.4693; LoRA r64 0.4738; rsLoRA r64 alpha 64 0.5133; LoRA r10 on MLP only 0.4943; full fine-tune 0.4716. Train time 942 s, 1,191 s, 967 s, 966 s, 1,050 s, 2,147 s",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/method_comparison/MetaMathQA/results/lora--llama-3.2-3B-rank64-rslora.json",
+    "verified": true
+   },
+   {
+    "claim": "Related findings on short runs and low rank (abstracts)",
+    "value": "ALLoRA: dropout is not a reliable regulariser for short fine-tuning. 'LoRA Learns Less and Forgets Less': in standard low-rank settings LoRA substantially underperforms full fine-tuning on code and math but forgets less",
+    "source_url": "https://arxiv.org/abs/2405.09673",
+    "verified": true
+   },
+   {
+    "claim": "Adapter features the vLLM loader rejects",
+    "value": "vLLM main (latest release 0.33.0) rejects use_dora, lora_bias, bias other than none, modules_to_save other than classifier heads, and init_lora_weights of PiSSA/OLoRA/CorDA/LoftQ unless converted; it accepts rsLoRA and EVA-initialised adapters. Executed: DoRA merge_and_unload changes logits by at most 4.5e-7 and leaves no LoRA modules",
+    "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/main/vllm/lora/peft_helper.py",
+    "verified": true
+   },
+   {
+    "claim": "Resolution of the validation and test splits",
+    "value": "Wilson 95% interval at 80% exact match: 74.6-84.5% for n=250, 76.3-83.3% for n=500. Exact McNemar needs splits such as 0 vs 6 or 5 vs 15 discordant notes for p < 0.05",
+    "source_url": "file:///private/tmp/claude-501/-Users-mikaelervamaa-Library-Application-Support-Claude-scratch-workspaces-5d672b86-628a-4541-8274-071bf0a9e008-6b216046-ec1a-4b9a-9976-dd851f37ac44-scratch-2026-11-14-099cd6/0881be11-baf2-48a2-9868-60cfd5b0055a/scratchpad/runs/plan_numbers.json",
+    "verified": true
+   },
+   {
+    "claim": "Training volume of the fixed protocol",
+    "value": "Effective batch 16 gives 108 steps per epoch, 324 steps and 2,661,051 tokens for 3 epochs. That takes 532 s at 5,000 tokens/s, 266 s at 10,000, 177 s at 15,000. Downloads for 270M + 1B + 4B total 11,136,312,144 bytes (10.37 GiB)",
+    "source_url": "file:///private/tmp/claude-501/-Users-mikaelervamaa-Library-Application-Support-Claude-scratch-workspaces-5d672b86-628a-4541-8274-071bf0a9e008-6b216046-ec1a-4b9a-9976-dd851f37ac44-scratch-2026-11-14-099cd6/0881be11-baf2-48a2-9868-60cfd5b0055a/scratchpad/runs/budget_arithmetic.json",
+    "verified": true
+   },
+   {
+    "claim": "Only available throughput anchor",
+    "value": "PEFT benchmark logged 7,299 tokens/s and 20.76 GiB peak memory for LoRA r32 on q/v, Llama-3.2-3B, batch 4, no gradient checkpointing, NVIDIA L40S. At that rate one epoch of this dataset is 121.5 s. Different model, GPU and targets",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/method_comparison/MetaMathQA/results/lora--llama-3.2-3B-rank32.json",
+    "verified": true
+   },
+   {
+    "claim": "Throughput and memory of Gemma 3 on the actual 40 GB GPU",
+    "value": "Not measured. No GPU was used in this step",
+    "source_url": "file:///private/tmp/claude-501/-Users-mikaelervamaa-Library-Application-Support-Claude-scratch-workspaces-5d672b86-628a-4541-8274-071bf0a9e008-6b216046-ec1a-4b9a-9976-dd851f37ac44-scratch-2026-11-14-099cd6/0881be11-baf2-48a2-9868-60cfd5b0055a/scratchpad/runs/gemma-lora-research.jsonl",
+    "verified": false
+   },
+   {
+    "claim": "Which adapter method is best for this task",
+    "value": "Not established by any source opened and not measured here; the opened papers compare against plain LoRA on other tasks and data sizes",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/docs/source/package_reference/lora.md",
+    "verified": false
+   },
+   {
+    "claim": "DoRA's advantage specifically at low rank",
+    "value": "Stated in the PEFT docs and the v0.9.0 release notes ('especially at lower ranks, e.g. r=8'); the paper body was not opened (abstract only) and the PEFT benchmark at r=32 did not reproduce a gain",
+    "source_url": "https://raw.githubusercontent.com/huggingface/peft/v0.21.3/docs/source/package_reference/lora_variant_dora.md",
+    "verified": false
+   }
+  ],
+  "recipe": "VALIDATION STATUS. Every snippet below was constructed and stepped on CPU with tiny RANDOM Gemma 3 models under peft 0.21.3 + transformers 5.23.0 + torch 2.15.0, and the encode function was run on all 1,716 real training rows with the real Gemma 3 tokenizer. Nothing was run on a GPU or with real Gemma weights.\n\n## 0. Environment (pin; an unpinned 'pip install transformers' now installs 5.23.0)\npip install torch \"transformers==5.23.0\" \"peft==0.21.3\" \"accelerate==1.15.0\" pyarrow sentencepiece protobuf\n# not needed here: bitsandbytes (no quantisation; bf16 weights are 0.50 / 1.86 / 8.01 GiB), scipy (LoftQ only), flash-attn\n\n## 1. Base models: ungated mirrors, licence tag 'gemma', pinned revisions\nBASES = {\n    \"270m\": (\"unsloth/gemma-3-270m-it\", \"23cf460f6bb16954176b3ddcc8d4f250501458a9\"),\n    \"1b\":   (\"unsloth/gemma-3-1b-it\",   \"5b11413a10db4e486ef16a20101fd028f8f2499c\"),\n    \"4b\":   (\"unsloth/gemma-3-4b-it\",   \"bf46152c47f5dd20b896357cb51abc4c03b8ee8c\"),\n}\nimport torch\nfrom transformers import AutoModelForCausalLM, AutoTokenizer\nname, rev = BASES[\"1b\"]\nmodel = AutoModelForCausalLM.from_pretrained(name, revision=rev, dtype=torch.bfloat16, attn_implementation=\"sdpa\").to(\"cuda\")\ntok = AutoTokenizer.from_pretrained(name, revision=rev)\n# mirror tokenizer: bos=2, pad=<pad>=0, eos=<end_of_turn>=106, padding_side=\"left\"\n# 'dtype' replaces the deprecated 'torch_dtype'. Never fp16 (Gemma 3 overflows); require torch.cuda.is_bf16_supported().\n\n## 2. Encoding: one <bos>, loss on the answer AND its <end_of_turn>, no truncation\nEOT = \"<end_of_turn>\"\ndef encode(row, tok, max_length=768):                      # longest train row is 686 tokens\n    msgs = messages(row)                                   # scribe/prompts.py; the template folds the system text into the user turn\n    prompt = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)\n    full = tok.apply_chat_template(msgs + [{\"role\": \"assistant\", \"content\": row[\"target_json\"]}], tokenize=False)\n    assert full.startswith(prompt) and full[len(prompt):] == row[\"target_json\"] + EOT + \"\\n\", \"template drift\"\n    enc = tok(full, add_special_tokens=False, return_offsets_mapping=True)   # template already contains <bos>\n    start = len(prompt); end = start + len(row[\"target_json\"]) + len(EOT)\n    labels = [t if (hi > start and lo < end) else -100 for t, (lo, hi) in zip(enc[\"input_ids\"], enc[\"offset_mapping\"])]\n    assert len(labels) <= max_length and labels[-2] == tok.convert_tokens_to_ids(EOT)   # last token is the trailing newline (masked)\n    return {\"input_ids\": enc[\"input_ids\"], \"attention_mask\": [1] * len(labels), \"labels\": labels}\n\ndef collate(batch):                                         # right padding for training\n    n = max(len(x[\"input_ids\"]) for x in batch)\n    pad = {\"input_ids\": tok.pad_token_id, \"attention_mask\": 0, \"labels\": -100}\n    return {k: torch.tensor([x[k] + [pad[k]] * (n - len(x[k])) for x in batch]) for k in pad}\n\n## 3. Targets: language model only. A string target_modules is a regex (re.fullmatch).\n## A suffix list or 'all-linear' also adapts the SigLIP vision tower on 4B and larger.\nLM = r\"(?:.*\\.)?(?:language_model|model)\\.layers\\.\\d+\\.(?:self_attn\\.(?:q_proj|k_proj|v_proj|o_proj)|mlp\\.(?:gate_proj|up_proj|down_proj))\"\nCOMMON = dict(target_modules=LM, lora_dropout=0.0, bias=\"none\", task_type=\"CAUSAL_LM\")   # no modules_to_save on an -it base\n\n## 4. LoraConfig per arm (PEFT 0.21.3)\nfrom peft import LoraConfig, EvaConfig, get_peft_model, initialize_lora_eva_weights\nARMS = {\n    \"lora_r16\":      LoraConfig(r=16, lora_alpha=32, **COMMON),                        # control, scaling 32/16 = 2.0\n    \"rslora_r16_s4\": LoraConfig(r=16, lora_alpha=16, use_rslora=True, **COMMON),       # scaling 16/sqrt(16) = 4.0 (same as LoRA alpha 64)\n    \"rslora_r64\":    LoraConfig(r=64, lora_alpha=16, use_rslora=True, **COMMON),       # scaling 16/sqrt(64) = 2.0: rank effect at the control's scale\n    \"dora_r16\":      LoraConfig(r=16, lora_alpha=32, use_dora=True, **COMMON),         # merge before serving\n    \"eva_r16\":       LoraConfig(r=16, lora_alpha=32, init_lora_weights=\"eva\", eva_config=EvaConfig(rho=2.0), **COMMON),\n    # optional, both rewrite the base weights (save with path_initial_model_for_weight_conversion to get a plain LoRA):\n    \"pissa_r16\":     LoraConfig(r=16, lora_alpha=16, init_lora_weights=\"pissa_niter_4\", **COMMON),\n    \"olora_r16\":     LoraConfig(r=16, lora_alpha=16, init_lora_weights=\"olora\", **COMMON),\n}\npeft_model = get_peft_model(model, ARMS[\"lora_r16\"])\n# EVA needs one extra call before training (same data as training; keep the batches on the model's device):\n#   peft_model = get_peft_model(model, ARMS[\"eva_r16\"], low_cpu_mem_usage=True)\n#   initialize_lora_eva_weights(peft_model, torch.utils.data.DataLoader(train, batch_size=8, collate_fn=collate))\n# LoftQ only applies to a quantised base (needs scipy):\n#   LoraConfig(init_lora_weights=\"loftq\", loftq_config=LoftQConfig(loftq_bits=4, loftq_iter=1), ...) on the NON-quantised model\n\n## 5. LoRA+ (an optimiser, not a config flag)\nfrom peft.optimizers import create_loraplus_optimizer\nopt = create_loraplus_optimizer(model=peft_model, optimizer_cls=torch.optim.AdamW, lr=1e-4, loraplus_lr_ratio=16, loraplus_weight_decay=0.0)\n# A matrices train at 1e-4, B matrices at 1.6e-3. Pass as Trainer(..., optimizers=(opt, None)); the Trainer builds the scheduler.\n# Do not combine with DoRA as is: every DoRA magnitude vector lands in the 16x group.\n\n## 6. Training arguments for Transformers 5.23.0\nfrom transformers import Trainer, TrainingArguments, set_seed\nset_seed(20261114)\nargs = TrainingArguments(\n    output_dir=out, learning_rate=2e-4, lr_scheduler_type=\"cosine\",\n    warmup_steps=0.05,                      # a float below 1 is a ratio; warmup_ratio raises TypeError in 5.x\n    weight_decay=0.0, num_train_epochs=3, max_grad_norm=1.0, bf16=True,\n    per_device_train_batch_size=16, gradient_accumulation_steps=1,     # 4B: start at 8 x 2; on OOM halve the batch and double accumulation\n    per_device_eval_batch_size=32, eval_strategy=\"epoch\", save_strategy=\"no\",\n    logging_steps=5, report_to=\"none\", seed=20261114, data_seed=20261114, remove_unused_columns=False,\n)\ntrainer = Trainer(model=peft_model, args=args, train_dataset=train, eval_dataset=val, data_collator=collate)\n# 1,716 rows at effective batch 16 = 108 steps per epoch, 324 steps, 17 warmup steps.\n\n## 7. 270M-specific arms (the two documented recipes for this size)\n# Google guide: full fine-tune, no PEFT, learning_rate=5e-5 (guide: 5 epochs, batch 4, constant schedule, no gradient checkpointing)\n# Unsloth notebook: LoraConfig(r=128, lora_alpha=128, **COMMON), learning_rate=5e-5\n# In the ablation both use the fixed protocol of section 9 with lr 5e-5.\n\n## 8. Validation decoding and serving\ntok.padding_side = \"left\"                                   # batched generation only\nenc = tok(prompts, add_special_tokens=False, padding=True, return_tensors=\"pt\").to(model.device)\nout = model.generate(**enc, do_sample=False, max_new_tokens=160, eos_token_id=[1, 106], pad_token_id=0)\n# do_sample=False overrides the mirror default (do_sample true, top_k 64, top_p 0.95); longest answer is 118 tokens incl. <end_of_turn>.\n# Serving: plain LoRA, rsLoRA and EVA adapters load in vLLM as adapters. DoRA must be merged first:\n#   merged = peft_model.merge_and_unload(); merged.save_pretrained(dir); tok.save_pretrained(dir)\n# Ship a Notice file: \"Gemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms\".\n\n## 9. Ablation plan: one 40 GB GPU, 60 minutes wall clock, selection on validation only\nHeld fixed in every run: dataset-v1 train (1,716 rows, 887,017 tokens per epoch) and val (250); the prompt from scribe/prompts.py; the mirror chat template; label mask = answer + <end_of_turn>; max_length 768 with no truncation; seed 20261114; effective batch 16; 3 epochs = 324 steps = 2,661,051 tokens; AdamW, weight decay 0; cosine schedule with 5% warmup; gradient clip 1.0; bf16; sdpa; dropout 0; all seven language-model projections; greedy decoding with max_new_tokens 160.\nMeasured per run, on val only: eval_loss on the masked answer tokens after each epoch, then batched greedy generation on the 250 notes for note-level exact match (primary), event F1, route accuracy and invalid-JSON rate (scribe/metrics.py).\nThe time caps are decisions, not predictions: throughput was not measured. After the first 20 optimizer steps of each size compute tokens per second; a 3-epoch run then costs 2,661,051 / tokens_per_second seconds (532 s at 5,000; 266 s at 10,000; 177 s at 15,000).\n\n0-7 min    Setup: install, download 10.37 GiB (270M + 1B + 4B), encode, assert one <bos>, last supervised label is <end_of_turn>, max length <= 768; 20-step calibration on 1B.\n7-25 min   Stage A, size screen, cheapest first:\n           A1  270M full fine-tune, lr 5e-5\n           A2  270M LoRA r=128 alpha=128, lr 5e-5\n           A3  1B   lora_r16 (control), lr 2e-4\n           A4  4B   lora_r16 (control), lr 2e-4, batch 8 x accumulation 2\n           If calibration puts A4 above 9 minutes (below 4,928 tokens/s), run it for 2 epochs and record that.\n           Pick the size with the highest val exact match; if a smaller size is within 3 points and not significantly worse on the paired val notes (exact McNemar p >= 0.05), take the smaller one. If A1 wins, keep it as a finalist and run Stage B on the best LoRA size.\n25-47 min  Stage B, methods on the chosen size, one change at a time against that size's control, in this order; stop at the cap and record the rest as 'not run':\n           B1  rslora_r16_s4   scale 4.0 instead of 2.0\n           B2  rslora_r64      rank 64 at the control's scale\n           B3  LoRA+           control config, lr 1e-4, ratio 16\n           B4  eva_r16         data-driven initialisation, base weights untouched\n           B5  dora_r16        last: 1.26x training time in the PEFT benchmark and must be merged for vLLM\n47-52 min  Stage C, only if at least 8 minutes remain before minute 52: rerun the control and the best arm with seed 20261115.\n           Keep a non-control arm only if it beats the control on the paired val notes (exact McNemar p < 0.05) or wins under both seeds; otherwise ship the control.\n52-60 min  Stage D: one evaluation of the selected model and of the untouched base on test (500 notes): exact match with Wilson interval, event F1, McNemar against base, risk-coverage. Save the adapter, and merged weights if DoRA. Test is never used for a choice.\n\nNoise floor: the Wilson 95% interval at 80% exact match is 74.6-84.5% for n=250 and 76.3-83.3% for n=500.\nLeft out of the 60 minutes: 12B (22.7 GiB of bf16 weights) and 27B (51.1 GiB, needs 4-bit QLoRA); QLoRA and LoftQ (nothing is quantised); PiSSA and OLoRA (rewrite base weights, need conversion before vLLM); combined arms.",
+  "open_risks": [
+   "Nothing was run on a GPU. Training throughput, peak memory at the proposed batch sizes and every accuracy outcome are unknown; the 60-minute plan depends on the 20-step calibration and may have to drop arms.",
+   "The snippets were validated only on tiny random Gemma 3 models on CPU. Real-weight behaviour (bf16 stability with sdpa, EVA device placement on GPU, DoRA speed, 4B memory without gradient checkpointing) is unverified.",
+   "Version-1 scripts, owned by the other workflow and not edited: scribe/train_lora.py passes warmup_ratio=0.05, which raises TypeError on Transformers 5.23.0, and scribe/run_gpu.sh installs transformers unpinned, so the GPU run would stop at TrainingArguments. Pin transformers below 5 or switch to warmup_steps=0.05.",
+   "Version-1 label mask excludes <end_of_turn> in all 1,716 training rows. The adapter is never trained to stop, which can produce run-on output that fails JSON parsing. Whether it actually does was not measured.",
+   "Validation has 250 notes: at 80% exact match the 95% interval is about +/-5 points. Gains of 1-2% reported for LoRA+ and similar methods cannot be resolved, and a single seed can make a noise winner look real. The plan defaults to the plain control unless a paired test says otherwise.",
+   "No opened source compares these methods on a ~1.7k-example structured-extraction task. The PEFT benchmark is one seed, one math task, a different model, and its rsLoRA arm also has 4x the adapter scale, so rank and scale are confounded there.",
+   "Paper claims come from abstracts only, as instructed. DoRA's low-rank advantage is cited from PEFT documentation, not from the paper body.",
+   "Label quality of dataset-v1 is contested: the stricter Jev re-audit flags 43 of 60 accepted pairs (0.717) while the independent full-read audit found 2 wrong of 60 (Wilson 0.9-11.4%). All training text is synthetic, so any method ranking may not transfer to real notes.",
+   "The Unsloth mirrors are third-party copies: the 270M chat template carries 'Unsloth Chat template fixes' and the mirror tokenizer sets eos_token to <end_of_turn>. Pin the revisions given in the recipe; parameter counts match Google's originals but byte identity of the weights was not checked.",
+   "Licence: Gemma 3 is under the Gemma Terms of Use, not Apache. Adapters and merged weights are Model Derivatives with redistribution duties, and the Prohibited Use Policy names automated decisions in healthcare and unlicensed medical practice. This is a reading of the terms, not legal advice.",
+   "Serving: vLLM rejects DoRA adapters, modules_to_save and PiSSA/OLoRA-initialised adapters. If the serverless container loads adapters through vLLM, only plain LoRA, rsLoRA and EVA arms are loadable as adapters; anything else must be merged, which makes the container carry full weights.",
+   "Gemma 4 (Apache 2.0, ungated on Hugging Face, native system role) is the generation Google's current guides target. This step was scoped to Gemma 3 and did not evaluate Gemma 4; for a 'Best Use of Gemma' track that choice is worth a deliberate decision.",
+   "The two Unsloth documentation pages end with an 'Agent Instructions' block asking automated readers to send ask/goal queries to their documentation endpoint. It is text from a fetched page, not from the user, and was not acted on.",
+   "The run log is in the scratchpad, not in the repo's runs/ folder, because this task said to write nothing in the repo. A sibling step wrote its log into the repo; if the orchestrator expects runs/gemma-lora-research.jsonl there, it has to be copied. The scratchpad can be cleared by a reboot."
+  ]
+ },
+ "build:ops-batch-script": {
+  "status": "done",
+  "summary": "ops/verda_job.py (stdlib only) and ops/README.md are built; 27 unit tests pass against fake verda/ssh/rsync, and a real --dry-run is pasted into the README. No cloud resource was created, deleted or changed; no git command was run.\n\nWhat the tool does: `run` prints the cost estimate first, tries candidates in order, waits for SSH, rsyncs, starts the command detached (nohup, log file, exit-code file), polls and streams the log, fetches artifacts with sha256, and deletes the machine with `--with-volumes` in a finally block and on SIGINT/SIGTERM/SIGHUP. Time cap, budget cap and spot reclaim each have their own exit code (72, 73, 74). `sweep` lists leftover state files and deletes only with `--delete-mine`. `--dry-run` and `--keep` work as specified.\n\nThings that differ from the brief or that you should know:\n- **Extra read-only verda calls.** Beyond help/list/describe I ran `cost estimate`, `instance-types`, `vm availability` and `images`. The first dry-run showed that the type in the CLI's own help example (`1V100.6V`) is not in the catalog, so I needed real names. Nothing was changed by these calls.\n- **Dry-run does a price lookup.** `--dry-run` executes the read-only `cost estimate` so the estimate is real; `--offline` skips it.\n- **Machines found by hostname.** After a create timeout the tool takes over a machine only if it has the exact hostname generated for that call (six random hex digits, recorded beforehand) and its id was absent from `vm list` just before. `sweep --delete-mine` uses the same rule for creates that never settled. Delete is always called with one explicit id.\n- **Additions.** Per-candidate `,image=SLUG` (image slugs differ by instance type) and `,usd=PRICE`, a repeatable `--copy LOCAL[:SUBDIR]`, and `--artifact-exclude`.\n- **A machine is running that this tool did not create.** At 17:16 UTC `vm list` showed `az-equity-a100-20261114` (1A100.22V, FIN-03, on-demand, 2.386 USD/h, created 16:56:35 UTC). I left it untouched.\n\nTest cases cover all six required scenarios plus spot reclaim, time cap, SIGINT, SIGTERM while create is in flight, repeated signals during cleanup, failing deletes, keep-then-sweep, and dry-run. Every test also asserts the `--agent ... -o json` contract and that a same-prefix machine the tool did not create survives.",
+  "key_numbers": [
+   {
+    "name": "unit tests run / failures (final run)",
+    "value": "27 / 0",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-ops.jsonl"
+   },
+   {
+    "name": "unit test wall time, final run (s)",
+    "value": "84.142",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-ops.jsonl"
+   },
+   {
+    "name": "real dry-run: 1V100.4V spot hourly incl. 50 GiB OS volume (USD/h)",
+    "value": "0.1357",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/ops/README.md"
+   },
+   {
+    "name": "real dry-run: 1V100.4V on-demand hourly incl. 50 GiB OS volume (USD/h)",
+    "value": "0.2577",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/ops/README.md"
+   },
+   {
+    "name": "real dry-run: planned ceiling for 90 min, budget 3 USD (USD)",
+    "value": "0.3866",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/ops/README.md"
+   },
+   {
+    "name": "cloud machines created / deleted by this work",
+    "value": "0 / 0",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-ops.jsonl"
+   },
+   {
+    "name": "cost of this work (USD)",
+    "value": "0",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-ops.jsonl"
+   },
+   {
+    "name": "verda CLI version used",
+    "value": "1.10.0",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-ops.jsonl"
+   },
+   {
+    "name": "GPU instance types in catalog at 17:12 UTC",
+    "value": "57",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-ops.jsonl"
+   },
+   {
+    "name": "running machine not created by this tool (az-equity-a100-20261114) price (USD/h)",
+    "value": "2.386",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-ops.jsonl"
+   },
+   {
+    "name": "sha256 of ops/verda_job.py as tested and dry-run",
+    "value": "82e04b46c0cd2d5641aeaa3d2eaaaf2e61090fedadbe7f5fccd5ebbdb889d5f2",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-ops.jsonl"
+   }
+  ],
+  "files": [
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/ops/verda_job.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/ops/README.md",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/ops/tests/test_verda_job.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/ops/tests/fakes/fake_verda.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/ops/tests/fakes/fake_ssh.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/ops/tests/fakes/fake_rsync.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/ops/.gitignore",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-ops.jsonl"
+  ],
+  "not_done": [
+   "No real `verda vm create` or `vm delete` was executed, so these are unverified against the real service: the JSON that create prints, the HTTP 503 body text, the exact status string of a reclaimed spot machine, the effect of `--with-volumes`, and whether `--wait=false` is accepted on create. The fake models them from the CLI help and the task brief. Watch the first real run and run `sweep` after it.",
+   "No ssh or rsync connection to a real Verda machine was made. Only the option sets were checked locally (ssh against a closed loopback port, rsync on a local copy).",
+   "Tests ran only on Python 3.15.2. The code avoids post-3.10 syntax, but it was not run on 3.10.",
+   "The cost figure is an estimate (seconds from the create call to confirmed deletion x hourly price incl. OS volume). Verda's billing granularity was not checked, and the budget can be overshot if teardown takes longer than the 120 s reserve.",
+   "The dry-run candidates (1V100.4V at FIN-01, spot then on-demand) are what `vm availability` listed in stock at 17:12 UTC, not a hardware recommendation. Whether a 16 GB V100 suits Gemma LoRA training (scribe/README.md asks for a bf16-capable GPU) was not checked.",
+   "SIGKILL or power loss cannot be handled by the tool; the state file remains and `sweep` reports it.",
+   "Three early run-log lines (help read, read-only probe, first two test runs) carry the time they were written, not the time the step ran; each says so in its metrics.note.",
+   "The machine `az-equity-a100-20261114` seen running at 17:16 UTC was not created by this tool and was not touched; someone should confirm it is still wanted."
+  ]
+ },
+ "build:serving-container": {
+  "status": "built_not_deployed",
+  "summary": "Serverless-kontin rakennuspalat ovat valmiina hakemistossa serve/, mutta mit\u00e4\u00e4n ei ole ajettu GPU:lla: oikeaa vLLM-imagea ei rakennettu, mit\u00e4\u00e4n ei viety Verdaan, eik\u00e4 smoke-testi\u00e4 ole ajettu oikeaa p\u00e4\u00e4tepistett\u00e4 vasten. Yksikk\u00f6testit menev\u00e4t l\u00e4pi (108 ajettu, 6 ohitettu ilman xgrammaria) v\u00e4\u00e4rennetty\u00e4 HTTP-palvelinta vasten.\n\nKolme havaintoa, jotka muuttavat suunnitelmaa:\n\n- **Ainoa koulutettu adapteri on MLX-muodossa (Gemma 3 1B), jota vLLM ei lue.** Tein muuntimen PEFT-muotoon. Muunnettu adapteri antoi 19 pid\u00e4tetyst\u00e4 muistiosta 16:ssa merkilleen saman vastauksen kuin MLX-ajo. Kolmessa muussa reitti ja tapahtumatyypit ovat samat ja vain \"N p\u00e4iv\u00e4\u00e4/viikkoa sitten\" -p\u00e4iv\u00e4m\u00e4\u00e4r\u00e4t eroavat; molemmat ajot ovat niiss\u00e4 v\u00e4\u00e4r\u00e4ss\u00e4.\n- **vLLM:n `disable_any_whitespace` rikkoisi ohjatun dekoodauksen.** xgrammar 0.2.9:ll\u00e4 se pakottaa v\u00e4lily\u00f6nnit erottimiin ja hylk\u00e4\u00e4 tiiviin JSONin, jota adapteri on opetettu kirjoittamaan. J\u00e4tin sen pois entrypointista ja lis\u00e4sin testin vahdiksi.\n- **Lausekeformaatille ei ole viel\u00e4 adapteria.** Skeema, p\u00e4iv\u00e4m\u00e4\u00e4rien ratkaisu koodissa ja testit ovat olemassa (ratkaisija t\u00e4sm\u00e4\u00e4 generaattorin parseriin kaikissa 11 254 lausekkeessa). Asiakas ottaa kehotteen, skeeman ja ratkaisijan koulutuspuolen moduulista (`scribe/v2/data_tools.py`), kun se valmistuu.\n\nSkeema on ajettu xgrammarin l\u00e4pi: kaikki 4 456 datasetin tavoitetta hyv\u00e4ksyt\u00e4\u00e4n molemmissa formaateissa ja kaikki virheelliset testivastaukset hyl\u00e4t\u00e4\u00e4n. Ilman kalibroitua kynnyst\u00e4 asiakas ohjaa jokaisen muistion ihmisen tarkistettavaksi.\n\nHalvin GPU, jonka sek\u00e4 julkinen hinnasto ett\u00e4 CLI listaavat, on L40S, 2,22 USD/h; nollaan skaalattuna tyhj\u00e4k\u00e4ynnist\u00e4 ei Verdan mukaan veloiteta. `serve/deploy.md` sis\u00e4lt\u00e4\u00e4 komennot j\u00e4rjestyksess\u00e4 ja listaa avoimet kohdat.\n\nLis\u00e4sin pyyt\u00e4m\u00e4tt\u00e4 `serve/selective.py`:n (kynnyksen valinta virherajalla) ja `serve/convert_mlx_adapter.py`:n. `serve/.venv` (781 Mt, xgrammar, torch, peft) j\u00e4i levylle tarkistusten uusimista varten; se on gitignoressa.",
+  "key_numbers": [
+   {
+    "name": "Unit tests run / skipped (system Python 3.15.2, fake HTTP server, no model)",
+    "value": "108 run, 6 skipped, OK",
+    "file": "runs/v2-serve.jsonl"
+   },
+   {
+    "name": "Unit tests with xgrammar 0.2.9 (serve/.venv, Python 3.12.13)",
+    "value": "108 run, 1 skipped, OK",
+    "file": "runs/v2-serve.jsonl"
+   },
+   {
+    "name": "Dataset targets accepted by the xgrammar grammar, absolute format",
+    "value": "4456 of 4456",
+    "file": "serve/tests/test_xgrammar.py"
+   },
+   {
+    "name": "Dataset targets accepted by the xgrammar grammar, expression format",
+    "value": "4456 of 4456",
+    "file": "serve/tests/test_xgrammar.py"
+   },
+   {
+    "name": "Malformed absolute answers rejected by both the client validator and xgrammar",
+    "value": "23 of 23",
+    "file": "serve/tests/support.py"
+   },
+   {
+    "name": "Malformed date expressions rejected by both the client validator and xgrammar",
+    "value": "18 of 18",
+    "file": "serve/tests/support.py"
+   },
+   {
+    "name": "Date expressions where the client resolver equals the generator's parser",
+    "value": "11254 of 11254",
+    "file": "serve/tests/test_dates.py"
+   },
+   {
+    "name": "Compact training JSON accepted by xgrammar with any_whitespace=False (vLLM disable_any_whitespace=true)",
+    "value": "False",
+    "file": "serve/tests/test_xgrammar.py"
+   },
+   {
+    "name": "MLX to PEFT conversion: modules / tensors / bit-exact transposes",
+    "value": "182 / 364 / 182",
+    "file": "runs/v2-serve.jsonl"
+   },
+   {
+    "name": "Converted adapter answers identical to stored MLX answers (PEFT 0.21.3, float32, Apple GPU, greedy)",
+    "value": "16 of 19",
+    "file": "serve/evidence/converted-adapter-vs-mlx.json"
+   },
+   {
+    "name": "Held-out synthetic notes in the smoke-test fixture",
+    "value": "50",
+    "file": "serve/fixtures/heldout-v1.jsonl"
+   },
+   {
+    "name": "Default smoke-test exact-match floor (breakage alarm, not a quality bar)",
+    "value": "0.2",
+    "file": "serve/smoke_test.py"
+   },
+   {
+    "name": "Version-1 adapter note-level exact match, measured by another step (Gemma 3 1B, MLX, n=200)",
+    "value": "0.41 (95% CI 0.344-0.479)",
+    "file": "data/scribe/eval-v1.json"
+   },
+   {
+    "name": "vLLM image pinned",
+    "value": "docker.io/vllm/vllm-openai:v0.29.0, linux/amd64 8,674,178,554 bytes compressed",
+    "file": "serve/Dockerfile"
+   },
+   {
+    "name": "L40S 48 GB serverless price, on-demand / spot (USD per GPU-hour)",
+    "value": "2.22 / 1.11",
+    "file": "serve/deploy.md"
+   },
+   {
+    "name": "RTX 6000 Ada 48 GB serverless price in CLI catalogue only (USD per GPU-hour, availability unverified)",
+    "value": "1.767",
+    "file": "serve/deploy.md"
+   },
+   {
+    "name": "Verda registry credentials expiry",
+    "value": "2026-11-20",
+    "file": "serve/deploy.md"
+   },
+   {
+    "name": "Cloud cost of this step (USD)",
+    "value": "0",
+    "file": "runs/v2-serve.jsonl"
+   },
+   {
+    "name": "Exact match and latency on a real endpoint",
+    "value": "not measured",
+    "file": "runs/v2-serve.jsonl"
+   }
+  ],
+  "files": [
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/README.md",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/deploy.md",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/Dockerfile",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/.dockerignore",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/entrypoint.sh",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/schema.json",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/client.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/smoke_test.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/selective.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/convert_mlx_adapter.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/runlog.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/.gitignore",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/fixtures/heldout-v1.jsonl",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/evidence/converted-adapter-vs-mlx.json",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/build/adapter-v1-peft/adapter_config.json",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/build/adapter-v1-peft/adapter_model.safetensors",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/fake_vllm.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/support.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/make_fixtures.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/check_converted_adapter.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/test_client.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/test_schema.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/test_dates.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/test_smoke.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/test_selective.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/test_entrypoint.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/test_convert.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/test_xgrammar.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/fixtures/targets-v1.jsonl.gz",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/fixtures/manifest.json",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/fixtures/prompts_expression.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/serve/tests/fixtures/data_tools_like.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-serve.jsonl"
+  ],
+  "not_done": [
+   "The real image was not built: docker.io/vllm/vllm-openai:v0.29.0 (8.7 GB) was not pulled. The Dockerfile passed 'docker build --check' and built only on a small stand-in base image (redis:7.2) with the entrypoint in dry-run mode.",
+   "Nothing was pushed to vccr.io and no Verda deployment was created, scaled, paused or deleted (forbidden in this step). 'verda registry ls' returns 404, so a push with the saved credentials is unproven.",
+   "vLLM has never been started. Read from the v0.29.0 source and docs, not observed: Gemma 3 LoRA loading, --language-model-only, the fixed xgrammar backend, log-probabilities being computed after the grammar mask, and CUDA 13.0 on Verda's R580 driver.",
+   "serve/smoke_test.py has not been run against a real endpoint: no exact match, no latency percentiles and no cold-start time exist for the served adapter. It was run only against the fake server, whose numbers are scripted and are not results.",
+   "No auto-accept threshold has been calibrated, so the client sends every note to human review. serve/selective.py is tested on constructed data only.",
+   "No expression-format adapter exists and scribe/v2/data_tools.py was not present yet; the expression path was tested with test-fixture prompt modules, not with the real training prompt.",
+   "The chat prompt rendered by vLLM was not compared token by token with the training-time rendering.",
+   "Unverified Verda details: the compute name string for L40S and whether a cheaper type (RTX 6000 Ada at 1.767 USD/h in the CLI catalogue, or 'General Compute 24 GB') is offered for containers; the CPU architecture of the GPU nodes; whether the gateway forwards the Authorization header to the container; how the registry-credentials object and secrets are named and created in the console; what a paused deployment, its scratch disk and registry storage cost.",
+   "The converter handles text-only Gemma 3 (270M, 1B) MLX adapters only; the multimodal 4B layout is not handled. An adapter with per-module ranks (EVA rank_pattern from scribe/v2) is refused by the entrypoint; serving merged weights for that case was not built.",
+   "The 3 of 19 converted-adapter answers that differ from MLX were not traced to a cause (bf16 versus float32 is the likely one, untested).",
+   "No git commands were run; nothing is committed. The existing junction-cuda-* deployments were only listed and described."
+  ]
+ },
+ "data:verify-build-v2": {
+  "status": "ok",
+  "summary": "The version-2 dataset is built: 898 of the 1,198 delivered Haiku notes passed both version-1 gates and are split into train, val and a 200-note held-out test. My 20 tests pass, including the two you asked for: no id occurs in two splits, and the expression target resolves to the absolute target for all 5,654 rows.\n\n**Loading.** All 48 writer files are valid JSON and every note joined to a specification. Two specifications have no note (one each in slices 01 and 02). No note text was edited.\n\n**Gates.** No note failed the code check. Jev rejected 300 of 1,198 (25.0 %), mostly on a route score below 0.8 (215 notes). The careful kind was rejected most often (61 of 150), and no `no_event` note was rejected. Because that gate rejected nothing, I asked its one question about 60 accepted notes that do contain events; all 60 scored 0.5 or higher. TypeSafe spend was USD 0.059 against the USD 3 limit.\n\n**Splits.**\n\n| file | rows | Nemotron | Haiku |\n| --- | --- | --- | --- |\n| train | 2,354 | 1,716 | 638 |\n| val | 310 | 250 | 60 |\n| test_nemotron | 500 | 500 | 0 |\n| test_haiku | 200 | 0 | 200 |\n| rejected | 2,290 | 1,990 | 300 |\n\n**Choices I made that you did not specify:**\n- **Event order in the expression target** is the order the date strings appear in the note, so the model needs no date comparison to order them. It differs from date order in 73 rows.\n- **A date without a year (`3.2.`)** is ABSOLUTE with the note's year, since you gave only four kinds.\n- **`rejected.parquet`** holds the version-1 rejected rows as well as the Haiku ones.\n- **The `split` column** holds the version-2 file name; every other version-1 value of a version-1 row is unchanged.\n- **Three extra columns:** `focus`, `facts` (the printed date strings) and `reject_stage`.\n- **Tests** are in `data/scribe/v2/tests/`, because `scribe/v2/tests/` belongs to the other workflow.\n\n`data_tools.py` provides the names `scribe/v2/data_iface.py` looks for; the other workflow's 90 tests, including its contract test against the real file, pass with it. Rebuilding gives byte-identical parquet files, and the version-1 files I read still match their manifest hashes.",
+  "key_numbers": [
+   {
+    "name": "writer files loaded / not valid JSON",
+    "value": "48 / 0",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/coverage.json"
+   },
+   {
+    "name": "notes joined to specifications / specifications / without a note",
+    "value": "1198 / 1200 / 2",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/coverage.json"
+   },
+   {
+    "name": "notes per slice",
+    "value": "slice-01 99, slice-02 99, slice-03 to slice-12 100 each",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/coverage.json"
+   },
+   {
+    "name": "specification ids without a note",
+    "value": "76ca9183010924415aabd4e393f096e23f992db28be9a9275dc0fb94eb199872 (slice 01), cf295d3773631e0d2f37d2f181344e2132455c9307ffc2b7a9831aa3128b1661 (slice 02)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json"
+   },
+   {
+    "name": "notes by kind (standard / careful / no_event)",
+    "value": "898 / 150 / 150",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json"
+   },
+   {
+    "name": "Haiku code-check failure rate",
+    "value": "0 of 1198 (0.0 %, 95 % interval 0.0 to 0.3 %)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/CARD.md"
+   },
+   {
+    "name": "Haiku Jev rejection rate, of notes that passed the code check",
+    "value": "300 of 1198 (25.0 %, 95 % interval 22.7 to 27.6 %)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/CARD.md"
+   },
+   {
+    "name": "Jev rejection, standard",
+    "value": "239 of 898 (26.6 %, 95 % interval 23.8 to 29.6 %)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/CARD.md"
+   },
+   {
+    "name": "Jev rejection, careful",
+    "value": "61 of 150 (40.7 %, 95 % interval 33.1 to 48.7 %)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/CARD.md"
+   },
+   {
+    "name": "Jev rejection, no_event",
+    "value": "0 of 150 (0.0 %, 95 % interval 0.0 to 2.5 %)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/CARD.md"
+   },
+   {
+    "name": "accepted Haiku notes",
+    "value": "898 of 1198 (75.0 %, 95 % interval 72.4 to 77.3 %); standard 659, careful 89, no_event 150",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json"
+   },
+   {
+    "name": "Jev rejection reasons (a note can have several)",
+    "value": "route below 0.8: 215; event below 0.8: 65; unlisted event at or above 0.5: 38; distractor at or above 0.5: 0",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json"
+   },
+   {
+    "name": "train.parquet rows",
+    "value": "2354 (nemotron-3.5-super-vl 1716, claude-haiku-5-5 638; standard 2184, careful 63, no_event 107)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/train.parquet"
+   },
+   {
+    "name": "val.parquet rows",
+    "value": "310 (nemotron-3.5-super-vl 250, claude-haiku-5-5 60; Haiku by kind: standard 44, careful 6, no_event 10)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/val.parquet"
+   },
+   {
+    "name": "test_nemotron.parquet rows",
+    "value": "500 (version-1 test, same rows in the same order)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/test_nemotron.parquet"
+   },
+   {
+    "name": "test_haiku.parquet rows",
+    "value": "200 (standard 147, careful 20, no_event 33)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/test_haiku.parquet"
+   },
+   {
+    "name": "rejected.parquet rows",
+    "value": "2290 (nemotron-3.5-super-vl 1990, claude-haiku-5-5 300; Haiku by kind: standard 239, careful 61)",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/rejected.parquet"
+   },
+   {
+    "name": "total rows in the five files / ids that occur in two files",
+    "value": "5654 / 0",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/tests/test_dataset_v2.py"
+   },
+   {
+    "name": "rows whose expression target was resolved against note_date / rows that do not reproduce the absolute target",
+    "value": "5654 / 0",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json"
+   },
+   {
+    "name": "expression date kinds in train, val and both tests",
+    "value": "ABSOLUTE 4068, DAYS_AGO 1381, MONTH 1357, WEEKS_AGO 1249",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json"
+   },
+   {
+    "name": "rows where order of appearance differs from date order (of 4160 rows with two or more events)",
+    "value": "73",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-data.jsonl"
+   },
+   {
+    "name": "rows that stop matching when the note date is shifted by one day (sensitivity of the resolver test)",
+    "value": "3286 of 5654, exactly the rows with a relative date",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-data.jsonl"
+   },
+   {
+    "name": "TypeSafe requests / tokens (input, output) / failed attempts",
+    "value": "1258 / 1410864 (1300516 in, 110348 out) / 0",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/typesafe-usage.json"
+   },
+   {
+    "name": "TypeSafe cost at USD 0.042 per million tokens (limit USD 3)",
+    "value": "USD 0.059256288",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json"
+   },
+   {
+    "name": "TypeSafe tokens verifying notes (1198 requests) / positive control (60 requests)",
+    "value": "1369795 / 41069",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json"
+   },
+   {
+    "name": "no_event gate: highest probability over the 150 no_event notes",
+    "value": "0.04",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json"
+   },
+   {
+    "name": "no_event gate positive control: event-bearing notes judged to contain an event / lowest probability",
+    "value": "60 of 60 (100.0 %, 95 % interval 94.0 to 100.0 %) / 0.69",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/no-event-gate-control.json"
+   },
+   {
+    "name": "hold-out rule and seed",
+    "value": "per kind, ids sorted by sha256(seed:id); first to test_haiku, next to val, rest to train; seed sama-scribe-v2-heldout-21661114",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json"
+   },
+   {
+    "name": "my tests run / failures / skipped",
+    "value": "20 / 0 / 0",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/tests/test_dataset_v2.py"
+   },
+   {
+    "name": "other suites run read-only with data_tools.py present (scribe/v2/tests, scribe/tests)",
+    "value": "90 tests OK, 14 tests OK",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-data.jsonl"
+   },
+   {
+    "name": "run log lines in runs/v2-data.jsonl (36 from the preparation step, 21 from this step)",
+    "value": "57",
+    "file": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-data.jsonl"
+   }
+  ],
+  "files": [
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/scribe/v2/data_tools.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/train.parquet",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/val.parquet",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/test_nemotron.parquet",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/test_haiku.parquet",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/rejected.parquet",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset/CARD.md",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/dataset-stats.json",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/tests/test_dataset_v2.py",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/coverage.json",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/typesafe-usage.json",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/no-event-gate-control.json",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/data/scribe/v2/verify",
+   "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/runs/v2-data.jsonl"
+  ],
+  "not_done": [
+   "Two specifications have no note (slice 01 n=91, which its writer explained, and one in slice 02 with no reason given). Nothing was written to replace them.",
+   "No audit of the accepted Haiku notes beyond the two gates: neither the stricter second Jev pass nor an independent reading that version 1 had was run. I read six rejected notes and no accepted ones.",
+   "test_haiku is filtered by the same Jev gate as the training notes, so it is not an unfiltered sample of the writer. Since 215 of 300 rejections were a route score below 0.8, the accepted set over-represents route wordings Jev reads as explicit.",
+   "The no_event gate is the single question you specified. It does not check that the note names the service given as entry_route.",
+   "The code-check rate describes delivered notes only: writers were told to leave out notes they could not make pass, and one reported checking with a script.",
+   "The positive control for the no_event gate was my addition: 60 extra requests, 41069 tokens, included in the spend figure.",
+   "The dataset folder data/scribe/v2/dataset/ is not one of the fallback folders data_iface.py searches by itself; it is reached through data_tools.load_split, which data_iface tries first.",
+   "The expression prompt (expression_messages) is new wording and has not been tried on a model.",
+   "Eleven ruff style findings remain in data_tools.py (ValueError instead of TypeError, dict() calls, timezone.utc, two broad excepts); I left them as they are.",
+   "The Finnish of the notes has not been reviewed by a Finnish clinician, and nothing here shows how well a model trained on this data extracts events.",
+   "The run-log lines for reading the background, the dry-run code check, the cache join check and the sensitivity check were appended after those steps ran, not at the time."
+  ]
+ }
+}

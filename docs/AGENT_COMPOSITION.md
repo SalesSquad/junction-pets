@@ -2,6 +2,53 @@
 
 The 34 independently versioned agents are specialists that can collaborate through one authorized host. They are not34 unrelated chatbots or34 permanently running workers. Each package now contains its exact current challenge/technology sources, bounded role, expected proof and preferred peer proposals in runtime AGENTS.md. The existing plugin producer embeds that same public guidance into the 34 generated skills. Developer research remains in CHALLENGE_RESEARCH.md and the shared source index.
 
+## Chibi Agent Mesh — implementation sequence (14 November 2026)
+
+**Product decision:** A pet is one continuing Chibi companion, not a duplicate per
+challenge. Junction adds a *view* of the 34 existing company specialists; a
+solution may reference several pets and the same pet may serve several solutions.
+Golfer, Sailor and other existing Chibi companions keep their original Chibi
+identity, passport, art and skills. They may join a solution when relevant, but
+must not be copied into `pets/` or renamed as company sponsors.
+
+| Layer | Existing owner / source | Next addition, without parallel infrastructure |
+| --- | --- | --- |
+| Identity and art | 34 `pets/*/pet.json` with unique `artIndex`; original 6×6 atlas in `apps/catalog/public/assets/company-mascots.png`; Chibi Pet Passport | Reuse art and stable IDs in Council trace. The private host remains the identity and avatar authority for adopted pets. |
+| Solution membership | Junction solution workspace successor [PR #82](https://github.com/SalesSquad/junction-pets/pull/82), `agentIds[]` and `capabilityUses[]` | Join solution, pet and declared capability in the workspace. Do not create a second product-to-agent registry. |
+| Peer selection | `ops/agent-composition-20261113.json` proposals; `services/pet-adapters/` declared capabilities; Council contract v1 | Rank eligible recipients by declared skill, context fit and evidence. Proposals never confer authority. |
+| Request and decision | `contracts/pet-collaboration/v1/`; private Chibi `pet_collaboration.rs`, Cedar and HostPolicy | Send a bounded, source-bound help request **only after** the host maps its scope to a known Cedar action and authorizes the recipient. Admission is currently not dispatch. |
+| Execution and receipts | Chibi PetExecutor, artifact store, revocation, receipts; Council replay | Record actual host call, source, model/tool/effect, cost and recipient result with a host-signed receipt. No public trace includes private payloads. |
+| Marketplace display | Chibi Junction bundle refresh [PR #109](https://github.com/SalesSquad/chibi/pull/109) | Project the verified membership and sanitized receipts into Chibi, with labels for simulated/proposed/host-verified work. Do not replace the existing catalog. |
+
+### Milestones and acceptance
+
+1. **Visible slice — this branch:** augment the already functioning
+   `apps/collaboration-demo/` trace with each participant's canonical atlas
+   index. Render existing avatar art in team, scenario and handoff timeline,
+   with initials if the local atlas fails to load. The deterministic fixture and
+   SHA-256 trace integrity remain unchanged except for the newly included field.
+2. **Challenge-specific teams:** after the existing solution workspace source
+   is accepted, show one selected solution and its related specialists, not all
+   122 proposed edges. Render proposal vs actual handoff as different states.
+3. **Host-gated `request_peer_help`:** use Chibi's existing per-tenant
+   admission seam, skill intersection, Cedar action mapping, scoped context
+   capsule, nonce/expiry and budget. Preserve cycle/depth limits, deny unknown
+   skills, revocations, unapproved effects and cross-tenant delegation.
+4. **Intelligent routing (opt-in):** evaluate Proofmatch/capability matching,
+   Jev/Typesafe evidence, OpenAI Responses/Decisions and other provider
+   proposals against a deterministic policy baseline. Model-generated choices
+   remain suggestions until a Chibi host decision and verified receipt.
+5. **Real product reuse:** prove one authorized peer-help flow; then compose
+   existing Golfer/Sailor, Meta, NVIDIA, Aimo or Rokoko companions into the
+   relevant challenge solutions without cloning accounts, art or execution
+   engines. Prefer one useful end-to-end interaction to a large unverified graph.
+
+**Evidence labels:** `SYNTHETIC` = fixture replay, `PROPOSED` = unexecuted
+capability match, `HOST_VERIFIED` = actual private host receipt. Public
+visualizations must never infer the third state from a graph edge, GitHub PR,
+manifest or checksum. No new provider spending, identity scopes, host grants,
+merges or deployment are part of the visible slice.
+
 ## One source map, one execution authority
 
 - [Fresh19 main and19 technical briefs](challenge-research/README.md) own challenge facts and captured material links.

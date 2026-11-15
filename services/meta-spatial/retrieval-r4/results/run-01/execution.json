@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "work_id": "META-LENS-R4-COVERAGE93-20261114",
+  "source_commit": "0faa839b99b8fbee06d88bab7fee5c9c7a0aa0ad",
+  "source_sha256": {
+    "test_features.py": "25bbf0cd3fd9b9e963a5af5f3400f7632f456953dd7b62842c2c7ed129134b4c",
+    "test_runtime.py": "9d499d19d05ad0d4b6a7ac5c884fe9b53ea3c5cf4fb25cdc73f0e70fb52b1690",
+    "prepare_candidates.py": "38bc19fda401b10e8ebd3d6bc3f9286a0a7f647dcf054057bb41e70cd37eba9d",
+    "features.py": "f4cc45e793d1518eb52071a7e14d3a7ad6314168c11e49d8fd0534e5752da9ef",
+    "runtime.py": "a027a6b40f2495e0fb0c3fae3d86bd8cac59e4e5bff1dae09d1ce2ad23483512",
+    "R_MODEL.md": "c61cdc43d07d3d65041e227eba3812a8e356ee3c2947e9db5c29d4ebb38c79d5",
+    ".gitignore": "4c206e794c6a46d48fb1d94e2208b0d2363e64fe4fcc7faf9b1473438fb7c22e",
+    "run_experiment.py": "3705a94db04cc1f0eb0c0bf14209f1370d6d99aba050838f52e4c399d93455b2",
+    "train_reranker.R": "3a8a6cc620b6c5af94e36d8afd34b0fffc250412e1525ad91eece6a82ea28df5",
+    "contract.json": "a45f587632d1ab14aeaf7140051b4f0f440a4f7bdb75110dc2f6896581759154",
+    "test_reranker.R": "d5271c2836c3e5677238d19f54ac45f28d8c410e1959a8bc7626e5edf003af09"
+  },
+  "started_at_unix": 1794688657.035964,
+  "python": "3.12.16 (main, Oct 25 2026, 18:24:37) [Clang 21.0.0 (clang-2100.3.34.2)]",
+  "new_cloud_instances": 0,
+  "new_pixel_inference": false,
+  "qualification": false,
+  "stages": [
+    {
+      "name": "export",
+      "exit_code": 0,
+      "elapsed_seconds": 24.610187583006336,
+      "log_sha256": "71ecded0d3380ff8bc2c1faf5167e39b058e36bccc4da0c1d479c0ca4b3ff769"
+    },
+    {
+      "name": "fit",
+      "exit_code": 0,
+      "elapsed_seconds": 65.48130687500816,
+      "log_sha256": "d0c3ee8fe2267debd6a00646d745c13bfbbe882781e6ec77ceea476dd47815a1"
+    }
+  ],
+  "status": "TRAINED_AND_VERIFIED_RESEARCH_ONLY",
+  "runtime_parity": {
+    "status": "PASS",
+    "candidate_rows": 644000,
+    "queries": 6440,
+    "max_absolute_score_difference": 5.1514348342607263e-14,
+    "max_absolute_confidence_difference": 5.684341886080802e-14,
+    "all_runtime_results_abstain": true,
+    "singleton_runtime": "no confidence; no diagnostic acceptance",
+    "qualification": false
+  },
+  "artifacts": [
+    {
+      "path": "candidates/candidates.csv",
+      "bytes": 188506487,
+      "sha256": "ae3045b8353c674c65997f725da45fd6aaa5df32e1dbda7169c6565a35e9d988"
+    },
+    {
+      "path": "candidates/data_manifest.json",
+      "bytes": 9636,
+      "sha256": "b73a6c0f9a68886e0b78ff19fac19c10cca2d8b1df1bc4a380417d94eed8725a"
+    },
+    {
+      "path": "candidates/query_diagnostics.json",
+      "bytes": 909022,
+      "sha256": "ef87ba20fb15bc761f728905ee557cf457b0033910a8568df29215903cbbb025"
+    },
+    {
+      "path": "export.log",
+      "bytes": 4780,
+      "sha256": "71ecded0d3380ff8bc2c1faf5167e39b058e36bccc4da0c1d479c0ca4b3ff769"
+    },
+    {
+      "path": "fit.log",
+      "bytes": 134,
+      "sha256": "d0c3ee8fe2267debd6a00646d745c13bfbbe882781e6ec77ceea476dd47815a1"
+    },
+    {
+      "path": "runtime_parity.json",
+      "bytes": 323,
+      "sha256": "f1d0550090d76d2895bbc0e36c2ee4c45382dad1450d451600daae6c659089ec"
+    },
+    {
+      "path": "training/model.json",
+      "bytes": 17485,
+      "sha256": "9198d6374cf9df2e7ada2fdc8a8805f61392ff2861b65ce6e9fd5177f86d9439"
+    },
+    {
+      "path": "training/model.rds",
+      "bytes": 3066,
+      "sha256": "af2953da374e16ff6278e9e4ecbeb1ea592187658b2edc988c3f062fbae171a7"
+    },
+    {
+      "path": "training/predictions.csv",
+      "bytes": 32860276,
+      "sha256": "dd40faf91e1df23967fc5622a843215b89d93cbe081db5a89806a3dc29d6ef36"
+    },
+    {
+      "path": "training/query_metrics.csv",
+      "bytes": 1083799,
+      "sha256": "9de5b1a73c820f3382f18e0a8ea90b45fca1f9b44437fe7d3d779d8e5673e3f6"
+    },
+    {
+      "path": "training/report.json",
+      "bytes": 26850,
+      "sha256": "0b26aed311162966a6bf4c52c5a0ee8eac976508cd7224f34b3bef97d35c2f33"
+    }
+  ],
+  "elapsed_seconds": 101.53569602966309
+}

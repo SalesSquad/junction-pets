@@ -1,0 +1,86 @@
+{
+ "id": "f7f425c42530676bb5fef338bedd28e3b9284584b24980e8a6b96fe9c994209a",
+ "curriculum": "no_event",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas asioi yksityisessä terveydenhuollossa astman hoitolääkkeen reseptin uusimiseksi 15.10.2026. Edellinen lääkityksen seurantakäynti oli 13.7.2024. Anamneesissa on aiemmin hoidettu virtsarakon syöpä, joka on hoidettu ja päättynyt. Potilas voi hyvin, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Yleistä neuvontaa on annettu, eikä tässä yhteydessä ole syöpäepäilyä eikä uusia tutkimuksia.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:47 outside 60-140"
+    ],
+    "words": 47,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 883,
+      "total_tokens": 1037,
+      "completion_tokens": 154,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 3.29
+    }
+   ],
+   "repair_request": [
+    "The note has 47 words. Write 80 to 110 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas asioi yksityisessä terveydenhuollossa astman hoitolääkkeen reseptin uusimiseksi 15.10.2026. Edellinen lääkityksen seurantakäynti oli 13.7.2024. Anamneesissa on aiemmin hoidettu virtsarakon syöpä, joka on hoidettu ja päättynyt. Potilas voi hyvin, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Yleistä neuvontaa on annettu, eikä tässä yhteydessä ole syöpäepäilyä eikä uusia tutkimuksia. Potilaan vointia seurataan jatkossa tarvittaessa, ja hän saa ohjeita lääkkeen käyttöön. Yhteydenpito hoitajaan on sujunut hyvin, eikä oireita ole ilmennyt. Potilas on tyytyväinen hoitoon ja pärjää itsenäisesti kotona. Seuranta jatkuu sovitun suunnitelman mukaisesti, ja potilas osaa ottaa yhteyttä tarvittaessa.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 86,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "PRIVATE",
+     "events": []
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1117,
+      "total_tokens": 1377,
+      "completion_tokens": 260,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.12
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 848,
+      "total_tokens": 860,
+      "completion_tokens": 12,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.91
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:59+00:00"
+}

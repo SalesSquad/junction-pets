@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "commandId": "lens-arkit-native-20261114-02",
+  "sourceHead": "4d3dc8665b79b4ac99c290f3c6d9b734f0dca42a",
+  "startedAt": "2026-11-14T14:32:41.883107+00:00",
+  "cameraStarted": false,
+  "simulatorStarted": false,
+  "physicalDeviceUsed": false,
+  "phases": [
+    {
+      "name": "ios-core-module",
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+        "-swift-version",
+        "6",
+        "-parse-as-library",
+        "-emit-module",
+        "-target",
+        "arm64-apple-ios17.0",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.2.sdk",
+        "-module-cache-path",
+        "/Users/mikaelervamaa/Developer/lens-arkit-screen-context-proof-20261114-v2/ModuleCache",
+        "-module-name",
+        "ChibiLensCore",
+        "-emit-module-path",
+        "/Users/mikaelervamaa/Developer/lens-arkit-screen-context-proof-20261114-v2/iOSModules/ChibiLensCore.swiftmodule",
+        "/Users/mikaelervamaa/Developer/junction-meta-arkit-screen-context-20261114/apps/meta-lens-apple/Sources/ChibiLensCore/CaptureEpoch.swift",
+        "/Users/mikaelervamaa/Developer/junction-meta-arkit-screen-context-20261114/apps/meta-lens-apple/Sources/ChibiLensCore/Demo.swift",
+        "/Users/mikaelervamaa/Developer/junction-meta-arkit-screen-context-20261114/apps/meta-lens-apple/Sources/ChibiLensCore/Evidence.swift"
+      ],
+      "cwd": "/Users/mikaelervamaa/Developer/junction-meta-arkit-screen-context-20261114/apps/meta-lens-apple",
+      "timeoutSeconds": 180,
+      "elapsedSeconds": 4.582,
+      "exitCode": 0,
+      "stoppedReason": null,
+      "rawLog": "/Users/mikaelervamaa/Developer/lens-arkit-screen-context-proof-20261114-v2/ios-core-module.txt",
+      "rawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ios-arkit-module",
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+        "-swift-version",
+        "6",
+        "-parse-as-library",
+        "-emit-module",
+        "-target",
+        "arm64-apple-ios17.0",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.2.sdk",
+        "-module-cache-path",
+        "/Users/mikaelervamaa/Developer/lens-arkit-screen-context-proof-20261114-v2/ModuleCache",
+        "-I",
+        "/Users/mikaelervamaa/Developer/lens-arkit-screen-context-proof-20261114-v2/iOSModules",
+        "-module-name",
+        "ChibiLensARKit",
+        "-emit-module-path",
+        "/Users/mikaelervamaa/Developer/lens-arkit-screen-context-proof-20261114-v2/iOSModules/ChibiLensARKit.swiftmodule",
+        "/Users/mikaelervamaa/Developer/junction-meta-arkit-screen-context-20261114/apps/meta-lens-apple/Sources/ChibiLensARKit/PhoneSpatialCapture.swift",
+        "/Users/mikaelervamaa/Developer/junction-meta-arkit-screen-context-20261114/apps/meta-lens-apple/Sources/ChibiLensARKit/PhoneSpatialObservation.swift"
+      ],
+      "cwd": "/Users/mikaelervamaa/Developer/junction-meta-arkit-screen-context-20261114/apps/meta-lens-apple",
+      "timeoutSeconds": 180,
+      "elapsedSeconds": 13.753,
+      "exitCode": 0,
+      "stoppedReason": null,
+      "rawLog": "/Users/mikaelervamaa/Developer/lens-arkit-screen-context-proof-20261114-v2/ios-arkit-module.txt",
+      "rawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "macos-observation-tests",
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift",
+        "test",
+        "--package-path",
+        "/Users/mikaelervamaa/Developer/junction-meta-arkit-screen-context-20261114/apps/meta-lens-apple",
+        "--scratch-path",
+        "/Users/mikaelervamaa/Developer/lens-arkit-screen-context-proof-20261114-v2/SwiftPM",
+        "--jobs",
+        "1",
+        "--filter",
+        "PhoneSpatialObservationTests"
+      ],
+      "cwd": "/Users/mikaelervamaa/Developer/junction-meta-arkit-screen-context-20261114/apps/meta-lens-apple",
+      "timeoutSeconds": 300,
+      "elapsedSeconds": 74.104,
+      "exitCode": 0,
+      "stoppedReason": null,
+      "rawLog": "/Users/mikaelervamaa/Developer/lens-arkit-screen-context-proof-20261114-v2/macos-observation-tests.txt",
+      "rawLogSha256": "e4eb7f4e0756863f317dccbc9d3dbef9ec5599eaf071af504f594e9bf61b9546"
+    }
+  ],
+  "result": "PASS",
+  "dirtyBefore": "",
+  "sourceFilesSha256": {
+    "Sources/ChibiLensARKit/PhoneSpatialCapture.swift": "5187717fd6a68d9ec70347b4ee5f04453cbf840b11a189109ab209437ca5caaa",
+    "Sources/ChibiLensARKit/PhoneSpatialObservation.swift": "95ecb5225851aab186483e41dfab10e6bb43971a62ca4784fa160676dcec3dd6",
+    "Tests/ChibiLensARKitTests/PhoneSpatialObservationTests.swift": "3ea93eb308c00d0e9b2e3a7a87fc40c5ee75043f38cbb49fb61d35bff531b4d3",
+    "Package.swift": "a0b5078864a55e0b2d8437569b77c9432a85eae56c6a71d3f7d5284b1938e103"
+  },
+  "runnerSha256": "facea1f89f6d7fdecf03b4c2ac0d7f982d7d4c5e32e3be939952005e2fcd7198",
+  "initialFreeGiB": 23.748,
+  "nativeAdmissionCandidates": [
+    {
+      "pid": 37519,
+      "executableBasename": "node",
+      "native": false
+    }
+  ],
+  "xcode": "Xcode 27.2\nBuild version 27B52",
+  "swift": "Apple Swift version 6.4.2 (swiftlang-6.4.2.1.9 clang-2100.4.1.1)\nTarget: arm64-apple-macosx27.3.0",
+  "sdk": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS27.2.sdk",
+  "environment": {
+    "DEVELOPER_DIR": "/Applications/Xcode.app/Contents/Developer",
+    "target": "arm64-apple-ios17.0",
+    "nativeJobs": 1
+  },
+  "artifactSha256": {
+    "iOSModules/ChibiLensARKit.abi.json": "4277ac6b49f8511196028a5ac20f5b1b1dfa754c24615d34068089f0b1739728",
+    "iOSModules/ChibiLensARKit.swiftdoc": "a7ec0c3d4b3500ae488e9473f977f320bb2923cd6eb59b1aee72826ededd22c5",
+    "iOSModules/ChibiLensARKit.swiftmodule": "a5d0b6d5e6c0e406dda578d681beaec67a6d1108d99c383026fcf5fec11d4200",
+    "iOSModules/ChibiLensARKit.swiftsourceinfo": "9d1fb859b3cefe2541623253a66618b8952764cfc19499d22c7d7792a7a61908",
+    "iOSModules/ChibiLensCore.abi.json": "4277ac6b49f8511196028a5ac20f5b1b1dfa754c24615d34068089f0b1739728",
+    "iOSModules/ChibiLensCore.swiftdoc": "fc5902c09c351a40f5cd6ad31228588acba8316fc47c51e735b3c8e6b701bae8",
+    "iOSModules/ChibiLensCore.swiftmodule": "26eba034e8570feac1c56582ef6d2d79935b54ab258a4012447d1e753490092d",
+    "iOSModules/ChibiLensCore.swiftsourceinfo": "200bb874e24a2299e2e631c333c8e6feb1a3c26730face4b2c441901eda2c2fa"
+  },
+  "headAfter": "4d3dc8665b79b4ac99c290f3c6d9b734f0dca42a",
+  "dirtyAfter": "",
+  "completedAt": "2026-11-14T14:34:16.226274+00:00",
+  "finalFreeGiB": 23.361
+}

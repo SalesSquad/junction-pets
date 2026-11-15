@@ -1,0 +1,70 @@
+{
+ "id": "2ca6f483eb9ff1ea76605a24c643a008cdb2b91590d75846e7e8766ae4cdc846",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on saapunut vastaanotolle yksityisessä terveydenhuollossa. Syöpäpolun tuloreitti on yksityinen terveydenhuolto. Ensimmäinen yhteydenotto terveydenhuoltoon tapahtui huhtikuussa 2024, jolloin yhteyteen otti yksityisen lääkäriaseman hoitaja eikä lääkäri tutkinut potilasta. Erikoislääkärikäynti erikoissairaanhoidossa oli 107 päivää sitten. Moniammatillinen hoitopäätös hoidosta tehtiin 5 viikkoa sitten. Tuleva kontrolliaika, joka ei ole vielä toteutunut, on 7.5.2025. Syntymäaika on 20.2.1995. Potilas voi hyvin, toimintakyky on säilynyt ja kotona pärjääminen sujuu. Neuvoa ja tukea on annettu.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 67,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2024-04-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2024-11-24",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-02-04",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 838,
+      "total_tokens": 1063,
+      "completion_tokens": 225,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.53
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 813,
+      "total_tokens": 904,
+      "completion_tokens": 91,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.63
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:58+00:00"
+}

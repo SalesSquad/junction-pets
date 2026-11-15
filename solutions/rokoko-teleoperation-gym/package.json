@@ -1,0 +1,13 @@
+{
+  "name": "@junction/motionbridge-studio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Offline teleoperation demonstration gym with fail-closed replay",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "demo": "node cli.mjs --episode fixtures/episodes.json",
+    "serve": "python3 -m http.server 8765"
+  },
+  "engines": { "node": ">=20" }
+}

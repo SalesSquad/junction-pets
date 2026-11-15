@@ -1,0 +1,3862 @@
+{
+  "at": "2026-11-14T11:08:59.118Z",
+  "providers": [
+    "typesafe-jev"
+  ],
+  "A_typesafe-jev": {
+    "fields": {
+      "states_rule": {
+        "kLH": 0.747675962815405,
+        "kLG": 0.4033550946202792,
+        "kHG": 0.5579082077831423,
+        "consensusN": 300,
+        "consensusHit": 259
+      },
+      "source_type": {
+        "kLH": 0.928366086997502,
+        "kLG": 0.8401673354780771,
+        "kHG": 0.8098098098098098,
+        "consensusN": 336,
+        "consensusHit": 332
+      },
+      "contradicts": {
+        "kLH": 0.13943161634103024,
+        "kLG": 0.10568383658969797,
+        "kHG": 0.3226381461675623,
+        "consensusN": 372,
+        "consensusHit": 324
+      },
+      "jurisdiction_match": {
+        "kLH": 0,
+        "kLG": 1,
+        "kHG": 0,
+        "consensusN": 372,
+        "consensusHit": 372
+      }
+    },
+    "allowlist": {
+      "tp": 154,
+      "fp": 0,
+      "fn": 34,
+      "tn": 148
+    },
+    "judge": {
+      "tp": 188,
+      "fp": 1,
+      "fn": 0,
+      "tn": 147
+    },
+    "both": {
+      "tp": 188,
+      "fp": 1,
+      "fn": 0,
+      "tn": 147
+    },
+    "vetoed": {
+      "tp": 154,
+      "fp": 0,
+      "fn": 34,
+      "tn": 148
+    },
+    "allowFp": [],
+    "judgeOnly": [
+      "www.gdpr.org",
+      "santaclara.courts.ca.gov",
+      "regelex.com",
+      "codes.findlaw.com",
+      "codes.findlaw.com",
+      "newyork.public.law",
+      "lexecor.com",
+      "regelex.com",
+      "caselaw.findlaw.com",
+      "www.courtlistener.com",
+      "regelex.com",
+      "www.transportation.gov",
+      "consumerlawlibrary.org",
+      "sip.lex.pl",
+      "www.efta.int",
+      "www.efta.int",
+      "www.courtlistener.com",
+      "codes.findlaw.com",
+      "codes.findlaw.com",
+      "newyork.public.law",
+      "newyork.public.law",
+      "www.courtlistener.com",
+      "exa.ai",
+      "codes.findlaw.com",
+      "newyork.public.law",
+      "codes.findlaw.com",
+      "codes.findlaw.com",
+      "www.courtlistener.com",
+      "eur-lex.europa.eu",
+      "service.betterregulation.com",
+      "www.nationaltransport.ie",
+      "www.federalreserve.gov",
+      "www.ssa.gov",
+      "codes.findlaw.com",
+      "regelex.com"
+    ],
+    "brier": 0.04742398753894078,
+    "baseRateBrier": 0.2132937374443183,
+    "n": 380,
+    "labels": {
+      "0": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.34,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "1": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "2": {
+        "states_rule": "yes",
+        "p_yes": 0.86,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "3": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "4": {
+        "states_rule": "partial",
+        "p_yes": 0.27,
+        "contradicts": false,
+        "p_contra": 0.21,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "5": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.18,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "6": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "7": {
+        "states_rule": "yes",
+        "p_yes": 0.88,
+        "contradicts": false,
+        "p_contra": 0.22,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "8": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.12,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "9": {
+        "states_rule": "yes",
+        "p_yes": 0.96,
+        "contradicts": false,
+        "p_contra": 0.16,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "10": {
+        "states_rule": "partial",
+        "p_yes": 0.18,
+        "contradicts": false,
+        "p_contra": 0.21,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "11": {
+        "states_rule": "partial",
+        "p_yes": 0.03,
+        "contradicts": true,
+        "p_contra": 0.77,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "12": {
+        "states_rule": "no",
+        "p_yes": 0.02,
+        "contradicts": true,
+        "p_contra": 0.74,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "13": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.03,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "14": {
+        "states_rule": "partial",
+        "p_yes": 0.41,
+        "contradicts": false,
+        "p_contra": 0.21,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "15": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "16": {
+        "states_rule": "yes",
+        "p_yes": 0.49,
+        "contradicts": false,
+        "p_contra": 0.5,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "17": {
+        "states_rule": "no",
+        "p_yes": 0.03,
+        "contradicts": true,
+        "p_contra": 0.82,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "18": {
+        "states_rule": "yes",
+        "p_yes": 0.94,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "19": {
+        "states_rule": "yes",
+        "p_yes": 0.54,
+        "contradicts": false,
+        "p_contra": 0.42,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "20": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.33,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "21": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.38,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "22": {
+        "states_rule": "yes",
+        "p_yes": 0.51,
+        "contradicts": true,
+        "p_contra": 0.8,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "23": {
+        "states_rule": "partial",
+        "p_yes": 0.04,
+        "contradicts": false,
+        "p_contra": 0.5,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "24": {
+        "states_rule": "partial",
+        "p_yes": 0.19,
+        "contradicts": false,
+        "p_contra": 0.22,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "25": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": true,
+        "p_contra": 0.75,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "26": {
+        "states_rule": "yes",
+        "p_yes": 0.94,
+        "contradicts": false,
+        "p_contra": 0.17,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "27": {
+        "states_rule": "partial",
+        "p_yes": 0.47,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "28": {
+        "states_rule": "yes",
+        "p_yes": 0.91,
+        "contradicts": false,
+        "p_contra": 0.27,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "29": {
+        "states_rule": "yes",
+        "p_yes": 0.64,
+        "contradicts": true,
+        "p_contra": 0.73,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "30": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.23,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "31": {
+        "states_rule": "partial",
+        "p_yes": 0.1,
+        "contradicts": false,
+        "p_contra": 0.31,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "32": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "33": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "34": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": false,
+        "p_contra": 0.21,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "35": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": false,
+        "p_contra": 0.31,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "36": {
+        "states_rule": "yes",
+        "p_yes": 0.86,
+        "contradicts": false,
+        "p_contra": 0.24,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "37": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.2,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "38": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "39": {
+        "states_rule": "yes",
+        "p_yes": 0.73,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "40": {
+        "states_rule": "yes",
+        "p_yes": 0.81,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "41": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "42": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": true,
+        "p_contra": 0.61,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "43": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "44": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "45": {
+        "states_rule": "yes",
+        "p_yes": 0.94,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "46": {
+        "states_rule": "yes",
+        "p_yes": 0.66,
+        "contradicts": false,
+        "p_contra": 0.16,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "47": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "48": {
+        "states_rule": "yes",
+        "p_yes": 0.69,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "49": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": true,
+        "p_contra": 0.84,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "50": {
+        "states_rule": "partial",
+        "p_yes": 0.16,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "51": {
+        "states_rule": "no",
+        "p_yes": 0.04,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "52": {
+        "states_rule": "yes",
+        "p_yes": 0.52,
+        "contradicts": false,
+        "p_contra": 0.08,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "53": {
+        "states_rule": "partial",
+        "p_yes": 0.14,
+        "contradicts": true,
+        "p_contra": 0.67,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "54": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": false,
+        "p_contra": 0.22,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "55": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "56": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": true,
+        "p_contra": 0.65,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "57": {
+        "states_rule": "partial",
+        "p_yes": 0.15,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "58": {
+        "states_rule": "partial",
+        "p_yes": 0.04,
+        "contradicts": true,
+        "p_contra": 0.87,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "59": {
+        "states_rule": "yes",
+        "p_yes": 0.56,
+        "contradicts": false,
+        "p_contra": 0.33,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "60": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "61": {
+        "states_rule": "yes",
+        "p_yes": 0.86,
+        "contradicts": false,
+        "p_contra": 0.26,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "62": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.03,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "63": {
+        "states_rule": "partial",
+        "p_yes": 0.09,
+        "contradicts": false,
+        "p_contra": 0.36,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "64": {
+        "states_rule": "partial",
+        "p_yes": 0.03,
+        "contradicts": true,
+        "p_contra": 0.68,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "65": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "66": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": true,
+        "p_contra": 0.67,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "67": {
+        "states_rule": "yes",
+        "p_yes": 0.57,
+        "contradicts": true,
+        "p_contra": 0.51,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "68": {
+        "states_rule": "yes",
+        "p_yes": 0.9,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "69": {
+        "states_rule": "yes",
+        "p_yes": 0.94,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "70": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "71": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "72": {
+        "states_rule": "yes",
+        "p_yes": 0.96,
+        "contradicts": false,
+        "p_contra": 0.15,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "73": {
+        "states_rule": "yes",
+        "p_yes": 0.88,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "74": {
+        "states_rule": "yes",
+        "p_yes": 0.7,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "75": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.12,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "76": {
+        "states_rule": "yes",
+        "p_yes": 0.82,
+        "contradicts": false,
+        "p_contra": 0.16,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "77": {
+        "states_rule": "yes",
+        "p_yes": 0.81,
+        "contradicts": true,
+        "p_contra": 0.75,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "78": {
+        "states_rule": "partial",
+        "p_yes": 0.34,
+        "contradicts": true,
+        "p_contra": 0.76,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "79": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "80": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "81": {
+        "states_rule": "yes",
+        "p_yes": 0.55,
+        "contradicts": true,
+        "p_contra": 0.68,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "82": {
+        "states_rule": "yes",
+        "p_yes": 0.94,
+        "contradicts": false,
+        "p_contra": 0.33,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "83": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "84": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.36,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "85": {
+        "states_rule": "yes",
+        "p_yes": 0.75,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "86": {
+        "states_rule": "yes",
+        "p_yes": 0.89,
+        "contradicts": false,
+        "p_contra": 0.08,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "87": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "88": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.18,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "89": {
+        "states_rule": "partial",
+        "p_yes": 0.26,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "90": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "91": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.33,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "92": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "93": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.02,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "94": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.16,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "95": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.4,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "96": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "97": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "98": {
+        "states_rule": "yes",
+        "p_yes": 0.76,
+        "contradicts": false,
+        "p_contra": 0.32,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "99": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "100": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "101": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "102": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "103": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.31,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "104": {
+        "states_rule": "yes",
+        "p_yes": 0.63,
+        "contradicts": true,
+        "p_contra": 0.55,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "105": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "106": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "107": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "108": {
+        "states_rule": "partial",
+        "p_yes": 0.26,
+        "contradicts": false,
+        "p_contra": 0.39,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "109": {
+        "states_rule": "yes",
+        "p_yes": 0.92,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "110": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.37,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "111": {
+        "states_rule": "yes",
+        "p_yes": 0.89,
+        "contradicts": false,
+        "p_contra": 0.25,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "112": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "113": {
+        "states_rule": "yes",
+        "p_yes": 0.78,
+        "contradicts": true,
+        "p_contra": 0.85,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "114": {
+        "states_rule": "yes",
+        "p_yes": 0.88,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "115": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "116": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.17,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "117": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "118": {
+        "states_rule": "yes",
+        "p_yes": 0.67,
+        "contradicts": false,
+        "p_contra": 0.46,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "119": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.4,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "120": {
+        "states_rule": "partial",
+        "p_yes": 0.12,
+        "contradicts": false,
+        "p_contra": 0.22,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "121": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.24,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "122": {
+        "states_rule": "yes",
+        "p_yes": 0.94,
+        "contradicts": true,
+        "p_contra": 0.6,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "123": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.03,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "124": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "125": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.24,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "126": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": true,
+        "p_contra": 0.71,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "127": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "128": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "129": {
+        "states_rule": "partial",
+        "p_yes": 0.38,
+        "contradicts": false,
+        "p_contra": 0.45,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "130": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.38,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "131": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "132": {
+        "states_rule": "yes",
+        "p_yes": 0.75,
+        "contradicts": false,
+        "p_contra": 0.19,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "133": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "134": {
+        "states_rule": "yes",
+        "p_yes": 0.96,
+        "contradicts": false,
+        "p_contra": 0.12,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "135": {
+        "states_rule": "partial",
+        "p_yes": 0.44,
+        "contradicts": false,
+        "p_contra": 0.24,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "136": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "137": {
+        "states_rule": "yes",
+        "p_yes": 0.63,
+        "contradicts": false,
+        "p_contra": 0.46,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "138": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "139": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "140": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": true,
+        "p_contra": 0.87,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "141": {
+        "states_rule": "yes",
+        "p_yes": 0.82,
+        "contradicts": true,
+        "p_contra": 0.59,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "142": {
+        "states_rule": "partial",
+        "p_yes": 0.06,
+        "contradicts": true,
+        "p_contra": 0.83,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "143": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "144": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "145": {
+        "states_rule": "partial",
+        "p_yes": 0.04,
+        "contradicts": true,
+        "p_contra": 0.7,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "146": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.27,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "147": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "148": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "149": {
+        "states_rule": "yes",
+        "p_yes": 0.68,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "150": {
+        "states_rule": "yes",
+        "p_yes": 0.9,
+        "contradicts": false,
+        "p_contra": 0.23,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "151": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "152": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "153": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "154": {
+        "states_rule": "yes",
+        "p_yes": 0.8,
+        "contradicts": false,
+        "p_contra": 0.16,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "155": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "156": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.33,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "157": {
+        "states_rule": "partial",
+        "p_yes": 0.38,
+        "contradicts": false,
+        "p_contra": 0.19,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "158": {
+        "states_rule": "yes",
+        "p_yes": 0.94,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "159": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "160": {
+        "states_rule": "partial",
+        "p_yes": 0.21,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "161": {
+        "states_rule": "partial",
+        "p_yes": 0.04,
+        "contradicts": true,
+        "p_contra": 0.63,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "162": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "163": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.19,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "164": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "165": {
+        "states_rule": "yes",
+        "p_yes": 0.96,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "166": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.08,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "167": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "168": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "169": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.12,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "170": {
+        "states_rule": "yes",
+        "p_yes": 0.95,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "171": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "172": {
+        "states_rule": "yes",
+        "p_yes": 0.78,
+        "contradicts": false,
+        "p_contra": 0.16,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "173": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.12,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "174": {
+        "states_rule": "yes",
+        "p_yes": 0.62,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "175": {
+        "states_rule": "yes",
+        "p_yes": 0.66,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "176": {
+        "states_rule": "partial",
+        "p_yes": 0.21,
+        "contradicts": false,
+        "p_contra": 0.22,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "177": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.15,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "178": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "179": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "180": {
+        "states_rule": "partial",
+        "p_yes": 0.23,
+        "contradicts": true,
+        "p_contra": 0.58,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "181": {
+        "states_rule": "yes",
+        "p_yes": 0.75,
+        "contradicts": false,
+        "p_contra": 0.3,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "182": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.41,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "183": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": true,
+        "p_contra": 0.66,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "184": {
+        "states_rule": "yes",
+        "p_yes": 0.72,
+        "contradicts": false,
+        "p_contra": 0.26,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "185": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.03,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "186": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.03,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "187": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.41,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "188": {
+        "states_rule": "yes",
+        "p_yes": 0.93,
+        "contradicts": false,
+        "p_contra": 0.08,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "189": {
+        "states_rule": "yes",
+        "p_yes": 0.94,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "190": {
+        "states_rule": "yes",
+        "p_yes": 0.77,
+        "contradicts": true,
+        "p_contra": 0.64,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "191": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "192": {
+        "states_rule": "partial",
+        "p_yes": 0.04,
+        "contradicts": true,
+        "p_contra": 0.6,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "193": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.17,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "194": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.16,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "195": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "196": {
+        "states_rule": "partial",
+        "p_yes": 0.11,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "197": {
+        "states_rule": "partial",
+        "p_yes": 0.08,
+        "contradicts": false,
+        "p_contra": 0.47,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "198": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "199": {
+        "states_rule": "yes",
+        "p_yes": 0.61,
+        "contradicts": true,
+        "p_contra": 0.8,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "200": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "201": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": true,
+        "p_contra": 0.55,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "202": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "203": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "204": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": true,
+        "p_contra": 0.82,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "205": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "206": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "207": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.21,
+        "source_type": "other",
+        "jurisdiction_match": true
+      },
+      "208": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": true,
+        "p_contra": 0.57,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "209": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "210": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "211": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "212": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "213": {
+        "states_rule": "yes",
+        "p_yes": 0.94,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "214": {
+        "states_rule": "partial",
+        "p_yes": 0.27,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "215": {
+        "states_rule": "partial",
+        "p_yes": 0.03,
+        "contradicts": true,
+        "p_contra": 0.71,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "216": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "217": {
+        "states_rule": "yes",
+        "p_yes": 0.52,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "218": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "219": {
+        "states_rule": "yes",
+        "p_yes": 0.95,
+        "contradicts": false,
+        "p_contra": 0.25,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "220": {
+        "states_rule": "yes",
+        "p_yes": 0.93,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "221": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "222": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.43,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "223": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "224": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "225": {
+        "states_rule": "yes",
+        "p_yes": 0.92,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "226": {
+        "states_rule": "yes",
+        "p_yes": 0.62,
+        "contradicts": false,
+        "p_contra": 0.44,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "227": {
+        "states_rule": "yes",
+        "p_yes": 0.81,
+        "contradicts": false,
+        "p_contra": 0.12,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "228": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "229": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.15,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "230": {
+        "states_rule": "yes",
+        "p_yes": 0.68,
+        "contradicts": true,
+        "p_contra": 0.89,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "231": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.26,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "232": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": true,
+        "p_contra": 0.62,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "233": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.37,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "234": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.08,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "235": {
+        "states_rule": "yes",
+        "p_yes": 0.71,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "236": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "237": {
+        "states_rule": "yes",
+        "p_yes": 0.93,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "238": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.03,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "239": {
+        "states_rule": "yes",
+        "p_yes": 0.95,
+        "contradicts": false,
+        "p_contra": 0.4,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "240": {
+        "states_rule": "yes",
+        "p_yes": 0.7,
+        "contradicts": false,
+        "p_contra": 0.41,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "241": {
+        "states_rule": "yes",
+        "p_yes": 0.79,
+        "contradicts": false,
+        "p_contra": 0.32,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "242": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": true,
+        "p_contra": 0.57,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "243": {
+        "states_rule": "partial",
+        "p_yes": 0.42,
+        "contradicts": true,
+        "p_contra": 0.68,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "244": {
+        "states_rule": "yes",
+        "p_yes": 0.89,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "245": {
+        "states_rule": "yes",
+        "p_yes": 0.59,
+        "contradicts": true,
+        "p_contra": 0.89,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "246": {
+        "states_rule": "yes",
+        "p_yes": 0.93,
+        "contradicts": false,
+        "p_contra": 0.19,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "247": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.12,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "248": {
+        "states_rule": "yes",
+        "p_yes": 0.8,
+        "contradicts": false,
+        "p_contra": 0.18,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "249": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "250": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "251": {
+        "states_rule": "yes",
+        "p_yes": 0.79,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "252": {
+        "states_rule": "yes",
+        "p_yes": 0.95,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "253": {
+        "states_rule": "yes",
+        "p_yes": 0.96,
+        "contradicts": false,
+        "p_contra": 0.18,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "254": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.12,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "255": {
+        "states_rule": "partial",
+        "p_yes": 0.13,
+        "contradicts": true,
+        "p_contra": 0.56,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "256": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.03,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "257": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.49,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "258": {
+        "states_rule": "partial",
+        "p_yes": 0.09,
+        "contradicts": false,
+        "p_contra": 0.24,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "259": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "260": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": false,
+        "p_contra": 0.16,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "261": {
+        "states_rule": "yes",
+        "p_yes": 0.94,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "262": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.17,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "263": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "264": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.5,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "265": {
+        "states_rule": "no",
+        "p_yes": 0.05,
+        "contradicts": false,
+        "p_contra": 0.33,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "266": {
+        "states_rule": "yes",
+        "p_yes": 0.89,
+        "contradicts": false,
+        "p_contra": 0.28,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "267": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.18,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "268": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.15,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "269": {
+        "states_rule": "partial",
+        "p_yes": 0.1,
+        "contradicts": true,
+        "p_contra": 0.6,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "270": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "271": {
+        "states_rule": "partial",
+        "p_yes": 0.24,
+        "contradicts": false,
+        "p_contra": 0.16,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "272": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.33,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "273": {
+        "states_rule": "yes",
+        "p_yes": 0.83,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "274": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "275": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.2,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "276": {
+        "states_rule": "yes",
+        "p_yes": 0.75,
+        "contradicts": false,
+        "p_contra": 0.18,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "277": {
+        "states_rule": "yes",
+        "p_yes": 0.55,
+        "contradicts": false,
+        "p_contra": 0.18,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "278": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.2,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "279": {
+        "states_rule": "no",
+        "p_yes": 0.02,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "280": {
+        "states_rule": "yes",
+        "p_yes": 0.75,
+        "contradicts": false,
+        "p_contra": 0.17,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "281": {
+        "states_rule": "yes",
+        "p_yes": 0.72,
+        "contradicts": false,
+        "p_contra": 0.44,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "282": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.2,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "283": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": true,
+        "p_contra": 0.53,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "284": {
+        "states_rule": "partial",
+        "p_yes": 0.42,
+        "contradicts": false,
+        "p_contra": 0.45,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "285": {
+        "states_rule": "yes",
+        "p_yes": 0.87,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "286": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": true,
+        "p_contra": 0.73,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "287": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "288": {
+        "states_rule": "yes",
+        "p_yes": 0.93,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "289": {
+        "states_rule": "yes",
+        "p_yes": 0.88,
+        "contradicts": false,
+        "p_contra": 0.19,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "290": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.36,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "291": {
+        "states_rule": "yes",
+        "p_yes": 0.96,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "292": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.03,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "293": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "294": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "295": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.5,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "296": {
+        "states_rule": "no",
+        "p_yes": 0.02,
+        "contradicts": false,
+        "p_contra": 0.19,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "297": {
+        "states_rule": "partial",
+        "p_yes": 0.34,
+        "contradicts": false,
+        "p_contra": 0.2,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "298": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": true,
+        "p_contra": 0.59,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "299": {
+        "states_rule": "partial",
+        "p_yes": 0.26,
+        "contradicts": false,
+        "p_contra": 0.2,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "300": {
+        "states_rule": "yes",
+        "p_yes": 0.86,
+        "contradicts": false,
+        "p_contra": 0.15,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "301": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.08,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "302": {
+        "states_rule": "yes",
+        "p_yes": 0.85,
+        "contradicts": false,
+        "p_contra": 0.43,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "303": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.03,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "304": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": false,
+        "p_contra": 0.3,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "305": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": true,
+        "p_contra": 0.62,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "306": {
+        "states_rule": "yes",
+        "p_yes": 0.91,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "307": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": true,
+        "p_contra": 0.51,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "308": {
+        "states_rule": "partial",
+        "p_yes": 0.05,
+        "contradicts": true,
+        "p_contra": 0.88,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "309": {
+        "states_rule": "partial",
+        "p_yes": 0.43,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "310": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.45,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "311": {
+        "states_rule": "yes",
+        "p_yes": 0.88,
+        "contradicts": false,
+        "p_contra": 0.27,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "312": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "313": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "314": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "315": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.24,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "316": {
+        "states_rule": "yes",
+        "p_yes": 0.96,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "317": {
+        "states_rule": "no",
+        "p_yes": 0.04,
+        "contradicts": true,
+        "p_contra": 0.71,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "318": {
+        "states_rule": "yes",
+        "p_yes": 0.73,
+        "contradicts": false,
+        "p_contra": 0.24,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "319": {
+        "states_rule": "partial",
+        "p_yes": 0.19,
+        "contradicts": false,
+        "p_contra": 0.12,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "320": {
+        "states_rule": "yes",
+        "p_yes": 0.9,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "321": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.33,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "322": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "323": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.1,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "324": {
+        "states_rule": "partial",
+        "p_yes": 0.37,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "325": {
+        "states_rule": "partial",
+        "p_yes": 0.03,
+        "contradicts": true,
+        "p_contra": 0.63,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "326": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.08,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "327": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.15,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "328": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "329": {
+        "states_rule": "no",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.03,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "330": {
+        "states_rule": "partial",
+        "p_yes": 0.11,
+        "contradicts": false,
+        "p_contra": 0.2,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "331": {
+        "states_rule": "yes",
+        "p_yes": 0.73,
+        "contradicts": false,
+        "p_contra": 0.19,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "332": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.17,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "333": {
+        "states_rule": "yes",
+        "p_yes": 0.86,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "334": {
+        "states_rule": "yes",
+        "p_yes": 0.76,
+        "contradicts": false,
+        "p_contra": 0.21,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "335": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "336": {
+        "states_rule": "yes",
+        "p_yes": 0.8,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "337": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "338": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.3,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "339": {
+        "states_rule": "yes",
+        "p_yes": 0.92,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "340": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.15,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "341": {
+        "states_rule": "yes",
+        "p_yes": 0.79,
+        "contradicts": true,
+        "p_contra": 0.63,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "342": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.11,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "343": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": false,
+        "p_contra": 0.16,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "344": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "345": {
+        "states_rule": "partial",
+        "p_yes": 0.03,
+        "contradicts": false,
+        "p_contra": 0.26,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "346": {
+        "states_rule": "yes",
+        "p_yes": 0.95,
+        "contradicts": false,
+        "p_contra": 0.2,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "347": {
+        "states_rule": "partial",
+        "p_yes": 0.12,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "348": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "349": {
+        "states_rule": "yes",
+        "p_yes": 0.91,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "350": {
+        "states_rule": "partial",
+        "p_yes": 0.37,
+        "contradicts": true,
+        "p_contra": 0.76,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "351": {
+        "states_rule": "partial",
+        "p_yes": 0.04,
+        "contradicts": true,
+        "p_contra": 0.59,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "352": {
+        "states_rule": "yes",
+        "p_yes": 0.9,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "353": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.06,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "354": {
+        "states_rule": "yes",
+        "p_yes": 1,
+        "contradicts": false,
+        "p_contra": 0.07,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "355": {
+        "states_rule": "no",
+        "p_yes": 0.06,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "356": {
+        "states_rule": "yes",
+        "p_yes": 0.89,
+        "contradicts": true,
+        "p_contra": 0.62,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "357": {
+        "states_rule": "yes",
+        "p_yes": 0.81,
+        "contradicts": false,
+        "p_contra": 0.15,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "358": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.05,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "359": {
+        "states_rule": "yes",
+        "p_yes": 0.99,
+        "contradicts": false,
+        "p_contra": 0.09,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "360": {
+        "states_rule": "partial",
+        "p_yes": 0.03,
+        "contradicts": true,
+        "p_contra": 0.69,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "361": {
+        "states_rule": "partial",
+        "p_yes": 0.33,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "362": {
+        "states_rule": "yes",
+        "p_yes": 0.68,
+        "contradicts": false,
+        "p_contra": 0.25,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "363": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "secondary",
+        "jurisdiction_match": true
+      },
+      "364": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.13,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "365": {
+        "states_rule": "partial",
+        "p_yes": 0.23,
+        "contradicts": false,
+        "p_contra": 0.49,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "366": {
+        "states_rule": "yes",
+        "p_yes": 0.85,
+        "contradicts": false,
+        "p_contra": 0.12,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "367": {
+        "states_rule": "yes",
+        "p_yes": 0.97,
+        "contradicts": false,
+        "p_contra": 0.26,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "368": {
+        "states_rule": "yes",
+        "p_yes": 0.96,
+        "contradicts": false,
+        "p_contra": 0.23,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "369": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.22,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "370": {
+        "states_rule": "partial",
+        "p_yes": 0.2,
+        "contradicts": false,
+        "p_contra": 0.2,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "371": {
+        "states_rule": "yes",
+        "p_yes": 0.88,
+        "contradicts": false,
+        "p_contra": 0.37,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "372": {
+        "states_rule": "partial",
+        "p_yes": 0.14,
+        "contradicts": false,
+        "p_contra": 0.14,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "373": {
+        "states_rule": "partial",
+        "p_yes": 0.02,
+        "contradicts": false,
+        "p_contra": 0.21,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "374": {
+        "states_rule": "yes",
+        "p_yes": 0.9,
+        "contradicts": false,
+        "p_contra": 0.21,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "375": {
+        "states_rule": "partial",
+        "p_yes": 0.08,
+        "contradicts": false,
+        "p_contra": 0.22,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      },
+      "376": {
+        "states_rule": "partial",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.48,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "377": {
+        "states_rule": "partial",
+        "p_yes": 0.01,
+        "contradicts": false,
+        "p_contra": 0.28,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "378": {
+        "states_rule": "no",
+        "p_yes": 0,
+        "contradicts": false,
+        "p_contra": 0.04,
+        "source_type": "legal_text",
+        "jurisdiction_match": true
+      },
+      "379": {
+        "states_rule": "yes",
+        "p_yes": 0.98,
+        "contradicts": false,
+        "p_contra": 0.17,
+        "source_type": "official_guidance",
+        "jurisdiction_match": true
+      }
+    }
+  },
+  "B_typesafe-jev": {
+    "n": 18,
+    "heurOk": 14,
+    "combinedOk": 14,
+    "judgeOk": 11,
+    "fixed": 1,
+    "broken": 1,
+    "abstained": 5,
+    "heurCover": 15,
+    "unionCover": 15
+  },
+  "C_typesafe-jev": {
+    "tp": 12,
+    "injections": 12,
+    "fpNeg": 0,
+    "negatives": 8,
+    "fpReal": 0,
+    "real": 90,
+    "synthP": [
+      0.99,
+      0.99,
+      0.99,
+      0.99,
+      0.99,
+      0.99,
+      0.97,
+      0.98,
+      0.99,
+      0.99,
+      0.99,
+      0.99,
+      0.03,
+      0.23,
+      0.03,
+      0.05,
+      0.3,
+      0.03,
+      0.07,
+      0.04
+    ],
+    "realMaxP": 0.05
+  },
+  "D_typesafe-jev": {
+    "same": 49,
+    "n": 49,
+    "maxDiff": 0.10999999999999999
+  },
+  "tokens": {
+    "typesafe-jev": 536476
+  },
+  "ms": {
+    "typesafe-jev": [
+      243,
+      245,
+      249,
+      258,
+      258,
+      261,
+      265,
+      277,
+      225,
+      225,
+      220,
+      211,
+      193,
+      211,
+      205,
+      209,
+      151,
+      152,
+      153,
+      152,
+      159,
+      162,
+      176,
+      186,
+      159,
+      151,
+      165,
+      159,
+      169,
+      194,
+      187,
+      181,
+      201,
+      204,
+      207,
+      202,
+      173,
+      160,
+      206,
+      176,
+      147,
+      151,
+      155,
+      151,
+      164,
+      145,
+      156,
+      167,
+      150,
+      174,
+      171,
+      163,
+      182,
+      169,
+      174,
+      180,
+      206,
+      202,
+      189,
+      189,
+      197,
+      205,
+      188,
+      187,
+      156,
+      163,
+      174,
+      171,
+      175,
+      176,
+      187,
+      194,
+      167,
+      161,
+      153,
+      161,
+      162,
+      158,
+      171,
+      191,
+      198,
+      193,
+      190,
+      176,
+      199,
+      191,
+      212,
+      177,
+      153,
+      177,
+      176,
+      149,
+      197,
+      200,
+      202,
+      181,
+      164,
+      168,
+      165,
+      189,
+      177,
+      179,
+      191,
+      185,
+      204,
+      161,
+      158,
+      196,
+      152,
+      194,
+      147,
+      175,
+      159,
+      170,
+      170,
+      190,
+      189,
+      178,
+      183,
+      205,
+      149,
+      180,
+      173,
+      157,
+      185,
+      165,
+      190,
+      185,
+      176,
+      207,
+      152,
+      165,
+      140,
+      171,
+      179,
+      180,
+      166,
+      172,
+      172,
+      173,
+      184,
+      221,
+      167,
+      178,
+      178,
+      179,
+      180,
+      188,
+      190,
+      178,
+      178,
+      182,
+      180,
+      166,
+      180,
+      162,
+      163,
+      170,
+      216,
+      171,
+      158,
+      162,
+      158,
+      173,
+      201,
+      142,
+      170,
+      171,
+      163,
+      145,
+      166,
+      151,
+      164,
+      160,
+      186,
+      171,
+      200,
+      181,
+      183,
+      161,
+      170,
+      171,
+      191,
+      196,
+      154,
+      153,
+      161,
+      172,
+      171,
+      175,
+      170,
+      198,
+      156,
+      151,
+      161,
+      163,
+      162,
+      228,
+      152,
+      184,
+      203,
+      214,
+      199,
+      190,
+      160,
+      156,
+      187,
+      213,
+      160,
+      161,
+      160,
+      179,
+      171,
+      147,
+      155,
+      180,
+      156,
+      141,
+      146,
+      168,
+      176,
+      159,
+      172,
+      166,
+      212,
+      192,
+      201,
+      191,
+      208,
+      204,
+      162,
+      242,
+      164,
+      171,
+      171,
+      186,
+      191,
+      191,
+      213,
+      159,
+      171,
+      145,
+      165,
+      182,
+      170,
+      173,
+      201,
+      190,
+      190,
+      162,
+      185,
+      208,
+      178,
+      184,
+      171,
+      135,
+      156,
+      160,
+      173,
+      186,
+      183,
+      207,
+      163,
+      157,
+      151,
+      149,
+      178,
+      149,
+      158,
+      185,
+      157,
+      227,
+      194,
+      182,
+      173,
+      140,
+      213,
+      155,
+      160,
+      153,
+      164,
+      168,
+      176,
+      196,
+      204,
+      214,
+      231,
+      158,
+      163,
+      153,
+      142,
+      163,
+      194,
+      171,
+      168,
+      203,
+      198,
+      199,
+      179,
+      174,
+      182,
+      162,
+      202,
+      150,
+      165,
+      147,
+      164,
+      154,
+      175,
+      186,
+      171,
+      143,
+      154,
+      144,
+      179,
+      160,
+      185,
+      147,
+      215,
+      211,
+      191,
+      204,
+      195,
+      205,
+      168,
+      184,
+      187,
+      148,
+      151,
+      164,
+      165,
+      191,
+      161,
+      189,
+      259,
+      154,
+      166,
+      175,
+      149,
+      197,
+      185,
+      273,
+      219,
+      210,
+      164,
+      185,
+      308,
+      195,
+      169,
+      172,
+      254,
+      176,
+      164,
+      173,
+      184,
+      248,
+      148,
+      136,
+      156,
+      171,
+      171,
+      173,
+      195,
+      174,
+      207,
+      191,
+      207,
+      181,
+      189,
+      210,
+      200,
+      160,
+      162,
+      165,
+      171,
+      166,
+      209,
+      222,
+      164,
+      185,
+      139,
+      160,
+      158,
+      157,
+      159,
+      164,
+      171,
+      174,
+      177,
+      180,
+      191,
+      198,
+      269,
+      269,
+      270,
+      155,
+      158,
+      165,
+      165,
+      165,
+      168,
+      176,
+      216,
+      222,
+      222,
+      151,
+      151,
+      149,
+      154,
+      173,
+      171,
+      174,
+      208,
+      158,
+      159,
+      162,
+      137,
+      152,
+      188,
+      173,
+      204,
+      150,
+      138,
+      142,
+      209,
+      165,
+      165,
+      170,
+      208,
+      192,
+      193,
+      193,
+      161,
+      162,
+      169,
+      149,
+      157,
+      160,
+      163,
+      185,
+      168,
+      170,
+      175,
+      175,
+      187,
+      191,
+      150,
+      149,
+      152,
+      152,
+      174,
+      187,
+      192,
+      205,
+      216,
+      146,
+      163,
+      163,
+      166,
+      175,
+      178,
+      187,
+      283,
+      146,
+      151,
+      155,
+      172,
+      150,
+      163,
+      182,
+      158,
+      144,
+      144,
+      146,
+      169,
+      157,
+      164,
+      166,
+      164,
+      148,
+      166,
+      196,
+      191,
+      165,
+      194,
+      170,
+      197,
+      194,
+      162,
+      150,
+      149,
+      155,
+      150,
+      174,
+      139,
+      147,
+      165,
+      178,
+      168,
+      193,
+      192,
+      160,
+      156,
+      160,
+      187,
+      177,
+      198,
+      170,
+      164,
+      232,
+      153,
+      557,
+      519,
+      489,
+      477,
+      456,
+      473,
+      434,
+      375,
+      193,
+      193,
+      193,
+      193,
+      193,
+      193,
+      194,
+      205,
+      150,
+      163,
+      161,
+      170,
+      179,
+      190,
+      194,
+      200,
+      170,
+      175,
+      181,
+      169,
+      162,
+      187,
+      164,
+      164,
+      215,
+      191,
+      137,
+      163,
+      164,
+      166,
+      169,
+      170,
+      212,
+      224,
+      152,
+      152,
+      156,
+      167,
+      195,
+      170,
+      131,
+      188,
+      186,
+      192,
+      186,
+      179,
+      151,
+      160,
+      162,
+      172,
+      146,
+      166,
+      169,
+      180,
+      196,
+      197,
+      197,
+      198,
+      146,
+      146,
+      162,
+      176,
+      154,
+      163,
+      169,
+      174,
+      174,
+      152,
+      165,
+      166,
+      177,
+      186,
+      144,
+      177,
+      152,
+      179,
+      149,
+      150,
+      153,
+      155,
+      157,
+      172,
+      175,
+      198,
+      141,
+      157,
+      163,
+      167,
+      170,
+      170,
+      173,
+      218,
+      145,
+      229,
+      184,
+      185,
+      139,
+      150,
+      151,
+      155,
+      166,
+      172,
+      172,
+      173,
+      172,
+      175,
+      152,
+      174,
+      180,
+      156,
+      163,
+      178,
+      162,
+      162,
+      162,
+      162,
+      183,
+      160,
+      171,
+      183,
+      209,
+      210,
+      146,
+      163,
+      174,
+      182,
+      140,
+      140,
+      192,
+      193,
+      141,
+      224,
+      211,
+      212,
+      157,
+      164,
+      190,
+      191,
+      223,
+      185,
+      192,
+      192,
+      207,
+      207
+    ]
+  }
+}

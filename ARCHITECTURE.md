@@ -112,3 +112,14 @@ bounds, reproduction and missing live qualification.
 ## Source-bound challenge composition —13 November 2026
 
 Read [AGENT_COMPOSITION.md](docs/AGENT_COMPOSITION.md) for all 34 runtime knowledge summaries, canonical peer routing and the Stoa→NVIDIA drawing-specific recipe. Source and region hashes bind the task and result; production execution stays with existing Chibi HostPolicy/PetExecutor/HostArtifactStore. The source graph is not a grant issuer or running-agent registry. Historical benchmark and offline-registry behavior remain separate from drawing interpretation.
+
+## Product development workspaces (owner scope clarification, 13 November 2026)
+
+A challenge solution can include UI, backend, data, device adapters, research and
+submission assets as well as agents. `solutions/<id>/` holds its bounded source,
+brief, component map and continuation. This is a development organization layer:
+it does not add a production host, replace collaboration protocols or relocate
+existing code. Existing `apps/`, `services/`, `pets/` and pending PRs stay at their
+current paths and under their current owners. Several solutions may reuse the
+same declared expertise through existing contracts. See
+[the workspace guide](docs/SOLUTION_WORKSPACES.md).

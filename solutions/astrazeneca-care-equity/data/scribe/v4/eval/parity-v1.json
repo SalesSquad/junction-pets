@@ -1,0 +1,49 @@
+{
+ "schema": "scribe-v4-engine-parity-v1",
+ "synthetic": true,
+ "created_utc": "2026-11-14T23:53:42Z",
+ "question": "Does batched MLX decoding reproduce step 3's single-sequence validation outputs?",
+ "arms": {
+  "A-270m-abs": {
+   "notes": 310,
+   "same_raw_text": 243,
+   "same_resolved_prediction": 308,
+   "exact_single": 293,
+   "exact_batch": 294,
+   "differing_predictions": [
+    {
+     "id": "8d237dca321973a3",
+     "single_exact": false,
+     "batch_exact": true
+    },
+    {
+     "id": "cb8a192e4d569438",
+     "single_exact": false,
+     "batch_exact": false
+    }
+   ]
+  },
+  "B-270m-expr-aug": {
+   "notes": 310,
+   "same_raw_text": 309,
+   "same_resolved_prediction": 309,
+   "exact_single": 290,
+   "exact_batch": 291,
+   "differing_predictions": [
+    {
+     "id": "75a10f248e8fc2e8",
+     "single_exact": false,
+     "batch_exact": true
+    }
+   ]
+  },
+  "C-1b-expr-aug": {
+   "notes": 310,
+   "same_raw_text": 310,
+   "same_resolved_prediction": 310,
+   "exact_single": 304,
+   "exact_batch": 304,
+   "differing_predictions": []
+  }
+ }
+}

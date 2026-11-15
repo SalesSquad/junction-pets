@@ -52,6 +52,8 @@ try {
   await page.setViewportSize({ width: 600, height: 600 });
   await page.goto(`${origin}/?display=1`); await revision(4);
   await page.locator('#toast').waitFor({ state: 'hidden', timeout: 9000 });
+  assert.equal(await page.locator('#learningPanel').isVisible(), false);
+  assert.equal(await page.locator('.compact-return').isVisible(), true);
   const dimensions = await page.evaluate(() => ({
     width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
     buttonBottom: document.querySelector('#primaryAction').getBoundingClientRect().bottom,
@@ -65,7 +67,8 @@ try {
   observations.push('Browser refresh restored local progress; actual Chromium compact surface is 600×600 with its action visible and no document overflow.');
   await page.locator('#primaryAction').click(); await page.keyboard.press('Escape'); await revision(4);
   await page.setViewportSize({ width: 1440, height: 1120 });
-  await page.goto(origin); await revision(4);
+  await page.locator('.compact-return').click(); await revision(4);
+  assert.equal(await page.locator('#learningPanel').isVisible(), true);
   await page.locator('#observationSample').waitFor({ state: 'visible' });
   await page.waitForFunction(() => !document.querySelector('#observationSample').disabled);
   await page.locator('#observationSample').click();

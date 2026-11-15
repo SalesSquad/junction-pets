@@ -1,0 +1,29 @@
+{
+  "schema": "meta_r6_protocol_v1",
+  "work_id": "META-LENS-R6-VERDA-20261114",
+  "status_at_protocol_commit": "predeclared_before_model_execution",
+  "objective": "Improve exact-product ranking within the existing R4 adapted top100 pool using independently extracted NVIDIA image and OCR features.",
+  "prior_dataset_sha256": "bd70decf437dd34dfa9e2866c2110b142d7e746ea66c6f1098ac81deb6cac59c",
+  "r4_report_sha256": "8eda9a3d532b931bc93a765e555bc9008ce9d3c781d1c9efef583e6db515ca80",
+  "queries": {"train": 3313, "dev": 727},
+  "candidate_limit": 100,
+  "candidate_rows": 404000,
+  "query_view": 1,
+  "gallery_view": 0,
+  "oracle_candidate_injection": false,
+  "query_catalog_text_as_feature": false,
+  "extraction_models": {
+    "ocr": {"id": "nvidia/nemotron-ocr-v2", "revision": "0e83e83f17943524b90afa6c0fd82ac2bc1a40ca", "variant": "v2_english"},
+    "radio": {"id": "nvidia/C-RADIOv4-SO400M", "revision": "c0457f5dc26ca145f954cd4fc5bb6114e5705ad8", "resolution": [512, 512]}
+  },
+  "ablations": ["refit6", "plus_radio", "plus_ocr", "plus_both"],
+  "ridge_grid": [0.01, 0.1, 1.0],
+  "fit_scope": "training families only; train-only scaler; family/query/negative balanced pairwise logistic objective",
+  "selection": "Development exact recall@1, then MRR, then fewer features and larger regularization; keep frozen R4 unless an improvement is measured.",
+  "test_or_calibration_used": false,
+  "ocr_accuracy_ground_truth": null,
+  "accepted_coverage_qualified": false,
+  "physical_identity_verified": false,
+  "action_authorized": false,
+  "execution_bound": {"gpu_vm_count": 1, "max_runtime_seconds": 7200, "max_batch_size": 16}
+}

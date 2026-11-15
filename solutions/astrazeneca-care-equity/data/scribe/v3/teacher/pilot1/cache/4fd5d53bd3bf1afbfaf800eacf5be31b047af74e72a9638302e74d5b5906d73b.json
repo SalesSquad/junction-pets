@@ -1,0 +1,121 @@
+{
+ "id": "4fd5d53bd3bf1afbfaf800eacf5be31b047af74e72a9638302e74d5b5906d73b",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on ottanut yhteyttä yksityisen lääkäriaseman ajanvaraukseen lokakuussa 2023. Syöpädiagnoosi vahvistettiin 20. joulukuuta 2023. Moniammatillinen tiimi on tehnyt hoitopäätöksen 30 viikkoa sitten, ja syöpähoito on aloitettu 37 päivää sitten. Seuranta-aika on suunniteltu 22.9.2024, mutta se ei ole vielä toteutunut. Syntymäaika on 25.12.1990. Potilas tuntee vointinsa tyydyttäväksi ja selviytyy arjesta kotona. Hoitoa ja jatkotoimenpiteistä on neuvottu.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:55 outside 60-140"
+    ],
+    "words": 55,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 873,
+      "total_tokens": 1055,
+      "completion_tokens": 182,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.95
+    }
+   ],
+   "repair_request": [
+    "The note has 55 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas on ottanut yhteyttä yksityisen lääkäriaseman ajanvaraukseen lokakuussa 2023. Syöpädiagnoosi vahvistettiin 20. joulukuuta 2023. Moniammatillinen tiimi on tehnyt hoitopäätöksen 30 viikkoa sitten, ja syöpähoito on aloitettu 37 päivää sitten. Seuranta-aika on suunniteltu 22.9.2024, mutta se ei ole vielä toteutunut. Syntymäaika on 25.12.1990. Potilas kertoo voivansa kohtuullisesti ja selviytyvän arjen toiminnoista kotona. Liikkumiskyky on säilynyt, ja päivittäiset askareet sujuvat omatoimisesti. Hoitoa ja jatkotoimenpiteistä on annettu neuvontaa. Potilas on saanut ohjeita oireiden seurantaan ja yhteydenotosta tarvittaessa. Tulevasta kontrollista on kerrottu potilaalle.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 79,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "MDT_DECISION",
+       "date": "2024-01-27",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "MDT_DECISION",
+       "date": "2024-01-17",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-10-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2023-12-20",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2024-01-17",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2024-07-18",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1135,
+      "total_tokens": 1386,
+      "completion_tokens": 251,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.09
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 839,
+      "total_tokens": 953,
+      "completion_tokens": 114,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.39
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:35:01+00:00"
+}

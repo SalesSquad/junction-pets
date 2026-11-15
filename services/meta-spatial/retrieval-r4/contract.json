@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "work_id": "META-LENS-R4-COVERAGE93-20261114",
+  "source_base": "6f3601b33fb875e8ea372c48f4b7be4db737b87d",
+  "owned_root": "services/meta-spatial/retrieval-r4",
+  "input": "candidates.csv",
+  "row_unit": "one query/candidate pair",
+  "required_columns": [
+    "split",
+    "query_id",
+    "query_family",
+    "candidate_id",
+    "candidate_family",
+    "label",
+    "f_visual",
+    "f_adapted",
+    "f_text",
+    "f_reverse_rank",
+    "f_density",
+    "f_gap",
+    "baseline_rank"
+  ],
+  "splits": [
+    "train",
+    "dev",
+    "cal",
+    "test"
+  ],
+  "label": "1 only for exact product_id equality; training supervision and evaluation truth, never an input feature",
+  "features": [
+    "f_visual",
+    "f_adapted",
+    "f_text",
+    "f_reverse_rank",
+    "f_density",
+    "f_gap"
+  ],
+  "semantics": {
+    "f_visual": "frozen normalized query image dot candidate gallery image",
+    "f_adapted": "pinned R3 image adapter score; nullable path forbidden, use visual if explicit identity artifact",
+    "f_text": "query IMAGE dot candidate catalog text embedding; NEVER query title/hint/true family",
+    "f_reverse_rank": "1/rank of query among queries for this candidate gallery image within same split",
+    "f_density": "candidate visual similarity minus mean of its top10 query similarities within same split",
+    "f_gap": "candidate adapted score minus best other candidate adapted score for this query",
+    "baseline_rank": "stable 1-based candidate rank under pinned R3 visual score; audit/baseline only"
+  },
+  "rules": [
+    "No mutation of R2/R3 source or historical results.",
+    "Model input allowlist is exact features only; identifiers, family labels, split and label never features.",
+    "Training rows only fit model/scalers; dev only selects fixed candidate hyperparameters; cal only freezes policy; test is historical diagnosis, never new qualification.",
+    "All true labels kept separate from runtime features. No oracle positive injected into candidate set; report missing positives.",
+    "Deterministic top100 candidates from union of frozen/adapted/text scores; per-method ranks and no overwrite of original baseline.",
+    "Family/image hash train/dev/cal/test disjointness required before fit. Local gallery/reciprocal stats use unlabeled features only, reported transductive catalog protocol.",
+    "Catalog metadata is candidate-side only; cannot treat ground-truth title/family as OCR.",
+    "R4 output remains research-only action_authorized=false physical_identity_verified=false. Production gate cannot pass based on historical test.",
+    "Capture/OCR/multiview evidence requires actual input provenance; no fabricated camera observations."
+  ],
+  "output_contract": {
+    "training": "R script writes model.rds, model.json (numeric portable weights/scaler), predictions.csv with split/query_id/candidate_id/rank_score and selected-model report.json; source hashes supplied by coordinator.",
+    "policy": "conditional wrong/accepted measured separately from family incidence; strict coverage >0.93 and error<=0.01 are proposed targets, not guaranteed. Fail closed when insufficient calibration, no model, no qualification.",
+    "runtime": "Python loads portable linear scorer and frozen policy, returns bounded ranked candidates plus non-authorizing diagnostic proposal."
+  }
+}

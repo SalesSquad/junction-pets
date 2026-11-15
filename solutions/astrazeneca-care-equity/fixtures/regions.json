@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "equity-fixture-v1",
+  "dataClass": "SYNTHETIC_DEMONSTRATION",
+  "datasetId": "fictional-cancer-pathway-q2-2026",
+  "period": "2026-Q2",
+  "source": {
+    "id": "DEMO_GENERATOR_ONLY",
+    "title": "Invented regional cancer-pathway observations",
+    "license": "SYNTHETIC_NOT_REAL_TH_L_OR_CANCER_REGISTRY",
+    "retrievedAt": "2026-11-14",
+    "isObservedPublicDataset": false
+  },
+  "strategy": {
+    "document": "Finnish National Cancer Strategy 2026–2035",
+    "goalReference": "GOAL_3_REQUIRES_PRIMARY_SOURCE_CLAUSE_VERIFICATION",
+    "clauseVerified": false
+  },
+  "indicators": [
+    {
+      "id": "timely_referrals",
+      "stage": "primary-to-specialist referral",
+      "label": "Timely specialist referrals",
+      "unit": "percent",
+      "better": "higher",
+      "standardization": "AGE_STANDARDIZED",
+      "action": {
+        "title": "Review the referral handoff rather than ranking people",
+        "owner": "Regional referral pathway lead",
+        "intervention": "Audit referral queue timestamps and triage criteria with primary and specialist care; consider a small protocol pilot only after source validation.",
+        "measure": "Time to first specialist assessment, by geography and referral source, with uncertainty bounds"
+      }
+    },
+    {
+      "id": "diagnostic_wait",
+      "stage": "diagnosis",
+      "label": "Days to diagnostic confirmation",
+      "unit": "days",
+      "better": "lower",
+      "standardization": "NOT_STANDARDIZED",
+      "action": {
+        "title": "Investigate the diagnostic queue",
+        "owner": "Regional diagnostic service lead",
+        "intervention": "Examine scheduling handoffs and equipment capacity before proposing a pathway redesign.",
+        "measure": "Median days from accepted referral to confirmed diagnosis"
+      }
+    },
+    {
+      "id": "treatment_start",
+      "stage": "treatment initiation",
+      "label": "On-target treatment initiation",
+      "unit": "percent",
+      "better": "higher",
+      "standardization": "AGE_STANDARDIZED",
+      "action": {
+        "title": "Check treatment-start scheduling",
+        "owner": "Regional oncology pathway lead",
+        "intervention": "Review confirmed-diagnosis-to-first-treatment scheduling and identify avoidable system delays.",
+        "measure": "Share starting in the target window, by pathway stage"
+      }
+    }
+  ],
+  "regions": [
+    {"id":"fictional-coastal","name":"Fictional Coastal Region","populationContext":"fictional region","period":"2026-Q2","measures":{
+      "timely_referrals":{"value":64,"low":60,"high":68,"n":680,"standardization":"AGE_STANDARDIZED","sourceRef":"DEMO_GENERATOR_ONLY"},
+      "diagnostic_wait":{"value":29,"low":26,"high":32,"n":410,"standardization":"NOT_STANDARDIZED","sourceRef":"DEMO_GENERATOR_ONLY"},
+      "treatment_start":{"value":76,"low":72,"high":80,"n":15,"standardization":"AGE_STANDARDIZED","sourceRef":"DEMO_GENERATOR_ONLY"}
+    }},
+    {"id":"fictional-inland","name":"Fictional Inland Region","populationContext":"fictional region","period":"2026-Q2","measures":{
+      "timely_referrals":{"value":82,"low":78,"high":86,"n":710,"standardization":"AGE_STANDARDIZED","sourceRef":"DEMO_GENERATOR_ONLY"},
+      "diagnostic_wait":{"value":31,"low":28,"high":34,"n":420,"standardization":"NOT_STANDARDIZED","sourceRef":"DEMO_GENERATOR_ONLY"},
+      "treatment_start":{"value":84,"low":81,"high":87,"n":690,"standardization":"AGE_STANDARDIZED","sourceRef":"DEMO_GENERATOR_ONLY"}
+    }},
+    {"id":"fictional-harbor","name":"Fictional Harbor Region","populationContext":"fictional region","period":"2026-Q2","measures":{
+      "timely_referrals":{"value":71,"low":65,"high":77,"n":505,"standardization":"AGE_STANDARDIZED","sourceRef":"DEMO_GENERATOR_ONLY"},
+      "diagnostic_wait":{"value":35,"low":29,"high":41,"n":380,"standardization":"NOT_STANDARDIZED","sourceRef":"DEMO_GENERATOR_ONLY"},
+      "treatment_start":{"value":79,"low":72,"high":86,"n":420,"standardization":"AGE_STANDARDIZED","sourceRef":"DEMO_GENERATOR_ONLY"}
+    }}
+  ]
+}

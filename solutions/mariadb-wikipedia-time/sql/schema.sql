@@ -21,6 +21,11 @@ CREATE TABLE IF NOT EXISTS wiki_revision_events (
   content_sha256 CHAR(64) NOT NULL,
   source_url VARCHAR(1024) NULL,
   dataset_license VARCHAR(250) NOT NULL,
+  provenance VARCHAR(40) NOT NULL DEFAULT 'UNDECLARED',
+  retrieved_at_utc DATETIME(3) NULL,
+  source_uri VARCHAR(1024) NULL,
+  snapshot_sha256 CHAR(64) NULL,
+  attribution TEXT NULL,
   PRIMARY KEY (dataset_id, source_revision_id),
   KEY page_date (dataset_id, page_id, revised_at_utc, source_revision_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 WITH SYSTEM VERSIONING;

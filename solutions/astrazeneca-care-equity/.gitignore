@@ -1,0 +1,38 @@
+.codex-logs/
+ml/data/
+ml/.venv/
+ml/artifacts/*.pt
+__pycache__/
+.claude/
+runs/*.tmp
+eventlog/.venv/
+scribe/.venv/
+data/scribe/cache/
+scribe/artifacts/
+genomics/.venv/
+genomics/cache/
+data/genomics/raw/
+*.safetensors
+scribe/v2/artifacts/
+serve/.venv/
+ops/.venv/
+scribe/v3/artifacts/
+# per-request caches of paid calls (kept locally so nothing is paid twice; results are in the JSON files next to them)
+data/scribe/v2/verify/
+data/scribe/v3/judges/cache/
+data/scribe/v3/teacher/cache/
+data/scribe/v3/teacher/superseded/
+# per-request caches of hosted model and judge calls (results are in the JSON files next to them)
+data/scribe/nemotron/cache/
+data/scribe/stress/cache/
+data/planner/jev-cache/
+data/planner/vision/cache/
+scribe/v4/artifacts/
+scribe/artifacts/mlx-venv/
+flare/.venv/
+# NVIDIA_OPTIONS.md section 3 lanes (integrator, 15 Nov): rebuildable MLX chat JSONL (scribe/mlx2/export.py) and the per-note Nemotron cache of step 8
+data/scribe/v4/mlx/chat/
+data/scribe/v4/eval/nemotron/cache/
+# rendered media (kept in iCloud Drive Events/Junction-2026/SAMA-AstraZeneca; rebuild: submission/video and submission/fallback READMEs)
+submission/video/SAMA-video.mp4
+submission/fallback/SAMA-demo-fallback.mp4

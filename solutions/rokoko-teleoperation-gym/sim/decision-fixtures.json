@@ -1,0 +1,163 @@
+{
+  "source_kind": "OFFLINE_STUB",
+  "sent": false,
+  "response_scope": "Locally normalized fixture, invented one-hot baseline probabilities; NOT provider/model outputs or measured confidence; wire_response_excerpt intentionally omits request metadata/usage; live provider compatibility NOT tested",
+  "fixtures": [
+    {
+      "provider": "openai",
+      "request": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/decisions",
+        "headers": {
+          "Authorization": "Bearer REDACTED",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "model": "gpt-6-luna",
+          "input": "{\"object\": [0.02, 0.015], \"age\": 0.02, \"quality\": 0.99, \"deadman\": true, \"inside\": true, \"obstacle_distance\": 0.1}",
+          "questions": [
+            {
+              "type": "choice",
+              "name": "next_step",
+              "instructions": "Select the next simulation-only step from observed evidence.",
+              "choices": [
+                {
+                  "value": "CONTINUE",
+                  "description": "Fresh confident observations, no mapped obstacle nearby; continue bounded simulation."
+                },
+                {
+                  "value": "REPLAN",
+                  "description": "Fresh object observation has lateral displacement; adjust object-centered target."
+                },
+                {
+                  "value": "REOBSERVE",
+                  "description": "Tracking is stale or occluded; hold and await fresh observations."
+                },
+                {
+                  "value": "REQUEST_HUMAN",
+                  "description": "Mapped obstacle blocks local push; request help within remaining budget and hold."
+                },
+                {
+                  "value": "HALT",
+                  "description": "Deadman released, workspace invalid, or intervention budget exhausted; halt proposals."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "normalized_offline_response": {
+        "type": "choice",
+        "name": "next_step",
+        "choice": "REPLAN",
+        "confidence": 1.0,
+        "probabilities": {
+          "CONTINUE": 0.0,
+          "REPLAN": 1.0,
+          "REOBSERVE": 0.0,
+          "REQUEST_HUMAN": 0.0,
+          "HALT": 0.0
+        }
+      },
+      "wire_response_excerpt": {
+        "answers": [
+          {
+            "type": "choice",
+            "name": "next_step",
+            "choice": "REPLAN",
+            "confidence": 1.0,
+            "probabilities": [
+              {
+                "value": "CONTINUE",
+                "probability": 0.0
+              },
+              {
+                "value": "REPLAN",
+                "probability": 1.0
+              },
+              {
+                "value": "REOBSERVE",
+                "probability": 0.0
+              },
+              {
+                "value": "REQUEST_HUMAN",
+                "probability": 0.0
+              },
+              {
+                "value": "HALT",
+                "probability": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "provider": "openrouter",
+      "request": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/alpha/decisions",
+        "headers": {
+          "Authorization": "Bearer REDACTED",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "model": "typesafe/jev-1.13",
+          "state": {
+            "object": [
+              0.02,
+              0.015
+            ],
+            "age": 0.02,
+            "quality": 0.99,
+            "deadman": true,
+            "inside": true,
+            "obstacle_distance": 0.1
+          },
+          "questions": {
+            "next_step": {
+              "type": "choice",
+              "instructions": "Select the next simulation-only step from observed evidence.",
+              "criteria": {
+                "CONTINUE": "Fresh confident observations, no mapped obstacle nearby; continue bounded simulation.",
+                "REPLAN": "Fresh object observation has lateral displacement; adjust object-centered target.",
+                "REOBSERVE": "Tracking is stale or occluded; hold and await fresh observations.",
+                "REQUEST_HUMAN": "Mapped obstacle blocks local push; request help within remaining budget and hold.",
+                "HALT": "Deadman released, workspace invalid, or intervention budget exhausted; halt proposals."
+              }
+            }
+          }
+        }
+      },
+      "normalized_offline_response": {
+        "type": "choice",
+        "name": "next_step",
+        "choice": "REPLAN",
+        "confidence": 1.0,
+        "probabilities": {
+          "CONTINUE": 0.0,
+          "REPLAN": 1.0,
+          "REOBSERVE": 0.0,
+          "REQUEST_HUMAN": 0.0,
+          "HALT": 0.0
+        }
+      },
+      "wire_response_excerpt": {
+        "answers": {
+          "next_step": {
+            "type": "choice",
+            "choice": "REPLAN",
+            "confidence": 1.0,
+            "probabilities": {
+              "CONTINUE": 0.0,
+              "REPLAN": 1.0,
+              "REOBSERVE": 0.0,
+              "REQUEST_HUMAN": 0.0,
+              "HALT": 0.0
+            }
+          }
+        }
+      }
+    }
+  ]
+}

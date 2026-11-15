@@ -16,6 +16,14 @@ Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS
 
 The original Meta scanning PR #60 (https://github.com/SalesSquad/junction-pets/pull/60) adds a bounded, host-injected synthetic Chibi Lens kernel in services/meta-spatial/. This integration branch contains the tested source; main availability must be verified at handoff. Real Meta DAT/ARKit, Chibi identity and memory, source rights, live provider inference and device scans are NOT qualified. Start at docs/META_START_HERE.md and use only the authorized HostPolicy for real calls.
 
+## Build a solution
+
+This repo also supports complete challenge products, beyond an agent package. [Junction Product Factory — 19 products + 19 technology integrations](https://github.com/SalesSquad/junction-pets/issues/80) is the canonical development backlog. Start with [solution workspaces](docs/SOLUTION_WORKSPACES.md): scaffold a bounded product directory, hand it to any authorized developer executor, and reuse existing agent/service contracts. `node scripts/solution-workspace.mjs list` discovers the current product workspaces.
+
+## Pets and special capabilities
+
+Every company has one pet with its basic capabilities in `pets/<company>/pet.json`. Some pets also have **special capabilities**: extra abilities backed by a service in `services/`. They are declared once in [`config/special-capabilities.json`](config/special-capabilities.json) with the pets that have them (`"all"` or a list of company slugs). `npm run validate` checks the registry against the 34-company roster and the service directories, and `npm run build` adds each pet's `specialCapabilities` to the catalog. An entry describes source, not a live provider or Chibi connection.
+
 ## Start a new agent
 
 Read [START_HERE.md](START_HERE.md) for the common onboarding path, all 34 agent research packets, current source boundaries and pending runtime extensions. [The machine-readable source map](docs/AGENT_SOURCE_INDEX.json) supports Codex/Claude tools. Meta-specific work starts at [META_START_HERE.md](docs/META_START_HERE.md). Fetch current main and open PR heads before editing; dated status paragraphs below are historical checkpoints.

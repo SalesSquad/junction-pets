@@ -1,0 +1,52 @@
+{
+  "claims": [
+    {
+      "id": "fix-2283",
+      "reasons": [],
+      "title": "The supplied patch resolves the reproduced metadata-generic generator failure",
+      "verdict": "READY FOR HUMAN"
+    },
+    {
+      "id": "inventory-2283",
+      "reasons": [
+        "A structural classification narrows review scope; it does not establish runtime behavior."
+      ],
+      "title": "Changed paths are bound to the official source revisions",
+      "verdict": "INSPECTION ONLY"
+    }
+  ],
+  "codeChangeApproved": false,
+  "decision": "Request evidence",
+  "declaredReviewer": "Demo Reviewer",
+  "logIntegrity": {
+    "diff-2283": {
+      "baseVerified": false,
+      "headVerified": false,
+      "reasons": [
+        "Pinned change inventory, base: a log path and digest are required.",
+        "Pinned change inventory, head: a log path and digest are required."
+      ]
+    },
+    "frozen-2283": {
+      "baseVerified": true,
+      "headVerified": true,
+      "reasons": []
+    }
+  },
+  "packetId": "tieto-2283",
+  "packetSHA256": "c2aeb40f8f98978af04a04f9592a17e52d1a8f0356ce85e6544af40194bf1845",
+  "rationale": "UI smoke-test record only. The frozen #2283 fail/pass is observed. Request target-environment regression evidence before repository approval.",
+  "recordedAt": "2026-11-14T23:31:26Z",
+  "remoteWritePerformed": false,
+  "reviewerAuthenticated": false,
+  "schemaVersion": 1,
+  "source": {
+    "baseSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+    "branch": "ju26-issue-2283",
+    "headSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+    "issueId": "2283",
+    "issueURL": "https://github.com/MessagePack-CSharp/MessagePack-CSharp/issues/2283",
+    "repository": "https://github.com/te-industry-tech-office/junction26-messagepack-csharp"
+  },
+  "verdictAtDecision": "READY FOR HUMAN"
+}

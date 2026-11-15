@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "repo": "SalesSquad/junction-pets",
+  "deadline": "2026-11-15T17:00:00Z",
+  "training_cutoff": "2026-11-15T16:40:00Z",
+  "max_jobs": 10,
+  "vcpu_per_job": 8,
+  "lanes": [
+    "word_svm",
+    "char_svm",
+    "hybrid_linear",
+    "complement_nb",
+    "svd_mlp"
+  ],
+  "credit": {
+    "authorized_existing_eur": 1000,
+    "observed_junction_balance_eur": 995.95,
+    "observed_at": "2026-11-15T03:00:00Z",
+    "published_eur_per_vcpu_minute": 0.0017,
+    "price_source": "https://craci.com/pricing",
+    "no_cash_topup": true
+  },
+  "datasets": {
+    "banking77": {
+      "id": "PolyAI/banking77",
+      "revision": "1846984189f2bc0ac51c6fc3a600fa9e1714e0c6",
+      "source_revision": "1846984189f2bc0ac51c6fc3a600fa9e1714e0c6",
+      "license": "CC-BY-4.0",
+      "attribution": "Casanueva et al. (2020), PolyAI, Efficient Intent Detection with Dual Sentence Encoders.",
+      "label_count": 77,
+      "text_column": "text",
+      "label_column": "label",
+      "files": {
+        "test": {
+          "url": "https://huggingface.co/datasets/PolyAI/banking77/resolve/1846984189f2bc0ac51c6fc3a600fa9e1714e0c6/data/test-00000-of-00001.parquet",
+          "sha256": "1f40f777c33f0edfa6c530ff84fe2878db6490838c12d22d036f626948905341",
+          "bytes": 92409,
+          "rows": 3080
+        },
+        "train": {
+          "url": "https://huggingface.co/datasets/PolyAI/banking77/resolve/1846984189f2bc0ac51c6fc3a600fa9e1714e0c6/data/train-00000-of-00001.parquet",
+          "sha256": "8dc89b87a188509c42cce5a086e8f7c1ff4a225bdd9ae3f23e6cdfa5806e363a",
+          "bytes": 293553,
+          "rows": 10003
+        }
+      },
+      "documentation": [
+        {
+          "path": "DATASET_CARD.md",
+          "url": "https://huggingface.co/datasets/PolyAI/banking77/resolve/1846984189f2bc0ac51c6fc3a600fa9e1714e0c6/README.md",
+          "sha256": "f3786a5327fd6533c7c0ff3ff654e20ee3d1261d2fa41667381f59a2e42364e1",
+          "bytes": 13049
+        },
+        {
+          "path": "LICENSE",
+          "url": "https://raw.githubusercontent.com/PolyAI-LDN/task-specific-datasets/57ec275d8078af65b7731c2a98be812d844a6d6b/LICENSE",
+          "sha256": "7e7170e3cebf88a9f60c7b8421418323c09304da1af4d5e90f4da1dc1c8a2661",
+          "bytes": 18650
+        }
+      ]
+    },
+    "massive-fi-FI": {
+      "id": "AmazonScience/massive",
+      "revision": "ed58ac423a2f4121720918bf5301577edce4ffd3",
+      "source_revision": "ff6bd8e4b27c3543e4f8fe2108f32bb95a6f8740",
+      "license": "CC-BY-4.0",
+      "attribution": "FitzGerald et al. (2022), Amazon, MASSIVE: A 1M-Example Multilingual Natural Language Understanding Dataset with 51 Typologically-Diverse Languages.",
+      "label_count": 60,
+      "text_column": "utt",
+      "label_column": "intent",
+      "files": {
+        "test": {
+          "url": "https://huggingface.co/datasets/AmazonScience/massive/resolve/ed58ac423a2f4121720918bf5301577edce4ffd3/fi-FI/test/0000.parquet",
+          "sha256": "3e41ad98f5d0cfa7250ed4f77742f7b26405dc4430a5d385a48e43e870ec7339",
+          "bytes": 218714,
+          "rows": 2974
+        },
+        "train": {
+          "url": "https://huggingface.co/datasets/AmazonScience/massive/resolve/ed58ac423a2f4121720918bf5301577edce4ffd3/fi-FI/train/0000.parquet",
+          "sha256": "698f297f87127b6e5c6953399aa5f52fdf2b496d5f4c845c606e5d66aefe7af7",
+          "bytes": 791155,
+          "rows": 11514
+        },
+        "validation": {
+          "url": "https://huggingface.co/datasets/AmazonScience/massive/resolve/ed58ac423a2f4121720918bf5301577edce4ffd3/fi-FI/validation/0000.parquet",
+          "sha256": "d316a262df69073b6303966a3bdc186d0e992f67d4474f367d003c3805917708",
+          "bytes": 159156,
+          "rows": 2033
+        }
+      },
+      "documentation": [
+        {
+          "path": "DATASET_CARD.md",
+          "url": "https://huggingface.co/datasets/AmazonScience/massive/resolve/ff6bd8e4b27c3543e4f8fe2108f32bb95a6f8740/README.md",
+          "sha256": "9a74b2298db2cb509eb39725612ef5d5b9eb99d59ef7c960ab01f58526051e3d",
+          "bytes": 34420
+        },
+        {
+          "path": "LICENSE",
+          "url": "https://huggingface.co/datasets/AmazonScience/massive/resolve/ff6bd8e4b27c3543e4f8fe2108f32bb95a6f8740/LICENSE",
+          "sha256": "c2e6ea015269147de02117ebdd91f30ef09831251f5345fa8365273b1db1d435",
+          "bytes": 18704
+        },
+        {
+          "path": "CITATION.cff",
+          "url": "https://huggingface.co/datasets/AmazonScience/massive/resolve/ff6bd8e4b27c3543e4f8fe2108f32bb95a6f8740/CITATION.cff",
+          "sha256": "7432a8f5ed188ecb761e40a2295781d72a9de2b27dd5ba56adc6dcc21db81ad9",
+          "bytes": 1146
+        }
+      ]
+    }
+  },
+  "max_spend_eur": 150
+}

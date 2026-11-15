@@ -1,0 +1,2490 @@
+{
+ "schemaVersion": "scribe-audit-key-v1",
+ "generated": "2026-11-14T18:57:52+00:00",
+ "synthetic": true,
+ "sample": {
+  "order": "SHA-256('scribe-v3-audit|' + id) within each group; slices by SHA-256('scribe-v3-audit-shuffle|' + id)",
+  "accepted_by_rule": {
+   "sampled": 160,
+   "available": 1506,
+   "wanted": 160
+  },
+  "code_check_pass_rejected_by_rule": {
+   "sampled": 80,
+   "available": 83,
+   "wanted": 80
+  },
+  "by_status_and_readback": {
+   "accepted/inconsistent": 11,
+   "accepted/consistent": 149,
+   "rejected/inconsistent": 13,
+   "rejected/consistent": 67
+  },
+  "by_status_and_curriculum": {
+   "accepted/careful": 36,
+   "accepted/hard_standard": 47,
+   "accepted/long_multi_visit": 25,
+   "accepted/no_event": 24,
+   "accepted/terse": 28,
+   "rejected/careful": 17,
+   "rejected/hard_standard": 11,
+   "rejected/long_multi_visit": 34,
+   "rejected/no_event": 2,
+   "rejected/terse": 16
+  }
+ },
+ "judged_sha256": "24e0e7b7ab83682ac14e95fc63c8880e0e3d9b38243aed6f6e36fd2cc242cf81",
+ "candidates_sha256": "009b78400e14fec86c0549a775164d17c5519b0ab5608185185834e06599229e",
+ "slices": {
+  "slice-01.json": {
+   "items": 30,
+   "accepted": 24,
+   "rejected": 6,
+   "sha256": "15f7f8a4d608d17dce77ef7ed08d15e5628c9b3eb4ca1a9561fa5b077e243c0a"
+  },
+  "slice-02.json": {
+   "items": 30,
+   "accepted": 16,
+   "rejected": 14,
+   "sha256": "7d6ff3b7ae01c406b6daf61e52cfcd5e8800f50a55f68061b89a833389621ad7"
+  },
+  "slice-03.json": {
+   "items": 30,
+   "accepted": 16,
+   "rejected": 14,
+   "sha256": "3b610b8e9f0f72b8171b9bee37d578fb217e7a7ea09e7e4980e0326f29532909"
+  },
+  "slice-04.json": {
+   "items": 30,
+   "accepted": 23,
+   "rejected": 7,
+   "sha256": "75efd652c06acebdd97019656c75bde6ef769deb256b762392310675e537cb40"
+  },
+  "slice-05.json": {
+   "items": 30,
+   "accepted": 20,
+   "rejected": 10,
+   "sha256": "28c39b82d9dffeb8de4692aed75089d314732a6a847699674ddacb98c3a43538"
+  },
+  "slice-06.json": {
+   "items": 30,
+   "accepted": 23,
+   "rejected": 7,
+   "sha256": "d74eee13df2d0bdffe825b724961872a0a02fe57a71ae6333692b115ca30f5f3"
+  },
+  "slice-07.json": {
+   "items": 30,
+   "accepted": 21,
+   "rejected": 9,
+   "sha256": "38eeae262fc156209afb69971beccd1191481f2ed0c8f62adcf33a924a29c2ea"
+  },
+  "slice-08.json": {
+   "items": 30,
+   "accepted": 17,
+   "rejected": 13,
+   "sha256": "38f70259a730df19180f3c8c1c277b2ffab02c4900624aeda0828acc439c6f80"
+  }
+ },
+ "items": {
+  "bf473f481860": {
+   "id": "49ed05fb4dcb528e0702772e3ed5c0cfe9cac6cd34fcfa3e4b2048f33b8646fd",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 2,
+   "repaired": true
+  },
+  "b42bc8b1ea1f": {
+   "id": "f41dd164ac52318a895d4f79732e47d110d6a63c446de9b9327616ac5ca04e99",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "d17940968ad3": {
+   "id": "bc0dde45109e7491408211a6023914a7616b1d70b33e43f89569a0a0fea6d293",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "593d976f9cfd": {
+   "id": "8ca60548cf446cbb76160cec851abaad4c8904c86aa617ced8745a4c953c4eca",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": false
+  },
+  "64ee7da9c982": {
+   "id": "b80a69bf58125639c1afcafc9b4ab53ce980a6f2aded418269596b11478cb390",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "e9dce11ba467": {
+   "id": "1fc9ccbdd24297b107f48108a85cd2d5406ef6928a58a3ed5c7149dc47ef48a3",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 1,
+   "repaired": false
+  },
+  "c4594a8e2a54": {
+   "id": "8d45570d71484c139481f5bf6a2bdaca42b805a185010f73e5997cd9d806a3fd",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "81498de54b42": {
+   "id": "92b6be619934237f763a53d9848d21ebeeac55454baca6dcc618717a78428453",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 1,
+   "repaired": false
+  },
+  "a92fc69fd71c": {
+   "id": "42e3fc13bb42aff5c795ea7dc90e445d9b9e1a41ea7a0da926db041e0759a72c",
+   "slice": 1,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "c2a1055b6980": {
+   "id": "8dad2246534724c9601b94f94e03aa4ccc52cfc5c749879c31f9245eab8873ce",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "70e391b2412d": {
+   "id": "7758af0b2d1c0c63c109e88a2cd3a0042802641e53a22905ce78f57dfee64eb2",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 1,
+   "repaired": true
+  },
+  "0b107432dd5a": {
+   "id": "a4bbbf7ec332658343c88358d456bc6074c203639f1604e7a649fe73375b49d1",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": true
+  },
+  "038e2ad4bdc7": {
+   "id": "d3ffc592a4e64c475134777f8373395ee16cc519c875daa727cc95c4f3ce2256",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "e50f4af20bdc": {
+   "id": "1acc283395879d2e317805e8535fdd5abfd83d31e92efc39e4cbd43673a8baa1",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "08104e1dd7ed": {
+   "id": "f3faf8ac479e3bb1cf82f3fc9020ffab3a3b7d18424c10c320d21b2e1dfd2f5f",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "954c2ed04d5b": {
+   "id": "ef2d727badecad29a852528f6d24e834266a988f9874b487db83f1b2eab0da33",
+   "slice": 1,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "451c2dcddef4": {
+   "id": "562f551df9ec4dda37361f28b2cfd652e1680a8cdf91f1af4e11d0cd32aa4dc2",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "38af38ab7c76": {
+   "id": "35fdfa759c8e6e6e2a7d268f406ea5fb7bd54afbbfdeed24e6051b4a9c0f156a",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "69b585514fe8": {
+   "id": "c8d89522ef3b53117e479e144b41deb599802e10de7ad481807f0c6fcf04ba90",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "fe6da61998ea": {
+   "id": "45748275b1551b134cd8cbdb9ae7a0a43f761aae3a008c8b168b5506a088b232",
+   "slice": 1,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "794fdf9edb0f": {
+   "id": "db93915afad8990934030aa89335be0f40e2cfc6dbe0735fdba10f7c0160207b",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "e48396f71243": {
+   "id": "5a5acf7dd195c9e18bde090ae47db4fea11b912060253650f15ce71d1449c64c",
+   "slice": 1,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 2,
+   "repaired": true
+  },
+  "108606b7ef8c": {
+   "id": "8aaf7975c1d70d4f250e895446d0ba78ca5fcfeb29b495e0f8c3c60bd9959a2e",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "57c0f482911d": {
+   "id": "98a9b9371e18733fbc95d8364b4799157ab481e3edd699bcd7f78023bad9c710",
+   "slice": 1,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "8011662e0a91": {
+   "id": "6ce4fc104ad8e528ad3a217d9b5abcce4430f648320fe0cf1135f9ccad4f3d23",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "4daab539c864": {
+   "id": "92364aa3aa1b3df7df7b054571f7b5e6a89eabc966fd0c5fd96af63a1687d93d",
+   "slice": 1,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": true
+  },
+  "7c2fd45a9ac7": {
+   "id": "cfd56e809d479c8583ba3fd4cbb9464b8880d895165ed70df3ad24ec9ac2bcbb",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": true
+  },
+  "97a7980e8d94": {
+   "id": "f61b7246bcbe12ed3bb81b25d576a2be3b26dce154cc2ea984662fde4c96e7be",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": true
+  },
+  "7bc8bdd9da63": {
+   "id": "e8fbb84d0b9a6fd659e4493db4160e27148577dbb32c07fe90ee86f151ea2496",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "0df10c31d0f5": {
+   "id": "5cd8804c73dcc0653b867d08039fe6aa6440a38b44d088c552964f2991b13a02",
+   "slice": 1,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": false
+  },
+  "84591f0fc986": {
+   "id": "a58c5fb1bd5d4e63b7201f1e877c28af660ad516ea6eb8a0cc684f88a271f63b",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "1b49ada25ceb": {
+   "id": "aa9fc733f66f62cba10758001e2e01edb647ee0c4de1588330ccc62720f6f58c",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "22b516463b8f": {
+   "id": "6f9d4f9ba52f600a44974fc29c7d5412dc9cfb80b2e6684ffb09b64b263898bd",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "01c0287e1053": {
+   "id": "45504e7e133755da7608d0e20b41d0992f40f364aaa537a73c1308cbe2dfebd4",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "e48d53a6af83": {
+   "id": "cb02d7de8ace95e5a3534e6053147df936a2536f72df3e00325b3a339b93b13b",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": true
+  },
+  "3ba8fc33e3b8": {
+   "id": "c975582dfb852a3beabf3d196f4cb7b4f18ba8d79253b7a541b6820d5c3b642b",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "9c876afc4ed4": {
+   "id": "3f48e9ae2c374c352a77d06ba11aad6220a4e1bea6892a8d0486e48393627388",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 4,
+   "repaired": false
+  },
+  "4ae84b43cead": {
+   "id": "2465e75dac20f52d20b0182e329e532713c90f50d1860788a258f703e4ea545b",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 4,
+   "repaired": false
+  },
+  "a02094b8e79d": {
+   "id": "82d858524b7df7c5582ffb76464b65696060bbd2b2e12fc7fe258c8a9e7ca1d6",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "a341c7a0a3e4": {
+   "id": "e9da0926beb9305bc6ff3ce6ecd427927e2844e3d34edca9c99be9349f73a0bf",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "a328402506cd": {
+   "id": "a00ab2ef0e0446169bcbcc6d31e4743958fe4f4e46194e16da7362b685e0d7b8",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 7,
+   "repaired": false
+  },
+  "ea80b456e4d5": {
+   "id": "a513eebbf153901fefd200013e4f3270da3d6bc3056e60a5cfecaac3d8cb8d3b",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "fbe7e66d9f9e": {
+   "id": "78c0169c95692e1b1b4cd761948ae6b43e159527eee8a3ca67d7a749159763dc",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "c018ea15b4cb": {
+   "id": "aac34c61ca863d375b6e26b79d13fa608a57f125da342e08f494a24bf05146b0",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": false
+  },
+  "035c8613e8ed": {
+   "id": "2128dbd3a33003fd4063dc0fc0ee61a124f5d3627091110d814ea199f3c82467",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "61d836566676": {
+   "id": "d998ba94735931195fd8b438756dd1aaebbae06615534b4bcff176f37eaac3d7",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "f04b81d70d69": {
+   "id": "4234c49d1b7b08bc8b848ef1db7a09713c5299786952ba45a4ed3fd0744b43d1",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "e9825db1649a": {
+   "id": "f2638f3b1a125225dd67c48c02d31ee3f86df21255d4dde8196ddc9269f43180",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "245bbd745719": {
+   "id": "0d265b0437c17382fda8f97ef61c30f2602296bd7715695bf0b6a1f89226d7cd",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "1bc7413eac98": {
+   "id": "afd18a91b82a38cbec2e484d48c1a4877a1be412dfa2685a53905715a5e0cfa0",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "71128cee0d7c": {
+   "id": "ce4da2bb0eed07a3e87947da748260f0fb4f191a7944900001a3e5b488c04dd5",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": true
+  },
+  "ceb443a7f059": {
+   "id": "e1862d75259bf101a0a1363874d27a0ba8f64f3ed1159e343000f0174b812866",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": true
+  },
+  "ae8e994dd1f9": {
+   "id": "5ea5d5e6c133d3fb1e432f9df120b1bd7d844d2c5968cf692988a81dd631059e",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 1,
+   "repaired": false
+  },
+  "2416630156b0": {
+   "id": "05d500882d6ea8f341c36c1ceb92befe0c843e2148125a12cf7e64debce47732",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "61272ec77932": {
+   "id": "bb4cebaef4f4306631dd2b94f6b65eb6fdfa898133f72955a3e25b152346b48f",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "c17cc0dd8510": {
+   "id": "127cd1598589e7643ff3e8299c268bc7f84a73f8fe513dfa96cd0e75876b02df",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "1eba658d8aaa": {
+   "id": "4c40e22603b09cc3d1a3dd46515bdbcc13d54ad9e2507a4577f5a8281256aea1",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "325371ee4c1f": {
+   "id": "020bc8f33a792bc6a0ab2ec70712f3f16f4f3960b82e4e1c7da556056b64a965",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "9097151447a9": {
+   "id": "1cbeb4b1093de394a45969314b8fc8c2ee53e6b7c2216a1e7b7011bb2df45a27",
+   "slice": 2,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 7,
+   "repaired": false
+  },
+  "fde73fb40355": {
+   "id": "9ec1fd9a6f0f66361899793eae41875d9bac4b188c35c99c96687f655d56db63",
+   "slice": 2,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 2,
+   "repaired": false
+  },
+  "695d1c7b8dc5": {
+   "id": "5f718990d3759765291d697f94adbce1b767a5c2ff5d56d01b5989a127363682",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": true
+  },
+  "43937e4fe792": {
+   "id": "d63d605f8259a1bcb384e825f1c11a4289004b26df6e330e475cf23730b71af9",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "b2bd3d30f009": {
+   "id": "ebda511e5a894153dd2a5b4513de27d5b2dec717edf205ff0394d4e4dced3428",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": true
+  },
+  "d7f49aa417c4": {
+   "id": "cccd530c472a9fd195a44e7c3527ff444c55fa1a5994147e9b8d086906cc1188",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "e72e5cc225ea": {
+   "id": "0816118331a87f3b857e9ab03d821ecd52fa5f65d923e23b82f51d0760974279",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "08ef030f0d8d": {
+   "id": "9450c46419605ac427c488e8388fc5e915ed433623a904cca960bb6700213bfc",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "59e6dfebd7a8": {
+   "id": "ec72103bcaf0080418122354c2d6331b8643562592d3997f07f95e2003ed2f89",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "1396d9f35778": {
+   "id": "12a97d1caf7e71a9cf7d71ca31d447df72b84f87923d23af95c925e4a694553a",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "9c079d334609": {
+   "id": "4948a55c473a06c2385bddff4d2041b3eb74991fd9871d9387330acb8e277e3d",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 2,
+   "repaired": true
+  },
+  "3c23a2678b31": {
+   "id": "22fe1dc27b24b6fdeea95e073a1c500dbe3a88bb1995be62de37bd39c2cd6374",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "2fdf35964f1c": {
+   "id": "44f4e3796adcd2cc613ec82415033363a385abffe55e7b528ba26c46c4d57b53",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "5a7b4114f459": {
+   "id": "31c11fefbe9ada867e31cf2670049fdd533c7b880474361c2da89e8b7b6a2850",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "a41eddf4a9b5": {
+   "id": "34299bbaa7965f60d1e5d7f1bb5d789962911074545837b9766409560604ea81",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": true
+  },
+  "bde41fa5789e": {
+   "id": "a8b46dfb1cb0e83670fb8bb1a138e86f43b19d14b291b37e97175c4d5c505a89",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": true
+  },
+  "ef5df789e526": {
+   "id": "f9c391e57ccf515420db73c11c0eca0880eacb44043078cabc7bf93ecbef0119",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "108ab54da298": {
+   "id": "ec08d63ee4ca879e0587f803c8adcb7a92cbb3e076bf0aad2d445e2e44e507c6",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "f6b50881d9e3": {
+   "id": "77d98123e2cef8879dafe99b80a1e1adf3acffed7df7862aad3d4fa2d73e286c",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "ed8d1ea2d36a": {
+   "id": "0a954c2909109460df44b00df5fbc330cf6c306420b6e73c86408d1626c02a65",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": true
+  },
+  "3f26cb79c4e0": {
+   "id": "1b0641c59e66a6389c1d74af00f774537545dc13374920510f146f149a8e10ff",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": true
+  },
+  "e134186e73a2": {
+   "id": "4c6c36450f9b3ceb09aa68ce4e0f8489777c5bf5d0ceb206799f4f987bf12708",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 1,
+   "repaired": false
+  },
+  "06c436f95d24": {
+   "id": "ea5dbfd160b4b932e579c49656bcba2697906a286d4e6032eef0591d62735f18",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "87cc3cb648ac": {
+   "id": "87685d5e68fa320bb7df1f91d6a56ff86442b672f4704d66ee57849d2d1917e2",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "535ba54374ad": {
+   "id": "0247bcbba4d155ae8bfa95c8b5b9c32dd12bfdfa255f57bbd064b33153e7b749",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 1,
+   "repaired": false
+  },
+  "aef8fe618e9a": {
+   "id": "b4b8557cd012981bcc8e36d6aca083e3db47c4813c43876fdbe82ffeb0b3bbeb",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "7d784b0faafb": {
+   "id": "1dbb91082e5478d34e82d3e70ca0266d70e712a67943e50e8890bd70bde33dd8",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "92a6ef145737": {
+   "id": "2f956cf87810df2eece1efe41dac3cd65ef3a5a1d00a9c6b90096e331628bd6e",
+   "slice": 3,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "d4b357d85de7": {
+   "id": "9c49fc6e46f42b1e3814cbeb00ae2c6789608b8217077ad267842ce7ae8a464b",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": true
+  },
+  "093bc2363f03": {
+   "id": "429bb2d562de287bc24f4f5d4b1fd2feba65150be0a8e9a16fbb59be6f662110",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "443ef92d0991": {
+   "id": "c1d95b828b640b39f323da9d3b187a7b29e38884861f828d16fb171178aa80f1",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "9f570ccbce1d": {
+   "id": "1844b33f6b21b9696a13bd4e9f33b7a8a505f340409a4545bee02cf1cc7ff58f",
+   "slice": 3,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "6e20df5a7559": {
+   "id": "c598f10008fede1312d8383e42d648237398ce00e27e498446912024d7eeda7a",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "67bc6a255733": {
+   "id": "119a7d43b9ca7d545540fd28f06f7d3c4418816d4f2d99be4cdfc6e908c921a9",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "58ed46f0c30b": {
+   "id": "d961b185cb621444ce6cc0c7413969055c1b3baae12ed8a60a9f7f6d1fc00162",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "48edfb92ee4b": {
+   "id": "cb148b3deb6ae04ea1fddad074ce073ebaead282befc51d49d565279e112e3d3",
+   "slice": 4,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 7,
+   "repaired": true
+  },
+  "acbdc560b6bc": {
+   "id": "fe56e9d7a8bb13b34f7d90f8ca7327a944b1753b9c4103ff28b98ca72ee3adf6",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 2,
+   "repaired": false
+  },
+  "7fcaa2fac5f5": {
+   "id": "1db7b42f87d3b526e7ab17de0453e81c5d342cbca3276bac804eb96883499835",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "7694d5a7df9a": {
+   "id": "960281b681c3a277b99a724e9439510e5cccc2a36f45450360150778ac56a4ee",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "ceaac66a71fe": {
+   "id": "6f71c4b870dbe48c00fb6c1d2d605ec307a56b7d83f72faef134f443f85ad7f0",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "39c6e3bd31f7": {
+   "id": "3c1f9662c1aca6f30bb4497e83aa38c9d932f52be2ecfc494e9f9882bac53cbe",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "b9f4de68c62b": {
+   "id": "9649c41169d43629f88664be407fe28fb8e7479ee104efbc3ba4f8a210a334fb",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "2c1a35ba65c3": {
+   "id": "2aa6ab4a364fc979e6a3e3a62e0d410ec55c2f258e7ae908c40cb033ac51edf3",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "014c45f4ddff": {
+   "id": "2112bc191170ece34d3ce7730ff8e06819c570b61ad29de1816884e350c3ad02",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "e1c553b08880": {
+   "id": "43bb23fab36dfc5de2b0dda3ca911b0026c62f8e973c84849979a893c6aa1292",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "5856fbff5d10": {
+   "id": "293ed775beeed58b45d59502c393c1a5a0b6ccc7ad77851d7634ab983880d400",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "77ce77ffd816": {
+   "id": "88eb4d3dce9198b2cb8b4d857fe5117c9d0329775b0f939575bbab3e28a5567b",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "9117c0d06175": {
+   "id": "27c1258871963796947518e0e01519393d7eebee87b3ee759da2c16ff0820a3a",
+   "slice": 4,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "6c20727f41c2": {
+   "id": "6796481a020788185665cadb6bcda91c0dcc5ba65a36c7b43baed6826f8a687d",
+   "slice": 4,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "3853cab2c79a": {
+   "id": "cace214c1235e505f315b79670112f3a50a678d50d9a920bddc4937efadc0c17",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "5a17c7232d73": {
+   "id": "324d0d7f60dfe380fd2771c0d344f450ef95be66eed0531f3617031df149a859",
+   "slice": 4,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": true
+  },
+  "1627095fd9d6": {
+   "id": "045d2facb337efed27b19561b0c08c1daf86f9fd6d157ececa7c733638bd0a5a",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "f2122210a10d": {
+   "id": "a8052b3644e9652514905f96319a8ca7c4ec5fe2a331e4d2d5434d1d5c528e4e",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 7,
+   "repaired": false
+  },
+  "6d6130882cec": {
+   "id": "cecb5639e6fbd160b7099fc67ec492427f285f6c62f2fdd201478c11c898ffcc",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": true
+  },
+  "e9d04ac92b17": {
+   "id": "07e39a6b1efa55c7dc26b7800ff7c7607c8508f3d09c7f31ba55fe36135e0809",
+   "slice": 4,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "ebc430e73f58": {
+   "id": "feb08a92287349fe43eade591517ef7d19f934816d4ceb781d5e905bd2d2b4ae",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 1,
+   "repaired": true
+  },
+  "0b21f56cee57": {
+   "id": "aa61d0b710a936d6df14537a24420060356dfde7078a954d3c5427042d2c6b86",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "438e4e622542": {
+   "id": "7de10480ebba0624d225c04d7edfd28ecca529bb03f6aeabe75be4475f9552a6",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "a79674bee400": {
+   "id": "ff85126e63bfb885d99b36937b7c6e1f80c7ff65ec3008da0ebdb77f70e5790f",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": true
+  },
+  "a7849449bf16": {
+   "id": "5a19180d2ceef8144db3ae91348d2514693f46373efb1fe69a3a7abd10d5feae",
+   "slice": 4,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": true
+  },
+  "1aa013faa59d": {
+   "id": "512d35c5efbe522a19572e4a946e3aa3a970fcfdee934e2d2236dcb95c8b71f4",
+   "slice": 4,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 7,
+   "repaired": false
+  },
+  "66b9967be3dd": {
+   "id": "5b670107d878501e21734dabd5427906ea347c58554d9cc37547669977ee665d",
+   "slice": 4,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 4,
+   "repaired": false
+  },
+  "ad845b25e312": {
+   "id": "2354e1ce4b0b83d3200cce927442b6ef36cef90e796af57a1a55e4bcd10fedac",
+   "slice": 5,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": true
+  },
+  "4cd6c6588a04": {
+   "id": "6b6c89f965d742863a4ed5c1ce6e73e1e7d132a3376306f87384436a3ad37a32",
+   "slice": 5,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "eeacfe75d2c6": {
+   "id": "4745b189ccf3981123dfadadcf84f0dae1ba50f9ec52427228059bcb296ba4ce",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "7af3a308d12c": {
+   "id": "beaa5e11874ff29e6116ee9f3ae98643213010cbe1c7a8548a42b4ccea6c5817",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": true
+  },
+  "4fb133e4d617": {
+   "id": "fae0a6cbe337faa12ca7ab8e21a4df4db01a748fabd7528e11c25ba3df37e951",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "42ed4306b8d9": {
+   "id": "707d610e1b926205a136eda07b5e1b825c69019f6bb3789662a7d57cc6f5cd51",
+   "slice": 5,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": true
+  },
+  "1c2a3c94e2fd": {
+   "id": "a8331f2c65927b0cab44738e6fb93c3508d14c30a45964569822bfcd9fa89776",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "46499525fff3": {
+   "id": "be790a6b3a00cd20686ee90ae0b05c5c3a72f58f8532df72c28dea7ce21c7eab",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "1ca3dda28031": {
+   "id": "ac49857d7b27435ff1d5d1726340782387172b7141fe0334ffdbcacb97ea69cb",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "893a9157d1a4": {
+   "id": "cabb29af3353f289a02fbcb66075baf4168f7f085ff2af332c5072082c45f79c",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "b525f7d1bfe3": {
+   "id": "b4cd32577eb3569b3094367f73fc4c7fa2a40b2b1e8b5262fd5000b3b03e355e",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "59cb74ac23b8": {
+   "id": "fb310c071c7e075f18f8ff389da8b64ddea928b4e419e6d85b1796dfd5d0039a",
+   "slice": 5,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "02ab988daea5": {
+   "id": "8dc8bec0874ae5877e47eda5f0649105f120ff6887ac134c534a0437ae13933f",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "89be30ccc32a": {
+   "id": "79d1678f2bf0fead4870758f482371509ff95e602a0ad6f0b225b7132436daf9",
+   "slice": 5,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "ef48dd59b2d1": {
+   "id": "f8d40541478f8f8da89571d6c3655ccef077aae160af46a12574b18e7f002435",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "23cd11df6330": {
+   "id": "6b3ef9f3e0682db5862094ab2c6c373b33f4d35cb3b9122f3c8a46edc57fd56b",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "652aa205e734": {
+   "id": "2b78133e697da41ff24f0f64ba72a2e32534efd4a341f1ad92484467158bcf17",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "afa35b8d57b4": {
+   "id": "7ecc298f020996d6b62471e2f4eb446339e49afe1753e2d71c5062211d187cf8",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "ce41efde2a86": {
+   "id": "56cd89c48a45b1e7e7a90de9c9e753cbda4c325f6dfe8a1c4edcc8172d28c000",
+   "slice": 5,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "fca41071158d": {
+   "id": "204f343e403649209b7eb20faab5eb79611dd92edcfa95df7c37ef0f169ecef2",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": true
+  },
+  "735662a3c216": {
+   "id": "9bba8a9c343a431f0fbb8fdeceda6df32b659f6ba907959ce5ffa95db277f5cb",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 1,
+   "repaired": false
+  },
+  "8fb125bd5a4c": {
+   "id": "e7ef1a98967bde5c47e0add63ac8061e46c228c74d9e9d892a9986f01f99117c",
+   "slice": 5,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "a337feec01c4": {
+   "id": "e830115360eda6f5add816e613e07f8ce6c0bde74bfa78932fd085caf625164c",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 2,
+   "repaired": true
+  },
+  "8fe2978fecb9": {
+   "id": "afa08f88d1f6b9e52d3295c50a356afdcbf439739deb180e74e63b2f35536041",
+   "slice": 5,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "c362f9e86f85": {
+   "id": "932d4cf9ff76024a7fa048252e045e1b224b98a3bb69102553dd0ffd45429d45",
+   "slice": 5,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "c4bc6ca81d79": {
+   "id": "dc758b4f2806b51ad750120b5a576b76e0896faec1398c11d7b4e6321ed6bf8b",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "04d970195e72": {
+   "id": "cc935fde58895a80085e9648eb1cef25c5493e0d65297a1904a1b185ff67a492",
+   "slice": 5,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "411e26c8b116": {
+   "id": "03753fe552ae84d8dcf21ccf61b69d6537a38317ceb2a6ce4338dc3763d1b099",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "ff94e87d66d2": {
+   "id": "43cc6a084712291fddf844a9f68ce1e73418404f82f72fb0561b3ca76fdcd631",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "201fc12b0d8b": {
+   "id": "2f906701e6fd4c47023d9dc16829d6a934e1dd2b4de88e701b33008cc0711cca",
+   "slice": 5,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "508445a98d04": {
+   "id": "1bf9300f632a0b08062b98a28f6fa37b9768ecc0e7e3ddc813c236d0507db90f",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "2b06d5a1aba5": {
+   "id": "e194bbcfc957c5ce96bad746315bcb614109dcc340db4dabf40c1f29be996a01",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "9c5282471908": {
+   "id": "4a7466903f91543af85f174004d61b5563557dc3fd34815363df01b41d0fcbf3",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "72ae33252587": {
+   "id": "fe1c2ac37da4d12c9ae6a8a3f6a539e81a2058d1e16ac8c56fe5b84a3f6ecb97",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 1,
+   "repaired": true
+  },
+  "546ea9034c91": {
+   "id": "733c787d519fbf3c71dfb572472c862c6959799f8d17d4975ec2b1e4c42e7841",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 4,
+   "repaired": true
+  },
+  "ada19c739be7": {
+   "id": "4205c08ab43041cbbce4881e5739a4a325efba50a8c868bc455f463dbb4c510d",
+   "slice": 6,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "684e5b9b89ff": {
+   "id": "5fc33fd656326d8b0ea7df72ba8fed981144498cc0f3725074ad36f0da65069b",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "6e8266baf989": {
+   "id": "39e1a5a014a9a477cfbb90f7a2a9261a2625762012f19a4d79f6fcd135fa972d",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": true
+  },
+  "e785e6db9457": {
+   "id": "0cc81fc28f7614af2f2649593b3273684fbbfd1b08ff185f28b793cd332b2de0",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "d70cf5165254": {
+   "id": "2fdcd0023e96ede63af10eb36b7d28d731c6adc21fca8bc62856267e17530b6a",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "26b67044d10f": {
+   "id": "253e30346dba47b43be316014e2cb60a14d0b994da8df6b76305fa7d91d69533",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "9bb2b75e0da3": {
+   "id": "251f227aab0320c5fe34daae3725bfeccb7abcee0fb16958529d690b939e50c3",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "a79b2645619d": {
+   "id": "a6fa3f9e58b930f1d20042d34fe7a8bb0a93d93bfa086146795cda3a86c364ed",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "0eea7b8055a9": {
+   "id": "6e4401c3f2ea6904276b4ea5d1efbfdca0f27a3c3f238a0d5f1ff168a00d97dd",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 2,
+   "repaired": false
+  },
+  "3a74680545f6": {
+   "id": "e0a6553518275c026cf70b883a6b9558b225a9083c01d7bad656e894af498534",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "2275cd9b14f3": {
+   "id": "cea75b7c3e0f6e5ad0923df0e284a22d122338918237ee09ecb1b51c4adbc1f4",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": false
+  },
+  "b7c1363979f6": {
+   "id": "f0d910bd4fe95b425e9c85974ae158127f30970c42059d0726338d0d3249cd78",
+   "slice": 6,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "b7f406b6efb3": {
+   "id": "107e5bcfbae5ede5e1e3bc235fb9cccde6fb20f9c612ae179db397a6dfb576aa",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 1,
+   "repaired": true
+  },
+  "2cc577551e9f": {
+   "id": "bf57c57abe2434af5428f2dedcd10d2a43b916c5590916ff5b487233da329ba9",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 1,
+   "repaired": false
+  },
+  "54d94f26bfab": {
+   "id": "8ad7391ace61275541dc829f7abfccedb9972f4c8c0917b4a0e6810a58a2d623",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "862db218ec62": {
+   "id": "99c4451ec6f884574b863d98bf01ebab4960fdab494baf0b9cb624496b3848af",
+   "slice": 6,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": true
+  },
+  "5a4fc89965a7": {
+   "id": "beb6245d3e14c389bd85116876a3df86c1dbfd1a33899501b89cac00ce5d94c9",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": true
+  },
+  "acd1542d0e23": {
+   "id": "5cdebe3e1283a30ea8722873e80dc7f4e57d54930489adc45474a7807c348c1a",
+   "slice": 6,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "eac6256e3069": {
+   "id": "264bf92170fff8bd871f2dfb2cc5c3a8babe5ba1de9130372f773069e0701c6d",
+   "slice": 6,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "ffbef15db307": {
+   "id": "5fae85d6fa9eecdcab0bc5c398c954903b5bf8467c7b2f0bdaa220c63256fd42",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "fc802c96a019": {
+   "id": "41416302d8639752c49da155ab19fd672796a6fa7f2214adcd33f32e4c6d7df3",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "a9a4ced119ae": {
+   "id": "200dae1138e6fd088dd313a4eb26e6eac7236fffc1da0012db623ac16999b269",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "dae5a6ddc4b8": {
+   "id": "f881439919ca3dec1f9a57632c0ab0b2170a1f6e898282807f2cae630a6488cd",
+   "slice": 6,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 2,
+   "repaired": true
+  },
+  "cfb596863325": {
+   "id": "c9e80ac66e5930cab5805771b93039dcc38351a3ce0e9278674ab63c536b1a5d",
+   "slice": 6,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 4,
+   "repaired": false
+  },
+  "9860650da870": {
+   "id": "5f78fbd6171aeb446393b2f97a90b6f6b67a0c69d81c1c6c9ac83691a4e2438f",
+   "slice": 6,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 1,
+   "repaired": true
+  },
+  "5f60a9db0683": {
+   "id": "19a8d34b2c599689b176ca04f300a67c74434c67e7903ca72140ec58090416f8",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "e48277b52b76": {
+   "id": "f50f10c124146d1c18d0543cda75f28330fee4e6a865c5b7f83286ca13fbc8e1",
+   "slice": 7,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "39618307e72a": {
+   "id": "752290c83c82bb77274fb57b44610c9e1031916be4a22cfb85fde76c11708a80",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 7,
+   "repaired": false
+  },
+  "36b9322c6fb5": {
+   "id": "3473990693d5c7bec132d8ba8956bdaea4eaf0b5136d0a65f2398d6192d083fd",
+   "slice": 7,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "212c6875207e": {
+   "id": "5ef8ee71459a46b6d1607831b6a4ee139f5668f9f5a4d57d51f00aeda9ac1cb2",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "90d7f9ab4c7a": {
+   "id": "1f9666706d9e9d32ea7d3913a66af5ef66d1cc7e6bd8a7e3fd06e42861c0dc2d",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "6dfa6cb7112b": {
+   "id": "2a95686a02f78bd376faf390c905005fed6608f75ab0ecd65360504480ed27ec",
+   "slice": 7,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 7,
+   "repaired": true
+  },
+  "117e099749c5": {
+   "id": "e165d53f444fc3b447ee36d342d6c47c964fc3624d6f1f15c8c654e34d4d004c",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "39138a2888e8": {
+   "id": "5fbf4ca0625c89b1adcec7773d3ab65ed6c0b7e6e69a067819666a85a1147e23",
+   "slice": 7,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "ada217bb1616": {
+   "id": "bc2b6036367c5356f40cca2c6ce6ddb3eb81d215cb963f6003abfa948221a50f",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": false,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 4,
+   "repaired": true
+  },
+  "c50bedccc2c2": {
+   "id": "d3bbfc79c9304a2005a8812a4489e50b6879983da697493e5aef9a905c0761cf",
+   "slice": 7,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": true
+  },
+  "a5a42e6cf6db": {
+   "id": "e0879bf192aee4af56809adb63ec7d329b3ee19d3308e5af88484781793f6f79",
+   "slice": 7,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 1,
+   "repaired": true
+  },
+  "c44cd4a14af5": {
+   "id": "324ffa7b1bf4be8f8ca2be9f56262253a7955706e01e09353eabcfd622f622dc",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 7,
+   "repaired": false
+  },
+  "369a074527f4": {
+   "id": "75daa7e24e168da2822801930853d1aa5f339c47baf641aefbca9a2bef850d51",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 7,
+   "repaired": false
+  },
+  "e3326bf45465": {
+   "id": "d5765ffdda593aecbb176d684a150891add849b233bc2f7e943a3439c61e1cbd",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "5a7457b0f257": {
+   "id": "3e5d4d73beedb7e5a694fccb6afafe60e455ec139b7894ebad746878a43d0b85",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "b9d916550fdc": {
+   "id": "a2a55d384e01dd3b58acc3ff8344b48601b1c329cf0bb5ca7e2de416497046a3",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "72ce38d47641": {
+   "id": "bad30d6fbe56bfabadfc71bd57d0aa566675dbf4efbfdaafc30c6d97a4c480c1",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "1b6915b35567": {
+   "id": "7f1d7062753c8ccf677f654c385e8309a7856aaaa2c8c025e9373b60f24abcd6",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 4,
+   "repaired": false
+  },
+  "b31899a403a1": {
+   "id": "7e157af51ef934a5b1648d707498112925404e20a9ac694c607eef332785ccda",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "8f5604f246bf": {
+   "id": "23deafce0cdb7a60e10d39e69ecceb8e7f4a2a8f3eea7f831428dfc486fb8ca2",
+   "slice": 7,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "e5680acd58c8": {
+   "id": "d96680752b6c54bfb755f20dad4dd9f69da465701625930adcca7bc2cbfff340",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "6fbaa806ffa6": {
+   "id": "eb7ff428d8dc5d1087fb09c630353e90d9cafb1ad8daa2eeaab17679546538e4",
+   "slice": 7,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": true
+  },
+  "e11eeeea4d01": {
+   "id": "e77cc2fdc5edc0b329e1694d15784ceddc03c09240e91df8f33d37297dbaa906",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 2,
+   "repaired": true
+  },
+  "24d9ac174d2e": {
+   "id": "bf62573d5335683f7bc58b9a093bc9647390b318aab096965c3f465d45f8a0d1",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "daf12c856635": {
+   "id": "0ef880425b413db6dda63a38526fd3cae49e675127300c3ce3bef24bf04ec98c",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "abd7fcc099a6": {
+   "id": "aafd2b9d31c8b290249d31d24e1a232d7857f90e9a9b6ea0447bb2f8eeecab79",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 4,
+   "repaired": false
+  },
+  "69ced871ab16": {
+   "id": "9d31971f741cb99da27093b568758077a8cf2b5417793c05b73e0b214a3f61f9",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 4,
+   "repaired": false
+  },
+  "7745aab04cfe": {
+   "id": "bf96e4e1aa069d16e8d144f6f048db12ba7175569dd6e753d7518995356bec50",
+   "slice": 7,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "541921be9d23": {
+   "id": "3a45afa2703c721584ddb7bb2efa11ef69ead32a9f77e12f485bc53756c3bdfe",
+   "slice": 7,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "4e7d2c12b363": {
+   "id": "b467884a30db0137daedf68093ecb5640f2dc864c4ed9f5d2d73f07b7627864c",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "2fb734fa7041": {
+   "id": "e4be8ba3281c52095df586c070e5c275cbc96ada516d1794df6a42c49d742790",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "cfe5b1a06d50": {
+   "id": "963c9c728cd44d048033f6efd60dd21e5916cd30a9bcd8e649b9be86ae9ffd9e",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": false
+  },
+  "4f72a8f404e8": {
+   "id": "661d619683b80f74dabdd778e239ca6ebee36d0ea23f81318965dc3ec27de11b",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 1,
+   "repaired": false
+  },
+  "d96dfce81f3e": {
+   "id": "62d74fe7a35b04d68f9e60bb27e98e20ee4a284f7e0c0cac36e59efa93c4c2f9",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": true
+  },
+  "06af97424b5d": {
+   "id": "60bd2fcdda70c225afbf5d304f6dbde70e4193ceaa970914de80de4688f96a0e",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "0c224e1177ba": {
+   "id": "6577aae9dd38250d33cbee1248766660e2890ca1f779104ab5153f86c53fbec7",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "cd045ee8e1f2": {
+   "id": "b3c8c93a878b9195125edfeb6dd132a0da788dfe3963fdc7959238887497cceb",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "f238d26c6f7e": {
+   "id": "bd52fdbae8587872fa311cf0e326569aaf3e0877da951b24bff45c3ab941d8b4",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "fca34d374747": {
+   "id": "b10b0383c0bbe89cf5cbe511fc09b1690b2a0ecf546f8f2c20770d1a70ca7084",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "025768433910": {
+   "id": "a7ffeddb52e3f37d5c874de042f08ea6328162ae1b35717c5b724e0cb45ebf46",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "d193924ba763": {
+   "id": "c754130e5bc465337af296548d062728c78695e65e1d396c3eb01a68812f130a",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "b42c92a5c762": {
+   "id": "20d981df55d0f26dd26b1332290a5b6cc1764a3c4a96ba5aa03c08d8b5641373",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": false
+  },
+  "64225e571917": {
+   "id": "cde5cd50cd887a9243f7e82cff67ae2b37a898116fa827431b402bc648a4418c",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": true
+  },
+  "dddba2eee2a1": {
+   "id": "6b73f05975402deae517f93d30d8109270a1f14fabb257eda47eae59328eafe9",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "no_event",
+   "kind": "no_event",
+   "n_events": 0,
+   "repaired": false
+  },
+  "716b4c66c5b5": {
+   "id": "04e3d223b2c82cffde42ed46202b2c98dfa6c7699436fb3a898bf4566a07c917",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": false
+  },
+  "c5aa3bec0171": {
+   "id": "95fd51174988ac6b0b4f0d3e807628a5b5f1c0049d72ac836cdf8074b44d2521",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": false
+  },
+  "d0b03a267afb": {
+   "id": "a351aad11571b85b454d55fbdcd5d5fd571b002a90e0d1cd1a7b4ce1327fa22d",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": true
+  },
+  "1fc8aac5ad65": {
+   "id": "a87056baa55b9b765917b67b7da6325c03ea705d544e9c6486fd61473a2eae43",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 2,
+   "repaired": false
+  },
+  "5c8ebfa83267": {
+   "id": "1f914e1311e446663eb2b30c53abedfc23e57aa30b413e149ce0f9243b458bbd",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": false
+  },
+  "f828e74e6004": {
+   "id": "02ccf4d5d93738aac2c0b8559a43f03ede22daf025a79c87d00767b6a200f5a9",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": false
+  },
+  "bf9905bc3599": {
+   "id": "0fbff8f0af8573b68e07fee56a4725854274dd96fac77f64847928237c5c6b82",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  },
+  "3678716780a6": {
+   "id": "52b9d0891b6cf1a41b68fc0c885236a7a687e591ba990517e29d5730d4ba7289",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 9,
+   "repaired": true
+  },
+  "bc6912e6707f": {
+   "id": "592ade9e0fd076d58eeccac65f080cffc66e53dfc01bc345b170f4bc2bf75a66",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": false,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 3,
+   "repaired": true
+  },
+  "938a67d88dce": {
+   "id": "0a0808f72b12d1543109de0ad19e8d683198d0a3f30138b9fe7d1f481cb35c52",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "careful",
+   "kind": "careful",
+   "n_events": 3,
+   "repaired": false
+  },
+  "cc65e3fe4fb6": {
+   "id": "da8e8b43102dfc61683b52815ffed77ee2a7a8713c86d45be1ba1ae3129b1825",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "65e85f17ae8e": {
+   "id": "843e17f81ef4585499560d4401813cb86e834e1b12126a379bf50070c51d13c9",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 6,
+   "repaired": false
+  },
+  "3606eacbc7e7": {
+   "id": "21c8477950f479bf508e373bab11a7785cbaa091bf5822bd3e865a720d5747d1",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "long_multi_visit",
+   "kind": "standard",
+   "n_events": 8,
+   "repaired": false
+  },
+  "e90af452d1ab": {
+   "id": "2cdba61dd1637a98f7dcd1ae2ee053211b722896d8d921d09f5596ee18302319",
+   "slice": 8,
+   "status": "rejected",
+   "readback_consistent": true,
+   "curriculum": "terse",
+   "kind": "standard",
+   "n_events": 1,
+   "repaired": true
+  },
+  "d48c14755a03": {
+   "id": "a81a1d115b933884506c22715a03ef5f8a865017fc49429957110093367db393",
+   "slice": 8,
+   "status": "accepted",
+   "readback_consistent": true,
+   "curriculum": "hard_standard",
+   "kind": "standard",
+   "n_events": 4,
+   "repaired": false
+  }
+ }
+}

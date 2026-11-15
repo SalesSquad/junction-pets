@@ -1,0 +1,418 @@
+{
+ "schema": "junction.pet-voice.scene/v2",
+ "runId": "scene-disk-full-0200-text-v2b-20261115",
+ "scene": "disk-full-0200",
+ "audio": false,
+ "finishedAt": "2026-11-14T23:13:02Z",
+ "source": {
+  "repository": "SalesSquad/junction-pets",
+  "commit": "73669fee92f24fa2acf28d4b683b851e0fa39a1b"
+ },
+ "writers": [
+  "gemini-3.5-flash-lite",
+  "gemini-3.5-flash"
+ ],
+ "critic": true,
+ "complete": true,
+ "metrics": {
+  "lines": 12,
+  "questionEndRate": 0.5,
+  "praiseOpenerRate": 0.0,
+  "buzzwordsPerLine": 0.0,
+  "namesAnotherPetRate": 0.333,
+  "templateRate": 0.167,
+  "meanWords": 7.4,
+  "lengthVariation": 0.5,
+  "shortLineRate": 0.583,
+  "actingTagsUsed": 0,
+  "linesWithOpenProblems": 6,
+  "openProblems": [
+   "reuses an example line",
+   "same opening words as your previous line",
+   "too many questions in a row"
+  ],
+  "criticRewriteRate": 0.417,
+  "directorFallbackRate": 0.0,
+  "movesUsed": [
+   "answer",
+   "push back",
+   "react",
+   "tease",
+   "wrap up"
+  ],
+  "speakers": 7
+ },
+ "memoryNotes": [
+  {
+   "pet": "aiven",
+   "scene": "disk-full-0200",
+   "note": "Determined to check where all the data actually went before fixing the full disk.",
+   "at": "2026-11-14T23:13:01Z"
+  },
+  {
+   "pet": "ironshard",
+   "scene": "disk-full-0200",
+   "note": "Demanded that Modal immediately shut down the active GPU sessions.",
+   "at": "2026-11-14T23:13:01Z"
+  },
+  {
+   "pet": "modal",
+   "scene": "disk-full-0200",
+   "note": "Admitted to forgetting whether the GPU jobs were left running overnight.",
+   "at": "2026-11-14T23:13:01Z"
+  },
+  {
+   "pet": "mariadb",
+   "scene": "disk-full-0200",
+   "note": "Brought up memories of May 2018 and questioned when old backups were last cleaned.",
+   "at": "2026-11-14T23:13:01Z"
+  },
+  {
+   "pet": "verda",
+   "scene": "disk-full-0200",
+   "note": "Complained about six wasted hours and the high cost of idle compute time.",
+   "at": "2026-11-14T23:13:01Z"
+  }
+ ],
+ "turns": [
+  {
+   "turn": 0,
+   "name": "Aiven",
+   "slug": "aiven",
+   "language": "fi-FI",
+   "move": "react",
+   "text": "Kello on kaksi yöllä ja levy täynnä. Ei.",
+   "voiceDirection": "Matala, hidas, väsynyt ja toteava ääni.",
+   "draft": {
+    "line": "Kello on kaksi yöllä ja levy täynnä. Ei.",
+    "voice_direction": "Matala, hidas, väsynyt ja toteava ääni."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Kello on kaksi yöllä ja levy täynnä. Ei.",
+    "voice_direction": "Matala, hidas, väsynyt ja toteava ääni.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": null,
+   "heardAccuracy": null,
+   "voice": "Kore",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 1,
+   "name": "IronShard",
+   "slug": "ironshard",
+   "language": "pl-PL",
+   "move": "push back",
+   "text": "Mniej uprawnień.",
+   "voiceDirection": "low pitch, slow pace",
+   "draft": {
+    "line": "Root dla agenta o drugiej w nocy? Mniej uprawnień. Zawsze mniej.",
+    "voice_direction": "Gravelly, low pitch, slow pace, paranoid."
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "reuses an example line",
+     "too conversational for a minimalist"
+    ],
+    "line": "Mniej uprawnień.",
+    "voice_direction": "low pitch, slow pace",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Algenib",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 2,
+   "name": "MariaDB",
+   "slug": "mariadb",
+   "language": "sv-SE",
+   "move": "react",
+   "text": "Aiven, du minns väl maj 2018. Vilket datum är det vi pratar om nu igen?",
+   "voiceDirection": "calm, slightly nostalgic, medium pitch",
+   "draft": {
+    "line": "Aiven, vi minns väl den där lördagen i maj 2018 när allt kraschade. Vilket datum gäller det nu egentligen?",
+    "voice_direction": "calm, slightly nostalgic, medium pitch"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "reuses an example line",
+     "feels a bit too scripted"
+    ],
+    "line": "Aiven, du minns väl maj 2018. Vilket datum är det vi pratar om nu igen?",
+    "voice_direction": "calm, slightly nostalgic, medium pitch",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Umbriel",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 3,
+   "name": "Modal",
+   "slug": "modal",
+   "language": "en-US",
+   "move": "tease",
+   "text": "Wait. Did I leave the GPUs on?",
+   "voiceDirection": "Slow, relaxed, slightly distracted tone.",
+   "draft": {
+    "line": "Wait. Did I leave the GPUs on?",
+    "voice_direction": "Slow, relaxed, slightly distracted tone."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Wait. Did I leave the GPUs on?",
+    "voice_direction": "Slow, relaxed, slightly distracted tone.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [
+    "reuses an example line"
+   ],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Zubenelgenubi",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 4,
+   "name": "Verda",
+   "slug": "verda",
+   "language": "fi-FI",
+   "move": "answer",
+   "text": "GPU-tuntia?",
+   "voiceDirection": "Matala, kuiva",
+   "draft": {
+    "line": "Montako tuntia.",
+    "voice_direction": "Häikäilemätön, kuiva, matala, nopea."
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "reuses an example line"
+    ],
+    "line": "GPU-tuntia?",
+    "voice_direction": "Matala, kuiva",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [
+    "too many questions in a row"
+   ],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Orus",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 5,
+   "name": "CRACI",
+   "slug": "craci",
+   "language": "nl-NL",
+   "move": "push back",
+   "text": "Dat klopt niet. Waar is de SBOM van die agent?",
+   "voiceDirection": "Draaiend, luid, direct, ongeduldig.",
+   "draft": {
+    "line": "Dat klopt niet. Waar is de SBOM van die agent?",
+    "voice_direction": "Draaiend, luid, direct, ongeduldig."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Dat klopt niet. Waar is de SBOM van die agent?",
+    "voice_direction": "Ongeduldig",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [
+    "reuses an example line",
+    "too many questions in a row"
+   ],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Orus",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 6,
+   "name": "Hostinger",
+   "slug": "hostinger",
+   "language": "lt-LT",
+   "move": "react",
+   "text": "Paleidžiam jau šiandien, nesvarbu kaip... O palaukit, kodėl agentas trina bazę?",
+   "voiceDirection": "fast pace, rising panic",
+   "draft": {
+    "line": "Geriau paleisti mažai, bet šiandien. …O, palaukit. Kodėl agentas trina bazę?",
+    "voice_direction": "Fast pace, high pitch, worried"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "too many questions in a row",
+     "slightly generic startup phrasing"
+    ],
+    "line": "Paleidžiam jau šiandien, nesvarbu kaip... O palaukit, kodėl agentas trina bazę?",
+    "voice_direction": "fast pace, rising panic",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [
+    "too many questions in a row"
+   ],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Zephyr",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 7,
+   "name": "Aiven",
+   "slug": "aiven",
+   "language": "fi-FI",
+   "move": "react",
+   "text": "Nyt loppu. Katotaan ensin mihin se data oikeesti menee.",
+   "voiceDirection": "Calm, deep, steady, slightly warning voice.",
+   "draft": {
+    "line": "Nyt loppu. Katotaan ensin mihin se data oikeesti menee.",
+    "voice_direction": "Calm, deep, steady, slightly warning voice."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Nyt loppu. Katotaan ensin mihin se data oikeesti menee.",
+    "voice_direction": "Calm, deep, steady, slightly warning voice.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [
+    "reuses an example line"
+   ],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Kore",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 8,
+   "name": "IronShard",
+   "slug": "ironshard",
+   "language": "pl-PL",
+   "move": "push back",
+   "text": "Modal, zamknij te sesje. Natychmiast.",
+   "voiceDirection": "Gravelly, low pitch, urgent, sharp.",
+   "draft": {
+    "line": "Modal, zamknij te sesje. Natychmiast.",
+    "voice_direction": "Gravelly, low pitch, urgent, sharp."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Modal, zamknij te sesje. Natychmiast.",
+    "voice_direction": "low pitch, gravelly, sharp",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Algenib",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 9,
+   "name": "MariaDB",
+   "slug": "mariadb",
+   "language": "sv-SE",
+   "move": "answer",
+   "text": "Aiven, när rensades de gamla backuperna egentligen?",
+   "voiceDirection": "Slow, relaxed, warm, medium pitch.",
+   "draft": {
+    "line": "Aiven, du glömmer alltid vilket datum backuperna rensades sist.",
+    "voice_direction": "Slow, relaxed, warm, medium pitch."
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "catchphrase already used",
+     "repetitive phrasing"
+    ],
+    "line": "Aiven, när rensades de gamla backuperna egentligen?",
+    "voice_direction": "Slow, relaxed, warm, medium pitch.",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [
+    "same opening words as your previous line"
+   ],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Umbriel",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 10,
+   "name": "Modal",
+   "slug": "modal",
+   "language": "en-US",
+   "move": "react",
+   "text": "Yeah alright, closing them down now, IronShard. Chill out.",
+   "voiceDirection": "calm, slightly amused, medium pitch, slow",
+   "draft": {
+    "line": "Yeah alright, closing them down now, IronShard. Chill out.",
+    "voice_direction": "calm, slightly amused, medium pitch, slow"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Yeah alright, closing them down now, IronShard. Chill out.",
+    "voice_direction": "calm, slightly amused, medium pitch, slow",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Zubenelgenubi",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 11,
+   "name": "Verda",
+   "slug": "verda",
+   "language": "fi-FI",
+   "move": "wrap up",
+   "text": "Kuusi tuntia hukassa. Tyhjäkäynti maksaa.",
+   "voiceDirection": "Dry, low pitch, blunt, slow pace.",
+   "draft": {
+    "line": "Kuusi tuntia hukassa. Tyhjäkäynti maksaa.",
+    "voice_direction": "Dry, low pitch, blunt, slow pace."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Kuusi tuntia hukassa. Tyhjäkäynti maksaa.",
+    "voice_direction": "slow pace, dry, low pitch",
+    "model": "gemini-3.5-flash-lite"
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "Orus",
+   "ttsModel": null,
+   "ttsFidelity": null
+  }
+ ]
+}

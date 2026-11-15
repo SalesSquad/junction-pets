@@ -1,0 +1,68 @@
+{
+ "id": "534d70f79c8d463ee3027a323e924b15cac52471d6fc2a09637de4b885123ca1",
+ "curriculum": "no_event",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Käynti yksityisessä terveydenhuollossa. Unirekisteröintilähete saapui keuhkosairauksien poliklinikalle 24 viikkoa sitten uniapneaepäilyn vuoksi. Potilas voi nyt hyvin, voi kotona itsenäisesti ja selviytyy arjesta. Ohjattiin oireiden seurantaan ja tarvittaessa uudelleen yhteydenottoon.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:29 outside 60-140"
+    ],
+    "words": 29,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 749,
+      "total_tokens": 848,
+      "completion_tokens": 99,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.0
+    }
+   ],
+   "repair_request": [
+    "The note has 29 words. Write 80 to 110 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Käynti yksityisessä terveydenhuollossa. Unirekisteröintilähete saapui keuhkosairauksien poliklinikalle 24 viikkoa sitten uniapneaepäilyn vuoksi. Potilas kertoo voivansa hyvin ja selviytyvänsä arjesta itsenäisesti. Kotona pärjääminen on sujunut ilman apua. Toimintakyky on säilynyt hyvänä, eikä uusia oireita ole ilmennyt. Ohjattiin seuraamaan uniapneaan liittyviä oireita ja ottamaan yhteyttä tarvittaessa. Seuraava arviointi tehdään tarvittaessa. Potilas on tyytyväinen hoitoon ja ohjaukseen.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:54 outside 60-140"
+    ],
+    "words": 54,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 928,
+      "total_tokens": 1102,
+      "completion_tokens": 174,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.8
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:35:00+00:00"
+}

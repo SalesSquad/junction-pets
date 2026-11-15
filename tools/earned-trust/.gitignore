@@ -1,0 +1,11 @@
+.DS_Store
+.build/
+dist/
+__pycache__/
+*.pyc
+verification/.work/
+verification/artifacts/
+
+# Keep only the reviewed, packaged evidence logs; ordinary build logs stay ignored.
+!macos/Sources/EarnedTrust/Resources/Packets/**/evidence/**/*.log
+!docs/evidence/native/packet-tests.log

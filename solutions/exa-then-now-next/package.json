@@ -1,0 +1,34 @@
+{
+  "name": "internet-butler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first Internet Butler: Exa web search, TypeSafe Jev judgments, on-device Gemma 4, and a permission council with revocable grants.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "vite",
+    "dev:relay": "node relay/server.mjs",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/",
+    "bench:decisions": "node bench/eval_decisions.mjs",
+    "bench:live": "sh scripts/with-exa-key.sh sh -c 'node bench/run3.mjs && node bench/warrant-demo.mjs'",
+    "dev:live": "sh scripts/with-exa-key.sh node scripts/dev.mjs",
+    "judge:local": ".venv-mlx/bin/python gemma/serve_mlx_decide.py --adapter adapters/gemma4-e2b-choice",
+    "catalog:local": ".venv-catalog/bin/python bench/catalog/serve_catalog.py"
+  },
+  "dependencies": {
+    "@litert-lm/core": "^0.19.0",
+    "@typesafe-ai/sdk": "^0.7.0",
+    "idb": "^8.0.4"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "actual_cost": "unknown; no new paid GPU or provider-model call",
+  "data_split": {
+    "calibration_normal": 64,
+    "fit_normal": 128,
+    "heldout_anomaly": 100,
+    "heldout_normal": 100
+  },
+  "delivery_pipeline_sha256": "dc67c6582f47f290b67264bf0b95b8d5384a4d27ed3097fc8ac7c6885256f38f",
+  "evidence_hashes": {
+    "inspect-m7-held-normal/inspection.json": "1c5d622815080c25ecead92a815899c2bf2fe3042c174077d43339d659da85e1",
+    "manifest.json": "e45d2caa0107fdc2c4fa973fd378d41d87559d9c2b0cc0f6977db4736a71df26",
+    "native-verified-completion.json": "50d5e865d5682878a8b1a4a9f908277fa4bc593e557272032e908dd4306ca161",
+    "r-m7-native-verified.log": "d588dd7784f28dc5655d22165567297dc35620c8fa3c8f4b5ab506370a31e51e",
+    "run-m7-native-verified.log": "3449f907f05d0bfc37cc5e6e935e666d32d8cd71e8aa15fc7d2ce2b6afd4e967",
+    "visa-1cls.csv": "a48557e6033318cb90556f706196bc9d247a776a23ea51aecee5a80dd0332995"
+  },
+  "experiment": {
+    "actuation": false,
+    "cost": "unknown",
+    "fit_seconds": 38.45282006263733,
+    "latency_mean_seconds": 0.02231338209546238,
+    "latency_meaning": "Per-forward plus output validation, excludes preprocessing; descriptive, not robot throughput",
+    "limits": "File-level only. VisA candle is not Intel/robot evidence. CPU is not Intel NPU/iGPU. No cycles/min or reliability bounds.",
+    "metrics": {
+      "binary_confusion": {
+        "fn": 77,
+        "fp": 6,
+        "tn": 94,
+        "tp": 23
+      },
+      "coverage": 0.765,
+      "heldout_count": 200,
+      "image_auroc": 0.8164,
+      "ternary_counts": {
+        "anomaly": {
+          "defect": 0,
+          "good": 62,
+          "hold": 38
+        },
+        "normal": {
+          "defect": 0,
+          "good": 91,
+          "hold": 9
+        }
+      }
+    },
+    "mode": "REAL_DATA_OFFLINE",
+    "parity": {
+      "atol": 0.001,
+      "count": 200,
+      "device": "CPU",
+      "failures": [],
+      "max_map_error": 0.00046539306640625,
+      "max_score_error": 0.00042724609375,
+      "rtol": 0.001,
+      "status": "pass"
+    },
+    "physical_object_ids": "UNKNOWN",
+    "robot": "NO ROBOT",
+    "session_ids": "UNKNOWN",
+    "total_seconds": 64.74168610572815
+  },
+  "experiment_pipeline_sha256": "fbf186e29023125568f2c5637539ff29bb3c1a939d18cebb5465d4282f79e2c0",
+  "experiment_source_commit": "c90e93fc882eb9b98b8f30cdc3084281091b5ec8",
+  "inspection": {
+    "actuation": false,
+    "automatic_acceptance": false,
+    "binary_defect": false,
+    "diagnostic_proposal": "good",
+    "executor": {
+      "machine": "arm64",
+      "openvino": "2026.3.0",
+      "system": "Darwin"
+    },
+    "forward_processing_seconds": 0.12245345900009852,
+    "image": "0790.JPG",
+    "map_sha256": "6b3536f2aba62b7d158d6c5c70ffc32c44d07c7ad3d3ec54fae0af08d8c4f2d1",
+    "mode": "USER_IMAGE_OFFLINE",
+    "model_bin_sha256": "3ed2288a3319b11447909b9763257e21a256c82d55b5f639fcde0a7b4430add3",
+    "model_sha256": "e921f9621f0b1ccf785e2ec930b93a6cf3d74474f5d18200b15ad6fa80d4c063",
+    "preprocess_sha256": "1196779b4127b789d7412722c20eb03e305cbfefb03849fa9dcec1dee6cdd7cf",
+    "proposal": "hold",
+    "quality_status": "NOT_QUALIFIED_FOR_AUTONOMOUS_USE",
+    "review_reason": "Normal-only calibration has no independent defect-risk qualification; user domain is unverified.",
+    "robot": "NO ROBOT",
+    "score": 11.327592849731445,
+    "sha256": "27fa2ec32fec3979c3231ed1d0d6b2e8e7d15232d36fadd472fcbde1c6e2daec",
+    "source": "USER_SUPPLIED_UNVERIFIED_DOMAIN",
+    "source_artifact_ledger": "5580ebf1ad84b8d55ea840def27148c0389ce8ced3e08c06c6c18f2c46ccc8a0",
+    "thresholds_sha256": "8bbf2ba9ce45287b073d8e3da7be35fc6e3b4e42e6e5a6e0521630fc5f71a4f4"
+  },
+  "limits": [
+    "VisA candle public images are not SO-101 station data.",
+    "Physical object/session identity and independence unknown.",
+    "Anomaly scores are not probabilities; AUROC is not accuracy.",
+    "Same-object reinspection, robot motion and physical E-stop not implemented.",
+    "OpenVINO parity proves numerical portability only, not model quality or Intel NPU/iGPU qualification."
+  ],
+  "model_artifacts": {
+    "artifacts.json": "5580ebf1ad84b8d55ea840def27148c0389ce8ced3e08c06c6c18f2c46ccc8a0",
+    "config.json": "911324b7b3467f3c4e9311e6d74373bf250d6864077812029a71d49491c361fb",
+    "model.bin": "3ed2288a3319b11447909b9763257e21a256c82d55b5f639fcde0a7b4430add3",
+    "model.safetensors": "eb3427735a8c0e63d99ec0f2d5d4963619e7302494038d38cd8a0599595a7ed6",
+    "model.xml": "e921f9621f0b1ccf785e2ec930b93a6cf3d74474f5d18200b15ad6fa80d4c063",
+    "predictions.csv": "4be51f139a1dee90e1aaae86f584cc756009e6ae3a2bfe9547635c63d4195f51",
+    "thresholds.json": "8bbf2ba9ce45287b073d8e3da7be35fc6e3b4e42e6e5a6e0521630fc5f71a4f4"
+  },
+  "next_dependency": "Separate defect-labelled station calibration/validation data and authorized Intel/SO-101 station; keep the now-exposed test cohort untouched.",
+  "ownedBriefRefs": [
+    "M330"
+  ],
+  "partnerEvidenceKey": "ignite-next-and-intel",
+  "runtime": "authorized MacBook Pro arm64 CPU, not Intel target, GPU, CRACI or Codex Cloud",
+  "source_base": "c1e926f624fda2d4063e71a48306d92940d097d3",
+  "verdict": "REJECTED_FOR_AUTONOMOUS_SORTING: normal-only thresholds do not control defect escape. No tuning on the exposed heldout set.",
+  "work_id": "J26-INTEL-M330-M7"
+}

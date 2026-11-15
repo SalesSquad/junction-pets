@@ -1,0 +1,884 @@
+{
+  "action_authorized": false,
+  "consumer": {
+    "reference_commit": "4210b617b087a63a52b0ea1d09ae33b2df9d6d46",
+    "replay_utility_sha256": "dec449b13db222475814a5e99d889676b8399e0c8234ea278162c1d498288cbd",
+    "source_sha256": {
+      "contract.py": "45c7a2b1295e5fd4818125481d68fbeffbbe95b7e1ba2c9a0e3adf04e74708d9",
+      "reconcile.py": "e864c0eac73f94755e844c1daf806c2d4aa61c39328017830992b5948f470025"
+    }
+  },
+  "development_diagnosis": {
+    "accepted_coverage_qualified": false,
+    "additional_views_actually_captured": 0,
+    "baseline_correct": 6,
+    "basis": "Arithmetic over the already published evaluation and its hash-bound truth; no new campaign selection.",
+    "cases": 8,
+    "distinct_families_declared": 8,
+    "lanes": {
+      "critic": {
+        "abstentions": 5,
+        "accuracy_gain_qualified": false,
+        "baseline_losses": [
+          "q0001",
+          "q0006"
+        ],
+        "baseline_wins": [],
+        "denominator": 8,
+        "proposed": 3,
+        "rank1_correct": 4,
+        "wrong_proposals": 1
+      },
+      "detail": {
+        "abstentions": 7,
+        "accuracy_gain_qualified": false,
+        "baseline_losses": [
+          "q0006"
+        ],
+        "baseline_wins": [],
+        "denominator": 8,
+        "proposed": 1,
+        "rank1_correct": 5,
+        "wrong_proposals": 0
+      },
+      "visual": {
+        "abstentions": 7,
+        "accuracy_gain_qualified": false,
+        "baseline_losses": [
+          "q0006"
+        ],
+        "baseline_wins": [],
+        "denominator": 8,
+        "proposed": 1,
+        "rank1_correct": 5,
+        "wrong_proposals": 0
+      }
+    },
+    "ocr": {
+      "no_legible_text_cases": 5,
+      "observed_text_cases": 3,
+      "ocr_accuracy": null,
+      "spans_observed": 23,
+      "transcription_ground_truth_available": false
+    },
+    "outside_pool_case_ids": [
+      "q0002",
+      "q0003"
+    ],
+    "published_additional_view_requests": {
+      "label_closeup": 5,
+      "other": 1,
+      "side_view": 1
+    },
+    "published_r_arithmetic_matches": true,
+    "recoverable_baseline_errors_inside_pool": 0,
+    "recoverable_case_ids": [],
+    "same_backbone_independent_models": false,
+    "split": "dev",
+    "top3_candidate_oracle": 6,
+    "visual_detail_same_rank1_cases": 8
+  },
+  "execution_mode": "offline replay of committed model artifacts",
+  "input_bytes_unchanged_after_replay": true,
+  "inputs": {
+    "artifact_sha256": {
+      "evaluation.json": "1c4301e5cd90b41561271cff5b45592cb83de6a58466f550032b5a5c17aa9090",
+      "evidence-manifest.json": "cd9abe18fdf73137c109e0db2592263354e512ce4712e018e40d05bc5362df11",
+      "nim-01/plan.json": "6dda600f9a6b7c3ed6f0918f766c4fdd816b49ab7c72fc74d7784451acded7b3",
+      "nim-01/summary.json": "2ce1ebdba7c97baa3e424ce754b728269244ef8b60cc3b1d42dc3e4eb0afede5",
+      "pilot-01/critic/q0001.receipt.json": "83bf004c72b63266c48de5249a805853cd839ffcacb94ca65ccf6e828845e061",
+      "pilot-01/critic/q0001.request.json": "73f89f4e2611ee05632a8eceb0c8e24e2cf233b83d97e50702b9afc3e47facaa",
+      "pilot-01/critic/q0001.response.json": "b644762901f87721434a414a8f705f81e5cd7676920ce88196e2dbf2a06a958e",
+      "pilot-01/detail/q0001.receipt.json": "fd02aa4c85741d35f602365713ce978ce11d54bf901bd6044972ab1852b70672",
+      "pilot-01/detail/q0001.request.json": "4b143c13fa9da02c33e3d0462de1ef5eb62edf0d7591f737a90bace3f55a0fc7",
+      "pilot-01/detail/q0001.response.json": "f3077bc076a121190398152afa0538b0a2206e8a93e512969028c6b3fa5c7a90",
+      "pilot-01/ocr/q0001.receipt.json": "4ba65f285b908fb8779e340baf0b1c2297eee8b0eaca4ce6873c1ba62e3a32da",
+      "pilot-01/ocr/q0001.request.json": "08725ab489958c53a251777ddc02f0616898bae33fe76e4c94228f4a8d06e1e9",
+      "pilot-01/ocr/q0001.response.json": "6625919df01b3cd9f42988220c3ebd44eff22690d8342deeddeb201b052e62c8",
+      "pilot-01/plan.json": "5e2ed4795e4a73199a22ef3ca35784a9726a76739b1b039984c0281a79600c2b",
+      "pilot-01/summary.json": "741d4ac3358fb72415a7f93a8c3dbb2dbccff82513ceace435221eb12bbfb82b",
+      "pilot-01/visual/q0001.receipt.json": "5f026ab34aa606c3526a951b12eb23e48bb3a55edc87a8a2851df598843759e4",
+      "pilot-01/visual/q0001.request.json": "fbdc0fe6318002a4ad03bf08b631887ac4891a0e17af353361be2860f5424077",
+      "pilot-01/visual/q0001.response.json": "37acfe0f4efb93db5c98ccbd3fa1767c88043535955096e5fe5f73d46ab838d5",
+      "pilot-02/critic/q0001.receipt.json": "39c8dc989c13c86363b4691d9025d6d062c52a922330895787bf81b3582af40f",
+      "pilot-02/critic/q0001.request.json": "bb9d6000b2decc2c77d5713a6f57f16a0e09db609af4cc69a9f1c331d6076947",
+      "pilot-02/critic/q0001.response.json": "96a053c168ee62dded7c7dd3c733a6dd67c76c344a1d57323c5a57d8bd782fd0",
+      "pilot-02/detail/q0001.receipt.json": "4d7bb55bd43a16b3de25c6dd4a06fa708714f73c5ab436adb966d47f9357ecec",
+      "pilot-02/detail/q0001.request.json": "1bfc7de93c5c13215af64fd923e2a5dbfc541aad88951c5622c23c8b1c6b48f2",
+      "pilot-02/detail/q0001.response.json": "d8ae3358fb209ce798dedff0603da2e533ea77bea7c98a4c7314fcddaf68d5ce",
+      "pilot-02/ocr/q0001.receipt.json": "19bb4b18e347f270b102448db4366a98385a54d8857487de4b29043811011860",
+      "pilot-02/ocr/q0001.request.json": "0437eed745f6675b2c860f7933c08a4a597664cdd2b3a77a1270ccf0779556ae",
+      "pilot-02/ocr/q0001.response.json": "0aa3679fc3445a1a5f65b745c9d953986e34716a00b63988d70301c0710d7b44",
+      "pilot-02/plan.json": "eeaf000fab4450e295fe45ad8e1afbe0f980138ccf57a9d3fe56b751f9b0355a",
+      "pilot-02/summary.json": "879a11fe49f22ffdd855f87d21a4f4d9e7d4d3ab8f5e002e0e811f93bfa8e1eb",
+      "pilot-02/visual/q0001.receipt.json": "7a448e57d1a9babd6c0343c944225cd05f13c16c252ccc87af48fd87b0b63b14",
+      "pilot-02/visual/q0001.request.json": "e83b81f4934ec4000d562fd0052692ddb3d1e11b263722e40a6b800f9655a827",
+      "pilot-02/visual/q0001.response.json": "ead381449b22d74eadbd36552b2a37b0dd46219ad34e4b4588edd6494d4c5225",
+      "pilot-03/critic/q0001.observation.json": "965feeb1cf2820eced7c74242a7eb609bc8d04bdbddc8300851c999bc8452823",
+      "pilot-03/critic/q0001.receipt.json": "f60eb6b9efcd15b242eb381dc9225e51422ade4f7628414932f53efa968f1954",
+      "pilot-03/critic/q0001.request.json": "33de98dd57f04d54985391737edfdaba4143c2e0053fffd9b1682ed2a8da5db4",
+      "pilot-03/critic/q0001.response.json": "5ccd5db8cadc8567fdd1dce1737bc116ca173fa2da3444a3ee600b6766510682",
+      "pilot-03/detail/q0001.observation.json": "e5111eab788ebdac214cfbcd9e7925b1b2d7825622bc3e284ad918f781eb52c5",
+      "pilot-03/detail/q0001.receipt.json": "ff2cd77c337afe4a958480227ac9e7dd6efa24b0023d40c0495a38370aa2cdd8",
+      "pilot-03/detail/q0001.request.json": "45b9d185ed43806ed4f08f7f7c3827cb07a83766b7467658fc21ac87cad6a18b",
+      "pilot-03/detail/q0001.response.json": "6b00ba31869956c7f1b190eb9f92a03418e59ab4b783d184a84ce898777de327",
+      "pilot-03/ocr/q0001.observation.json": "e69f2d8b645ed83f39da7b3287616a3bc901c2bb5335789d702619de84240576",
+      "pilot-03/ocr/q0001.receipt.json": "2c694f8dada5bfc61aef3ceaac007a86122392008a6a23d45590eaf8e9dfe303",
+      "pilot-03/ocr/q0001.request.json": "e2daf09406e7cc8c5762ecc446a963f8e551cc6d616d5cb197a6cd7588966450",
+      "pilot-03/ocr/q0001.response.json": "0a7b1b37af08d9d74aab68e0c0fd74c8376f6f00c0cd2e4ac2dde54e97c63aad",
+      "pilot-03/plan.json": "312ba6c7971070883ba435982e0da17e063426d1e413ba0ba27a26671b94d42e",
+      "pilot-03/summary.json": "86100eb888822a0a200dacad404768aa639cdb651f4ed350ee79e85297061e25",
+      "pilot-03/visual/q0001.observation.json": "6751ec3fdaa6a71b17dae1fb3c6df2dac6a48e30d0bf088cfe4760634702b968",
+      "pilot-03/visual/q0001.receipt.json": "fea0fb38e6fa5f80a27de22176aaa085e57557179f8a6d2df56c4a1f63898806",
+      "pilot-03/visual/q0001.request.json": "80a21ebe235c5cdca10e687259d8886f2c232b9fb67358143362e99fc48fd59f",
+      "pilot-03/visual/q0001.response.json": "c17706d04d72f3a7c03986bca7feba67925f80ec9939c581ef452adcf09d5b2c",
+      "pilot-04/critic/q0002.receipt.json": "00dc8cf7efc94edc9edfed815cd84dc72a40f2e01939b15f245f0432206074e2",
+      "pilot-04/critic/q0002.request.json": "545173efb51e6f90f227795689fdd55a0a60c1d8477d3ec98ed8d34fd896ce00",
+      "pilot-04/critic/q0002.response.json": "b78836cc5875c0e1c27c4e99e604680befc7f104245e2d781168890ea158bf77",
+      "pilot-04/detail/q0002.observation.json": "5a810ace7c86e9ffaa31abc4910fe1b5122cbb4339877938d7e4380a3c22a91a",
+      "pilot-04/detail/q0002.receipt.json": "63e120fe3976d7d2c0e3892ec4bf2fb459fc20777a00fd897a7af6ff35f22e4f",
+      "pilot-04/detail/q0002.request.json": "84c91611e13315905d4681dbb05be856475be7466a361bcece7836c07c1cd569",
+      "pilot-04/detail/q0002.response.json": "6338360362b85697770fff351628868775ec1379db659417740b79a7354e7324",
+      "pilot-04/detail/q0003.observation.json": "289b0823871a726d4be4a3ae1fae18088d00d1433af6b85537e968aaff549969",
+      "pilot-04/detail/q0003.receipt.json": "9c1265167b7a60ce5c8f502dac3ef3feb946a4c9b16518ef604afaeda7add7bd",
+      "pilot-04/detail/q0003.request.json": "1635b4deefe426c1ca12deebea6a6d6ad623af5cba12f11e34126f8462d9950c",
+      "pilot-04/detail/q0003.response.json": "5cf5d0213153220f19a50968235d60cefdaf7e829f2f2380133c77435df1f2d6",
+      "pilot-04/detail/q0004.observation.json": "a2246f149d801b823fabefe8e040545c52c9ed957f544229ff704ffb06713fb4",
+      "pilot-04/detail/q0004.receipt.json": "388f32cc14553344ff12db62cd97c3ea64a75ebe281e1b63fb9bc4b85c6fbb92",
+      "pilot-04/detail/q0004.request.json": "1cd89101227a88b5b1f02416886c1b61346bb353ed83cbd544569c3a0b5af17f",
+      "pilot-04/detail/q0004.response.json": "3a721314d84a664a32708b59d5120413c5eefa083c5ead7332c524eb85fcf31e",
+      "pilot-04/detail/q0005.observation.json": "6bfd128a006f6ae42b6b7c00d51f83727c2ccb2e3f2793608bf7bd0cf4712e3a",
+      "pilot-04/detail/q0005.receipt.json": "31705d5be5b6e85fe3a2fef2db6da5ca45f2e7a8724dcab8f5fcebb1b60aa6a1",
+      "pilot-04/detail/q0005.request.json": "3a4286d18e95fc6d8d5956ea7fac57cf9b0870d7e9521ba56e0122e6459aa8b0",
+      "pilot-04/detail/q0005.response.json": "a15d511e95cc9c9dc5bc7d226ff9edc8379d099cb3459f1898b07d1f94d15fa1",
+      "pilot-04/detail/q0006.observation.json": "2991daba4203639b63684fd0f0ced80a4f1cc90083808a9ca8dba7529d118e41",
+      "pilot-04/detail/q0006.receipt.json": "1868e4893daa2a7010fd9e17ef618afdc6e428dd6ce733813a337871c2211f0f",
+      "pilot-04/detail/q0006.request.json": "608987aea4f5ca9d1562bc60198921f6d3fae2a3fdce9902aa06f96549a7321f",
+      "pilot-04/detail/q0006.response.json": "f629cc0c9ed5bd24237d29f578a8e19ce8b600e26cd87f2f763169eac61aa3ac",
+      "pilot-04/detail/q0007.observation.json": "071ba4210a68d289cf41414bcee4ea600c3323fd3c19dc08d3e115771e393a17",
+      "pilot-04/detail/q0007.receipt.json": "3d714639b00ba47707e95cc0dbf149e473672674816613218575b7e86feaf59f",
+      "pilot-04/detail/q0007.request.json": "199ba0f2f816fe16d8bf4c0d8c5cd590427b7d0f582368eaa3f0039c8093d861",
+      "pilot-04/detail/q0007.response.json": "7b69dbb56916d8612a9f8b1ec464b7f2bd7aa9dbe21555c60f9a3d9328933e5f",
+      "pilot-04/detail/q0008.observation.json": "c1600a56500136ce5fdef3cbade234f4c317c5d6258de4dc398ba0832ba29737",
+      "pilot-04/detail/q0008.receipt.json": "f101ab073854847aa8de7345332357585d0bb1370cc79b7bac8a867174c2c9cb",
+      "pilot-04/detail/q0008.request.json": "05f8371d14a6a484db089e8e28d92a2e8522d855c1008c773942049d47632ce6",
+      "pilot-04/detail/q0008.response.json": "d1931ef94c58a2f1f17cc3e23af1e0231e5acee7721da673257a9bef3b7068b4",
+      "pilot-04/ocr/q0002.observation.json": "19be04cebc5f297226881afc7300e455d211d387b723c6133d9b912a88b8e26a",
+      "pilot-04/ocr/q0002.receipt.json": "05437f810814c006eb54ae9478a004a4c6bfe96a2d8caafb7a6110fda481f1a0",
+      "pilot-04/ocr/q0002.request.json": "0d60c89c2450209f4f2348c516f91c2435609a8f51b21ebce11f835e765c0127",
+      "pilot-04/ocr/q0002.response.json": "44a5c5a9d5ee66ade10e4adb8e56260495a4d53a5f29784695cd1d67925f4e80",
+      "pilot-04/ocr/q0003.observation.json": "53b8ca57ee362781ef3dd0ef679eeadf23e772fb0c64c1050a4ab0753a4c7e67",
+      "pilot-04/ocr/q0003.receipt.json": "521db730d79b4e8859463ced567c5e12cee14c186c81b52d1c87c05087ed2a6f",
+      "pilot-04/ocr/q0003.request.json": "0bc532eb5b45747beb122744753c61009994a1d37832317bf8eaa6dc34c1a3df",
+      "pilot-04/ocr/q0003.response.json": "646d5a0b7fb77041cbba567e3015b59f04c1d8d4a600307ea3985a6f8e98b083",
+      "pilot-04/ocr/q0004.observation.json": "53b8ca57ee362781ef3dd0ef679eeadf23e772fb0c64c1050a4ab0753a4c7e67",
+      "pilot-04/ocr/q0004.receipt.json": "c976f3a5769a162da72a41fbb1300ae490778907d45853d2017358eca6c6fe6a",
+      "pilot-04/ocr/q0004.request.json": "f51f9ed61ffc44493ddf0ae4b865f70ae63183ead1c5eb87d3d1424213ebdb04",
+      "pilot-04/ocr/q0004.response.json": "86aa7ebdbf92d52b5231a208f6c8c46699a38fc06eb8597383040ab005b1acd8",
+      "pilot-04/ocr/q0005.observation.json": "008a2f157f2344e727c75f211b82fff93ec4f679b57b83b07013c3a9097b7881",
+      "pilot-04/ocr/q0005.receipt.json": "e40f1c330c397ac75d373e67747549622cb4aa27b06a50645f53e845b200dbdc",
+      "pilot-04/ocr/q0005.request.json": "d7f7508ee599d3a2a1d7a3c524943d53908273e00e492049268b1ca881992505",
+      "pilot-04/ocr/q0005.response.json": "7d9f1a2814b4290728e25d32d1de397aadc3819c04838a4b16a364fb5cf14f18",
+      "pilot-04/ocr/q0006.observation.json": "53b8ca57ee362781ef3dd0ef679eeadf23e772fb0c64c1050a4ab0753a4c7e67",
+      "pilot-04/ocr/q0006.receipt.json": "77f0a4f4a45265bcbc51b287985c0e4251f6a3b2460c3b7c43861c80610e329b",
+      "pilot-04/ocr/q0006.request.json": "6302ffce720477afebfd061a857b283a900300f74ff14d732e2b3fe1a117086e",
+      "pilot-04/ocr/q0006.response.json": "aaf78e80dbbab57da241b19dbde503a92735c9b77d58b1c8a828b068edf183a5",
+      "pilot-04/ocr/q0007.observation.json": "53b8ca57ee362781ef3dd0ef679eeadf23e772fb0c64c1050a4ab0753a4c7e67",
+      "pilot-04/ocr/q0007.receipt.json": "d097a50983ec5e0893511faf78a71ebfc92bba4a04f1339e7ecfec13d58bf907",
+      "pilot-04/ocr/q0007.request.json": "48abc806f9c3249f25ba25e2b5aec178609055d9dd55866400d44f9ecc176fd7",
+      "pilot-04/ocr/q0007.response.json": "d2295274865b4d8f7f92848d6644c73f74046fb47259cbcd7f0480dc4eb40323",
+      "pilot-04/ocr/q0008.observation.json": "53b8ca57ee362781ef3dd0ef679eeadf23e772fb0c64c1050a4ab0753a4c7e67",
+      "pilot-04/ocr/q0008.receipt.json": "21b39227c95f5410f8447f296382c329adea63104d8330e9060d621110cffba9",
+      "pilot-04/ocr/q0008.request.json": "13a321031b365da5836d6cd9bfc8aa0efb777d3438491c5f188d2fe34eaa1128",
+      "pilot-04/ocr/q0008.response.json": "d3a4438ec112b9e8eecba1e901d8b5e43334f6dfa4ba5162c8dfdeba811cd745",
+      "pilot-04/plan.json": "497e34ed668e56dceb27563fceca6dc4b71c1ec310ebecd98efcb1ec0432c0e9",
+      "pilot-04/summary.json": "0cf090f2aedf2208b9de796765233f6a3f1cadb78dac6e16281303fb4f12bbf9",
+      "pilot-04/visual/q0002.observation.json": "214efa45dcdb843b41b5a2fca5fe9898f5b1fe2a210903777e0772604ff5bd4b",
+      "pilot-04/visual/q0002.receipt.json": "bab727713ee00482ad66e72e0ae2e12916f2d46849cbb7bb0aafbe0af175f90d",
+      "pilot-04/visual/q0002.request.json": "0bdaccf55b069e0656a36b8fc63451c5addcb93b5be381dc0a430073e6170cc6",
+      "pilot-04/visual/q0002.response.json": "f19f4ec0eeff65133cc27cbce58fa223a32becd9f71edd452d1f30d8670bdb59",
+      "pilot-04/visual/q0003.observation.json": "d07015be3e93a242a0dac293282c8ae3bf349b7286aa521a69a845a16c925849",
+      "pilot-04/visual/q0003.receipt.json": "64e8829d50813baa326da6796a8b3c1e1ff032666e1cb531610fe46a671d8d59",
+      "pilot-04/visual/q0003.request.json": "0da99b5287ad3f6184ed80830d8b8d687fa422a6397210efd55b72a1b835655b",
+      "pilot-04/visual/q0003.response.json": "74a9dbb7de70db122ca13c9f9949a8b36dbeef2493af313eb6849156bfb79aff",
+      "pilot-04/visual/q0004.observation.json": "f4e86440452d40b95e88aef6c2fa596e5685e86c246a8fca291b7247036d60da",
+      "pilot-04/visual/q0004.receipt.json": "d943ba6e283aaadfecfd759e1904ffabcfc0e7c2ba8c5aabd433d7f6a9128e63",
+      "pilot-04/visual/q0004.request.json": "8aeafc00343e71754351bc5ac720a5ba3996c7c488192a619bd6fd83c7136bdf",
+      "pilot-04/visual/q0004.response.json": "904d33e6c6c8d7a77366f301b3f04130511352027013d34c34dadb49f60a0107",
+      "pilot-04/visual/q0005.observation.json": "1da9d2e951dd40fa1186024d8ad3f7e2a5988d53ccfcbf238d306861a36e3173",
+      "pilot-04/visual/q0005.receipt.json": "382769cc22e30d28952d73d0adfe1871d8b7888751917567309d3e07bc6e0f59",
+      "pilot-04/visual/q0005.request.json": "d791124da3f75115a1825d5bd8ab79ddd0ff89a9023a53eaaf3b3bd99c233740",
+      "pilot-04/visual/q0005.response.json": "d3036156445761af0278dcb12bc6c3f74fe344c1de98bf059fc6ce76bade4615",
+      "pilot-04/visual/q0006.observation.json": "5f516202b4bef67c1f8790eb307fcfb5f216153ae800b5d521e4e4566a46da0f",
+      "pilot-04/visual/q0006.receipt.json": "7d08f5c877a8aa94fd0c9b29c270c16ef1f6077384c7875cd5d80d7a1ca14adb",
+      "pilot-04/visual/q0006.request.json": "153241e21f1d7a8ffe2f5cb876e55ee6b8c314343e3d9090fc8193b5a5bdf941",
+      "pilot-04/visual/q0006.response.json": "fa41164b0032a6520d9756ea9fbb90d7c53f84193ff9025d1d855fc342594e5e",
+      "pilot-04/visual/q0007.observation.json": "b8fc717f531b804de3da28d0d9e19c6e238dd34c089a8a638b2f206430deb786",
+      "pilot-04/visual/q0007.receipt.json": "36a47bb1583d2ab039c088fc437e713e7a83b637b805d57a7c758d6bfe408349",
+      "pilot-04/visual/q0007.request.json": "1289db724ccd6817f2cf4d8d46ea4bc8069495cc155c28158c6fc554782bc4ef",
+      "pilot-04/visual/q0007.response.json": "3cce0f3c9a474ee689f0db1c0d605dc8f6924daecb543f4dcbae4300f0508788",
+      "pilot-04/visual/q0008.observation.json": "2e44742b5753cafe4bcec97d69d52e0a64948d60fbea341e0f92ec20a3f7757b",
+      "pilot-04/visual/q0008.receipt.json": "38cdadaa8f408cc62976aeeb301a8a68e240a493fac8b9722ad73e9a6aea198d",
+      "pilot-04/visual/q0008.request.json": "f4e9f36f1eed3bd1c4aed3179ed9dbcfb615710a3e0816bf74fe927344fe1040",
+      "pilot-04/visual/q0008.response.json": "7e46907a8b8f15ffca482f1ef855c249d6c93a502fecdb86ad1c59442e637b35",
+      "pilot-05/critic/q0002.receipt.json": "5a54f3d7c84d6d2d401541a9e23aa0da5a541ed8b42114f3846235ff87335aa6",
+      "pilot-05/critic/q0002.request.json": "0b13275022851531b94a66270a9c33bd4358c0b3d5128f7a3a1d9ea403d1214b",
+      "pilot-05/critic/q0002.response.json": "e3ff2d3b7a11040cf61c9ff8101ee396895d8c924b60d9c0ac910020b8043bce",
+      "pilot-05/plan.json": "3ede4a8bbcb8318227eec1548185e00ae552aae8dd69a58d5011709b2916d4bb",
+      "pilot-05/summary.json": "ce449ba8223bd0fbb0a5d4daf5e7eb1d014015f2fe550aca8a993020158703f0",
+      "pilot-06/critic/q0002.observation.json": "09ac3c186430d20297f3472cb8b3852c61466df403bfbba16d45bc80cf784ca0",
+      "pilot-06/critic/q0002.receipt.json": "ec2fce024a61cfb3fb2f6b321ef7b9f92a63ffa5164d7c42294aea53581aceeb",
+      "pilot-06/critic/q0002.request.json": "ae59d63edb0fd2f9c78d717b259dfc3538bd9328940351d18d53c69002f7963c",
+      "pilot-06/critic/q0002.response.json": "27090a59e6d4d775ab96a70e5203f616b0a7b30ccf079a03c133a8d6b6219634",
+      "pilot-06/critic/q0003.observation.json": "7a82e5fe3857e275b3bd8e136b0e2edbf9ee5bbddd7ee74cf09e07c70f11216d",
+      "pilot-06/critic/q0003.receipt.json": "c1911dab44a83afbc28cd552f1c2083d48cdcf213483ab3790eb576379453ddd",
+      "pilot-06/critic/q0003.request.json": "d329a3bacadfba660125977cee24f7cac609001c5dd60c1a45258e8ab02974ac",
+      "pilot-06/critic/q0003.response.json": "bfebe15632732e675b178083e39b87ea61b510993030637371d128fd65c8a5d3",
+      "pilot-06/critic/q0004.observation.json": "afd9f84d1ca3962c68aea829e793ef9ef7b57a01b4f71d43fbfc18e501fdbccc",
+      "pilot-06/critic/q0004.receipt.json": "8adf99be2c2ee5b6d4098097f76b7bb40165665abdad2bfa1a20723a26b0d196",
+      "pilot-06/critic/q0004.request.json": "219fafb6d9cdce9e71653a4497ba893d4a93ad990ac5bf571eb7459991114066",
+      "pilot-06/critic/q0004.response.json": "2bc828e0ef5c2f8d48071599c1c480e1d4d53c95d590f6697511c5f77da5c0d6",
+      "pilot-06/critic/q0005.observation.json": "f32a5a3618fb5c6e458416b1f4fbdf7c2511105d762ad4995a3b5a2a03ec479a",
+      "pilot-06/critic/q0005.receipt.json": "7a9ab21c58182ca717ae39bf58fc22d486bd58155a1962e365f2005581d5079b",
+      "pilot-06/critic/q0005.request.json": "76db1df7f989c1728af3d5d3c1f07ae02e72963cfd5690a64c76174fbbc885e9",
+      "pilot-06/critic/q0005.response.json": "73876cdb9cd8da5973332ab3a91903250712289be020bdba822199ce92a09023",
+      "pilot-06/critic/q0006.observation.json": "dc1482a7326cc2fb55a3736b0793120df5622ca9e719f32033acb54528403e50",
+      "pilot-06/critic/q0006.receipt.json": "959506ac942a283023c24c47a60401b837e28813f00f08faa6aa77ab7be22a88",
+      "pilot-06/critic/q0006.request.json": "7d6d985194ad918b6b2549455bd39efe7181c7e1a856e7a4ddd1db1c622b59ae",
+      "pilot-06/critic/q0006.response.json": "64d3711c7b70eb2affcb6f7feb717412220b0da4baa664898cb5677ce773dd2c",
+      "pilot-06/critic/q0007.observation.json": "070905e0d6ad63693ace782c24e05678456d41f7aeab720170798fa2f5c01b5a",
+      "pilot-06/critic/q0007.receipt.json": "8a796da6a9bcf2117e2d1bd6137e457b29e870e2c55cb66481fc192bd2fb1ef5",
+      "pilot-06/critic/q0007.request.json": "16d5cc17a8c30fa96e0c9d73a93a45793e78c707f4451de83911f292d188f2ee",
+      "pilot-06/critic/q0007.response.json": "07a858161125cc9713cebd3b6c1c8aa5f60d60fda5ed3e7bd55d6a82c376ea39",
+      "pilot-06/critic/q0008.observation.json": "c3478f285e678933e4b73cdf5b0e04eec17aa742a23bafd11fe556fd69070105",
+      "pilot-06/critic/q0008.receipt.json": "94a22208afa60c36b93df7bd8f8ce8613deef719355b98c04904bdb3609f0f11",
+      "pilot-06/critic/q0008.request.json": "449955208450c1fa05f7143c107e2cef8ea1c611bda704a4b35d2889ec50cae5",
+      "pilot-06/critic/q0008.response.json": "54022c57ca9725f3aed0e4212d7990e8eb9fe21f97c264c3ead27601ae4a2942",
+      "pilot-06/plan.json": "986919897baac1897b89d3d7b736436117ca6a29083e02e9a9984687bb0ec6fe",
+      "pilot-06/summary.json": "1e7a09e6ff7513e5fdc809d384790ccec398dd20b67ff0eb45fc81c19b09f217",
+      "prepared-01/cases.json": "40eab6b31ed50034b92b7d93f0c27d79efecfdb832f29c4d05cc86fe1c57e4eb",
+      "prepared-01/evaluation_truth.json": "07ab9cda07582bc69955f6f3276b8ad48b550df31c92f975b4dd348d9ec3eac0",
+      "r-summary.csv": "ad909ebef1dcab02be4e744eea8ce997ec96d14b50c527ca3a2793a9a768517e",
+      "verification.json": "6bc6bb6f895b7a438aa7cbddcd19e3c5e24900a4e5ff8fb56bf63d3e292028eb"
+    },
+    "bytes": 416259,
+    "download_index_sha256": "c07e66cb49084d46c0813750ae9ad8380cf8ed191d1635aa69b39965567194b5",
+    "git_blob_verified_files": 178,
+    "manifest_sha256": "cd9abe18fdf73137c109e0db2592263354e512ce4712e018e40d05bc5362df11",
+    "manifest_verified_files": 177,
+    "source_commit": "b3d6e31ceb797c49293613480af510f999eaeeb2"
+  },
+  "kind": "meta.r5-committed-model-artifact-replay",
+  "limitations": [
+    "This run performs file verification and offline replay only; it does not run or retrain a model.",
+    "Git blob and SHA-256 bindings verify committed/supplied bytes, not signed provider execution, checkpoint identity or billing.",
+    "Consumer source and original case paths are unchanged; original images and private host files are never opened.",
+    "Historical pilot01/02 plan rejections are preserved; the reader contract and historical inputs were not loosened or rewritten.",
+    "Each pilot remains separate. The published R5 evaluator alone owns campaign joining and failure supersession.",
+    "These eight deliberately selected development families cannot establish population accuracy, accepted coverage or >93% qualification.",
+    "Four role prompts share one backbone. Agreement and abstention grant no identity or action authority."
+  ],
+  "new_gpu_instances": 0,
+  "new_inference_calls": 0,
+  "next_priorities": [
+    "Predeclare a broader candidate pool and diagnostics with recoverable baseline errors; preserve a separate future qualification holdout.",
+    "Keep the stronger existing R4 ranking as the baseline; investigate q0006 and the critic's wrong q0001 proposal before proposing fusion.",
+    "Use independent transcriptions to measure OCR error; three text detections and 23 spans do not establish transcription accuracy.",
+    "Treat the seven additional-view requests as proposed evidence acquisition; obtain and register real extra views before a multiview claim.",
+    "Retain cheap structured-output canaries and exact schema tests; ten failed calls and reasoning-only output are historical efficiency failures, not valid observations.",
+    "Resolve the separate NIM credential blocker through the authorized owner before planning independent-backbone inference."
+  ],
+  "nim": {
+    "live_ocr_and_nano_verified": false,
+    "reason": "nvidia_nim_credential_missing_or_invalid",
+    "reported_inference_calls": 0,
+    "source": "published nim-01/summary.json",
+    "status": "BLOCKED_AUTH"
+  },
+  "physical_identity_verified": false,
+  "published_receipt_accounting": {
+    "failed_attempt_reported_usage": {
+      "fields": {
+        "completion_tokens": {
+          "pairs_without_reported_field": 0,
+          "reported_sum": 9957,
+          "reporting_receipts": 10
+        },
+        "prompt_tokens": {
+          "pairs_without_reported_field": 0,
+          "reported_sum": 12438,
+          "reporting_receipts": 10
+        },
+        "total_tokens": {
+          "pairs_without_reported_field": 0,
+          "reported_sum": 22395,
+          "reporting_receipts": 10
+        }
+      },
+      "planned_pairs_without_receipt": 0,
+      "receipts_without_usage": 0,
+      "verified_cost_usd": null
+    },
+    "provider_execution_independently_attested": false,
+    "reported_attempts": 42,
+    "reported_failed_observations": 10,
+    "reported_reasoning_tokens": 8192,
+    "reported_usage": {
+      "fields": {
+        "completion_tokens": {
+          "pairs_without_reported_field": 0,
+          "reported_sum": 18284,
+          "reporting_receipts": 42
+        },
+        "prompt_tokens": {
+          "pairs_without_reported_field": 0,
+          "reported_sum": 52449,
+          "reporting_receipts": 42
+        },
+        "total_tokens": {
+          "pairs_without_reported_field": 0,
+          "reported_sum": 70733,
+          "reporting_receipts": 42
+        }
+      },
+      "planned_pairs_without_receipt": 0,
+      "receipts_without_usage": 0,
+      "verified_cost_usd": null
+    },
+    "reported_valid_observations": 32,
+    "verified_cost_usd": null
+  },
+  "qualification": false,
+  "runs": [
+    {
+      "additional_view_proposals": null,
+      "case_agreement_counts": null,
+      "case_count": 1,
+      "consumer_status": "VALIDATION_ERROR",
+      "error": {
+        "code": "unexpected_fields",
+        "message": "plan has missing or unexpected fields"
+      },
+      "execution_source_commit": "c1c766547765bec0b13a437ce3bb38507c525423",
+      "historical_plan_outside_supported_contract": true,
+      "missing_supported_plan_fields": [
+        "chat_template_kwargs",
+        "response_format"
+      ],
+      "plan_sha256": "5e2ed4795e4a73199a22ef3ca35784a9726a76739b1b039984c0281a79600c2b",
+      "published_receipt_inventory": {
+        "basis": "Published receipt declarations; consumer validation is reported separately.",
+        "pairs_without_receipt": 0,
+        "receipt_files": 4,
+        "reported_failed_pairs": 4,
+        "reported_failure_errors": {
+          "incomplete_provider_completion": 4
+        },
+        "reported_statuses": {
+          "preparation_or_schema_error": 4
+        },
+        "reported_usage": {
+          "fields": {
+            "completion_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 8192,
+              "reporting_receipts": 4
+            },
+            "prompt_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 4736,
+              "reporting_receipts": 4
+            },
+            "total_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 12928,
+              "reporting_receipts": 4
+            }
+          },
+          "planned_pairs_without_receipt": 0,
+          "receipts_without_usage": 0,
+          "verified_cost_usd": null
+        },
+        "reported_valid_observations": 0,
+        "requested_pairs": 4
+      },
+      "requested_lanes": [
+        "ocr",
+        "visual",
+        "detail",
+        "critic"
+      ],
+      "run": "pilot-01",
+      "start_index": 0
+    },
+    {
+      "additional_view_proposals": null,
+      "case_agreement_counts": null,
+      "case_count": 1,
+      "consumer_status": "VALIDATION_ERROR",
+      "error": {
+        "code": "unexpected_fields",
+        "message": "plan has missing or unexpected fields"
+      },
+      "execution_source_commit": "3ae406c41a369ba4a64af344d31fa3261d59bb19",
+      "historical_plan_outside_supported_contract": true,
+      "missing_supported_plan_fields": [
+        "response_format"
+      ],
+      "plan_sha256": "eeaf000fab4450e295fe45ad8e1afbe0f980138ccf57a9d3fe56b751f9b0355a",
+      "published_receipt_inventory": {
+        "basis": "Published receipt declarations; consumer validation is reported separately.",
+        "pairs_without_receipt": 0,
+        "receipt_files": 4,
+        "reported_failed_pairs": 4,
+        "reported_failure_errors": {
+          "bounded_trait_list_required": 2,
+          "invalid_response_text": 1,
+          "unexpected_response_fields": 1
+        },
+        "reported_statuses": {
+          "preparation_or_schema_error": 4
+        },
+        "reported_usage": {
+          "fields": {
+            "completion_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 1352,
+              "reporting_receipts": 4
+            },
+            "prompt_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 4736,
+              "reporting_receipts": 4
+            },
+            "total_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 6088,
+              "reporting_receipts": 4
+            }
+          },
+          "planned_pairs_without_receipt": 0,
+          "receipts_without_usage": 0,
+          "verified_cost_usd": null
+        },
+        "reported_valid_observations": 0,
+        "requested_pairs": 4
+      },
+      "requested_lanes": [
+        "ocr",
+        "visual",
+        "detail",
+        "critic"
+      ],
+      "run": "pilot-02",
+      "start_index": 0
+    },
+    {
+      "additional_view_proposals": {
+        "action_authorized": false,
+        "captured": false,
+        "deduplicated_count": 0,
+        "kinds": {},
+        "requesting_lanes": {}
+      },
+      "case_agreement_counts": {
+        "agreement": 0,
+        "all_abstain": 0,
+        "disagreement": 1,
+        "partial": 0
+      },
+      "case_count": 1,
+      "consumer_counts": {
+        "actual_call_count_known": false,
+        "actual_inference_calls": null,
+        "bytes_read": 56742,
+        "expected_pairs": 4,
+        "failed_pairs": 0,
+        "missing_or_incomplete_pairs": 0,
+        "pairs_without_reported_attempt_count": 0,
+        "receipt_reported_attempts": 4,
+        "receipts_reporting_attempts": 4,
+        "selected_cases": 1,
+        "valid_observations": 4,
+        "verified_cost_usd": null
+      },
+      "consumer_report_sha256": "52539b639ec81828c07e724a36c48dccdeffd6b9732cce2b5b338032a536753f",
+      "consumer_reported_usage": {
+        "basis": "Sums of supplied receipt fields; missing values are unknown, not zero actual usage.",
+        "fields": {
+          "completion_tokens": {
+            "pairs_without_reported_field": 0,
+            "reported_sum": 1966,
+            "reporting_receipts": 4
+          },
+          "prompt_tokens": {
+            "pairs_without_reported_field": 0,
+            "reported_sum": 5096,
+            "reporting_receipts": 4
+          },
+          "total_tokens": {
+            "pairs_without_reported_field": 0,
+            "reported_sum": 7062,
+            "reporting_receipts": 4
+          }
+        },
+        "pairs_with_reported_usage": 4,
+        "pairs_without_reported_usage": 0,
+        "verified_cost_usd": null
+      },
+      "consumer_status": "COMPLETE",
+      "execution_source_commit": "fbf27ab1ca3905ccc1c561cc6a6e7e9f05df9a5d",
+      "plan_sha256": "312ba6c7971070883ba435982e0da17e063426d1e413ba0ba27a26671b94d42e",
+      "plan_variant": "legacy_four_lane",
+      "published_receipt_inventory": {
+        "basis": "Published receipt declarations; consumer validation is reported separately.",
+        "pairs_without_receipt": 0,
+        "receipt_files": 4,
+        "reported_failed_pairs": 0,
+        "reported_failure_errors": {},
+        "reported_statuses": {
+          "observed_schema_valid": 4
+        },
+        "reported_usage": {
+          "fields": {
+            "completion_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 1966,
+              "reporting_receipts": 4
+            },
+            "prompt_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 5096,
+              "reporting_receipts": 4
+            },
+            "total_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 7062,
+              "reporting_receipts": 4
+            }
+          },
+          "planned_pairs_without_receipt": 0,
+          "receipts_without_usage": 0,
+          "verified_cost_usd": null
+        },
+        "reported_valid_observations": 4,
+        "requested_pairs": 4
+      },
+      "requested_lanes": [
+        "ocr",
+        "visual",
+        "detail",
+        "critic"
+      ],
+      "run": "pilot-03",
+      "start_index": 0
+    },
+    {
+      "additional_view_proposals": {
+        "action_authorized": false,
+        "captured": false,
+        "deduplicated_count": 7,
+        "kinds": {
+          "label_closeup": 5,
+          "other": 1,
+          "side_view": 1
+        },
+        "requesting_lanes": {
+          "detail": 7
+        }
+      },
+      "case_agreement_counts": {
+        "agreement": 0,
+        "all_abstain": 0,
+        "disagreement": 0,
+        "partial": 7
+      },
+      "case_count": 7,
+      "consumer_counts": {
+        "actual_call_count_known": false,
+        "actual_inference_calls": null,
+        "bytes_read": 161146,
+        "expected_pairs": 28,
+        "failed_pairs": 1,
+        "missing_or_incomplete_pairs": 6,
+        "pairs_without_reported_attempt_count": 6,
+        "receipt_reported_attempts": 22,
+        "receipts_reporting_attempts": 22,
+        "selected_cases": 7,
+        "valid_observations": 21,
+        "verified_cost_usd": null
+      },
+      "consumer_report_sha256": "41d7e3d91a1544945b8d64938d1fc3f1a2ae51ce15198dd2f0b4c722b0cdcd73",
+      "consumer_reported_usage": {
+        "basis": "Sums of supplied receipt fields; missing values are unknown, not zero actual usage.",
+        "fields": {
+          "completion_tokens": {
+            "pairs_without_reported_field": 6,
+            "reported_sum": 4980,
+            "reporting_receipts": 22
+          },
+          "prompt_tokens": {
+            "pairs_without_reported_field": 6,
+            "reported_sum": 25885,
+            "reporting_receipts": 22
+          },
+          "total_tokens": {
+            "pairs_without_reported_field": 6,
+            "reported_sum": 30865,
+            "reporting_receipts": 22
+          }
+        },
+        "pairs_with_reported_usage": 22,
+        "pairs_without_reported_usage": 6,
+        "verified_cost_usd": null
+      },
+      "consumer_status": "PARTIAL",
+      "execution_source_commit": "fbf27ab1ca3905ccc1c561cc6a6e7e9f05df9a5d",
+      "plan_sha256": "497e34ed668e56dceb27563fceca6dc4b71c1ec310ebecd98efcb1ec0432c0e9",
+      "plan_variant": "legacy_four_lane",
+      "published_receipt_inventory": {
+        "basis": "Published receipt declarations; consumer validation is reported separately.",
+        "pairs_without_receipt": 6,
+        "receipt_files": 22,
+        "reported_failed_pairs": 1,
+        "reported_failure_errors": {
+          "proposal_identifiability_mismatch": 1
+        },
+        "reported_statuses": {
+          "observed_schema_valid": 21,
+          "preparation_or_schema_error": 1
+        },
+        "reported_usage": {
+          "fields": {
+            "completion_tokens": {
+              "pairs_without_reported_field": 6,
+              "reported_sum": 4980,
+              "reporting_receipts": 22
+            },
+            "prompt_tokens": {
+              "pairs_without_reported_field": 6,
+              "reported_sum": 25885,
+              "reporting_receipts": 22
+            },
+            "total_tokens": {
+              "pairs_without_reported_field": 6,
+              "reported_sum": 30865,
+              "reporting_receipts": 22
+            }
+          },
+          "planned_pairs_without_receipt": 6,
+          "receipts_without_usage": 0,
+          "verified_cost_usd": null
+        },
+        "reported_valid_observations": 21,
+        "requested_pairs": 28
+      },
+      "requested_lanes": [
+        "ocr",
+        "visual",
+        "detail",
+        "critic"
+      ],
+      "run": "pilot-04",
+      "start_index": 1
+    },
+    {
+      "additional_view_proposals": {
+        "action_authorized": false,
+        "captured": false,
+        "deduplicated_count": 0,
+        "kinds": {},
+        "requesting_lanes": {}
+      },
+      "case_agreement_counts": {
+        "agreement": 0,
+        "all_abstain": 0,
+        "disagreement": 0,
+        "partial": 7
+      },
+      "case_count": 7,
+      "consumer_counts": {
+        "actual_call_count_known": false,
+        "actual_inference_calls": null,
+        "bytes_read": 30565,
+        "expected_pairs": 7,
+        "failed_pairs": 1,
+        "missing_or_incomplete_pairs": 6,
+        "pairs_without_reported_attempt_count": 6,
+        "receipt_reported_attempts": 1,
+        "receipts_reporting_attempts": 1,
+        "selected_cases": 7,
+        "valid_observations": 0,
+        "verified_cost_usd": null
+      },
+      "consumer_report_sha256": "5298cf2d4f210c0ddf228275ca2228f7d10ceeffd4f18fb4fac425896a7459d8",
+      "consumer_reported_usage": {
+        "basis": "Sums of supplied receipt fields; missing values are unknown, not zero actual usage.",
+        "fields": {
+          "completion_tokens": {
+            "pairs_without_reported_field": 6,
+            "reported_sum": 19,
+            "reporting_receipts": 1
+          },
+          "prompt_tokens": {
+            "pairs_without_reported_field": 6,
+            "reported_sum": 1509,
+            "reporting_receipts": 1
+          },
+          "total_tokens": {
+            "pairs_without_reported_field": 6,
+            "reported_sum": 1528,
+            "reporting_receipts": 1
+          }
+        },
+        "pairs_with_reported_usage": 1,
+        "pairs_without_reported_usage": 6,
+        "verified_cost_usd": null
+      },
+      "consumer_status": "PARTIAL",
+      "execution_source_commit": "790befeb650fcdb9878092f9eb8861a4bde59aba",
+      "plan_sha256": "3ede4a8bbcb8318227eec1548185e00ae552aae8dd69a58d5011709b2916d4bb",
+      "plan_variant": "semantic_choice_subset",
+      "published_receipt_inventory": {
+        "basis": "Published receipt declarations; consumer validation is reported separately.",
+        "pairs_without_receipt": 6,
+        "receipt_files": 1,
+        "reported_failed_pairs": 1,
+        "reported_failure_errors": {
+          "unexpected_response_fields": 1
+        },
+        "reported_statuses": {
+          "preparation_or_schema_error": 1
+        },
+        "reported_usage": {
+          "fields": {
+            "completion_tokens": {
+              "pairs_without_reported_field": 6,
+              "reported_sum": 19,
+              "reporting_receipts": 1
+            },
+            "prompt_tokens": {
+              "pairs_without_reported_field": 6,
+              "reported_sum": 1509,
+              "reporting_receipts": 1
+            },
+            "total_tokens": {
+              "pairs_without_reported_field": 6,
+              "reported_sum": 1528,
+              "reporting_receipts": 1
+            }
+          },
+          "planned_pairs_without_receipt": 6,
+          "receipts_without_usage": 0,
+          "verified_cost_usd": null
+        },
+        "reported_valid_observations": 0,
+        "requested_pairs": 7
+      },
+      "requested_lanes": [
+        "critic"
+      ],
+      "run": "pilot-05",
+      "start_index": 1
+    },
+    {
+      "additional_view_proposals": {
+        "action_authorized": false,
+        "captured": false,
+        "deduplicated_count": 0,
+        "kinds": {},
+        "requesting_lanes": {}
+      },
+      "case_agreement_counts": {
+        "agreement": 0,
+        "all_abstain": 0,
+        "disagreement": 0,
+        "partial": 7
+      },
+      "case_count": 7,
+      "consumer_counts": {
+        "actual_call_count_known": false,
+        "actual_inference_calls": null,
+        "bytes_read": 72507,
+        "expected_pairs": 7,
+        "failed_pairs": 0,
+        "missing_or_incomplete_pairs": 0,
+        "pairs_without_reported_attempt_count": 0,
+        "receipt_reported_attempts": 7,
+        "receipts_reporting_attempts": 7,
+        "selected_cases": 7,
+        "valid_observations": 7,
+        "verified_cost_usd": null
+      },
+      "consumer_report_sha256": "fe1d571116abc69f5ceccf072704296b3a7609bc2d0590b5bd27e53b71856ac2",
+      "consumer_reported_usage": {
+        "basis": "Sums of supplied receipt fields; missing values are unknown, not zero actual usage.",
+        "fields": {
+          "completion_tokens": {
+            "pairs_without_reported_field": 0,
+            "reported_sum": 1775,
+            "reporting_receipts": 7
+          },
+          "prompt_tokens": {
+            "pairs_without_reported_field": 0,
+            "reported_sum": 10487,
+            "reporting_receipts": 7
+          },
+          "total_tokens": {
+            "pairs_without_reported_field": 0,
+            "reported_sum": 12262,
+            "reporting_receipts": 7
+          }
+        },
+        "pairs_with_reported_usage": 7,
+        "pairs_without_reported_usage": 0,
+        "verified_cost_usd": null
+      },
+      "consumer_status": "COMPLETE",
+      "execution_source_commit": "ac037c9643cdeda9a812516232f052e3190591e5",
+      "plan_sha256": "986919897baac1897b89d3d7b736436117ca6a29083e02e9a9984687bb0ec6fe",
+      "plan_variant": "semantic_choice_subset",
+      "published_receipt_inventory": {
+        "basis": "Published receipt declarations; consumer validation is reported separately.",
+        "pairs_without_receipt": 0,
+        "receipt_files": 7,
+        "reported_failed_pairs": 0,
+        "reported_failure_errors": {},
+        "reported_statuses": {
+          "observed_schema_valid": 7
+        },
+        "reported_usage": {
+          "fields": {
+            "completion_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 1775,
+              "reporting_receipts": 7
+            },
+            "prompt_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 10487,
+              "reporting_receipts": 7
+            },
+            "total_tokens": {
+              "pairs_without_reported_field": 0,
+              "reported_sum": 12262,
+              "reporting_receipts": 7
+            }
+          },
+          "planned_pairs_without_receipt": 0,
+          "receipts_without_usage": 0,
+          "verified_cost_usd": null
+        },
+        "reported_valid_observations": 7,
+        "requested_pairs": 7
+      },
+      "requested_lanes": [
+        "critic"
+      ],
+      "run": "pilot-06",
+      "start_index": 1
+    }
+  ],
+  "schema_version": 1,
+  "work_id": "META-LENS-ACCEL-FOLLOWUP-20261114"
+}

@@ -1,0 +1,49 @@
+{
+ "model": "nemotron-3.5-super-vl",
+ "synthetic_input_only": true,
+ "model_listed": true,
+ "tool_call": {
+  "seconds": 0.55,
+  "usage": {
+   "prompt_tokens": 437,
+   "total_tokens": 493,
+   "completion_tokens": 56,
+   "prompt_tokens_details": null,
+   "completion_tokens_details": {
+    "reasoning_tokens": 0
+   }
+  },
+  "finish_reason": "tool_calls",
+  "n_tool_calls": 1,
+  "content_head": "",
+  "name": "resolve_relative_date",
+  "arguments": {
+   "note_date": "2025-03-10",
+   "n": 3,
+   "unit": "weeks"
+  },
+  "arguments_valid": true,
+  "ok": true
+ },
+ "thinking": {
+  "seconds": 1.24,
+  "usage": {
+   "prompt_tokens": 556,
+   "total_tokens": 1217,
+   "completion_tokens": 661,
+   "prompt_tokens_details": null,
+   "completion_tokens_details": {
+    "reasoning_tokens": 613
+   }
+  },
+  "finish_reason": "stop",
+  "separate_reasoning_field": true,
+  "reasoning_chars": 1997,
+  "think_tag_in_content": false,
+  "content_head": "{\"entry_route\":\"SCREENING\",\"events\":[{\"type\":\"PHYSICIAN_ASSESSMENT\",\"date\":{\"kind\":\"ABSOLUTE\",\"date\":\"2024-07-29\"}}]}",
+  "parsed": true,
+  "exact": true
+ },
+ "ledger_requests": 2,
+ "request_errors": {}
+}

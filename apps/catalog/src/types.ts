@@ -8,7 +8,9 @@ export type Pet = {
   sources:Array<{id:string;title:string;url:string;publisher:string;checkedAt:string;summary:string}>;
   sourceEvidence:{roster:string;roleVerified:boolean;notes:string};
   availability:{content:string;runtime:string;companyEndorsed:boolean};
+  specialCapabilities?:SpecialCapability[];
 };
+export type SpecialCapability = {id:string;title:string;description:string;service:string;requiresConnection:boolean;status:'source-only'|'offline-demo'|'needs-host-connection';run?:string};
 export type Catalogue = {schemaVersion:1;collection:{id:string;title:string;sourceRevision:string;contentSha256:string};pets:Pet[]};
 export type HostConfig = {canonicalOrigin:string;locale:string;runtimeStatus:'unverified'|'verified';publishedSlugs:string[];verifiedAt:string|null};
 export type RoleFilter = 'all' | 'challenge' | 'technology' | 'more';

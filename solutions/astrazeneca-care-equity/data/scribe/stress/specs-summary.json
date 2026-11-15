@@ -1,0 +1,123 @@
+{
+ "set": "stress-v1",
+ "target": {
+  "standard": 150,
+  "terse": 70,
+  "long": 50,
+  "no_event": 35,
+  "no_event_terse": 15
+ },
+ "built": {
+  "standard": 150,
+  "terse": 70,
+  "long": 50,
+  "no_event": 35,
+  "no_event_terse": 15
+ },
+ "specifications": 320,
+ "ids_checked_against": {
+  "files": [
+   "data/scribe/dataset-v1/rejected.parquet",
+   "data/scribe/dataset-v1/test.parquet",
+   "data/scribe/dataset-v1/train.parquet",
+   "data/scribe/dataset-v1/val.parquet",
+   "data/scribe/v2/dataset/rejected.parquet",
+   "data/scribe/v2/dataset/test_haiku.parquet",
+   "data/scribe/v2/dataset/test_nemotron.parquet",
+   "data/scribe/v2/dataset/train.parquet",
+   "data/scribe/v2/dataset/val.parquet",
+   "data/scribe/v3/dataset/rejected.parquet",
+   "data/scribe/v3/dataset/test_haiku.parquet",
+   "data/scribe/v3/dataset/test_nemotron.parquet",
+   "data/scribe/v3/dataset/train.parquet",
+   "data/scribe/v3/dataset/val.parquet",
+   "data/scribe/v3/teacher/specs.jsonl",
+   "data/scribe/v3/dataset/round2.jsonl"
+  ],
+  "ids": 7254,
+  "collisions": 0
+ },
+ "seeds": {
+  "standard": 28261114,
+  "terse": 28361114,
+  "long": 28461114,
+  "no_event": 28561114,
+  "no_event_terse": 28611114,
+  "phrasing": 28661114,
+  "order": 28761114
+ },
+ "phrase_plan": {
+  "standard": 90,
+  "heldout": 148,
+  "no_event_heldout": 26,
+  "vague": 32,
+  "no_event_standard": 24
+ },
+ "notes_with_heldout_fact": 148,
+ "notes_with_vague_fact": 32,
+ "no_event_notes": 50,
+ "no_event_with_heldout_distractor": 26,
+ "fact_families": {
+  "month": 78,
+  "weeks": 94,
+  "numeric": 120,
+  "heldout_weeks_word": 101,
+  "heldout_days_word": 45,
+  "days": 64,
+  "vague": 32,
+  "no_year": 26,
+  "heldout_toissa": 36,
+  "long": 75
+ },
+ "events_per_note": {
+  "4": 69,
+  "2": 86,
+  "3": 54,
+  "1": 61
+ },
+ "builders": {
+  "standard": {
+   "indices_drawn": 150,
+   "skipped": {},
+   "plan": {
+    "standard": 50,
+    "heldout": 82,
+    "vague": 18
+   }
+  },
+  "terse": {
+   "indices_drawn": 251,
+   "skipped": {
+    "terse_needs_at_most_2_events_1_distractor": 181
+   },
+   "plan": {
+    "heldout": 38,
+    "standard": 24,
+    "vague": 8
+   }
+  },
+  "long": {
+   "indices_drawn": 77,
+   "skipped": {
+    "long_needs_3_events": 27
+   },
+   "plan": {
+    "heldout": 28,
+    "vague": 6,
+    "standard": 16
+   }
+  },
+  "no_event": {
+   "attempts": 36,
+   "rejected": {
+    "outside_season": 1
+   }
+  },
+  "no_event_terse": {
+   "attempts": 22,
+   "rejected": {
+    "outside_season": 7
+   }
+  }
+ }
+}

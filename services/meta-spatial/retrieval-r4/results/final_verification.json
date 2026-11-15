@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "source_commit": "e52a8d29d0a660d4830fd39a455b90eeae7c4de5",
+  "source_sha256": {
+    "check_cached_numerics.py": "bc833348c7c4ffc788be9e45824839a133146298fbc5edaf07c87ecba15c6184",
+    "test_features.py": "adaea416a787bd734b09f169cbcd71110f15cce95d3d33fbc2ce9e9f8063e388",
+    "test_experiment.py": "99473476a7b672ff6a061e3fc47d07e618f522924c307b68f4702d6793eb544e",
+    "comparison_protocol.json": "7d280946d56d07b59453267120e504fba193a16fa0e447074b1b8490d6b8657d",
+    "test_runtime.py": "9d499d19d05ad0d4b6a7ac5c884fe9b53ea3c5cf4fb25cdc73f0e70fb52b1690",
+    "prepare_candidates.py": "8c9b76325304dd94e872b95f475852a88ef3dc2be2fac47a2d1fb8ea4251f5b0",
+    "features.py": "f8754bd2c97a998f66099a0579c92d519b3130ea8bb4b060d3e1ca95f3b9164d",
+    "runtime.py": "a027a6b40f2495e0fb0c3fae3d86bd8cac59e4e5bff1dae09d1ce2ad23483512",
+    "R_MODEL.md": "c61cdc43d07d3d65041e227eba3812a8e356ee3c2947e9db5c29d4ebb38c79d5",
+    "README.md": "9cd536104157001f328e5657ffd70415e53d45a22b2a96015ad9824ea08803e0",
+    "final_verify.py": "2112f7ca269c5af3266d4886aa430fc849eba4f95ddc3d4f73036bbfa25b9b1c",
+    ".gitignore": "4c206e794c6a46d48fb1d94e2208b0d2363e64fe4fcc7faf9b1473438fb7c22e",
+    "compute_plan.json": "2257960ed6df05258d7440fcd4338b7f173ac0a7bebd42ba15706bb5d8dc2b57",
+    "REVIEW.md": "c4c43879e4bd2525f08a11527ac857841f3501b4f21be9e29b1b9c219e337e0e",
+    "run_experiment.py": "bffabea2914b9c008c466e75c3d7615c2cc2edc36344a23a7bc3d3a250f62002",
+    "train_reranker.R": "3a8a6cc620b6c5af94e36d8afd34b0fffc250412e1525ad91eece6a82ea28df5",
+    "contract.json": "a45f587632d1ab14aeaf7140051b4f0f440a4f7bdb75110dc2f6896581759154",
+    "test_reranker.R": "d5271c2836c3e5677238d19f54ac45f28d8c410e1959a8bc7626e5edf003af09"
+  },
+  "status": "PASS",
+  "runs": {
+    "run-01": {
+      "original_source_commit": "0faa839b99b8fbee06d88bab7fee5c9c7a0aa0ad",
+      "execution_sha256": "06768a3208c075f47674f3fe1591a4538730a5d15bf41a6fe9d7f859d245b035",
+      "model_sha256": "9198d6374cf9df2e7ada2fdc8a8805f61392ff2861b65ce6e9fd5177f86d9439",
+      "report_sha256": "0b26aed311162966a6bf4c52c5a0ee8eac976508cd7224f34b3bef97d35c2f33",
+      "independent_numerics_sha256": "d597783af0d615a51f11592c81182ed4b42516286fec1693fbdff3f0106e9943",
+      "original_artifacts_verified": 11,
+      "parity": {
+        "status": "PASS",
+        "candidate_rows": 644000,
+        "queries": 6440,
+        "max_absolute_score_difference": 5.1514348342607263e-14,
+        "max_absolute_confidence_difference": 5.684341886080802e-14,
+        "all_runtime_results_abstain": true,
+        "singleton_runtime": "no confidence; no diagnostic acceptance",
+        "qualification": false
+      }
+    },
+    "run-02": {
+      "original_source_commit": "944cdde3705e742e06f0ece5604c721950c19c1a",
+      "execution_sha256": "bed4420668ad4df7608b955b62701af0079081f375991c133df774073895d758",
+      "model_sha256": "4f6db7b937a244b2a6cdf5298d6087bcd84d01445219882c2b7d041986a3a0b6",
+      "report_sha256": "8eda9a3d532b931bc93a765e555bc9008ce9d3c781d1c9efef583e6db515ca80",
+      "independent_numerics_sha256": "777f838517705e29e82806ad893776ff106c324a11535ad8b5f88860aeb1bd58",
+      "original_artifacts_verified": 11,
+      "parity": {
+        "status": "PASS",
+        "candidate_rows": 644000,
+        "queries": 6440,
+        "max_absolute_score_difference": 5.3290705182007514e-14,
+        "max_absolute_confidence_difference": 5.684341886080802e-14,
+        "all_runtime_results_abstain": true,
+        "singleton_runtime": "no confidence; no diagnostic acceptance",
+        "qualification": false
+      }
+    }
+  },
+  "checks": [
+    {
+      "name": "python_focused_checks",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "test_duplicate_query_summary_is_rejected (test_experiment.ParityAdmissionTests.test_duplicate_query_summary_is_rejected) ... ok\ntest_nonfinite_reference_confidence_is_rejected (test_experiment.ParityAdmissionTests.test_nonfinite_reference_confidence_is_rejected) ... ok\ntest_valid_outputs_pass (test_experiment.ParityAdmissionTests.test_valid_outputs_pass) ... ok\ntest_density_uses_ten_highest_queries_not_all_queries (test_features.FeatureNumerics.test_density_uses_ten_highest_queries_not_all_queries) ... ok\ntest_explicit_adapted_topk_preserves_original_order_and_default_rrf (test_features.FeatureNumerics.test_explicit_adapted_topk_preserves_original_order_and_default_rrf) ... ok\ntest_features_match_independent_scalar_reference (test_features.FeatureNumerics.test_features_match_independent_scalar_reference) ... ok\ntest_multiview_pools_only_registered_views_and_rejects_query_leak (test_features.FeatureNumerics.test_multiview_pools_only_registered_views_and_rejects_query_leak) ... ok\ntest_nonfinite_unscaled_and_duplicate_inputs_rejected (test_features.FeatureNumerics.test_nonfinite_unscaled_and_duplicate_inputs_rejected) ... ok\ntest_ranks_preserve_ties_in_both_directions (test_features.FeatureNumerics.test_ranks_preserve_ties_in_both_directions) ... ok\ntest_rrf_union_is_deterministic_capped_and_has_no_truth_input (test_features.FeatureNumerics.test_rrf_union_is_deterministic_capped_and_has_no_truth_input) ... ok\ntest_cache_receipt_order_hash_and_model_binding (test_features.SourceAdmission.test_cache_receipt_order_hash_and_model_binding) ... ok\ntest_export_reports_missing_truth_without_injection_or_family_features (test_features.SourceAdmission.test_export_reports_missing_truth_without_injection_or_family_features) ... ok\ntest_family_and_image_leakage_are_independently_rejected (test_features.SourceAdmission.test_family_and_image_leakage_are_independently_rejected) ... ok\ntest_invalid_views_and_duplicate_products_rejected (test_features.SourceAdmission.test_invalid_views_and_duplicate_products_rejected) ... ok\ntest_feature_and_authority_admission (test_runtime.RuntimeTests.test_feature_and_authority_admission) ... ok\ntest_finite_ranks_cannot_overflow_confidence (test_runtime.RuntimeTests.test_finite_ranks_cannot_overflow_confidence) ... ok\ntest_hash_and_duplicate_field_binding (test_runtime.RuntimeTests.test_hash_and_duplicate_field_binding) ... ok\ntest_numeric_parity_and_no_authorization (test_runtime.RuntimeTests.test_numeric_parity_and_no_authorization) ... ok\n\n----------------------------------------------------------------------\nRan 18 tests in 0.076s\n\nOK\n"
+    },
+    {
+      "name": "r_focused_checks",
+      "exit_code": 0,
+      "stdout": "PASS train-only scaler and zero-variance handling\nPASS family/query weighting does not reward extra candidate rows\nPASS analytic gradient matches finite differences\nPASS real parameter fit improves deliberately wrong baseline\nPASS RRF may omit original top1 without dropping the query denominator\nPASS test labels cannot select model or acceptance policy\nPASS missing positives stay in recall denominator and deterministic ties\nPASS small calibration abstains and full qualification always remains false\nPASS conditional family evidence counts clusters, not video-like duplicates\nPASS reject leakage, duplicate rows, nonfinite features and invalid supervision\nPASS manifest hash/admission and portable JSON round trip\nR4 focused checks: 11 passed\n",
+      "stderr": ""
+    }
+  ],
+  "qualification": false,
+  "hosted_ci": false,
+  "elapsed_seconds": 24.52520237500721
+}

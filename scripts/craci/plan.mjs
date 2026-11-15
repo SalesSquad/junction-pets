@@ -29,10 +29,28 @@ const SPONSOR_PINS = Object.freeze({
   '2129': '083afd994c1c9a994cb2cd5aa0b6ad805a621457',
   '2297': 'a0aa5ab2de7f5a669d97e37184a89034c1de82b6',
 });
+const FRONTIER_PINS = Object.freeze({
+  'rokoko-heldout': '0390b87a54ad5cbc98fd5d781f828be0cfa8fbe8',
+  'arduino-proof-48': 'eb7ff4cb7fa6c867ced7d944385b4e0bd08d04c4',
+  'valio-settlement-browser': 'd45f450a38ec6c8fb2f73b96d181454458ae3928',
+  'valio-http-race': 'd45f450a38ec6c8fb2f73b96d181454458ae3928',
+  'valio-funding-race': 'd45f450a38ec6c8fb2f73b96d181454458ae3928',
+  'bahn-offline-sweep': 'a4396d5ead2acc3d3db5e9a456af7f48058bb358',
+  'rokoko-rl-cpu': '59479b42b177c1829a2e6678adfff1fb68aef09c',
+  'rokoko-rl-full': '59479b42b177c1829a2e6678adfff1fb68aef09c',
+  'aalto-consent-browser': '1a02a0bb650598571b63554312c7b5e82b323c7f',
+  'astra-equity-browser': 'ebff750c176838123311affed06082e8144001f5',
+  'rokoko-rl-seed-sweep': '59479b42b177c1829a2e6678adfff1fb68aef09c',
+  'rokoko-rl-ablations': '59479b42b177c1829a2e6678adfff1fb68aef09c',
+});
 export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
+  'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision', 'lens-hb-scene8-ood', 'lens-hb-six-feedback', 'lens-six-unknown-ml',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab',
+  'rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-mujoco-v12-pilot', 'rokoko-mujoco-v13-causal', 'rokoko-mujoco-v13-pilot', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos',
+  'rokoko-r-tournament', 'hf-open3d-ml',
 ]);
 
 function choose(value, choices, label) {
@@ -57,6 +75,8 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
   const shard = choose(input.shard || 'all', ['all', '0', '1', '2', '3'], 'shard');
   const toolchain = choose(input.tieto_toolchain || 'pinned', ['pinned', 'compatible'], 'Tieto toolchain');
   const revision = choose(input.sponsor_revision || 'base', ['base', '2283', '2234', '2129', '2297', 'heads', 'all'], 'sponsor revision');
+  const epoch = String(input.epoch || '1');
+  if (!/^(?:[1-9]|1[0-2])$/.test(epoch)) throw new Error('Immune epoch must be 1 through 12');
   const product = input.product || 'stoa';
   choose(product, ['stoa', 'valio', ...Object.keys(PRODUCT_PINS), 'all'], 'product');
   const include = [];
@@ -76,6 +96,135 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override) throw new Error('Tieto uses sponsor_revision pins; source_sha is unsupported for this workload');
     const revisions = revision === 'all' ? ['base', '2283', '2234', '2129', '2297'] : revision === 'heads' ? ['2283', '2234', '2129', '2297'] : [revision];
     for (const rev of revisions) add(`tieto-${rev}-${toolchain}`, SPONSOR_PINS[rev], {revision: rev, source_repository: 'te-industry-tech-office/junction26-messagepack-csharp'});
+  } else if (['meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x'].includes(workload)) {
+    // These are frozen synthetic five-score model experiments, not image recognition.
+    const meta = '634f1e0e6cb2de46bcf0a783532d46c23f513d11';
+    if (override && override !== meta) throw new Error('Meta R source must match frozen candidate SHA');
+    const hard = workload === 'meta-r-hardshift-2x';
+    const n = hard ? 24 : workload === 'meta-r-robust' ? 12 : 8;
+    for (let cohort = 0; cohort < n; cohort++) {
+      const prefix = hard ? 'meta-r-hardshift-2x' : workload === 'meta-r-robust' ? 'meta-r-robust' : 'meta-r';
+      add(`${prefix}-${cohort}`, meta, {cohort});
+    }
+  } else if (workload === 'lens-r8-meta') {
+    if (override && override !== harnessSha) throw new Error('Lens R8 requires the pinned immutable harness');
+    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining'], 'R8 lane slice');
+    const arms = ['color-logit','color-balanced','fusion-logit','fusion-balanced',
+      'texture-tree','quality-logit','centroid-shrink','consensus-ensemble'];
+    for (const [index, arm] of arms.entries()) {
+      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
+      add(`lens-r8-${index}-${arm}`, harnessSha, {arm, iteration: index + 1});
+    }
+  } else if (workload === 'lens-six-ml') {
+    // Exactly six pretrained hypotheses on public numeric BOP features.
+    if (override && override !== harnessSha) throw new Error('Lens ML source must equal exact harness SHA');
+    for (let round=1; round<=6; round++) {
+      add(`lens-six-${round}`, harnessSha, {round});
+    }
+  } else if (workload === 'lens-real-bop-train') {
+    // Admitted public BOP YCB-Video features are stored at the pinned harness source.
+    if (override && override !== harnessSha) throw new Error('Real RGB numeric features must use exact source/harness SHA');
+    for (const profile of ['all','color','spatial','gradient']) {
+      add(`lens-real-${profile}`, harnessSha, {profile});
+    }
+  } else if (workload === 'lens-r3-methods') {
+    if (when.getTime() >= Date.parse(WINDOW_END) - 31 * 60 * 1000) throw new Error('Lens R3 31-minute admission cutoff reached');
+    if (override && override !== harnessSha) throw new Error('Lens R3 requires pinned immutable harness');
+    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining'], 'R3 lane slice');
+    const methods = ['risk-upper', 'metadata-shield', 'hard-negative'];
+    for (const [index, method] of methods.entries()) {
+      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0)) continue;
+      add(`lens-r3-${index}-${method}`, harnessSha, {method, iteration: index + 1});
+    }
+  } else if (workload === 'lens-hb-vision') {
+    if (override && override !== harnessSha) throw new Error('HB real Vision study requires exact harness source SHA');
+    const slice = choose(input.lane_slice || 'all', ['all', 'pilot', 'remaining', 'selection-repair'], 'HB lane slice');
+    for (const [index, model] of ['color', 'vision_prototype', 'vision_pca', 'vision_guard'].entries()) {
+      if ((slice === 'pilot' && index !== 0) || (slice === 'remaining' && index === 0) ||
+          (slice === 'selection-repair' && !['vision_prototype', 'vision_guard'].includes(model))) continue;
+      add(`hb-vision-${index}-${model}`, harnessSha, {model});
+    }
+  } else if (workload === 'lens-hb-six-feedback') {
+    // Six disjoint dev frame folds from public scene10. NEVER test scene8/11.
+    // Each cell runs six sequential train/cal-only corrective learning stages.
+    if (override && override !== harnessSha)
+      throw new Error('HB six-stage learning requires exact source/harness SHA');
+    const selected = choose(input.learning_fold || 'all',
+      ['all','0','1','2','3','4','5'], 'HB six-feedback fold');
+    for (let fold=0; fold<6; fold++) {
+      if (selected !== 'all' && selected !== String(fold)) continue;
+      add(`hb-dev-fold-${fold}`, harnessSha, {fold});
+    }
+  } else if (workload === 'lens-six-unknown-ml') {
+    if (override && override !== harnessSha)
+      throw new Error('HB six unknown-ML requires exact source/harness SHA');
+    const selected = choose(input.learning_fold || 'all',
+      ['all','remaining','0','1','2','3','4','5'], 'HB unknown-ML fold');
+    for (let fold=0; fold<6; fold++) {
+      if ((selected === 'remaining' && fold === 0) ||
+          (!['all','remaining'].includes(selected) && selected !== String(fold))) continue;
+      add('hb-unknown-fold-' + fold, harnessSha, {fold});
+    }
+  } else if (workload === 'lens-hb-scene8-ood') {
+    // A single new public physical-scene contrast. No previously exposed
+    // test11, no upload of original image crops, no automatic model promotion.
+    if (override && override !== harnessSha)
+      throw new Error('HB scene8 OOD requires exact source/harness SHA');
+    add('hb-scene8-ood-public', harnessSha, {scene: 8});
+  } else if (['rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-mujoco-v12-pilot', 'rokoko-mujoco-v13-causal', 'rokoko-mujoco-v13-pilot', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos'].includes(workload)) {
+    // New portable product qualifications have no stale fallback pin; the caller
+    // must provide the exact reviewed task commit before CRACI reserves capacity.
+    if (!override) throw new Error(`${workload} requires an explicit source_sha`);
+    if (workload === 'rokoko-mujoco-v12-pilot' &&
+        override !== '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f')
+      throw new Error('V12 pilot requires exact reviewed source_sha');
+    if (workload === 'rokoko-mujoco-v13-pilot' &&
+        override !== 'faec266d6d3a44af3a564f46e0778209c1dc3af1')
+      throw new Error('V13 pilot requires exact prospective source_sha');
+    add(workload, override, {qualification: 'product-source'});
+  } else if (workload === 'hf-open3d-ml') {
+    if (override && override !== harnessSha) throw new Error('Open 3D study requires exact harness source');
+    if (when.getTime() >= Date.parse(WINDOW_END) - 300 * 60 * 1000)
+      throw new Error('Open 3D campaign requires five hours before the credit deadline');
+    // Three pilot cells (fold 0/ridge) run first. These 42 are the rest.
+    for (const line of ['v2d', 'g1', 'robo']) {
+      for (let fold = 0; fold < 5; fold++) {
+        for (const method of ['ridge', 'trees', 'mlp']) {
+          if (fold === 0 && method === 'ridge') continue;
+          add(`open3d-${line}-${fold}-${method}`, harnessSha, {line, fold, method});
+        }
+      }
+    }
+  } else if (workload === 'immune-tournament') {
+    if (override && override !== harnessSha) throw new Error('Immune source must match pinned harness SHA');
+    for (let index = 0; index < 4; index++) {
+      add(`immune-${epoch}-${index}`, harnessSha, {epoch: Number(epoch), seed: Number(epoch) * 1009 + index * 17});
+    }
+  } else if (workload === 'chaos-lab') {
+    if (override && override !== harnessSha) throw new Error('Chaos source must match pinned harness SHA');
+    for (const [index, profile] of ['provenance', 'network', 'control', 'evidence'].entries()) {
+      add(`chaos-${epoch}-${profile}`, harnessSha, {epoch: Number(epoch), profile,
+        seed: Number(epoch) * 10007 + index * 73});
+    }
+  } else if (workload === 'rokoko-r-tournament') {
+    const simulator = '59479b42b177c1829a2e6678adfff1fb68aef09c';
+    if (override && override !== simulator) throw new Error('R tournament requires pinned simulator SHA');
+    for (let cohort = 0; cohort < 4; cohort++) {
+      add(`rokoko-r-${cohort}`, simulator, {cohort});
+    }
+  } else if (workload === 'rokoko-rl-ablations') {
+    for (const learnerSeed of [17,43]) add(`rokoko-ablation-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});
+  } else if (workload === 'rokoko-rl-seed-sweep') {
+    for (const learnerSeed of [17,23,31,43,59,67,73,89]) add(`rokoko-learner-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});
+  } else if (['aalto-consent-browser','astra-equity-browser'].includes(workload)) {
+    const clinicalProduct = workload === 'aalto-consent-browser' ? 'aalto' : 'astra';
+    for (const engine of selectedEngines) add(`${clinicalProduct}-${engine}`, override || FRONTIER_PINS[workload], {browser: engine, product: clinicalProduct});
+  } else if (workload === 'bahn-offline-sweep') {
+    for (let seedShard = 0; seedShard < 8; seedShard++) add(`bahn-offline-${seedShard}`, override || FRONTIER_PINS[workload], {seed_shard: seedShard});
+  } else if (workload === 'valio-settlement-browser') {
+    for (const engine of selectedEngines) add(`valio-settlement-${engine}`, override || FRONTIER_PINS[workload], {browser: engine, product: 'valio'});
+  } else if (Object.hasOwn(FRONTIER_PINS, workload)) {
+    add(workload, override || FRONTIER_PINS[workload]);
   } else {
     if (workload === 'sbank-sponsor' && !override) throw new Error('sbank-sponsor requires source_sha');
     const source = override || BASELINES[workload] || harnessSha;
@@ -90,8 +239,8 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     }
   }
   return {schemaVersion: 1, workload, harnessSha, selectedAt: when.toISOString(), windowEnd: WINDOW_END,
-    sourceOverride: override || null, maxParallel: Math.min(8, include.length),
-    jobCount: workload === 'cache-proof' ? 2 : include.length, matrix: {include}};
+    sourceOverride: override || null, maxParallel: ['lens-hb-six-feedback','lens-six-unknown-ml'].includes(workload) ? Math.min(4,include.length) : ['meta-r-hardshift-2x','lens-six-ml','hf-open3d-ml'].includes(workload) ? Math.min(6, include.length) : Math.min(8, include.length),
+    jobCount: workload === 'cache-proof' ? 2 : workload === 'hf-open3d-ml' ? include.length + 5 : include.length, matrix: {include}};
 }
 
 async function main() {

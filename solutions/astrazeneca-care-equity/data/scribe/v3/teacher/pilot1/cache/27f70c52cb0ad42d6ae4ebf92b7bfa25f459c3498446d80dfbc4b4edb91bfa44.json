@@ -1,0 +1,107 @@
+{
+ "id": "27f70c52cb0ad42d6ae4ebf92b7bfa25f459c3498446d80dfbc4b4edb91bfa44",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas hakeutui päivystykseen 212 päivää sitten, ja päivystävä lääkäri tutki ja arvioi hänet. Lähettävä lääkäri lähetti lähetteen erikoissairaanhoitoon marraskuussa 2025, ja se saapui sekä rekisteröitiin erikoissairaanhoidon yksikköön 10 viikkoa sitten. Syöpähoito aloitettiin 25.3. Aiempi rokotuskäynti, joka ei liity syöpään, oli 6.12.2024. Syntymäaika on 12.1.1951. Potilas voi tällä hetkellä kohtalaisesti, selviytyy kotona ja on saanut neuvontaa.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:55 outside 60-140"
+    ],
+    "words": 55,
+    "v1_ok": false
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 883,
+      "total_tokens": 1069,
+      "completion_tokens": 186,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.08
+    }
+   ],
+   "repair_request": [
+    "The note has 55 words. Write 85 to 120 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas hakeutui päivystykseen 212 päivää sitten, ja päivystävä lääkäri tutki ja arvioi hänet. Lähettävä lääkäri lähetti lähetteen erikoissairaanhoitoon marraskuussa 2025, ja se saapui sekä rekisteröitiin erikoissairaanhoidon yksikköön 10 viikkoa sitten. Syöpähoito aloitettiin 25.3. Aiempi rokotuskäynti, joka ei liity syöpään, oli 6.12.2024. Syntymäaika on 12.1.1951. Potilas voi tällä hetkellä kohtalaisesti, selviytyy kotona itsenäisesti ja on saanut neuvontaa sekä tukea. Voimavarat ovat riittävät, ja arjen toiminnot sujuvat. Seuranta jatkuu sovitun mukaisesti.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 69,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "EMERGENCY",
+     "events": [
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-09-30",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2025-11-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-02-19",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-03-25",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1149,
+      "total_tokens": 1374,
+      "completion_tokens": 225,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.67
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 813,
+      "total_tokens": 938,
+      "completion_tokens": 125,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.77
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:52+00:00"
+}

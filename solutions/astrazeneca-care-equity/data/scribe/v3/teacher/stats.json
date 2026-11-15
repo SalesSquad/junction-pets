@@ -1,0 +1,443 @@
+{
+ "round": 2,
+ "teacher_model": "nemotron-3.5-super-vl",
+ "generated_utc": "2026-11-14T18:45:25+00:00",
+ "synthetic": true,
+ "requests": {
+  "teacher_requests_ledger": 4042,
+  "cap": 5500,
+  "calls_in_completed_specifications": {
+   "write": 1600,
+   "readback": 1761,
+   "repair": 289
+  },
+  "calls_in_completed_specifications_total": 3650,
+  "requests_outside_candidates": {
+   "total": 392,
+   "pilot1_first_prompts_notes_kept_in_pilot1_not_used": 118,
+   "superseded_long_notes_told_in_time_order_kept_in_superseded": 197,
+   "lost_unrecorded_replies_of_one_aborted_pilot_run_import_error": 77
+  },
+  "request_errors": {}
+ },
+ "wall_seconds": {
+  "total": 325.9,
+  "runs": [
+   {
+    "command": "protocol.py run --limit 40 --deadline 18:44",
+    "wall_seconds": 15.1,
+    "teacher_requests": 118
+   },
+   {
+    "command": "protocol.py run --limit 40 --deadline 18:48",
+    "wall_seconds": 8.2,
+    "teacher_requests": 83
+   },
+   {
+    "command": "protocol.py run --limit 40 --deadline 18:48",
+    "wall_seconds": 6.7,
+    "teacher_requests": 82
+   },
+   {
+    "command": "protocol.py run --deadline 19:00",
+    "wall_seconds": 268.8,
+    "teacher_requests": 3551
+   },
+   {
+    "command": "protocol.py regen-long",
+    "wall_seconds": 27.1,
+    "teacher_requests": 208
+   }
+  ]
+ },
+ "specifications": {
+  "target": 1600,
+  "built": 1600,
+  "completed": 1600,
+  "not_completed": 0
+ },
+ "definitions": {
+  "code_check": "scribe/verify.py code_check: every planned date string present, nothing else looks like a date; words 60-140 for hard_standard, careful, no_event; 110-260 for long_multi_visit; 25-90 for terse",
+  "readback": "a fresh teacher call that sees only the note, the note date and the event-type definitions; consistent = its canonical JSON equals the answer key exactly; run only on a note that passed the code check",
+  "repair": "one rewrite when the first note failed the code check or the read-back; repair_success = the rewritten note passes the code check and its read-back equals the answer key",
+  "final": "the kept note: the attempt with the better (code check, read-back) result, the rewrite on a tie",
+  "denominators": "first-attempt read-back: first notes that passed the code check; final read-back: kept notes that were read back; repair_success: specifications with a repair",
+  "told_out_of_chronological_order": "among kept notes with two or more events and every event date string present: the date strings do not appear in time order",
+  "regenerated": "long_multi_visit specifications whose first protocol run gave a note told in time order were run through the protocol once more with the telling order stated explicitly; the earlier record is in superseded/ and is not in these rates"
+ },
+ "overall": {
+  "specifications": 1600,
+  "completed": 1600,
+  "code_check_pass_first_attempt": {
+   "numerator": 1486,
+   "denominator": 1600,
+   "rate": 0.9287
+  },
+  "code_check_pass_final": {
+   "numerator": 1589,
+   "denominator": 1600,
+   "rate": 0.9931
+  },
+  "readback_consistent_first_attempt": {
+   "numerator": 1311,
+   "denominator": 1486,
+   "rate": 0.8822
+  },
+  "readback_consistent_final": {
+   "numerator": 1465,
+   "denominator": 1589,
+   "rate": 0.922
+  },
+  "clean_first_attempt": {
+   "numerator": 1311,
+   "denominator": 1600,
+   "rate": 0.8194
+  },
+  "clean_final": {
+   "numerator": 1465,
+   "denominator": 1600,
+   "rate": 0.9156
+  },
+  "repair_attempted": {
+   "numerator": 289,
+   "denominator": 1600,
+   "rate": 0.1806
+  },
+  "repair_success": {
+   "numerator": 154,
+   "denominator": 289,
+   "rate": 0.5329
+  },
+  "first_readback_difference_classes": {
+   "extra_event": 110,
+   "wrong_type": 14,
+   "wrong_date": 42,
+   "invalid_output": 9,
+   "missing_event": 5,
+   "wrong_route": 9
+  },
+  "final_readback_difference_classes": {
+   "extra_event": 78,
+   "wrong_route": 6,
+   "wrong_date": 31,
+   "invalid_output": 7,
+   "wrong_type": 9
+  },
+  "told_out_of_chronological_order": {
+   "numerator": 264,
+   "denominator": 1220,
+   "rate": 0.2164
+  },
+  "regenerated": 90
+ },
+ "per_curriculum": {
+  "hard_standard": {
+   "specifications": 480,
+   "completed": 480,
+   "code_check_pass_first_attempt": {
+    "numerator": 471,
+    "denominator": 480,
+    "rate": 0.9812
+   },
+   "code_check_pass_final": {
+    "numerator": 479,
+    "denominator": 480,
+    "rate": 0.9979
+   },
+   "readback_consistent_first_attempt": {
+    "numerator": 451,
+    "denominator": 471,
+    "rate": 0.9575
+   },
+   "readback_consistent_final": {
+    "numerator": 473,
+    "denominator": 479,
+    "rate": 0.9875
+   },
+   "clean_first_attempt": {
+    "numerator": 451,
+    "denominator": 480,
+    "rate": 0.9396
+   },
+   "clean_final": {
+    "numerator": 473,
+    "denominator": 480,
+    "rate": 0.9854
+   },
+   "repair_attempted": {
+    "numerator": 29,
+    "denominator": 480,
+    "rate": 0.0604
+   },
+   "repair_success": {
+    "numerator": 22,
+    "denominator": 29,
+    "rate": 0.7586
+   },
+   "first_readback_difference_classes": {
+    "extra_event": 15,
+    "wrong_route": 1,
+    "wrong_type": 3,
+    "invalid_output": 1
+   },
+   "final_readback_difference_classes": {
+    "wrong_route": 3,
+    "wrong_type": 2,
+    "extra_event": 1
+   },
+   "told_out_of_chronological_order": {
+    "numerator": 7,
+    "denominator": 480,
+    "rate": 0.0146
+   },
+   "regenerated": 0
+  },
+  "careful": {
+   "specifications": 400,
+   "completed": 400,
+   "code_check_pass_first_attempt": {
+    "numerator": 396,
+    "denominator": 400,
+    "rate": 0.99
+   },
+   "code_check_pass_final": {
+    "numerator": 400,
+    "denominator": 400,
+    "rate": 1.0
+   },
+   "readback_consistent_first_attempt": {
+    "numerator": 365,
+    "denominator": 396,
+    "rate": 0.9217
+   },
+   "readback_consistent_final": {
+    "numerator": 385,
+    "denominator": 400,
+    "rate": 0.9625
+   },
+   "clean_first_attempt": {
+    "numerator": 365,
+    "denominator": 400,
+    "rate": 0.9125
+   },
+   "clean_final": {
+    "numerator": 385,
+    "denominator": 400,
+    "rate": 0.9625
+   },
+   "repair_attempted": {
+    "numerator": 35,
+    "denominator": 400,
+    "rate": 0.0875
+   },
+   "repair_success": {
+    "numerator": 20,
+    "denominator": 35,
+    "rate": 0.5714
+   },
+   "first_readback_difference_classes": {
+    "wrong_type": 1,
+    "wrong_date": 11,
+    "wrong_route": 4,
+    "extra_event": 15,
+    "invalid_output": 2
+   },
+   "final_readback_difference_classes": {
+    "wrong_route": 2,
+    "wrong_date": 11,
+    "invalid_output": 1,
+    "extra_event": 2
+   },
+   "told_out_of_chronological_order": {
+    "numerator": 20,
+    "denominator": 324,
+    "rate": 0.0617
+   },
+   "regenerated": 0
+  },
+  "no_event": {
+   "specifications": 240,
+   "completed": 240,
+   "code_check_pass_first_attempt": {
+    "numerator": 202,
+    "denominator": 240,
+    "rate": 0.8417
+   },
+   "code_check_pass_final": {
+    "numerator": 238,
+    "denominator": 240,
+    "rate": 0.9917
+   },
+   "readback_consistent_first_attempt": {
+    "numerator": 130,
+    "denominator": 202,
+    "rate": 0.6436
+   },
+   "readback_consistent_final": {
+    "numerator": 170,
+    "denominator": 238,
+    "rate": 0.7143
+   },
+   "clean_first_attempt": {
+    "numerator": 130,
+    "denominator": 240,
+    "rate": 0.5417
+   },
+   "clean_final": {
+    "numerator": 170,
+    "denominator": 240,
+    "rate": 0.7083
+   },
+   "repair_attempted": {
+    "numerator": 110,
+    "denominator": 240,
+    "rate": 0.4583
+   },
+   "repair_success": {
+    "numerator": 40,
+    "denominator": 110,
+    "rate": 0.3636
+   },
+   "first_readback_difference_classes": {
+    "extra_event": 78,
+    "invalid_output": 1
+   },
+   "final_readback_difference_classes": {
+    "extra_event": 72,
+    "invalid_output": 1
+   },
+   "told_out_of_chronological_order": {
+    "numerator": 0,
+    "denominator": 0,
+    "rate": null
+   },
+   "regenerated": 0
+  },
+  "long_multi_visit": {
+   "specifications": 240,
+   "completed": 240,
+   "code_check_pass_first_attempt": {
+    "numerator": 222,
+    "denominator": 240,
+    "rate": 0.925
+   },
+   "code_check_pass_final": {
+    "numerator": 233,
+    "denominator": 240,
+    "rate": 0.9708
+   },
+   "readback_consistent_first_attempt": {
+    "numerator": 199,
+    "denominator": 222,
+    "rate": 0.8964
+   },
+   "readback_consistent_final": {
+    "numerator": 219,
+    "denominator": 233,
+    "rate": 0.9399
+   },
+   "clean_first_attempt": {
+    "numerator": 199,
+    "denominator": 240,
+    "rate": 0.8292
+   },
+   "clean_final": {
+    "numerator": 219,
+    "denominator": 240,
+    "rate": 0.9125
+   },
+   "repair_attempted": {
+    "numerator": 41,
+    "denominator": 240,
+    "rate": 0.1708
+   },
+   "repair_success": {
+    "numerator": 20,
+    "denominator": 41,
+    "rate": 0.4878
+   },
+   "first_readback_difference_classes": {
+    "wrong_date": 15,
+    "invalid_output": 4,
+    "missing_event": 3,
+    "extra_event": 1,
+    "wrong_route": 2
+   },
+   "final_readback_difference_classes": {
+    "wrong_date": 9,
+    "invalid_output": 5,
+    "extra_event": 1
+   },
+   "told_out_of_chronological_order": {
+    "numerator": 237,
+    "denominator": 237,
+    "rate": 1.0
+   },
+   "regenerated": 90
+  },
+  "terse": {
+   "specifications": 240,
+   "completed": 240,
+   "code_check_pass_first_attempt": {
+    "numerator": 195,
+    "denominator": 240,
+    "rate": 0.8125
+   },
+   "code_check_pass_final": {
+    "numerator": 239,
+    "denominator": 240,
+    "rate": 0.9958
+   },
+   "readback_consistent_first_attempt": {
+    "numerator": 166,
+    "denominator": 195,
+    "rate": 0.8513
+   },
+   "readback_consistent_final": {
+    "numerator": 218,
+    "denominator": 239,
+    "rate": 0.9121
+   },
+   "clean_first_attempt": {
+    "numerator": 166,
+    "denominator": 240,
+    "rate": 0.6917
+   },
+   "clean_final": {
+    "numerator": 218,
+    "denominator": 240,
+    "rate": 0.9083
+   },
+   "repair_attempted": {
+    "numerator": 74,
+    "denominator": 240,
+    "rate": 0.3083
+   },
+   "repair_success": {
+    "numerator": 52,
+    "denominator": 74,
+    "rate": 0.7027
+   },
+   "first_readback_difference_classes": {
+    "wrong_date": 16,
+    "wrong_type": 10,
+    "wrong_route": 2,
+    "extra_event": 1,
+    "missing_event": 2,
+    "invalid_output": 1
+   },
+   "final_readback_difference_classes": {
+    "wrong_date": 11,
+    "wrong_type": 7,
+    "extra_event": 2,
+    "wrong_route": 1
+   },
+   "told_out_of_chronological_order": {
+    "numerator": 0,
+    "denominator": 179,
+    "rate": 0.0
+   },
+   "regenerated": 0
+  }
+ }
+}

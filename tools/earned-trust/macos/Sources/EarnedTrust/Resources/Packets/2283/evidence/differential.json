@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "workId": "TIETO-MACOS-20261115",
+  "caseId": "MP2283-metadata-generic-struct-resolver",
+  "createdAt": "2026-11-14T23:17:08.915832+00:00",
+  "repository": {
+    "url": "https://github.com/te-industry-tech-office/junction26-messagepack-csharp",
+    "baseSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+    "headSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4"
+  },
+  "harness": {
+    "path": "tools/earned-trust/verification",
+    "sha256": "96961b0d0267a9988aef04e278bcf2eba715c18a5667224f752e199619304327",
+    "inputSha256": "723dc3d529194a22083046dc6ce7f267892e48ab08df09eca825a204a9a22bf6",
+    "files": {
+      "Program.cs": "86263705a686e24d90e4de7a61ae47fcad7e538cafd7ccd41772f220662073bc",
+      "FrozenCheck.csproj": "6eeb129bf8b79e301949359ca068029fff3890d8933c9888901179a8b7fd050a",
+      "global.json": "04d20cb75e9c4955787486dc9208fbbce63fc26fc043f42553ee61f0f389cc5a",
+      "fixtures/Library.cs": "ec0bcc447a14e2e48fff0e4e4012fa3794eb7e67fd024f5082e53c2f888a178e",
+      "fixtures/Application.cs": "c87eaba3b1a67f60dd0e57bed60418a7ce253bdf4fdab391064122b17d1ec0c1",
+      "run.py": "9b5ec27b430d89bd7cae2a2a0d6d487f5e0aa840d01a40e5488c6e19524665e0"
+    }
+  },
+  "environment": {
+    "sdkVersion": "9.0.100",
+    "runtimeTarget": "net8.0",
+    "sdkArchiveSha512": "7f69bda047de1f952286be330a5e858171ded952d1aa24169e62212f90a27149e63b636c88ad313a6e3ec860da31f8c547ff4ab6808103a070f7fb26ba99c1c7",
+    "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "runtimes": [
+      "Microsoft.AspNetCore.App 9.0.0 [/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/shared/Microsoft.AspNetCore.App]",
+      "Microsoft.NETCore.App 8.0.11 [/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/shared/Microsoft.NETCore.App]",
+      "Microsoft.NETCore.App 9.0.0 [/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/shared/Microsoft.NETCore.App]"
+    ],
+    "compatibilityExperiment": true,
+    "originalSdkVersion": "8.0.402",
+    "originalSdkExecuted": false,
+    "toolchainMetadataSha256": "a57d4834d7cc313d212c09de3e2581ebcde61ac961ed40aed45935f940489c4e"
+  },
+  "revisions": [
+    {
+      "role": "base",
+      "sourceSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+      "sourceTree": "b5d1e9794b7253350ede75f5c38cf8b5906d63b7",
+      "sourceArchiveSha256": "7b3a69e5ff66aa92aeac93d689eab95f0cd3f294bd445de661429d4fc7888762",
+      "upstreamGlobalJsonSha256": "93a54ce25a689f2a6b6f48f243d504d00db4f92df658726a2f59126df6ca0fd4",
+      "harnessSha256": "96961b0d0267a9988aef04e278bcf2eba715c18a5667224f752e199619304327",
+      "executionOverlaySha256": "04d20cb75e9c4955787486dc9208fbbce63fc26fc043f42553ee61f0f389cc5a",
+      "status": "fail",
+      "exitCode": 1,
+      "diagnostics": [
+        {
+          "id": "AD0001",
+          "severity": "warning",
+          "message": "Analyzer 'MessagePack.SourceGenerator.Analyzers.MsgPack00xMessagePackAnalyzer' threw an exception of type 'System.IndexOutOfRangeException' with message 'Index was outside the bounds of the array.'.\r\nException occurred with following context:\r\nCompilation: FrozenApplication\nISymbol: Cmd (NamedType)\n\nSystem.IndexOutOfRangeException: Index was outside the bounds of the array.\n   at System.Collections.Immutable.ImmutableArray`1.get_Item(Int32 index)\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.GetObjectInfo(INamedTypeSymbol formattedType, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 1075\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.CollectGeneric(INamedTypeSymbol type, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 651\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.CollectCore(ITypeSymbol typeSymbol, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 363\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.GetObjectInfo(INamedTypeSymbol formattedType, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 1043\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.CollectObject(INamedTypeSymbol type, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 678\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.CollectCore(ITypeSymbol typeSymbol, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 378\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.Collect() in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 292\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.Collect(Compilation compilation, AnalyzerOptions options, ReferenceSymbols referenceSymbols, Action`1 reportAnalyzerDiagnostic, ITypeSymbol targetType, CancellationToken cancellationToken) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 271\n   at MessagePack.SourceGenerator.Analyzers.MsgPack00xMessagePackAnalyzer.AnalyzeSymbol(SymbolAnalysisContext context, ReferenceSymbols typeReferences, AnalyzerOptions options) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/Analyzers/MsgPack00xMessagePackAnalyzer.cs:line 430\n   at MessagePack.SourceGenerator.Analyzers.MsgPack00xMessagePackAnalyzer.<>c__DisplayClass55_0.<Initialize>b__1(SymbolAnalysisContext context) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/Analyzers/MsgPack00xMessagePackAnalyzer.cs:line 357\n   at Microsoft.CodeAnalysis.Diagnostics.AnalyzerExecutor.<>c.<ExecuteSymbolActions>b__45_1(ValueTuple`2 data)\n   at Microsoft.CodeAnalysis.Diagnostics.AnalyzerExecutor.ExecuteAndCatchIfThrows_NoLock[TArg](DiagnosticAnalyzer analyzer, Action`1 analyze, TArg argument, Nullable`1 info, CancellationToken cancellationToken)\n-----\n\nSuppress the following diagnostics to disable this analyzer: MsgPack003, MsgPack004, MsgPack005, MsgPack006, MsgPack007, MsgPack008, MsgPack009, MsgPack010, MsgPack011, MsgPack012, MsgPack013, MsgPack014, MsgPack015, MsgPack016, MsgPack017, MsgPack018",
+          "location": "None"
+        },
+        {
+          "id": "CS8785",
+          "severity": "warning",
+          "message": "Generator 'MessagePackGenerator' failed to generate source. It will not contribute to the output and compilation errors may occur as a result. Exception was of type 'IndexOutOfRangeException' with message 'Index was outside the bounds of the array.'.\r\nSystem.IndexOutOfRangeException: Index was outside the bounds of the array.\n   at System.Collections.Immutable.ImmutableArray`1.get_Item(Int32 index)\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.GetObjectInfo(INamedTypeSymbol formattedType, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 1075\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.CollectGeneric(INamedTypeSymbol type, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 651\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.CollectCore(ITypeSymbol typeSymbol, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 363\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.GetObjectInfo(INamedTypeSymbol formattedType, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 1043\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.CollectObject(INamedTypeSymbol type, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 678\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.CollectCore(ITypeSymbol typeSymbol, ISymbol callerSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 378\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.Collect() in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 292\n   at MessagePack.SourceGenerator.CodeAnalysis.TypeCollector.Collect(Compilation compilation, AnalyzerOptions options, ReferenceSymbols referenceSymbols, Action`1 reportAnalyzerDiagnostic, ITypeSymbol targetType, CancellationToken cancellationToken) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs:line 271\n   at MessagePack.SourceGenerator.MessagePackGenerator.<>c__DisplayClass0_0.<Initialize>g__Collect|8(ITypeSymbol typeSymbol) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/MessagePackGenerator.cs:line 47\n   at MessagePack.SourceGenerator.MessagePackGenerator.<>c.<Initialize>b__0_4(ValueTuple`2 s, CancellationToken ct) in /workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source/src/MessagePack.SourceGenerator/MessagePackGenerator.cs:line 55\n   at Microsoft.CodeAnalysis.TransformNode`2.<>c__DisplayClass6_0.<.ctor>b__0(TInput i, CancellationToken token)\n   at Microsoft.CodeAnalysis.TransformNode`2.UpdateStateTable(Builder builder, NodeStateTable`1 previousTable, CancellationToken cancellationToken)\n-----\n",
+          "location": "None"
+        }
+      ],
+      "generatedResolver": {
+        "expectedHintName": "App.AppResolver.g.cs",
+        "present": false
+      },
+      "tests": {
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0
+      },
+      "logs": [
+        {
+          "path": "base/build.log",
+          "sha256": "6ffb8cb57e13a9f24c0f9bbb8ea2fe7855cf88be913dcd1ed6736eb006e9cdc8"
+        },
+        {
+          "path": "base/probe.log",
+          "sha256": "f11ea45902c053d4316e63845a871d13d0b8ba38032499c44ca6becb86fb45d3"
+        }
+      ],
+      "build": {
+        "exitCode": 0,
+        "error": null,
+        "command": [
+          "/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/dotnet",
+          "build",
+          "FrozenCheck.csproj",
+          "-c",
+          "Release",
+          "--nologo",
+          "-v:minimal",
+          "-m:1",
+          "-p:EarnedTrustSourceRoot=/workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/source"
+        ]
+      },
+      "execution": {
+        "command": [
+          "/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/dotnet",
+          "/workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/harness/bin/Release/net8.0/FrozenCheck.dll",
+          "/workspace/scratch/719328893edb/tieto-dotnet-work/run-003/base/observation.json"
+        ],
+        "error": null
+      },
+      "observation": {
+        "path": "base/observation.json",
+        "sha256": "334c8d43594764b0871a7a3312e2b6123c3fae1d83b24e7c29cd22611a4d94d3"
+      },
+      "reason": "Measured issue-specific analyzer/generator crash or missing consumer resolver."
+    },
+    {
+      "role": "head",
+      "sourceSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+      "sourceTree": "09d08ca6636efe8b23c7bb7bf35e6ba2978cd78d",
+      "sourceArchiveSha256": "5cb35060cbc9d13c61a111b6674b068072866aaa90ef1757ed6f7f634846a99d",
+      "upstreamGlobalJsonSha256": "93a54ce25a689f2a6b6f48f243d504d00db4f92df658726a2f59126df6ca0fd4",
+      "harnessSha256": "96961b0d0267a9988aef04e278bcf2eba715c18a5667224f752e199619304327",
+      "executionOverlaySha256": "04d20cb75e9c4955787486dc9208fbbce63fc26fc043f42553ee61f0f389cc5a",
+      "status": "pass",
+      "exitCode": 0,
+      "diagnostics": [],
+      "generatedResolver": {
+        "expectedHintName": "App.AppResolver.g.cs",
+        "present": true
+      },
+      "tests": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "logs": [
+        {
+          "path": "head/build.log",
+          "sha256": "78a5738b9e678be7829c1ae7c659b712eebff042f1fe9bebab1ed0231c577994"
+        },
+        {
+          "path": "head/probe.log",
+          "sha256": "b53402b28b795cdd50399622cdb170ae96b6cadcbbd0d83314974ba6987d2b42"
+        }
+      ],
+      "build": {
+        "exitCode": 0,
+        "error": null,
+        "command": [
+          "/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/dotnet",
+          "build",
+          "FrozenCheck.csproj",
+          "-c",
+          "Release",
+          "--nologo",
+          "-v:minimal",
+          "-m:1",
+          "-p:EarnedTrustSourceRoot=/workspace/scratch/719328893edb/tieto-dotnet-work/run-003/head/source"
+        ]
+      },
+      "execution": {
+        "command": [
+          "/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/dotnet",
+          "/workspace/scratch/719328893edb/tieto-dotnet-work/run-003/head/harness/bin/Release/net8.0/FrozenCheck.dll",
+          "/workspace/scratch/719328893edb/tieto-dotnet-work/run-003/head/observation.json"
+        ],
+        "error": null
+      },
+      "observation": {
+        "path": "head/observation.json",
+        "sha256": "f4da43f392d90f3a2e891fb4917ae3ffb5b3834156e76363ebae8563cac1268c"
+      }
+    }
+  ],
+  "conclusion": {
+    "status": "demonstrated",
+    "reason": "The identical frozen probe reproduced issue-specific failure on the base and passed on the supplied patch."
+  },
+  "humanDecision": null,
+  "authentication": {
+    "type": "local-sha256-integrity",
+    "signedRunner": false
+  }
+}

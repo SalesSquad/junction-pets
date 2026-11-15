@@ -1,0 +1,336 @@
+{
+ "round": 2,
+ "teacher_model": "nemotron-3.5-super-vl",
+ "generated_utc": "2026-11-14T18:35:04+00:00",
+ "synthetic": true,
+ "requests": {
+  "teacher_requests_ledger": 118,
+  "cap": 5500,
+  "calls_in_completed_specifications": {
+   "write": 40,
+   "repair": 34,
+   "readback": 44
+  },
+  "calls_in_completed_specifications_total": 118,
+  "request_errors": {}
+ },
+ "wall_seconds": {
+  "total": 15.1,
+  "runs": [
+   {
+    "command": "protocol.py run --limit 40 --deadline 18:44",
+    "wall_seconds": 15.1,
+    "teacher_requests": 118
+   }
+  ]
+ },
+ "specifications": {
+  "target": 1600,
+  "built": 1600,
+  "completed": 40,
+  "not_completed": 1560
+ },
+ "definitions": {
+  "code_check": "scribe/verify.py code_check: every planned date string present, nothing else looks like a date; words 60-140 for hard_standard, careful, no_event; 110-260 for long_multi_visit; 25-90 for terse",
+  "readback": "a fresh teacher call that sees only the note, the note date and the event-type definitions; consistent = its canonical JSON equals the answer key exactly; run only on a note that passed the code check",
+  "repair": "one rewrite when the first note failed the code check or the read-back; repair_success = the rewritten note passes the code check and its read-back equals the answer key",
+  "final": "the kept note: the attempt with the better (code check, read-back) result, the rewrite on a tie"
+ },
+ "overall": {
+  "specifications": 1600,
+  "completed": 40,
+  "code_check_pass_first_attempt": {
+   "numerator": 16,
+   "denominator": 40,
+   "rate": 0.4
+  },
+  "code_check_pass_final": {
+   "numerator": 35,
+   "denominator": 40,
+   "rate": 0.875
+  },
+  "readback_consistent_first_attempt": {
+   "numerator": 6,
+   "denominator": 16,
+   "rate": 0.375
+  },
+  "readback_consistent_final": {
+   "numerator": 14,
+   "denominator": 35,
+   "rate": 0.4
+  },
+  "clean_first_attempt": {
+   "numerator": 6,
+   "denominator": 40,
+   "rate": 0.15
+  },
+  "clean_final": {
+   "numerator": 14,
+   "denominator": 40,
+   "rate": 0.35
+  },
+  "repair_attempted": {
+   "numerator": 34,
+   "denominator": 40,
+   "rate": 0.85
+  },
+  "repair_success": {
+   "numerator": 8,
+   "denominator": 34,
+   "rate": 0.2353
+  },
+  "first_readback_difference_classes": {
+   "wrong_date": 15
+  },
+  "final_readback_difference_classes": {
+   "extra_event": 5,
+   "wrong_date": 27
+  }
+ },
+ "per_curriculum": {
+  "hard_standard": {
+   "specifications": 480,
+   "completed": 12,
+   "code_check_pass_first_attempt": {
+    "numerator": 9,
+    "denominator": 12,
+    "rate": 0.75
+   },
+   "code_check_pass_final": {
+    "numerator": 12,
+    "denominator": 12,
+    "rate": 1.0
+   },
+   "readback_consistent_first_attempt": {
+    "numerator": 1,
+    "denominator": 9,
+    "rate": 0.1111
+   },
+   "readback_consistent_final": {
+    "numerator": 2,
+    "denominator": 12,
+    "rate": 0.1667
+   },
+   "clean_first_attempt": {
+    "numerator": 1,
+    "denominator": 12,
+    "rate": 0.0833
+   },
+   "clean_final": {
+    "numerator": 2,
+    "denominator": 12,
+    "rate": 0.1667
+   },
+   "repair_attempted": {
+    "numerator": 11,
+    "denominator": 12,
+    "rate": 0.9167
+   },
+   "repair_success": {
+    "numerator": 1,
+    "denominator": 11,
+    "rate": 0.0909
+   },
+   "first_readback_difference_classes": {
+    "wrong_date": 13
+   },
+   "final_readback_difference_classes": {
+    "wrong_date": 16
+   }
+  },
+  "careful": {
+   "specifications": 400,
+   "completed": 10,
+   "code_check_pass_first_attempt": {
+    "numerator": 1,
+    "denominator": 10,
+    "rate": 0.1
+   },
+   "code_check_pass_final": {
+    "numerator": 8,
+    "denominator": 10,
+    "rate": 0.8
+   },
+   "readback_consistent_first_attempt": {
+    "numerator": 1,
+    "denominator": 1,
+    "rate": 1.0
+   },
+   "readback_consistent_final": {
+    "numerator": 5,
+    "denominator": 8,
+    "rate": 0.625
+   },
+   "clean_first_attempt": {
+    "numerator": 1,
+    "denominator": 10,
+    "rate": 0.1
+   },
+   "clean_final": {
+    "numerator": 5,
+    "denominator": 10,
+    "rate": 0.5
+   },
+   "repair_attempted": {
+    "numerator": 9,
+    "denominator": 10,
+    "rate": 0.9
+   },
+   "repair_success": {
+    "numerator": 4,
+    "denominator": 9,
+    "rate": 0.4444
+   },
+   "first_readback_difference_classes": {},
+   "final_readback_difference_classes": {
+    "wrong_date": 4
+   }
+  },
+  "no_event": {
+   "specifications": 240,
+   "completed": 6,
+   "code_check_pass_first_attempt": {
+    "numerator": 0,
+    "denominator": 6,
+    "rate": 0.0
+   },
+   "code_check_pass_final": {
+    "numerator": 4,
+    "denominator": 6,
+    "rate": 0.6667
+   },
+   "readback_consistent_first_attempt": {
+    "numerator": 0,
+    "denominator": 0,
+    "rate": null
+   },
+   "readback_consistent_final": {
+    "numerator": 1,
+    "denominator": 4,
+    "rate": 0.25
+   },
+   "clean_first_attempt": {
+    "numerator": 0,
+    "denominator": 6,
+    "rate": 0.0
+   },
+   "clean_final": {
+    "numerator": 1,
+    "denominator": 6,
+    "rate": 0.1667
+   },
+   "repair_attempted": {
+    "numerator": 6,
+    "denominator": 6,
+    "rate": 1.0
+   },
+   "repair_success": {
+    "numerator": 1,
+    "denominator": 6,
+    "rate": 0.1667
+   },
+   "first_readback_difference_classes": {},
+   "final_readback_difference_classes": {
+    "extra_event": 5
+   }
+  },
+  "long_multi_visit": {
+   "specifications": 240,
+   "completed": 6,
+   "code_check_pass_first_attempt": {
+    "numerator": 0,
+    "denominator": 6,
+    "rate": 0.0
+   },
+   "code_check_pass_final": {
+    "numerator": 5,
+    "denominator": 6,
+    "rate": 0.8333
+   },
+   "readback_consistent_first_attempt": {
+    "numerator": 0,
+    "denominator": 0,
+    "rate": null
+   },
+   "readback_consistent_final": {
+    "numerator": 2,
+    "denominator": 5,
+    "rate": 0.4
+   },
+   "clean_first_attempt": {
+    "numerator": 0,
+    "denominator": 6,
+    "rate": 0.0
+   },
+   "clean_final": {
+    "numerator": 2,
+    "denominator": 6,
+    "rate": 0.3333
+   },
+   "repair_attempted": {
+    "numerator": 6,
+    "denominator": 6,
+    "rate": 1.0
+   },
+   "repair_success": {
+    "numerator": 2,
+    "denominator": 6,
+    "rate": 0.3333
+   },
+   "first_readback_difference_classes": {},
+   "final_readback_difference_classes": {
+    "wrong_date": 4
+   }
+  },
+  "terse": {
+   "specifications": 240,
+   "completed": 6,
+   "code_check_pass_first_attempt": {
+    "numerator": 6,
+    "denominator": 6,
+    "rate": 1.0
+   },
+   "code_check_pass_final": {
+    "numerator": 6,
+    "denominator": 6,
+    "rate": 1.0
+   },
+   "readback_consistent_first_attempt": {
+    "numerator": 4,
+    "denominator": 6,
+    "rate": 0.6667
+   },
+   "readback_consistent_final": {
+    "numerator": 4,
+    "denominator": 6,
+    "rate": 0.6667
+   },
+   "clean_first_attempt": {
+    "numerator": 4,
+    "denominator": 6,
+    "rate": 0.6667
+   },
+   "clean_final": {
+    "numerator": 4,
+    "denominator": 6,
+    "rate": 0.6667
+   },
+   "repair_attempted": {
+    "numerator": 2,
+    "denominator": 6,
+    "rate": 0.3333
+   },
+   "repair_success": {
+    "numerator": 0,
+    "denominator": 2,
+    "rate": 0.0
+   },
+   "first_readback_difference_classes": {
+    "wrong_date": 2
+   },
+   "final_readback_difference_classes": {
+    "wrong_date": 3
+   }
+  }
+ }
+}

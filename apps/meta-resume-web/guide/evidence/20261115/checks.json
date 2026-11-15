@@ -1,0 +1,72 @@
+{
+  "workID": "LENS-GUIDE-20261115",
+  "startedAt": "2026-11-14T23:46:03.932407+00:00",
+  "completedAt": "2026-11-14T23:46:04.641596+00:00",
+  "executor": "ChatGPT cloud Linux transient workspace; partial source materialization, not a git checkout",
+  "node": "v24.22.1",
+  "system": "Linux",
+  "machine": "x86_64",
+  "command": [
+    "node",
+    "--test",
+    "apps/meta-resume-web/guide/guide-core.test.mjs",
+    "apps/meta-resume-web/guide/context-handoff.test.mjs",
+    "apps/meta-resume-web/guide/guide-ui-boundaries.test.mjs",
+    "services/meta-spatial/guide-server.test.mjs"
+  ],
+  "exitCode": 0,
+  "rawStdout": "checks.stdout.txt",
+  "rawStdoutSHA256": "6d12eea25288c06754ea0ec361118b0d7184165969ff04754dd7c26a83eaabd3",
+  "rawStderr": "checks.stderr.txt",
+  "syntaxChecks": [
+    {
+      "path": "apps/meta-resume-web/guide/guide-app.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "path": "apps/meta-resume-web/guide/guide-webmcp.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "path": "apps/meta-resume-web/guide/guide-storage.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "path": "services/meta-spatial/observation-server.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "nativeRunnerPythonAST": "PASS; syntax only, no Apple execution",
+  "sourceFiles": {
+    "apps/meta-resume-web/guide/capture.mjs": "468b2fa6a9b3ff6d0d502f857d9a8b02bc1ffea4c094a039d79f838e7e7b49f2",
+    "apps/meta-resume-web/guide/context-handoff.mjs": "5045c9107dc123f2396f130ae723fa68c32c9016ba5a24afd4d0729eca152982",
+    "apps/meta-resume-web/guide/context-handoff.test.mjs": "da5b85bfe7deb0ddc2b764d1b9ec244d068c444c2953b5cf03ef2e0ea051704d",
+    "apps/meta-resume-web/guide/guide-app.mjs": "d8d281889ce4c517feaa130d7876c71779acc6a8a64903e621c08a4fbe99eaa6",
+    "apps/meta-resume-web/guide/guide-contract.d.ts": "c40c6bd735e74ac5b52ecf84ee12443f72be3dffc9b437675191840460a559db",
+    "apps/meta-resume-web/guide/guide-core.mjs": "72266028b0f873037f3ebacd47883a7423ac55a0dcfa862c74f967f363aefa6a",
+    "apps/meta-resume-web/guide/guide-core.test.mjs": "93dff595590e68dc2e3b9761391cc7b2340534b8dfc3b97a11b7d7b95f12ae5d",
+    "apps/meta-resume-web/guide/guide-storage.mjs": "1533802988d0e02d6f8860496f600dad04a9ad4fbd72480bd0d93054e896b9d3",
+    "apps/meta-resume-web/guide/guide-ui-boundaries.test.mjs": "baef4ef62abe0039e7a2f4238960804860d3592e7e3e5a0a5ab847a875532b1f",
+    "apps/meta-resume-web/guide/guide-webmcp.mjs": "fd4a748148aa4d9aa2ddf829e51dd698f774db60ca4b7697353b7550bf50cdf5",
+    "apps/meta-resume-web/guide/guide.css": "e988a68bd97919cdf20302c9b127e391248a364f1c35ae27b072e681b3c657ac",
+    "apps/meta-resume-web/guide/index.html": "c182f583d40f46c31eadcb0633d0c5e6dbed1173e6cf073573fe3ff6a9766f8c",
+    "apps/meta-resume-web/index.html": "b7510026f5fdb24cf38a29e3f577d76e39111d24e38334ac0cdd855a439e989c",
+    "services/meta-spatial/guide-server.mjs": "c5cd8237d8c24f8819bbbefdbb77507f14f0c9a658a6db306ebed523d1c1afc8",
+    "services/meta-spatial/guide-server.test.mjs": "c04b6910d492436018e1129e2146b61e58fd14d6fc27026de55b42e5a27a0815",
+    "services/meta-spatial/observation-server.mjs": "b5909bfdaa7cf83ac462e61a29f5ba84a32f79b95a19feee2f448c6139d0a554"
+  },
+  "limits": [
+    "Synthetic storage, metadata and minimal DOM contract; no rendered browser pass",
+    "HTTP exercised in the same executor process against loopback",
+    "No camera, glasses, physical identity, private host, model inference, training or deployment qualification"
+  ],
+  "rawStderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

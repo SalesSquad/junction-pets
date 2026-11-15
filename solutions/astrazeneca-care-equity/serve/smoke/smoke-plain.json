@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "pathway-scribe-smoke-v1",
+  "ts": "2026-11-14T19:04:27Z",
+  "synthetic": true,
+  "endpoint": "127.0.0.1:8000",
+  "served_models": [
+    "gemma-base",
+    "pathway-scribe"
+  ],
+  "settings": {
+    "confidence_kind": "geo_mean_prob",
+    "format": "absolute",
+    "guided": "none",
+    "model": "pathway-scribe",
+    "prompts": "/root/scribe-v2/scribe/prompts.py",
+    "threshold": null,
+    "concurrency": 8,
+    "max_tokens": 384
+  },
+  "notes_file": "/root/scribe-v2/serve-smoke/heldout-v2-100.jsonl",
+  "notes_sha256": "67484fa6050b571ff0e826b63aaf417c6fc7eb3e3658859419723c482145a697",
+  "n": 100,
+  "requests": {
+    "answered": 100,
+    "valid_output": 98,
+    "invalid_output": 2,
+    "failed": 0,
+    "retried": 0,
+    "failure_kinds": []
+  },
+  "exact_match": {
+    "value": 0.22,
+    "n": 100,
+    "ci95": [
+      0.150012823846054,
+      0.31070353514985793
+    ]
+  },
+  "valid_output_rate": {
+    "value": 0.98,
+    "n": 100,
+    "ci95": [
+      0.929988209271456,
+      0.9944980324498376
+    ]
+  },
+  "route_accuracy": {
+    "value": 0.89,
+    "n": 100,
+    "ci95": [
+      0.8136870349691969,
+      0.9374580364293543
+    ]
+  },
+  "event_precision": {
+    "value": 0.5579710144927537,
+    "n": 276,
+    "ci95": [
+      0.498983152403498,
+      0.6153673092287926
+    ]
+  },
+  "event_recall": {
+    "value": 0.6086956521739131,
+    "n": 253,
+    "ci95": [
+      0.5473617382165985,
+      0.6667781450115082
+    ]
+  },
+  "event_f1": 0.5822306238185255,
+  "distractor_extraction": {
+    "value": 0.06493506493506493,
+    "n": 77,
+    "ci95": [
+      0.028053080447716178,
+      0.14316425064219399
+    ]
+  },
+  "latency_seconds": {
+    "definition": "client-side wall time of the successful HTTP attempt, in seconds; includes network and platform queueing; nearest-rank percentiles; the first request is excluded when more than one succeeded",
+    "n": 99,
+    "first_request_s": 1.7025714420005897,
+    "first_request_total_s_with_retries": 1.70257316200059,
+    "p50": 1.3958624729993971,
+    "p90": 1.918775994000498,
+    "p95": 1.9902904190003028,
+    "p99": 2.3209426600005827,
+    "max": 2.3209426600005827,
+    "mean": 1.3628937255050713
+  },
+  "wall_seconds": 19.177318275999824,
+  "notes_per_second": 5.214493421906063,
+  "decisions": {
+    "HUMAN_REVIEW": 100
+  },
+  "review_reasons": {
+    "duplicate_event": 1,
+    "event_after_note_date": 6,
+    "invalid_output": 2,
+    "no_calibrated_threshold": 100
+  },
+  "auto_accept": {
+    "n": 0,
+    "wrong": 0,
+    "error_rate": {
+      "value": null,
+      "n": 0,
+      "ci95": [
+        null,
+        null
+      ]
+    },
+    "note": "empirical on these notes; not a guarantee"
+  },
+  "confidence": {
+    "kind": "geo_mean_prob",
+    "mean_when_exact": 0.9982996293376826,
+    "mean_when_wrong": 0.9386076107495387,
+    "n_scored": 100
+  },
+  "floors": {
+    "min_exact_match": 0.2,
+    "min_valid": 0.9,
+    "max_p95_seconds": null
+  },
+  "passed": true,
+  "failures": [],
+  "limits": "Synthetic notes with machine-written labels. Research artefact; not evidence about real clinical notes."
+}

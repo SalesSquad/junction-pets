@@ -1,0 +1,43 @@
+{
+  "actual_independent_scenarios": 10,
+  "actual_physics_episodes": 40,
+  "actual_physics_steps": 120000,
+  "actuation_authorized": false,
+  "campaign_elapsed_s": 4.058,
+  "input_kind": "UNVERIFIED_REPLAY",
+  "local_shard": 0,
+  "model_calls": 0,
+  "mujoco_version": "3.3.7",
+  "notice": "MuJoCo CPU contact only; no licensed Rokoko SDK, trained RL, NVIDIA GPU or real human.",
+  "physics_steps_per_episode": 3000,
+  "physics_timestep_s": 0.002,
+  "policies": [
+    "aligned_replay",
+    "contact_feedback",
+    "guarded_feedback",
+    "safe_abstain"
+  ],
+  "provider_cost": "unknown",
+  "raw_csv_sha256": "1bc20e126dcf22ac99cc65afa81deddd1e89f1cd7609b248f838feeede037775",
+  "regime_plan": [
+    "nominal",
+    "lateral_shift",
+    "friction_mass",
+    "sensor_dropout",
+    "adversarial"
+  ],
+  "schema": "motionbridge.megasim.v1",
+  "seed_base": 300001,
+  "shards": 1,
+  "source_commit": "f7064d4aa3c175632b41bd06b8d18a787b341b43",
+  "source_kind": "SYNTHETIC_MUJOCO",
+  "source_sha256": {
+    "fixtures/retarget-map.json": "2c0639e7e8aed8c8d097d88409b285063d14fece9ee6430316a69d2fc330aaa6",
+    "fixtures/synthetic-retarget.csv": "7e86589006a4fd2f31d053883d0ffd058c7b412716b7eae8cc7234f3be358333",
+    "mega/experiment.py": "040413ceb9604c86810bb9734e6a2d167ad72d26a96a7331f94f2e4f15d5c3da",
+    "sim/experiment.py": "3ed46bdae2fab2d5fbee1715ef2df1288567e2ab4313364adfbc3e1f8195c8b8",
+    "sim/scene.xml": "f0c127fdd2f36d402efed57a90d308da8c047d3bdd699364f41a270988434d5a"
+  },
+  "total_case_plan": 10,
+  "training": "NONE: four scripted controllers"
+}

@@ -1,0 +1,174 @@
+{
+ "id": "7529b9f6cec572f6a062afd24eb1bd44725501cebb1da0e18d6d6c8397079e25",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on ottanut yhteyttä julkiseen perusterveydenhuoltoon ensimmäistä kertaa elokuussa 2025, jolloin terveyskeskuksen hoitaja vastasi yhteydenottoon. Terveyskeskuslääkäri on tutkinut ja arvioinut potilasta 316 päivää sitten. Lähete on saapunut erikoissairaanhoidon yksikköön ja rekisteröity sinne 4.1.2026. Syöpädiagnoosi on vahvistettu 140 päivää sitten. Aiempi syöpään liittymätön rokotuskäynti on ollut 12.3.2024. Tuleva kontrolliaika, joka ei ole vielä toteutunut, on 9.10.2026. Potilas voi tällä hetkellä kohtuullisesti, kotona pärjääminen onnistuu ja hän on saanut neuvontaa jatkosta.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 69,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-09-22",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-08-24",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PUBLIC_PRIMARY",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-08-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-08-24",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-01-04",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2026-03-17",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 917,
+      "total_tokens": 1143,
+      "completion_tokens": 226,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.26
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 814,
+      "total_tokens": 936,
+      "completion_tokens": 122,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.06
+    }
+   ],
+   "repair_request": [
+    "An independent reader dated 'lääkärin arvio' to 2025-08-24 (DAY) instead of '316 päivää sitten' (= 2025-09-22, DAY). Put that date string directly with that fact and no other date near it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas on ottanut yhteyttä julkiseen perusterveydenhuoltoon ensimmäistä kertaa elokuussa 2025, jolloin terveyskeskuksen hoitaja vastasi yhteydenottoon. Terveyskeskuslääkäri on tutkinut ja arvioinut potilasta 316 päivää sitten. Lähete on saapunut erikoissairaanhoidon yksikköön ja rekisteröity sinne 4.1.2026. Syöpädiagnoosi on vahvistettu 140 päivää sitten. Aiempi syöpään liittymätön rokotuskäynti on ollut 12.3.2024. Tuleva kontrolliaika, joka ei ole vielä toteutunut, on 9.10.2026. Potilas voi tällä hetkellä kohtuullisesti, kotona pärjääminen onnistuu ja hän on saanut neuvontaa jatkosta.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 69,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-09-22",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-08-24",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PUBLIC_PRIMARY",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-08-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-08-24",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-01-04",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2026-03-17",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1273,
+      "total_tokens": 1499,
+      "completion_tokens": 226,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.83
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 814,
+      "total_tokens": 936,
+      "completion_tokens": 122,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.57
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:58+00:00"
+}

@@ -1,0 +1,86 @@
+{
+ "schema": "scribe-stress-preregistration-v1",
+ "frozen": true,
+ "frozen_utc": "2026-11-14T21:57:19Z",
+ "synthetic": true,
+ "set": "stress-v1",
+ "file": "data/scribe/stress/stress-v1.parquet",
+ "sha256": "ae16f7474a8734bbc108d5e2f5c66bce698cbd0e4c88f60ffd4b742908184dfa",
+ "rows": 308,
+ "slices": {
+  "notes": 308,
+  "with_events": 259,
+  "heldout_slice (>=1 held-out fact, no vague fact)": 143,
+  "standard_slice (>=1 event, six standard forms only)": 87,
+  "vague_slice": 29,
+  "no_event": 49,
+  "no_event_with_heldout_distractor": 25,
+  "curriculum:long": 49,
+  "heldout_family:heldout_weeks_word": 86,
+  "curriculum:standard": 145,
+  "heldout_family:heldout_days_word": 43,
+  "heldout_family:heldout_toissa": 36,
+  "curriculum:no_event": 35,
+  "curriculum:terse": 65,
+  "curriculum:no_event_terse": 14
+ },
+ "purpose": "Primary test set of NVIDIA_OPTIONS.md step 8: does a model that copies the date phrase while code counts (arm B) beat a careful Finnish rule (arm A') on date phrasings that no training note and no resolver lexicon contains?",
+ "written_before_any_system_saw_the_set": "This file, the parquet and its sha256 were written before any scored system (A, A', B, C or the Nemotron reader) saw a stress note. Only the writer (Nemotron 3.5 Super VL, which wrote the notes) and the TypeSafe Jev gate saw them. No Nemotron read-back was used to select notes.",
+ "resolver_freeze": {
+  "file": "data/scribe/v4/resolver/freeze.json",
+  "sha256": "0e8e4d70dc879bee3009ae16418e6edd7b551bee24703ff73c527d5aeb9b29c3",
+  "frozen_at_utc": "2026-11-14T21:37:24Z",
+  "files": {
+   "scribe/v3/resolve.py": "0ca753f81bfc374579e67dedfcde5b7abf0715cc88db5ca76810e4de8b0f2ec8",
+   "scribe/v3/lexicon.py": "2cef63da47473e2825bdfef1100d50bb32c9b77b5c5613c4b8ea4b5e2db32260"
+  }
+ },
+ "systems": {
+  "A": "Gemma 3 270M, absolute-date format (step 3 control arm A on MLX); if step 3 does not produce arm A before step 8, the stored C-270m-all-v2data adapter is used instead, and which one is recorded before scoring. Post-processing: frozen resolver arm A (scribe/v3/resolve.py repair, digits only).",
+  "A'": "The same model output as A, post-processed by frozen resolver arm A' (digits plus lexicon fi-relative-lexicon-v1). A and A' share one generation; they differ only in the frozen rule.",
+  "B": "Gemma 3 270M, expression format with training-split phrase augmentation (step 3 arm B; number words 1-6, 'eilen', 'viikko sitten'); dates computed by scribe/v2/data_tools.resolve_expression. No lexicon.",
+  "C": "Gemma 3 1B, expression format (step 3 arm C), scored only if it was trained because B looked promising on validation.",
+  "nemotron_reader": "Nemotron 3.5 Super VL as the cascade's escalation reader, the prompt version Lane B selects on validation in step 4 (its prompt sha256 recorded before scoring). Secondary system, not in the primary comparison. Caveat: the same model wrote these notes, so its score here is optimistic."
+ },
+ "endpoint": "Note-level exact match: the canonical answer (entry route plus every event with type, date and precision) after the system's own date code equals the answer key (target_json). An output that cannot be parsed or validated is wrong.",
+ "primary": {
+  "comparison": "B against A'",
+  "slice": "heldout: notes with at least one pathway fact in a held-out phrasing (number words 7-12 or 'toissapäivänä') and no vague fact",
+  "test": "exact two-sided McNemar test on paired note-level exact match",
+  "success": "B - A' >= 0.10 (10 points) with McNemar p < 0.01 on the heldout slice, AND B >= 0.85 exact match on the standard slice",
+  "if_A_prime_wins": "the headline is: a careful Finnish rule beats the learned reader on these phrasings",
+  "source": "NVIDIA_OPTIONS.md section 3.2, step 8 (success criteria written before the set existed)"
+ },
+ "secondary": [
+  "Exact match with Wilson 95% intervals for every system on: heldout, standard, no_event (and no_event with a held-out distractor), by length curriculum (standard, terse, long) and by held-out family.",
+  "A against A' on the heldout slice (expected: equal, because the frozen lexicon excludes these phrasings by design).",
+  "Interval error in days per event where the type matches; parse failures.",
+  "Cascade (step 8): at thresholds chosen on validation only, the share of notes pre-filled correctly for one-click confirmation and the error among them; target at least 60% with 5% or less error (against 263/700 today). A person confirms every note."
+ ],
+ "vague_scoring": {
+  "slice": "vague: notes with one pathway fact phrased vaguely ('pari viikkoa sitten', 'viime kuussa', 'muutama päivä sitten', 'kuukausi sitten', 'pari kuukautta sitten'); correct outcome: send to a person",
+  "outcomes": {
+   "sent_to_person": "the system flags the phrase or the note for a person (for A': resolve() needs_person contains the phrase)",
+   "invented_precise_date": "not flagged, and the output has an event of the vague fact's type with DAY precision",
+   "month_without_flag": "not flagged, and the event is output with MONTH precision",
+   "dropped": "not flagged, and no event of that type is output"
+  },
+  "precise_part": "exact match of the other (precise) events and the route, reported separately",
+  "question": "does a system invent a precise date where the note gives none?"
+ },
+ "multiplicity": "One primary comparison (B against A' on the heldout slice); everything else is descriptive and reported with Wilson intervals, without a success claim.",
+ "fallback": "Not used: 308 notes passed both gates (kill threshold 150), so no code-rendered phrasing shift of validation notes was built.",
+ "scored_once": "Each system is scored on this set exactly once, after its configuration is frozen on validation. No prompt, threshold, training or selection choice may use this set. A rerun is allowed only to repair a crash before any score is read, and it is logged.",
+ "not_for_training": "No training or augmentation script may read data/scribe/stress/. The held-out phrasings must stay out of every training split.",
+ "construction": {
+  "answer_keys": "scribe/stress/specs.py: scribe/sample.py with new seeds (from 28261114), last fact(s) re-phrased; ids checked against data/scribe/dataset-v1, v2/dataset, v3/dataset and the v3 teacher specs (0 collisions)",
+  "writer": "nemotron-3.5-super-vl on the event endpoint, prompt stress-writer-v1, enable_thinking off, at most 2 rewrites after a failed code check",
+  "code_gate": "scribe/stress/check.py: every date string verbatim; no undeclared date or time reference; word bounds; standard forms resolve to the key with the frozen resolver, held-out phrasings with the generator's own arithmetic",
+  "jev_gate": "scribe/judges (rule and thresholds of data/scribe/v3/judges/policy.json, question set v2); vague facts asked at their nominal date"
+ },
+ "limitations": [
+  "SYNTHETIC notes from one writer model (Nemotron 3.5 Super VL); the students were trained mostly on Nemotron-written notes, so writer style is not new.",
+  "The Jev gate and the code gate select notes that state the key clearly; real notes are messier.",
+  "Finnish only. No Swedish slice was built."
+ ]
+}

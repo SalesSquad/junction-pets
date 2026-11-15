@@ -1,0 +1,197 @@
+{
+  "V11LostV5Goals": 0,
+  "V11NewUnsafe": 0,
+  "V11NovelGoals": 0,
+  "action4ActualExecutions": 3,
+  "action4DistinctRealWorldSupport": 1,
+  "action4LegalObservations": 48800,
+  "action4TrainingDecision": "UNSUPPORTED_NO_MODEL; PROPOSE_SOURCE_BOUND_REAL_TRAIN_EXPLORATION",
+  "actualV10CandidateGoals": 26,
+  "actualV10V5Goals": 37,
+  "actualV11CandidateGoals": 18,
+  "actualV11V5Goals": 18,
+  "frozenV5OriginalSuccessNoninterference": {
+    "v10": {
+      "firedOnV5OriginalWinningWorlds": 0,
+      "originalWinningSeedIds": [
+        515005,
+        515006,
+        515008,
+        515009,
+        515015,
+        515016,
+        515017,
+        515018,
+        515019,
+        515021,
+        515022,
+        515023,
+        515030,
+        515031,
+        515032,
+        515033,
+        515034,
+        515035,
+        515036,
+        515038,
+        515039,
+        515040,
+        515041,
+        515045,
+        515046,
+        515048,
+        515049,
+        515067,
+        515096,
+        515140,
+        515146,
+        515155,
+        515196,
+        515218,
+        515247,
+        515259,
+        515296
+      ],
+      "realV5SafeGoalWorlds": 37
+    },
+    "v11": {
+      "firedOnV5OriginalWinningWorlds": 0,
+      "originalWinningSeedIds": [
+        517002,
+        517003,
+        517005,
+        517011,
+        517020,
+        517024,
+        517029,
+        517031,
+        517038,
+        517039,
+        517048,
+        517052,
+        517080,
+        517173,
+        517178,
+        517246,
+        517274,
+        517323
+      ],
+      "realV5SafeGoalWorlds": 18
+    }
+  },
+  "observedV10RealOptions": 38569,
+  "observedV10RealTrials": 800,
+  "observedV11RealOptions": 34992,
+  "observedV11RealTrials": 800,
+  "schema": "junction.rokoko.v12.actual-source-learning-readout.v1",
+  "scienceLimitations": [
+    "Post-step dwell labels train only and never enter inference.",
+    "Predictive position calibration is a world-disjoint TRAIN diagnostic, not an unsafe-event guarantee.",
+    "No unseen action4 counterfactual is labeled; 3 executed samples are insufficient to learn it.",
+    "No candidate V12 250-tick physical goal improvement has been measured.",
+    "The unpromoted policy must not be deployed or dispatched until independent source/harness review and authorized fresh TRAIN physics."
+  ],
+  "sourceActionCounts": {
+    "v10": {
+      "actualGoal250Terminal": [
+        0,
+        3,
+        87,
+        0,
+        0,
+        0,
+        0
+      ],
+      "executed": [
+        650,
+        2145,
+        3982,
+        20608,
+        3,
+        236,
+        10945
+      ],
+      "legal": [
+        27802,
+        21675,
+        21101,
+        27797,
+        27802,
+        27802,
+        38569
+      ],
+      "unsafe": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "v11": {
+      "actualGoal250Terminal": [
+        0,
+        0,
+        59,
+        0,
+        0,
+        0,
+        0
+      ],
+      "executed": [
+        297,
+        703,
+        4166,
+        15303,
+        0,
+        251,
+        14272
+      ],
+      "legal": [
+        20998,
+        15667,
+        15305,
+        20994,
+        20998,
+        20998,
+        34992
+      ],
+      "unsafe": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "sourceEvidence": {
+    "v10": {
+      "fullTransitionsSha256": "739c30a13ecacdecd404774fc9dadd887944f32df5cef14cfd2758a639460419",
+      "harnessSha": "a64e6fcc73a1d47485fe052990e31c9d9e45100f",
+      "sourceSha": "9cc583d3f0f24484b79c1929ba875c7a3b667806",
+      "trainingSha256": "103091f37e1b7d46937ea002845dda05f08391f4580f0aa7c181722d78b118af"
+    },
+    "v11": {
+      "fullTransitionsSha256": "0a38081a43426ee4774d09d22886202aaf56d59f6b925a0a75cb2f2da14c848b",
+      "harnessSha": "b1938bee9dbca482f645b5dde3359de38e6c125e",
+      "sourceSha": "ab6df4054ef6ed350b479469590a48046a0c0a68",
+      "trainingSha256": "c3b3b399344fa18eff7a303cf27e2a510ab9eb74111a6216df1ec11a906579df"
+    }
+  },
+  "split": {
+    "calibration": 65,
+    "diagnostic": 70,
+    "fit": 185
+  },
+  "supportedCandidateActionModels": [
+    1,
+    2,
+    3,
+    5
+  ]
+}

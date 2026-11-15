@@ -1,0 +1,1890 @@
+{
+ "schema": "sama-flare-gate-v1",
+ "synthetic": true,
+ "label": "SYNTHETIC",
+ "generated_utc": "2026-11-14T23:42:17Z",
+ "title": "Comparability gate",
+ "lede": "Each county computes its referral-to-treatment clock where its data live; a county's figure is labelled 'not comparable' when the way its dates were read would distort it. The figure itself stays visible.",
+ "clock": {
+  "name": "Referral to treatment",
+  "start_event": "REFERRAL_SENT",
+  "end_event": "TREATMENT_START",
+  "starts": "when the referral is sent",
+  "threshold_days": 42,
+  "histogram_edge_days": 42.5,
+  "threshold_label": "placeholder (OECD/EU-reported target)",
+  "threshold_text": "42 days is a placeholder: the OECD/EU reports a six-week target from a suspected-cancer referral to the start of primary treatment. Finnish law lets specialised treatment start up to six months after the need is identified and names no cancer-specific limit.",
+  "sources": [
+   {
+    "name": "OECD/EU Country Cancer Profile Finland 2025",
+    "page": 19,
+    "url": "https://cancer-inequalities.jrc.ec.europa.eu/sites/default/files/docs/ccp2025/ec-oecd-fi-2024-1666-en.pdf",
+    "reopened_utc": "2026-11-14T22:56Z"
+   },
+   {
+    "name": "STM, Hoitotakuu (treatment guarantee), page updated 29 Oct 2026",
+    "url": "https://stm.fi/hoitotakuu",
+    "reopened_utc": "2026-11-14T22:56Z"
+   }
+  ],
+  "computed_in": "NVIDIA FLARE 2.9.1 simulator, 23 sites"
+ },
+ "rule": {
+  "label": "placeholder thresholds",
+  "bias_limit_days": 3.0,
+  "missed_limit": 0.1,
+  "text": "A county's cell is 'not comparable' when the scribe's median bias is above 3 days either way, or its missed-event share is above 10%. Thresholds are placeholders.",
+  "median_bias_definition": "median scribe-measured interval length minus median true length, days, over the county's within-note intervals whose two endpoints the scribe found",
+  "missed_definition": "gold events not found with their correct type, divided by all gold events in the county's notes",
+  "missed_share_computed_in": "NVIDIA FLARE 2.9.1 simulator, 23 sites",
+  "median_bias_computed_in": "plain Python on the same site partitions: FLARE-ready, not run in FLARE (medians are not among the statistics this job runs; FLARE's quantile statistic is an approximate T-digest and its package was not installed)",
+  "why_median_bias": "the median of per-interval errors is 0 for the raw scribe in most counties because its errors are two-sided, yet the county median moves by up to tens of days; the rule therefore tests the shift of the county median"
+ },
+ "scribe_input": {
+  "run": "C-270m-all-v2data (Gemma 3 270M LoRA)",
+  "notes": 700,
+  "kind": "SYNTHETIC notes",
+  "arms": {
+   "raw": "stored predictions as the scribe wrote them",
+   "resolver": "the same predictions after the code relative-date resolver (runs/diagnose/resolve_relative.py)"
+  },
+  "exact_notes": {
+   "raw": 305,
+   "resolver": 651
+  },
+  "assignment": "notes sorted by SHA-256 id; note k goes to county k mod 23 (SYNTHETIC, content-blind)",
+  "scenario": "the SYNTHETIC event log's dates are structured fields; the gate asks what would happen if a county's dates were read from notes by this scribe"
+ },
+ "counties": [
+  {
+   "county": "HVA01",
+   "rtt": {
+    "n": 346,
+    "within": 197,
+    "share_within": 0.569364161849711,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 350,
+    "complete_share": 0.988571428571,
+    "open_share": 0.011428571429,
+    "missing_share": 0.0
+   },
+   "notes": 31,
+   "writers": {
+    "nemotron": 20,
+    "haiku": 11
+   },
+   "scribe": {
+    "raw": {
+     "events": 74,
+     "missed_share": 0.013513513514,
+     "intervals": 32,
+     "mean_signed_err_days": -1.25,
+     "sd_signed_err_days": 38.764799463164,
+     "share_err_above_3": 0.3125,
+     "share_err_below_minus_3": 0.15625,
+     "median_bias_days": -19.0,
+     "exact_notes": 18,
+     "intervals_with_error": 15,
+     "nonzero_errors_days": [
+      -136,
+      -74,
+      -69,
+      -67,
+      -4,
+      5,
+      11,
+      18,
+      18,
+      22,
+      31,
+      35,
+      46,
+      54,
+      70
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -19 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 74,
+     "missed_share": 0.013513513514,
+     "intervals": 32,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 30,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA02",
+   "rtt": {
+    "n": 720,
+    "within": 427,
+    "share_within": 0.5930555555555556,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 730,
+    "complete_share": 0.986301369863,
+    "open_share": 0.013698630137,
+    "missing_share": 0.0
+   },
+   "notes": 31,
+   "writers": {
+    "nemotron": 22,
+    "haiku": 9
+   },
+   "scribe": {
+    "raw": {
+     "events": 66,
+     "missed_share": 0.075757575758,
+     "intervals": 38,
+     "mean_signed_err_days": -13.263157894737,
+     "sd_signed_err_days": 98.178735026378,
+     "share_err_above_3": 0.157894736842,
+     "share_err_below_minus_3": 0.263157894737,
+     "median_bias_days": -2.5,
+     "exact_notes": 18,
+     "intervals_with_error": 19,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    },
+    "resolver": {
+     "events": 66,
+     "missed_share": 0.075757575758,
+     "intervals": 38,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 28,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA03",
+   "rtt": {
+    "n": 1754,
+    "within": 1024,
+    "share_within": 0.5838084378563284,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 1772,
+    "complete_share": 0.989841986456,
+    "open_share": 0.010158013544,
+    "missing_share": 0.0
+   },
+   "notes": 31,
+   "writers": {
+    "nemotron": 22,
+    "haiku": 9
+   },
+   "scribe": {
+    "raw": {
+     "events": 80,
+     "missed_share": 0.0375,
+     "intervals": 56,
+     "mean_signed_err_days": 17.357142857143,
+     "sd_signed_err_days": 68.10484659604,
+     "share_err_above_3": 0.5,
+     "share_err_below_minus_3": 0.25,
+     "median_bias_days": 20.0,
+     "exact_notes": 9,
+     "intervals_with_error": 44,
+     "nonzero_errors_days": [
+      -146,
+      -126,
+      -119,
+      -88,
+      -67,
+      -61,
+      -61,
+      -61,
+      -38,
+      -38,
+      -27,
+      -22,
+      -19,
+      -9,
+      -3,
+      2,
+      5,
+      8,
+      8,
+      8,
+      28,
+      29,
+      30,
+      35,
+      35,
+      35,
+      40,
+      40,
+      47,
+      49,
+      53,
+      58,
+      59,
+      63,
+      76,
+      76,
+      88,
+      88,
+      116,
+      119,
+      146,
+      164,
+      176,
+      176
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias +20 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 80,
+     "missed_share": 0.0375,
+     "intervals": 56,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 28,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA04",
+   "rtt": {
+    "n": 1005,
+    "within": 576,
+    "share_within": 0.573134328358209,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 1021,
+    "complete_share": 0.984329089128,
+    "open_share": 0.015670910872,
+    "missing_share": 0.0
+   },
+   "notes": 31,
+   "writers": {
+    "nemotron": 21,
+    "haiku": 10
+   },
+   "scribe": {
+    "raw": {
+     "events": 64,
+     "missed_share": 0.046875,
+     "intervals": 42,
+     "mean_signed_err_days": -35.166666666667,
+     "sd_signed_err_days": 114.198781905141,
+     "share_err_above_3": 0.285714285714,
+     "share_err_below_minus_3": 0.380952380952,
+     "median_bias_days": -28.5,
+     "exact_notes": 12,
+     "intervals_with_error": 28,
+     "nonzero_errors_days": [
+      -387,
+      -365,
+      -361,
+      -197,
+      -170,
+      -129,
+      -102,
+      -98,
+      -98,
+      -30,
+      -30,
+      -27,
+      -26,
+      -22,
+      -14,
+      -4,
+      8,
+      8,
+      8,
+      14,
+      30,
+      31,
+      31,
+      60,
+      68,
+      70,
+      70,
+      185
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -28.5 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 64,
+     "missed_share": 0.046875,
+     "intervals": 42,
+     "mean_signed_err_days": -26.071428571429,
+     "sd_signed_err_days": 95.141330778477,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.071428571429,
+     "median_bias_days": -16.0,
+     "exact_notes": 25,
+     "intervals_with_error": 3,
+     "nonzero_errors_days": [
+      -365,
+      -365,
+      -365
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -16 days is beyond +/-3"
+     ]
+    }
+   }
+  },
+  {
+   "county": "HVA05",
+   "rtt": {
+    "n": 1725,
+    "within": 1003,
+    "share_within": 0.5814492753623188,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 1741,
+    "complete_share": 0.99080987938,
+    "open_share": 0.00919012062,
+    "missing_share": 0.0
+   },
+   "notes": 31,
+   "writers": {
+    "nemotron": 22,
+    "haiku": 9
+   },
+   "scribe": {
+    "raw": {
+     "events": 75,
+     "missed_share": 0.053333333333,
+     "intervals": 50,
+     "mean_signed_err_days": -4.0,
+     "sd_signed_err_days": 37.509182549213,
+     "share_err_above_3": 0.26,
+     "share_err_below_minus_3": 0.24,
+     "median_bias_days": -29.5,
+     "exact_notes": 11,
+     "intervals_with_error": 29,
+     "nonzero_errors_days": [
+      -141,
+      -125,
+      -64,
+      -45,
+      -45,
+      -39,
+      -38,
+      -28,
+      -28,
+      -25,
+      -22,
+      -5,
+      -3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      5,
+      12,
+      22,
+      25,
+      30,
+      31,
+      31,
+      32,
+      45,
+      60,
+      98
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -29.5 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 75,
+     "missed_share": 0.053333333333,
+     "intervals": 50,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 29,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA06",
+   "rtt": {
+    "n": 731,
+    "within": 425,
+    "share_within": 0.5813953488372093,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 738,
+    "complete_share": 0.990514905149,
+    "open_share": 0.009485094851,
+    "missing_share": 0.0
+   },
+   "notes": 31,
+   "writers": {
+    "nemotron": 23,
+    "haiku": 8
+   },
+   "scribe": {
+    "raw": {
+     "events": 80,
+     "missed_share": 0.0125,
+     "intervals": 48,
+     "mean_signed_err_days": -2.291666666667,
+     "sd_signed_err_days": 42.654953234777,
+     "share_err_above_3": 0.354166666667,
+     "share_err_below_minus_3": 0.25,
+     "median_bias_days": -3.0,
+     "exact_notes": 14,
+     "intervals_with_error": 31,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    },
+    "resolver": {
+     "events": 80,
+     "missed_share": 0.0125,
+     "intervals": 48,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 30,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA07",
+   "rtt": {
+    "n": 585,
+    "within": 342,
+    "share_within": 0.5846153846153846,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 590,
+    "complete_share": 0.991525423729,
+    "open_share": 0.008474576271,
+    "missing_share": 0.0
+   },
+   "notes": 31,
+   "writers": {
+    "nemotron": 28,
+    "haiku": 3
+   },
+   "scribe": {
+    "raw": {
+     "events": 87,
+     "missed_share": 0.022988505747,
+     "intervals": 59,
+     "mean_signed_err_days": -21.050847457627,
+     "sd_signed_err_days": 69.415893968718,
+     "share_err_above_3": 0.186440677966,
+     "share_err_below_minus_3": 0.372881355932,
+     "median_bias_days": -32.0,
+     "exact_notes": 8,
+     "intervals_with_error": 38,
+     "nonzero_errors_days": [
+      -199,
+      -171,
+      -164,
+      -151,
+      -151,
+      -135,
+      -125,
+      -113,
+      -102,
+      -97,
+      -95,
+      -94,
+      -62,
+      -48,
+      -48,
+      -33,
+      -26,
+      -23,
+      -22,
+      -22,
+      -22,
+      -22,
+      -2,
+      -1,
+      1,
+      1,
+      3,
+      12,
+      12,
+      26,
+      38,
+      40,
+      40,
+      45,
+      86,
+      86,
+      125,
+      171
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -32 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 87,
+     "missed_share": 0.022988505747,
+     "intervals": 59,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 29,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA08",
+   "rtt": {
+    "n": 1898,
+    "within": 1120,
+    "share_within": 0.5900948366701791,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 1915,
+    "complete_share": 0.991122715405,
+    "open_share": 0.008877284595,
+    "missing_share": 0.0
+   },
+   "notes": 31,
+   "writers": {
+    "nemotron": 21,
+    "haiku": 10
+   },
+   "scribe": {
+    "raw": {
+     "events": 68,
+     "missed_share": 0.058823529412,
+     "intervals": 37,
+     "mean_signed_err_days": -3.459459459459,
+     "sd_signed_err_days": 61.007556269055,
+     "share_err_above_3": 0.324324324324,
+     "share_err_below_minus_3": 0.189189189189,
+     "median_bias_days": 5.0,
+     "exact_notes": 15,
+     "intervals_with_error": 20,
+     "nonzero_errors_days": [
+      -234,
+      -172,
+      -103,
+      -54,
+      -20,
+      -20,
+      -9,
+      3,
+      7,
+      9,
+      13,
+      20,
+      27,
+      33,
+      36,
+      38,
+      40,
+      46,
+      60,
+      152
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias +5 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 68,
+     "missed_share": 0.058823529412,
+     "intervals": 37,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 29,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA09",
+   "rtt": {
+    "n": 706,
+    "within": 424,
+    "share_within": 0.6005665722379604,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 716,
+    "complete_share": 0.986033519553,
+    "open_share": 0.013966480447,
+    "missing_share": 0.0
+   },
+   "notes": 31,
+   "writers": {
+    "nemotron": 18,
+    "haiku": 13
+   },
+   "scribe": {
+    "raw": {
+     "events": 57,
+     "missed_share": 0.0,
+     "intervals": 27,
+     "mean_signed_err_days": 8.814814814815,
+     "sd_signed_err_days": 68.090458518874,
+     "share_err_above_3": 0.37037037037,
+     "share_err_below_minus_3": 0.259259259259,
+     "median_bias_days": 32.0,
+     "exact_notes": 20,
+     "intervals_with_error": 17,
+     "nonzero_errors_days": [
+      -153,
+      -120,
+      -95,
+      -54,
+      -33,
+      -33,
+      -4,
+      30,
+      30,
+      38,
+      40,
+      50,
+      60,
+      95,
+      115,
+      120,
+      152
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias +32 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 57,
+     "missed_share": 0.0,
+     "intervals": 27,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 30,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA10",
+   "rtt": {
+    "n": 543,
+    "within": 324,
+    "share_within": 0.5966850828729282,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 548,
+    "complete_share": 0.990875912409,
+    "open_share": 0.009124087591,
+    "missing_share": 0.0
+   },
+   "notes": 31,
+   "writers": {
+    "nemotron": 25,
+    "haiku": 6
+   },
+   "scribe": {
+    "raw": {
+     "events": 73,
+     "missed_share": 0.013698630137,
+     "intervals": 56,
+     "mean_signed_err_days": -8.303571428571,
+     "sd_signed_err_days": 45.337489862287,
+     "share_err_above_3": 0.25,
+     "share_err_below_minus_3": 0.321428571429,
+     "median_bias_days": -0.5,
+     "exact_notes": 13,
+     "intervals_with_error": 38,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    },
+    "resolver": {
+     "events": 73,
+     "missed_share": 0.013698630137,
+     "intervals": 56,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 29,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA11",
+   "rtt": {
+    "n": 433,
+    "within": 250,
+    "share_within": 0.5773672055427251,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 433,
+    "complete_share": 1.0,
+    "open_share": 0.0,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 24,
+    "haiku": 6
+   },
+   "scribe": {
+    "raw": {
+     "events": 76,
+     "missed_share": 0.013157894737,
+     "intervals": 53,
+     "mean_signed_err_days": 12.245283018868,
+     "sd_signed_err_days": 58.652793775803,
+     "share_err_above_3": 0.377358490566,
+     "share_err_below_minus_3": 0.245283018868,
+     "median_bias_days": -2.0,
+     "exact_notes": 11,
+     "intervals_with_error": 35,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    },
+    "resolver": {
+     "events": 76,
+     "missed_share": 0.013157894737,
+     "intervals": 53,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 29,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA12",
+   "rtt": {
+    "n": 442,
+    "within": 259,
+    "share_within": 0.5859728506787331,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 451,
+    "complete_share": 0.980044345898,
+    "open_share": 0.019955654102,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 26,
+    "haiku": 4
+   },
+   "scribe": {
+    "raw": {
+     "events": 77,
+     "missed_share": 0.012987012987,
+     "intervals": 54,
+     "mean_signed_err_days": 6.740740740741,
+     "sd_signed_err_days": 57.988998691582,
+     "share_err_above_3": 0.277777777778,
+     "share_err_below_minus_3": 0.240740740741,
+     "median_bias_days": 0.0,
+     "exact_notes": 13,
+     "intervals_with_error": 29,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    },
+    "resolver": {
+     "events": 77,
+     "missed_share": 0.012987012987,
+     "intervals": 54,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 29,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA13",
+   "rtt": {
+    "n": 859,
+    "within": 519,
+    "share_within": 0.6041909196740396,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 869,
+    "complete_share": 0.988492520138,
+    "open_share": 0.011507479862,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 24,
+    "haiku": 6
+   },
+   "scribe": {
+    "raw": {
+     "events": 74,
+     "missed_share": 0.013513513514,
+     "intervals": 59,
+     "mean_signed_err_days": -4.728813559322,
+     "sd_signed_err_days": 62.009685146889,
+     "share_err_above_3": 0.338983050847,
+     "share_err_below_minus_3": 0.322033898305,
+     "median_bias_days": 15.0,
+     "exact_notes": 9,
+     "intervals_with_error": 39,
+     "nonzero_errors_days": [
+      -210,
+      -132,
+      -124,
+      -118,
+      -79,
+      -78,
+      -72,
+      -70,
+      -70,
+      -70,
+      -70,
+      -64,
+      -45,
+      -44,
+      -39,
+      -38,
+      -32,
+      -8,
+      -7,
+      6,
+      8,
+      17,
+      17,
+      21,
+      32,
+      32,
+      38,
+      38,
+      38,
+      66,
+      72,
+      74,
+      74,
+      74,
+      74,
+      74,
+      75,
+      122,
+      139
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias +15 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 74,
+     "missed_share": 0.013513513514,
+     "intervals": 59,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 28,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA14",
+   "rtt": {
+    "n": 562,
+    "within": 323,
+    "share_within": 0.5747330960854092,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 566,
+    "complete_share": 0.992932862191,
+    "open_share": 0.007067137809,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 18,
+    "haiku": 12
+   },
+   "scribe": {
+    "raw": {
+     "events": 68,
+     "missed_share": 0.014705882353,
+     "intervals": 51,
+     "mean_signed_err_days": -17.313725490196,
+     "sd_signed_err_days": 84.551165620842,
+     "share_err_above_3": 0.294117647059,
+     "share_err_below_minus_3": 0.333333333333,
+     "median_bias_days": -30.0,
+     "exact_notes": 16,
+     "intervals_with_error": 34,
+     "nonzero_errors_days": [
+      -232,
+      -205,
+      -186,
+      -162,
+      -143,
+      -143,
+      -143,
+      -138,
+      -130,
+      -120,
+      -32,
+      -30,
+      -29,
+      -27,
+      -27,
+      -24,
+      -22,
+      -3,
+      3,
+      7,
+      8,
+      14,
+      15,
+      31,
+      34,
+      37,
+      42,
+      45,
+      56,
+      66,
+      71,
+      141,
+      170,
+      173
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -30 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 68,
+     "missed_share": 0.014705882353,
+     "intervals": 51,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 29,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA15",
+   "rtt": {
+    "n": 963,
+    "within": 581,
+    "share_within": 0.6033229491173416,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 968,
+    "complete_share": 0.994834710744,
+    "open_share": 0.005165289256,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 21,
+    "haiku": 9
+   },
+   "scribe": {
+    "raw": {
+     "events": 63,
+     "missed_share": 0.031746031746,
+     "intervals": 45,
+     "mean_signed_err_days": -2.511111111111,
+     "sd_signed_err_days": 44.901215929184,
+     "share_err_above_3": 0.311111111111,
+     "share_err_below_minus_3": 0.311111111111,
+     "median_bias_days": -28.0,
+     "exact_notes": 13,
+     "intervals_with_error": 32,
+     "nonzero_errors_days": [
+      -93,
+      -69,
+      -66,
+      -65,
+      -64,
+      -63,
+      -62,
+      -62,
+      -61,
+      -42,
+      -31,
+      -31,
+      -31,
+      -25,
+      -2,
+      -2,
+      1,
+      3,
+      4,
+      4,
+      19,
+      22,
+      26,
+      29,
+      34,
+      57,
+      64,
+      66,
+      69,
+      83,
+      84,
+      91
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -28 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 63,
+     "missed_share": 0.031746031746,
+     "intervals": 45,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 27,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA16",
+   "rtt": {
+    "n": 655,
+    "within": 390,
+    "share_within": 0.5954198473282443,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 662,
+    "complete_share": 0.989425981873,
+    "open_share": 0.010574018127,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 21,
+    "haiku": 9
+   },
+   "scribe": {
+    "raw": {
+     "events": 69,
+     "missed_share": 0.028985507246,
+     "intervals": 36,
+     "mean_signed_err_days": -19.916666666667,
+     "sd_signed_err_days": 53.030651514007,
+     "share_err_above_3": 0.055555555556,
+     "share_err_below_minus_3": 0.333333333333,
+     "median_bias_days": -70.5,
+     "exact_notes": 17,
+     "intervals_with_error": 15,
+     "nonzero_errors_days": [
+      -130,
+      -130,
+      -108,
+      -108,
+      -97,
+      -97,
+      -88,
+      -60,
+      -55,
+      -32,
+      -11,
+      -5,
+      -2,
+      102,
+      104
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -70.5 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 69,
+     "missed_share": 0.028985507246,
+     "intervals": 36,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 28,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA17",
+   "rtt": {
+    "n": 623,
+    "within": 367,
+    "share_within": 0.5890850722311396,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 627,
+    "complete_share": 0.993620414673,
+    "open_share": 0.006379585327,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 18,
+    "haiku": 12
+   },
+   "scribe": {
+    "raw": {
+     "events": 76,
+     "missed_share": 0.013157894737,
+     "intervals": 46,
+     "mean_signed_err_days": -7.130434782609,
+     "sd_signed_err_days": 60.913274851547,
+     "share_err_above_3": 0.217391304348,
+     "share_err_below_minus_3": 0.347826086957,
+     "median_bias_days": -9.5,
+     "exact_notes": 13,
+     "intervals_with_error": 27,
+     "nonzero_errors_days": [
+      -159,
+      -121,
+      -114,
+      -114,
+      -105,
+      -95,
+      -94,
+      -79,
+      -54,
+      -39,
+      -22,
+      -22,
+      -22,
+      -19,
+      -4,
+      -4,
+      1,
+      20,
+      54,
+      54,
+      66,
+      70,
+      75,
+      75,
+      95,
+      114,
+      115
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -9.5 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 76,
+     "missed_share": 0.013157894737,
+     "intervals": 46,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 27,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA18",
+   "rtt": {
+    "n": 236,
+    "within": 149,
+    "share_within": 0.6313559322033898,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 239,
+    "complete_share": 0.987447698745,
+    "open_share": 0.012552301255,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 19,
+    "haiku": 11
+   },
+   "scribe": {
+    "raw": {
+     "events": 72,
+     "missed_share": 0.027777777778,
+     "intervals": 53,
+     "mean_signed_err_days": -15.339622641509,
+     "sd_signed_err_days": 72.145937407939,
+     "share_err_above_3": 0.320754716981,
+     "share_err_below_minus_3": 0.358490566038,
+     "median_bias_days": 0.0,
+     "exact_notes": 9,
+     "intervals_with_error": 36,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    },
+    "resolver": {
+     "events": 72,
+     "missed_share": 0.027777777778,
+     "intervals": 53,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 17.650452162437,
+     "share_err_above_3": 0.018867924528,
+     "share_err_below_minus_3": 0.018867924528,
+     "median_bias_days": 2.0,
+     "exact_notes": 27,
+     "intervals_with_error": 2,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA19",
+   "rtt": {
+    "n": 1436,
+    "within": 836,
+    "share_within": 0.5821727019498607,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 1456,
+    "complete_share": 0.986263736264,
+    "open_share": 0.013736263736,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 19,
+    "haiku": 11
+   },
+   "scribe": {
+    "raw": {
+     "events": 77,
+     "missed_share": 0.0,
+     "intervals": 55,
+     "mean_signed_err_days": -13.527272727273,
+     "sd_signed_err_days": 109.667317550492,
+     "share_err_above_3": 0.309090909091,
+     "share_err_below_minus_3": 0.309090909091,
+     "median_bias_days": -1.0,
+     "exact_notes": 12,
+     "intervals_with_error": 35,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    },
+    "resolver": {
+     "events": 77,
+     "missed_share": 0.0,
+     "intervals": 55,
+     "mean_signed_err_days": -6.654545454545,
+     "sd_signed_err_days": 86.005214781994,
+     "share_err_above_3": 0.018181818182,
+     "share_err_below_minus_3": 0.036363636364,
+     "median_bias_days": 0.0,
+     "exact_notes": 28,
+     "intervals_with_error": 3,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA20",
+   "rtt": {
+    "n": 244,
+    "within": 148,
+    "share_within": 0.6065573770491803,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 245,
+    "complete_share": 0.995918367347,
+    "open_share": 0.004081632653,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 20,
+    "haiku": 10
+   },
+   "scribe": {
+    "raw": {
+     "events": 77,
+     "missed_share": 0.038961038961,
+     "intervals": 49,
+     "mean_signed_err_days": 4.489795918367,
+     "sd_signed_err_days": 52.80116888265,
+     "share_err_above_3": 0.224489795918,
+     "share_err_below_minus_3": 0.224489795918,
+     "median_bias_days": 0.0,
+     "exact_notes": 17,
+     "intervals_with_error": 22,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    },
+    "resolver": {
+     "events": 77,
+     "missed_share": 0.038961038961,
+     "intervals": 49,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 28,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA21",
+   "rtt": {
+    "n": 605,
+    "within": 360,
+    "share_within": 0.5950413223140496,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 616,
+    "complete_share": 0.982142857143,
+    "open_share": 0.017857142857,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 21,
+    "haiku": 9
+   },
+   "scribe": {
+    "raw": {
+     "events": 78,
+     "missed_share": 0.0,
+     "intervals": 56,
+     "mean_signed_err_days": 19.25,
+     "sd_signed_err_days": 77.283010011021,
+     "share_err_above_3": 0.392857142857,
+     "share_err_below_minus_3": 0.321428571429,
+     "median_bias_days": 24.0,
+     "exact_notes": 12,
+     "intervals_with_error": 43,
+     "nonzero_errors_days": [
+      -164,
+      -115,
+      -102,
+      -95,
+      -70,
+      -68,
+      -66,
+      -64,
+      -33,
+      -30,
+      -30,
+      -29,
+      -29,
+      -23,
+      -18,
+      -18,
+      -13,
+      -13,
+      1,
+      1,
+      3,
+      4,
+      5,
+      5,
+      54,
+      54,
+      60,
+      62,
+      62,
+      68,
+      68,
+      74,
+      83,
+      93,
+      93,
+      125,
+      130,
+      143,
+      155,
+      155,
+      158,
+      164,
+      238
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias +24 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 78,
+     "missed_share": 0.0,
+     "intervals": 56,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 29,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA90",
+   "rtt": {
+    "n": 2403,
+    "within": 1399,
+    "share_within": 0.5821889305035373,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 2430,
+    "complete_share": 0.988888888889,
+    "open_share": 0.011111111111,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 27,
+    "haiku": 3
+   },
+   "scribe": {
+    "raw": {
+     "events": 57,
+     "missed_share": 0.017543859649,
+     "intervals": 38,
+     "mean_signed_err_days": -5.394736842105,
+     "sd_signed_err_days": 58.707492718394,
+     "share_err_above_3": 0.157894736842,
+     "share_err_below_minus_3": 0.315789473684,
+     "median_bias_days": -7.5,
+     "exact_notes": 13,
+     "intervals_with_error": 20,
+     "nonzero_errors_days": [
+      -136,
+      -134,
+      -73,
+      -59,
+      -57,
+      -36,
+      -32,
+      -24,
+      -24,
+      -19,
+      -17,
+      -4,
+      2,
+      2,
+      4,
+      5,
+      5,
+      17,
+      136,
+      239
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -7.5 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 57,
+     "missed_share": 0.017543859649,
+     "intervals": 38,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 0.0,
+     "share_err_above_3": 0.0,
+     "share_err_below_minus_3": 0.0,
+     "median_bias_days": 0.0,
+     "exact_notes": 28,
+     "intervals_with_error": 0,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  },
+  {
+   "county": "HVA91",
+   "rtt": {
+    "n": 107,
+    "within": 67,
+    "share_within": 0.6261682242990654,
+    "suppressed": false
+   },
+   "completeness": {
+    "started": 109,
+    "complete_share": 0.981651376147,
+    "open_share": 0.018348623853,
+    "missing_share": 0.0
+   },
+   "notes": 30,
+   "writers": {
+    "nemotron": 20,
+    "haiku": 10
+   },
+   "scribe": {
+    "raw": {
+     "events": 70,
+     "missed_share": 0.014285714286,
+     "intervals": 55,
+     "mean_signed_err_days": -7.345454545455,
+     "sd_signed_err_days": 50.964482251647,
+     "share_err_above_3": 0.290909090909,
+     "share_err_below_minus_3": 0.363636363636,
+     "median_bias_days": -8.0,
+     "exact_notes": 12,
+     "intervals_with_error": 39,
+     "nonzero_errors_days": [
+      -159,
+      -121,
+      -88,
+      -88,
+      -76,
+      -73,
+      -70,
+      -61,
+      -54,
+      -45,
+      -38,
+      -38,
+      -37,
+      -34,
+      -34,
+      -31,
+      -31,
+      -30,
+      -8,
+      -7,
+      -1,
+      1,
+      3,
+      7,
+      8,
+      8,
+      9,
+      10,
+      10,
+      30,
+      35,
+      37,
+      38,
+      66,
+      66,
+      74,
+      97,
+      100,
+      121
+     ],
+     "comparable": false,
+     "reasons": [
+      "median bias -8 days is beyond +/-3"
+     ]
+    },
+    "resolver": {
+     "events": 70,
+     "missed_share": 0.014285714286,
+     "intervals": 55,
+     "mean_signed_err_days": 0.0,
+     "sd_signed_err_days": 23.286460857315,
+     "share_err_above_3": 0.018181818182,
+     "share_err_below_minus_3": 0.018181818182,
+     "median_bias_days": 0.0,
+     "exact_notes": 27,
+     "intervals_with_error": 2,
+     "nonzero_errors_days": null,
+     "comparable": true,
+     "reasons": []
+    }
+   }
+  }
+ ],
+ "national": {
+  "n": 19581,
+  "within": 11510,
+  "share_within": 0.5878147183494203,
+  "share_within_central_pooled": 0.5878147183494203,
+  "started": 19792,
+  "complete_share": 0.9893391269199676,
+  "open_share": 0.010660873080032336,
+  "completeness_note": "the SYNTHETIC event log has no missing end dates; a started clock is either complete or still open at the administrative data cut",
+  "computed_from": "unsuppressed county rows (FLARE's own national row is wrong when a county is suppressed)",
+  "flare_global_row": {
+   "n": 19581,
+   "within": 11510,
+   "equals_county_rows": true
+  }
+ },
+ "summary": {
+  "raw": {
+   "not_comparable": 15,
+   "comparable": 8,
+   "of": 23,
+   "not_comparable_counties": [
+    "HVA01",
+    "HVA03",
+    "HVA04",
+    "HVA05",
+    "HVA07",
+    "HVA08",
+    "HVA09",
+    "HVA13",
+    "HVA14",
+    "HVA15",
+    "HVA16",
+    "HVA17",
+    "HVA21",
+    "HVA90",
+    "HVA91"
+   ]
+  },
+  "resolver": {
+   "not_comparable": 1,
+   "comparable": 22,
+   "of": 23,
+   "not_comparable_counties": [
+    "HVA04"
+   ]
+  }
+ },
+ "flare": {
+  "ran": true,
+  "run_status": "FINISHED:COMPLETED",
+  "nvflare": "2.9.1",
+  "sites": 23,
+  "simulator_threads": 1,
+  "elapsed_seconds": 179.63,
+  "precision": 12,
+  "privacy_filters": [
+   "MinCountCleanser(min_count)",
+   "AddNoiseToMinMax(0.1, 0.3)",
+   "HistogramBinsCleanser(10%)"
+  ],
+  "output": "data/flare/fedstats-gate-p12.json",
+  "equivalence": {
+   "cells": 253,
+   "cells_ok": 253,
+   "cells_failed": [],
+   "suppressed_central": [],
+   "suppressed_flare": [],
+   "suppressed_sets_identical": true,
+   "max_abs_diff_mean": 4.911626660941693e-13,
+   "max_abs_diff_sd": 4.973799150320701e-13,
+   "max_abs_diff_share_within_42": 0.0,
+   "tolerance": 1e-06,
+   "success": true
+  },
+  "gate_decisions_identical_with_central_missed_share": true
+ },
+ "crosscheck_stored_files": {
+  "raw_missed_equal_stored_notes": true,
+  "raw_interval_errors_equal_stored": true,
+  "resolver_interval_errors_equal_stored": true,
+  "stored_interval_files_aligned": true,
+  "files": [
+   "runs/diagnose/notes-C-270m-all-v2data.jsonl",
+   "runs/diagnose/intervals-C-270m-all-v2data.json",
+   "runs/diagnose/intervals-C-270m-all-v2data-resolved.json"
+  ],
+  "note": "no stored per-note event file exists for the resolver arm; its events are checked through the pooled exact-note total (651/700) in gate_prep.py"
+ },
+ "realData": {
+  "kind": "PUBLISHED",
+  "question": "Can this area see its cancer stage?",
+  "rule": "yes when stage is recorded for at least 70% of cancers, the stated aim",
+  "aim_pct": 70,
+  "areas": [
+   {
+    "area": "Whole country",
+    "pct": 42,
+    "canSee": false
+   },
+   {
+    "area": "Pirkanmaa wellbeing services county",
+    "pct": 72,
+    "canSee": true
+   },
+   {
+    "area": "Sisä-Suomi collaborative area (yhteistyöalue)",
+    "pct": 60,
+    "canSee": false
+   },
+   {
+    "area": "Other areas, not named one by one in the source",
+    "pctRange": [
+     33,
+     42
+    ],
+    "canSee": false
+   }
+  ],
+  "note": "Published by area only. No value is given or invented for any SYNTHETIC county.",
+  "source": {
+   "name": "Syöpäjärjestöt news item, 17 Jun 2026, on the Finnish Cancer Registry report Syöpä 2024",
+   "url": "https://www.syopajarjestot.fi/uutinen/syovan-levinneisyystiedoissa-suuria-alueellisia-eroja-suomessa/",
+   "reopened_utc": "2026-11-14T22:56Z"
+  }
+ },
+ "limits": [
+  "All pathway and note data here are SYNTHETIC. Nothing was run on real notes or real patients.",
+  "Simulation only: 23 FLARE sites on one Mac reading partitions of one folder; no network, provisioning or site approval.",
+  "Notes are assigned to counties by a content-blind rule, so differences between counties in one arm are sampling noise of the same scribe on 30-31 notes, not county effects.",
+  "The bias is estimated on 27-59 within-note intervals per county; a real gate would need a fixed audit sample per county.",
+  "Both thresholds are placeholders, not validated limits; 42 days is a placeholder for the OECD/EU-reported target, not a Finnish legal limit.",
+  "A person confirms every extracted event in SAMA; the gate labels figures, it does not replace that check."
+ ],
+ "files": {
+  "prep": "flare/gate_prep.py",
+  "rule": "flare/gate.py",
+  "site": "flare/gate_stats.py",
+  "job": "flare/run_gate.py",
+  "build": "flare/build_gate.py",
+  "render": "web/flare.mjs",
+  "log": "runs/ship-flare.jsonl"
+ }
+}

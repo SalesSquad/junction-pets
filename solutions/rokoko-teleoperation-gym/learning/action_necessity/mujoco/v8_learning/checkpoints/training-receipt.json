@@ -1,0 +1,73 @@
+{
+  "actual_v7_raw_train_transitions": 68568,
+  "deployment_authorized": false,
+  "dev_cal_test_ood_opened": false,
+  "executed_head": "4b91c64bc1a79bf630b1da6d12bea28e87c2990a",
+  "fit_example_count": 4339,
+  "gradient_epochs_per_stage": 55,
+  "independent_science_qualification": false,
+  "l2": 0.003,
+  "learn_rate": 0.055,
+  "limitations": [
+    "Imitation training and internal train-only diagnostic, not success improvement.",
+    "Two near goal witnesses share existing V5/V6 policies; strong overfitting risk.",
+    "Must first compare with frozen baselines on new real MuJoCo worlds."
+  ],
+  "model_weights_frozen": true,
+  "model_weights_sha256": "9dd1011cd267899da4b9205fb73bdd2f5a8453719b1003351a24a82a2743e0ea",
+  "next_fresh_train_seed": 513000,
+  "schema": "junction.rokoko.mujoco-v8.hierarchical-imitation.v1.receipt",
+  "stage_diagnostics": [
+    {
+      "diagnostic_samples": 139,
+      "fit_cross_entropy": 0.630265677614241,
+      "initial_fit_cross_entropy": 1.8838611981285753,
+      "initial_train_diagnostic_cross_entropy": 1.8045954583664352,
+      "stage": 0,
+      "train_diagnostic_cross_entropy": 0.6197723563694656,
+      "train_samples": 725,
+      "trained": true
+    },
+    {
+      "diagnostic_samples": 200,
+      "fit_cross_entropy": 0.4488695346710061,
+      "initial_fit_cross_entropy": 1.7044101138339058,
+      "initial_train_diagnostic_cross_entropy": 1.6881268919273293,
+      "stage": 1,
+      "train_diagnostic_cross_entropy": 0.43319755487504746,
+      "train_samples": 867,
+      "trained": true
+    },
+    {
+      "diagnostic_samples": 475,
+      "fit_cross_entropy": 0.41051181156111927,
+      "initial_fit_cross_entropy": 1.943462387787735,
+      "initial_train_diagnostic_cross_entropy": 1.9439097203857991,
+      "stage": 2,
+      "train_diagnostic_cross_entropy": 0.41576492521398434,
+      "train_samples": 1917,
+      "trained": true
+    },
+    {
+      "diagnostic_samples": 0,
+      "fit_cross_entropy": 0.00874950619680146,
+      "initial_fit_cross_entropy": 1.9459101490553135,
+      "initial_train_diagnostic_cross_entropy": null,
+      "stage": 3,
+      "train_diagnostic_cross_entropy": null,
+      "train_samples": 16,
+      "trained": true
+    }
+  ],
+  "teacher_witness_world_trials": {
+    "frozen_v5": 2,
+    "frozen_v6": 1,
+    "repeat_left": 74
+  },
+  "train_diagnostic_seed_count": 14,
+  "train_diagnostic_seed_max": 512298,
+  "train_diagnostic_seed_min": 512017,
+  "v7_evidence_dataset_sha256": "d1ad3e8de866e38a15e86d76f16205d7ff1830289de151af78014edb03c36320",
+  "v7_qualification_sha256": "2c371bc969d502bd1a64d6a5744012440deea961c22cfee7a173dbd72de5bc49",
+  "v7_replay_sha256": "89b854b61f820c3a87c6b7e8c4e1732c0627ee5663e4e7cee17954b44da22f17"
+}

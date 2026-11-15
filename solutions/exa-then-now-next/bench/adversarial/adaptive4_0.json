@@ -1,0 +1,214 @@
+{
+ "items": [
+  {
+   "id": "eu261-amount",
+   "attacks": [
+    {
+     "text": "Passengers whose flight of 1,500 kilometres or less arrives three hours or more late may claim reimbursement of EUR 250 under Article 7 of Regulation (EC) No 261/2004.",
+     "strategy": "remedy form swap with permissive verb",
+     "why_false": "Article 7 grants a fixed compensation entitlement, not a reimbursement that passengers may claim."
+    },
+    {
+     "text": "Passengers whose flight of 1,500 kilometres or less arrives less than three hours late are entitled to compensation of EUR 250 under Article 7 of Regulation (EC) No 261/2004.",
+     "strategy": "comparison direction hidden in verb and preposition",
+     "why_false": "The threshold is three hours or more, so a flight arriving less than three hours late does not trigger the EUR 250 compensation."
+    },
+    {
+     "text": "Passengers whose flight of 1,500 kilometres or less arrives three hours or more late are entitled to compensation of EUR 250 under Article 8 of Regulation (EC) No 261/2004.",
+     "strategy": "wrong article number inside the same instrument",
+     "why_false": "Compensation of EUR 250 for this case is set in Article 7; Article 8 concerns reimbursement or re-routing."
+    }
+   ],
+   "hard_true": "A passenger on a flight of 1,500 kilometres or less that lands three hours or more behind schedule is due a fixed sum of EUR 250, as laid down in Article 7 of Regulation (EC) No 261/2004."
+  },
+  {
+   "id": "eu261-exception",
+   "attacks": [
+    {
+     "text": "An operating air carrier is not obliged to pay compensation under Article 5(3) of Regulation (EC) No 261/2004 if the cancellation is caused by extraordinary circumstances which could have been avoided even after reasonable measures had been taken.",
+     "strategy": "inverted avoidability condition",
+     "why_false": "The exemption applies only where the extraordinary circumstances could not have been avoided, so the inverted condition reverses the rule."
+    },
+    {
+     "text": "An operating air carrier is not obliged to pay compensation under Article 5(3) of Regulation (EC) No 261/2004 if the cancellation is caused by extraordinary circumstances which could not have been avoided even after the airport operator had taken reasonable measures.",
+     "strategy": "wrong actor implied by passive construction",
+     "why_false": "The test asks whether the operating carrier took all reasonable measures, not the airport operator."
+    },
+    {
+     "text": "An operating air carrier is not obliged to pay compensation under Article 5(3) of Regulation (EC) No 261/2004 if the delay, rather than the cancellation, is caused by extraordinary circumstances which could not have been avoided even after reasonable measures had been taken.",
+     "strategy": "conflating cancellation with delay as the triggering case",
+     "why_false": "Article 5(3) addresses cancellations, so extending the exemption to delays changes which cases are covered."
+    }
+   ],
+   "hard_true": "Article 5(3) of Regulation (EC) No 261/2004 relieves an operating carrier from paying compensation where a cancellation stems from extraordinary circumstances that, even after reasonable measures, could not have been avoided."
+  },
+  {
+   "id": "eu-crd-withdrawal",
+   "attacks": [
+    {
+     "text": "Under Article 9 of Directive 2011/83/EU on consumer rights, a consumer has a period of 14 days to withdraw from a distance contract and must give a reason for doing so.",
+     "strategy": "reversed requirement on reasons",
+     "why_false": "The withdrawal right exists without giving any reason, so requiring a reason reverses the rule."
+    },
+    {
+     "text": "Under Article 9 of Directive 2011/83/EU on consumer rights, a consumer has a period of 14 days to request a refund for goods already used, without giving any reason.",
+     "strategy": "remedy swap from withdrawal to refund request",
+     "why_false": "The 14-day period concerns exercising withdrawal from the contract, not requesting a refund for used goods."
+    },
+    {
+     "text": "Under Article 6 of Directive 2011/83/EU on consumer rights, a consumer has a period of 14 days to withdraw from a distance contract without giving any reason.",
+     "strategy": "wrong article number inside the same instrument",
+     "why_false": "The withdrawal period is set in Article 9; Article 6 concerns information requirements for distance contracts."
+    }
+   ],
+   "hard_true": "A consumer may exercise a right of withdrawal from a distance contract, with no reason needed, within 14 days, as set out in Article 9 of Directive 2011/83/EU on consumer rights."
+  },
+  {
+   "id": "eu-guarantee",
+   "attacks": [
+    {
+     "text": "Under Article 10 of Directive (EU) 2019/771, the seller is liable for a lack of conformity which exists at the time of delivery and whose notification to the seller becomes due within two years of that time.",
+     "strategy": "conflating the deadline for notice with the deadline for the defect becoming apparent",
+     "why_false": "The two-year period runs from when the defect becomes apparent, not from when the buyer notifies the seller."
+    },
+    {
+     "text": "Under Article 10 of Directive (EU) 2019/771, the seller should be held liable for a lack of conformity which exists at the time of delivery and becomes apparent within two years of that time.",
+     "strategy": "binding obligation framed as a recommendation",
+     "why_false": "The directive makes seller liability a binding obligation, not a recommended standard."
+    },
+    {
+     "text": "Under Article 12 of Directive (EU) 2019/771, the seller is liable for a lack of conformity which exists at the time of delivery and becomes apparent within two years of that time.",
+     "strategy": "wrong article number inside the same instrument",
+     "why_false": "The liability rule and two-year period are set in Article 10; Article 12 is a different provision."
+    }
+   ],
+   "hard_true": "Where goods are handed over and a non-conformity present at handover shows itself within two years of that handover, the vendor bears liability under Article 10 of Directive (EU) 2019/771."
+  },
+  {
+   "id": "gdpr-access",
+   "attacks": [
+    {
+     "text": "Under Article 12(3) of the GDPR, the controller should provide information on action taken on an access request without undue delay and in any event within one month of receipt of the request.",
+     "strategy": "obligation framed as recommendation",
+     "why_false": "Article 12(3) imposes a binding duty on the controller, not a recommended timeframe."
+    },
+    {
+     "text": "Under Article 12(3) of the GDPR, the controller must acknowledge receipt of an access request without undue delay and in any event within one month of receipt of the request.",
+     "strategy": "conflating the acknowledgement step with the fulfilment deadline",
+     "why_false": "The one-month period governs providing information on the action taken, not acknowledging receipt."
+    },
+    {
+     "text": "Under Article 15(3) of the GDPR, the controller must provide information on action taken on an access request without undue delay and in any event within one month of receipt of the request.",
+     "strategy": "wrong article number inside the same instrument",
+     "why_false": "The one-month deadline for responding to access requests is in Article 12(3); Article 15(3) concerns providing a copy of personal data."
+    }
+   ],
+   "hard_true": "Where a data subject files an access request, the controller's duty to furnish information on the action taken falls due without undue delay and no later than one month after the request reaches it, under Article 12(3) of the GDPR."
+  },
+  {
+   "id": "eu-rail",
+   "attacks": [
+    {
+     "text": "Under Article 19 of Regulation (EU) 2021/782 on rail passengers' rights, passengers are entitled to a refund of 25 % of the ticket price for a delay of 60 to 119 minutes.",
+     "strategy": "remedy swap from compensation to refund",
+     "why_false": "The provision grants compensation, a payment in addition to the fare, not a refund of the ticket price."
+    },
+    {
+     "text": "Under Article 19 of Regulation (EU) 2021/782 on rail passengers' rights, passengers are entitled to compensation of 25 % of the ticket price per hour of delay for a delay of 60 to 119 minutes.",
+     "strategy": "wrong unit of the rule's object",
+     "why_false": "The 25 % is a single fixed share of the fare for the 60 to 119 minute band, not a rate per hour."
+    },
+    {
+     "text": "Under Article 18 of Regulation (EU) 2021/782 on rail passengers' rights, passengers are entitled to compensation of 25 % of the ticket price for a delay of 60 to 119 minutes.",
+     "strategy": "wrong article number inside the same instrument",
+     "why_false": "The compensation band is set in Article 19; Article 18 is a different provision."
+    }
+   ],
+   "hard_true": "For a rail journey delayed by 60 to 119 minutes, a passenger is due a payment equal to 25 % of the fare, as provided in Article 19 of Regulation (EU) 2021/782 on rail passengers' rights."
+  },
+  {
+   "id": "eu-bus",
+   "attacks": [
+    {
+     "text": "Under Article 19 of Regulation (EU) No 181/2011, where a regular bus or coach service is delayed in departure for 120 minutes or more, passengers shall be offered continuation, re-routing or reimbursement of the ticket price.",
+     "strategy": "boundary flipped from exclusive to inclusive threshold",
+     "why_false": "The threshold is a delay of more than 120 minutes, so a delay of exactly 120 minutes does not trigger the entitlement."
+    },
+    {
+     "text": "Under Article 19 of Regulation (EU) No 181/2011, where a regular bus or coach service is delayed in departure for more than 120 minutes, the carrier may offer continuation, re-routing or reimbursement of the ticket price.",
+     "strategy": "obligation converted into optional permission",
+     "why_false": "The provision obliges the carrier to offer these options, so a permissive wording reverses its legal force."
+    },
+    {
+     "text": "Under Article 18 of Regulation (EU) No 181/2011, where a regular bus or coach service is delayed in departure for more than 120 minutes, passengers shall be offered continuation, re-routing or reimbursement of the ticket price.",
+     "strategy": "wrong article number inside the same instrument",
+     "why_false": "The departure-delay entitlement is in Article 19; Article 18 concerns a different passenger right."
+    }
+   ],
+   "hard_true": "On a regular bus or coach service whose departure slips by more than 120 minutes, travellers must be offered onward carriage, rerouting or money back for the fare, under Article 19 of Regulation (EU) No 181/2011."
+  },
+  {
+   "id": "eu-late-payment",
+   "attacks": [
+    {
+     "text": "Under Directive 2011/7/EU on combating late payment, payment periods in commercial transactions between undertakings must not exceed 60 calendar days unless expressly agreed and not grossly unfair to the creditor.",
+     "strategy": "recommendation strengthened into a mandatory prohibition",
+     "why_false": "The directive says payment periods should not exceed 60 days, a recommendation rather than a binding ceiling."
+    },
+    {
+     "text": "Under Directive 2011/7/EU on combating late payment, payment periods in commercial transactions between undertakings should not exceed 60 calendar days unless expressly agreed and not grossly unfair to the debtor.",
+     "strategy": "party swap in the fairness test",
+     "why_false": "The fairness test protects the creditor, so naming the debtor reverses whose position the test assesses."
+    },
+    {
+     "text": "Under Article 4 of Directive 2011/7/EU on combating late payment, payment periods in commercial transactions between undertakings should not exceed 60 calendar days unless expressly agreed and not grossly unfair to the creditor.",
+     "strategy": "wrong article number inside the same instrument",
+     "why_false": "The 60-day guidance is not located in Article 4 of the directive as stated."
+    }
+   ],
+   "hard_true": "Under Directive 2011/7/EU, commercial creditors and debtors should keep payment terms between businesses at or below 60 calendar days, save where expressly agreed and not grossly unfair to the creditor."
+  },
+  {
+   "id": "uk-cra-reject",
+   "attacks": [
+    {
+     "text": "Under section 22 of the Consumer Rights Act 2015, the time limit for exercising the short-term right to repair faulty goods is 30 days.",
+     "strategy": "remedy swap from reject to repair",
+     "why_false": "Section 22 sets the time limit for the short-term right to reject, not the right to repair."
+    },
+    {
+     "text": "Under section 22 of the Consumer Rights Act 2015, the time limit for exercising the short-term right to reject faulty goods is at least 30 days.",
+     "strategy": "bound direction changed from maximum to minimum",
+     "why_false": "The 30 days is the fixed maximum period for rejection, so describing it as a minimum reverses the rule."
+    },
+    {
+     "text": "Under section 23 of the Consumer Rights Act 2015, the time limit for exercising the short-term right to reject faulty goods is 30 days.",
+     "strategy": "wrong section number inside the same instrument",
+     "why_false": "The short-term right to reject and its 30-day limit are in section 22; section 23 is a different provision."
+    }
+   ],
+   "hard_true": "Section 22 of the Consumer Rights Act 2015 gives a buyer a short-term right to reject defective goods, and that right must be exercised within a window of 30 days."
+  },
+  {
+   "id": "uk-deposit",
+   "attacks": [
+    {
+     "text": "Under section 213 of the Housing Act 2004, a landlord in England must return a tenant's deposit within 30 days of receiving it.",
+     "strategy": "wrong legal consequence in the main verb",
+     "why_false": "The provision requires protection of the deposit in an authorised scheme and the prescribed information, not return of the deposit."
+    },
+    {
+     "text": "Under section 213 of the Housing Act 2004, a landlord in England may protect a tenant's deposit in an authorised scheme and give the prescribed information within 30 days of receiving it.",
+     "strategy": "obligation converted into optional permission",
+     "why_false": "The section requires the landlord to protect the deposit and give the information, so permissive wording reverses its force."
+    },
+    {
+     "text": "Under section 215 of the Housing Act 2004, a landlord in England must protect a tenant's deposit in an authorised scheme and give the prescribed information within 30 days of receiving it.",
+     "strategy": "wrong section number inside the same instrument",
+     "why_false": "The deposit protection duty and 30-day requirement are in section 213; section 215 is a different provision."
+    }
+   ],
+   "hard_true": "A landlord in England who receives a tenant's deposit has to lodge it with an authorised scheme and supply the prescribed information within 30 days of receipt, as required by section 213 of the Housing Act 2004."
+  }
+ ]
+}

@@ -1,0 +1,817 @@
+{
+  "accepted_coverage_qualified": false,
+  "action_authorized": false,
+  "all_audited_attempts": 42,
+  "all_query_denominator": 8,
+  "attempt_selection": {
+    "audit_only_successes_excluded": 0,
+    "method": "explicit directories; no automatic outcome-based retry selection",
+    "reason": "Explicit technical generation repairs only; retain all completed observations and every failed request; no accuracy-based response selection."
+  },
+  "audit_only_runs": [
+    {
+      "artifacts_sha256": {
+        "critic/q0001.receipt.json": "83bf004c72b63266c48de5249a805853cd839ffcacb94ca65ccf6e828845e061",
+        "critic/q0001.request.json": "73f89f4e2611ee05632a8eceb0c8e24e2cf233b83d97e50702b9afc3e47facaa",
+        "critic/q0001.response.json": "b644762901f87721434a414a8f705f81e5cd7676920ce88196e2dbf2a06a958e",
+        "detail/q0001.receipt.json": "fd02aa4c85741d35f602365713ce978ce11d54bf901bd6044972ab1852b70672",
+        "detail/q0001.request.json": "4b143c13fa9da02c33e3d0462de1ef5eb62edf0d7591f737a90bace3f55a0fc7",
+        "detail/q0001.response.json": "f3077bc076a121190398152afa0538b0a2206e8a93e512969028c6b3fa5c7a90",
+        "ocr/q0001.receipt.json": "4ba65f285b908fb8779e340baf0b1c2297eee8b0eaca4ce6873c1ba62e3a32da",
+        "ocr/q0001.request.json": "08725ab489958c53a251777ddc02f0616898bae33fe76e4c94228f4a8d06e1e9",
+        "ocr/q0001.response.json": "6625919df01b3cd9f42988220c3ebd44eff22690d8342deeddeb201b052e62c8",
+        "plan.json": "5e2ed4795e4a73199a22ef3ca35784a9726a76739b1b039984c0281a79600c2b",
+        "summary.json": "741d4ac3358fb72415a7f93a8c3dbb2dbccff82513ceace435221eb12bbfb82b",
+        "visual/q0001.receipt.json": "5f026ab34aa606c3526a951b12eb23e48bb3a55edc87a8a2851df598843759e4",
+        "visual/q0001.request.json": "fbdc0fe6318002a4ad03bf08b631887ac4891a0e17af353361be2860f5424077",
+        "visual/q0001.response.json": "37acfe0f4efb93db5c98ccbd3fa1767c88043535955096e5fe5f73d46ab838d5"
+      },
+      "attempts": 4,
+      "case_count": 1,
+      "directory": "/Users/mikaelervamaa/Developer/meta-lens-r5-control-20261114/pilot-01",
+      "http200_calls": 4,
+      "lanes": [
+        "ocr",
+        "visual",
+        "detail",
+        "critic"
+      ],
+      "model": "nemotron-3.5-super-vl",
+      "provider": "verda_nemotron",
+      "source_commit": "c1c766547765bec0b13a437ce3bb38507c525423",
+      "start_index": 0,
+      "statuses": {
+        "preparation_or_schema_error": 4
+      },
+      "summary_status": "PARTIAL_OR_FAILED",
+      "valid_observations": 0
+    },
+    {
+      "artifacts_sha256": {
+        "critic/q0001.receipt.json": "39c8dc989c13c86363b4691d9025d6d062c52a922330895787bf81b3582af40f",
+        "critic/q0001.request.json": "bb9d6000b2decc2c77d5713a6f57f16a0e09db609af4cc69a9f1c331d6076947",
+        "critic/q0001.response.json": "96a053c168ee62dded7c7dd3c733a6dd67c76c344a1d57323c5a57d8bd782fd0",
+        "detail/q0001.receipt.json": "4d7bb55bd43a16b3de25c6dd4a06fa708714f73c5ab436adb966d47f9357ecec",
+        "detail/q0001.request.json": "1bfc7de93c5c13215af64fd923e2a5dbfc541aad88951c5622c23c8b1c6b48f2",
+        "detail/q0001.response.json": "d8ae3358fb209ce798dedff0603da2e533ea77bea7c98a4c7314fcddaf68d5ce",
+        "ocr/q0001.receipt.json": "19bb4b18e347f270b102448db4366a98385a54d8857487de4b29043811011860",
+        "ocr/q0001.request.json": "0437eed745f6675b2c860f7933c08a4a597664cdd2b3a77a1270ccf0779556ae",
+        "ocr/q0001.response.json": "0aa3679fc3445a1a5f65b745c9d953986e34716a00b63988d70301c0710d7b44",
+        "plan.json": "eeaf000fab4450e295fe45ad8e1afbe0f980138ccf57a9d3fe56b751f9b0355a",
+        "summary.json": "879a11fe49f22ffdd855f87d21a4f4d9e7d4d3ab8f5e002e0e811f93bfa8e1eb",
+        "visual/q0001.receipt.json": "7a448e57d1a9babd6c0343c944225cd05f13c16c252ccc87af48fd87b0b63b14",
+        "visual/q0001.request.json": "e83b81f4934ec4000d562fd0052692ddb3d1e11b263722e40a6b800f9655a827",
+        "visual/q0001.response.json": "ead381449b22d74eadbd36552b2a37b0dd46219ad34e4b4588edd6494d4c5225"
+      },
+      "attempts": 4,
+      "case_count": 1,
+      "directory": "/Users/mikaelervamaa/Developer/meta-lens-r5-control-20261114/pilot-02",
+      "http200_calls": 4,
+      "lanes": [
+        "ocr",
+        "visual",
+        "detail",
+        "critic"
+      ],
+      "model": "nemotron-3.5-super-vl",
+      "provider": "verda_nemotron",
+      "source_commit": "3ae406c41a369ba4a64af344d31fa3261d59bb19",
+      "start_index": 0,
+      "statuses": {
+        "preparation_or_schema_error": 4
+      },
+      "summary_status": "PARTIAL_OR_FAILED",
+      "valid_observations": 0
+    },
+    {
+      "artifacts_sha256": {
+        "critic/q0002.receipt.json": "5a54f3d7c84d6d2d401541a9e23aa0da5a541ed8b42114f3846235ff87335aa6",
+        "critic/q0002.request.json": "0b13275022851531b94a66270a9c33bd4358c0b3d5128f7a3a1d9ea403d1214b",
+        "critic/q0002.response.json": "e3ff2d3b7a11040cf61c9ff8101ee396895d8c924b60d9c0ac910020b8043bce",
+        "plan.json": "3ede4a8bbcb8318227eec1548185e00ae552aae8dd69a58d5011709b2916d4bb",
+        "summary.json": "ce449ba8223bd0fbb0a5d4daf5e7eb1d014015f2fe550aca8a993020158703f0"
+      },
+      "attempts": 1,
+      "case_count": 7,
+      "directory": "/Users/mikaelervamaa/Developer/meta-lens-r5-control-20261114/pilot-05",
+      "http200_calls": 1,
+      "lanes": [
+        "critic"
+      ],
+      "model": "nemotron-3.5-super-vl",
+      "provider": "verda_nemotron",
+      "source_commit": "790befeb650fcdb9878092f9eb8861a4bde59aba",
+      "start_index": 1,
+      "statuses": {
+        "preparation_or_schema_error": 1
+      },
+      "summary_status": "PARTIAL_OR_FAILED",
+      "valid_observations": 0
+    }
+  ],
+  "baseline_r4_rank1": {
+    "denominator": 8,
+    "numerator": 6,
+    "rate": 0.75
+  },
+  "binding": {
+    "cases_sha256": "40eab6b31ed50034b92b7d93f0c27d79efecfdb832f29c4d05cc86fe1c57e4eb",
+    "input_hashes": {
+      "dataset": "bd70decf437dd34dfa9e2866c2110b142d7e746ea66c6f1098ac81deb6cac59c",
+      "predictions": "ecbd5e9f93cd0b9f27cb233a2524aae4be5869be4cad8f9c3423570fe640d931",
+      "query_metrics": "defa179486404eb28b0c7200e61f07a4062368e704695d027b1c2fa050e1915f",
+      "r4_report": "8eda9a3d532b931bc93a765e555bc9008ce9d3c781d1c9efef583e6db515ca80"
+    },
+    "truth_sha256": "07ab9cda07582bc69955f6f3276b8ad48b550df31c92f975b4dd348d9ec3eac0"
+  },
+  "candidate_recall_at_3_ranking_ceiling": {
+    "denominator": 8,
+    "numerator": 6,
+    "rate": 0.75
+  },
+  "distinct_families": 8,
+  "evaluator_source_commit": "9a16495474f815e43729bbae87eb5d42d71d49a2",
+  "evaluator_source_sha256": {
+    "evaluate.py": "45e4fdde58c7df9865ac49843624ff47c7ba2230621041ec20f25e51207e3639",
+    "protocol.py": "932e163971d03286a491d6a6a2b4dff4a64918049555f0c35788e121f0029497"
+  },
+  "excluded_failed_attempts": [
+    {
+      "case_id": "q0002",
+      "error": "proposal_identifiability_mismatch",
+      "lane": "critic",
+      "reason": "Caller-explicit failed-attempt exclusion: Explicit technical generation repairs only; retain all completed observations and every failed request; no accuracy-based response selection.",
+      "receipt_path": "/Users/mikaelervamaa/Developer/meta-lens-r5-control-20261114/pilot-04/critic/q0002.receipt.json",
+      "receipt_sha256": "00dc8cf7efc94edc9edfed815cd84dc72a40f2e01939b15f245f0432206074e2",
+      "run_directory": "/Users/mikaelervamaa/Developer/meta-lens-r5-control-20261114/pilot-04",
+      "status": "preparation_or_schema_error"
+    }
+  ],
+  "lanes": {
+    "critic": {
+      "actual_additional_views_observed": 0,
+      "additional_observation_requests": {},
+      "all_queries": 8,
+      "attempted_cases": 8,
+      "correct_proposals": 2,
+      "failed_attempts": 0,
+      "failure_statuses": {},
+      "model_abstentions": 5,
+      "not_attempted_cases": 0,
+      "operational_missing_or_failed": 0,
+      "proposal_coverage_descriptive": {
+        "denominator": 8,
+        "numerator": 3,
+        "rate": 0.375
+      },
+      "proposal_precision_descriptive": {
+        "denominator": 3,
+        "numerator": 2,
+        "rate": 0.6666666666666666
+      },
+      "proposed_cases": 3,
+      "rank1_correct_all_queries": {
+        "denominator": 8,
+        "numerator": 4,
+        "rate": 0.5
+      },
+      "rank1_correct_among_valid": {
+        "denominator": 8,
+        "numerator": 4,
+        "rate": 0.5
+      },
+      "rank1_wrong_observed": 4,
+      "total_no_proposal": 5,
+      "valid_observations": 8,
+      "valid_response_rate": {
+        "denominator": 8,
+        "numerator": 8,
+        "rate": 1.0
+      },
+      "wrong_proposals": 1
+    },
+    "detail": {
+      "actual_additional_views_observed": 0,
+      "additional_observation_requests": {
+        "label_closeup": 5,
+        "other": 1,
+        "side_view": 1
+      },
+      "all_queries": 8,
+      "attempted_cases": 8,
+      "correct_proposals": 1,
+      "failed_attempts": 0,
+      "failure_statuses": {},
+      "model_abstentions": 7,
+      "not_attempted_cases": 0,
+      "operational_missing_or_failed": 0,
+      "proposal_coverage_descriptive": {
+        "denominator": 8,
+        "numerator": 1,
+        "rate": 0.125
+      },
+      "proposal_precision_descriptive": {
+        "denominator": 1,
+        "numerator": 1,
+        "rate": 1.0
+      },
+      "proposed_cases": 1,
+      "rank1_correct_all_queries": {
+        "denominator": 8,
+        "numerator": 5,
+        "rate": 0.625
+      },
+      "rank1_correct_among_valid": {
+        "denominator": 8,
+        "numerator": 5,
+        "rate": 0.625
+      },
+      "rank1_wrong_observed": 3,
+      "total_no_proposal": 7,
+      "valid_observations": 8,
+      "valid_response_rate": {
+        "denominator": 8,
+        "numerator": 8,
+        "rate": 1.0
+      },
+      "wrong_proposals": 0
+    },
+    "ocr": {
+      "all_queries": 8,
+      "attempted_cases": 8,
+      "failed_attempts": 0,
+      "failure_statuses": {},
+      "no_legible_text_cases": 5,
+      "not_attempted_cases": 0,
+      "observed_text_cases": 3,
+      "ocr_accuracy": null,
+      "spans_observed": 23,
+      "text_observation_rate_all_queries": {
+        "denominator": 8,
+        "numerator": 3,
+        "rate": 0.375
+      },
+      "transcription_ground_truth_available": false,
+      "valid_observations": 8,
+      "valid_response_rate": {
+        "denominator": 8,
+        "numerator": 8,
+        "rate": 1.0
+      }
+    },
+    "visual": {
+      "actual_additional_views_observed": 0,
+      "additional_observation_requests": {},
+      "all_queries": 8,
+      "attempted_cases": 8,
+      "correct_proposals": 1,
+      "failed_attempts": 0,
+      "failure_statuses": {},
+      "model_abstentions": 7,
+      "not_attempted_cases": 0,
+      "operational_missing_or_failed": 0,
+      "proposal_coverage_descriptive": {
+        "denominator": 8,
+        "numerator": 1,
+        "rate": 0.125
+      },
+      "proposal_precision_descriptive": {
+        "denominator": 1,
+        "numerator": 1,
+        "rate": 1.0
+      },
+      "proposed_cases": 1,
+      "rank1_correct_all_queries": {
+        "denominator": 8,
+        "numerator": 5,
+        "rate": 0.625
+      },
+      "rank1_correct_among_valid": {
+        "denominator": 8,
+        "numerator": 5,
+        "rate": 0.625
+      },
+      "rank1_wrong_observed": 3,
+      "total_no_proposal": 7,
+      "valid_observations": 8,
+      "valid_response_rate": {
+        "denominator": 8,
+        "numerator": 8,
+        "rate": 1.0
+      },
+      "wrong_proposals": 0
+    }
+  },
+  "limitations": [
+    "Eight development families only; prompts/model routes are selected on development.",
+    "Missing or failed calls remain in all-query denominators and differ from explicit model abstentions.",
+    "OCR accuracy cannot be inferred without independent transcription ground truth.",
+    "Only frozen top3 candidates were shown; missing truth limits ranking accuracy.",
+    "No new viewpoint was captured; additional-observation outputs are requests only.",
+    "Four prompted roles share one backbone; agreement is not independent evidence.",
+    "Proposal metrics are descriptive and do not calibrate or authorize acceptance."
+  ],
+  "model_ensemble_independence": false,
+  "per_case": [
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0001",
+      "lane": "ocr",
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0002",
+      "lane": "ocr",
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0003",
+      "lane": "ocr",
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0004",
+      "lane": "ocr",
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0005",
+      "lane": "ocr",
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0006",
+      "lane": "ocr",
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0007",
+      "lane": "ocr",
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0008",
+      "lane": "ocr",
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0001",
+      "lane": "visual",
+      "model_abstained": false,
+      "proposed_candidate": "c03",
+      "rank1": "c03",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0002",
+      "lane": "visual",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": false,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0003",
+      "lane": "visual",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c03",
+      "rank1_correct": false,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0004",
+      "lane": "visual",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0005",
+      "lane": "visual",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0006",
+      "lane": "visual",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": false,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0007",
+      "lane": "visual",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c02",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0008",
+      "lane": "visual",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0001",
+      "lane": "detail",
+      "model_abstained": false,
+      "proposed_candidate": "c03",
+      "rank1": "c03",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0002",
+      "lane": "detail",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": false,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0003",
+      "lane": "detail",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c03",
+      "rank1_correct": false,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0004",
+      "lane": "detail",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0005",
+      "lane": "detail",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0006",
+      "lane": "detail",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": false,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0007",
+      "lane": "detail",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c02",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0008",
+      "lane": "detail",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0001",
+      "lane": "critic",
+      "model_abstained": false,
+      "proposed_candidate": "c01",
+      "rank1": "c01",
+      "rank1_correct": false,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0002",
+      "lane": "critic",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": false,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0003",
+      "lane": "critic",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": false,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0004",
+      "lane": "critic",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0005",
+      "lane": "critic",
+      "model_abstained": false,
+      "proposed_candidate": "c01",
+      "rank1": "c01",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0006",
+      "lane": "critic",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": false,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0007",
+      "lane": "critic",
+      "model_abstained": false,
+      "proposed_candidate": "c02",
+      "rank1": "c02",
+      "rank1_correct": true,
+      "valid_observation": true
+    },
+    {
+      "attempt_status": "observed_schema_valid",
+      "case_id": "q0008",
+      "lane": "critic",
+      "model_abstained": true,
+      "proposed_candidate": null,
+      "rank1": "c01",
+      "rank1_correct": true,
+      "valid_observation": true
+    }
+  ],
+  "physical_identity_verified": false,
+  "qualification": false,
+  "schema_version": 1,
+  "selected_runs": [
+    {
+      "artifacts_sha256": {
+        "critic/q0001.observation.json": "965feeb1cf2820eced7c74242a7eb609bc8d04bdbddc8300851c999bc8452823",
+        "critic/q0001.receipt.json": "f60eb6b9efcd15b242eb381dc9225e51422ade4f7628414932f53efa968f1954",
+        "critic/q0001.request.json": "33de98dd57f04d54985391737edfdaba4143c2e0053fffd9b1682ed2a8da5db4",
+        "critic/q0001.response.json": "5ccd5db8cadc8567fdd1dce1737bc116ca173fa2da3444a3ee600b6766510682",
+        "detail/q0001.observation.json": "e5111eab788ebdac214cfbcd9e7925b1b2d7825622bc3e284ad918f781eb52c5",
+        "detail/q0001.receipt.json": "ff2cd77c337afe4a958480227ac9e7dd6efa24b0023d40c0495a38370aa2cdd8",
+        "detail/q0001.request.json": "45b9d185ed43806ed4f08f7f7c3827cb07a83766b7467658fc21ac87cad6a18b",
+        "detail/q0001.response.json": "6b00ba31869956c7f1b190eb9f92a03418e59ab4b783d184a84ce898777de327",
+        "ocr/q0001.observation.json": "e69f2d8b645ed83f39da7b3287616a3bc901c2bb5335789d702619de84240576",
+        "ocr/q0001.receipt.json": "2c694f8dada5bfc61aef3ceaac007a86122392008a6a23d45590eaf8e9dfe303",
+        "ocr/q0001.request.json": "e2daf09406e7cc8c5762ecc446a963f8e551cc6d616d5cb197a6cd7588966450",
+        "ocr/q0001.response.json": "0a7b1b37af08d9d74aab68e0c0fd74c8376f6f00c0cd2e4ac2dde54e97c63aad",
+        "plan.json": "312ba6c7971070883ba435982e0da17e063426d1e413ba0ba27a26671b94d42e",
+        "summary.json": "86100eb888822a0a200dacad404768aa639cdb651f4ed350ee79e85297061e25",
+        "visual/q0001.observation.json": "6751ec3fdaa6a71b17dae1fb3c6df2dac6a48e30d0bf088cfe4760634702b968",
+        "visual/q0001.receipt.json": "fea0fb38e6fa5f80a27de22176aaa085e57557179f8a6d2df56c4a1f63898806",
+        "visual/q0001.request.json": "80a21ebe235c5cdca10e687259d8886f2c232b9fb67358143362e99fc48fd59f",
+        "visual/q0001.response.json": "c17706d04d72f3a7c03986bca7feba67925f80ec9939c581ef452adcf09d5b2c"
+      },
+      "attempts": 4,
+      "case_count": 1,
+      "directory": "/Users/mikaelervamaa/Developer/meta-lens-r5-control-20261114/pilot-03",
+      "http200_calls": 4,
+      "lanes": [
+        "ocr",
+        "visual",
+        "detail",
+        "critic"
+      ],
+      "model": "nemotron-3.5-super-vl",
+      "provider": "verda_nemotron",
+      "source_commit": "fbf27ab1ca3905ccc1c561cc6a6e7e9f05df9a5d",
+      "start_index": 0,
+      "statuses": {
+        "observed_schema_valid": 4
+      },
+      "summary_status": "COMPLETE",
+      "valid_observations": 4
+    },
+    {
+      "artifacts_sha256": {
+        "critic/q0002.receipt.json": "00dc8cf7efc94edc9edfed815cd84dc72a40f2e01939b15f245f0432206074e2",
+        "critic/q0002.request.json": "545173efb51e6f90f227795689fdd55a0a60c1d8477d3ec98ed8d34fd896ce00",
+        "critic/q0002.response.json": "b78836cc5875c0e1c27c4e99e604680befc7f104245e2d781168890ea158bf77",
+        "detail/q0002.observation.json": "5a810ace7c86e9ffaa31abc4910fe1b5122cbb4339877938d7e4380a3c22a91a",
+        "detail/q0002.receipt.json": "63e120fe3976d7d2c0e3892ec4bf2fb459fc20777a00fd897a7af6ff35f22e4f",
+        "detail/q0002.request.json": "84c91611e13315905d4681dbb05be856475be7466a361bcece7836c07c1cd569",
+        "detail/q0002.response.json": "6338360362b85697770fff351628868775ec1379db659417740b79a7354e7324",
+        "detail/q0003.observation.json": "289b0823871a726d4be4a3ae1fae18088d00d1433af6b85537e968aaff549969",
+        "detail/q0003.receipt.json": "9c1265167b7a60ce5c8f502dac3ef3feb946a4c9b16518ef604afaeda7add7bd",
+        "detail/q0003.request.json": "1635b4deefe426c1ca12deebea6a6d6ad623af5cba12f11e34126f8462d9950c",
+        "detail/q0003.response.json": "5cf5d0213153220f19a50968235d60cefdaf7e829f2f2380133c77435df1f2d6",
+        "detail/q0004.observation.json": "a2246f149d801b823fabefe8e040545c52c9ed957f544229ff704ffb06713fb4",
+        "detail/q0004.receipt.json": "388f32cc14553344ff12db62cd97c3ea64a75ebe281e1b63fb9bc4b85c6fbb92",
+        "detail/q0004.request.json": "1cd89101227a88b5b1f02416886c1b61346bb353ed83cbd544569c3a0b5af17f",
+        "detail/q0004.response.json": "3a721314d84a664a32708b59d5120413c5eefa083c5ead7332c524eb85fcf31e",
+        "detail/q0005.observation.json": "6bfd128a006f6ae42b6b7c00d51f83727c2ccb2e3f2793608bf7bd0cf4712e3a",
+        "detail/q0005.receipt.json": "31705d5be5b6e85fe3a2fef2db6da5ca45f2e7a8724dcab8f5fcebb1b60aa6a1",
+        "detail/q0005.request.json": "3a4286d18e95fc6d8d5956ea7fac57cf9b0870d7e9521ba56e0122e6459aa8b0",
+        "detail/q0005.response.json": "a15d511e95cc9c9dc5bc7d226ff9edc8379d099cb3459f1898b07d1f94d15fa1",
+        "detail/q0006.observation.json": "2991daba4203639b63684fd0f0ced80a4f1cc90083808a9ca8dba7529d118e41",
+        "detail/q0006.receipt.json": "1868e4893daa2a7010fd9e17ef618afdc6e428dd6ce733813a337871c2211f0f",
+        "detail/q0006.request.json": "608987aea4f5ca9d1562bc60198921f6d3fae2a3fdce9902aa06f96549a7321f",
+        "detail/q0006.response.json": "f629cc0c9ed5bd24237d29f578a8e19ce8b600e26cd87f2f763169eac61aa3ac",
+        "detail/q0007.observation.json": "071ba4210a68d289cf41414bcee4ea600c3323fd3c19dc08d3e115771e393a17",
+        "detail/q0007.receipt.json": "3d714639b00ba47707e95cc0dbf149e473672674816613218575b7e86feaf59f",
+        "detail/q0007.request.json": "199ba0f2f816fe16d8bf4c0d8c5cd590427b7d0f582368eaa3f0039c8093d861",
+        "detail/q0007.response.json": "7b69dbb56916d8612a9f8b1ec464b7f2bd7aa9dbe21555c60f9a3d9328933e5f",
+        "detail/q0008.observation.json": "c1600a56500136ce5fdef3cbade234f4c317c5d6258de4dc398ba0832ba29737",
+        "detail/q0008.receipt.json": "f101ab073854847aa8de7345332357585d0bb1370cc79b7bac8a867174c2c9cb",
+        "detail/q0008.request.json": "05f8371d14a6a484db089e8e28d92a2e8522d855c1008c773942049d47632ce6",
+        "detail/q0008.response.json": "d1931ef94c58a2f1f17cc3e23af1e0231e5acee7721da673257a9bef3b7068b4",
+        "ocr/q0002.observation.json": "19be04cebc5f297226881afc7300e455d211d387b723c6133d9b912a88b8e26a",
+        "ocr/q0002.receipt.json": "05437f810814c006eb54ae9478a004a4c6bfe96a2d8caafb7a6110fda481f1a0",
+        "ocr/q0002.request.json": "0d60c89c2450209f4f2348c516f91c2435609a8f51b21ebce11f835e765c0127",
+        "ocr/q0002.response.json": "44a5c5a9d5ee66ade10e4adb8e56260495a4d53a5f29784695cd1d67925f4e80",
+        "ocr/q0003.observation.json": "53b8ca57ee362781ef3dd0ef679eeadf23e772fb0c64c1050a4ab0753a4c7e67",
+        "ocr/q0003.receipt.json": "521db730d79b4e8859463ced567c5e12cee14c186c81b52d1c87c05087ed2a6f",
+        "ocr/q0003.request.json": "0bc532eb5b45747beb122744753c61009994a1d37832317bf8eaa6dc34c1a3df",
+        "ocr/q0003.response.json": "646d5a0b7fb77041cbba567e3015b59f04c1d8d4a600307ea3985a6f8e98b083",
+        "ocr/q0004.observation.json": "53b8ca57ee362781ef3dd0ef679eeadf23e772fb0c64c1050a4ab0753a4c7e67",
+        "ocr/q0004.receipt.json": "c976f3a5769a162da72a41fbb1300ae490778907d45853d2017358eca6c6fe6a",
+        "ocr/q0004.request.json": "f51f9ed61ffc44493ddf0ae4b865f70ae63183ead1c5eb87d3d1424213ebdb04",
+        "ocr/q0004.response.json": "86aa7ebdbf92d52b5231a208f6c8c46699a38fc06eb8597383040ab005b1acd8",
+        "ocr/q0005.observation.json": "008a2f157f2344e727c75f211b82fff93ec4f679b57b83b07013c3a9097b7881",
+        "ocr/q0005.receipt.json": "e40f1c330c397ac75d373e67747549622cb4aa27b06a50645f53e845b200dbdc",
+        "ocr/q0005.request.json": "d7f7508ee599d3a2a1d7a3c524943d53908273e00e492049268b1ca881992505",
+        "ocr/q0005.response.json": "7d9f1a2814b4290728e25d32d1de397aadc3819c04838a4b16a364fb5cf14f18",
+        "ocr/q0006.observation.json": "53b8ca57ee362781ef3dd0ef679eeadf23e772fb0c64c1050a4ab0753a4c7e67",
+        "ocr/q0006.receipt.json": "77f0a4f4a45265bcbc51b287985c0e4251f6a3b2460c3b7c43861c80610e329b",
+        "ocr/q0006.request.json": "6302ffce720477afebfd061a857b283a900300f74ff14d732e2b3fe1a117086e",
+        "ocr/q0006.response.json": "aaf78e80dbbab57da241b19dbde503a92735c9b77d58b1c8a828b068edf183a5",
+        "ocr/q0007.observation.json": "53b8ca57ee362781ef3dd0ef679eeadf23e772fb0c64c1050a4ab0753a4c7e67",
+        "ocr/q0007.receipt.json": "d097a50983ec5e0893511faf78a71ebfc92bba4a04f1339e7ecfec13d58bf907",
+        "ocr/q0007.request.json": "48abc806f9c3249f25ba25e2b5aec178609055d9dd55866400d44f9ecc176fd7",
+        "ocr/q0007.response.json": "d2295274865b4d8f7f92848d6644c73f74046fb47259cbcd7f0480dc4eb40323",
+        "ocr/q0008.observation.json": "53b8ca57ee362781ef3dd0ef679eeadf23e772fb0c64c1050a4ab0753a4c7e67",
+        "ocr/q0008.receipt.json": "21b39227c95f5410f8447f296382c329adea63104d8330e9060d621110cffba9",
+        "ocr/q0008.request.json": "13a321031b365da5836d6cd9bfc8aa0efb777d3438491c5f188d2fe34eaa1128",
+        "ocr/q0008.response.json": "d3a4438ec112b9e8eecba1e901d8b5e43334f6dfa4ba5162c8dfdeba811cd745",
+        "plan.json": "497e34ed668e56dceb27563fceca6dc4b71c1ec310ebecd98efcb1ec0432c0e9",
+        "summary.json": "0cf090f2aedf2208b9de796765233f6a3f1cadb78dac6e16281303fb4f12bbf9",
+        "visual/q0002.observation.json": "214efa45dcdb843b41b5a2fca5fe9898f5b1fe2a210903777e0772604ff5bd4b",
+        "visual/q0002.receipt.json": "bab727713ee00482ad66e72e0ae2e12916f2d46849cbb7bb0aafbe0af175f90d",
+        "visual/q0002.request.json": "0bdaccf55b069e0656a36b8fc63451c5addcb93b5be381dc0a430073e6170cc6",
+        "visual/q0002.response.json": "f19f4ec0eeff65133cc27cbce58fa223a32becd9f71edd452d1f30d8670bdb59",
+        "visual/q0003.observation.json": "d07015be3e93a242a0dac293282c8ae3bf349b7286aa521a69a845a16c925849",
+        "visual/q0003.receipt.json": "64e8829d50813baa326da6796a8b3c1e1ff032666e1cb531610fe46a671d8d59",
+        "visual/q0003.request.json": "0da99b5287ad3f6184ed80830d8b8d687fa422a6397210efd55b72a1b835655b",
+        "visual/q0003.response.json": "74a9dbb7de70db122ca13c9f9949a8b36dbeef2493af313eb6849156bfb79aff",
+        "visual/q0004.observation.json": "f4e86440452d40b95e88aef6c2fa596e5685e86c246a8fca291b7247036d60da",
+        "visual/q0004.receipt.json": "d943ba6e283aaadfecfd759e1904ffabcfc0e7c2ba8c5aabd433d7f6a9128e63",
+        "visual/q0004.request.json": "8aeafc00343e71754351bc5ac720a5ba3996c7c488192a619bd6fd83c7136bdf",
+        "visual/q0004.response.json": "904d33e6c6c8d7a77366f301b3f04130511352027013d34c34dadb49f60a0107",
+        "visual/q0005.observation.json": "1da9d2e951dd40fa1186024d8ad3f7e2a5988d53ccfcbf238d306861a36e3173",
+        "visual/q0005.receipt.json": "382769cc22e30d28952d73d0adfe1871d8b7888751917567309d3e07bc6e0f59",
+        "visual/q0005.request.json": "d791124da3f75115a1825d5bd8ab79ddd0ff89a9023a53eaaf3b3bd99c233740",
+        "visual/q0005.response.json": "d3036156445761af0278dcb12bc6c3f74fe344c1de98bf059fc6ce76bade4615",
+        "visual/q0006.observation.json": "5f516202b4bef67c1f8790eb307fcfb5f216153ae800b5d521e4e4566a46da0f",
+        "visual/q0006.receipt.json": "7d08f5c877a8aa94fd0c9b29c270c16ef1f6077384c7875cd5d80d7a1ca14adb",
+        "visual/q0006.request.json": "153241e21f1d7a8ffe2f5cb876e55ee6b8c314343e3d9090fc8193b5a5bdf941",
+        "visual/q0006.response.json": "fa41164b0032a6520d9756ea9fbb90d7c53f84193ff9025d1d855fc342594e5e",
+        "visual/q0007.observation.json": "b8fc717f531b804de3da28d0d9e19c6e238dd34c089a8a638b2f206430deb786",
+        "visual/q0007.receipt.json": "36a47bb1583d2ab039c088fc437e713e7a83b637b805d57a7c758d6bfe408349",
+        "visual/q0007.request.json": "1289db724ccd6817f2cf4d8d46ea4bc8069495cc155c28158c6fc554782bc4ef",
+        "visual/q0007.response.json": "3cce0f3c9a474ee689f0db1c0d605dc8f6924daecb543f4dcbae4300f0508788",
+        "visual/q0008.observation.json": "2e44742b5753cafe4bcec97d69d52e0a64948d60fbea341e0f92ec20a3f7757b",
+        "visual/q0008.receipt.json": "38cdadaa8f408cc62976aeeb301a8a68e240a493fac8b9722ad73e9a6aea198d",
+        "visual/q0008.request.json": "f4e9f36f1eed3bd1c4aed3179ed9dbcfb615710a3e0816bf74fe927344fe1040",
+        "visual/q0008.response.json": "7e46907a8b8f15ffca482f1ef855c249d6c93a502fecdb86ad1c59442e637b35"
+      },
+      "attempts": 22,
+      "case_count": 7,
+      "directory": "/Users/mikaelervamaa/Developer/meta-lens-r5-control-20261114/pilot-04",
+      "http200_calls": 22,
+      "lanes": [
+        "ocr",
+        "visual",
+        "detail",
+        "critic"
+      ],
+      "model": "nemotron-3.5-super-vl",
+      "provider": "verda_nemotron",
+      "source_commit": "fbf27ab1ca3905ccc1c561cc6a6e7e9f05df9a5d",
+      "start_index": 1,
+      "statuses": {
+        "observed_schema_valid": 21,
+        "preparation_or_schema_error": 1
+      },
+      "summary_status": "PARTIAL_OR_FAILED",
+      "valid_observations": 21
+    },
+    {
+      "artifacts_sha256": {
+        "critic/q0002.observation.json": "09ac3c186430d20297f3472cb8b3852c61466df403bfbba16d45bc80cf784ca0",
+        "critic/q0002.receipt.json": "ec2fce024a61cfb3fb2f6b321ef7b9f92a63ffa5164d7c42294aea53581aceeb",
+        "critic/q0002.request.json": "ae59d63edb0fd2f9c78d717b259dfc3538bd9328940351d18d53c69002f7963c",
+        "critic/q0002.response.json": "27090a59e6d4d775ab96a70e5203f616b0a7b30ccf079a03c133a8d6b6219634",
+        "critic/q0003.observation.json": "7a82e5fe3857e275b3bd8e136b0e2edbf9ee5bbddd7ee74cf09e07c70f11216d",
+        "critic/q0003.receipt.json": "c1911dab44a83afbc28cd552f1c2083d48cdcf213483ab3790eb576379453ddd",
+        "critic/q0003.request.json": "d329a3bacadfba660125977cee24f7cac609001c5dd60c1a45258e8ab02974ac",
+        "critic/q0003.response.json": "bfebe15632732e675b178083e39b87ea61b510993030637371d128fd65c8a5d3",
+        "critic/q0004.observation.json": "afd9f84d1ca3962c68aea829e793ef9ef7b57a01b4f71d43fbfc18e501fdbccc",
+        "critic/q0004.receipt.json": "8adf99be2c2ee5b6d4098097f76b7bb40165665abdad2bfa1a20723a26b0d196",
+        "critic/q0004.request.json": "219fafb6d9cdce9e71653a4497ba893d4a93ad990ac5bf571eb7459991114066",
+        "critic/q0004.response.json": "2bc828e0ef5c2f8d48071599c1c480e1d4d53c95d590f6697511c5f77da5c0d6",
+        "critic/q0005.observation.json": "f32a5a3618fb5c6e458416b1f4fbdf7c2511105d762ad4995a3b5a2a03ec479a",
+        "critic/q0005.receipt.json": "7a9ab21c58182ca717ae39bf58fc22d486bd58155a1962e365f2005581d5079b",
+        "critic/q0005.request.json": "76db1df7f989c1728af3d5d3c1f07ae02e72963cfd5690a64c76174fbbc885e9",
+        "critic/q0005.response.json": "73876cdb9cd8da5973332ab3a91903250712289be020bdba822199ce92a09023",
+        "critic/q0006.observation.json": "dc1482a7326cc2fb55a3736b0793120df5622ca9e719f32033acb54528403e50",
+        "critic/q0006.receipt.json": "959506ac942a283023c24c47a60401b837e28813f00f08faa6aa77ab7be22a88",
+        "critic/q0006.request.json": "7d6d985194ad918b6b2549455bd39efe7181c7e1a856e7a4ddd1db1c622b59ae",
+        "critic/q0006.response.json": "64d3711c7b70eb2affcb6f7feb717412220b0da4baa664898cb5677ce773dd2c",
+        "critic/q0007.observation.json": "070905e0d6ad63693ace782c24e05678456d41f7aeab720170798fa2f5c01b5a",
+        "critic/q0007.receipt.json": "8a796da6a9bcf2117e2d1bd6137e457b29e870e2c55cb66481fc192bd2fb1ef5",
+        "critic/q0007.request.json": "16d5cc17a8c30fa96e0c9d73a93a45793e78c707f4451de83911f292d188f2ee",
+        "critic/q0007.response.json": "07a858161125cc9713cebd3b6c1c8aa5f60d60fda5ed3e7bd55d6a82c376ea39",
+        "critic/q0008.observation.json": "c3478f285e678933e4b73cdf5b0e04eec17aa742a23bafd11fe556fd69070105",
+        "critic/q0008.receipt.json": "94a22208afa60c36b93df7bd8f8ce8613deef719355b98c04904bdb3609f0f11",
+        "critic/q0008.request.json": "449955208450c1fa05f7143c107e2cef8ea1c611bda704a4b35d2889ec50cae5",
+        "critic/q0008.response.json": "54022c57ca9725f3aed0e4212d7990e8eb9fe21f97c264c3ead27601ae4a2942",
+        "plan.json": "986919897baac1897b89d3d7b736436117ca6a29083e02e9a9984687bb0ec6fe",
+        "summary.json": "1e7a09e6ff7513e5fdc809d384790ccec398dd20b67ff0eb45fc81c19b09f217"
+      },
+      "attempts": 7,
+      "case_count": 7,
+      "directory": "/Users/mikaelervamaa/Developer/meta-lens-r5-control-20261114/pilot-06",
+      "http200_calls": 7,
+      "lanes": [
+        "critic"
+      ],
+      "model": "nemotron-3.5-super-vl",
+      "provider": "verda_nemotron",
+      "source_commit": "ac037c9643cdeda9a812516232f052e3190591e5",
+      "start_index": 1,
+      "statuses": {
+        "observed_schema_valid": 7
+      },
+      "summary_status": "COMPLETE",
+      "valid_observations": 7
+    }
+  ],
+  "split": "dev",
+  "status": "EVALUATED_RESEARCH_ONLY",
+  "work_id": "META-LENS-R5-NEMOTRON4-20261114"
+}

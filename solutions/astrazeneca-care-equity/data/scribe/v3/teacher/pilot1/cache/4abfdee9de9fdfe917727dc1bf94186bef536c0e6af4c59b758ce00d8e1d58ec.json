@@ -1,0 +1,187 @@
+{
+ "id": "4abfdee9de9fdfe917727dc1bf94186bef536c0e6af4c59b758ce00d8e1d58ec",
+ "curriculum": "terse",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Tuloreitti seulonta. Yhteys seulontayksikön hoitajaan 15.6.2026, lääkärin arvio 20 viikkoa sitten. Lähetteen vastaanotto erikoissairaanhoidossa 108 päivää sitten. Syöpähoito aloitettu syyskuussa 2026. Syntymäaika 26.3.1960. Kontrolliaika 17.1.2027 ei ole vielä toteutunut. Potilaan vointi hyvä, kotona pärjää hyvin, neuvottu jatkohoitoon.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 37,
+    "v1_ok": false
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2026-07-23",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2026-07-22",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-06-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2026-07-22",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-08-24",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-09-01",
+       "precision": "MONTH"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 1035,
+      "total_tokens": 1182,
+      "completion_tokens": 147,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.07
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 735,
+      "total_tokens": 857,
+      "completion_tokens": 122,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.04
+    }
+   ],
+   "repair_request": [
+    "An independent reader dated 'lääkärin arvio' to 2026-07-22 (DAY) instead of '20 viikkoa sitten' (= 2026-07-23, DAY). Put that date string directly with that fact and no other date near it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Tuloreitti seulonta. Yhteys seulontayksikön hoitajaan 15.6.2026. Lääkärin arvio 20 viikkoa sitten. Lähetteen vastaanotto erikoissairaanhoidossa 108 päivää sitten. Syöpähoito aloitettu syyskuussa 2026. Syntymäaika 26.3.1960. Kontrolliaika 17.1.2027 ei ole vielä toteutunut. Potilaan vointi hyvä, kotona pärjää hyvin, neuvottu jatkohoitoon.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 37,
+    "v1_ok": false
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2026-07-23",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2026-07-21",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-08-24",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-08-23",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-06-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2026-07-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-08-23",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-09-01",
+       "precision": "MONTH"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1312,
+      "total_tokens": 1459,
+      "completion_tokens": 147,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.18
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 735,
+      "total_tokens": 857,
+      "completion_tokens": 122,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.87
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:57+00:00"
+}

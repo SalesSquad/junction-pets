@@ -1,0 +1,41 @@
+{
+ "synthetic": true,
+ "created": "2026-11-14T21:52:34Z",
+ "note": "Time MLX greedy inference on the first 20 validation notes per base size, before committing to the arm list.\n\nBase models without an adapter, version-1 absolute prompt, max 384 new tokens. A base model may not stop early, so\nseconds per note is an upper bound for a trained adapter; tokens per second is the comparable speed figure.\nOne MLX process at a time (sequential subprocesses).",
+ "results": {
+  "270m": {
+   "status": "ok",
+   "model": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/scribe/v4/artifacts/hf-cache/hub/models--mlx-community--gemma-3-270m-it-bf16/snapshots/c806ef3a4ed971bd75aaee3346e0fef808512f03",
+   "adapter": null,
+   "format": "absolute",
+   "source": "val",
+   "notes": 20,
+   "load_seconds": 1.9,
+   "wall_seconds": 40.96,
+   "seconds_per_note": 2.048,
+   "generated_tokens": 6875,
+   "tokens_per_second": 167.8,
+   "peak_memory_gb": 1.146,
+   "hit_max_tokens": 17,
+   "mean_new_tokens": 343.8,
+   "mean_prompt_tokens": 447.8
+  },
+  "1b": {
+   "status": "ok",
+   "model": "/Users/mikaelervamaa/Developer/codex-task-worktrees/j26-astra-equity-20261114/solutions/astrazeneca-care-equity/scribe/artifacts/hf-cache/hub/models--mlx-community--gemma-3-1b-it-bf16/snapshots/60444cd9d4be58ce6995614c6551b4d8db047483",
+   "adapter": null,
+   "format": "absolute",
+   "source": "val",
+   "notes": 20,
+   "load_seconds": 3.33,
+   "wall_seconds": 21.04,
+   "seconds_per_note": 1.052,
+   "generated_tokens": 1478,
+   "tokens_per_second": 70.2,
+   "peak_memory_gb": 3.101,
+   "hit_max_tokens": 0,
+   "mean_new_tokens": 73.9,
+   "mean_prompt_tokens": 447.8
+  }
+ }
+}

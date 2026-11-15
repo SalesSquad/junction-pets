@@ -1,0 +1,214 @@
+{
+  "adaptive_rule_training": {
+    "candidate_grammar": [
+      "always_v5",
+      "public_corridor",
+      "threshold_le",
+      "threshold_ge"
+    ],
+    "crossfit_diagnostic": {
+      "factual_world_paired_option_delta": 0,
+      "held_lost_baseline_goal_worlds": 0,
+      "held_novel_goal_worlds": 0,
+      "held_selected_phase_worlds": 0,
+      "held_unsafe_worlds": 0,
+      "held_worlds": 48,
+      "mean_option_delta_bootstrap_95pct": [
+        0.0,
+        0.0
+      ],
+      "per_world_mean_option_delta": 0.0
+    },
+    "exploratory_right4_excluded": true,
+    "folds": [
+      {
+        "fit_option_delta": 0,
+        "fit_world_set_sha256": "0d3d085551f199baf2f9841e54d7d62872dd523c7e463569b9f910f148a2a780",
+        "fit_worlds": 38,
+        "fold": 0,
+        "held_lost_baseline_goal_worlds": 0,
+        "held_novel_goal_worlds": 0,
+        "held_option_delta": 0,
+        "held_original_worlds": 10,
+        "held_phase_selected_worlds": 0,
+        "held_unsafe_worlds": 0,
+        "held_world_set_sha256": "a14499870d19acd1d88e5c2ad3ab1c51aaa76c48b9691f2f90529b7f2b073e08",
+        "learned_rule": {
+          "kind": "always_v5"
+        }
+      },
+      {
+        "fit_option_delta": 0,
+        "fit_world_set_sha256": "602f72c7d11e4bd6c6ac444ad044d9e1b38a38b29d1a4042634bbe6e0b869e15",
+        "fit_worlds": 38,
+        "fold": 1,
+        "held_lost_baseline_goal_worlds": 0,
+        "held_novel_goal_worlds": 0,
+        "held_option_delta": 0,
+        "held_original_worlds": 10,
+        "held_phase_selected_worlds": 0,
+        "held_unsafe_worlds": 0,
+        "held_world_set_sha256": "aea1e6e9de2c168faf03c511e9186f87aad83022af373c133ffd7dfe56973341",
+        "learned_rule": {
+          "kind": "always_v5"
+        }
+      },
+      {
+        "fit_option_delta": 0,
+        "fit_world_set_sha256": "5ea404fbacf402995ebdc4dc962ff26cb10c7e66115408eefb3cc80fb4765bb7",
+        "fit_worlds": 39,
+        "fold": 2,
+        "held_lost_baseline_goal_worlds": 0,
+        "held_novel_goal_worlds": 0,
+        "held_option_delta": 0,
+        "held_original_worlds": 9,
+        "held_phase_selected_worlds": 0,
+        "held_unsafe_worlds": 0,
+        "held_world_set_sha256": "44fc68b955cde391d2eb1f3ebc75146dd28552e9606c86d4bb1280af4251b570",
+        "learned_rule": {
+          "kind": "always_v5"
+        }
+      },
+      {
+        "fit_option_delta": 0,
+        "fit_world_set_sha256": "8acb6c4dd7e2c63974a2e67958810b934685ae28031c423cc84f426e7141f854",
+        "fit_worlds": 40,
+        "fold": 3,
+        "held_lost_baseline_goal_worlds": 0,
+        "held_novel_goal_worlds": 0,
+        "held_option_delta": 0,
+        "held_original_worlds": 8,
+        "held_phase_selected_worlds": 0,
+        "held_unsafe_worlds": 0,
+        "held_world_set_sha256": "4b0cfba2e5185fe8e3d1ff4fb00d536129274f1a2065ff9c92b56a4546373b25",
+        "learned_rule": {
+          "kind": "always_v5"
+        }
+      },
+      {
+        "fit_option_delta": 0,
+        "fit_world_set_sha256": "e8804c69b60ff1917cb907901b0351db8dabaf93e863a273bbf884b1fc7ad87e",
+        "fit_worlds": 37,
+        "fold": 4,
+        "held_lost_baseline_goal_worlds": 0,
+        "held_novel_goal_worlds": 0,
+        "held_option_delta": 0,
+        "held_original_worlds": 11,
+        "held_phase_selected_worlds": 0,
+        "held_unsafe_worlds": 0,
+        "held_world_set_sha256": "19521da27af562ee4176a86910443f204df78ef56b5d78b4a26e7638cc4626dc",
+        "learned_rule": {
+          "kind": "always_v5"
+        }
+      }
+    ],
+    "learner_emits_robot_actions": false,
+    "policy_feature_allowlist": [
+      "initial_public_obstacle_y",
+      "original_public_mask"
+    ],
+    "thresholds_fitted_only_on_nonheld_worlds": true
+  },
+  "cohort": {
+    "dev_cal_test_ood_opened": false,
+    "diagnostic_holdout_is_not_final_test": true,
+    "folds": 5,
+    "paired_strategies": [
+      "frozen_v5",
+      "v12_phase_dwell_supported_actions",
+      "v12_right_side_action4_exploration_train_only"
+    ],
+    "partition": "seed mod 5; grouped all arms by world; seed never inference",
+    "unique_original_worlds": 48
+  },
+  "counterexample_driven_next_questions": [
+    {
+      "distinct_original_train_worlds": 36,
+      "hypothesis": "why_all_baseline_policies_fail_goal250",
+      "needed_next_evidence": "new source-reviewed disjoint MuJoCo TRAIN, only after unsafe V13 stop resolved",
+      "observed_world_sha256_examples": [
+        "6f4365b98f66e5d9947576a8fb05dfa84639cbbd5b4ed35971d251e06bb79b3c",
+        "8ade726bf55378fc0205f7d65ca46bf4677a83a0e3692cd05bb31a9ba4826592",
+        "38ffe391e01314061d3f93d17899b8b01a20946319e4192bd564b0c0920c1a1f"
+      ]
+    },
+    {
+      "distinct_original_train_worlds": 22,
+      "hypothesis": "why_supported_phase_adds_options",
+      "needed_next_evidence": "predeclared public-trigger change and prospective zero-goal-loss comparison",
+      "observed_world_sha256_examples": [
+        "cb0c3b1216fa0c67298f22319dfbb94e40aefa26276e2c3396582fb1de598524",
+        "1283b8faf5c30e6fa653af602a75b3172db1a92a4ebbbc2adbdf7b8f6e6adab5",
+        "c881cb1d804eadf28588c4ace5db647f250fc47d524ae3468c2b4787ad681416"
+      ]
+    },
+    {
+      "distinct_original_train_worlds": 2,
+      "hypothesis": "where_phase_saves_options_without_new_goals",
+      "needed_next_evidence": "world-disjoint repeat; no hidden outcome feature at inference",
+      "observed_world_sha256_examples": [
+        "c05bd11ca6d9a113af60629b2f922c880eeaabdfb588fadf7d31a9ca85ca1f05",
+        "9af4534c873037431f97a7f7922bff5b43ac2c6bfa2aa8243ac4135b2b05e671"
+      ]
+    },
+    {
+      "distinct_original_train_worlds": 48,
+      "hypothesis": "right4_has_no_qualified_learned_effect_model",
+      "needed_next_evidence": "many new distinct-world actually executed RIGHT4 actions with independent physics safety",
+      "observed_world_sha256_examples": []
+    }
+  ],
+  "evidence_level": "source-verified-original-V12-factual-paired-TRAIN-diagnostic-only",
+  "further_paid_physics_authorized": false,
+  "model_promotion_authorized": false,
+  "original_observed_arm_readout": {
+    "frozen_v5": {
+      "is_untrained_exploration": false,
+      "may_be_selected_by_learned_rule": true,
+      "original_actual_option_total": 1337,
+      "original_actual_physics_ticks": 130740,
+      "original_actual_safe_goal_worlds": 12,
+      "real_episodes": 48,
+      "unsafe_worlds": 0
+    },
+    "v12_phase_dwell_supported_actions": {
+      "is_untrained_exploration": false,
+      "may_be_selected_by_learned_rule": true,
+      "original_actual_option_total": 1658,
+      "original_actual_physics_ticks": 163040,
+      "original_actual_safe_goal_worlds": 12,
+      "real_episodes": 48,
+      "unsafe_worlds": 0
+    },
+    "v12_right_side_action4_exploration_train_only": {
+      "is_untrained_exploration": true,
+      "may_be_selected_by_learned_rule": false,
+      "original_actual_option_total": 1233,
+      "original_actual_physics_ticks": 120240,
+      "original_actual_safe_goal_worlds": 12,
+      "real_episodes": 48,
+      "unsafe_worlds": 0
+    }
+  },
+  "original_source": {
+    "actual_mask_legal_options": 4228,
+    "actual_real_episodes": 144,
+    "original_full_transitions_sha256": "7e8d7c80cb8d035d904338e1a544662181a93933cc5c324458f7195c56f90b91",
+    "original_harness_head": "4874d15dd68d3a809aaf7d769d6b5bef85d378bd",
+    "original_product_head": "78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f",
+    "original_training_sha256": "cdc4d9d8729d61c730048c802579d25813dc45b55cf4e68d61d680840b7e7a2d",
+    "original_zip_sha256": "f2bed411c74bd99a4a622bd3ed1853a2542313ede8acc219b9f1d57c08729311"
+  },
+  "quarantined_v13": {
+    "efficacy_rows_accepted": 0,
+    "manifest_sha256": "5c3eae39e3a3bf6250c4713c42894034b1d27b64982b3e68c9c17e7f9d8c4d3a",
+    "physics_dispatch_allowed": false,
+    "source": "V13_INCOMPLETE_QUARANTINED",
+    "training_rows_accepted": 0,
+    "unsafe_transition_sha256": "4702034192e3877e42278a1b297e9b8c787955fbe2a30e411dd06fd9a7fee4ba"
+  },
+  "recommendation": "Retain frozen V5. Fix V13 unsafe causal uncertainty, then preregister and independently review a new source-disjoint prospective TRAIN test. This offline diagnostic cannot qualify physical gain.",
+  "robot_motor_execution_authorized": false,
+  "schema": "junction.rokoko.v15.source-bound-paired-active-tournament.v1",
+  "science_decision": "STOP_V13_UNSAFE_AND_V12_ZERO_NOVEL_GOAL"
+}

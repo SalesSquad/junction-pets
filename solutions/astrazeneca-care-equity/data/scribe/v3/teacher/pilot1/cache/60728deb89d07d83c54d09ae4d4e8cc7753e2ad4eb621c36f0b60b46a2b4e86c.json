@@ -1,0 +1,201 @@
+{
+ "id": "60728deb89d07d83c54d09ae4d4e8cc7753e2ad4eb621c36f0b60b46a2b4e86c",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas otti yhteyttä terveyskeskuksen ajanvaraukseen 50 viikkoa sitten. Terveyskeskuslääkäri tutki ja arvioi potilaan 317 päivää sitten. Lähetys vastaanotettiin ja rekisteröitiin erikoissairaanhoidossa elokuussa 2025. Potilas kävi erikoislääkärin vastaanotolla 38 päivää sitten. Seuraava kontrolliaika on 7.5.2026, mutta se ei ole vielä toteutunut. Aiempi syöpään liittymätön rokotuskäynti oli 29.2.2024. Potilas voi tällä hetkellä kohtuullisesti, selviytyy kotona päivittäisistä toiminnoista ja on saanut neuvontaa jatkohoitoon liittyen.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 61,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "FIRST_CONTACT",
+       "date": "2025-05-03",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "FIRST_CONTACT",
+       "date": "2025-04-12",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-06-05",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-04-27",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PUBLIC_PRIMARY",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-04-12",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-04-27",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-08-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2026-03-11",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 918,
+      "total_tokens": 1118,
+      "completion_tokens": 200,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.03
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 788,
+      "total_tokens": 913,
+      "completion_tokens": 125,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.01
+    }
+   ],
+   "repair_request": [
+    "An independent reader dated 'ensimmäinen yhteydenotto terveydenhuoltoon' to 2025-04-12 (DAY) instead of '50 viikkoa sitten' (= 2025-05-03, DAY). Put that date string directly with that fact and no other date near it.",
+    "An independent reader dated 'lääkärin arvio' to 2025-04-27 (DAY) instead of '317 päivää sitten' (= 2025-06-05, DAY). Put that date string directly with that fact and no other date near it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas otti yhteyttä terveyskeskuksen ajanvaraukseen 50 viikkoa sitten. Terveyskeskuslääkäri tutki ja arvioi potilaan 317 päivää sitten. Lähetys vastaanotettiin ja rekisteröitiin erikoissairaanhoidossa elokuussa 2025. Potilas kävi erikoislääkärin vastaanotolla 38 päivää sitten. Seuraava kontrolliaika on 7.5.2026, mutta se ei ole vielä toteutunut. Aiempi syöpään liittymätön rokotuskäynti oli 29.2.2024. Potilas voi tällä hetkellä kohtuullisesti, selviytyy kotona päivittäisistä toiminnoista ja on saanut neuvontaa jatkohoitoon liittyen.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 61,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "FIRST_CONTACT",
+       "date": "2025-05-03",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "FIRST_CONTACT",
+       "date": "2025-04-19",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-06-05",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-05-07",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "PUBLIC_PRIMARY",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-04-19",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-05-07",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-08-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2026-03-11",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1325,
+      "total_tokens": 1525,
+      "completion_tokens": 200,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.84
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 788,
+      "total_tokens": 913,
+      "completion_tokens": 125,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.2
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:35:01+00:00"
+}

@@ -1,0 +1,146 @@
+{
+  "children": {
+    "baseline": {
+      "action_failures": 1,
+      "created_at_unix": 1794702637.050795,
+      "elapsed_seconds": 20.396162040997297,
+      "evidence": {
+        "bundle": "w7e9544e09e16e271cf82.json.gz",
+        "event_count": 5480,
+        "policy": "baseline",
+        "score": {
+          "marginCents": 587725,
+          "marginShare": 0.2773160234847473,
+          "onTimeShare": 0.9732620320855615,
+          "ranked": true,
+          "revenueCents": 2119333,
+          "undeliveredShare": 0.0053475935828877,
+          "wonOrders": 187
+        },
+        "seed_group": "fork:w9c80405de6143e9eac90:66427a8afd85fcba",
+        "sha256": "b4eb174b212dddfa2e459edaa805d8a754c403b0a4219c40968477f702547810",
+        "world_id": "w7e9544e09e16e271cf82"
+      },
+      "last_actions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "last_intent_at": 14100,
+      "observed_now": 14280,
+      "requested_at_unix": 1794702637.0048609,
+      "score": {
+        "marginCents": 587725,
+        "marginShare": 0.2773160234847473,
+        "onTimeShare": 0.9732620320855615,
+        "ranked": true,
+        "revenueCents": 2119333,
+        "undeliveredShare": 0.0053475935828877,
+        "wonOrders": 187
+      },
+      "state": "completed",
+      "steps": 767,
+      "world_id": "w7e9544e09e16e271cf82"
+    },
+    "candidate": {
+      "action_failures": 1,
+      "created_at_unix": 1794702637.587594,
+      "elapsed_seconds": 19.95310562499799,
+      "evidence": {
+        "bundle": "w5824febe43379fa67fda.json.gz",
+        "event_count": 4566,
+        "policy": "learned",
+        "score": {
+          "marginCents": 416038,
+          "marginShare": 0.28527250635633317,
+          "onTimeShare": 0.98,
+          "ranked": true,
+          "revenueCents": 1458388,
+          "undeliveredShare": 0.006666666666666667,
+          "wonOrders": 150
+        },
+        "seed_group": "fork:w9c80405de6143e9eac90:66427a8afd85fcba",
+        "sha256": "2a2403f3e09127ba0db1c2ffa56f55af9bced67eb0548bebe6dcd3721e2f1764",
+        "world_id": "w5824febe43379fa67fda"
+      },
+      "last_actions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "last_intent_at": 14100,
+      "observed_now": 14280,
+      "requested_at_unix": 1794702637.5425332,
+      "score": {
+        "marginCents": 416038,
+        "marginShare": 0.28527250635633317,
+        "onTimeShare": 0.98,
+        "ranked": true,
+        "revenueCents": 1458388,
+        "undeliveredShare": 0.006666666666666667,
+        "wonOrders": 150
+      },
+      "state": "completed",
+      "steps": 738,
+      "world_id": "w5824febe43379fa67fda"
+    }
+  },
+  "comparison": {
+    "margin_delta_cents": -171687,
+    "on_time_delta_percentage_points": 0.6737967914438481,
+    "scope": "one shared-future conditional comparison; not independent worlds or final qualification",
+    "won_orders_delta": -37
+  },
+  "config": {
+    "candidate": "learned",
+    "late_threshold": 0.02,
+    "max_minutes": 20160,
+    "max_steps": 10000,
+    "max_wall_seconds": 900,
+    "parent_id": "w9c80405de6143e9eac90",
+    "seed_group": "bahn-reliability-fork-20261115-01",
+    "source": {
+      "files_sha256": {
+        "admission_experiment.py": "87978c32d09afabbd1f4666dadd5d46e515781da41bc983d2df71f6f7a88d2b8",
+        "discovery_experiment.py": "a4591318949347614c217dfbac8db10d8ada8681c4ceee7822c906fff577bf8b",
+        "dispatch.py": "7d02a31cd7dcf04a76ba2fc7b0ca984524e8f89803faeac791f83365f8136b9b",
+        "fork_study.py": "1148f60edb773066f951de66b1ff816f1e7887763c197a46c08a0c1a1ffdd91c",
+        "notes_experiment.py": "a7e32cd9ed0435a1c1a6038cb8c3b70d760edc2dacd96992ed4fae0726cbdda7",
+        "official_study.py": "a8e407336589ebc8f6a5e20ba88b088e5c615ccea6ab5a2c2bc9d5670a461fe6",
+        "reliability_experiment.py": "59b3843a9f3a19706cc727d95a6a77cd247c9ac9000b61cf7b1c6420ad3dc956",
+        "typed_notes.py": "73112136261ebc3a02f9436bbcd1894648b8d63a23be9b13e7c7ad22ca66aa8e"
+      },
+      "model_sha256": "33115ca3e7ca4d4520785955e0be92b9aecdc68f9f78fb4bcaa347541f971675",
+      "sdk_files_sha256": {
+        "client.py": "03562b3422b8f917dcdafe5c69f38f3047147316db83bc14fabfd1a22e3b873d",
+        "starter.py": "a5294694e4de10736359159bed00c94bdae7ebbe0cad5c42044030e0f4e0a3d1",
+        "types.py": "accf9e181b67a922ecf50612bdd46456ff89f4187d3a7a25a00d65f87e9697ee"
+      },
+      "sdk_version": "0.1.0",
+      "source_sha": "fa2c3b7fe3f6a9bbb4ba834b2902ad861e6af1ab"
+    }
+  },
+  "created_at_unix": 1794702636.81988,
+  "future_group": "fork:w9c80405de6143e9eac90:66427a8afd85fcba",
+  "parent": {
+    "fingerprint": {
+      "ends_at": 14280,
+      "history_count": 1040,
+      "history_sha256": "03eb4112cfe1d73d43d3df51c63cfe1d6920dfb901880ee6d1fa087ef4aa0639",
+      "last_seq": 1039,
+      "now": 1440,
+      "snapshot_sha256": "66427a8afd85fcba53f345c8ecf3298f5fe6d66a34b48f88804323646c10e3b8"
+    },
+    "initial_score": {
+      "marginCents": 15430,
+      "marginShare": 0.31007596157710704,
+      "onTimeShare": 1,
+      "ranked": true,
+      "revenueCents": 49762,
+      "undeliveredShare": 0,
+      "wonOrders": 48
+    },
+    "level": 8,
+    "world_id": "w9c80405de6143e9eac90"
+  },
+  "same_future_evidence": {
+    "hidden_rng_observed": false,
+    "official_contract": "https://spread.bahnexpress.com/kit/API.md#practice-worlds"
+  },
+  "schemaVersion": 1,
+  "seed": "bahn-reliability-fork-20261115-01",
+  "seed_provenance": "caller_label",
+  "state": "completed"
+}

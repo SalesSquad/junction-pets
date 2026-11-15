@@ -1,0 +1,56 @@
+{
+ "synthetic": true,
+ "created": "2026-11-14T21:50:24Z",
+ "files": {
+  "absolute/train": {
+   "path": "data/scribe/v4/mlx/chat/absolute/train.jsonl",
+   "rows": 2354,
+   "sha256": "0d9c85ef2d83f2926f4b4617127cc6f00b174c7b9af1771a031b1f619977d8c8"
+  },
+  "absolute/valid": {
+   "path": "data/scribe/v4/mlx/chat/absolute/valid.jsonl",
+   "rows": 310,
+   "sha256": "6791530c0427b34f608f3213e807321e963b7733d2547a6b19fbccc8af0488ba"
+  },
+  "expression-aug/train": {
+   "path": "data/scribe/v4/mlx/chat/expression-aug/train.jsonl",
+   "rows": 2354,
+   "sha256": "643fb23938403b0e1a7839bacc789b8a353d52463a3fb7edb867fc6fb07802b2"
+  },
+  "expression-aug/valid": {
+   "path": "data/scribe/v4/mlx/chat/expression-aug/valid.jsonl",
+   "rows": 310,
+   "sha256": "d99883eb9ada0ca955b464d0b9d3585609f844e93b925cc1a2d44fe6689fb74a"
+  }
+ },
+ "augmentation": {
+  "train_rows": 2354,
+  "rows_with_relative_fact": 1314,
+  "eligible_rows": 1314,
+  "target_share": 0.3333333333333333,
+  "rewritten_rows": 438,
+  "rewritten_phrases": 627,
+  "phrase_counts": {
+   "kolme päivää sitten": 63,
+   "kaksi päivää sitten": 61,
+   "viisi päivää sitten": 55,
+   "kaksi viikkoa sitten": 55,
+   "kuusi viikkoa sitten": 54,
+   "kuusi päivää sitten": 48,
+   "neljä päivää sitten": 48,
+   "viisi viikkoa sitten": 47,
+   "kolme viikkoa sitten": 45,
+   "neljä viikkoa sitten": 44,
+   "viikko sitten": 41,
+   "eilen": 24,
+   "päivä sitten": 19,
+   "yksi viikko sitten": 12,
+   "yksi päivä sitten": 11
+  },
+  "rewritten_by_writer": {
+   "nemotron-3.5-super-vl": 336,
+   "claude-haiku-5-5": 102
+  }
+ },
+ "heldout": "data/scribe/v4/mlx/heldout-phrasings.json"
+}

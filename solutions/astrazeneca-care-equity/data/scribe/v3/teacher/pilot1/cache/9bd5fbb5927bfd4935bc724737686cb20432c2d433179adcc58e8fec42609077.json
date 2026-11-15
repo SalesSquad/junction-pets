@@ -1,0 +1,201 @@
+{
+ "id": "9bd5fbb5927bfd4935bc724737686cb20432c2d433179adcc58e8fec42609077",
+ "curriculum": "hard_standard",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Potilas on hakeutunut syöpäpolulle seulonnan kautta. Oireet alkoivat 317 päivää sitten. Lähete lähetettiin erikoissairaanhoitoon 5. marraskuuta 2025. Moniammatillinen hoitopäätös tehtiin joulukuussa 2025, ja syöpähoito aloitettiin 15 viikkoa sitten. Potilas on käynyt aiemmalla rokotuskäynnillä 11.4.2024. Seuraava kontrolli on varattu 16.5.2026, mutta se ei ole vielä toteutunut. Potilas voi tällä hetkellä kohtalaisesti, selviytyy arjesta ja pystyy liikkumaan kotona itsenäisesti. Neuvoa on annettu lepoon ja ravitsemukseen liittyen.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 64,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-06-17",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-04-28",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "TREATMENT_START",
+       "date": "2026-01-15",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "TREATMENT_START",
+       "date": "2026-01-22",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-04-28",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2025-11-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-12-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-01-22",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 863,
+      "total_tokens": 1065,
+      "completion_tokens": 202,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.94
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 790,
+      "total_tokens": 910,
+      "completion_tokens": 120,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 0.59
+    }
+   ],
+   "repair_request": [
+    "An independent reader dated 'oireiden alku' to 2025-04-28 (DAY) instead of '317 päivää sitten' (= 2025-06-17, DAY). Put that date string directly with that fact and no other date near it.",
+    "An independent reader dated 'syöpähoidon aloitus' to 2026-01-22 (DAY) instead of '15 viikkoa sitten' (= 2026-01-15, DAY). Put that date string directly with that fact and no other date near it."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Potilas on hakeutunut syöpäpolulle seulonnan kautta. Oireet alkoivat 317 päivää sitten. Lähete lähetettiin erikoissairaanhoitoon 5. marraskuuta 2025. Moniammatillinen hoitopäätös tehtiin joulukuussa 2025. Syöpähoito aloitettiin 15 viikkoa sitten. Potilas on käynyt aiemmalla rokotuskäynnillä 11.4.2024. Seuraava kontrolli on varattu 16.5.2026, mutta se ei ole vielä toteutunut. Potilas voi tällä hetkellä kohtalaisesti, selviytyy arjesta ja pystyy liikkumaan kotona itsenäisesti. Neuvoa on annettu lepoon ja ravitsemukseen liittyen.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 63,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": false,
+    "differences": [
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-06-17",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-04-29",
+       "precision": "DAY"
+      }
+     },
+     {
+      "class": "wrong_date",
+      "expected": {
+       "type": "TREATMENT_START",
+       "date": "2026-01-15",
+       "precision": "DAY"
+      },
+      "got": {
+       "type": "TREATMENT_START",
+       "date": "2026-01-22",
+       "precision": "DAY"
+      }
+     }
+    ],
+    "answer": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-04-29",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2025-11-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-12-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-01-22",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1261,
+      "total_tokens": 1462,
+      "completion_tokens": 201,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.07
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 789,
+      "total_tokens": 909,
+      "completion_tokens": 120,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.2
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:34:55+00:00"
+}

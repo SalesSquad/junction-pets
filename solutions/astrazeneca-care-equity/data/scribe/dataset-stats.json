@@ -1,0 +1,79 @@
+{
+  "counts": {
+    "train": 1716,
+    "val": 250,
+    "test": 500,
+    "rejected": 1990
+  },
+  "whole_episode_split_reassignments": [
+    {
+      "id": "00011f568b68899c49305a797851166102221011b9de19275341f5a182dbeaf1",
+      "from": "test",
+      "to": "val"
+    }
+  ],
+  "generated": 4476,
+  "duplicate_episode_rows_removed": 20,
+  "sampler_quarantined": 1,
+  "code_check_failure": {
+    "value": 0.0980786416443253,
+    "n": 4476,
+    "ci95": [
+      0.08970707046877444,
+      0.10713950701096445
+    ]
+  },
+  "verifier_rejection_given_code_pass": {
+    "value": 0.3859301461481298,
+    "n": 4037,
+    "ci95": [
+      0.37102837787025167,
+      0.4010487972959349
+    ]
+  },
+  "usage": {
+    "teacher_requests": 4500,
+    "typesafe_tokens": 6846798,
+    "typesafe_requests": 7194,
+    "typesafe_reserved": 0
+  },
+  "date_forms": {
+    "month": 1083,
+    "days": 1056,
+    "weeks": 976,
+    "long": 1083,
+    "numeric": 1543,
+    "no_year": 490
+  },
+  "typesafe_cost_usd": 0.287565516,
+  "audit": {
+    "strata": {
+      "True": {
+        "population": 2466,
+        "sampled": 60,
+        "strict_disagreements": 43
+      },
+      "False": {
+        "population": 1990,
+        "sampled": 60,
+        "strict_disagreements": 2
+      }
+    },
+    "accepted_residual_noise_proxy": {
+      "value": 0.7166666666666667,
+      "n": 60,
+      "ci95": [
+        0.5923271483560882,
+        0.8149317157156729
+      ]
+    },
+    "limit": "Second Jev pass disagreement is a model-based proxy, not independent human label truth. Stricter thresholds and shared-model errors can bias this estimate.",
+    "section4_noise_formula_estimate": {
+      "teacher_unfaithfulness_e": 0.8283138839018552,
+      "catch_fraction_c": 0.5211823460881974,
+      "false_rejection_f": 0.08670646159208749,
+      "residual": 0.7166666666666667,
+      "limit": "Stratified estimates from stricter Jev judgments, not ground truth."
+    }
+  }
+}

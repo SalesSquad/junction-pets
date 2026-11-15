@@ -1,0 +1,17 @@
+{
+ "host": "az-equity-a100-20261114",
+ "address": "95.133.254.130",
+ "gpu": "NVIDIA A100 80 GB",
+ "provider": "Verda",
+ "status": "task-owned",
+ "basis": "The task coordinator states, as verified by the coordinator on 2026-11-14, that this host was rented on Verda by the coordinator of this same task for this work. It is this task's own machine.",
+ "how_used": "The Evo 2 scores were produced on this host. The first genomics worker's task text named a different GPU box (A100 40 GB), which stopped answering; that worker found this host through a known_hosts entry and ran the scoring on it from 17:04 UTC. At about 17:24 UTC the permission system blocked that sub-agent from connecting to an address it had not been given; per the coordinator this was not a revocation of the host. The coordinator fetched the final score file (2,150 variants), the run's metrics file and the window-choice file from the host at about 18:20 UTC. The same host also serves the project's scribe v2 track (runs/v2-gpu.jsonl).",
+ "end_state": "The run's own metrics file records that the scoring process stopped by itself at 17:27:31 UTC at its time budget. The genomics fix worker did not connect to the host and did not check its current state; /root/genomics (venv and 13 GB of weights) was last reported there in runs/genomics.jsonl.",
+ "remaining_work": "To complete the benchmark, score the remaining positions from the checkpoint on this host (bash genomics/run_all.sh start <seconds> window, then bash genomics/run_all.sh collect). Removing /root/genomics belongs to the coordinator's teardown of the host.",
+ "recorded_by": "genomics fix worker, 2026-11-14, from the coordinator's task statement; not independently verified by this worker (no connection to the host or to Verda was made). Supersedes the integrator's earlier record of this host.",
+ "files_copied_about_18_20_utc": {
+  "evo2-scores.csv": "60e6d24a4686b469b32e18037bd235624396a0e3c75ec0846740902727ee3dde",
+  "evo2-run.json": "e1962c1285af033a2229ea7f21a4918492be4b05e548f15c1bd8d5c2e970033d",
+  "choice.json": "882cb723668872fcaeb57ff542e2abbac951f1840c2fe864523b5349297f53fb"
+ }
+}

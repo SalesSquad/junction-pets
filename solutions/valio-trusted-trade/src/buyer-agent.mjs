@@ -3,6 +3,7 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { randomUUID } from 'node:crypto';
 import assert from 'node:assert/strict';
+import { verifyBuyerTerms, verifyBuyerBody } from './buyer-terms.mjs';
 
 const args = process.argv.slice(2);
 const scenario = args.find((x) => ['success', 'refusal', 'replay', 'stale'].includes(x)) ?? 'success';
@@ -48,12 +49,13 @@ if (scenario === 'refusal') {
     assert.equal(line.stockVersion, fact.version);
     assert.ok(line.quantityLitres <= fact.unitsAvailable);
   }
-  assert.equal(quote.totalCents, quote.lines.reduce((sum, line) => sum + line.quantityLitres * line.unitPriceCents, 0));
+  verifyBuyerTerms(quote, policy, { requirements: [need], budgetCents: quoteRequest.budgetCents });
   assert.equal(quote.lines.reduce((sum, line) => sum + line.quantityLitres, 0), need.quantityLitres);
   stdout.write(`SYNTHETIC ${quote.id}: ${quote.totalCents} EUR cents. ${quote.explanation}\n`);
   const interop = await api(`${routes.quotes}/${quote.id}/body`);
   assert.equal(interop.signature, 'UNSIGNED');
   assert.equal(interop.body.total_cents, quote.totalCents);
+  verifyBuyerBody(interop.body, quote);
   const orderRequest = { buyerId, quoteId: quote.id, idempotencyKey: randomUUID() };
   if (quote.approvalRequired) {
     await api(routes.orders, orderRequest, 'APPROVAL_REQUIRED');

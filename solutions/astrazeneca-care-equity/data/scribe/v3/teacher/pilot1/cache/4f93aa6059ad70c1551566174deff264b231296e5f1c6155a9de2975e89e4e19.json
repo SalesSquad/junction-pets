@@ -1,0 +1,122 @@
+{
+ "id": "4f93aa6059ad70c1551566174deff264b231296e5f1c6155a9de2975e89e4e19",
+ "curriculum": "long_multi_visit",
+ "attempts": [
+  {
+   "attempt": 1,
+   "action": "write",
+   "note_text": "Lähete on lähetetty erikoissairaanhoitoon 58 päivää sitten. Seulontayksikön lääkäri tutki ja arvioi potilaan 28. lokakuuta 2025. Syöpähoito on aloitettu 17 päivää sitten. Potilas otti ensimmäistä kertaa yhteyttä terveydenhuoltoon 19. lokakuuta 2025, jolloin seulontayksikön ajanvaraus vastasi. Lähete saapui erikoissairaanhoidon yksikköön ja rekisteröitiin sinne 11.11.2025. Syöpädiagnoosi vahvistettiin 26. marraskuuta 2025. Potilaan oireet alkoivat hänen oman kertomansa mukaan 13.9.2025. Syöpäpolun tuloreitti on ollut seulonta. Potilas voi tällä hetkellä kohtalaisesti, selviytyy päivittäisistä toiminnoista ja pärjää kotona. Hän on saanut neuvontaa jatkosta ja voinnin seurannasta.",
+   "code_check": {
+    "passed": false,
+    "failures": [
+     "words:80 outside 110-260"
+    ],
+    "words": 80,
+    "v1_ok": true
+   },
+   "readback": null,
+   "calls": [
+    {
+     "kind": "write",
+     "usage": {
+      "prompt_tokens": 1059,
+      "total_tokens": 1327,
+      "completion_tokens": 268,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 2.05
+    }
+   ],
+   "repair_request": [
+    "The note has 80 words. Write 150 to 220 words."
+   ]
+  },
+  {
+   "attempt": 2,
+   "action": "repair",
+   "note_text": "Lähete on lähetetty erikoissairaanhoitoon 58 päivää sitten. Seulontayksikön lääkäri tutki ja arvioi potilaan 28. lokakuuta 2025. Syöpähoito on aloitettu 17 päivää sitten. Potilas otti ensimmäistä kertaa yhteyttä terveydenhuoltoon 19. lokakuuta 2025, jolloin seulontayksikön ajanvaraus vastasi. Lähete saapui erikoissairaanhoidon yksikköön ja rekisteröitiin sinne 11.11.2025. Syöpädiagnoosi vahvistettiin 26. marraskuuta 2025. Potilaan oireet alkoivat hänen oman kertomansa mukaan 13.9.2025. Syöpäpolun tuloreitti on ollut seulonta. Potilas voi tällä hetkellä kohtalaisesti ja selviytyy päivittäisistä toiminnoistaan. Hän pärjää kotona itsenäisesti. Potilaalle on annettu neuvontaa jatkohoitoon liittyen ja voinnin seurannasta. Potilas on tietoinen omasta hoitopolustaan ja sen vaiheista. Hän voi ottaa yhteyttä hoitavaan yksikköön, jos oireet muuttuvat tai herää kysyttävää. Potilaan toimintakyky on säilynyt melko hyvänä. Kotona pärjääminen on sujunut hyvin. Potilas on saanut tietoa ja tukea hoitonsa eri vaiheissa. Hän on motivoitunut jatkamaan hoitoa ja noudattamaan annettuja ohjeita.",
+   "code_check": {
+    "passed": true,
+    "failures": [],
+    "words": 132,
+    "v1_ok": true
+   },
+   "readback": {
+    "consistent": true,
+    "differences": [],
+    "answer": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-09-13",
+       "precision": "DAY"
+      },
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-10-19",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2025-10-28",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2025-11-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-11-11",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2025-11-26",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2025-12-16",
+       "precision": "DAY"
+      }
+     ]
+    }
+   },
+   "calls": [
+    {
+     "kind": "repair",
+     "usage": {
+      "prompt_tokens": 1408,
+      "total_tokens": 1808,
+      "completion_tokens": 400,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 1.24
+    },
+    {
+     "kind": "readback",
+     "usage": {
+      "prompt_tokens": 988,
+      "total_tokens": 1189,
+      "completion_tokens": 201,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+       "reasoning_tokens": 0
+      }
+     },
+     "seconds": 2.03
+    }
+   ]
+  }
+ ],
+ "finished_utc": "2026-11-14T18:35:04+00:00"
+}

@@ -1,0 +1,22 @@
+{
+  "name": "valio-synthetic-trade-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Optional local-only MCP bridge for the invented Valio procurement fixture",
+  "engines": {
+    "node": ">=22.16"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node checks/bridge.mjs",
+    "check:lookup": "node checks/lookup.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.4.0"
+  }
+}

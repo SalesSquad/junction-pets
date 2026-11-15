@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "runId": "rokoko.v11.43653579339.science",
+  "projectId": "rokoko",
+  "taskId": "rokoko.mujoco-prospective-train",
+  "kind": "synthetic-test",
+  "capturedAt": "2026-11-14T23:34:00.581Z",
+  "status": "succeeded",
+  "source": {
+    "repository": "SalesSquad/junction-pets",
+    "commit": "ab6df4054ef6ed350b479469590a48046a0c0a68"
+  },
+  "evidence": {
+    "level": "source-reported",
+    "ref": "https://github.com/SalesSquad/junction-pets/actions/runs/43653579339",
+    "receiptSha256": "d4218ccf76b889e1675b53c2017e01b172a77493f37d1605ab9e72bd557fff11"
+  },
+  "dataset": {
+    "sha256": "0a38081a43426ee4774d09d22886202aaf56d59f6b925a0a75cb2f2da14c848b",
+    "sampleSetSha256": "7e70ec97aa0a5f14ed1d3291652e8a951aae4f6a4e2fa93e6e45fe81a6f63c92",
+    "split": "train",
+    "sampleCount": 800,
+    "origin": "synthetic"
+  },
+  "evaluation": {
+    "kind": "train-only-prospective-physics",
+    "protocolSha256": "b4074ae2f194114c2337a106d15caec966bb403f29911ecfee1f8d466465c3c1",
+    "independentHoldout": false
+  },
+  "artifact": {
+    "type": "report",
+    "sha256": "1a15574beee17d5315cd28a91ec65cf055371d924c61abe4877ba9b0224df7e8"
+  },
+  "metrics": [
+    {"id": "frozen-v5-safe-goals-total", "value": 18, "unit": "count", "direction": "higher", "samples": 160},
+    {"id": "frozen-v6-safe-goals-total", "value": 14, "unit": "count", "direction": "higher", "samples": 160},
+    {"id": "frozen-v8-safe-goals-total", "value": 0, "unit": "count", "direction": "higher", "samples": 160},
+    {"id": "v10-safe-goals-total", "value": 9, "unit": "count", "direction": "higher", "samples": 160},
+    {"id": "v11-safe-goals-total", "value": 18, "unit": "count", "direction": "higher", "samples": 160},
+    {"id": "frozen-v5-safe-near-goals", "value": 6, "unit": "count", "direction": "higher", "samples": 128},
+    {"id": "v11-safe-near-goals", "value": 6, "unit": "count", "direction": "higher", "samples": 128},
+    {"id": "frozen-v5-safe-clear-goals", "value": 12, "unit": "count", "direction": "higher", "samples": 32},
+    {"id": "v11-safe-clear-goals", "value": 12, "unit": "count", "direction": "higher", "samples": 32},
+    {"id": "v11-novel-safe-goals-vs-frozen-v5", "value": 0, "unit": "count", "direction": "higher", "samples": 160},
+    {"id": "v11-lost-frozen-v5-safe-goals", "value": 0, "unit": "count", "direction": "lower", "samples": 160},
+    {"id": "v11-unsafe-trials", "value": 0, "unit": "count", "direction": "lower", "samples": 160},
+    {"id": "v10-unsafe-trials", "value": 1, "unit": "count", "direction": "lower", "samples": 160},
+    {"id": "frozen-v8-unsafe-trials", "value": 1, "unit": "count", "direction": "lower", "samples": 160},
+    {"id": "v11-action-changed-worlds-vs-v5", "value": 62, "unit": "count", "direction": "higher", "samples": 160},
+    {"id": "v11-forward-reopen-near-worlds", "value": 108, "unit": "count", "direction": "higher", "samples": 128},
+    {"id": "frozen-v5-forward-reopen-near-worlds", "value": 60, "unit": "count", "direction": "higher", "samples": 128},
+    {"id": "independently-verified-public-mask-transitions", "value": 34992, "unit": "count", "direction": "higher", "samples": 34992},
+    {"id": "independent-initial-public-world-replays", "value": 512, "unit": "count", "direction": "higher", "samples": 512},
+    {"id": "hosted-independent-positive-trajectory-replays", "value": 189, "unit": "count", "direction": "higher", "samples": 800},
+    {"id": "hosted-independent-clear-goal-trajectory-replays", "value": 42, "unit": "count", "direction": "higher", "samples": 800}
+  ],
+  "limitations": [
+    "Successful source-bound CRACI hosted run 43653579339: harness b1938bee9dbca482f645b5dde3359de38e6c125e and product ab6df4054ef6ed350b479469590a48046a0c0a68; receipt is source-reported, not provider-attested.",
+    "GitHub original artifact 14137341587 ZIP SHA256 bbf94c662fab3ac0efab3448c9e917dcce473a2644efc82a3f4835dd85792bae; byte-identical original archived in Mac Mini iCloud Drive Junction/CRACI.",
+    "Lossless original training.json SHA256 c3b3b399344fa18eff7a303cf27e2a510ab9eb74111a6216df1ec11a906579df; full transitions gzip SHA256 0a38081a43426ee4774d09d22886202aaf56d59f6b925a0a75cb2f2da14c848b.",
+    "Independent read-only forensic audit checked all 512 public initial scans, 160 paired TRAIN worlds, 800 full original trial traces, 34992 real 18D public masked seven-option events, exact source SHA and 250-tick contact-goal criterion.",
+    "V11 safe goal250 totals exactly match frozen V5: 18/160; near 6/128 and clear 12/32, with zero novel, zero V5 losses and zero V11 unsafe. Source-driven rescue changes actions in 62 worlds but produces zero new safe physical goals; NO MODEL PROMOTION.",
+    "The hosted physics replay reports 189 positives and 42 clear-goal trajectories. The independent off-host audit checked retained raw transitions/terminal outcomes; it did NOT rerun independent fresh MuJoCo physics locally.",
+    "Forward reopen is a diagnostic proxy only (V11 108/128 near versus V5 60/128); its improvement must NOT be counted as goal250 physical success. V8 and V10 each produced one unsafe trial on this fresh 517000 cohort.",
+    "V11 gate was fitted on V10 TRAIN and frozen SHA256 b115fc329b50f2557e8c6074734990dbcf6d1c5046516fbbda6158c5c513eaa8; original cohort SHA256 f976a253a52249972516af0eb0b9f269cd7dab5eb0ec6f84d6cb96355eca4bbf. The 517000 cohort remains TRAIN, not holdout.",
+    "Frozen source plan SHA256 3b4fc425c5f9af4ab2e28b2afcaeae62543ba08a3064406c4150b84c4d57f494; evaluation protocol SHA256 b4074ae2f194114c2337a106d15caec966bb403f29911ecfee1f8d466465c3c1 is exact original independent qualifier script bytes.",
+    "No sealed holdout, real robot deployment, model promotion, merge/release, provider attestation or verified monetary cost. No new charged run may begin without current source and authorized credit-window admission checks."
+  ],
+  "policySha256": null
+}

@@ -1,0 +1,22 @@
+{
+ "schemaVersion": "scribe-judges-policy-v1",
+ "rule": "jev",
+ "jev_question_set": "v2",
+ "benchmark_rule_name": "jev_hint",
+ "thresholds": {
+  "jev": {
+   "event_min": 0.3,
+   "unlisted_max": 0.6,
+   "route_min": 0.0
+  },
+  "decisions": {
+   "event_min": 0.2,
+   "unlisted_max": 1.01,
+   "route_min": 0.0
+  }
+ },
+ "pass_definition": "a judge passes a pair when every event_<i> probability >= event_min, the unlisted probability < unlisted_max, the chosen route equals the claimed route and its probability >= route_min; an error, a refusal or a malformed answer never passes",
+ "chosen_on": "thresholds and rule: calibration half of data/scribe/v3/judges/pairs-v1.jsonl; the v2 question set was designed after the v1 results of both halves had been seen (see question_sets.disclosure in the benchmark)",
+ "benchmark": "data/scribe/v3/judges/benchmark-v1.json",
+ "generated": "2026-11-14T19:10:35+00:00"
+}
