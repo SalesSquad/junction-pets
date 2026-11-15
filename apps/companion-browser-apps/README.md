@@ -24,6 +24,18 @@ content policy in the embedded page. Adaptations fail if their source anchors
 change. ProofMatch's service worker is scoped to its own app directory. The
 original localhost servers and their response headers are not included.
 
+Stoa's DXF parser and conservative evidence-bound question engine run inside
+the browser and keep imported drawings in tab memory. Room-label counts,
+validated room areas and unit outlines are supported; unsupported object counts
+are refused. Chronicle Witness runs its original comparison engine
+on the bundled synthetic fixture only; it has no live Wikipedia or MariaDB
+connection. Both embedded pages block outgoing connections.
+SAMA includes its existing public-data snapshot and synthetic, precomputed
+scribe examples; live model calls and online claim verification are disabled.
+Trusted Trade's browser planner uses its original portfolio and pack-allocation
+engines with the existing fictional catalog. It cannot approve, order or pay;
+the server-side trade and approval workflow remains a separate local service.
+
 RoundLens's embedded client has changed paths, so its downloaded artifact uses
 `roundlens.shortlist.embedded.v1`: `upstreamProductSourceDigest` names the
 original package, and `embeddedClientDigest` identifies the adapted client.
