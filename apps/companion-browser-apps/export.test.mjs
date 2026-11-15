@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {mkdtemp, readFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {createHash} from 'node:crypto';
 import {exportApps} from './export.mjs';
 
 test('export maps each selected pet to a real entry and its browser assets', async () => {
@@ -12,7 +14,8 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     const apps = await exportApps(output);
     const catalog = JSON.parse(await readFile(join(output, 'catalog.json'), 'utf8'));
     assert.deepEqual(catalog.apps, apps);
-    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker']));
+    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker','junction-aalto-university','junction-hostinger','junction-cala']));
+    assert.equal(apps.filter(app=>app.petSlug==='junction-intel').length,2);
     for (const app of apps) assert.match(await readFile(join(output, app.path), 'utf8'), /<html/i);
     assert.match(await readFile(join(output,'apps/spread-director/index.html'), 'utf8'), /Use synthetic example/);
     const example = JSON.parse(await readFile(join(output,'apps/spread-director/demo.json'), 'utf8'));
@@ -24,6 +27,21 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     assert.match(await readFile(join(output,'apps/banker/index.html'), 'utf8'), /oikeaa maksua ei lähetetä/);
     assert.match(await readFile(join(output,'apps/banker/app.mjs'), 'utf8'), /Maksua ei lähetetty/);
     for (const file of ['app.mjs','guide/index.html','guide/guide-app.mjs']) assert.ok((await readFile(join(output,'apps/meta-lens',file),'utf8')).length > 0);
+    const recovery=await readFile(join(output,'apps/recovery-compass/web/index.html'),'utf8');
+    assert.match(recovery,/connect-src 'none'/); assert.match(recovery,/href="\.\/styles\.css"/);
+    const traffic=await readFile(join(output,'apps/traffic-forensics/public/traffic/index.html'),'utf8');
+    assert.match(traffic,/connect-src 'none'/); assert.match(traffic,/src="\.\/app\.mjs"/);
+    const roundlens=join(output,'apps/roundlens');
+    const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css'];
+    const entries=await Promise.all(names.map(async name=>`${name}\0${createHash('sha256').update(await readFile(join(roundlens,name))).digest('hex')}\n`));
+    const expectedDigest=createHash('sha256').update(entries.join('')).digest('hex');
+    const core=await import(pathToFileURL(join(roundlens,'core.mjs')).href);
+    const {fixture}=await import(pathToFileURL(join(roundlens,'fixture.mjs')).href);
+    const artifact=core.makeArtifact(fixture,core.DEFAULT_GOAL,[{id:'inv-larch',note:'',approved:true}]);
+    assert.equal(artifact.schema,'roundlens.shortlist.embedded.v1');
+    assert.equal(artifact.embeddedClientDigest,expectedDigest);
+    assert.match(artifact.upstreamProductSourceDigest,/^[0-9a-f]{64}$/);
+    assert.equal(Object.hasOwn(artifact,'productSourceDigest'),false);
     await assert.rejects(exportApps(output), {code:'EEXIST'});
   } finally { await rm(temp, {recursive:true,force:true}); }
 });

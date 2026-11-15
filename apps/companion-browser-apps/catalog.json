@@ -1,13 +1,202 @@
 {
   "schemaVersion": 1,
   "apps": [
-    {"petSlug":"junction-arduino","name":"Green Edge OS","solution":"arduino-green-edge","directory":"green-edge","entry":"index.html","files":["index.html","styles.css","app.mjs","core.mjs","meter-view.mjs","measurement.mjs","sim/view.mjs","sim/engine.mjs"]},
-    {"petSlug":"junction-intel","name":"Inspect / Action","solution":"intel-physical-ai","directory":"inspect-action","entry":"index.html","files":["index.html","style.css","app.mjs","core.mjs"]},
-    {"petSlug":"junction-city-of-espoo","name":"ProofMatch","solution":"espoo-proofmatch","directory":"proofmatch","entry":"index.html","files":["index.html","styles.css","app.mjs","matcher.mjs","data.mjs","benchmark.mjs","skill-graph.mjs","event-meetings.mjs","demo-validation.mjs","sw.js","esco/catalog.mjs","esco/validation.mjs"],"adaptation":"proofmatch"},
-    {"petSlug":"junction-rokoko","name":"MotionBridge Studio","solution":"rokoko-teleoperation-gym","directory":"motionbridge","entry":"web/index.html","files":["web/index.html","web/styles.css","web/app.mjs","src/engine.mjs","fixtures/episodes.json"]},
-    {"petSlug":"junction-bahn-express","name":"Spread dispatch director","solution":"bahn-freight-optimizer","directory":"spread-director","entry":"index.html","files":["index.html","demo.json"],"adaptation":"spread"},
-    {"petSlug":"junction-s-pankki","name":"Lumo","solution":"s-pankki-economic-trainer","directory":"lumo","entry":"web/index.html","files":["web/index.html","web/styles.css","web/app.mjs","src/coach.mjs","src/demo-data.mjs"],"adaptation":"lumo"},
-    {"petSlug":"junction-meta","name":"Chibi Lens resume","solution":"meta-find-verify","source":"apps/meta-resume-web","directory":"meta-lens","entry":"index.html","files":["index.html","styles.css","learning-panel.css","app.mjs","state.mjs","fixture.mjs","webmcp.mjs","observation-client.mjs","learning-core.mjs","learning-observation.mjs","learning-panel.mjs","README.md","guide/index.html","guide/guide.css","guide/guide-app.mjs","guide/guide-core.mjs","guide/guide-storage.mjs","guide/guide-webmcp.mjs","guide/capture.mjs","guide/context-handoff.mjs"]},
-    {"petSlug":"junction-banker","name":"Banker","solution":"banker","directory":"banker","entry":"index.html","files":["index.html","styles.css","app.mjs"]}
+    {
+      "petSlug": "junction-arduino",
+      "name": "Green Edge OS",
+      "solution": "arduino-green-edge",
+      "directory": "green-edge",
+      "entry": "index.html",
+      "files": [
+        "index.html",
+        "styles.css",
+        "app.mjs",
+        "core.mjs",
+        "meter-view.mjs",
+        "measurement.mjs",
+        "sim/view.mjs",
+        "sim/engine.mjs"
+      ]
+    },
+    {
+      "petSlug": "junction-intel",
+      "name": "Inspect / Action",
+      "solution": "intel-physical-ai",
+      "directory": "inspect-action",
+      "entry": "index.html",
+      "files": [
+        "index.html",
+        "style.css",
+        "app.mjs",
+        "core.mjs"
+      ]
+    },
+    {
+      "petSlug": "junction-city-of-espoo",
+      "name": "ProofMatch",
+      "solution": "espoo-proofmatch",
+      "directory": "proofmatch",
+      "entry": "index.html",
+      "files": [
+        "index.html",
+        "styles.css",
+        "app.mjs",
+        "matcher.mjs",
+        "data.mjs",
+        "benchmark.mjs",
+        "skill-graph.mjs",
+        "event-meetings.mjs",
+        "demo-validation.mjs",
+        "sw.js",
+        "esco/catalog.mjs",
+        "esco/validation.mjs"
+      ],
+      "adaptation": "proofmatch"
+    },
+    {
+      "petSlug": "junction-rokoko",
+      "name": "MotionBridge Studio",
+      "solution": "rokoko-teleoperation-gym",
+      "directory": "motionbridge",
+      "entry": "web/index.html",
+      "files": [
+        "web/index.html",
+        "web/styles.css",
+        "web/app.mjs",
+        "src/engine.mjs",
+        "fixtures/episodes.json"
+      ]
+    },
+    {
+      "petSlug": "junction-bahn-express",
+      "name": "Spread dispatch director",
+      "solution": "bahn-freight-optimizer",
+      "directory": "spread-director",
+      "entry": "index.html",
+      "files": [
+        "index.html",
+        "demo.json"
+      ],
+      "adaptation": "spread"
+    },
+    {
+      "petSlug": "junction-s-pankki",
+      "name": "Lumo",
+      "solution": "s-pankki-economic-trainer",
+      "directory": "lumo",
+      "entry": "web/index.html",
+      "files": [
+        "web/index.html",
+        "web/styles.css",
+        "web/app.mjs",
+        "src/coach.mjs",
+        "src/demo-data.mjs"
+      ],
+      "adaptation": "lumo"
+    },
+    {
+      "petSlug": "junction-meta",
+      "name": "Chibi Lens resume",
+      "solution": "meta-find-verify",
+      "source": "apps/meta-resume-web",
+      "directory": "meta-lens",
+      "entry": "index.html",
+      "files": [
+        "index.html",
+        "styles.css",
+        "learning-panel.css",
+        "app.mjs",
+        "state.mjs",
+        "fixture.mjs",
+        "webmcp.mjs",
+        "observation-client.mjs",
+        "learning-core.mjs",
+        "learning-observation.mjs",
+        "learning-panel.mjs",
+        "README.md",
+        "guide/index.html",
+        "guide/guide.css",
+        "guide/guide-app.mjs",
+        "guide/guide-core.mjs",
+        "guide/guide-storage.mjs",
+        "guide/guide-webmcp.mjs",
+        "guide/capture.mjs",
+        "guide/context-handoff.mjs"
+      ],
+      "adaptation": "meta"
+    },
+    {
+      "petSlug": "junction-aalto-university",
+      "name": "Recovery Compass",
+      "solution": "aalto-recovery-compass",
+      "directory": "recovery-compass",
+      "entry": "web/index.html",
+      "files": [
+        "web/index.html",
+        "web/styles.css",
+        "web/app.mjs",
+        "src/compass.mjs",
+        "src/vault.mjs"
+      ],
+      "adaptation": "recovery"
+    },
+    {
+      "petSlug": "junction-hostinger",
+      "name": "Signal Desk · Traffic Forensics",
+      "solution": "hostinger-manipulation-radar",
+      "directory": "traffic-forensics",
+      "entry": "public/traffic/index.html",
+      "files": [
+        "public/traffic/index.html",
+        "public/traffic/style.css",
+        "public/traffic/app.mjs",
+        "public/traffic/core.mjs"
+      ],
+      "adaptation": "traffic"
+    },
+    {
+      "petSlug": "junction-intel",
+      "name": "Inspect / Action · Batch Studio",
+      "solution": "intel-physical-ai",
+      "directory": "inspect-batch",
+      "entry": "batch/studio/index.html",
+      "files": [
+        "core.mjs",
+        "batch/cell.mjs",
+        "batch/studio/index.html",
+        "batch/studio/style.css",
+        "batch/studio/app.mjs",
+        "batch/studio/model.mjs"
+      ],
+      "adaptation": "intel-batch"
+    },
+    {
+      "petSlug": "junction-cala",
+      "name": "RoundLens",
+      "solution": "cala-founder-opportunity-graph",
+      "directory": "roundlens",
+      "entry": "public/index.html",
+      "files": [
+        "public/index.html",
+        "public/app.mjs",
+        "public/style.css",
+        "core.mjs",
+        "fixture.mjs",
+        "source-meta.mjs"
+      ],
+      "adaptation": "roundlens"
+    },
+    {
+      "petSlug": "junction-banker",
+      "name": "Banker",
+      "solution": "banker",
+      "directory": "banker",
+      "entry": "index.html",
+      "files": [
+        "index.html",
+        "styles.css",
+        "app.mjs"
+      ]
+    }
   ]
 }

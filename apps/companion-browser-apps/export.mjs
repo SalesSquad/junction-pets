@@ -1,6 +1,7 @@
 import {readFile, mkdir, writeFile} from 'node:fs/promises';
 import {resolve, join, dirname, isAbsolute, relative} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
+import {createHash} from 'node:crypto';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const safe = value => typeof value === 'string' && value.length > 0 && !isAbsolute(value) && !value.split('/').some(part => !part || part === '.' || part === '..' || part.includes('\\'));
@@ -20,6 +21,49 @@ function adapt(kind, file, text) {
     text = replaceOnce(text, 'href="/web/styles.css"', 'href="./styles.css"');
     return replaceOnce(text, 'src="/web/app.mjs"', 'src="./app.mjs"');
   }
+  if (kind === 'meta' && file === 'observation-client.mjs') {
+    for (const endpoint of ['config','demo-observation','observe']) text = replaceOnce(text, `'/api/${endpoint}'`, `'./api/${endpoint}'`);
+    return text;
+  }
+  if (kind === 'meta' && file === 'index.html') {
+    text = replaceOnce(text, 'href="./" class="brand"', 'href="./index.html" class="brand"');
+    return replaceOnce(text, 'href="./guide/"', 'href="./guide/index.html"');
+  }
+  if (kind === 'meta' && file === 'guide/index.html') {
+    if (text.split('href="../"').length !== 3 || text.split('href="./"').length !== 3) throw new Error('Expected guide navigation anchors are missing or ambiguous');
+    return text.replaceAll('href="../"','href="../index.html"').replaceAll('href="./"','href="./index.html"');
+  }
+  if (kind === 'recovery' && file === 'web/index.html') {
+    text = replaceOnce(text, 'href="/styles.css"', 'href="./styles.css"');
+    text = replaceOnce(text, 'src="/app.mjs"', 'src="./app.mjs"');
+    return replaceOnce(text, '<head>', `<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
+  }
+  if (kind === 'recovery' && file === 'web/app.mjs') {
+    text = replaceOnce(text, "from '/src/compass.mjs'", "from '../src/compass.mjs'");
+    return replaceOnce(text, "from '/src/vault.mjs'", "from '../src/vault.mjs'");
+  }
+  if (kind === 'traffic' && file === 'public/traffic/index.html') {
+    text = replaceOnce(text, 'href="/traffic/style.css"', 'href="./style.css"');
+    text = replaceOnce(text, 'src="/traffic/app.mjs"', 'src="./app.mjs"');
+    text = replaceOnce(text, '<a href="/">◉ SIGNAL DESK</a>', '<span>◉ SIGNAL DESK</span>');
+    return replaceOnce(text, '<head>', `<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
+  }
+  if (kind === 'intel-batch' && file === 'batch/studio/index.html') return replaceOnce(text, 'href="/" aria-label="Inspect / Action home"', 'href="./index.html" aria-label="Inspect / Action home"');
+  if (kind === 'roundlens' && file === 'public/index.html') {
+    text = replaceOnce(text, 'href="/style.css"', 'href="./style.css"');
+    text = replaceOnce(text, 'src="/app.mjs"', 'src="./app.mjs"');
+    text = replaceOnce(text, 'href="/" aria-label="RoundLens home"', 'href="./index.html" aria-label="RoundLens home"');
+    return replaceOnce(text, '<head>', `<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
+  }
+  if (kind === 'roundlens' && file === 'public/app.mjs') {
+    text = replaceOnce(text, "from '/fixture.mjs'", "from '../fixture.mjs'");
+    return replaceOnce(text, "from '/core.mjs'", "from '../core.mjs'");
+  }
+  if (kind === 'roundlens' && file === 'core.mjs') {
+    text = replaceOnce(text, "import { PRODUCT_SOURCE_DIGEST }", "import { PRODUCT_SOURCE_DIGEST, EMBEDDED_CLIENT_DIGEST }");
+    text = replaceOnce(text, "schema:'roundlens.shortlist.v1'", "schema:'roundlens.shortlist.embedded.v1'");
+    return replaceOnce(text, 'productSourceDigest:PRODUCT_SOURCE_DIGEST', 'upstreamProductSourceDigest:PRODUCT_SOURCE_DIGEST, embeddedClientDigest:EMBEDDED_CLIENT_DIGEST');
+  }
   return text;
 }
 export async function exportApps(output) {
@@ -28,10 +72,10 @@ export async function exportApps(output) {
   if (!rel || (!rel.startsWith('..') && !isAbsolute(rel))) throw new Error('Export must be outside the Junction source tree');
   const catalog = JSON.parse(await readFile(new URL('./catalog.json', import.meta.url), 'utf8'));
   if (catalog.schemaVersion !== 1 || !Array.isArray(catalog.apps)) throw new Error('Invalid app catalog');
-  const pets = new Set(), directories = new Set();
+  const directories = new Set();
   for (const app of catalog.apps) {
-    if (!/^junction-[a-z0-9-]+$/.test(app.petSlug) || !app.name || !safe(app.solution) || (app.source !== undefined && !(typeof app.source === 'string' && /^(solutions|apps)\/[a-z0-9-]+$/.test(app.source))) || !safe(app.directory) || !safe(app.entry) || !Array.isArray(app.files) || !app.files.includes(app.entry) || app.files.some(file => !safe(file)) || pets.has(app.petSlug) || directories.has(app.directory)) throw new Error('Invalid app entry');
-    pets.add(app.petSlug); directories.add(app.directory);
+    if (!/^junction-[a-z0-9-]+$/.test(app.petSlug) || !app.name || !safe(app.solution) || (app.source !== undefined && !(typeof app.source === 'string' && /^(solutions|apps)\/[a-z0-9-]+$/.test(app.source))) || !safe(app.directory) || !safe(app.entry) || !Array.isArray(app.files) || !app.files.includes(app.entry) || app.files.some(file => !safe(file)) || directories.has(app.directory)) throw new Error('Invalid app entry');
+    directories.add(app.directory);
   }
   // Refuse an existing output rather than removing anything the caller owns.
   await mkdir(target);
@@ -41,8 +85,19 @@ export async function exportApps(output) {
       const bytes = await readFile(join(root, app.source ?? join('solutions', app.solution), file));
       const dest = join(target, 'apps', app.directory, file);
       await mkdir(dirname(dest), {recursive:true});
-      const data = app.adaptation && file.endsWith('.html') || app.adaptation === 'proofmatch' && file === 'app.mjs' ? adapt(app.adaptation, file, bytes.toString('utf8')) : bytes;
+      const data = app.adaptation && (file.endsWith('.html') || file.endsWith('.mjs')) ? adapt(app.adaptation, file, bytes.toString('utf8')) : bytes;
       await writeFile(dest, data, {flag:'wx'});
+    }
+    if (app.adaptation === 'roundlens') {
+      // The embedded client differs from the original local-server package. Its
+      // exported artifact names both the original package digest and a digest
+      // over exactly these adapted browser bytes, never the old digest as its own.
+      const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css'];
+      const entries=await Promise.all(names.map(async name=>`${name}\0${createHash('sha256').update(await readFile(join(target,'apps',app.directory,name))).digest('hex')}\n`));
+      const digest=createHash('sha256').update(entries.join('')).digest('hex');
+      const meta=join(target,'apps',app.directory,'source-meta.mjs');
+      const original=await readFile(meta,'utf8');
+      await writeFile(meta,`${original}\nexport const EMBEDDED_CLIENT_DIGEST = '${digest}';\n`);
     }
     exported.push({petSlug:app.petSlug,name:app.name,path:`/apps/${app.directory}/${app.entry}`,solution:app.solution});
   }
