@@ -24,6 +24,8 @@ import urllib.request
 
 REPO = "SalesSquad/junction-pets"
 TAG = "hf-intents-20261115"
+DATA_CACHE_TAG = "hf-intents-data-20261115"
+_DATA_CACHE_ASSETS = None
 DEADLINE = "2026-11-15T17:00:00Z"
 CUTOFF = "2026-11-15T16:40:00Z"
 DATASETS = ("banking77", "massive-fi-FI")
@@ -308,18 +310,41 @@ class DownloadRedirects(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
+def data_cache_assets():
+    global _DATA_CACHE_ASSETS
+    if _DATA_CACHE_ASSETS is None:
+        repo = json.loads(gh("api", f"repos/{REPO}"))
+        if repo.get("private") is not True or repo.get("full_name") != REPO:
+            raise ValueError("Dataset cache must remain in the exact private repository")
+        item = api(f"releases/tags/{DATA_CACHE_TAG}")
+        if (item.get("tag_name") != DATA_CACHE_TAG or item.get("prerelease") is not True
+                or item.get("draft") is not False):
+            raise ValueError("Expected the fixed private dataset-cache prerelease")
+        _DATA_CACHE_ASSETS = release_assets(item)
+    return _DATA_CACHE_ASSETS
+
+
 def fetch(entry, path):
     before(DEADLINE)
+    if (type(entry.get("bytes")) is not int or not 0 < entry["bytes"] <= 5_000_000
+            or not re.fullmatch(r"[a-f0-9]{64}", entry.get("sha256", ""))):
+        raise ValueError("Dataset cache requests require bounded publisher bytes and SHA-256")
     path = Path(path)
     if matching_file(path, entry["bytes"], entry["sha256"]):
         return path
-    path.parent.mkdir(parents=True, exist_ok=True)
-    opener = urllib.request.build_opener(DownloadRedirects())
-    with opener.open(entry["url"], timeout=45) as response:
-        data = response.read(entry["bytes"] + 1)
-    if len(data) != entry["bytes"] or hashlib.sha256(data).hexdigest() != entry["sha256"]:
-        raise ValueError("Publisher dataset bytes do not match the fixed manifest")
-    return atomic_verified_write(path, entry["bytes"], entry["sha256"], lambda out: out.write(data))
+    name = "sha256-" + entry["sha256"]
+    matches = [asset for asset in data_cache_assets() if asset.get("name") == name]
+    if len(matches) != 1:
+        raise ValueError("The exact publisher file is absent or ambiguous in the private cache")
+    asset = matches[0]
+    expected = "sha256:" + entry["sha256"]
+    if (asset.get("size") != entry["bytes"] or asset.get("label") != expected
+            or (asset.get("digest") and asset["digest"] != expected)):
+        raise ValueError("Cached dataset metadata differs from the pinned publisher file")
+    download_asset(asset, path)
+    if not matching_file(path, entry["bytes"], entry["sha256"]):
+        raise ValueError("Cached dataset bytes differ from the pinned publisher file")
+    return path
 
 
 def dataset_files(manifest, dataset, destination, splits, documentation=False):
