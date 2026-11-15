@@ -13,7 +13,7 @@ npm test     # checks, no install and no keys needed
 npm start    # then open http://127.0.0.1:4179 (default PORT in web/serve.mjs); the page uses stored outputs
 ```
 
-Optional live Gemma (laptop CPU): see `submission/DEMO_SCRIPT.md`. Optional live Nemotron ("Ask Nemotron live" button): see `submission/DEMO_SCRIPT.md`, step 7.
+Jury view: http://127.0.0.1:4179/?jury shows only the demo path. Optional live Gemma (laptop CPU): see `submission/DEMO_SCRIPT.md`. Optional live Nemotron ("Ask Nemotron live" button): see `submission/DEMO_SCRIPT.md`, step 7.
 
 Links: [deck (PDF)](submission/deck/SAMA-deck.pdf) | [demo script](submission/DEMO_SCRIPT.md) | [Q&A](submission/QA.md) | [video source](submission/video/) (the rendered MP4 is kept out of git; rebuild it from that folder)
 

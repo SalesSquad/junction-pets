@@ -7,6 +7,8 @@ import {plannerHtml} from './planner.mjs';
 import {scribeDemoHtml,withSecondCall} from './scribe-demo.mjs';
 import {safetyNetHtml} from './safetynet.mjs';
 import {flareGateHtml} from './flare.mjs';
+// Jury view (?jury): the demo path only; styles in styles.css under .jury. The default page is unchanged.
+if(new URLSearchParams(location.search).has('jury'))document.documentElement.classList.add('jury');
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=v=>{if(v==null)return 'Not available';if(typeof v!=='number')return String(v);if(Number.isInteger(v))return v.toLocaleString('en-GB');const a=Math.abs(v),d=a>=100?0:a>=10?1:a>=2?2:3;return Number(v.toFixed(d)).toLocaleString('en-GB',{maximumFractionDigits:d});};
 const display=v=>fmt(v);
