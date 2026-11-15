@@ -1,0 +1,81 @@
+# Owner-requested lightweight automatic checks; heavy qualification stays manual.
+# Existing credit-window flag and shutdown remain authoritative.
+name: CRACI automatic CI
+'on':
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: craci-auto-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  portable:
+    name: Tests, build and dependency security
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
+    runs-on: craci
+    timeout-minutes: 15
+    env:
+      CRACI_WINDOW_END: '2026-11-15T17:00:00Z'
+    steps:
+      - name: Configure monitored CRACI networking
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, npm]
+      - name: Enforce the authorized credit deadline
+        shell: bash
+        run: |
+          set -euo pipefail
+          remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
+          # Leave time for the entire 15-minute job and runner teardown.
+          test "$remaining" -gt 960
+      - name: Check out the event source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Set up Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Record source and executor
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git rev-parse HEAD
+          node --version
+          npm --version
+          uname -sm
+      - name: Install locked dependencies
+        id: dependencies
+        run: npm ci --ignore-scripts
+      - name: Audit production and development dependencies
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: npm audit --audit-level=high
+      - name: Validate source contracts
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: npm run validate
+      - name: Run Node tests
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: npm test
+      - name: Build the catalog
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: npm run build
+      - name: Record lockfile and build digests
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d dist/site
+          manifest="$RUNNER_TEMP/craci-auto-build.sha256"
+          find dist/site -type f -print0 | LC_ALL=C sort -z | xargs -0 -r sha256sum -- > "$manifest"
+          test -s "$manifest"
+          sha256sum package-lock.json "$manifest"
