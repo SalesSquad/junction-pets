@@ -35,13 +35,21 @@ guard CommandLine.arguments.count > 1,
   FileHandle.standardError.write("cannot load image\n".data(using: .utf8)!); exit(1)
 }
 var rows: [[String: Any]] = []
-// Whole image plus 2x2 overlapping tiles: tiles give small tags more pixels per glyph.
-let tiles: [CGRect] = [CGRect(x: 0, y: 0, width: 1, height: 1)] + (0..<4).map { i in
-  CGRect(x: i % 2 == 0 ? 0 : 0.42, y: i / 2 == 0 ? 0 : 0.42, width: 0.58, height: 0.58)
+// Whole image plus overlapping N x N tiles; N grows with the sheet size (~1,800 px per tile) so
+// small schedule text on large sheets keeps enough pixels per glyph. Rotated passes (vertical
+// tags) use 2 x 2 tiles.
+func grid(_ n: Int) -> [CGRect] {
+  let step = 1.0 / Double(n), pad = min(0.08, step * 0.25)
+  return (0..<(n * n)).map { i in
+    let x0 = max(0, Double(i % n) * step - pad), y0 = max(0, Double(i / n) * step - pad)
+    return CGRect(x: x0, y: y0, width: min(1, Double(i % n + 1) * step + pad) - x0, height: min(1, Double(i / n + 1) * step + pad) - y0)
+  }
 }
+let n = max(2, Int((Double(max(base.width, base.height)) / 1800).rounded(.up)))
+let full = CGRect(x: 0, y: 0, width: 1, height: 1)
 for times in [0, 1, 3] {
   guard let img = rotated(base, clockwise90: times) else { continue }
-  for roi in tiles {
+  for roi in [full] + grid(times == 0 ? n : 2) {
     let req = VNRecognizeTextRequest()
     req.recognitionLevel = .accurate
     req.usesLanguageCorrection = false
