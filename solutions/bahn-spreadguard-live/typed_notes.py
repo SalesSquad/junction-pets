@@ -15,7 +15,7 @@ import unicodedata
 from typing import Any
 
 DAY = 1440
-VERSION = "bounded-notes-2"
+VERSION = "bounded-notes-3"
 
 
 @dataclass
@@ -214,10 +214,18 @@ def parse_notes(request: dict[str, Any]) -> NoteConstraints:
         assertions.setdefault(name, []).append(value)
         result.evidence.setdefault(name, []).append(evidence)
 
+    def temporal_assertion_count() -> int:
+        return sum(len(assertions.get(name, [])) for name in
+                   ("readyAt", "releaseAt", "pickupBefore", "pickupHours", "deliveryHours", "noteDeadline"))
+
     for original in clauses:
         # A contact reminder does not make preceding yard hours delivery
         # hours merely because it mentions arrival at the end of the clause.
-        clause = re.split(r",\s*(?:soita|call|ring|ilmoita)\b", original, maxsplit=1)[0]
+        contact_parts = re.split(r",\s*(?:soita|call|ring|ilmoita)\b", original, maxsplit=1)
+        clause = contact_parts[0]
+        if len(contact_parts) > 1 and (_clock_tokens(contact_parts[1]) or _has_day(contact_parts[1])
+                                       or RANGE.search(contact_parts[1]) or FI_RANGE.search(contact_parts[1])):
+            result.unknown.append("unparsed_contact_timing: " + original)
         if re.match(r"^(?:soita|call|ring|ilmoita)\b", clause):
             result.unknown.append("contact_instruction: " + original)
             continue
@@ -274,6 +282,7 @@ def parse_notes(request: dict[str, Any]) -> NoteConstraints:
         pickup, delivery, ready, payment = bool(PICKUP.search(clause)), bool(DELIVERY.search(clause)), bool(ready_match), bool(PAYMENT.search(clause))
         ranges = list(RANGE.finditer(clause)) + list(FI_RANGE.finditer(clause))
         temporal = FI_RANGE.sub(" ", RANGE.sub(" ", clause))
+        before_ranges = temporal_assertion_count()
         if ranges and (OPEN.search(clause) or pickup or delivery):
             if _has_day(clause):
                 # A date-specific opening interval must not become a global
@@ -295,6 +304,8 @@ def parse_notes(request: dict[str, Any]) -> NoteConstraints:
             else:
                 result.ambiguous.append("multiple_hours_or_stop_roles")
                 seen = True
+        ranges_consumed = temporal_assertion_count() > before_ranges
+        before_clocks = temporal_assertion_count()
         clocks = [token for token in _clock_tokens(temporal) if not _negated(temporal, token[0])]
         day = _day(temporal, arrived)
         negated_ready_lower_bound = re.search(r"\b(?:not\s+ready\s+(?:before|until)|ei\s+(?:ole\s+)?valmi\w*\s+ennen|inte\s+klar\w*\s+före)\b", temporal)
@@ -348,6 +359,24 @@ def parse_notes(request: dict[str, Any]) -> NoteConstraints:
             elif pickup and after and not delivery:
                 assert_value("readyAt", timestamp, original)
                 seen = True
+        clocks_consumed = temporal_assertion_count() > before_clocks
+        invalid_clock = any((match["m"] is not None or match["ap"] is not None)
+                            and _minutes(int(match["h"]), int(match["m"] or 0), match["ap"]) is None
+                            for match in CLOCK.finditer(temporal))
+        temporal_cue = (_has_day(temporal) or READY.search(temporal) or PAYMENT.search(temporal)
+                        or OPEN.search(temporal) or AFTER.search(temporal) or BEFORE.search(temporal)
+                        or re.search(r"\b(?:klo|kl|at)\b", temporal))
+        # Recognizing a requirement does not consume another fact in its
+        # clause. In particular, an unscoped "not before 16:00" must remain
+        # unknown, so callers cannot clear the source note and lose its bound.
+        # Track ranges and clocks separately: parsed hours cannot hide a
+        # second unresolved clock, or vice versa. No generic clock is guessed
+        # to mean readiness solely to make the clause appear complete.
+        if ((ranges and not ranges_consumed) or (clocks and not clocks_consumed)
+                or invalid_clock
+                or (not ranges and not clocks and temporal_cue and not clocks_consumed)):
+            result.unknown.append("unparsed_temporal_constraint: " + original)
+            seen = True
         if not seen:
             result.unknown.append(original)
     for name, values in assertions.items():

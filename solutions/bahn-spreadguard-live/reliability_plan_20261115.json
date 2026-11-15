@@ -1,22 +1,83 @@
 {
-  "schemaVersion": 1,
-  "work_id": "bahn-reliability-20261115",
-  "source_base": "957f0c3e2f0e77aef4c9ad045c0b9a9234fecc55",
-  "world_kind": "practice",
-  "level": 8,
+  "additional_development_experiments": [
+    {
+      "policy": "learned",
+      "threshold": 0.05
+    },
+    {
+      "policy": "notes",
+      "promotion": "rejected_pre_fix",
+      "version": "bounded-notes-2"
+    },
+    {
+      "policy": "trust"
+    },
+    {
+      "adaptive": true,
+      "policy": "learned",
+      "threshold": 0.075
+    }
+  ],
   "board": false,
-  "partitions": {
-    "development": ["bahn-reliability-dev-20261115-01", "bahn-reliability-dev-20261115-02", "bahn-reliability-dev-20261115-03", "bahn-reliability-dev-20261115-04", "bahn-reliability-dev-20261115-05", "bahn-reliability-dev-20261115-06"],
-    "blind": ["bahn-reliability-blind-20261115-01", "bahn-reliability-blind-20261115-02", "bahn-reliability-blind-20261115-03", "bahn-reliability-blind-20261115-04", "bahn-reliability-blind-20261115-05"]
-  },
-  "initial_development_policies": ["baseline", "deadline", "capacity"],
-  "frozen_candidate": null,
   "decision_rules": {
-    "primary_service_target": 0.98,
-    "stretch_service_target": 0.99,
-    "official_eligibility_floor_per_world": 0.90,
-    "report": ["pooled_on_time_share", "worst_world_share", "paired_margin", "won_volume", "whole_seed_bootstrap", "handler_latency"],
     "candidate_selection": "Use development only. Prefer higher service while preserving gross margin and volume; explicitly report all tradeoffs. No automatic promotion.",
-    "claim_limit": "Five blind seeds do not establish a 98–99% guarantee or final-world success probability. No retuning against blind outcomes."
-  }
+    "claim_limit": "Five blind seeds do not establish a 98\u201399% guarantee or final-world success probability. No retuning against blind outcomes.",
+    "official_eligibility_floor_per_world": 0.9,
+    "primary_service_target": 0.98,
+    "report": [
+      "pooled_on_time_share",
+      "worst_world_share",
+      "paired_margin",
+      "won_volume",
+      "whole_seed_bootstrap",
+      "handler_latency"
+    ],
+    "stretch_service_target": 0.99
+  },
+  "frozen_candidate": {
+    "files_sha256": {
+      "admission_experiment.py": "87978c32d09afabbd1f4666dadd5d46e515781da41bc983d2df71f6f7a88d2b8",
+      "discovery_experiment.py": "a4591318949347614c217dfbac8db10d8ada8681c4ceee7822c906fff577bf8b",
+      "dispatch.py": "7d02a31cd7dcf04a76ba2fc7b0ca984524e8f89803faeac791f83365f8136b9b",
+      "notes_experiment.py": "a7e32cd9ed0435a1c1a6038cb8c3b70d760edc2dacd96992ed4fae0726cbdda7",
+      "official_study.py": "243d508a44e4ddff30c7b81319fedf370b545b4bf943e0de1412efa1bddf5954",
+      "reliability_experiment.py": "59b3843a9f3a19706cc727d95a6a77cd247c9ac9000b61cf7b1c6420ad3dc956",
+      "typed_notes.py": "73112136261ebc3a02f9436bbcd1894648b8d63a23be9b13e7c7ad22ca66aa8e"
+    },
+    "frozen_at_utc": "2026-11-15T00:13:44.267328+00:00",
+    "late_threshold": 0.05,
+    "model_sha256": "33115ca3e7ca4d4520785955e0be92b9aecdc68f9f78fb4bcaa347541f971675",
+    "parent_commit": "4fe55abc5d607dbf530e4865093b3c16cd5ecacb",
+    "policy": "learned",
+    "reason": "Primary98percentservicegoal;0.05developed98.50percentvs0.075at98.00percent.Costinmarginexplicitlyreported.",
+    "run_receipts_record_actual_commit": true,
+    "selection_partition": "development"
+  },
+  "initial_development_policies": [
+    "baseline",
+    "deadline",
+    "capacity"
+  ],
+  "level": 8,
+  "partitions": {
+    "blind": [
+      "bahn-reliability-blind-20261115-01",
+      "bahn-reliability-blind-20261115-02",
+      "bahn-reliability-blind-20261115-03",
+      "bahn-reliability-blind-20261115-04",
+      "bahn-reliability-blind-20261115-05"
+    ],
+    "development": [
+      "bahn-reliability-dev-20261115-01",
+      "bahn-reliability-dev-20261115-02",
+      "bahn-reliability-dev-20261115-03",
+      "bahn-reliability-dev-20261115-04",
+      "bahn-reliability-dev-20261115-05",
+      "bahn-reliability-dev-20261115-06"
+    ]
+  },
+  "schemaVersion": 1,
+  "source_base": "957f0c3e2f0e77aef4c9ad045c0b9a9234fecc55",
+  "work_id": "bahn-reliability-20261115",
+  "world_kind": "practice"
 }

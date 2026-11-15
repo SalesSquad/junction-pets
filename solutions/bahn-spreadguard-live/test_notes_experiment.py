@@ -11,6 +11,7 @@ from spread import starter
 from notes_experiment import NotesDesk, supported_constraints
 from reliability_experiment import ReliabilityDesk
 from test_dispatch import FakeWorld, request, won_order
+from typed_notes import parse_notes
 
 
 def noted_request(text: str) -> dict:
@@ -119,6 +120,41 @@ class NotesActionContracts(unittest.TestCase):
                 baseline.post(copy.deepcopy(order), [0])
                 candidate.post(copy.deepcopy(order), [0])
                 self.assertEqual(candidate.outbox, baseline.outbox)
+
+    def test_partial_manual_note_cannot_erase_baseline_pickup_bound(self) -> None:
+        value = noted_request("Manual gearbox, not before 16:00.")
+        original = copy.deepcopy(value)
+        constraints = parse_notes(value)
+        # The parser has not established a typed readiness fact. Its manual
+        # match must not consume and silently discard the remaining clock.
+        self.assertIsNone(constraints.readyAt)
+        self.assertFalse(constraints.evidence.get("readyAt"))
+        order = won_order(value)
+        order_original = copy.deepcopy(order)
+        baseline = self.desk(value, ReliabilityDesk)
+        candidate = self.desk(value)
+        baseline.post(copy.deepcopy(order), [0])
+        candidate.post(order, [0])
+        expected_window = {"from": 960, "to": 4200}
+        self.assertEqual(baseline.outbox[-1]["stops"][0]["window"], expected_window)
+        self.assertEqual(candidate.outbox[-1]["stops"][0].get("window"), expected_window)
+        self.assertEqual(candidate.outbox, baseline.outbox)
+        self.assertEqual(value, original)
+        self.assertEqual(order, order_original)
+
+    def test_partial_manual_note_keeps_baseline_quote_and_slack(self) -> None:
+        value = noted_request("Manual gearbox, not before 16:00.")
+        original = copy.deepcopy(value)
+        candidate = self.desk(value)
+        baseline = self.desk(value, ReliabilityDesk)
+        self.assertEqual(candidate._slack(value, value["options"][0]),
+                         baseline._slack(value, value["options"][0]))
+        candidate.quote(value)
+        baseline.quote(value)
+        self.assertEqual(candidate.outbox, baseline.outbox)
+        self.assertEqual(supported_constraints(value), (None, "unknown"))
+        self.assertEqual(candidate.notes_summary()["eligible_requests"], 0)
+        self.assertEqual(value, original)
 
     def test_unscoped_trade_in_never_broadcasts_new_constraints(self) -> None:
         value = noted_request("Ready tomorrow at 14:00. No plates.")

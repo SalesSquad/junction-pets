@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import copy
 import csv
+import fcntl
 import gzip
 import hashlib
 import json
@@ -91,6 +92,17 @@ def resolve_configuration(args: argparse.Namespace) -> None:
 
 
 def run_practice(args: argparse.Namespace) -> None:
+    resolve_configuration(args)
+    output = Path(args.output)
+    output.mkdir(parents=True, exist_ok=True)
+    # Two invocations must never create/play different worlds in one receipt
+    # directory or interleave decision rows. Fails before opening the client.
+    with (output / ".study.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _run_practice_locked(args)
+
+
+def _run_practice_locked(args: argparse.Namespace) -> None:
     from reliability_experiment import ReliabilityDesk, features_for
 
     resolve_configuration(args)

@@ -207,6 +207,51 @@ class NoteBoundaryTests(unittest.TestCase):
         self.assertEqual(parsed.deliveryHours, {"opens": 420, "closes": 1200})
         self.assertIsNone(parsed.pickupHours)
 
+    def test_requirement_does_not_hide_unresolved_clock(self):
+        for text, field in [("Manual gearbox, not before 16:00.", "manualRequired"),
+                            ("Car has no plates, not before 16:00.", "platesRequired"),
+                            ("Summer tyres, until 16:00.", "summerTyres")]:
+            with self.subTest(text=text):
+                parsed = parse_notes(request(text))
+                self.assertTrue(getattr(parsed, field))
+                self.assertIsNone(parsed.readyAt)
+                self.assertNotIn("readyAt", parsed.evidence)
+                self.assertTrue(any(reason.startswith("unparsed_temporal_constraint:") for reason in parsed.unknown))
+
+    def test_requirement_does_not_hide_unresolved_temporal_forms(self):
+        for text in ["Manual gearbox, ready before tomorrow.", "Manual gearbox, 14:00-16:00.",
+                     "Manual gearbox, ready at 25:00.", "Manual gearbox, pickup at noon."]:
+            with self.subTest(text=text):
+                parsed = parse_notes(request(text))
+                self.assertTrue(parsed.manualRequired)
+                self.assertTrue(parsed.unknown)
+                self.assertIsNone(parsed.readyAt)
+
+    def test_supported_hours_do_not_hide_another_unresolved_clock(self):
+        parsed = parse_notes(request("Manual gearbox, pickup hours 9-16, appointment at 17:00"))
+        self.assertEqual(parsed.pickupHours, {"opens": 540, "closes": 960})
+        self.assertTrue(parsed.unknown)
+        self.assertIsNone(parsed.readyAt)
+
+    def test_supported_clock_does_not_hide_invalid_hours(self):
+        parsed = parse_notes(request("Manual gearbox, ready at 13:00, pickup hours 20-9"))
+        self.assertEqual(parsed.readyAt, 780)
+        self.assertIsNone(parsed.pickupHours)
+        self.assertTrue(parsed.unknown)
+
+    def test_supported_requirement_and_clock_remain_complete(self):
+        parsed = parse_notes(request("Manual gearbox, ready after 16:00"))
+        self.assertTrue(parsed.manualRequired)
+        self.assertEqual(parsed.readyAt, 960)
+        self.assertFalse(parsed.unknown)
+        self.assertFalse(parsed.ambiguous)
+
+    def test_discarded_contact_tail_does_not_hide_timing(self):
+        parsed = parse_notes(request("Manual gearbox, call before 16:00"))
+        self.assertTrue(parsed.manualRequired)
+        self.assertTrue(parsed.unknown)
+        self.assertIsNone(parsed.readyAt)
+
 
 class NoteEvaluationTests(unittest.TestCase):
     def test_nonbinding_note_deadline_is_separate(self):
