@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "workId": "TIETO-MACOS-20261115",
+  "caseId": "MP2283-metadata-generic-struct-resolver",
+  "createdAt": "2026-11-14T23:13:41.418270+00:00",
+  "repository": {
+    "url": "https://github.com/te-industry-tech-office/junction26-messagepack-csharp",
+    "baseSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+    "headSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4"
+  },
+  "harness": {
+    "path": "tools/earned-trust/verification",
+    "sha256": "874ce15ad53308f1c0e015e633b9a258df079715cb210f89dbd170d222f1b2f6",
+    "inputSha256": "723dc3d529194a22083046dc6ce7f267892e48ab08df09eca825a204a9a22bf6",
+    "files": {
+      "Program.cs": "86263705a686e24d90e4de7a61ae47fcad7e538cafd7ccd41772f220662073bc",
+      "FrozenCheck.csproj": "6eeb129bf8b79e301949359ca068029fff3890d8933c9888901179a8b7fd050a",
+      "global.json": "04d20cb75e9c4955787486dc9208fbbce63fc26fc043f42553ee61f0f389cc5a",
+      "fixtures/Library.cs": "ec0bcc447a14e2e48fff0e4e4012fa3794eb7e67fd024f5082e53c2f888a178e",
+      "fixtures/Application.cs": "c87eaba3b1a67f60dd0e57bed60418a7ce253bdf4fdab391064122b17d1ec0c1",
+      "run.py": "18eb66456b536f495a224341967a56ddc1d4c530b1e083c96fae23f9a0b4eb9e"
+    }
+  },
+  "environment": {
+    "sdkVersion": "9.0.100",
+    "runtimeTarget": "net8.0",
+    "sdkArchiveSha512": "7f69bda047de1f952286be330a5e858171ded952d1aa24169e62212f90a27149e63b636c88ad313a6e3ec860da31f8c547ff4ab6808103a070f7fb26ba99c1c7",
+    "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "runtimes": [
+      "Microsoft.AspNetCore.App 9.0.0 [/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/shared/Microsoft.AspNetCore.App]",
+      "Microsoft.NETCore.App 8.0.11 [/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/shared/Microsoft.NETCore.App]",
+      "Microsoft.NETCore.App 9.0.0 [/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/shared/Microsoft.NETCore.App]"
+    ],
+    "compatibilityExperiment": true,
+    "originalSdkVersion": "8.0.402",
+    "originalSdkExecuted": false,
+    "toolchainMetadataSha256": "a57d4834d7cc313d212c09de3e2581ebcde61ac961ed40aed45935f940489c4e"
+  },
+  "revisions": [
+    {
+      "role": "base",
+      "sourceSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+      "sourceTree": "b5d1e9794b7253350ede75f5c38cf8b5906d63b7",
+      "sourceArchiveSha256": "7b3a69e5ff66aa92aeac93d689eab95f0cd3f294bd445de661429d4fc7888762",
+      "upstreamGlobalJsonSha256": "93a54ce25a689f2a6b6f48f243d504d00db4f92df658726a2f59126df6ca0fd4",
+      "harnessSha256": "874ce15ad53308f1c0e015e633b9a258df079715cb210f89dbd170d222f1b2f6",
+      "executionOverlaySha256": "04d20cb75e9c4955787486dc9208fbbce63fc26fc043f42553ee61f0f389cc5a",
+      "status": "inconclusive",
+      "exitCode": null,
+      "diagnostics": [],
+      "generatedResolver": {
+        "expectedHintName": "App.AppResolver.g.cs",
+        "present": null
+      },
+      "tests": {
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0
+      },
+      "logs": [
+        {
+          "path": "base/build.log",
+          "sha256": "4490a127ad5cf7e88c1280632e4109306f606f5af95b13acec5a6708c9d0807e"
+        }
+      ],
+      "build": {
+        "exitCode": 1,
+        "error": null,
+        "command": [
+          "/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/dotnet",
+          "build",
+          "FrozenCheck.csproj",
+          "-c",
+          "Release",
+          "--nologo",
+          "-v:minimal",
+          "-p:EarnedTrustSourceRoot=/workspace/scratch/719328893edb/tieto-dotnet-work/run-001/base/source"
+        ]
+      },
+      "reason": "Build/restore/environment failure: behavioral probe did not execute."
+    },
+    {
+      "role": "head",
+      "sourceSha": "9df83c38409c8bfad0517aebffe48211eda4a5b4",
+      "sourceTree": "09d08ca6636efe8b23c7bb7bf35e6ba2978cd78d",
+      "sourceArchiveSha256": "5cb35060cbc9d13c61a111b6674b068072866aaa90ef1757ed6f7f634846a99d",
+      "upstreamGlobalJsonSha256": "93a54ce25a689f2a6b6f48f243d504d00db4f92df658726a2f59126df6ca0fd4",
+      "harnessSha256": "874ce15ad53308f1c0e015e633b9a258df079715cb210f89dbd170d222f1b2f6",
+      "executionOverlaySha256": "04d20cb75e9c4955787486dc9208fbbce63fc26fc043f42553ee61f0f389cc5a",
+      "status": "inconclusive",
+      "exitCode": null,
+      "diagnostics": [],
+      "generatedResolver": {
+        "expectedHintName": "App.AppResolver.g.cs",
+        "present": null
+      },
+      "tests": {
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0
+      },
+      "logs": [
+        {
+          "path": "head/build.log",
+          "sha256": "a2d2db746f9d86bfb8b80bc3eb3cd7f75cae261a20b6d7ab4f4ef6aba2c4aba2"
+        }
+      ],
+      "build": {
+        "exitCode": 1,
+        "error": null,
+        "command": [
+          "/workspace/scratch/719328893edb/tieto-dotnet-work/dotnet/dotnet",
+          "build",
+          "FrozenCheck.csproj",
+          "-c",
+          "Release",
+          "--nologo",
+          "-v:minimal",
+          "-p:EarnedTrustSourceRoot=/workspace/scratch/719328893edb/tieto-dotnet-work/run-001/head/source"
+        ]
+      },
+      "reason": "Build/restore/environment failure: behavioral probe did not execute."
+    }
+  ],
+  "conclusion": {
+    "status": "inconclusive",
+    "reason": "At least one revision lacks completed issue-specific behavioral evidence."
+  },
+  "humanDecision": null,
+  "authentication": {
+    "type": "local-sha256-integrity",
+    "signedRunner": false
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "packetId": "tieto-2234",
+  "title": "Diagnostics when generation is suppressed",
+  "generatedAt": "2026-11-14T23:13:41Z",
+  "source": {
+    "repository": "https://github.com/te-industry-tech-office/junction26-messagepack-csharp",
+    "baseSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+    "headSha": "9007cee1163c4a274fd60c3cc20c21ae63622786",
+    "issueId": "2234",
+    "issueURL": "https://github.com/MessagePack-CSharp/MessagePack-CSharp/issues/2234",
+    "branch": "ju26-issue-2234"
+  },
+  "requirement": {
+    "id": "MP-2234",
+    "summary": "Suppressing source generation must preserve relevant contract diagnostics and avoid collection crashes on invalid keys.",
+    "details": "Required diagnostics, opt-out behavior and invalid-input crash prevention are separate claims; passing a branch's own suite does not prove all of them."
+  },
+  "checks": [
+    {
+      "id": "diff-2234",
+      "title": "Pinned change inventory",
+      "requirementId": "MP-2234",
+      "kind": "structural",
+      "evidence": "observed",
+      "baseOutcome": "notRun",
+      "headOutcome": "notRun",
+      "baseSourceSha": "32258fdbee4bcd653c79f51b4376b5103c6f4d27",
+      "headSourceSha": "9007cee1163c4a274fd60c3cc20c21ae63622786",
+      "baseHarnessSha256": null,
+      "headHarnessSha256": null,
+      "baseLog": null,
+      "headLog": null,
+      "baseLogSha256": null,
+      "headLogSha256": null,
+      "limitations": [
+        "File classification is source inspection, not behavioral or coverage-tool execution."
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "inventory-2234",
+      "title": "Changed paths are bound to the official source revisions",
+      "requirementId": "MP-2234",
+      "kind": "structural",
+      "checkIds": [
+        "diff-2234"
+      ],
+      "paths": [
+        "README.md",
+        "src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs",
+        "tests/MessagePack.SourceGenerator.ExecutionTests/SuppressedSourceGenerationTests.cs",
+        "tests/MessagePack.SourceGenerator.Tests/SuppressSourceGenerationAnalyzerTests.cs"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "role": "documentation",
+      "additions": 14,
+      "deletions": 0,
+      "group": "Documentation"
+    },
+    {
+      "path": "src/MessagePack.SourceGenerator/CodeAnalysis/TypeCollector.cs",
+      "role": "source",
+      "additions": 18,
+      "deletions": 4,
+      "group": "Implementation"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.ExecutionTests/SuppressedSourceGenerationTests.cs",
+      "role": "test",
+      "additions": 37,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    },
+    {
+      "path": "tests/MessagePack.SourceGenerator.Tests/SuppressSourceGenerationAnalyzerTests.cs",
+      "role": "test",
+      "additions": 193,
+      "deletions": 0,
+      "group": "Behavior and generator tests"
+    }
+  ],
+  "provenance": {
+    "toolchain": "git diff --no-renames --numstat -z",
+    "origin": "structural-inspection",
+    "note": "Official AI-authored changes are supplied by the organizer; this review desk and evidence collector are our contribution."
+  },
+  "limitations": [
+    "No behavioral qualification is inferred from source inspection.",
+    "Local hashes establish byte integrity, not runner identity, truthful outcomes or human authentication.",
+    "No model inference, merge, release or external approval is performed by this application."
+  ]
+}
