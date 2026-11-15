@@ -60,7 +60,7 @@ ja estää uudet.
 | `revoked` | Hyväksyjän oikeuden peruminen hyväksynnän jälkeen estää tilauksen `IDENTITY_REVOKED`-virheellä |
 | `retry` | Socket suljetaan kerran tilauksen COMMITin ja kerran maksun COMMITin jälkeen ennen HTTP-kuittausta; palvelin ja ostaja käynnistetään molemmissa kohdissa samoista tilatiedostoista samalla portilla; edelleen vain yksi tilaus ja maksu, lopuksi täysi palautus |
 | `shortage` | Kaksi toimituskelpoista maidon testierää asetetaan nollaan; puuttuvaa 1 000 litraa ei korvata kaurajuomalla eikä tilausta synny |
-| `expired` | Yhteistä hallittua kelloa siirretään 121 sekuntia ilman nukkumista; vanhentunut allekirjoitus torjutaan ja uusi allekirjoitus ei elvytä vanhentunutta tarjousta |
+| `expired` | Yhteistä hallittua kelloa siirretään vähintään 121 sekuntia ja aina tarjouksen voimassaolon yli ilman nukkumista; vanhentunut allekirjoitus torjutaan ja uusi allekirjoitus ei elvytä vanhentunutta tarjousta |
 
 `retry` osoittaa todellisen socket-kuittauksen menetyksen ja tilan uudelleen
 avaamisen saman Node-prosessin sisällä. Se ei esitä tämän ajon olevan fyysinen
@@ -85,3 +85,5 @@ The page runs all seven scenarios, shows the actual asserted event chain and exp
 Local UI routes: GET /, /app.js, /style.css; GET /api/simulation/status and /api/simulation/report; POST /api/simulation/run with the sole JSON field scenario = all or one documented scenario ID. POST requires the same Origin as its loopback Host, JSON at most 1024 bytes in 3 seconds, and one active run. Arbitrary URLs, credentials, grants and actor input are rejected. The source receipt includes checkout commit, dirty state and hashes of the five executable/UI source files. PASS is derived from executed assertions; an assertion or cleanup error yields FAIL.
 
 The browser actors are scripted fixtures, not authenticated real people. The receipt is a synthetic domain receipt, not Valio acceptance. Backend traffic goes only to its own ephemeral loopback server; no mock-provider API, actual supplier, payment service or identity provider is called. Private synthetic SQLite fixtures remain local; export contains no raw keys/tokens/subjects.
+
+The UI reconciles a lost run reply with single-flight status reads, including transient 503, and never submits another run automatically. Reconciliation is bounded to two minutes; an unresolved state offers a read-only status retry, keeping new runs disabled until verified. Simulation error codes are safe structured diagnostics; raw transport/error messages are not rendered. Controlled expiry derives from the actual quote expiry. Backend close waits are bounded to three seconds and the UI HTTP socket to two minutes.

@@ -34,10 +34,10 @@ export async function createSimulationServer() {
   const lab=await createSimulationLab();
   let active=null;
   let state={mode:'LOCAL_SIMULATION',disclosure:'SCRIPTED_TEST_ACTORS_NO_REAL_ORDERS_OR_PAYMENTS',source,
-    runId:null,busy:false,startedAt:null,completedAt:null,outcome:'NOT_RUN',results:[],scenarios,externalProviderCalls:0};
+    runId:null,busy:false,startedAt:null,completedAt:null,outcome:'NOT_RUN',results:[],scenarios,executionError:null,externalProviderCalls:0};
   const snapshot=()=>structuredClone(state);
   const run=async selected=>{
-    state={...state,runId:randomUUID(),busy:true,startedAt:new Date().toISOString(),completedAt:null,outcome:'RUNNING',results:[]};
+    state={...state,runId:randomUUID(),busy:true,startedAt:new Date().toISOString(),completedAt:null,outcome:'RUNNING',results:[],executionError:null};
     try {
       for(const scenario of selected) {
         const result=await lab.runScenario(scenario.id);
@@ -45,8 +45,10 @@ export async function createSimulationServer() {
         state.results.push(result);
       }
       state.outcome=state.results.every(result=>result.outcome==='PASS')?'PASS':'FAIL';
-    } catch {
-      state.outcome='FAIL';state.error='SIMULATION_EXECUTION_FAILED';
+    } catch(caught) {
+      const candidate=caught?.code??caught?.message;
+      const code=typeof candidate==='string'&&/^[A-Z0-9_]{1,80}$/.test(candidate)?candidate:'SIMULATION_EXECUTION_FAILED';
+      state.outcome='FAIL';state.executionError={code,kind:'EXECUTION_FAILURE',message:'Simulaation suoritusta ei voitu varmentaa.'};
     } finally {state.busy=false;state.completedAt=new Date().toISOString();}
     return snapshot();
   };
@@ -76,6 +78,7 @@ export async function createSimulationServer() {
       try {return send(200,await promise);} finally {if(active===promise)active=null;}
     } catch(error) {send(error.message==='REQUEST_TOO_LARGE'?413:['INVALID_REQUEST','UPLOAD_ABORTED','UPLOAD_TIMEOUT'].includes(error.message)?400:500,{error:'SIMULATION_REQUEST_REFUSED'});}
   });
+  server.setTimeout(120000,socket=>socket.destroy());
   server.maxConnections=16;server.maxHeadersCount=24;server.requestTimeout=10000;server.headersTimeout=5000;server.keepAliveTimeout=1500;
   let closed=false;
   return {server,status:snapshot,async close(){if(closed)return;closed=true;if(active)await active.catch(()=>{});server.closeAllConnections();if(server.listening)await new Promise(resolveClose=>server.close(resolveClose));await lab.close();}};

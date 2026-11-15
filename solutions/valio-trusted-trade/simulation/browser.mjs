@@ -20,9 +20,24 @@ try {
   await page.goto(base+'/');
   await page.waitForFunction(()=>!document.getElementById('run-all').disabled&&document.querySelectorAll('[data-scenario]').length===7);
   assert.match(await page.locator('body').innerText(),/Oikeita tilauksia tai maksuja ei lähetetä/);
+  let lostRunReply=false,statusFailure=0,runRequests=0;
+  await page.route('**/api/simulation/status',async route=>{
+    if(lostRunReply&&statusFailure===0){statusFailure++;await route.fulfill({status:503,contentType:'application/json',body:'{"error":"SCRIPTED_STATUS_LOSS"}'});}
+    else await route.continue();
+  });
+  await page.route('**/api/simulation/run',async route=>{
+    runRequests++;
+    const backend=route.fetch();
+    let observedBusy=false;
+    for(let i=0;i<50;i++){if((await(await fetch(base+'/api/simulation/status')).json()).busy){observedBusy=true;break;}await new Promise(resolve=>setTimeout(resolve,10));}
+    lostRunReply=observedBusy;
+    await route.abort('failed');
+    await backend;
+  });
   await page.locator('#run-all').focus();await page.keyboard.press('Enter');
   await page.waitForFunction(()=>document.getElementById('overall').textContent==='Kaikki ajon tarkistukset läpi',{},{timeout:120000});
   assert.equal(await page.locator('#passed').textContent(),'7 / 7');
+  assert.equal(lostRunReply,true);assert.equal(statusFailure,1);assert.equal(runRequests,1,'lost UI reply/status must reconcile, never start a duplicate run');
   assert.equal(await page.locator('.mark.pass').count(),7);
   const report=await(await fetch(base+'/api/simulation/report')).json();
   assert.equal(report.outcome,'PASS');assert.equal(report.results.length,7);assert.equal(report.externalProviderCalls,0);
@@ -40,8 +55,8 @@ try {
   await page.screenshot({path:resolve(destination,'simulation-mobile.png'),fullPage:true});
   assert.equal(await page.locator('#error').isVisible(),false);
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
-  const receipt={...report,browserEvidence:{engine:'Chromium',desktop:{width:1440,height:1050},mobile:{width:390,height:844},keyboardRun:true,reloadDidNotRerun:true,horizontalOverflow:false,javascriptErrors:errors,externalBrowserRequests:external}};
+  const receipt={...report,browserEvidence:{engine:'Chromium',desktop:{width:1440,height:1050},mobile:{width:390,height:844},keyboardRun:true,lostRunReplyRecovered:true,temporaryStatusFailureRecovered:true,runRequests,reloadDidNotRerun:true,horizontalOverflow:false,javascriptErrors:errors,externalBrowserRequests:external}};
   await writeFile(resolve(destination,'simulation-report.json'),JSON.stringify(receipt,null,2)+'\n');
   console.log(JSON.stringify({check:'simulation-browser-seven-scenarios',outcome:'PASS',runId:report.runId,scenarios:7,allResults:'PASS',
-    keyboardRun:true,reloadDidNotRerun:true,desktopAndMobile:true,javascriptErrors:0,externalRequests:0,source:report.source,artifacts:destination}));
+    keyboardRun:true,lostRunReplyRecovered:true,temporaryStatusFailureRecovered:true,runRequests,reloadDidNotRerun:true,desktopAndMobile:true,javascriptErrors:0,externalRequests:0,source:report.source,artifacts:destination}));
 } finally {await context.close();await browser.close();await app.close();}

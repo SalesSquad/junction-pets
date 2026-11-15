@@ -24,9 +24,44 @@ export const scenarios = Object.freeze([
 ].map(value=>Object.freeze(value)));
 const buyerId='helsinki-hotel-demo',issuer='https://local-simulation.invalid';
 const requirements=[{family:'dairy-milk',lactoseFree:true,quantityLitres:1000,deliverBy:'2026-11-16'}];
-const safeCode=error=>/^[A-Z0-9_]{1,80}$/.test(error?.code??'')?error.code:'SIMULATION_FAILED';
+const safeCode=error=>{
+  if(error?.name==='TimeoutError')return 'SIMULATION_TIMEOUT';
+  if(error?.name==='AbortError')return 'SIMULATION_ABORTED';
+  if(error?.name==='SyntaxError')return 'SIMULATION_PROTOCOL_JSON_INVALID';
+  if(typeof error?.code==='string'&&/^[A-Z0-9_]{1,80}$/.test(error.code))return error.code;
+  if(typeof error?.cause?.code==='string'&&/^[A-Z0-9_]{1,60}$/.test(error.cause.code))return 'TRANSPORT_'+error.cause.code;
+  return 'SIMULATION_FAILED';
+};
 const milliseconds=start=>Math.round((performance.now()-start)*100)/100;
 const failure=code=>Object.assign(new Error(code),{code});
+const object=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+const closeServer=async server=>{
+  if(!server)return;
+  let timer;
+  try{
+    server.closeAllConnections();
+    await Promise.race([new Promise((resolve,reject)=>server.close(error=>error&&error.code!=='ERR_SERVER_NOT_RUNNING'?reject(error):resolve())),
+      new Promise((_,reject)=>{timer=setTimeout(()=>reject(failure('SIMULATION_CLEANUP_TIMEOUT')),3000);})]);
+  }finally{clearTimeout(timer);server.closeAllConnections();}
+};
+const responseJson=async response=>{
+  if(!Number.isInteger(response.status)||response.status<200||response.status>599)throw failure('SIMULATION_PROTOCOL_STATUS_INVALID');
+  if(typeof response.headers?.get!=='function'||!/^application\/json(?:\s*;|$)/i.test(response.headers.get('content-type')??''))throw failure('SIMULATION_PROTOCOL_MEDIA_INVALID');
+  const length=response.headers.get('content-length');
+  if(length!==null&&(!/^[0-9]+$/.test(length)||Number(length)>2097152))throw failure('SIMULATION_PROTOCOL_BODY_LIMIT');
+  if(typeof response.body?.getReader!=='function')throw failure('SIMULATION_PROTOCOL_BODY_MISSING');
+  const reader=response.body.getReader(),chunks=[];let bytes=0;
+  try{
+    while(true){const part=await reader.read();if(part.done)break;
+      if(!(part.value instanceof Uint8Array))throw failure('SIMULATION_PROTOCOL_BODY_INVALID');
+      bytes+=part.value.byteLength;if(bytes>2097152)throw failure('SIMULATION_PROTOCOL_BODY_LIMIT');chunks.push(Buffer.from(part.value));}
+  }finally{void reader.cancel().catch(()=>{});}
+  let value;try{value=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks)));}
+  catch{throw failure('SIMULATION_PROTOCOL_JSON_INVALID');}
+  if(!object(value))throw failure('SIMULATION_PROTOCOL_SHAPE_INVALID');
+  return value;
+};
+
 
 export async function createSimulationLab({stateDirectory}={}) {
   const fromIdentity=createRequire(new URL('../identity/package.json',import.meta.url));
@@ -77,7 +112,8 @@ export async function createSimulationLab({stateDirectory}={}) {
           headers:{Accept:'application/json','Content-Type':'application/json',Authorization:'Bearer '+await access(),
             ...(body===undefined?{}:{'Idempotency-Key':key??'simulation-command-'+ ++serial}),...(proof?{'X-Buyer-Decision-Proof':proof}:{})},
           body:body===undefined?undefined:JSON.stringify(body)});
-        const value=await response.json();if(!response.ok)throw failure(/^[A-Z0-9_]{1,80}$/.test(value.error?.code??'')?value.error.code:'SIMULATION_HTTP_REFUSED');
+        const value=await responseJson(response);
+        if(!response.ok)throw failure(typeof value.error?.code==='string'&&/^[A-Z0-9_]{1,80}$/.test(value.error.code)?value.error.code:'SIMULATION_HTTP_REFUSED');
         return value;
       };
       let decision='approve';
@@ -98,10 +134,25 @@ export async function createSimulationLab({stateDirectory}={}) {
         client=await createTradeClient({baseUrl:base,stateFile:join(runDirectory,'buyer.sqlite'),hostAccessToken:access,
           hostDecisionProof:async context=>({proof:await proofFor(context.quoteId,context.action,context.orderId,decision),decision})});
       };
-      const stop=async()=>{client?.close();client=null;if(server){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));server=null;}};
+      const stop=async()=>{try{client?.close();}finally{client=null;await closeServer(server);server=null;}};
       const audit=async()=>{
-        const entries=[];let cursor=null;
-        do{const page=await call('/api/audit?limit=100'+(cursor?'&cursor='+encodeURIComponent(cursor):''));entries.push(...page.receipts);cursor=page.page.nextCursor;assert.ok(entries.length<=1000);}while(cursor);
+        const entries=[],seen=new Set();let cursor=null,pages=0,through,snapshot;
+        do{
+          if(++pages>10)throw failure('SIMULATION_AUDIT_PAGE_INVALID');
+          const page=await call('/api/audit?limit=100'+(cursor?'&cursor='+encodeURIComponent(cursor):'')),meta=page.page;
+          if(!Array.isArray(page.receipts)||page.receipts.length>100||!object(meta)||
+              !Number.isSafeInteger(meta.through)||meta.through<0||meta.through>1000||
+              meta.returned!==page.receipts.length||!Number.isSafeInteger(meta.limit)||meta.limit<1||meta.limit>100||
+              typeof meta.complete!=='boolean'||typeof meta.snapshotId!=='string'||!meta.snapshotId.length||meta.snapshotId.length>2048||
+              !(meta.nextCursor===null||(typeof meta.nextCursor==='string'&&/^[A-Za-z0-9_-]{1,2048}$/.test(meta.nextCursor)))||
+              page.receipts.some(entry=>!object(entry)||typeof entry.event!=='string'||!/^[A-Z0-9_]{1,100}$/.test(entry.event)||
+                typeof entry.id!=='string'||!/^[A-Z]+-DEMO-[0-9]+$/.test(entry.id)))throw failure('SIMULATION_AUDIT_PAGE_INVALID');
+          if(through!==undefined&&(through!==meta.through||snapshot!==meta.snapshotId))throw failure('SIMULATION_AUDIT_SNAPSHOT_CHANGED');
+          through=meta.through;snapshot=meta.snapshotId;entries.push(...page.receipts);cursor=meta.nextCursor;
+          if(entries.length>through||(cursor&&(page.receipts.length===0||seen.has(cursor))))throw failure('SIMULATION_AUDIT_PAGE_INVALID');
+          if(cursor)seen.add(cursor);
+        }while(cursor);
+        if(entries.length!==through)throw failure('SIMULATION_AUDIT_INCOMPLETE');
         return entries;
       };
       const counts=async()=>{
@@ -141,12 +192,13 @@ export async function createSimulationLab({stateDirectory}={}) {
         if(definition.id==='expired'){
           const context=await call('/api/identity/decision-context?quoteId='+run.quote.id+'&action=QUOTE_DECISION');
           const oldProof=await mint('scripted-test-reviewer',{...context,reviewerGrantRevision:1,decision:'approve'});
-          clockOffset+=121000;
+          assert.ok(Number.isSafeInteger(context.expiresAtMs));
+          const advancedClockMs=Math.max(121000,context.expiresAtMs-now()+1);clockOffset+=advancedClockMs;
           const payload={buyerId,quoteId:run.quote.id,snapshotId:run.quote.snapshotId,decision:'approve'};
           await step('proof-expired','Vanhentunut hyväksyntä torjutaan hallitulla kellolla',()=>refused(()=>call('/api/agent/runs/'+run.run.id+'/decision',payload,oldProof),['HOST_ASSERTION_INVALID']),['HOST_ASSERTION_INVALID']);
           const freshProof=await mint('scripted-test-reviewer',{...context,reviewerGrantRevision:1,decision:'approve'});
           await step('quote-expired','Uusi allekirjoitus ei elvytä vanhentunutta tarjousta',()=>refused(()=>call('/api/agent/runs/'+run.run.id+'/decision',payload,freshProof),['QUOTE_EXPIRED']),['QUOTE_EXPIRED']);
-          summary.advancedClockMs=121000;
+          summary.advancedClockMs=advancedClockMs;
         }else if(definition.id==='stale'){
           const oldProof=await proofFor(run.quote.id,'QUOTE_DECISION'),oldSnapshot=run.quote.snapshotId;
           await step('price-change','Synteettinen hinta muuttuu tarjouksen jälkeen',async()=>{await call('/api/demo/reprice',{sku:'DEMO-LF-1',priceCents:175});return {newUnitPriceCents:175};});
@@ -211,7 +263,7 @@ export async function createSimulationLab({stateDirectory}={}) {
     }finally{
       let cleanupFailed=false;
       try{client?.close();}catch{cleanupFailed=true;}
-      try{if(server){server.closeAllConnections();await new Promise((resolve,reject)=>server.close(error=>error&&error.code!=='ERR_SERVER_NOT_RUNNING'?reject(error):resolve()));}}catch{cleanupFailed=true;}
+      try{await closeServer(server);}catch{cleanupFailed=true;}
       if(report){
         report.summary.resourcesClosed=!cleanupFailed;
         if(cleanupFailed){report.outcome='FAIL';report.summary.failureCode='SIMULATION_CLEANUP_FAILED';
