@@ -9,7 +9,13 @@ stopifnot(all(is.finite(x$score)), all(x$label %in% c('normal','anomaly')),
 stopifnot(all(tolower(as.character(x$binary_defect)) %in% c('true','false')))
 x$binary_defect <- tolower(as.character(x$binary_defect)) == 'true'
 h <- subset(x, partition == 'heldout')
-cat('REAL_DATA_OFFLINE / NO ROBOT\n')
+cat('DESCRIPTIVE_CSV_ANALYSIS / NO ROBOT / verify source bundle separately\n')
+stopifnot(all(c('image','sha256') %in% names(x)), !anyDuplicated(x$image), !anyDuplicated(x$sha256))
+n_pos <- sum(h$label == 'anomaly'); n_neg <- sum(h$label == 'normal')
+if (n_pos > 0L && n_neg > 0L) {
+  auc <- (sum(rank(h$score, ties.method='average')[h$label == 'anomaly']) - n_pos*(n_pos+1)/2) / (as.double(n_pos)*n_neg)
+  cat('Independent rank-based image AUROC:', format(auc, digits=8), '\n')
+}
 cat('Rows by partition and label:\n'); print(table(x$partition,x$label))
 cat('Heldout denominator:', nrow(h), '\n')
 print(table(label=h$label,proposal=h$proposal))
