@@ -2,6 +2,19 @@
 
 **34 independently authored, versioned company companions for Junction, with one auditable monorepo and a separate Chibi runtime.** This is the private source repository [`SalesSquad/junction-pets`](https://github.com/SalesSquad/junction-pets). A companion can explain public technical documentation, inspect material supplied by its user and suggest a bounded next step. It is **not** an official company representative, endorsement, published ChatGPT agent or automatically functioning Chibi account.
 
+
+## Junction 2026 submission
+
+**This repository is our Junction 2026 submission.** It is built in three layers:
+
+1. **One agent ("pet") per company.** Each of the 34 Junction companies and challenges has its own independently authored companion in `pets/<company>/`: a character, instructions, source-bound challenge research, starter prompts and evaluation cases. The same package is exported as a skills plugin in `plugins/junction-<company>/`.
+2. **Skills and special capabilities per agent.** Every pet has its basic capabilities in `pets/<company>/pet.json`. Some pets also have extra abilities, such as speaking with a voice, observing an image (NVIDIA, Stoa), finding and verifying objects (Meta), or database workflows (Aiven, MariaDB). Service-backed ones are declared in [`config/special-capabilities.json`](config/special-capabilities.json) and implemented in `services/`. Some pets also carry smaller company-specific skills in their own folder, for example recipe scaling for Valio Aimo (`pets/valio-aimo/recipe-scale.mjs`) and SMS guidance for S-Pankki (`pets/s-pankki/sms-guidance.mjs`).
+3. **Product pages built on top of the agents.** Some companies also have a full demo product in `solutions/<product>/` that reuses one or more pets. Examples: [Trusted Trade](solutions/valio-trusted-trade/README.md) for Valio Aimo (procurement agents with a Mission Control web page), and the S-Pankki products [Lumo](solutions/s-pankki-economic-trainer/README.md) and [Rahasää](solutions/s-pankki-rahasaa-coach/README.md). Other products are in [`solutions/`](solutions/README.md).
+
+Where to look: [`pets/`](pets) for the agents, [`plugins/`](plugins) for their skills, [`services/`](services) for special capabilities, [`solutions/`](solutions) for the product pages and [`apps/catalog`](apps/catalog) for the browsable catalog of all pets.
+
+Everything here is an independent hackathon prototype. Company data, accounts, prices and orders in demos are synthetic, and nothing is an official company product or endorsement. What is and is not verified is listed under [Source-bound status](#source-bound-status).
+
 Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS.md) for contributor rules, and the [cloud developer playbook](docs/CLOUD_DEVELOPER_PLAYBOOK.md) for assigning and continuing independent company work. Finnish overview: *34 yrityskohtaista, itsenäisesti laadittua kumppania; yritys- tai Chibi-julkaisua ei pidä päätellä valmiista lähdekoodista.*
 
 ## Challenge research —13 November2026
