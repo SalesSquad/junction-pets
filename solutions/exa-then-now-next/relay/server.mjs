@@ -4,7 +4,6 @@
 import { createServer } from "node:http";
 import { appendFileSync, readFileSync, existsSync } from "node:fs";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { TypeSafeClient } from "@typesafe-ai/sdk";
 import { exaMcpSearch } from "./exa-mcp.mjs";
 import { homedir } from "node:os";
 import { IMAGES_HEADER, localDecisions, logprobDecisions, openaiDecisions, typesafeJev } from "../src/decide/decide.ts";
@@ -13,7 +12,6 @@ import { announcedChanges, GOV_DOMAINS } from "../src/timetravel/announced.ts";
 import { nextSteps } from "../src/timetravel/nextSteps.ts";
 import { relativeDate, spokenDate } from "../src/ui/voice.ts";
 import { isPointInTimeUrl, officialFetch } from "../src/warrant/pointInTime.ts";
-import { image } from "@typesafe-ai/sdk";
 
 loadDotEnv(new URL("../.env.local", import.meta.url));
 
@@ -30,13 +28,15 @@ const MAX_BODY = 256 * 1024;
 const MAX_IMAGE_BODY = 24 * 1024 * 1024;
 const QUESTION_TYPES = new Set(["noul", "choice", "score", "box"]);
 
-const typesafe = TS_KEY ? new TypeSafeClient({ apiKey: TS_KEY, defaultModel: TS_MODEL }) : null;
+// Loaded only with a key, so the keyless relay (and the monorepo test run without this package installed) starts.
+const typesafeSdk = TS_KEY ? await import("@typesafe-ai/sdk") : null;
+const typesafe = TS_KEY ? new typesafeSdk.TypeSafeClient({ apiKey: TS_KEY, defaultModel: TS_MODEL }) : null;
 // OpenAI Decisions API (gpt-6-luna). Key from the environment or a key file outside the repo.
 const OPENAI_KEY = process.env.OPENAI_API_KEY || readKeyFile(process.env.OPENAI_ENV_FILE || `${homedir()}/.config/openai/factory-decisions.env`, "OPENAI_API_KEY");
 const DECIDERS = {
   openai: OPENAI_KEY ? openaiDecisions({ apiKey: OPENAI_KEY, model: process.env.OPENAI_DECISIONS_MODEL || "gpt-6-luna" }) : null,
   // Images go to the SDK as image(Blob) so it uploads them as multipart; the adapter adds the images header.
-  typesafe: typesafe ? typesafeJev({ systemOne: (r, o) => typesafe.systemOne(r, o), model: TS_MODEL, toAsset: (a) => image(new Blob([Buffer.from(a.dataBase64, "base64")], { type: a.format === "png" ? "image/png" : "image/jpeg" })) }) : null,
+  typesafe: typesafe ? typesafeJev({ systemOne: (r, o) => typesafe.systemOne(r, o), model: TS_MODEL, toAsset: (a) => typesafeSdk.image(new Blob([Buffer.from(a.dataBase64, "base64")], { type: a.format === "png" ? "image/png" : "image/jpeg" })) }) : null,
 };
 // Third judge of the clause panel: NVIDIA Nemotron on an OpenAI-compatible endpoint, read through token
 // log-probabilities (one or two output tokens, no reasoning). Optional; it has 6 s to answer, then abstains.
