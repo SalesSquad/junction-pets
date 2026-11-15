@@ -30,7 +30,7 @@ TASTE_FILE = HERE / "learned" / "taste.json"
 SCENE_EVIDENCE = HERE / "scene-evidence"
 # 15 Nov 02:00: both 3.5 models hit their free daily caps after ~8 text scenes; the `flash-lite-latest` alias still
 # answered in ~1 s (3.6-flash daily-capped, 3.7-flash 503, 3.8-flash and flash-latest timed out, others 404).
-WRITERS = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-flash-lite-latest"]
+WRITERS = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-flash-lite-latest", "openai:gpt-5.4-mini"]  # OpenAI = paid, last
 MOVES = ["react", "answer", "push back", "joke", "tease", "short reaction", "admit doubt", "new idea", "change the subject", "wrap up"]
 
 CRAFT = """How you talk matters more than anything else:
@@ -114,6 +114,14 @@ def gen_json(system: str, parts: list[dict], schema: dict, key: str, log: list, 
     for model in WRITERS:
         if model in pv.EXHAUSTED:
             continue
+        if model.startswith("openai:"):
+            audio = next((base64.b64decode(p["inlineData"]["data"]) for p in parts if "inlineData" in p), None)
+            prompt = "\n".join(p["text"] for p in parts if "text" in p)
+            try:
+                data, latency = pv.openai_json(system, prompt, schema, audio, model.removeprefix("openai:"), log)
+                return data, model, round(latency, 2)
+            except pv.ProviderError:
+                continue
         try:
             # 3 attempts: a 503 "high demand" storm on Flash-Lite cost ~90 s per line with 6 (15 Nov); fall through faster.
             resp, latency = pv.call(model, body, key, log, attempts=3, timeout=45)
@@ -489,13 +497,21 @@ def speak_line(slug: str, text: str, direction: str, key: str, tts_order: list[s
         # The model the voice was designed on goes first: the free tier gives each TTS model only ~10-15 calls a day,
         # so a designed id sent to a model that cannot use it burns quota for nothing.
         home = designed_voices().get(slug, {}).get("model")
-        order = ([home] if home else []) + [m for m in tts_order if m != home and not m.startswith("live:")]
+        order = ([home] if home else []) + [m for m in tts_order if m != home and not m.startswith(("live:", "openai:"))]
         try:
             out = pv.speak(text, voice, style, key, order, log, prefer)
             return {**out, "voiceUsed": voice}
         except pv.ProviderError:
             pass
-    return {**pv.speak(text, prebuilt, style, key, tts_order, log, prefer), "voiceUsed": prebuilt}
+    out = pv.speak(text, prebuilt, style, key, tts_order, log, prefer, openai_voice=openai_voice(slug))
+    return {**out, "voiceUsed": f"openai:{out['openaiVoice']}" if out.get("openaiVoice") else prebuilt}
+
+
+def openai_voice(slug: str) -> str:
+    """The pet's OpenAI fallback voice: same gender as its voice design, stable per pet."""
+    desc = characters().get(slug, {}).get("voice_design", "")
+    gender = "female" if re.search(r"\bwoman\b", desc, re.I) else "male" if re.search(r"\bman\b", desc, re.I) else None
+    return pv.openai_voice_for(slug if gender else pv.load_voices()[slug]["voice"], gender)
 
 
 def voice_script(lines: list[dict], run_id: str, prebuilt: bool = False, models: list[str] | None = None) -> list[dict]:
@@ -515,8 +531,9 @@ def voice_script(lines: list[dict], run_id: str, prebuilt: bool = False, models:
         slug, log = ln["slug"], []
         p, style = pv.persona(slug), ln.get("direction") or characters()[slug]["delivery"]
         if prebuilt:
-            spoken = {**pv.speak(ln["text"], pv.load_voices()[slug]["voice"], style, key, tts_order, log, prefer),
-                      "voiceUsed": pv.load_voices()[slug]["voice"]}
+            spoken = pv.speak(ln["text"], pv.load_voices()[slug]["voice"], style, key, tts_order, log, prefer,
+                              openai_voice=openai_voice(slug))
+            spoken["voiceUsed"] = f"openai:{spoken['openaiVoice']}" if spoken.get("openaiVoice") else pv.load_voices()[slug]["voice"]
         else:
             spoken = speak_line(slug, ln["text"], style, key, tts_order, log, prefer)
         wf.write_bytes(spoken["wav"])

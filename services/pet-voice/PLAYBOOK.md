@@ -70,14 +70,24 @@ in the language they heard, `--reply-language sv-SE` forces one language.
 - Free tier: TTS models are capped per day (~45 calls across four models on 14 Nov). Plan
   bigger demos after the reset (≈08:00 UTC) or on a paid key — paid use needs the owner's OK.
 
-**OpenAI (secondary, not wired in)** — [Text to speech](https://developers.openai.com/api/docs/guides/text-to-speech),
+**OpenAI (last-resort fallback, wired in 15 Nov)** — [Text to speech](https://developers.openai.com/api/docs/guides/text-to-speech),
 [Realtime / voice agents](https://developers.openai.com/api/docs/guides/realtime).
+- Order lists name it `openai:<model>`: `openai:gpt-4o-mini-tts` (speech), `openai:gpt-5.4-mini`
+  (director, writer, critic, memory, relay replies; Responses API with a strict JSON schema
+  converted from the Gemini one), `gpt-4o-mini-transcribe` to hear the previous line.
+  `model_order()` always puts OpenAI last, after cooling Gemini models, so it is only called
+  when every Gemini route failed and learning cannot promote paid calls.
+- Key: `OPENAI_API_KEY` env, else the Keychain item `OpenAI API Key` / `openai` (never printed).
+  `PET_VOICE_OPENAI=0` turns it off; `PET_VOICE_OPENAI_MAX_CALLS` (default 150 per process) is
+  the spend guard. Receipts name the model, so a run shows which lines were paid fallback.
+- Voice: a stable OpenAI voice of the pet's gender (from its voice design). The voices are tuned
+  for English; the TTS instruction asks for the text's own language with a native accent.
+- First live check (15 Nov 03:20): Finnish TTS 5.3 s audio in 2.3 s; transcription fidelity 0.94;
+  writer 4.0 s and the line passed every check.
 - `tts-1`, `tts-1-hd`, `gpt-4o-mini-tts` are deprecated and shut down **6 Jan 2027**; migrate to
   `gpt-realtime-2.1-mini` via the Realtime API (not `/v1/audio/speech`).
 - 13 built-in voices (alloy … marin, cedar; marin/cedar recommended). Usage policy requires
   telling listeners the voice is AI-generated.
-- An OpenAI adapter would only need a `speak()` twin; keep receipts in the same format so
-  `learn` can compare providers.
 
 ## 5. Boundaries
 
