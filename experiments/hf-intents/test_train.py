@@ -69,8 +69,10 @@ class BudgetTests(unittest.TestCase):
             train.atomic_json(root / "best.json", previous)
             now = [train.HARD_CUTOFF - 100]
             child = mock.Mock(pid=987654)
+            waits = [0]
             def wait(timeout):
-                if now[0] < train.HARD_CUTOFF - 90:
+                waits[0] += 1
+                if waits[0] <= 2:
                     now[0] += 10
                     raise subprocess.TimeoutExpired("candidate", timeout)
                 return 0
@@ -83,7 +85,8 @@ class BudgetTests(unittest.TestCase):
                  mock.patch.object(train.subprocess, "Popen", return_value=child), \
                  mock.patch.object(train.os, "killpg") as kill:
                 self.assertEqual(train.run(args), 0)
-            kill.assert_called_once_with(987654, train.signal.SIGTERM)
+            self.assertEqual(kill.call_args_list, [mock.call(987654, train.signal.SIGTERM), mock.call(987654, train.signal.SIGKILL)])
+            self.assertEqual(child.wait.call_args_list[-1], mock.call(timeout=5))
             self.assertEqual(train.validate_checkpoint(root), previous)
             self.assertEqual(train.history_rows(root)[0]["status"], "timeout")
 
@@ -111,6 +114,34 @@ class BudgetTests(unittest.TestCase):
             launch.assert_not_called()
             self.assertEqual(train.validate_checkpoint(root), previous)
             self.assertEqual((interrupted / "best.skops").read_bytes(), b"interrupted publication")
+
+    def test_evaluation_receipt_is_reused_only_for_exact_source_inputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            model, output = root / "best.skops", root / "evaluation.json"
+            model.write_bytes(b"owned model")
+            (root / "test.parquet").write_bytes(b"sealed test bytes")
+            binding = {"dataset": "banking77", "lane": "word_svm", "source_sha": "a" * 40,
+                       "run_id": "123", "model_sha256": train.digest_file(model),
+                       "test_sha256": train.digest_file(root / "test.parquet")}
+            train.atomic_json(root / "best.json", binding)
+            receipt = dict(binding, accuracy=0.5, macro_f1_observed=0.4, macro_f1_all_labels=0.1, rows=2)
+            train.atomic_json(output, receipt)
+            args = train.argparse.Namespace(dataset="banking77", model=str(model), data_dir=str(root),
+                                            out=str(output), source_sha="a" * 40, run_id="123")
+            with mock.patch.object(train, "read_parquet", side_effect=AssertionError("held-out data recalculated")), \
+                 mock.patch.object(train, "metric_report", side_effect=AssertionError("held-out metrics recalculated")):
+                self.assertEqual(train.evaluate(args), 0)
+                args.source_sha = "b" * 40
+                with self.assertRaisesRegex(ValueError, "checkpoint identity"):
+                    train.evaluate(args)
+                args.source_sha = "a" * 40
+                receipt["test_sha256"] = "0" * 64
+                train.atomic_json(output, receipt)
+                preserved = output.read_bytes()
+                with self.assertRaisesRegex(ValueError, "receipt identity"):
+                    train.evaluate(args)
+                self.assertEqual(output.read_bytes(), preserved)
 
 
 class DataAndModelTests(unittest.TestCase):
@@ -161,7 +192,8 @@ class DataAndModelTests(unittest.TestCase):
                     parquet(root / "test.parquet", ["refund money please", "activate card please"], [1, 0])
                     evaluation = root / f"evaluation-{lane}.json"
                     scored = subprocess.run([sys.executable, str(SCRIPT), "evaluate", "--dataset", "banking77", "--model", str(out / "best.skops"),
-                                             "--data-dir", str(root), "--out", str(evaluation)], text=True, capture_output=True, timeout=30)
+                                             "--data-dir", str(root), "--out", str(evaluation), "--source-sha", "a" * 40,
+                                             "--run-id", "123"], text=True, capture_output=True, timeout=30)
                     self.assertEqual(scored.returncode, 0, scored.stdout + scored.stderr)
                     metrics = json.loads(evaluation.read_text())
                     if lane == "word_svm":

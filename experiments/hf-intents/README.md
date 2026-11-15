@@ -26,7 +26,9 @@ Junction credits remaining (starter 10 EUR separate). Published pricing at
 https://craci.com/pricing is EUR0.0017/vCPU-minute. Ten 8-vCPU jobs from 05:00
 until 19:00 would be about EUR114.24 plus small setup/finalization overhead;
 actual metered cost depends on actual runner start/finish times. This reserve
-is within the existing EUR1,000 credit-only authority. It is a conservative
+is within the existing EUR1,000 credit-only authority. Admission refuses an
+estimate above this campaign's EUR150 cap or the observed available credit;
+chunk admission also bounds elapsed resource-minutes at the published rate. It is a conservative
 window estimate, not a new provider hard spending cap or a claim about other
 campaigns' future usage.
 

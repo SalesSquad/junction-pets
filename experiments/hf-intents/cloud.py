@@ -16,6 +16,7 @@ import signal
 import subprocess
 import sys
 import tarfile
+import tempfile
 import time
 import urllib.parse
 import urllib.error
@@ -55,6 +56,41 @@ def sha256(path):
         for chunk in iter(lambda: src.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def matching_file(path, size, digest):
+    path = Path(path)
+    return not path.is_symlink() and path.is_file() and path.stat().st_size == size and sha256(path) == digest
+
+
+def atomic_verified_write(destination, size, digest, writer):
+    """A failed transfer never leaves a final filename that looks complete."""
+    destination = Path(destination)
+    if matching_file(destination, size, digest):
+        return destination
+    if destination.is_symlink() or destination.is_dir():
+        raise ValueError("Task cache destination is not a regular file")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    handle, name = tempfile.mkstemp(prefix=f".{destination.name}.", suffix=".part", dir=destination.parent)
+    temporary = Path(name)
+    try:
+        with os.fdopen(handle, "wb") as out:
+            writer(out)
+        if not matching_file(temporary, size, digest):
+            raise ValueError("Transferred bytes failed integrity checks")
+        os.replace(temporary, destination)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return destination
+
+
+def copy_verified(source, destination):
+    source = Path(source)
+    def writer(out):
+        with source.open("rb") as src:
+            for chunk in iter(lambda: src.read(1024 * 1024), b""):
+                out.write(chunk)
+    return atomic_verified_write(destination, source.stat().st_size, sha256(source), writer)
 
 
 def write_json(path, value):
@@ -103,10 +139,45 @@ def load_manifest(path):
             total += entry["bytes"]
     if total > 20_000_000:
         raise ValueError("Dataset pack exceeds its size bound")
+    spend_limit(manifest)
     return manifest
 
 
+def spend_limit(manifest):
+    credit = manifest["credit"]
+    values = (manifest.get("max_spend_eur"), credit.get("authorized_existing_eur"),
+              credit.get("observed_junction_balance_eur"))
+    if any(type(v) not in (int, float) or not math.isfinite(v) or v <= 0 for v in values):
+        raise ValueError("A finite positive campaign cap and existing credit are required")
+    cap, authorized, observed = values
+    if cap > min(authorized, observed) or credit.get("published_eur_per_vcpu_minute") != .0017:
+        raise ValueError("Campaign cap exceeds its recorded credit authority or changes the rate")
+    return float(cap)
+
+
+def estimated_spend(manifest, admission=None, additional_seconds=0, now=None):
+    now = now or utcnow()
+    cap = spend_limit(manifest)
+    if admission is None:
+        seconds = max(0, (instant(DEADLINE) - now).total_seconds())
+    else:
+        if admission.get("max_spend_eur") != cap:
+            raise ValueError("The admission spend cap differs from this manifest")
+        seconds = (now - instant(admission["created_at"])).total_seconds()
+        if seconds < 0:
+            raise ValueError("Admission timestamp is in the future")
+        seconds += additional_seconds
+    # Conservatively charge all 80 vCPUs from admission, including queued time;
+    # reserve another 80 vCPU-minutes for initialization/finalization overhead.
+    estimate = (80 * seconds / 60 + 80) * .0017
+    if estimate > cap:
+        raise ValueError("Estimated campaign spend would exceed its explicit cap")
+    return estimate
+
+
 def gh(*args, output=None, timeout=180):
+    if not os.environ.get("GH_TOKEN"):
+        raise RuntimeError("Explicit workflow GH_TOKEN is required; stored credentials are not used")
     before(DEADLINE)
     seconds = min(timeout, max(1, int((instant(DEADLINE) - utcnow()).total_seconds())))
     result = subprocess.run(["gh", *args], stdout=output or subprocess.PIPE,
@@ -148,11 +219,11 @@ class NoGitHubRedirects(urllib.request.HTTPRedirectHandler):
 
 def upload(path):
     path = Path(path)
-    digest = sha256(path)
-    item = release()  # Re-check private visibility before every publication.
-    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    token = os.environ.get("GH_TOKEN")
     if not token:
         raise RuntimeError("Publication requires the workflow's ephemeral GitHub token")
+    digest = sha256(path)
+    item = release()  # Re-check private visibility before every publication.
     query = urllib.parse.urlencode({"name": path.name, "label": f"sha256:{digest}"})
     url = f"https://uploads.github.com/repos/{REPO}/releases/{item['id']}/assets?{query}"
     opener = urllib.request.build_opener(NoGitHubRedirects())
@@ -194,13 +265,10 @@ def download_asset(asset, destination):
         raise ValueError("Release asset lacks its SHA-256 label")
     if asset.get("digest") and asset["digest"] != expected:
         raise ValueError("Server and publisher digests disagree")
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    with destination.open("xb") as out:
+    def writer(out):
         gh("api", f"repos/{REPO}/releases/assets/{asset['id']}",
            "-H", "Accept: application/octet-stream", output=out)
-    if destination.stat().st_size != asset["size"] or sha256(destination) != expected[7:]:
-        raise ValueError("Downloaded release asset failed integrity checks")
-    return destination
+    return atomic_verified_write(destination, asset["size"], expected[7:], writer)
 
 
 def verify_admission(source, run_id, work, manifest_hash):
@@ -219,7 +287,7 @@ def verify_admission(source, run_id, work, manifest_hash):
     ref = api(f"git/ref/tags/{TAG}")
     if ref["object"].get("type") != "commit" or ref["object"].get("sha") != source:
         raise ValueError("The release tag no longer identifies the admitted source")
-    return item
+    return item, admission
 
 
 def binding(value, source, run_id, dataset=None, lane=None):
@@ -243,9 +311,7 @@ class DownloadRedirects(urllib.request.HTTPRedirectHandler):
 def fetch(entry, path):
     before(DEADLINE)
     path = Path(path)
-    if path.exists():
-        if path.stat().st_size != entry["bytes"] or sha256(path) != entry["sha256"]:
-            raise ValueError("Preserve differing local data; digest mismatch")
+    if matching_file(path, entry["bytes"], entry["sha256"]):
         return path
     path.parent.mkdir(parents=True, exist_ok=True)
     opener = urllib.request.build_opener(DownloadRedirects())
@@ -253,9 +319,7 @@ def fetch(entry, path):
         data = response.read(entry["bytes"] + 1)
     if len(data) != entry["bytes"] or hashlib.sha256(data).hexdigest() != entry["sha256"]:
         raise ValueError("Publisher dataset bytes do not match the fixed manifest")
-    with path.open("xb") as out:
-        out.write(data)
-    return path
+    return atomic_verified_write(path, entry["bytes"], entry["sha256"], lambda out: out.write(data))
 
 
 def dataset_files(manifest, dataset, destination, splits, documentation=False):
@@ -271,6 +335,7 @@ def dataset_files(manifest, dataset, destination, splits, documentation=False):
 
 def init(args, manifest):
     before(CUTOFF)
+    reserve = estimated_spend(manifest)
     repo = json.loads(gh("api", f"repos/{REPO}"))
     if repo.get("private") is not True or repo.get("full_name") != REPO:
         raise ValueError("Cloud destination must remain private")
@@ -296,7 +361,8 @@ def init(args, manifest):
     admission = {"schema_version": 1, "source_sha": args.source_sha, "run_id": args.run_id,
                  "deadline": DEADLINE, "training_cutoff": CUTOFF, "jobs": 10,
                  "vcpu_per_job": 8, "reserved_vcpu_minutes": 80 * minutes,
-                 "reserved_eur_at_published_rate": round((80 * minutes + 80) * .0017, 4),
+                 "reserved_eur_at_published_rate": round(reserve, 4),
+                 "max_spend_eur": spend_limit(manifest),
                  "price_source": "https://craci.com/pricing", "cash_topup_authorized": False,
                  "manifest_sha256": sha256(args.manifest), "created_at": utcnow().isoformat()}
     # The publisher downloads and verifies all data BEFORE acquiring the lease.
@@ -367,31 +433,32 @@ def pack_checkpoint(members, destination):
 
 def unpack_checkpoint(archive, destination, source, run_id, dataset, lane, manifest_hash):
     destination = Path(destination)
-    destination.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(archive, "r:gz") as package:
-        members = package.getmembers()
-        names = [m.name for m in members]
-        if (len(names) != len(set(names)) or set(names) - MEMBER_LIMITS.keys()
-                or not {"best.skops", "best.json", "history.jsonl", "metadata.json"}.issubset(names)
-                or sum(m.size for m in members) > MAX_ARCHIVE):
-            raise ValueError("Unexpected or oversized checkpoint archive")
-        for member in members:
-            if not member.isfile() or member.size < 0 or member.size > MEMBER_LIMITS[member.name]:
+    contents, size = {}, 0
+    with tarfile.open(archive, "r|gz") as package:
+        for index, member in enumerate(package):
+            if index >= len(MEMBER_LIMITS) or member.name not in MEMBER_LIMITS or member.name in contents:
+                raise ValueError("Unexpected or excessive checkpoint members")
+            size += member.size
+            if (not member.isfile() or member.size < 0 or member.size > MEMBER_LIMITS[member.name]
+                    or size > MAX_ARCHIVE):
                 raise ValueError("Checkpoint links or oversized members are refused")
             data = package.extractfile(member).read(member.size + 1)
             if len(data) != member.size:
                 raise ValueError("Truncated checkpoint member")
-            with (destination / member.name).open("xb") as out:
-                out.write(data)
-    metadata = json.loads((destination / "metadata.json").read_text())
-    best = json.loads((destination / "best.json").read_text())
+            contents[member.name] = data
+    if not {"best.skops", "best.json", "history.jsonl", "metadata.json"}.issubset(contents):
+        raise ValueError("Incomplete checkpoint archive")
+    metadata = json.loads(contents["metadata.json"])
+    best = json.loads(contents["best.json"])
     binding(metadata, source, run_id, dataset, lane)
     binding(best, source, run_id, dataset, lane)
     if (metadata.get("manifest_sha256") != manifest_hash
-            or metadata.get("model_sha256") != sha256(destination / "best.skops")
+            or metadata.get("model_sha256") != hashlib.sha256(contents["best.skops"]).hexdigest()
             or best.get("model_sha256") != metadata["model_sha256"]
-            or metadata.get("history_sha256") != sha256(destination / "history.jsonl")):
+            or metadata.get("history_sha256") != hashlib.sha256(contents["history.jsonl"]).hexdigest()):
         raise ValueError("Checkpoint data/model digest binding failed")
+    for name, data in contents.items():
+        atomic_verified_write(destination / name, len(data), hashlib.sha256(data).hexdigest(), lambda out, b=data: out.write(b))
     return best
 
 
@@ -437,7 +504,7 @@ def run(args, manifest):
     work = Path(args.work_dir) / args.dataset / args.lane
     work.mkdir(parents=True, exist_ok=True)
     manifest_hash = sha256(args.manifest)
-    item = verify_admission(args.source_sha, args.run_id, work, manifest_hash)
+    item, admission = verify_admission(args.source_sha, args.run_id, work, manifest_hash)
     out, data = work / "model", work / "data"
     out.mkdir(exist_ok=True)
     latest = latest_checkpoints(release_assets(item)).get((args.dataset, args.lane))
@@ -454,8 +521,7 @@ def run(args, manifest):
         published_history = value.get("history_sha256")
     elif latest:
         restore = work / f"restore-{sequence}.tar.gz"
-        if not restore.exists():
-            download_asset(latest[1], restore)
+        download_asset(latest[1], restore)
         restored = out if not (out / "best.json").exists() else work / f"cloud-current-{sequence}"
         restored_best = unpack_checkpoint(restore, restored, args.source_sha, args.run_id, args.dataset, args.lane, manifest_hash)
         published = restored_best["model_sha256"]
@@ -472,6 +538,7 @@ def run(args, manifest):
         seconds = min(540, int((end - utcnow()).total_seconds()) - 15)
         if seconds < 5:
             break
+        estimated_spend(manifest, admission, additional_seconds=seconds + 195)
         started = time.monotonic()
         argv = [sys.executable, str(Path(__file__).with_name("train.py")), "run",
                 "--dataset", args.dataset, "--lane", args.lane, "--data-dir", str(data),
@@ -529,11 +596,122 @@ def run(args, manifest):
                        args.lane, manifest_hash, max(1, sequence))
 
 
+def named_asset(items, name):
+    matches = [item for item in items if item["name"] == name]
+    if len(matches) > 1:
+        raise ValueError("Cloud receipt filename is not unique")
+    return matches[0] if matches else None
+
+
+def receipt_json(path):
+    path = Path(path)
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > 1_000_000:
+        raise ValueError("Local campaign receipt exceeds its regular-file bound")
+    return json.loads(path.read_text())
+
+
+def validate_evaluation(value, dataset, model_hash, test_spec, source, run_id, lane):
+    binding(value, source, run_id, dataset, lane)
+    if (value.get("model_sha256") != model_hash or value.get("test_sha256") != test_spec["sha256"]
+            or value.get("rows") != test_spec["rows"]):
+        raise ValueError("Existing test receipt belongs to different model or test bytes")
+    for metric in ("accuracy", "macro_f1_observed", "macro_f1_all_labels"):
+        if type(value.get(metric)) not in (int, float) or not math.isfinite(value[metric]) or not 0 <= value[metric] <= 1:
+            raise ValueError("Existing test receipt has invalid metrics")
+    return value
+
+
+def reused_evaluation(path, items, dataset, model_hash, test_spec, source, run_id, lane):
+    asset = named_asset(items, Path(path).name)
+    if asset:
+        if asset["size"] > 1_000_000:
+            raise ValueError("Test receipt exceeds its bound")
+        download_asset(asset, path)
+    if Path(path).exists():
+        return validate_evaluation(receipt_json(path), dataset,
+                                   model_hash, test_spec, source, run_id, lane)
+    return None
+
+
+def summary_markdown(summary):
+    report = "# HF intent campaign\n\n" + f"Status: {summary['status']}. Exact source `{summary['source_sha']}`, run `{summary['run_id']}`.\n\n"
+    report += "Official tests were evaluated only after selecting each family winner on validation.\n"
+    report += "\n".join(f"- {dataset}: {winner['lane']}, validation macro-F1 {winner['validation_macro_f1']:.6f}." for dataset, winner in summary["winners"].items())
+    if summary["missing_lanes"]:
+        report += "\n\nMissing lanes: " + ", ".join(summary["missing_lanes"])
+    return (report + "\n").encode()
+
+
+def publish_summary(summary, work):
+    path = Path(work) / "campaign-summary.json"
+    if path.exists():
+        existing = receipt_json(path)
+        # Preserve the original timestamp/bytes during an interrupted publication.
+        left, right = dict(existing), dict(summary)
+        left.pop("finished_at", None)
+        right.pop("finished_at", None)
+        if left != right:
+            raise ValueError("Preserve a different existing campaign summary")
+        summary = existing
+    else:
+        write_json(path, summary)
+    markdown = Path(work) / "campaign-summary.md"
+    data = summary_markdown(summary)
+    atomic_verified_write(markdown, len(data), hashlib.sha256(data).hexdigest(), lambda out: out.write(data))
+    upload(path)
+    upload(markdown)
+    print(json.dumps(summary, allow_nan=False))
+    return 1 if summary["status"] != "complete" else 0
+
+
+def recover_summary(args, manifest, work, items):
+    path = work / "campaign-summary.json"
+    asset = named_asset(items, path.name)
+    if asset:
+        if asset["size"] > 1_000_000:
+            raise ValueError("Campaign receipt exceeds its bound")
+        download_asset(asset, path)
+    if not path.exists():
+        return None
+    summary = receipt_json(path)
+    binding(summary, args.source_sha, args.run_id)
+    if (summary.get("manifest_sha256") != sha256(args.manifest)
+            or summary.get("status") not in {"complete", "partial"}
+            or set(summary.get("winners", {})) - set(DATASETS)):
+        raise ValueError("Existing campaign receipt belongs to different inputs")
+    if summary["status"] == "complete" and (set(summary["winners"]) != set(DATASETS) or summary.get("missing_lanes")):
+        raise ValueError("Completed summary is missing its model results")
+    for dataset, winner in summary["winners"].items():
+        lane = winner["lane"]
+        if lane not in LANES:
+            raise ValueError("Campaign receipt contains an unknown lane")
+        result = reused_evaluation(work / f"{dataset}-test-evaluation.json", items, dataset,
+                                   winner["model_sha256"], manifest["datasets"][dataset]["files"]["test"],
+                                   args.source_sha, args.run_id, lane)
+        if result is None or result != winner["test_evaluation"]:
+            raise ValueError("Completed campaign lacks its exact held-out receipt")
+        archive = work / f"{dataset}-winner.tar.gz"
+        cloud_archive = named_asset(items, archive.name)
+        if cloud_archive:
+            if cloud_archive.get("label") != "sha256:" + winner["winner_archive_sha256"]:
+                raise ValueError("Completed winner differs from its cloud archive")
+        elif archive.is_file() and sha256(archive) == winner["winner_archive_sha256"]:
+            upload(archive)
+        else:
+            raise ValueError("Completed campaign lacks its winning model archive")
+        upload(work / f"{dataset}-test-evaluation.json")
+    return publish_summary(summary, work)
+
+
 def finalize(args, manifest):
     work = Path(args.work_dir)
     work.mkdir(parents=True, exist_ok=True)
-    item = verify_admission(args.source_sha, args.run_id, work, sha256(args.manifest))
-    checkpoints = latest_checkpoints(release_assets(item))
+    item, _ = verify_admission(args.source_sha, args.run_id, work, sha256(args.manifest))
+    cloud_items = release_assets(item)
+    recovered = recover_summary(args, manifest, work, cloud_items)
+    if recovered is not None:
+        return recovered
+    checkpoints = latest_checkpoints(cloud_items)
     manifest_hash = sha256(args.manifest)
     missing = [f"{d}/{l}" for d in DATASETS for l in LANES if (d, l) not in checkpoints]
     summary = {"source_sha": args.source_sha, "run_id": args.run_id,
@@ -558,38 +736,37 @@ def finalize(args, manifest):
             continue
         _, _, lane, local, package, best = sorted(choices, key=lambda x: (-x[0], -x[1], x[2]))[0]
         # Selection has finished before any official test file is downloaded.
+        # An exact completed cloud/local receipt is reused WITHOUT prediction.
         test_dir = work / dataset / "sealed-test"
-        dataset_files(manifest, dataset, test_dir, ["test"])
         result = work / f"{dataset}-test-evaluation.json"
-        status = run_child([sys.executable, str(Path(__file__).with_name("train.py")), "evaluate",
-                            "--dataset", dataset, "--model", str(local / "checkpoint" / "best.skops"),
-                            "--data-dir", str(test_dir), "--out", str(result)],
-                           work / f"{dataset}-evaluation.log",
-                           min(300, max(1, (instant(DEADLINE) - utcnow()).total_seconds() - 90)))
-        if status or not result.is_file():
-            raise RuntimeError("Final held-out evaluation did not complete")
+        test_spec = manifest["datasets"][dataset]["files"]["test"]
+        receipt = reused_evaluation(result, cloud_items, dataset, best["model_sha256"], test_spec,
+                                    args.source_sha, args.run_id, lane)
+        if receipt is None:
+            dataset_files(manifest, dataset, test_dir, ["test"])
+            status = run_child([sys.executable, str(Path(__file__).with_name("train.py")), "evaluate",
+                                "--dataset", dataset, "--model", str(local / "checkpoint" / "best.skops"),
+                                "--data-dir", str(test_dir), "--out", str(result),
+                                "--source-sha", args.source_sha, "--run-id", args.run_id],
+                               work / f"{dataset}-evaluation.log",
+                               min(300, max(1, (instant(DEADLINE) - utcnow()).total_seconds() - 90)))
+            if status or not result.is_file():
+                raise RuntimeError("Final held-out evaluation did not complete")
+            receipt = validate_evaluation(receipt_json(result), dataset, best["model_sha256"],
+                                          test_spec, args.source_sha, args.run_id, lane)
         winner = work / f"{dataset}-winner.tar.gz"
-        with winner.open("xb") as out, package.open("rb") as src:
-            for chunk in iter(lambda: src.read(1024 * 1024), b""):
-                out.write(chunk)
+        copy_verified(package, winner)
         upload(winner)
         upload(result)
         summary["winners"][dataset] = {"lane": lane, "selection": "validation_macro_f1 then train CV then lane name",
                                          "model_sha256": best["model_sha256"],
+                                         "winner_archive_sha256": sha256(winner),
                                          "validation_macro_f1": best["validation_macro_f1"],
-                                         "test_evaluation": json.loads(result.read_text())}
+                                         "test_evaluation": receipt}
     summary["finished_at"] = utcnow().isoformat()
-    write_json(work / "campaign-summary.json", summary)
-    report = "# HF intent campaign\n\n" + f"Status: {summary['status']}. Exact source `{args.source_sha}`, run `{args.run_id}`.\n\n"
-    report += "Official tests were evaluated only after selecting each family winner on validation.\n"
-    report += "\n".join(f"- {dataset}: {winner['lane']}, validation macro-F1 {winner['validation_macro_f1']:.6f}." for dataset, winner in summary["winners"].items())
-    if missing:
-        report += "\n\nMissing lanes: " + ", ".join(missing)
-    (work / "campaign-summary.md").write_text(report + "\n")
-    upload(work / "campaign-summary.json")
-    upload(work / "campaign-summary.md")
-    print(json.dumps(summary, allow_nan=False))
-    return 1 if missing or len(summary["winners"]) != 2 else 0
+    if len(summary["winners"]) != 2:
+        summary["status"] = "partial"
+    return publish_summary(summary, work)
 
 
 def main(argv=None):

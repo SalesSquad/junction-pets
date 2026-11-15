@@ -241,6 +241,8 @@ def candidate(args):
             del model.named_steps["classifier"]._optimizer
         output = Path(args.model)
         sio.dump(model, output)
+        if output.stat().st_size > 100 * 1024 * 1024:
+            raise ValueError("candidate model exceeds the 100 MiB cloud member bound")
         if sio.get_untrusted_types(file=output):
             raise ValueError("checkpoint requires unapproved serialized types")
         # Exercise the same safe loader used by final evaluation before preserving the checkpoint.
@@ -375,7 +377,7 @@ def run(args):
                         os.killpg(child.pid, signal.SIGKILL)
                     except ProcessLookupError:
                         pass
-                    child.wait()
+                    child.wait(timeout=5)
                 code = None
         row["elapsed_seconds"] = time.time() - start
         if code == 0:
@@ -406,15 +408,34 @@ def run(args):
 
 
 def evaluate(args):
-    require_time(dt.datetime(2026, 11, 15, 17, tzinfo=dt.timezone.utc).timestamp(), 1)
-    if Path(args.out).exists():
-        raise ValueError("evaluation output already exists; preserve the held-out receipt")
-    import skops.io as sio
-
+    if not re.fullmatch(r"[0-9a-f]{40}", args.source_sha) or not re.fullmatch(r"[0-9]+", args.run_id):
+        raise ValueError("exact source SHA and numeric GitHub run ID required")
+    output = Path(args.out)
+    if not output.exists():
+        require_time(dt.datetime(2026, 11, 15, 17, tzinfo=dt.timezone.utc).timestamp(), 1)
     model_path = Path(args.model)
     metadata = json.loads(model_path.with_name("best.json").read_text())
-    if metadata["dataset"] != args.dataset or metadata["model_sha256"] != digest_file(model_path):
+    model_digest = digest_file(model_path)
+    if (metadata.get("dataset") != args.dataset or metadata.get("model_sha256") != model_digest
+            or metadata.get("source_sha") != args.source_sha or metadata.get("run_id") != args.run_id):
         raise ValueError("evaluation checkpoint identity/checksum mismatch")
+    binding = {"dataset": args.dataset, "lane": metadata["lane"], "source_sha": args.source_sha,
+               "run_id": args.run_id, "model_sha256": model_digest,
+               "test_sha256": digest_file(Path(args.data_dir) / "test.parquet")}
+    if output.exists():
+        receipt = json.loads(output.read_text())
+        if any(receipt.get(key) != value for key, value in binding.items()):
+            raise ValueError("existing evaluation receipt identity/checksum mismatch")
+        for key in ("accuracy", "macro_f1_observed", "macro_f1_all_labels"):
+            value = receipt.get(key)
+            if type(value) not in (int, float) or not math.isfinite(value) or not 0 <= value <= 1:
+                raise ValueError("existing evaluation receipt has invalid metrics")
+        if type(receipt.get("rows")) is not int or receipt["rows"] <= 0:
+            raise ValueError("existing evaluation receipt has invalid row count")
+        print(json.dumps({"status": "existing-receipt-reused", **binding}), flush=True)
+        return 0
+    import skops.io as sio
+
     if sio.get_untrusted_types(file=model_path):
         raise ValueError("unapproved serialized model types")
     model = sio.load(model_path, trusted=[])
@@ -422,10 +443,7 @@ def evaluate(args):
     if metadata["label_names"] != names:
         raise ValueError("test/model label vocabulary mismatch")
     result = metric_report(labels, model.predict(texts), names)
-    result.update(dataset=args.dataset, lane=metadata["lane"], source_sha=metadata["source_sha"],
-                  run_id=metadata["run_id"], model_sha256=metadata["model_sha256"],
-                  test_sha256=digest_file(Path(args.data_dir) / "test.parquet"),
-                  test_usage="single held-out evaluation after validation-only family selection")
+    result.update(binding, test_usage="single held-out evaluation after validation-only family selection")
     atomic_json(args.out, result)
     print(json.dumps({key: result[key] for key in ("dataset", "accuracy", "macro_f1_observed", "rows")}), flush=True)
     return 0
@@ -443,7 +461,7 @@ def main(argv=None):
     training.add_argument("--max-trials", type=int, default=10000)
     scoring = sub.add_parser("evaluate")
     scoring.add_argument("--dataset", choices=DATASETS, required=True)
-    for name in ("model", "data-dir", "out"):
+    for name in ("model", "data-dir", "out", "source-sha", "run-id"):
         scoring.add_argument("--" + name, required=True)
     internal = sub.add_parser("_candidate", help=argparse.SUPPRESS)
     for name in ("prepared", "config", "result", "model"):

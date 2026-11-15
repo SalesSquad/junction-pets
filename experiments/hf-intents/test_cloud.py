@@ -10,6 +10,7 @@ import unittest
 import subprocess
 import sys
 from unittest.mock import patch
+from types import SimpleNamespace
 
 spec = importlib.util.spec_from_file_location("intent_cloud", Path(__file__).with_name("cloud.py"))
 cloud = importlib.util.module_from_spec(spec)
@@ -138,6 +139,111 @@ class CloudBoundaries(unittest.TestCase):
         request = cloud.urllib.request.Request("https://uploads.github.com/", headers={"Authorization": "Bearer test"})
         with self.assertRaises(ValueError):
             cloud.NoGitHubRedirects().redirect_request(request, None, 302, "Found", {}, "https://another.example/")
+
+    def test_failed_transfer_does_not_poison_final_name_and_resume_verifies(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            path = root / "restored.tar.gz"
+            payload = b"complete task-owned download"
+            digest = hashlib.sha256(payload).hexdigest()
+            def interrupted(out):
+                out.write(payload[:4])
+                raise OSError("interrupted")
+            with self.assertRaises(OSError):
+                cloud.atomic_verified_write(path, len(payload), digest, interrupted)
+            self.assertFalse(path.exists())
+            self.assertFalse(list(root.glob("*.part")))
+            # Also repair a final filename left partial by the old implementation.
+            path.write_bytes(b"old partial")
+            cloud.atomic_verified_write(path, len(payload), digest, lambda out: out.write(payload))
+            self.assertEqual(path.read_bytes(), payload)
+            cloud.atomic_verified_write(path, len(payload), digest,
+                                        lambda _: self.fail("Valid cached bytes must not be downloaded again"))
+
+    def test_streaming_archive_never_uses_eager_header_scan(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            archive = self.package(root, {"state.json": b"{}"})
+            with patch.object(tarfile.TarFile, "getmembers", side_effect=AssertionError("eager scan refused")):
+                cloud.unpack_checkpoint(archive, root / "out", "a" * 40, "123", "banking77", "word_svm", "m" * 64)
+            # Same valid restore is idempotent; it verifies and reuses existing bytes.
+            cloud.unpack_checkpoint(archive, root / "out", "a" * 40, "123", "banking77", "word_svm", "m" * 64)
+
+    def test_explicit_token_required_instead_of_fallback_credentials(self):
+        with patch.dict("os.environ", {"GITHUB_TOKEN": "must-not-be-used"}, clear=True):
+            with patch.object(cloud, "release", side_effect=AssertionError("No provider request without explicit token")):
+                with self.assertRaises(RuntimeError):
+                    cloud.upload(Path("unopened"))
+            with self.assertRaises(RuntimeError):
+                cloud.gh("api", "user")
+
+    def test_spend_reservation_and_next_chunk_respect_cap(self):
+        manifest = {"max_spend_eur": 150, "credit": {"authorized_existing_eur": 1000,
+                    "observed_junction_balance_eur": 995.95, "published_eur_per_vcpu_minute": .0017}}
+        start = cloud.instant("2026-11-15T03:00:00Z")
+        self.assertLess(cloud.estimated_spend(manifest, now=start), 150)
+        too_small = dict(manifest, max_spend_eur=100)
+        with self.assertRaises(ValueError):
+            cloud.estimated_spend(too_small, now=start)
+        unauthorized = dict(manifest, max_spend_eur=1001)
+        with self.assertRaises(ValueError):
+            cloud.spend_limit(unauthorized)
+        near_limit = dict(manifest, max_spend_eur=107)
+        admission = {"created_at": start.isoformat(), "max_spend_eur": 107}
+        now = cloud.instant("2026-11-15T16:00:00Z")
+        self.assertLess(cloud.estimated_spend(near_limit, admission, now=now), 107)
+        with self.assertRaises(ValueError):
+            cloud.estimated_spend(near_limit, admission, additional_seconds=735, now=now)
+
+    def receipt(self, dataset="banking77", model="b" * 64):
+        return {"dataset": dataset, "lane": "word_svm", "source_sha": "a" * 40,
+                "run_id": "123", "model_sha256": model, "test_sha256": "c" * 64,
+                "rows": 3, "accuracy": .5, "macro_f1_observed": .4, "macro_f1_all_labels": .3}
+
+    def test_test_receipt_reuse_is_bound_to_exact_model_and_test(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "banking77-test-evaluation.json"
+            path.write_text(json.dumps(self.receipt()))
+            spec = {"sha256": "c" * 64, "rows": 3}
+            with patch.object(cloud, "run_child", side_effect=AssertionError("Do not rerun an evaluated test")):
+                reused = cloud.reused_evaluation(path, [], "banking77", "b" * 64, spec, "a" * 40, "123", "word_svm")
+            self.assertEqual(reused, self.receipt())
+            with self.assertRaises(ValueError):
+                cloud.reused_evaluation(path, [], "banking77", "d" * 64, spec, "a" * 40, "123", "word_svm")
+            with self.assertRaises(ValueError):
+                cloud.reused_evaluation(path, [], "banking77", "b" * 64,
+                                        dict(spec, sha256="e" * 64), "a" * 40, "123", "word_svm")
+
+    def test_completed_summary_resumes_markdown_without_test_predictions(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work = Path(folder)
+            manifest = {"datasets": {d: {"files": {"test": {"sha256": "c" * 64, "rows": 3}}} for d in cloud.DATASETS}}
+            manifest_path = work / "manifest.json"
+            manifest_path.write_text(json.dumps(manifest))
+            summary = {"source_sha": "a" * 40, "run_id": "123", "manifest_sha256": cloud.sha256(manifest_path),
+                       "status": "complete", "missing_lanes": [], "finished_at": "2026-11-15T16:44:00Z", "winners": {}}
+            items = []
+            for dataset in cloud.DATASETS:
+                receipt = self.receipt(dataset)
+                (work / f"{dataset}-test-evaluation.json").write_text(json.dumps(receipt))
+                archive_hash = hashlib.sha256(dataset.encode()).hexdigest()
+                summary["winners"][dataset] = {"lane": "word_svm", "model_sha256": "b" * 64,
+                                              "validation_macro_f1": .5, "winner_archive_sha256": archive_hash,
+                                              "test_evaluation": receipt}
+                items.append({"name": f"{dataset}-winner.tar.gz", "label": "sha256:" + archive_hash})
+            summary_path = work / "campaign-summary.json"
+            summary_path.write_text(json.dumps(summary))
+            original = summary_path.read_bytes()
+            args = SimpleNamespace(source_sha="a" * 40, run_id="123", manifest=str(manifest_path))
+            published = []
+            with patch.object(cloud, "upload", side_effect=lambda p: published.append(Path(p).name)), \
+                    patch.object(cloud, "run_child", side_effect=AssertionError("Never recompute the held-out test")), \
+                    patch.object(cloud, "dataset_files", side_effect=AssertionError("No fresh test download needed")):
+                result = cloud.recover_summary(args, manifest, work, items)
+            self.assertEqual(result, 0)
+            self.assertEqual(summary_path.read_bytes(), original)
+            self.assertIn("campaign-summary.md", published)
+            self.assertTrue((work / "campaign-summary.md").is_file())
 
 
 if __name__ == "__main__":
