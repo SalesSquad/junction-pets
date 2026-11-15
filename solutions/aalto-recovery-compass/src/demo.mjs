@@ -1,0 +1,3 @@
+import { newSession,checkIn,proposeAction,chooseAction,previewShare,consentDraft,revoke,publicSafetyHelp } from './compass.mjs';
+const begin=newSession();const checked=checkIn(begin,{energy:'steady',wish:'contact'});const proposed=proposeAction(checked.session);const chosen=chooseAction(checked.session,{confirmed:true});const scope={fields:['chosenAction'],recipient:'Demo clinician',explicitConsent:true};const before=previewShare(chosen.session,scope);const draft=consentDraft(chosen.session,scope);const after=revoke(draft.session);
+console.log(JSON.stringify({source:'SYNTHETIC_LOCAL_ONLY',proposed,preview:before.preview,draft: draft.session.draft,afterRevoke:after.session.draft,safety:publicSafetyHelp()},null,2));
