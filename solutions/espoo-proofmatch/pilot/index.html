@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>SIMULATED · ProofMatch conversation notebook</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#journey">Skip to the conversation</a>
+  <header class="masthead"><span>ProofMatch / Conversation notebook</span><strong>SIMULATED · FICTIONAL PEOPLE</strong></header>
+  <main id="journey" tabindex="-1">
+    <section class="intro" aria-labelledby="title">
+      <p class="eyebrow">After the introduction, keep both voices.</p>
+      <h1 id="title">What came from<br>the conversation?</h1>
+      <p class="lede">Try a fictional 15-minute repair-service conversation. Hear each person’s reflection, keep their choices separate, and see what is still unknown.</p>
+      <p class="boundary">One operator plays both people. These controls are <strong>not authentication or real-person consent</strong>. Nothing is sent, booked or assessed.</p>
+    </section>
+
+    <section class="scenario panel" aria-labelledby="scenario-title">
+      <div><p class="eyebrow">SIMULATED / Before</p><h2 id="scenario-title">A repair-service idea meets a practical need.</h2>
+        <p>Mira wants to explore a repair-service prototype. Rowan wants to clarify what a useful first example could look like. Neither person’s ability has been verified.</p>
+        <p><strong>Fictional 15 November 2026 · 09:00–09:15 UTC</strong><br>Starts with a simulated accepted meeting from ProofMatch’s existing event rules.</p>
+      </div>
+      <form id="scenario-form" class="scenario-controls" autocomplete="off">
+        <label for="mode">Fictional event format</label>
+        <select id="mode" name="mode"><option value="in-person">In person</option><option value="online">Online</option><option value="hybrid">Hybrid</option></select>
+        <p class="small">Starting a new scenario discards the current in-memory session.</p>
+        <label class="check"><input id="restart-confirm" type="checkbox" required> I choose to replace this fictional session.</label>
+        <button type="submit" class="secondary">Start new fictional scenario</button>
+      </form>
+    </section>
+
+    <section aria-labelledby="progress-title" class="progress-panel">
+      <div class="section-heading"><h2 id="progress-title">SIMULATED journey</h2><span id="format-label"></span></div>
+      <ol class="steps" aria-label="Conversation stages">
+        <li id="step-before">Accepted scenario</li><li id="step-during">Conversation & acknowledgements</li><li id="step-after">Independent reflections</li><li id="step-review">Review what is available</li>
+      </ol>
+      <p id="progress" class="progress-text"></p>
+      <div class="guidance"><strong>During this fictional meeting</strong><p id="format-guidance"></p><p>Ask together: “What do we each want to understand?” Then: “What remains unclear?” No transcript or timer is recorded.</p></div>
+      <form id="end-form" class="end-controls" autocomplete="off">
+        <label class="check"><input id="end-confirm" type="checkbox" required> I am simulating that the 15-minute conversation has ended.</label>
+        <button type="submit">Simulate end of conversation</button>
+      </form>
+    </section>
+
+    <section aria-labelledby="voices-title">
+      <div class="section-heading"><h2 id="voices-title">Two people. Two choices.</h2><span>SIMULATED / After</span></div>
+      <p>Acknowledging the conversation does not accept reflection sharing. Each person can decline, or revoke accepted sharing later.</p>
+      <div id="voices" class="voices"></div>
+    </section>
+
+    <section id="review" class="panel review" aria-labelledby="review-title">
+      <p class="eyebrow">SIMULATED / Evidence to inspect</p><h2 id="review-title">A conversation is a starting point.</h2>
+      <p id="review-summary"></p>
+      <div id="shared-reflections" class="shared-reflections"></div>
+      <p class="small">These are operator-entered fictional reflections. They establish no real meeting, skill, eligibility, hiring decision or real-world outcome. No person ranking is calculated.</p>
+    </section>
+
+    <section class="delete-panel" aria-labelledby="delete-title">
+      <div><h2 id="delete-title">Leave no active session record.</h2><p>Records live only in this tab’s memory. Reload to start over, revoke a reflection, or delete the entire active session.</p></div>
+      <form id="delete-form" autocomplete="off"><label class="check"><input id="delete-confirm" type="checkbox" required> Delete this active fictional meeting and both participant records.</label><button type="submit" class="danger">Delete simulated session</button></form>
+    </section>
+    <p id="notice" role="status" aria-live="polite" aria-atomic="true"></p>
+    <noscript><p>This local pilot needs JavaScript to run its simulated rules. No external scripts are used.</p></noscript>
+  </main>
+  <footer><strong>SIMULATED · Private development pilot</strong><p>Derived from pre-existing Workbase private IP. <strong>Not authorized for Workbase private IP competition export or submission.</strong> No municipal endorsement. No internet services, tracking, messages or persistent records.</p></footer>
+</body>
+</html>
