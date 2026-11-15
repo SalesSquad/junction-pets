@@ -1,4 +1,12 @@
-# Private CRACI repository bug and quality audit
+# CRACI repository bug and quality audit reference
+
+> **15 November routing update:** Junction is public and retains this audit
+> harness. Approved snapshots from other repositories must stay in the separate
+> private [SalesSquad/craci-repo-audit](https://github.com/SalesSquad/craci-repo-audit)
+> execution repository. Use that private checkout and its operator instructions;
+> the public copy's privacy guard intentionally refuses source publication here.
+> The original private-Junction setup described below is historical context.
+
 
 The owner stopped the HF training campaign on 15 November and requested that
 the ten CRACI workers inspect his repositories for bugs and poor code instead.
