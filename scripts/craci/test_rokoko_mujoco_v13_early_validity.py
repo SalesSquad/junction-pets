@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 HERE = Path(__file__).resolve().parent
@@ -30,6 +31,10 @@ class EarlyValidity(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory(prefix='v13-early-row-')
         self.root = Path(self.tmp.name); self.private = self.root/'private'
         self.scans = h.scan_real_public_starts(f.FakeEnv(), f.signature)
+        self.portable_pin = patch.object(h, 'PORTABLE_PREFLIGHT_SHA',
+                                        h.portable_scan_digest(self.scans))
+        self.portable_pin.start()
+        self.addCleanup(self.portable_pin.stop)
         cohort = f.Protocol.derive_cohort(self.scans, {})
         self.survey = dict(selected_first40_near8_clear=[
             dict(seed=r['seed'], world_hash=r['world_hash'], near=r['observed_corridor'])

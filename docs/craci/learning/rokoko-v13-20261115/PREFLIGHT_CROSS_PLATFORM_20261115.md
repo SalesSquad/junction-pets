@@ -1,0 +1,21 @@
+# V13 preflight: original ARM64 reference and x86_64 execution
+
+The first manually admitted burst pilot, [CRACI run #43665531960](https://github.com/SalesSquad/junction-pets/actions/runs/43665531960), failed at `V13_FRESH_PUBLIC_WORLDS_DIFFER_FROM_KNOWN_PREFLIGHT`. Its pinned qualifier performed the 512 reset-only scan, then raised during preflight before the episode loop opened. **No V5, V12 or RIGHT4 option episode was executed**, and no science result or safety finding follows from that run. The failed receipt artifact `14141522848` was downloaded to the owner's Mac; its ZIP SHA-256 is `65f897beaf2f0358a1a807cab09c7b550404936245c174fb981ca7c1823107f7`. A local copy at iCloud Drive `Junction/CRACI/rokoko-v13-preflight-stop-43665531960-github-artifact.zip` has the same SHA; synchronization to other devices is unverified. The ZIP contains command logs, manifest and failed receipt, not the individual reset records. Provider billing remains unverified.
+
+The existing original survey and source were not changed: survey SHA-256 `099d8cc69d0d11bca1e21d0fe2b4c7c397b3f094a352d80ea3fcc52a2fddad29`; original product `faec266d6d3a44af3a564f46e0778209c1dc3af1`; original ARM64 survey parent `c77158f9ae80acc2b1eafaf9284c4397426799b2`. The product differs from that parent only in the six V13 research files, with the original simulator unchanged.
+
+## Cause and evidence
+
+The original `_world_signature` hashes JSON representations of unrounded floating-point latent scenario values. Running the fixed reset-only probe on Mac ARM64 (Python 3.13.17) and local Linux x86_64 (Python 3.12.14), both MuJoCo 3.3.7 and NumPy 2.3.4, reproduced 512 unique worlds and the same 178 near / 334 clear classification and selected 40 near / 8 clear seeds. The Mac run reproduced **all 48** native hashes in the immutable original survey. Only **4/48** selected native hashes matched on the local Linux host. For example, seed 519024's initial x was `0.014539186803130771` on Mac and `0.01453918680313077` on Linux; its exact 18-D public observation and seven-bit mask were equal. This is evidence of platform-sensitive float serialization, not proof that later dynamics are bit-identical.
+
+A source-pinned reset-only probe, `scripts/craci/rokoko-v13-portable-preflight-probe.py` (SHA-256 `672544ac95968c69ff2edf33ecf2fb7bd20b3eb2883551dafe276079cde566e0`), derives for every seed a hash of the existing scenario-signature fields rounded to 12 decimal places and a separate exact hash of all 18 public observation values and the original mask. The ordered 512-seed aggregate was identical on both machines:
+
+`c9a64e3b1582543ee1c96ad2c67a042fe106ca82aed1a09fdf0b61f26f57cc3e`
+
+The Mac probe independently required the original 48 native survey hashes to match before reporting the aggregate. Probe output SHA-256: Mac `b332e876d6a501d9069c0da91d14494d3288f466ab36b48b47afd5947e2ac101`; local Linux `8b4ffd38ddcd23fc5e48c7e2617ad3079f71f4aeaf989f982529393498a60214`. Raw probe outputs remained on their respective machines. Their hashes and the aggregate are reproducible records, not a provider signature.
+
+## Verification contract
+
+The original survey byte hash and selected seed/stratum order remain pinned. The harness additionally requires the 512-world aggregate above; it does not pass latent fields or their fingerprints to the policy. Each Linux run still records its native full-precision world hashes and independently replays all 512 native hashes, public observations, masks and portable fingerprints on the same host. Full candidate episodes, original mask decisions and terminal physical goals must still pass the existing independent physics replay and fail-closed stop conditions. Rounding permits sub-picometre-equivalent numerical differences in position units and does not certify future physical behavior or generalization.
+
+The corrected preflight was locally tested on both ARM64 and x86_64 using the same exact harness bytes. Both completed 512 resets and an additional 512-reset verification, with zero option episodes. A separate real-Linux check ran the complete original producer with a zero-second episode budget and verified that the resulting zero-episode `INCOMPLETE_STOP` was losslessly packed. A later hosted run requires a new exact harness pin and preserves this failed run as evidence; no automatic retry is authorized by this record.
