@@ -165,7 +165,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   plan:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && (inputs.workload != 'rokoko-mujoco-v13-pilot' || vars.CRACI_V13_PILOT_SOURCE_REVIEWED == 'true') && (inputs.workload != 'rokoko-mujoco-v12-pilot' || vars.CRACI_V12_REPEAT_STUDY_AUTHORIZED == 'true') && (inputs.workload != 'rokoko-mujoco-v13-causal' || vars.CRACI_V13_CAUSAL_REPEAT_AUTHORIZED == 'true') }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && (inputs.workload != 'rokoko-mujoco-v13-pilot' || (vars.CRACI_V13_PILOT_SOURCE_REVIEWED == 'true' && vars.CRACI_V13_PILOT_REPEAT_AUTHORIZED == 'true')) && (inputs.workload != 'rokoko-mujoco-v12-pilot' || vars.CRACI_V12_REPEAT_STUDY_AUTHORIZED == 'true') && (inputs.workload != 'rokoko-mujoco-v13-causal' || vars.CRACI_V13_CAUSAL_REPEAT_AUTHORIZED == 'true') }}
     name: Admit exact sources and bounded matrix
     runs-on: craci
     timeout-minutes: 5
@@ -6101,7 +6101,7 @@ jobs:
     - plan
 
   rokoko-mujoco-v13-pilot:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && vars.CRACI_V13_PILOT_SOURCE_REVIEWED == 'true' && inputs.workload == 'rokoko-mujoco-v13-pilot' && github.event_name == 'workflow_dispatch' && github.run_attempt == 1 }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && vars.CRACI_V13_PILOT_SOURCE_REVIEWED == 'true' && vars.CRACI_V13_PILOT_REPEAT_AUTHORIZED == 'true' && inputs.workload == 'rokoko-mujoco-v13-pilot' && github.event_name == 'workflow_dispatch' && github.run_attempt == 1 }}
     name: Rokoko V13 519024 new 192-episode paired TRAIN sustained RIGHT4 bursts
     runs-on: craci
     timeout-minutes: 60

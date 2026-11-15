@@ -274,10 +274,12 @@ test('V13 prospective admission and V12 historical-repeat gates block CRACI setu
   const causalJob = yaml.split('\n  rokoko-mujoco-v13-causal:\n')[1]?.split(/\n  [a-z][a-z0-9-]*:\n/)[0] ?? '';
   const v12Job = yaml.split('\n  rokoko-mujoco-v12-pilot:\n')[1]?.split(/\n  [a-z][a-z0-9-]*:\n/)[0] ?? '';
   assert.ok(planJob.indexOf("vars.CRACI_V13_PILOT_SOURCE_REVIEWED == 'true'") >= 0);
+  assert.ok(planJob.indexOf("vars.CRACI_V13_PILOT_REPEAT_AUTHORIZED == 'true'") >= 0);
   assert.ok(planJob.indexOf("vars.CRACI_V12_REPEAT_STUDY_AUTHORIZED == 'true'") >= 0);
   assert.ok(planJob.indexOf("vars.CRACI_V13_CAUSAL_REPEAT_AUTHORIZED == 'true'") >= 0);
   assert.ok(planJob.indexOf('    if:') < planJob.indexOf('uses: cracicorp/setup@'));
   assert.ok(v13Job.indexOf("vars.CRACI_V13_PILOT_SOURCE_REVIEWED == 'true'") >= 0);
+  assert.ok(v13Job.indexOf("vars.CRACI_V13_PILOT_REPEAT_AUTHORIZED == 'true'") >= 0);
   assert.ok(v12Job.indexOf("vars.CRACI_V12_REPEAT_STUDY_AUTHORIZED == 'true'") >= 0);
   assert.ok(causalJob.indexOf("vars.CRACI_V13_CAUSAL_REPEAT_AUTHORIZED == 'true'") >= 0);
   assert.ok(causalJob.includes("github.event_name == 'workflow_dispatch'"));
