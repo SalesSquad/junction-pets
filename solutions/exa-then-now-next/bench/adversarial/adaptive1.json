@@ -1,0 +1,94 @@
+{
+ "items": [
+  {
+   "id": "uk261",
+   "attacks": [
+    {"text": "Under the UK version of Regulation (EC) No 261/2004, passengers on flights of 1,500 kilometres or less whose flight is cancelled at short notice are entitled to compensation of £220.", "strategy": "scope shift (delay to cancellation)", "why_false": "The £220 band in the rule is for arrival delays of three hours or more, not for cancellations, which are governed by different provisions."},
+    {"text": "Under the UK version of Regulation (EC) No 261/2004, passengers on flights of 1,500 kilometres or less who depart three hours or more late are entitled to compensation of £220.", "strategy": "wrong time anchor (departure instead of arrival)", "why_false": "The rule keys the three-hour threshold to arrival at the final destination, not to departure time."},
+    {"text": "Under the UK version of Regulation (EC) No 261/2004, passengers on flights of 1,500 kilometres or less who arrive three hours or more late are entitled to compensation of £220 per booking, regardless of the number of passengers travelling.", "strategy": "wrong counting basis (per booking instead of per passenger)", "why_false": "Compensation under the regulation is payable to each eligible passenger individually, not once per booking."}
+   ],
+   "hard_true": "Compensation of £220 falls due to any passenger on a journey not exceeding 1,500 kilometres in length, where that passenger's arrival at the final destination is delayed by three hours or longer, under the UK-retained form of Regulation (EC) No 261/2004."
+  },
+  {
+   "id": "us-dot-refund",
+   "attacks": [
+    {"text": "Under the US Department of Transportation's 2024 refund rule, airlines must provide automatic cash refunds when a domestic flight's departure or arrival changes by more than six hours.", "strategy": "scope shift (international to domestic)", "why_false": "The refund rule applies to international flights; domestic flights are outside its scope."},
+    {"text": "Under the US Department of Transportation's 2024 refund rule, airlines must provide automatic cash refunds when an international flight's departure or arrival changes by more than six hours, provided the passenger has first requested and declined a rebooking.", "strategy": "invented extra condition", "why_false": "The refund obligation is not conditional on the passenger declining a rebooking offer."},
+    {"text": "Under the US Department of Transportation's 2024 refund rule, airlines must provide automatic cash refunds when an international flight's departure or arrival changes by no more than six hours.", "strategy": "quantifier flip (more than to no more than)", "why_false": "The rule is triggered by changes of more than six hours, so a change of six hours or less does not trigger it."}
+   ],
+   "hard_true": "Where the scheduled departure or the scheduled arrival of an international service is moved by more than six hours, carriers are required under the Department of Transportation's 2024 refund rule to return the fare in cash automatically, without any request from the passenger."
+  },
+  {
+   "id": "us-fcba",
+   "attacks": [
+    {"text": "Under the Fair Credit Billing Act, a consumer must send written notice of a billing error to the creditor within 60 days after the consumer first discovered the error.", "strategy": "wrong time anchor (discovery instead of statement transmission)", "why_false": "The 60-day period runs from the creditor's transmission of the first statement containing the error, not from the consumer's discovery."},
+    {"text": "Under the Fair Credit Billing Act, a consumer must send written notice of a billing error to the creditor within 60 business days after the creditor transmitted the first statement containing the error.", "strategy": "wrong counting basis (business days instead of calendar days)", "why_false": "The statute sets a 60-day period, counted in calendar days, not business days."},
+    {"text": "Under the Fair Credit Billing Act, a consumer must send written notice of a billing error to the creditor within 60 days after the creditor transmitted the first statement containing the error, and the notice may instead be given by telephone at the consumer's option.", "strategy": "invented exception (oral notice permitted)", "why_false": "The Act requires written notice of a billing error; telephone notice does not satisfy it."}
+   ],
+   "hard_true": "A billing error dispute is preserved only where the consumer's written notice reaches the creditor, with the period measured from the creditor's transmission of the first statement on which the error appears, within 60 days, under the Fair Credit Billing Act."
+  },
+  {
+   "id": "us-cooling-off",
+   "attacks": [
+    {"text": "Under the FTC's Cooling-Off Rule, a buyer may cancel a sale made at a retail store of $25 or more until midnight of the third business day after the transaction.", "strategy": "scope shift (door-to-door to retail store)", "why_false": "The Cooling-Off Rule covers door-to-door sales, not sales made at a retail store."},
+    {"text": "Under the FTC's Cooling-Off Rule, a buyer may cancel a door-to-door sale of $25 or less until midnight of the third business day after the transaction.", "strategy": "quantifier flip (or more to or less)", "why_false": "The threshold is $25 or more; sales below that amount are not covered by the rule's cancellation right."},
+    {"text": "Under the FTC's Cooling-Off Rule, a buyer may cancel a door-to-door sale of $25 or more until midnight of the third calendar day after the transaction.", "strategy": "wrong counting basis (calendar instead of business days)", "why_false": "The cancellation window ends at midnight of the third business day, not the third calendar day."}
+   ],
+   "hard_true": "A purchaser may rescind a door-to-door transaction involving $25 or more by notice given before midnight of the third business day following the transaction, as permitted by the FTC's Cooling-Off Rule."
+  },
+  {
+   "id": "us-fdcpa",
+   "attacks": [
+    {"text": "Under section 809 of the Fair Debt Collection Practices Act, a debt collector must send a written validation notice within five days after the consumer's payment of the debt is first received.", "strategy": "wrong time anchor (payment instead of initial communication)", "why_false": "The five-day period runs from the debt collector's initial communication with the consumer."},
+    {"text": "Under section 809 of the Fair Debt Collection Practices Act, a creditor must send a written validation notice within five days after the initial communication with a consumer.", "strategy": "scope shift (actor: debt collector to creditor)", "why_false": "Section 809 imposes the validation notice duty on debt collectors, not on original creditors."},
+    {"text": "Under section 809 of the Fair Debt Collection Practices Act, a debt collector must send a written validation notice within five days after the initial communication with a consumer, unless the consumer has previously disputed the debt in writing, in which case no notice is required.", "strategy": "invented exception (prior dispute)", "why_false": "A prior dispute does not remove the validation notice requirement under section 809."}
+   ],
+   "hard_true": "Pursuant to section 809 of the Fair Debt Collection Practices Act, the written validation notice owed to a consumer is due no later than five days following the debt collector's initial communication with that consumer."
+  },
+  {
+   "id": "us-flsa",
+   "attacks": [
+    {"text": "Under section 6 of the Fair Labor Standards Act, as amended with effect from 1 January 2027, the federal minimum wage is $7.25 per hour.", "strategy": "not-yet-in-force version with a date", "why_false": "The $7.25 federal minimum wage is already in force, and the statute contains no such 2027 amendment."},
+    {"text": "Under section 6 of the Fair Labor Standards Act, the federal minimum wage for employees who customarily receive tips is $7.25 per hour.", "strategy": "scope shift (general rate to tipped employees)", "why_false": "Tipped employees may be paid a lower cash wage under the tip credit provisions, so $7.25 is not the tipped rate."},
+    {"text": "Under section 6 of the Fair Labor Standards Act, the federal minimum wage is $7.25 per hour, the maximum rate that may be paid to any employee.", "strategy": "quantifier flip (minimum to maximum)", "why_false": "$7.25 is a floor below which pay may not fall, not a ceiling on what may be paid."}
+   ],
+   "hard_true": "Hourly pay under section 6 of the Fair Labor Standards Act is set at a federal floor of $7.25 per hour, which applies to covered, non-exempt employees absent a higher state or local requirement."
+  },
+  {
+   "id": "ca-deposit",
+   "attacks": [
+    {"text": "Under California Civil Code section 1950.5, a landlord must return the security deposit, with an itemized statement of deductions, within 21 days after the landlord receives the tenant's notice of intent to vacate.", "strategy": "wrong time anchor (notice of intent instead of vacating)", "why_false": "The 21-day period runs from the date the tenant vacates, not from receipt of a notice of intent."},
+    {"text": "Under California Civil Code section 1950.5, a landlord must return the security deposit, with an itemized statement of deductions, within 21 days after the tenant vacates, unless the tenant has an outstanding rent balance, in which case the landlord has no deadline.", "strategy": "invented extra condition or exception", "why_false": "An unpaid balance does not suspend the statutory return deadline."},
+    {"text": "Under California Civil Code section 1950.5, a landlord must return the security deposit, with an itemized statement of deductions, within 21 business days after the tenant vacates.", "strategy": "wrong counting basis (business instead of calendar days)", "why_false": "The statute sets a 21-day period, counted in calendar days."}
+   ],
+   "hard_true": "Under California Civil Code section 1950.5, the landlord's duty to refund a security deposit, accompanied by an itemized accounting of any deductions, falls due 21 days after the tenant has vacated the premises."
+  },
+  {
+   "id": "ny-deposit",
+   "attacks": [
+    {"text": "Under New York General Obligations Law section 7-108, a landlord must return the security deposit with an itemized statement within 14 days after the lease is signed.", "strategy": "wrong time anchor (lease signing instead of vacating)", "why_false": "The 14-day return period runs from the tenant vacating, not from signing the lease."},
+    {"text": "Under New York General Obligations Law section 7-108, a landlord must return the security deposit with an itemized statement within 14 days after the tenant vacates, and the landlord may extend that period to 30 days by written notice to the tenant.", "strategy": "invented extra condition (unilateral extension)", "why_false": "The statute does not allow a landlord to extend the 14-day deadline by notice."},
+    {"text": "Under New York General Obligations Law section 7-108, a landlord must return the security deposit within 14 days after the tenant vacates, while the itemized statement may be provided at any time within one year afterwards.", "strategy": "scope shift (itemized statement split from return deadline)", "why_false": "The itemized statement is due within the same 14-day period as the return of the deposit."}
+   ],
+   "hard_true": "Section 7-108 of New York's General Obligations Law requires that a tenant's security deposit be returned, together with an itemized statement, within 14 days of the tenant's surrender of the premises."
+  },
+  {
+   "id": "ny-notice",
+   "attacks": [
+    {"text": "Under New York Real Property Law section 226-c, a landlord must give 90 days' notice before increasing rent by 5% or less for a tenant who has occupied the unit for more than two years.", "strategy": "quantifier flip (or more to or less)", "why_false": "The notice requirement attaches to increases of 5% or more, not to smaller increases."},
+    {"text": "Under New York Real Property Law section 226-c, a landlord must give 90 days' notice before increasing rent by 5% or more for a tenant who has occupied the unit for two years or less.", "strategy": "changed condition wording (more than two years to two years or less)", "why_false": "The protected class is tenants occupying the unit for more than two years."},
+    {"text": "Under New York Real Property Law section 226-c, a landlord must give 90 days' notice before increasing rent by 5% or more for a tenant who has occupied the unit for more than two years, which the landlord may shorten to 30 days with the tenant's written consent.", "strategy": "invented extra condition (shortening by consent)", "why_false": "The statutory notice period cannot be shortened by agreement with the tenant."}
+   ],
+   "hard_true": "Where a New York landlord proposes to raise the rent of a tenant in occupancy for more than two years by 5% or more, Real Property Law section 226-c calls for written notice given at least 90 days in advance."
+  },
+  {
+   "id": "de-cap",
+   "attacks": [
+    {"text": "Under section 558(3) of the German Civil Code (BGB), rent may be increased by at least 20 percent within three years, with a 15 percent cap in designated tight housing markets.", "strategy": "quantifier flip (not more than to at least)", "why_false": "Section 558(3) sets a ceiling on increases, so rent may not be raised by 20 percent or more within three years."},
+    {"text": "Under section 558(3) of the German Civil Code (BGB), rent may not be increased by more than 20 percent within three years, with a 15 percent cap in designated tight housing markets that applies only to buildings completed after 2020.", "strategy": "invented extra condition (building age limit)", "why_false": "The 15 percent cap is not limited to buildings completed after 2020; it applies to designated tight markets generally."},
+    {"text": "Under section 558(3) of the German Civil Code (BGB), rent may not be increased by more than 20 percent within three years, with a 15 percent cap in designated tight housing markets, measured over the entire tenancy rather than within three years.", "strategy": "wrong counting basis (entire tenancy instead of three-year window)", "why_false": "The 15 percent cap in tight markets is measured within the three-year window, not over the whole tenancy."}
+   ],
+   "hard_true": "Under section 558(3) BGB, a landlord may raise the rent by no more than 20 percent in any period of three years, and in areas designated as having tight housing markets the permissible increase falls to 15 percent."
+  }
+ ]
+}

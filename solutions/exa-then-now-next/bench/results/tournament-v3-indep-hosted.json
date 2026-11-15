@@ -1,0 +1,277 @@
+{
+ "file": "bench/datasets/out/training-v3/test-indep.jsonl",
+ "items": 1168,
+ "clusters": 65,
+ "provisions": 296,
+ "tierFilter": "all",
+ "note": "accuracy in %, 95 % interval from a bootstrap over clusters; ties share credit",
+ "all": {
+  "chance": "32.4 [30.4, 35.3]",
+  "first": "31.3 [26.1, 37.9]",
+  "lexical": "53.6 [48.1, 58.1]",
+  "jevChoice": "93.9 [90.9, 96.0]",
+  "code+jevChoice": "93.7 [90.5, 96.1]",
+  "lunaChoice": "93.5 [90.6, 95.6]",
+  "code+lunaChoice": "93.3 [90.7, 95.4]",
+  "nemotron": "91.8 [89.3, 93.8]",
+  "code+nemotron": "91.6 [89.1, 93.6]",
+  "mean(jevChoice+lunaChoice+nemotron)": "95.2 [92.4, 97.2]",
+  "code+mean(jevChoice+lunaChoice+nemotron)": "94.9 [91.7, 97.2]"
+ },
+ "byTier": {
+  "clean": {
+   "n": 1080,
+   "chance": "32.6 [30.4, 35.3]",
+   "first": "32.4 [27.2, 39.2]",
+   "lexical": "54.8 [49.2, 59.2]",
+   "jevChoice": "95.3 [92.9, 97.1]",
+   "code+jevChoice": "95.1 [92.5, 97.0]",
+   "lunaChoice": "95.5 [93.6, 97.0]",
+   "code+lunaChoice": "95.3 [93.2, 96.9]",
+   "nemotron": "93.3 [91.5, 94.9]",
+   "code+nemotron": "93.0 [91.3, 94.7]",
+   "mean(jevChoice+lunaChoice+nemotron)": "96.9 [95.0, 98.2]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "96.6 [94.4, 98.1]"
+  },
+  "half": {
+   "n": 88,
+   "chance": "30.3 [27.1, 35.0]",
+   "first": "18.2 [6.6, 31.0]",
+   "lexical": "39.3 [31.7, 46.6]",
+   "jevChoice": "76.1 [62.2, 88.3]",
+   "code+jevChoice": "76.1 [62.2, 88.5]",
+   "lunaChoice": "68.3 [53.4, 82.4]",
+   "code+lunaChoice": "69.4 [54.8, 82.3]",
+   "nemotron": "73.9 [61.2, 85.3]",
+   "code+nemotron": "73.9 [60.9, 85.5]",
+   "mean(jevChoice+lunaChoice+nemotron)": "75.0 [57.3, 89.2]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "75.0 [58.1, 88.8]"
+  }
+ },
+ "byLanguage": {
+  "Finnish": {
+   "n": 221,
+   "chance": "32.4 [29.5, 36.7]",
+   "first": "33.5 [22.6, 45.2]",
+   "lexical": "35.2 [31.6, 40.7]",
+   "jevChoice": "91.9 [84.8, 96.7]",
+   "code+jevChoice": "91.9 [85.0, 96.9]",
+   "lunaChoice": "92.8 [87.2, 97.9]",
+   "code+lunaChoice": "92.8 [87.1, 98.2]",
+   "nemotron": "91.9 [86.2, 96.2]",
+   "code+nemotron": "91.9 [86.5, 96.0]",
+   "mean(jevChoice+lunaChoice+nemotron)": "95.0 [90.3, 98.6]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "95.0 [90.0, 98.5]"
+  },
+  "English": {
+   "n": 699,
+   "chance": "32.3 [30.0, 35.4]",
+   "first": "32.9 [26.9, 41.3]",
+   "lexical": "65.1 [56.9, 71.6]",
+   "jevChoice": "94.7 [91.8, 96.9]",
+   "code+jevChoice": "94.4 [91.5, 96.6]",
+   "lunaChoice": "93.6 [89.9, 95.8]",
+   "code+lunaChoice": "93.3 [89.7, 95.7]",
+   "nemotron": "91.8 [88.6, 94.1]",
+   "code+nemotron": "91.3 [88.1, 94.1]",
+   "mean(jevChoice+lunaChoice+nemotron)": "95.0 [91.7, 97.3]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "94.6 [90.6, 97.2]"
+  },
+  "German": {
+   "n": 248,
+   "chance": "32.7 [29.7, 36.3]",
+   "first": "25.0 [18.0, 32.9]",
+   "lexical": "37.5 [33.1, 42.2]",
+   "jevChoice": "93.3 [88.8, 97.2]",
+   "code+jevChoice": "93.3 [88.9, 97.2]",
+   "lunaChoice": "93.9 [90.3, 96.6]",
+   "code+lunaChoice": "93.9 [90.5, 96.7]",
+   "nemotron": "91.9 [88.6, 95.8]",
+   "code+nemotron": "91.9 [89.0, 95.9]",
+   "mean(jevChoice+lunaChoice+nemotron)": "96.0 [93.0, 98.6]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "96.0 [93.0, 98.5]"
+  }
+ },
+ "byJurisdiction": {
+  "US": {
+   "n": 1149,
+   "chance": "32.5 [30.4, 35.2]",
+   "first": "31.4 [26.1, 38.4]",
+   "lexical": "53.8 [48.3, 58.5]",
+   "jevChoice": "93.9 [90.7, 96.1]",
+   "code+jevChoice": "93.6 [90.5, 95.8]",
+   "lunaChoice": "93.4 [90.4, 95.6]",
+   "code+lunaChoice": "93.2 [90.3, 95.5]",
+   "nemotron": "91.7 [89.2, 93.7]",
+   "code+nemotron": "91.4 [88.9, 93.4]",
+   "mean(jevChoice+lunaChoice+nemotron)": "95.1 [92.1, 97.2]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "94.9 [91.6, 97.2]"
+  },
+  "UK": {
+   "n": 19,
+   "chance": "30.1 [26.5, 43.8]",
+   "first": "26.3 [0.0, 75.0]",
+   "lexical": "41.1 [30.0, 45.1]",
+   "jevChoice": "94.7 [92.1, 100.0]",
+   "code+jevChoice": "100.0 [100.0, 100.0]",
+   "lunaChoice": "100.0 [100.0, 100.0]",
+   "code+lunaChoice": "100.0 [100.0, 100.0]",
+   "nemotron": "100.0 [100.0, 100.0]",
+   "code+nemotron": "100.0 [100.0, 100.0]",
+   "mean(jevChoice+lunaChoice+nemotron)": "100.0 [100.0, 100.0]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "100.0 [100.0, 100.0]"
+  }
+ },
+ "byAttack": {
+  "none": {
+   "n": 572,
+   "chance": "31.6 [29.5, 34.6]",
+   "first": "30.4 [25.9, 36.6]",
+   "lexical": "53.8 [48.0, 58.6]",
+   "jevChoice": "93.6 [90.3, 96.0]",
+   "code+jevChoice": "93.6 [90.3, 96.1]",
+   "lunaChoice": "92.8 [89.7, 95.4]",
+   "code+lunaChoice": "92.8 [89.5, 95.1]",
+   "nemotron": "91.8 [89.1, 94.2]",
+   "code+nemotron": "91.6 [88.8, 94.1]",
+   "mean(jevChoice+lunaChoice+nemotron)": "94.9 [91.3, 97.3]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "94.8 [91.5, 97.2]"
+  },
+  "distractors": {
+   "n": 113,
+   "chance": "32.0 [29.0, 35.3]",
+   "first": "33.6 [24.4, 44.7]",
+   "lexical": "57.0 [46.6, 66.2]",
+   "jevChoice": "94.7 [87.5, 99.2]",
+   "code+jevChoice": "93.8 [86.7, 99.0]",
+   "lunaChoice": "89.8 [83.5, 95.2]",
+   "code+lunaChoice": "88.9 [81.5, 94.5]",
+   "nemotron": "89.8 [84.4, 94.8]",
+   "code+nemotron": "88.9 [83.2, 94.0]",
+   "mean(jevChoice+lunaChoice+nemotron)": "94.7 [87.9, 99.2]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "93.8 [86.4, 98.6]"
+  },
+  "units": {
+   "n": 24,
+   "chance": "32.0 [27.0, 39.7]",
+   "first": "25.0 [6.7, 54.2]",
+   "lexical": "42.8 [32.1, 61.5]",
+   "jevChoice": "91.7 [80.6, 100.0]",
+   "code+jevChoice": "91.7 [80.0, 100.0]",
+   "lunaChoice": "95.8 [90.3, 100.0]",
+   "code+lunaChoice": "95.8 [90.0, 100.0]",
+   "nemotron": "87.5 [76.0, 100.0]",
+   "code+nemotron": "87.5 [76.2, 100.0]",
+   "mean(jevChoice+lunaChoice+nemotron)": "95.8 [90.3, 100.0]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "95.8 [90.3, 100.0]"
+  },
+  "multi": {
+   "n": 60,
+   "chance": "34.4 [31.3, 37.4]",
+   "first": "38.3 [28.6, 52.4]",
+   "lexical": "52.5 [39.4, 64.7]",
+   "jevChoice": "90.0 [81.8, 96.4]",
+   "code+jevChoice": "90.0 [81.8, 96.7]",
+   "lunaChoice": "96.7 [91.1, 100.0]",
+   "code+lunaChoice": "96.7 [91.1, 100.0]",
+   "nemotron": "88.3 [79.6, 96.3]",
+   "code+nemotron": "88.3 [80.4, 96.5]",
+   "mean(jevChoice+lunaChoice+nemotron)": "91.7 [83.7, 98.0]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "91.7 [83.3, 97.8]"
+  },
+  "negation": {
+   "n": 91,
+   "chance": "32.1 [28.6, 36.8]",
+   "first": "33.0 [22.9, 45.1]",
+   "lexical": "51.4 [42.5, 59.6]",
+   "jevChoice": "95.6 [91.4, 98.8]",
+   "code+jevChoice": "95.6 [91.4, 98.8]",
+   "lunaChoice": "97.8 [94.1, 100.0]",
+   "code+lunaChoice": "97.8 [93.8, 100.0]",
+   "nemotron": "96.7 [93.7, 100.0]",
+   "code+nemotron": "96.7 [93.6, 100.0]",
+   "mean(jevChoice+lunaChoice+nemotron)": "96.7 [92.3, 100.0]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "96.7 [92.0, 100.0]"
+  },
+  "slang": {
+   "n": 123,
+   "chance": "31.1 [28.9, 33.9]",
+   "first": "33.3 [27.5, 40.5]",
+   "lexical": "49.5 [41.3, 56.7]",
+   "jevChoice": "91.9 [85.3, 96.9]",
+   "code+jevChoice": "91.9 [85.6, 96.9]",
+   "lunaChoice": "92.3 [87.5, 96.6]",
+   "code+lunaChoice": "92.3 [87.5, 96.7]",
+   "nemotron": "88.2 [82.5, 93.2]",
+   "code+nemotron": "88.2 [82.3, 93.2]",
+   "mean(jevChoice+lunaChoice+nemotron)": "95.1 [90.2, 98.5]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "95.1 [90.5, 99.0]"
+  },
+  "injection": {
+   "n": 69,
+   "chance": "36.4 [32.7, 41.3]",
+   "first": "17.4 [7.1, 26.1]",
+   "lexical": "52.4 [40.7, 61.3]",
+   "jevChoice": "94.2 [88.9, 98.4]",
+   "code+jevChoice": "94.2 [89.4, 98.5]",
+   "lunaChoice": "98.6 [94.6, 100.0]",
+   "code+lunaChoice": "98.6 [94.3, 100.0]",
+   "nemotron": "95.7 [87.9, 100.0]",
+   "code+nemotron": "95.7 [87.7, 100.0]",
+   "mean(jevChoice+lunaChoice+nemotron)": "98.6 [94.8, 100.0]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "98.6 [94.8, 100.0]"
+  },
+  "dates": {
+   "n": 116,
+   "chance": "35.2 [32.1, 39.1]",
+   "first": "36.2 [28.7, 44.3]",
+   "lexical": "59.0 [51.9, 65.5]",
+   "jevChoice": "97.4 [93.1, 100.0]",
+   "code+jevChoice": "96.6 [92.1, 99.2]",
+   "lunaChoice": "93.1 [86.6, 97.3]",
+   "code+lunaChoice": "92.2 [85.1, 96.9]",
+   "nemotron": "94.4 [89.6, 97.6]",
+   "code+nemotron": "93.5 [88.3, 97.4]",
+   "mean(jevChoice+lunaChoice+nemotron)": "95.7 [90.8, 99.1]",
+   "code+mean(jevChoice+lunaChoice+nemotron)": "94.8 [89.2, 98.9]"
+  }
+ },
+ "lexicalHard": {
+  "n": 725,
+  "chance": "32.3 [29.9, 35.2]",
+  "first": "31.3 [24.7, 39.0]",
+  "lexical": "25.3 [23.1, 28.0]",
+  "jevChoice": "90.7 [86.9, 93.8]",
+  "code+jevChoice": "90.8 [87.0, 94.2]",
+  "lunaChoice": "91.0 [87.6, 94.2]",
+  "code+lunaChoice": "91.2 [87.9, 94.0]",
+  "nemotron": "90.2 [87.0, 93.0]",
+  "code+nemotron": "90.2 [87.0, 93.2]",
+  "mean(jevChoice+lunaChoice+nemotron)": "92.7 [88.6, 95.7]",
+  "code+mean(jevChoice+lunaChoice+nemotron)": "92.7 [88.5, 95.8]"
+ },
+ "paired": {
+  "jevChoice - lunaChoice": {
+   "difference": "0.4 [-1.5, 2.1]",
+   "pPositive": 0.6775
+  },
+  "nemotron - jevChoice": {
+   "difference": "-2.1 [-3.9, 0.2]",
+   "pPositive": 0.031
+  },
+  "nemotron - lunaChoice": {
+   "difference": "-1.7 [-3.9, 0.6]",
+   "pPositive": 0.069
+  }
+ },
+ "escalation": {},
+ "signing": {
+  "jevChoice+lunaChoice+nemotron": {
+   "rule": "all members pick the same clause and code allows it",
+   "coverage": "1008/1168 (86.3 %)",
+   "accuracyWhenSigned": "98.6 [97.4, 99.5]",
+   "onCleanItems": "99.1 [98.1, 99.7]"
+  }
+ },
+ "codeRuledOutPerItem": "0.02"
+}

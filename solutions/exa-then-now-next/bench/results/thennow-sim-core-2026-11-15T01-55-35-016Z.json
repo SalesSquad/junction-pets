@@ -1,0 +1,66 @@
+{
+ "summary": {
+  "set": "core",
+  "repeat": 1,
+  "judge": "jev",
+  "secondJudge": "gpt-6-luna",
+  "panel": [
+   "jev",
+   "gpt-6-luna",
+   "nemotron-3.5-super-vl"
+  ],
+  "agreed": "0/0",
+  "rightWhenAgreed": "0/0",
+  "rightWhenNotAgreed": "0/0",
+  "scenarios": 2,
+  "provision": "1/2",
+  "then": "0/0",
+  "now": "1/2",
+  "edges": "2/2",
+  "errors": [
+   "edge-before: National Minimum Wage Regulations 2015, regs. 4 and 4A — min"
+  ],
+  "medianMs": 2185
+ },
+ "rows": [
+  {
+   "id": "edge-future",
+   "expect": "future",
+   "provisionOk": true,
+   "via": "registry",
+   "then": "$2,150",
+   "goldThen": null,
+   "thenOk": false,
+   "now": "$2,150",
+   "goldNow": "$2,150",
+   "nowOk": true,
+   "p": 0.8197130854278692,
+   "ruledOut": 4,
+   "agreed": true,
+   "votes": [
+    "typesafe-jev:choice",
+    "openai-decisions:choice",
+    "nemotron-3.5-super-vl:choice"
+   ],
+   "future": true,
+   "ms": 2185,
+   "rep": 0,
+   "expectOk": true
+  },
+  {
+   "id": "edge-before",
+   "expect": "no-provision",
+   "provisionOk": false,
+   "then": null,
+   "goldThen": null,
+   "thenOk": false,
+   "now": null,
+   "goldNow": "£12.71",
+   "nowOk": false,
+   "ms": 523,
+   "err": "National Minimum Wage Regulations 2015, regs. 4 and 4A — minimum hourly wage for every age and apprentices (UK) was not in force on 2014-06-01 (the official source has no version for that date)",
+   "rep": 0,
+   "expectOk": true
+  }
+ ]
+}

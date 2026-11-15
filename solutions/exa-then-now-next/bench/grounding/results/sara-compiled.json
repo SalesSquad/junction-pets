@@ -1,0 +1,6218 @@
+[
+ {
+  "id": "sara-0",
+  "dataset": "sara_entailment",
+  "case": "s7703_a_2_pos",
+  "claim": "Section 7703(a)(2) applies to Alice for the year 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-0",
+   "elements": [
+    {
+     "name": "alice_legally_separated_2018",
+     "kind": "fact",
+     "question": "Was Alice legally separated from her spouse under a decree of divorce or separate maintenance at any time during 2018?"
+    }
+   ],
+   "formula": "alice_legally_separated_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.89,
+  "luna_compiled": 0.99
+ },
+ {
+  "id": "sara-1",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_2_pos",
+  "claim": "Section 3306(c)(2) applies to Alice employing Bob for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-1",
+   "elements": [
+    {
+     "name": "bob_domestic_service_in_alice_home_2017",
+     "kind": "fact",
+     "question": "Did Bob perform domestic service in Alice's private home in 2017?"
+    },
+    {
+     "name": "alice_paid_cash_1000_or_more_2017_or_2016",
+     "kind": "fact",
+     "question": "Did Alice pay cash remuneration totaling $1,000 or more to individuals employed in domestic service in 2017 or in 2016?"
+    }
+   ],
+   "formula": "bob_domestic_service_in_alice_home_2017 AND NOT alice_paid_cash_1000_or_more_2017_or_2016",
+   "handled": true
+  },
+  "jev_compiled": 0.6799999999999999,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-2",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_21_pos",
+  "claim": "Section 3306(c)(21) applies to Alice's employment situation in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-2",
+   "elements": [
+    {
+     "name": "alice_committed_to_penal_institution_performing_service_2017",
+     "kind": "fact",
+     "question": "In 2017, was Alice committed to a penal institution and performing service for an employer?"
+    }
+   ],
+   "formula": "alice_committed_to_penal_institution_performing_service_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.87,
+  "luna_compiled": 0.98
+ },
+ {
+  "id": "sara-3",
+  "dataset": "sara_entailment",
+  "case": "s7703_b_1_pos",
+  "claim": "Section 7703(b)(1) applies to Alice for the year 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-3",
+   "elements": [
+    {
+     "name": "alice_married_end_2018",
+     "kind": "fact",
+     "question": "Was Alice married (within the meaning of section 7703(a)) as of the last day of 2018?"
+    },
+    {
+     "name": "alice_files_separate_return_2018",
+     "kind": "fact",
+     "question": "Did Alice file a separate return for 2018?"
+    },
+    {
+     "name": "alice_home_principal_abode_child_over_half_2018",
+     "kind": "fact",
+     "question": "Did Alice maintain a household that was the principal place of abode of a child for more than one-half of 2018?"
+    },
+    {
+     "name": "alice_entitled_child_deduction_2018",
+     "kind": "fact",
+     "question": "Was Alice entitled to a deduction under section 151 for that child for 2018?"
+    }
+   ],
+   "formula": "alice_married_end_2018 AND alice_files_separate_return_2018 AND alice_home_principal_abode_child_over_half_2018 AND alice_entitled_child_deduction_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.87,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-4",
+  "dataset": "sara_entailment",
+  "case": "s2_a_2_B_pos",
+  "claim": "Section 2(a)(2)(B) applies to Bob in 2014.",
+  "label": 1,
+  "program": {
+   "id": "sara-4",
+   "elements": [
+    {
+     "name": "bob_spouse_died_2014",
+     "kind": "fact",
+     "question": "Did Bob's spouse die during 2014?"
+    }
+   ],
+   "formula": "bob_spouse_died_2014",
+   "handled": false
+  },
+  "jev_compiled": 0.99,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-5",
+  "dataset": "sara_entailment",
+  "case": "s68_f_pos",
+  "claim": "Section 68(f) applies to Alice for the year 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-5",
+   "elements": [
+    {
+     "name": "taxable_year_2018_in_excluded_period",
+     "kind": "given",
+     "value": true,
+     "why": "2018 taxable year begins after December 31, 2017 and before January 1, 2026, so the excerpt says section 68(f) does not apply to it"
+    }
+   ],
+   "formula": "NOT taxable_year_2018_in_excluded_period",
+   "handled": true
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-6",
+  "dataset": "sara_entailment",
+  "case": "s63_c_3_pos",
+  "claim": "Under section 63(c)(3), Alice's additional standard deduction in 2017 is equal to $1200.",
+  "label": 1,
+  "program": {
+   "id": "sara-6",
+   "elements": [
+    {
+     "name": "alice_aged_or_blind_2017",
+     "kind": "fact",
+     "question": "Was Alice aged 65 or older or blind at the end of 2017?"
+    }
+   ],
+   "formula": "alice_aged_or_blind_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.25,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-7",
+  "dataset": "sara_entailment",
+  "case": "s152_b_1_pos",
+  "claim": "Section 152(b)(1) applies to Bob for the year 2015.",
+  "label": 1,
+  "program": {
+   "id": "sara-7",
+   "elements": [
+    {
+     "name": "bob_dependent_of_taxpayer_2015",
+     "kind": "fact",
+     "question": "Was Bob a dependent of another taxpayer for any taxable year beginning in 2015?"
+    },
+    {
+     "name": "year_2015_is_calendar_year_of_assertion",
+     "kind": "given",
+     "value": true,
+     "why": "The assertion concerns Bob for the calendar year 2015, which is the calendar year the rule refers to"
+    }
+   ],
+   "formula": "bob_dependent_of_taxpayer_2015 AND year_2015_is_calendar_year_of_assertion",
+   "handled": true
+  },
+  "jev_compiled": 0.67,
+  "luna_compiled": 0.31
+ },
+ {
+  "id": "sara-8",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_iii_pos",
+  "claim": "Alice and her spouse have to pay $24543 in taxes for the year 2017 under section 1(a)(iii).",
+  "label": 1,
+  "program": {
+   "id": "sara-8",
+   "elements": [
+    {
+     "name": "joint_return_bracket_2017",
+     "kind": "fact",
+     "question": "Did Alice and her spouse file a joint return for 2017 with taxable income over $89,150 but not over $140,000?"
+    }
+   ],
+   "formula": "joint_return_bracket_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.96,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-9",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_1_A_i_pos",
+  "claim": "Section 3306(c)(1)(A)(i) applies to Alice employing Bob for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-9",
+   "elements": [
+    {
+     "name": "cash_wages_threshold_met",
+     "kind": "fact",
+     "question": "During 2016 or 2017, did Alice pay cash remuneration of $20,000 or more to individuals employed in agricultural labor?"
+    },
+    {
+     "name": "bob_agricultural_employee_2017",
+     "kind": "fact",
+     "question": "Was Bob employed by Alice in agricultural labor during 2017?"
+    }
+   ],
+   "formula": "cash_wages_threshold_met AND bob_agricultural_employee_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.95,
+  "luna_compiled": 0.96
+ },
+ {
+  "id": "sara-10",
+  "dataset": "sara_entailment",
+  "case": "s152_c_2_B_pos",
+  "claim": "Bob bears a relationship to Alice under section 152(c)(2)(B).",
+  "label": 1,
+  "program": {
+   "id": "sara-10",
+   "elements": [
+    {
+     "name": "bob_qualifying_relative",
+     "kind": "fact",
+     "question": "Is Bob a brother, sister, stepbrother, or stepsister of Alice, or a descendant of any such relative?"
+    }
+   ],
+   "formula": "bob_qualifying_relative",
+   "handled": true
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-11",
+  "dataset": "sara_entailment",
+  "case": "s151_a_pos",
+  "claim": "Alice's total exemption for 2015 under section 151(a) is equal to $4000.",
+  "label": 1,
+  "program": {
+   "id": "sara-11",
+   "elements": [
+    {
+     "name": "amount_stated_in_excerpt",
+     "kind": "given",
+     "value": false,
+     "why": "The excerpt states that exemptions are allowed as deductions but gives no dollar amount; the $4000 figure for 2015 comes from law outside the excerpt."
+    }
+   ],
+   "formula": "amount_stated_in_excerpt",
+   "handled": false
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-12",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_pos",
+  "claim": "Alice and her husband have to pay $2600 in taxes for the year 2017 under section 1(a).",
+  "label": 1,
+  "program": {
+   "id": "sara-12",
+   "elements": [
+    {
+     "name": "joint_return_2017",
+     "kind": "fact",
+     "question": "Did Alice and her husband file a joint return for 2017?"
+    }
+   ],
+   "formula": "joint_return_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-13",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_2_A_pos",
+  "claim": "Under section 3306(a)(2)(A), Alice is an employer for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-13",
+   "elements": [
+    {
+     "name": "agricultural_wages_threshold_met",
+     "kind": "fact",
+     "question": "During 2016 or 2017, did Alice pay wages of $20,000 or more for agricultural labor?"
+    }
+   ],
+   "formula": "agricultural_wages_threshold_met",
+   "handled": true
+  },
+  "jev_compiled": 0.78,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-14",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_10_B_pos",
+  "claim": "Section 3306(b)(10)(B) applies to the payment of $12980 that Alice made in 2019.",
+  "label": 1,
+  "program": {
+   "id": "sara-14",
+   "elements": [
+    {
+     "name": "payment_under_employer_plan_2019",
+     "kind": "fact",
+     "question": "Was the $12,980 payment that Alice made in 2019 made under a plan she established for her employees generally or for a class of her employees (or their dependents)?"
+    }
+   ],
+   "formula": "payment_under_employer_plan_2019",
+   "handled": true
+  },
+  "jev_compiled": 0.94,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-15",
+  "dataset": "sara_entailment",
+  "case": "s1_d_v_pos",
+  "claim": "Alice has to pay $207772 in taxes for the year 2017 under section 1(d)(v).",
+  "label": 1,
+  "program": {
+   "id": "sara-15",
+   "elements": [
+    {
+     "name": "taxable_income_over_125000_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $125,000?"
+    }
+   ],
+   "formula": "taxable_income_over_125000_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.99,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-16",
+  "dataset": "sara_entailment",
+  "case": "s7703_b_3_pos",
+  "claim": "Section 7703(b)(3) applies to Alice maintaining her home for the year 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-16",
+   "elements": [
+    {
+     "name": "spouse_absent_last_six_months_2018",
+     "kind": "fact",
+     "question": "During the last 6 months of 2018, was Alice's spouse not a member of Alice's household?"
+    }
+   ],
+   "formula": "spouse_absent_last_six_months_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.89,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-17",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_B_pos",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(B) for the year 2015.",
+  "label": 1,
+  "program": {
+   "id": "sara-17",
+   "elements": [
+    {
+     "name": "bob_is_siblings_relative_2015",
+     "kind": "fact",
+     "question": "In 2015, was Bob a brother, sister, stepbrother, or stepsister of Alice?"
+    }
+   ],
+   "formula": "bob_is_siblings_relative_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.92,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-18",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_iv_pos",
+  "claim": "Alice and her spouse have to pay $44789 in taxes for the year 2017 under section 1(a)(iv).",
+  "label": 1,
+  "program": {
+   "id": "sara-18",
+   "elements": [
+    {
+     "name": "joint_tax_for_2017_equals_44789",
+     "kind": "fact",
+     "question": "For 2017, did Alice and her spouse owe exactly $44,789 in federal income tax under the married-filing-jointly rate schedule?"
+    }
+   ],
+   "formula": "joint_tax_for_2017_equals_44789",
+   "handled": false
+  },
+  "jev_compiled": 0.38,
+  "luna_compiled": 0.03
+ },
+ {
+  "id": "sara-19",
+  "dataset": "sara_entailment",
+  "case": "s151_d_2_pos",
+  "claim": "Under section 151(d)(2), Bob's exemption amount for the year 2015 is equal to $0.",
+  "label": 1,
+  "program": {
+   "id": "sara-19",
+   "elements": [
+    {
+     "name": "bob_deduction_allowable_to_other_2015",
+     "kind": "fact",
+     "question": "For a taxable year beginning in 2015, was a deduction under section 151 for Bob allowable to another taxpayer?"
+    }
+   ],
+   "formula": "bob_deduction_allowable_to_other_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.75,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-20",
+  "dataset": "sara_entailment",
+  "case": "s151_c_pos",
+  "claim": "Alice can claim an exemption with Bob the dependent for 2015 under section 151(c).",
+  "label": 1,
+  "program": {
+   "id": "sara-20",
+   "elements": [
+    {
+     "name": "bob_is_alice_dependent_2015",
+     "kind": "fact",
+     "question": "For the taxable year 2015, was Bob a dependent of Alice as defined in section 152?"
+    }
+   ],
+   "formula": "bob_is_alice_dependent_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.91,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-21",
+  "dataset": "sara_entailment",
+  "case": "s63_c_2_C_pos",
+  "claim": "Under section 63(c)(2)(C), Alice's basic standard deduction in 2017 is equal to $3000.",
+  "label": 1,
+  "program": {
+   "id": "sara-21",
+   "elements": [
+    {
+     "name": "alice_other_case_filing_status_2017",
+     "kind": "fact",
+     "question": "For 2017, was Alice's filing status neither married filing jointly, surviving spouse, nor head of household?"
+    },
+    {
+     "name": "excerpt_amount_is_3000",
+     "kind": "given",
+     "value": true,
+     "why": "Section 63(c)(2)(C) as excerpted sets the amount at $3,000 in any other case."
+    }
+   ],
+   "formula": "alice_other_case_filing_status_2017 AND excerpt_amount_is_3000",
+   "handled": true
+  },
+  "jev_compiled": 0.94,
+  "luna_compiled": 0.96
+ },
+ {
+  "id": "sara-22",
+  "dataset": "sara_entailment",
+  "case": "s63_c_1_pos",
+  "claim": "Under section 63(c)(1), Alice's standard deduction in 2017 is equal to $5000.",
+  "label": 1,
+  "program": {
+   "id": "sara-22",
+   "elements": [
+    {
+     "name": "alice_standard_deduction_5000_2017",
+     "kind": "fact",
+     "question": "For 2017, was Alice's total standard deduction, the sum of her basic and additional standard deductions, exactly $5,000?"
+    }
+   ],
+   "formula": "alice_standard_deduction_5000_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-23",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_10_A_i_pos",
+  "claim": "Section 3306(c)(10)(A)(i) applies to Alice's employment situation in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-23",
+   "elements": [
+    {
+     "name": "alice_enrolled_regularly_attending_2017",
+     "kind": "fact",
+     "question": "In 2017, was Alice enrolled and regularly attending classes at a school, college, or university?"
+    },
+    {
+     "name": "alice_employed_by_her_school_2017",
+     "kind": "fact",
+     "question": "In 2017, were Alice's services performed in the employ of the school, college, or university she attended?"
+    }
+   ],
+   "formula": "alice_enrolled_regularly_attending_2017 AND alice_employed_by_her_school_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.85,
+  "luna_compiled": 0.8
+ },
+ {
+  "id": "sara-24",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_i_pos",
+  "claim": "Alice and her spouse have to pay $2600 in taxes for the year 2017 under section 1(a)(i).",
+  "label": 1,
+  "program": {
+   "id": "sara-24",
+   "elements": [
+    {
+     "name": "alice_couple_taxable_income_not_over_36900_2017",
+     "kind": "fact",
+     "question": "For tax year 2017, was the taxable income of Alice and her spouse not over $36,900?"
+    }
+   ],
+   "formula": "alice_couple_taxable_income_not_over_36900_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-25",
+  "dataset": "sara_entailment",
+  "case": "s1_d_iv_pos",
+  "claim": "Alice has to pay $33653 in taxes for the year 2017 under section 1(d)(iv).",
+  "label": 1,
+  "program": {
+   "id": "sara-25",
+   "elements": [
+    {
+     "name": "alice_taxable_income_70k_to_125k_2017",
+     "kind": "fact",
+     "question": "For tax year 2017, was Alice's taxable income over $70,000 but not over $125,000?"
+    }
+   ],
+   "formula": "alice_taxable_income_70k_to_125k_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-26",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_D_pos",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(D) for the year 2019.",
+  "label": 1,
+  "program": {
+   "id": "sara-26",
+   "elements": [
+    {
+     "name": "bob_stepparent_of_alice_2019",
+     "kind": "fact",
+     "question": "During 2019, was Bob the stepfather or stepmother of Alice, by reason of being married to Alice's parent?"
+    }
+   ],
+   "formula": "bob_stepparent_of_alice_2019",
+   "handled": true
+  },
+  "jev_compiled": 0.08,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-27",
+  "dataset": "sara_entailment",
+  "case": "s152_c_1_pos",
+  "claim": "Under section 152(c)(1), Bob is a qualifying child of Alice for the year 2019.",
+  "label": 1,
+  "program": {
+   "id": "sara-27",
+   "elements": [
+    {
+     "name": "bob_qualifies_as_child_relation_2019",
+     "kind": "fact",
+     "question": "For tax year 2019, was Bob a child, stepchild, or descendant of such a child of Alice, as required for a qualifying child?"
+    },
+    {
+     "name": "bob_meets_age_test_2019",
+     "kind": "fact",
+     "question": "For tax year 2019, did Bob meet the age requirement to be a qualifying child of Alice?"
+    },
+    {
+     "name": "bob_lived_with_alice_over_half_2019",
+     "kind": "fact",
+     "question": "During more than half of tax year 2019, did Bob live in Alice's home?"
+    },
+    {
+     "name": "bob_did_not_support_himself_2019",
+     "kind": "fact",
+     "question": "For tax year 2019, did Bob not provide more than half of his own support?"
+    }
+   ],
+   "formula": "bob_qualifies_as_child_relation_2019 AND bob_meets_age_test_2019 AND bob_lived_with_alice_over_half_2019 AND bob_did_not_support_himself_2019",
+   "handled": false
+  },
+  "jev_compiled": 0.66,
+  "luna_compiled": 0.43
+ },
+ {
+  "id": "sara-28",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_pos",
+  "claim": "Section 2(b)(1) applies to Bob in 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-28",
+   "elements": [
+    {
+     "name": "bob_unmarried_end_2018",
+     "kind": "fact",
+     "question": "At the close of tax year 2018, was Bob unmarried?"
+    },
+    {
+     "name": "bob_not_surviving_spouse_2018",
+     "kind": "fact",
+     "question": "For tax year 2018, was Bob not a surviving spouse?"
+    },
+    {
+     "name": "bob_furnished_over_half_household_cost_2018",
+     "kind": "fact",
+     "question": "During tax year 2018, did Bob furnish over half of the cost of maintaining his household?"
+    },
+    {
+     "name": "bob_household_has_qualifying_person_2018",
+     "kind": "fact",
+     "question": "During tax year 2018, did Bob's household include a qualifying person as required for head of household status?"
+    }
+   ],
+   "formula": "bob_unmarried_end_2018 AND bob_not_surviving_spouse_2018 AND bob_furnished_over_half_household_cost_2018 AND bob_household_has_qualifying_person_2018",
+   "handled": false
+  },
+  "jev_compiled": 0.77,
+  "luna_compiled": 0.43
+ },
+ {
+  "id": "sara-29",
+  "dataset": "sara_entailment",
+  "case": "s1_d_iii_pos",
+  "claim": "Alice has to pay $17123 in taxes for the year 2017 under section 1(d)(iii).",
+  "label": 1,
+  "program": {
+   "id": "sara-29",
+   "elements": [
+    {
+     "name": "alice_taxable_income_44575_to_70k_2017",
+     "kind": "fact",
+     "question": "For tax year 2017, was Alice's taxable income over $44,575 but not over $70,000?"
+    }
+   ],
+   "formula": "alice_taxable_income_44575_to_70k_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.95,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-30",
+  "dataset": "sara_entailment",
+  "case": "s1_b_v_pos",
+  "claim": "Alice has to pay $442985 in taxes for the year 2017 under section 1(b)(v).",
+  "label": 1,
+  "program": {
+   "id": "sara-30",
+   "elements": [
+    {
+     "name": "alice_taxable_income_over_250k_2017",
+     "kind": "fact",
+     "question": "For tax year 2017, was Alice's taxable income over $250,000?"
+    }
+   ],
+   "formula": "alice_taxable_income_over_250k_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.99,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-31",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_1_pos",
+  "claim": "Bob is an employer under section 3306(a)(1) for the year 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-31",
+   "elements": [
+    {
+     "name": "bob_paid_wages_threshold_2018",
+     "kind": "fact",
+     "question": "During calendar year 2018 or 2017, did Bob pay wages of $1,500 or more in any calendar quarter to employees?"
+    }
+   ],
+   "formula": "bob_paid_wages_threshold_2018",
+   "handled": false
+  },
+  "jev_compiled": 0.69,
+  "luna_compiled": 0.93
+ },
+ {
+  "id": "sara-32",
+  "dataset": "sara_entailment",
+  "case": "s2_b_2_A_pos",
+  "claim": "Section 2(b)(2)(A) applies to Alice and Bob in 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-32",
+   "elements": [
+    {
+     "name": "alice_legally_separated_end_2018",
+     "kind": "fact",
+     "question": "Was Alice legally separated from Bob under a decree of divorce or separate maintenance as of the end of 2018, according to the case facts?"
+    },
+    {
+     "name": "bob_legally_separated_end_2018",
+     "kind": "fact",
+     "question": "Was Bob legally separated from Alice under a decree of divorce or separate maintenance as of the end of 2018, according to the case facts?"
+    }
+   ],
+   "formula": "alice_legally_separated_end_2018 AND bob_legally_separated_end_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.94,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-33",
+  "dataset": "sara_entailment",
+  "case": "s152_c_1_E_pos",
+  "claim": "Section 152(c)(1)(E) applies to Bob for the year 2019.",
+  "label": 1,
+  "program": {
+   "id": "sara-33",
+   "elements": [
+    {
+     "name": "bob_filed_joint_return_2019",
+     "kind": "fact",
+     "question": "Did Bob file a joint return with his spouse for a taxable year beginning in 2019, other than only for a claim of refund, according to the case facts?"
+    }
+   ],
+   "formula": "NOT bob_filed_joint_return_2019",
+   "handled": true
+  },
+  "jev_compiled": 0.96,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-34",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_B_pos",
+  "claim": "Section 2(b)(1)(B) applies to Bob in 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-34",
+   "elements": [
+    {
+     "name": "bob_household_is_parent_abode_2018",
+     "kind": "fact",
+     "question": "In 2018, did Bob maintain a household that was the principal place of abode of Bob's father or mother, according to the case facts?"
+    },
+    {
+     "name": "bob_entitled_parent_dependency_2018",
+     "kind": "fact",
+     "question": "For 2018, was Bob entitled to a deduction under section 151 for the parent whose principal place of abode was Bob's household?"
+    }
+   ],
+   "formula": "bob_household_is_parent_abode_2018 AND bob_entitled_parent_dependency_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.67,
+  "luna_compiled": 0.99
+ },
+ {
+  "id": "sara-35",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_F_pos",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(F).",
+  "label": 1,
+  "program": {
+   "id": "sara-35",
+   "elements": [
+    {
+     "name": "alice_sibling_of_bobs_parent",
+     "kind": "fact",
+     "question": "Is Alice a brother or sister of Bob's father or mother, according to the case facts?"
+    }
+   ],
+   "formula": "alice_sibling_of_bobs_parent",
+   "handled": true
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-36",
+  "dataset": "sara_entailment",
+  "case": "s63_f_2_A_pos",
+  "claim": "Section 63(f)(2)(A) applies to Alice in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-36",
+   "elements": [
+    {
+     "name": "alice_blind_end_2017",
+     "kind": "fact",
+     "question": "Was Alice blind at the close of the taxable year 2017, according to the case facts?"
+    }
+   ],
+   "formula": "alice_blind_end_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-37",
+  "dataset": "sara_entailment",
+  "case": "s151_d_3_B_pos",
+  "claim": "Under section 151(d)(3)(B), the applicable percentage for Alice for 2015 is equal to 22.",
+  "label": 1,
+  "program": {
+   "id": "sara-37",
+   "elements": [
+    {
+     "name": "alice_agi_2015_exceeds_68b_amount",
+     "kind": "fact",
+     "question": "Was Alice's adjusted gross income for 2015 above the applicable amount in effect under section 68(b), according to the case facts?"
+    }
+   ],
+   "formula": "alice_agi_2015_exceeds_68b_amount",
+   "handled": false
+  },
+  "jev_compiled": 0.96,
+  "luna_compiled": 0.99
+ },
+ {
+  "id": "sara-38",
+  "dataset": "sara_entailment",
+  "case": "s152_c_3_pos",
+  "claim": "Bob satisfies section 152(c)(3) with Alice claiming Bob as a qualifying child for the year 2019.",
+  "label": 1,
+  "program": {
+   "id": "sara-38",
+   "elements": [
+    {
+     "name": "bob_younger_than_alice_2019",
+     "kind": "fact",
+     "question": "Was Bob younger than Alice in 2019, according to the case facts?"
+    },
+    {
+     "name": "bob_under_25_end_2019",
+     "kind": "fact",
+     "question": "Was Bob less than 25 years old at the end of 2019, according to the case facts?"
+    }
+   ],
+   "formula": "bob_younger_than_alice_2019 AND bob_under_25_end_2019",
+   "handled": true
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-39",
+  "dataset": "sara_entailment",
+  "case": "s63_f_1_B_pos",
+  "claim": "Section 63(f)(1)(B) applies to Bob with Alice as the spouse in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-39",
+   "elements": [
+    {
+     "name": "alice_age_65_before_close_2017",
+     "kind": "fact",
+     "question": "Had Alice attained age 65 before the close of 2017, according to the case facts?"
+    },
+    {
+     "name": "bob_entitled_exemption_for_alice_2017",
+     "kind": "fact",
+     "question": "For 2017, was Bob entitled to claim an additional exemption for Alice as his spouse, according to the case facts?"
+    }
+   ],
+   "formula": "alice_age_65_before_close_2017 AND bob_entitled_exemption_for_alice_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.77,
+  "luna_compiled": 0.94
+ },
+ {
+  "id": "sara-40",
+  "dataset": "sara_entailment",
+  "case": "s63_c_5_pos",
+  "claim": "Under section 63(c)(5), Bob's basic standard deduction in 2017 is equal to at most $500.",
+  "label": 1,
+  "program": {
+   "id": "sara-40",
+   "elements": [
+    {
+     "name": "bob_claimed_as_dependent_2017",
+     "kind": "fact",
+     "question": "In 2017, was Bob a dependent for whom another taxpayer was allowed a deduction under section 151?"
+    },
+    {
+     "name": "stated_limit_is_only_500",
+     "kind": "given",
+     "value": false,
+     "why": "Section 63(c)(5) caps the standard deduction at the greater of two amounts, so $500 alone is not the full limit; the excerpt is also truncated before those amounts."
+    }
+   ],
+   "formula": "bob_claimed_as_dependent_2017 AND stated_limit_is_only_500",
+   "handled": false
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-41",
+  "dataset": "sara_entailment",
+  "case": "s2_b_2_C_pos",
+  "claim": "Section 2(b)(2)(C) applies to Bob in 2014.",
+  "label": 1,
+  "program": {
+   "id": "sara-41",
+   "elements": [
+    {
+     "name": "bob_spouse_died_2014",
+     "kind": "fact",
+     "question": "Did Bob's spouse die during 2014?"
+    },
+    {
+     "name": "spouse_not_subparagraph_b_excluded",
+     "kind": "fact",
+     "question": "Was Bob's spouse who died in 2014 a spouse other than one described in subparagraph (B) of section 2(b)(2)?"
+    }
+   ],
+   "formula": "bob_spouse_died_2014 AND spouse_not_subparagraph_b_excluded",
+   "handled": false
+  },
+  "jev_compiled": 0.43,
+  "luna_compiled": 0.22
+ },
+ {
+  "id": "sara-42",
+  "dataset": "sara_entailment",
+  "case": "s1_b_iv_pos",
+  "claim": "Alice has to pay $57509 in taxes for the year 2017 under section 1(b)(iv).",
+  "label": 1,
+  "program": {
+   "id": "sara-42",
+   "elements": [
+    {
+     "name": "alice_taxable_income_in_bracket_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $127,500 but not over $250,000?"
+    },
+    {
+     "name": "alice_head_of_household_2017",
+     "kind": "fact",
+     "question": "Did Alice qualify as a head of household for 2017, so that the section 1(b) rate schedule applies?"
+    }
+   ],
+   "formula": "alice_taxable_income_in_bracket_2017 AND alice_head_of_household_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.83,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-43",
+  "dataset": "sara_entailment",
+  "case": "s1_c_iv_pos",
+  "claim": "Alice has to pay $65445 in taxes for the year 2017 under section 1(c)(iv).",
+  "label": 1,
+  "program": {
+   "id": "sara-43",
+   "elements": [
+    {
+     "name": "alice_taxable_income_in_bracket_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $115,000 but not over $250,000?"
+    },
+    {
+     "name": "alice_single_filer_2017",
+     "kind": "fact",
+     "question": "Did Alice file as a single taxpayer for 2017, so that the section 1(c) rate schedule applies?"
+    }
+   ],
+   "formula": "alice_taxable_income_in_bracket_2017 AND alice_single_filer_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.91,
+  "luna_compiled": 0.96
+ },
+ {
+  "id": "sara-44",
+  "dataset": "sara_entailment",
+  "case": "s68_b_1_A_pos",
+  "claim": "Under section 68(b)(1)(A), Alice's applicable amount for 2016 is equal to $300000.",
+  "label": 1,
+  "program": {
+   "id": "sara-44",
+   "elements": [
+    {
+     "name": "alice_joint_or_surviving_spouse_2016",
+     "kind": "fact",
+     "question": "For 2016, did Alice file a joint return or qualify as a surviving spouse under section 2(a)?"
+    }
+   ],
+   "formula": "alice_joint_or_surviving_spouse_2016",
+   "handled": true
+  },
+  "jev_compiled": 0.9,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-45",
+  "dataset": "sara_entailment",
+  "case": "s63_a_pos",
+  "claim": "Under section 63(a), Alice's taxable income in 2017 is equal to $26948.",
+  "label": 1,
+  "program": {
+   "id": "sara-45",
+   "elements": [
+    {
+     "name": "alice_taxable_income_is_26948_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 exactly $26,948, computed as gross income minus allowed deductions other than the standard deduction?"
+    }
+   ],
+   "formula": "alice_taxable_income_is_26948_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.87,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-46",
+  "dataset": "sara_entailment",
+  "case": "s1_c_i_pos",
+  "claim": "Alice has to pay $1162 in taxes for the year 2017 under section 1(c)(i).",
+  "label": 1,
+  "program": {
+   "id": "sara-46",
+   "elements": [
+    {
+     "name": "alice_taxable_income_not_over_22100_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 not over $22,100?"
+    },
+    {
+     "name": "alice_single_filer_2017",
+     "kind": "fact",
+     "question": "Did Alice file as a single taxpayer for 2017, so that the section 1(c) rate schedule applies?"
+    }
+   ],
+   "formula": "alice_taxable_income_not_over_22100_2017 AND alice_single_filer_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.92,
+  "luna_compiled": 0.95
+ },
+ {
+  "id": "sara-47",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_13_pos",
+  "claim": "Section 3306(c)(13) applies to Alice's employment situation in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-47",
+   "elements": [
+    {
+     "name": "alice_student_nurse_service_2017",
+     "kind": "fact",
+     "question": "Was Alice's employment in 2017 service performed as a student nurse in the employ of a hospital or nurses' training school?"
+    },
+    {
+     "name": "alice_enrolled_regularly_attending_2017",
+     "kind": "fact",
+     "question": "In 2017, was Alice enrolled and regularly attending classes at a nurses' training school during that service?"
+    }
+   ],
+   "formula": "alice_student_nurse_service_2017 AND alice_enrolled_regularly_attending_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.62,
+  "luna_compiled": 0.47
+ },
+ {
+  "id": "sara-48",
+  "dataset": "sara_entailment",
+  "case": "s68_a_1_pos",
+  "claim": "Section 68(a)(1) prescribes a reduction of Alice's itemized deductions for the year 2016 by $306.",
+  "label": 1,
+  "program": {
+   "id": "sara-48",
+   "elements": [
+    {
+     "name": "agi_exceeds_applicable_amount_2016",
+     "kind": "fact",
+     "question": "Did Alice's adjusted gross income for 2016 exceed the applicable amount under section 68(b)?"
+    }
+   ],
+   "formula": "agi_exceeds_applicable_amount_2016",
+   "handled": false
+  },
+  "jev_compiled": 0.67,
+  "luna_compiled": 0.25
+ },
+ {
+  "id": "sara-49",
+  "dataset": "sara_entailment",
+  "case": "s1_b_iii_pos",
+  "claim": "Alice has to pay $24056 in taxes for the year 2017 under section 1(b)(iii).",
+  "label": 1,
+  "program": {
+   "id": "sara-49",
+   "elements": [
+    {
+     "name": "taxable_income_in_2017_bracket",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $76,400 but not over $127,500?"
+    }
+   ],
+   "formula": "taxable_income_in_2017_bracket",
+   "handled": false
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-50",
+  "dataset": "sara_entailment",
+  "case": "s63_f_3_pos",
+  "claim": "Under section 63(f)(3), Alice's additional standard deduction in 2017 is equal to $750.",
+  "label": 1,
+  "program": {
+   "id": "sara-50",
+   "elements": [
+    {
+     "name": "unmarried_not_surviving_spouse_2017",
+     "kind": "fact",
+     "question": "Was Alice unmarried and not a surviving spouse at the close of 2017?"
+    }
+   ],
+   "formula": "unmarried_not_surviving_spouse_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.49,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-51",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_E_pos",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(E).",
+  "label": 1,
+  "program": {
+   "id": "sara-51",
+   "elements": [
+    {
+     "name": "bob_child_of_alice_sibling",
+     "kind": "fact",
+     "question": "Is Bob the son or daughter of a brother or sister of Alice?"
+    }
+   ],
+   "formula": "bob_child_of_alice_sibling",
+   "handled": true
+  },
+  "jev_compiled": 0.17,
+  "luna_compiled": 0.97
+ },
+ {
+  "id": "sara-52",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_A_pos",
+  "claim": "Section 3306(c)(A) applies to Alice employing Bob for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-52",
+   "elements": [
+    {
+     "name": "bob_employee_of_alice_2017",
+     "kind": "fact",
+     "question": "Did Bob perform services in 2017 as an employee for Alice, his employer?"
+    },
+    {
+     "name": "services_performed_within_us_2017",
+     "kind": "fact",
+     "question": "Were the services Bob performed for Alice in 2017 performed within the United States?"
+    }
+   ],
+   "formula": "bob_employee_of_alice_2017 AND services_performed_within_us_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.29,
+  "luna_compiled": 0.47
+ },
+ {
+  "id": "sara-53",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_A_pos",
+  "claim": "Section 2(b)(1)(A) applies to Bob in 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-53",
+   "elements": [
+    {
+     "name": "bob_maintains_household_2018",
+     "kind": "fact",
+     "question": "Did Bob maintain as his home a household that was the principal place of abode for more than one-half of 2018 of a qualifying person who was a member of that household?"
+    }
+   ],
+   "formula": "bob_maintains_household_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.92,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-54",
+  "dataset": "sara_entailment",
+  "case": "s2_b_2_B_pos",
+  "claim": "Section 2(b)(2)(B) applies to Bob in 2013.",
+  "label": 1,
+  "program": {
+   "id": "sara-54",
+   "elements": [
+    {
+     "name": "bob_spouse_nonresident_alien_2013",
+     "kind": "fact",
+     "question": "Was Bob's spouse a nonresident alien at any time during 2013?"
+    }
+   ],
+   "formula": "bob_spouse_nonresident_alien_2013",
+   "handled": true
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-55",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_ii_pos",
+  "claim": "Alice has to pay $14836 in taxes for the year 2017 under section 1(a)(ii).",
+  "label": 1,
+  "program": {
+   "id": "sara-55",
+   "elements": [
+    {
+     "name": "taxable_income_in_2017_second_bracket",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $36,900 but not over $89,150?"
+    }
+   ],
+   "formula": "taxable_income_in_2017_second_bracket",
+   "handled": false
+  },
+  "jev_compiled": 0.96,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-56",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_11_pos",
+  "claim": "Section 3306(b)(11) applies to the payment that Alice made to Bob for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-56",
+   "elements": [
+    {
+     "name": "paid_in_non_cash_medium",
+     "kind": "fact",
+     "question": "In 2017, was any part of the payment Alice made to Bob for agricultural labor made in a medium other than cash, such as goods, produce, or lodging?"
+    },
+    {
+     "name": "payment_for_agricultural_labor",
+     "kind": "fact",
+     "question": "Was the payment Alice made to Bob in 2017 remuneration for agricultural labor?"
+    }
+   ],
+   "formula": "paid_in_non_cash_medium AND payment_for_agricultural_labor",
+   "handled": true
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-57",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_i_pos",
+  "claim": "Alice has to pay $3834 in taxes for the year 2017 under section 1(a)(i).",
+  "label": 1,
+  "program": {
+   "id": "sara-57",
+   "elements": [
+    {
+     "name": "taxable_income_not_over_36900",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 not over $36,900?"
+    }
+   ],
+   "formula": "taxable_income_not_over_36900",
+   "handled": false
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-58",
+  "dataset": "sara_entailment",
+  "case": "s152_c_2_pos",
+  "claim": "Bob bears a relationship to Alice under section 152(c)(2).",
+  "label": 1,
+  "program": {
+   "id": "sara-58",
+   "elements": [
+    {
+     "name": "bob_qualifying_relationship_to_alice",
+     "kind": "fact",
+     "question": "In the relevant year, was Bob a son, daughter, or descendant of Alice, a stepchild of Alice, or a brother, sister, stepbrother, or stepsister of Alice (or a descendant of such a sibling)?"
+    }
+   ],
+   "formula": "bob_qualifying_relationship_to_alice",
+   "handled": true
+  },
+  "jev_compiled": 0.91,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-59",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_ii_pos",
+  "claim": "Alice and her spouse have to pay $7208 in taxes for the year 2017 under section 1(a)(ii).",
+  "label": 1,
+  "program": {
+   "id": "sara-59",
+   "elements": [
+    {
+     "name": "taxable_income_in_second_bracket_joint",
+     "kind": "fact",
+     "question": "For 2017, was the taxable income of Alice and her spouse on a joint return over $36,900 but not over $89,150?"
+    }
+   ],
+   "formula": "taxable_income_in_second_bracket_joint",
+   "handled": false
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-60",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_2_A_pos",
+  "claim": "Section 3306(b)(2)(A) applies to the payment Alice made to the health insurance fund for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-60",
+   "elements": [
+    {
+     "name": "payment_on_account_of_sickness_disability",
+     "kind": "fact",
+     "question": "Was the payment Alice made to the health insurance fund in 2017 made on account of an employee's sickness or accident disability?"
+    },
+    {
+     "name": "payment_to_employee_under_disability_provision",
+     "kind": "given",
+     "value": false,
+     "why": "The excerpt covers payments on account of sickness or accident disability; a payment made to a health insurance fund is not a payment of that kind as stated in the excerpt."
+    }
+   ],
+   "formula": "payment_on_account_of_sickness_disability AND payment_to_employee_under_disability_provision",
+   "handled": true
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-61",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_5_pos",
+  "claim": "Section 3306(c)(5) applies to Alice employing Bob for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-61",
+   "elements": [
+    {
+     "name": "bob_under_age_21_in_2017",
+     "kind": "fact",
+     "question": "Was Bob under the age of 21 during 2017?"
+    },
+    {
+     "name": "bob_is_alice_child",
+     "kind": "fact",
+     "question": "Was Bob Alice's child (son or daughter) during 2017?"
+    }
+   ],
+   "formula": "bob_under_age_21_in_2017 AND bob_is_alice_child",
+   "handled": false
+  },
+  "jev_compiled": 0.05,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-62",
+  "dataset": "sara_entailment",
+  "case": "s63_c_7_ii_pos",
+  "claim": "Under section 63(c)(7)(ii), Alice's basic standard deduction in 2019 is equal to $12000.",
+  "label": 1,
+  "program": {
+   "id": "sara-62",
+   "elements": [
+    {
+     "name": "basic_deduction_set_by_amended_63c7ii",
+     "kind": "fact",
+     "question": "Was Alice's basic standard deduction for 2019 determined by the $12,000 amount in section 63(c)(7)(ii) as amended?"
+    }
+   ],
+   "formula": "basic_deduction_set_by_amended_63c7ii",
+   "handled": false
+  },
+  "jev_compiled": 0.43,
+  "luna_compiled": 0.27
+ },
+ {
+  "id": "sara-63",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_iii_pos",
+  "claim": "Alice has to pay $22018 in taxes for the year 2017 under section 1(a)(iii).",
+  "label": 1,
+  "program": {
+   "id": "sara-63",
+   "elements": [
+    {
+     "name": "taxable_income_in_third_bracket_joint",
+     "kind": "fact",
+     "question": "For 2017, was the taxable income of Alice and her spouse on a joint return over $89,150 but not over $140,000?"
+    }
+   ],
+   "formula": "taxable_income_in_third_bracket_joint",
+   "handled": false
+  },
+  "jev_compiled": 0.57,
+  "luna_compiled": 0.47
+ },
+ {
+  "id": "sara-64",
+  "dataset": "sara_entailment",
+  "case": "s63_c_6_A_pos",
+  "claim": "Section 63(c)(6)(A) applies to Alice for 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-64",
+   "elements": [
+    {
+     "name": "married_filing_separately",
+     "kind": "fact",
+     "question": "Was Alice a married individual filing a separate return for 2017 in facts?"
+    },
+    {
+     "name": "spouse_itemizes",
+     "kind": "fact",
+     "question": "For 2017, did either Alice or her spouse itemize deductions, according to facts?"
+    }
+   ],
+   "formula": "married_filing_separately AND spouse_itemizes",
+   "handled": true
+  },
+  "jev_compiled": 0.85,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-65",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_v_pos",
+  "claim": "Alice and her spouse have to pay $247647 in taxes for the year 2017 under section 1(a)(v).",
+  "label": 1,
+  "program": {
+   "id": "sara-65",
+   "elements": [
+    {
+     "name": "joint_return_filed_2017",
+     "kind": "fact",
+     "question": "Did Alice and her spouse file a joint return for 2017, according to facts?"
+    },
+    {
+     "name": "taxable_income_over_250000_2017",
+     "kind": "fact",
+     "question": "Was Alice and her spouse's taxable income for 2017 over $250,000, according to facts?"
+    }
+   ],
+   "formula": "joint_return_filed_2017 AND taxable_income_over_250000_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.99,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-66",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_7_pos",
+  "claim": "Section 3306(b)(7) applies to the payment Alice made to Bob.",
+  "label": 1,
+  "program": {
+   "id": "sara-66",
+   "elements": [
+    {
+     "name": "non_cash_remuneration",
+     "kind": "fact",
+     "question": "Was the payment Alice made to Bob made in a medium other than cash, according to facts?"
+    },
+    {
+     "name": "service_outside_employer_trade_or_business",
+     "kind": "fact",
+     "question": "Was Bob's service for which Alice made the payment not in the course of Alice's trade or business, according to facts?"
+    }
+   ],
+   "formula": "non_cash_remuneration AND service_outside_employer_trade_or_business",
+   "handled": true
+  },
+  "jev_compiled": 0.91,
+  "luna_compiled": 0.06
+ },
+ {
+  "id": "sara-67",
+  "dataset": "sara_entailment",
+  "case": "s152_d_1_B_pos",
+  "claim": "Section 152(d)(1)(B) applies to Alice for the year 2015.",
+  "label": 1,
+  "program": {
+   "id": "sara-67",
+   "elements": [
+    {
+     "name": "alice_no_income_2015",
+     "kind": "fact",
+     "question": "Did Alice have no income for the calendar year 2015, according to facts?"
+    },
+    {
+     "name": "taxable_year_begins_in_2015",
+     "kind": "given",
+     "value": true,
+     "why": "The assertion concerns 2015, and the taxable year 2015 begins in calendar year 2015, which is the calendar year the excerpt refers to."
+    }
+   ],
+   "formula": "alice_no_income_2015 AND taxable_year_begins_in_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-68",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_10_A_pos",
+  "claim": "Section 3306(b)(10)(A) applies to the payment of $12980 that Alice made in 2019.",
+  "label": 1,
+  "program": {
+   "id": "sara-68",
+   "elements": [
+    {
+     "name": "payment_on_termination_death_or_disability_retirement",
+     "kind": "fact",
+     "question": "Was the payment Alice made in 2019 made upon or after the termination of an employee's employment because of death or retirement for disability, according to facts?"
+    }
+   ],
+   "formula": "payment_on_termination_death_or_disability_retirement",
+   "handled": true
+  },
+  "jev_compiled": 0.86,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-69",
+  "dataset": "sara_entailment",
+  "case": "s63_c_2_B_pos",
+  "claim": "Under section 63(c)(2)(B), Alice's basic standard deduction in 2017 is equal to $4400.",
+  "label": 1,
+  "program": {
+   "id": "sara-69",
+   "elements": [
+    {
+     "name": "alice_head_of_household_2017",
+     "kind": "fact",
+     "question": "Was Alice a head of household for 2017, according to facts?"
+    },
+    {
+     "name": "amount_matches_excerpt",
+     "kind": "given",
+     "value": true,
+     "why": "The assertion's amount of $4400 matches the $4,400 head-of-household amount stated in the excerpt, but any 2017 inflation adjustment is outside the excerpt."
+    }
+   ],
+   "formula": "alice_head_of_household_2017 AND amount_matches_excerpt",
+   "handled": false
+  },
+  "jev_compiled": 0.99,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-70",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_15_pos",
+  "claim": "Section 3306(b)(15) applies to the payment that Alice made to Charlie in 2020.",
+  "label": 1,
+  "program": {
+   "id": "sara-70",
+   "elements": [
+    {
+     "name": "charlie_survivor_or_estate_of_former_employee",
+     "kind": "fact",
+     "question": "Was Charlie the survivor or estate of a former employee of Alice's who had died, according to facts?"
+    },
+    {
+     "name": "alice_employer_of_deceased",
+     "kind": "fact",
+     "question": "Was Alice the employer of the former employee who died, according to facts?"
+    },
+    {
+     "name": "payment_after_year_of_death",
+     "kind": "fact",
+     "question": "Was the payment Alice made to Charlie in 2020 made after the calendar year in which the former employee died, according to facts?"
+    }
+   ],
+   "formula": "charlie_survivor_or_estate_of_former_employee AND alice_employer_of_deceased AND payment_after_year_of_death",
+   "handled": true
+  },
+  "jev_compiled": 0.68,
+  "luna_compiled": 0.03
+ },
+ {
+  "id": "sara-71",
+  "dataset": "sara_entailment",
+  "case": "s151_b_pos",
+  "claim": "Alice can receive an exemption for Bob under section 151(b) for the year 2015.",
+  "label": 1,
+  "program": {
+   "id": "sara-71",
+   "elements": [
+    {
+     "name": "bob_is_alice_spouse_2015",
+     "kind": "fact",
+     "question": "Was Bob Alice's spouse during 2015, according to facts?"
+    },
+    {
+     "name": "no_joint_return_2015",
+     "kind": "fact",
+     "question": "Did Alice and Bob not file a joint return for 2015, according to facts?"
+    },
+    {
+     "name": "bob_no_gross_income_2015",
+     "kind": "fact",
+     "question": "Did Bob have no gross income for the calendar year 2015, according to facts?"
+    },
+    {
+     "name": "bob_not_dependent_2015",
+     "kind": "fact",
+     "question": "Was Bob not the dependent of another taxpayer for 2015, according to facts?"
+    }
+   ],
+   "formula": "bob_is_alice_spouse_2015 AND no_joint_return_2015 AND bob_no_gross_income_2015 AND bob_not_dependent_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.24,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-72",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_2_B_pos",
+  "claim": "Section 3306(a)(2)(B) applies to Alice for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-72",
+   "elements": [
+    {
+     "name": "agricultural_employer_ten_days_2016_2017",
+     "kind": "fact",
+     "question": "Did Alice, on each of some 10 days during 2017 or during 2016, with each day in a different calendar week, employ at least 5 individuals in agricultural labor for some portion of the day?"
+    }
+   ],
+   "formula": "agricultural_employer_ten_days_2016_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.84,
+  "luna_compiled": 0.99
+ },
+ {
+  "id": "sara-73",
+  "dataset": "sara_entailment",
+  "case": "s152_b_2_pos",
+  "claim": "Section 152(b)(2) applies to Alice for the year 2015.",
+  "label": 1,
+  "program": {
+   "id": "sara-73",
+   "elements": [
+    {
+     "name": "alice_filed_joint_return_for_2015_year",
+     "kind": "fact",
+     "question": "Did Alice make a joint return with her spouse for a taxable year beginning in 2015?"
+    }
+   ],
+   "formula": "alice_filed_joint_return_for_2015_year",
+   "handled": true
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-74",
+  "dataset": "sara_entailment",
+  "case": "s68_b_1_D_pos",
+  "claim": "Under section 68(b)(1)(D), Alice's applicable amount for 2016 is equal to $150000.",
+  "label": 1,
+  "program": {
+   "id": "sara-74",
+   "elements": [
+    {
+     "name": "applicable_amount_equals_150000",
+     "kind": "given",
+     "value": false,
+     "why": "Subparagraph (D) sets the amount at one-half of the subparagraph (A) amount, which the excerpt does not state as $150,000; determining its 2016 value needs law outside the excerpt"
+    }
+   ],
+   "formula": "applicable_amount_equals_150000",
+   "handled": false
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-75",
+  "dataset": "sara_entailment",
+  "case": "s152_c_1_B_pos",
+  "claim": "Section 152(c)(1)(B) applies to Bob with Alice as the taxpayer for the year 2016.",
+  "label": 1,
+  "program": {
+   "id": "sara-75",
+   "elements": [
+    {
+     "name": "bob_shared_alice_abode_over_half_2016",
+     "kind": "fact",
+     "question": "Did Bob have the same principal place of abode as Alice for more than one-half of the taxable year 2016?"
+    }
+   ],
+   "formula": "bob_shared_alice_abode_over_half_2016",
+   "handled": true
+  },
+  "jev_compiled": 0.94,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-76",
+  "dataset": "sara_entailment",
+  "case": "s63_d_pos",
+  "claim": "Alice's deduction for 2017 falls under section 63(d).",
+  "label": 1,
+  "program": {
+   "id": "sara-76",
+   "elements": [
+    {
+     "name": "deduction_is_itemized_under_63d",
+     "kind": "fact",
+     "question": "Is Alice's deduction for 2017 a deduction allowable under chapter 1 of the Internal Revenue Code that is not one of the deductions excluded from itemized deductions by section 63(d)?"
+    }
+   ],
+   "formula": "deduction_is_itemized_under_63d",
+   "handled": true
+  },
+  "jev_compiled": 0.84,
+  "luna_compiled": 0.71
+ },
+ {
+  "id": "sara-77",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_1_A_pos",
+  "claim": "Under section 3306(a)(1)(A), Alice is an employer for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-77",
+   "elements": [
+    {
+     "name": "alice_paid_wages_1500_2016_2017",
+     "kind": "fact",
+     "question": "Did Alice pay wages of $1,500 or more during 2016 or 2017?"
+    }
+   ],
+   "formula": "alice_paid_wages_1500_2016_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.95,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-78",
+  "dataset": "sara_entailment",
+  "case": "s63_d_2_pos",
+  "claim": "Alice's deduction for 2017 falls under section 63(d)(2).",
+  "label": 1,
+  "program": {
+   "id": "sara-78",
+   "elements": [
+    {
+     "name": "deduction_is_personal_exemption_2017",
+     "kind": "fact",
+     "question": "Is Alice's deduction for 2017 the deduction for personal exemptions provided by section 151?"
+    }
+   ],
+   "formula": "deduction_is_personal_exemption_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.95,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-79",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_pos",
+  "claim": "Section 3306(b) applies to the money paid by Alice to Bob for the year 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-79",
+   "elements": [
+    {
+     "name": "wages_definition_applies_chapter",
+     "kind": "given",
+     "value": true,
+     "why": "Section 3306(b) defines wages for purposes of chapter 23 (FUTA), which contains section 3306"
+    },
+    {
+     "name": "alice_payment_to_bob_is_employment_remuneration_2018",
+     "kind": "fact",
+     "question": "In 2018, was the money Alice paid to Bob remuneration for employment, meaning payment for services Bob performed for Alice as an employee?"
+    }
+   ],
+   "formula": "wages_definition_applies_chapter AND alice_payment_to_bob_is_employment_remuneration_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.38,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-80",
+  "dataset": "sara_entailment",
+  "case": "s2_a_2_A_pos",
+  "claim": "Section 2(a)(2)(A) applies to Bob in 2015.",
+  "label": 1,
+  "program": {
+   "id": "sara-80",
+   "elements": [
+    {
+     "name": "bob_remarried_before_2015_close",
+     "kind": "fact",
+     "question": "Had Bob remarried at any time before the close of the 2015 taxable year?"
+    }
+   ],
+   "formula": "bob_remarried_before_2015_close",
+   "handled": true
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-81",
+  "dataset": "sara_entailment",
+  "case": "s1_b_ii_pos",
+  "claim": "Alice has to pay $11489 in taxes for the year 2017 under section 1(b)(ii).",
+  "label": 1,
+  "program": {
+   "id": "sara-81",
+   "elements": [
+    {
+     "name": "alice_2017_taxable_income_in_bracket",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $29,600 but not over $76,400?"
+    }
+   ],
+   "formula": "alice_2017_taxable_income_in_bracket",
+   "handled": false
+  },
+  "jev_compiled": 0.99,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-82",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_1_pos",
+  "claim": "Section 3306(c)(1) applies to Alice employing Bob for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-82",
+   "elements": [
+    {
+     "name": "bob_2017_service_is_agricultural_labor",
+     "kind": "fact",
+     "question": "Was the work Bob performed for Alice in 2017 agricultural labor?"
+    }
+   ],
+   "formula": "bob_2017_service_is_agricultural_labor",
+   "handled": false
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-83",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_10_A_ii_pos",
+  "claim": "Section 3306(c)(10)(A)(ii) applies to Bob's employment situation in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-83",
+   "elements": [
+    {
+     "name": "bob_is_spouse_of_student",
+     "kind": "fact",
+     "question": "Was Bob the spouse of a student in 2017?"
+    },
+    {
+     "name": "student_enrolled_and_attending_in_2017",
+     "kind": "fact",
+     "question": "Was that student enrolled and regularly attending classes at a school during 2017?"
+    }
+   ],
+   "formula": "bob_is_spouse_of_student AND student_enrolled_and_attending_in_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-84",
+  "dataset": "sara_entailment",
+  "case": "s2_b_3_B_pos",
+  "claim": "Section 2(b)(3)(B) applies to Bob as the taxpayer and Charlie as the individual in 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-84",
+   "elements": [
+    {
+     "name": "charlie_dependent_only_by_152d2H",
+     "kind": "fact",
+     "question": "Would Charlie fail to be a dependent of Bob for 2018 except for the rule in section 152(d)(2)(H)?"
+    }
+   ],
+   "formula": "charlie_dependent_only_by_152d2H",
+   "handled": false
+  },
+  "jev_compiled": 0.69,
+  "luna_compiled": 0.76
+ },
+ {
+  "id": "sara-85",
+  "dataset": "sara_entailment",
+  "case": "s1_c_ii_pos",
+  "claim": "Alice has to pay $3538 in taxes for the year 2017 under section 1(c)(ii).",
+  "label": 1,
+  "program": {
+   "id": "sara-85",
+   "elements": [
+    {
+     "name": "alice_unmarried_2017",
+     "kind": "fact",
+     "question": "Was Alice unmarried (not married and not a surviving spouse) for all of 2017?"
+    },
+    {
+     "name": "alice_2017_taxable_income_in_bracket",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $22,100 but not over $53,500?"
+    }
+   ],
+   "formula": "alice_unmarried_2017 AND alice_2017_taxable_income_in_bracket",
+   "handled": false
+  },
+  "jev_compiled": 0.94,
+  "luna_compiled": 0.74
+ },
+ {
+  "id": "sara-86",
+  "dataset": "sara_entailment",
+  "case": "s2_b_3_A_pos",
+  "claim": "Section 2(b)(3)(A) applies to Bob in 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-86",
+   "elements": [
+    {
+     "name": "bob_nonresident_alien_2018",
+     "kind": "fact",
+     "question": "Was Bob a nonresident alien at any time during 2018?"
+    }
+   ],
+   "formula": "bob_nonresident_alien_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-87",
+  "dataset": "sara_entailment",
+  "case": "s1_b_pos",
+  "claim": "Alice has to pay $24056 in taxes for the year 2017 under section 1(b).",
+  "label": 1,
+  "program": {
+   "id": "sara-87",
+   "elements": [
+    {
+     "name": "alice_head_of_household_2017",
+     "kind": "fact",
+     "question": "Was Alice a head of a household, as defined in section 2(b), for 2017?"
+    }
+   ],
+   "formula": "alice_head_of_household_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.9,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-88",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_16_pos",
+  "claim": "Section 3306(c)(16) applies to Alice's employment situation in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-88",
+   "elements": [
+    {
+     "name": "alice_2017_employment_for_international_org",
+     "kind": "fact",
+     "question": "Was Alice's employment in 2017 service performed in the employ of an international organization?"
+    }
+   ],
+   "formula": "alice_2017_employment_for_international_org",
+   "handled": true
+  },
+  "jev_compiled": 0.96,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-89",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_1_B_pos",
+  "claim": "Section 3306(a)(1)(B) applies to Alice for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-89",
+   "elements": [
+    {
+     "name": "alice_employed_individual_on_10_days_different_weeks",
+     "kind": "fact",
+     "question": "Did Alice, on each of some 10 days during 2017 or during 2016, with each day in a different calendar week, employ at least one individual in employment for some portion of the day?"
+    }
+   ],
+   "formula": "alice_employed_individual_on_10_days_different_weeks",
+   "handled": true
+  },
+  "jev_compiled": 0.82,
+  "luna_compiled": 0.18
+ },
+ {
+  "id": "sara-90",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_A_i_II_pos",
+  "claim": "Section 2(b)(1)(A)(i)(II) applies to Bob with Charlie as the qualifying child in 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-90",
+   "elements": [
+    {
+     "name": "charlie_not_bob_dependent_under_152b2_or_152b3_in_2018",
+     "kind": "fact",
+     "question": "In 2018, was Charlie not a dependent of Bob by reason of section 152(b)(2) or section 152(b)(3)?"
+    }
+   ],
+   "formula": "charlie_not_bob_dependent_under_152b2_or_152b3_in_2018",
+   "handled": false
+  },
+  "jev_compiled": 0.17,
+  "luna_compiled": 0.04
+ },
+ {
+  "id": "sara-91",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_iv_pos",
+  "claim": "Alice has to pay $70640 in taxes for the year 2017 under section 1(a)(iv).",
+  "label": 1,
+  "program": {
+   "id": "sara-91",
+   "elements": [
+    {
+     "name": "alice_2017_taxable_income_between_140k_and_250k",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $140,000 but not over $250,000?"
+    }
+   ],
+   "formula": "alice_2017_taxable_income_between_140k_and_250k",
+   "handled": false
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-92",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_v_pos",
+  "claim": "Alice has to pay $220295 in taxes for the year 2017 under section 1(a)(v).",
+  "label": 1,
+  "program": {
+   "id": "sara-92",
+   "elements": [
+    {
+     "name": "alice_2017_taxable_income_over_250k",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $250,000?"
+    }
+   ],
+   "formula": "alice_2017_taxable_income_over_250k",
+   "handled": false
+  },
+  "jev_compiled": 0.99,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-93",
+  "dataset": "sara_entailment",
+  "case": "s63_c_6_B_pos",
+  "claim": "Section 63(c)(6)(B) applies to Alice for 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-93",
+   "elements": [
+    {
+     "name": "alice_nonresident_alien_in_2017",
+     "kind": "fact",
+     "question": "Was Alice a nonresident alien individual for 2017?"
+    }
+   ],
+   "formula": "alice_nonresident_alien_in_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.81,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-94",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_6_pos",
+  "claim": "Section 3306(c)(6) applies to Alice's employment situation in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-94",
+   "elements": [
+    {
+     "name": "alice_2017_employment_for_us_government",
+     "kind": "fact",
+     "question": "Was Alice's employment in 2017 service performed in the employ of the United States Government?"
+    }
+   ],
+   "formula": "alice_2017_employment_for_us_government",
+   "handled": true
+  },
+  "jev_compiled": 0.99,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-95",
+  "dataset": "sara_entailment",
+  "case": "s63_c_6_D_pos",
+  "claim": "Section 63(c)(6)(D) applies to the Walter Brown Family Trust II for 1999.",
+  "label": 1,
+  "program": {
+   "id": "sara-95",
+   "elements": [
+    {
+     "name": "walter_brown_trust_ii_is_estate_or_trust_1999",
+     "kind": "fact",
+     "question": "In 1999, was the Walter Brown Family Trust II an estate or trust, common trust fund, or partnership?"
+    }
+   ],
+   "formula": "walter_brown_trust_ii_is_estate_or_trust_1999",
+   "handled": true
+  },
+  "jev_compiled": 0.85,
+  "luna_compiled": 0.96
+ },
+ {
+  "id": "sara-96",
+  "dataset": "sara_entailment",
+  "case": "s68_b_1_C_pos",
+  "claim": "Section 68(b)(1)(C) applies to Alice in 2016 with the applicable amount equal to $250000.",
+  "label": 1,
+  "program": {
+   "id": "sara-96",
+   "elements": [
+    {
+     "name": "alice_unmarried_2016",
+     "kind": "fact",
+     "question": "Was Alice unmarried for all of 2016 (not married at any time during 2016)?"
+    },
+    {
+     "name": "alice_not_surviving_spouse_2016",
+     "kind": "fact",
+     "question": "Was Alice not a surviving spouse for the year 2016?"
+    },
+    {
+     "name": "alice_not_head_of_household_2016",
+     "kind": "fact",
+     "question": "Was Alice not a head of household for the year 2016?"
+    }
+   ],
+   "formula": "alice_unmarried_2016 AND alice_not_surviving_spouse_2016 AND alice_not_head_of_household_2016",
+   "handled": true
+  },
+  "jev_compiled": 0.85,
+  "luna_compiled": 0.98
+ },
+ {
+  "id": "sara-97",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_1_B_pos",
+  "claim": "Section 3306(c)(1)(B) applies to Alice employing Bob for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-97",
+   "elements": [
+    {
+     "name": "bob_h2a_agricultural_labor_2017",
+     "kind": "fact",
+     "question": "Was Bob's work for Alice in 2017 agricultural labor performed by an alien admitted to the United States to perform agricultural labor under sections 214(c) and 101(a)(15)(H) of the Immigration and Nationality Act?"
+    }
+   ],
+   "formula": "NOT bob_h2a_agricultural_labor_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.86,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-98",
+  "dataset": "sara_entailment",
+  "case": "s1_d_pos",
+  "claim": "Alice has to pay $207772 in taxes for the year 2017 under section 1(d).",
+  "label": 1,
+  "program": {
+   "id": "sara-98",
+   "elements": [
+    {
+     "name": "alice_married_filing_separately_2017",
+     "kind": "fact",
+     "question": "Was Alice a married individual filing a separate return (not a joint return with her spouse) for the year 2017?"
+    }
+   ],
+   "formula": "alice_married_filing_separately_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.96,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-99",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_B_pos",
+  "claim": "Section 3306(c)(B) applies to Alice employing Bob for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-99",
+   "elements": [
+    {
+     "name": "bob_service_performed_outside_us_2017",
+     "kind": "fact",
+     "question": "Was Bob's service for Alice in 2017 performed outside the United States (other than in a contiguous country with which the US has an unemployment compensation agreement)?"
+    },
+    {
+     "name": "bob_us_citizen_2017",
+     "kind": "fact",
+     "question": "Was Bob a citizen of the United States in 2017?"
+    },
+    {
+     "name": "alice_american_employer_2017",
+     "kind": "fact",
+     "question": "Was Alice an American employer for whom Bob worked as an employee in 2017?"
+    }
+   ],
+   "formula": "bob_service_performed_outside_us_2017 AND bob_us_citizen_2017 AND alice_american_employer_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.63,
+  "luna_compiled": 0.87
+ },
+ {
+  "id": "sara-100",
+  "dataset": "sara_entailment",
+  "case": "s3301_pos",
+  "claim": "Alice has to pay $27181 in excise tax for the year 2015 under section 3301.",
+  "label": 1,
+  "program": {
+   "id": "sara-100",
+   "elements": [
+    {
+     "name": "alice_employer_2015",
+     "kind": "fact",
+     "question": "Was Alice an employer under section 3306(a) with individuals in her employ during the calendar year 2015?"
+    }
+   ],
+   "formula": "alice_employer_2015",
+   "handled": false
+  },
+  "jev_compiled": 0.95,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-101",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_3_pos",
+  "claim": "Section 3306(a)(3) applies to Bob for the year 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-101",
+   "elements": [
+    {
+     "name": "bob_domestic_service_cash_wages_2017_2018",
+     "kind": "fact",
+     "question": "Did Bob, during 2017 or 2018, pay cash wages totaling $1,000 or more for domestic service in a private home, local college club, or local chapter of a college fraternity or sorority?"
+    }
+   ],
+   "formula": "bob_domestic_service_cash_wages_2017_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.96,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-102",
+  "dataset": "sara_entailment",
+  "case": "s68_a_2_pos",
+  "claim": "Section 68(a)(2) prescribes a reduction of Alice's itemized deductions for the year 2016 by $48000.",
+  "label": 1,
+  "program": {
+   "id": "sara-102",
+   "elements": [
+    {
+     "name": "alice_itemizes_deductions_2016",
+     "kind": "fact",
+     "question": "Did Alice claim itemized deductions for the year 2016?"
+    }
+   ],
+   "formula": "alice_itemizes_deductions_2016",
+   "handled": false
+  },
+  "jev_compiled": 0.83,
+  "luna_compiled": 0.53
+ },
+ {
+  "id": "sara-103",
+  "dataset": "sara_entailment",
+  "case": "s1_c_iii_pos",
+  "claim": "Alice has to pay $27225 in taxes for the year 2017 under section 1(c)(iii).",
+  "label": 1,
+  "program": {
+   "id": "sara-103",
+   "elements": [
+    {
+     "name": "alice_taxable_income_53500_to_115000_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income over $53,500 but not over $115,000 for the year 2017?"
+    }
+   ],
+   "formula": "alice_taxable_income_53500_to_115000_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-104",
+  "dataset": "sara_entailment",
+  "case": "s68_b_1_B_pos",
+  "claim": "Under section 68(b)(1)(B), Alice's applicable amount for 2016 is equal to $275000.",
+  "label": 1,
+  "program": {
+   "id": "sara-104",
+   "elements": [
+    {
+     "name": "base_amount_unadjusted_in_2016",
+     "kind": "given",
+     "value": false,
+     "why": "Section 68(b)(2) inflation-adjusts the head-of-household amount for taxable years after 2008, so the 2016 applicable amount differs from the $275,000 base figure."
+    },
+    {
+     "name": "alice_head_of_household_2016",
+     "kind": "fact",
+     "question": "Was Alice a head of household, as defined in section 2(b), for the 2016 taxable year?"
+    }
+   ],
+   "formula": "base_amount_unadjusted_in_2016 AND alice_head_of_household_2016",
+   "handled": false
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-105",
+  "dataset": "sara_entailment",
+  "case": "s63_b_pos",
+  "claim": "Under section 63(b), Alice's taxable income in 2017 is equal to $31200.",
+  "label": 1,
+  "program": {
+   "id": "sara-105",
+   "elements": [
+    {
+     "name": "alice_did_not_itemize_2017",
+     "kind": "fact",
+     "question": "Did Alice elect not to itemize her deductions for the 2017 taxable year?"
+    }
+   ],
+   "formula": "alice_did_not_itemize_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-106",
+  "dataset": "sara_entailment",
+  "case": "s151_d_5_pos",
+  "claim": "The exemption amount of Alice's exemption is equal to $0 under section 151(d)(5).",
+  "label": 1,
+  "program": {
+   "id": "sara-106",
+   "elements": [
+    {
+     "name": "taxable_year_2018_to_2025",
+     "kind": "fact",
+     "question": "Did Alice's exemption relate to a taxable year beginning after December 31, 2017, and before January 1, 2026?"
+    }
+   ],
+   "formula": "taxable_year_2018_to_2025",
+   "handled": true
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 0.94
+ },
+ {
+  "id": "sara-107",
+  "dataset": "sara_entailment",
+  "case": "s63_f_1_A_pos",
+  "claim": "Section 63(f)(1)(A) applies to Alice in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-107",
+   "elements": [
+    {
+     "name": "alice_age_65_before_close_2017",
+     "kind": "fact",
+     "question": "Had Alice attained age 65 before the close of the 2017 taxable year?"
+    }
+   ],
+   "formula": "alice_age_65_before_close_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.91,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-108",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_H_pos",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(H) for the year 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-108",
+   "elements": [
+    {
+     "name": "bob_same_abode_and_household_2018",
+     "kind": "fact",
+     "question": "Did Bob have the same principal place of abode as Alice and was he a member of Alice's household for the entire 2018 taxable year?"
+    },
+    {
+     "name": "bob_not_spouse_at_any_time_2018",
+     "kind": "fact",
+     "question": "Was Bob not Alice's spouse at any time during the 2018 taxable year, determined without regard to section 7703?"
+    }
+   ],
+   "formula": "bob_same_abode_and_household_2018 AND bob_not_spouse_at_any_time_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.69,
+  "luna_compiled": 0.81
+ },
+ {
+  "id": "sara-109",
+  "dataset": "sara_entailment",
+  "case": "s151_d_3_A_pos",
+  "claim": "Under section 151(d)(3)(A), Alice's exemption amount is reduced to $1800.",
+  "label": 1,
+  "program": {
+   "id": "sara-109",
+   "elements": [
+    {
+     "name": "alice_agi_above_applicable_amount_2018",
+     "kind": "fact",
+     "question": "Was Alice's adjusted gross income for the taxable year above the applicable amount in effect under section 68(b)?"
+    }
+   ],
+   "formula": "alice_agi_above_applicable_amount_2018",
+   "handled": false
+  },
+  "jev_compiled": 0.73,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-110",
+  "dataset": "sara_entailment",
+  "case": "s63_f_2_B_pos",
+  "claim": "Section 63(f)(2)(B) applies to Bob in 2017 with Alice as the spouse.",
+  "label": 1,
+  "program": {
+   "id": "sara-110",
+   "elements": [
+    {
+     "name": "alice_blind_close_2017",
+     "kind": "fact",
+     "question": "Was Alice blind as of the close of the 2017 taxable year?"
+    },
+    {
+     "name": "bob_alice_married_close_2017",
+     "kind": "fact",
+     "question": "Were Bob and Alice spouses of each other as of the close of the 2017 taxable year?"
+    },
+    {
+     "name": "bob_additional_exemption_for_alice_2017",
+     "kind": "fact",
+     "question": "Was Bob entitled to an additional exemption under section 151(b) for Alice for the 2017 taxable year?"
+    }
+   ],
+   "formula": "alice_blind_close_2017 AND bob_alice_married_close_2017 AND bob_additional_exemption_for_alice_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.84,
+  "luna_compiled": 0.89
+ },
+ {
+  "id": "sara-111",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_7_pos",
+  "claim": "Section 3306(c)(7) applies to Alice's employment situation in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-111",
+   "elements": [
+    {
+     "name": "alice_2017_service_state_employ",
+     "kind": "fact",
+     "question": "Was Alice's employment service in 2017 performed in the employ of a State or a political subdivision thereof?"
+    }
+   ],
+   "formula": "alice_2017_service_state_employ",
+   "handled": true
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-112",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_2_C_pos",
+  "claim": "Section 3306(b)(2)(C) applies to the payment Alice made to the life insurance fund for the year 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-112",
+   "elements": [
+    {
+     "name": "payment_on_account_of_death",
+     "kind": "fact",
+     "question": "Was the payment Alice made to the life insurance fund in 2017 made on account of death?"
+    }
+   ],
+   "formula": "payment_on_account_of_death",
+   "handled": true
+  },
+  "jev_compiled": 0.25,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-113",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_11_pos",
+  "claim": "Section 3306(c)(11) applies to Alice's employment situation in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-113",
+   "elements": [
+    {
+     "name": "foreign_government_service",
+     "kind": "fact",
+     "question": "Was Alice's employment in 2017 service performed in the employ of a foreign government, including as a consular or other officer or employee or a nondiplomatic representative?"
+    }
+   ],
+   "formula": "foreign_government_service",
+   "handled": true
+  },
+  "jev_compiled": 0.5,
+  "luna_compiled": 0.1
+ },
+ {
+  "id": "sara-114",
+  "dataset": "sara_entailment",
+  "case": "s1_d_i_pos",
+  "claim": "Alice has to pay $999 in taxes for the year 2017 under section 1(d)(i).",
+  "label": 1,
+  "program": {
+   "id": "sara-114",
+   "elements": [
+    {
+     "name": "taxable_income_not_over_18450",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 not over $18,450?"
+    }
+   ],
+   "formula": "taxable_income_not_over_18450",
+   "handled": false
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-115",
+  "dataset": "sara_entailment",
+  "case": "s152_d_1_D_pos",
+  "claim": "Section 152(d)(1)(D) applies to Bob for the year 2015.",
+  "label": 1,
+  "program": {
+   "id": "sara-115",
+   "elements": [
+    {
+     "name": "bob_qualifying_child_of_any_taxpayer_2015",
+     "kind": "fact",
+     "question": "Was Bob a qualifying child of Alice or of any other taxpayer for any taxable year beginning in 2015?"
+    }
+   ],
+   "formula": "NOT bob_qualifying_child_of_any_taxpayer_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.91,
+  "luna_compiled": 0.75
+ },
+ {
+  "id": "sara-116",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_G_pos",
+  "claim": "Alice bears a relationship to Charlie under section 152(d)(2)(G) for the year 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-116",
+   "elements": [
+    {
+     "name": "charlie_in_law_of_alice_2018",
+     "kind": "fact",
+     "question": "Was Charlie a son-in-law, daughter-in-law, father-in-law, mother-in-law, brother-in-law, or sister-in-law of Alice at any time during 2018?"
+    }
+   ],
+   "formula": "charlie_in_law_of_alice_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.78,
+  "luna_compiled": 0.73
+ },
+ {
+  "id": "sara-117",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_A_i_I_pos",
+  "claim": "Section 2(b)(1)(A)(i)(I) applies to Charlie in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-117",
+   "elements": [
+    {
+     "name": "charlie_married_at_close_2017",
+     "kind": "fact",
+     "question": "Was Charlie married at the close of his taxable year 2017?"
+    }
+   ],
+   "formula": "charlie_married_at_close_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-118",
+  "dataset": "sara_entailment",
+  "case": "s63_c_7_i_pos",
+  "claim": "Under section 63(c)(7)(i), Alice's basic standard deduction in 2019 is equal to $18000.",
+  "label": 1,
+  "program": {
+   "id": "sara-118",
+   "elements": [
+    {
+     "name": "year_in_amended_period",
+     "kind": "given",
+     "value": true,
+     "why": "2019 falls within the 2018 to 2025 period in which the substituted amount applies, but the stated figure would also depend on inflation adjustment outside the excerpt"
+    }
+   ],
+   "formula": "year_in_amended_period",
+   "handled": false
+  },
+  "jev_compiled": 1,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-119",
+  "dataset": "sara_entailment",
+  "case": "s151_d_1_pos",
+  "claim": "Alice's exemption amount under section 151(d)(1) is equal to $2000.",
+  "label": 1,
+  "program": {
+   "id": "sara-119",
+   "elements": [
+    {
+     "name": "exemption_amount_defined_as_2000",
+     "kind": "given",
+     "value": true,
+     "why": "The excerpt defines exemption amount as $2,000, subject to other provisions of the subsection such as inflation adjustment and suspension rules outside the excerpt"
+    }
+   ],
+   "formula": "exemption_amount_defined_as_2000",
+   "handled": false
+  },
+  "jev_compiled": 1,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-120",
+  "dataset": "sara_entailment",
+  "case": "s1_d_ii_pos",
+  "claim": "Alice has to pay $5683 in taxes for the year 2017 under section 1(d)(ii).",
+  "label": 1,
+  "program": {
+   "id": "sara-120",
+   "elements": [
+    {
+     "name": "taxable_income_in_second_bracket",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $18,450 but not over $44,575?"
+    }
+   ],
+   "formula": "taxable_income_in_second_bracket",
+   "handled": false
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-121",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_A_pos",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(A).",
+  "label": 1,
+  "program": {
+   "id": "sara-121",
+   "elements": [
+    {
+     "name": "alice_is_child_or_descendant_of_bob",
+     "kind": "fact",
+     "question": "Was Alice a child of Bob, or a descendant of a child of Bob, in the tax year at issue?"
+    }
+   ],
+   "formula": "alice_is_child_or_descendant_of_bob",
+   "handled": true
+  },
+  "jev_compiled": 0.86,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-122",
+  "dataset": "sara_entailment",
+  "case": "s1_c_pos",
+  "claim": "Alice has to pay $65445 in taxes for the year 2017 under section 1(c).",
+  "label": 1,
+  "program": {
+   "id": "sara-122",
+   "elements": [
+    {
+     "name": "alice_unmarried_status",
+     "kind": "fact",
+     "question": "Was Alice unmarried for 2017, meaning not a married individual under section 7703 and not a surviving spouse or head of household?"
+    }
+   ],
+   "formula": "alice_unmarried_status",
+   "handled": false
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-123",
+  "dataset": "sara_entailment",
+  "case": "s1_b_i_pos",
+  "claim": "Alice has to pay $1434 in taxes for the year 2017 under section 1(b)(i).",
+  "label": 1,
+  "program": {
+   "id": "sara-123",
+   "elements": [
+    {
+     "name": "taxable_income_not_over_29600",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 not over $29,600?"
+    }
+   ],
+   "formula": "taxable_income_not_over_29600",
+   "handled": false
+  },
+  "jev_compiled": 0.99,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-124",
+  "dataset": "sara_entailment",
+  "case": "s63_c_2_A_ii_pos",
+  "claim": "Section 63(c)(2)(A)(ii) applies to Alice in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-124",
+   "elements": [
+    {
+     "name": "alice_surviving_spouse",
+     "kind": "fact",
+     "question": "Was Alice a surviving spouse as defined in section 2(a) for 2017?"
+    }
+   ],
+   "formula": "alice_surviving_spouse",
+   "handled": true
+  },
+  "jev_compiled": 0.83,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-125",
+  "dataset": "sara_entailment",
+  "case": "s152_c_2_A_pos",
+  "claim": "Bob bears a relationship to Alice under section 152(c)(2)(A).",
+  "label": 1,
+  "program": {
+   "id": "sara-125",
+   "elements": [
+    {
+     "name": "bob_is_child_or_descendant_of_alice",
+     "kind": "fact",
+     "question": "Was Bob a child of Alice, or a descendant of a child of Alice, in the tax year at issue?"
+    }
+   ],
+   "formula": "bob_is_child_or_descendant_of_alice",
+   "handled": true
+  },
+  "jev_compiled": 0.94,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-126",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_pos",
+  "claim": "Alice has to pay $14836 in taxes for the year 2017 under section 1(a).",
+  "label": 1,
+  "program": {
+   "id": "sara-126",
+   "elements": [
+    {
+     "name": "alice_joint_return_or_surviving_spouse",
+     "kind": "fact",
+     "question": "For 2017, was Alice a married individual filing a joint return or a surviving spouse?"
+    }
+   ],
+   "formula": "alice_joint_return_or_surviving_spouse",
+   "handled": false
+  },
+  "jev_compiled": 0.96,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-127",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_A_i_pos",
+  "claim": "Section 2(b)(1)(A)(i) applies to Charlie in 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-127",
+   "elements": [
+    {
+     "name": "charlie_qualifying_child",
+     "kind": "fact",
+     "question": "Was Charlie a qualifying child of the taxpayer, as defined in section 152(c), for 2018?"
+    }
+   ],
+   "formula": "charlie_qualifying_child",
+   "handled": false
+  },
+  "jev_compiled": 0.44,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-128",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_A_ii_pos",
+  "claim": "Section 2(b)(1)(A)(ii) applies to Charlie as the dependent in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-128",
+   "elements": [
+    {
+     "name": "charlie_dependent_of_taxpayer_2017",
+     "kind": "fact",
+     "question": "In 2017, was Charlie a dependent of the taxpayer (the person claiming him)?"
+    },
+    {
+     "name": "taxpayer_entitled_151_deduction_for_charlie_2017",
+     "kind": "fact",
+     "question": "In 2017, was the taxpayer entitled to a personal exemption deduction under section 151 for Charlie?"
+    }
+   ],
+   "formula": "charlie_dependent_of_taxpayer_2017 AND taxpayer_entitled_151_deduction_for_charlie_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.61,
+  "luna_compiled": 0.31
+ },
+ {
+  "id": "sara-129",
+  "dataset": "sara_entailment",
+  "case": "s152_a_pos",
+  "claim": "Under section 152(a), Bob is a dependent of Alice for the year 2015.",
+  "label": 1,
+  "program": {
+   "id": "sara-129",
+   "elements": [
+    {
+     "name": "bob_qualifies_as_dependent_of_alice_2015",
+     "kind": "fact",
+     "question": "For the year 2015, did Bob qualify as a dependent of Alice under section 152 (as a qualifying child or qualifying relative)?"
+    }
+   ],
+   "formula": "bob_qualifies_as_dependent_of_alice_2015",
+   "handled": false
+  },
+  "jev_compiled": 0.92,
+  "luna_compiled": 0.36
+ },
+ {
+  "id": "sara-130",
+  "dataset": "sara_entailment",
+  "case": "s7703_b_2_pos",
+  "claim": "Section 7703(b)(2) applies to Alice maintaining her home for the year 2018.",
+  "label": 1,
+  "program": {
+   "id": "sara-130",
+   "elements": [
+    {
+     "name": "alice_furnished_over_half_household_cost_2018",
+     "kind": "fact",
+     "question": "During the 2018 taxable year, did Alice furnish over one-half of the cost of maintaining her household?"
+    }
+   ],
+   "formula": "alice_furnished_over_half_household_cost_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.78,
+  "luna_compiled": 0.49
+ },
+ {
+  "id": "sara-131",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_C_pos",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(C).",
+  "label": 1,
+  "program": {
+   "id": "sara-131",
+   "elements": [
+    {
+     "name": "bob_is_alice_parent_or_ancestor_of_parent",
+     "kind": "fact",
+     "question": "Was Bob the father or mother of Alice, or an ancestor of Alice's father or mother?"
+    }
+   ],
+   "formula": "bob_is_alice_parent_or_ancestor_of_parent",
+   "handled": true
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-132",
+  "dataset": "sara_entailment",
+  "case": "s7703_a_1_pos",
+  "claim": "Section 7703(a)(1) applies to Alice for the year 2012.",
+  "label": 1,
+  "program": {
+   "id": "sara-132",
+   "elements": [
+    {
+     "name": "marital_status_rule_applies_to_taxable_year_2012",
+     "kind": "given",
+     "value": true,
+     "why": "The rule in section 7703(a)(1) governs marital status determinations for every taxable year, and 2012 is a taxable year."
+    }
+   ],
+   "formula": "marital_status_rule_applies_to_taxable_year_2012",
+   "handled": true
+  },
+  "jev_compiled": 1,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-133",
+  "dataset": "sara_entailment",
+  "case": "s2_a_1_B_pos",
+  "claim": "Section 2(a)(1)(B) applies to Bob in 2016.",
+  "label": 1,
+  "program": {
+   "id": "sara-133",
+   "elements": [
+    {
+     "name": "bob_maintained_home_principal_abode_of_child_2016",
+     "kind": "fact",
+     "question": "For the 2016 taxable year, did Bob maintain as his home a household that was the principal place of abode of a dependent who was his son, stepson, daughter, or stepdaughter?"
+    },
+    {
+     "name": "bob_entitled_151_deduction_for_child_2016",
+     "kind": "fact",
+     "question": "For the 2016 taxable year, was Bob entitled to a personal exemption deduction under section 151 for that dependent?"
+    }
+   ],
+   "formula": "bob_maintained_home_principal_abode_of_child_2016 AND bob_entitled_151_deduction_for_child_2016",
+   "handled": true
+  },
+  "jev_compiled": 0.77,
+  "luna_compiled": 0.99
+ },
+ {
+  "id": "sara-134",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_10_B_pos",
+  "claim": "Section 3306(c)(10)(B) applies to Alice's employment situation in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-134",
+   "elements": [
+    {
+     "name": "alice_work_2017_employed_by_hospital",
+     "kind": "fact",
+     "question": "Was Alice's work in 2017 performed in the employ of a hospital?"
+    },
+    {
+     "name": "alice_work_2017_as_hospital_patient",
+     "kind": "fact",
+     "question": "Was Alice's work in 2017 performed while she was a patient of that same hospital?"
+    }
+   ],
+   "formula": "alice_work_2017_employed_by_hospital AND alice_work_2017_as_hospital_patient",
+   "handled": true
+  },
+  "jev_compiled": 0.62,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-135",
+  "dataset": "sara_entailment",
+  "case": "s63_c_2_A_i_pos",
+  "claim": "Section 63(c)(2)(A)(i) applies to Alice in 2017.",
+  "label": 1,
+  "program": {
+   "id": "sara-135",
+   "elements": [
+    {
+     "name": "alice_filed_joint_return_2017",
+     "kind": "fact",
+     "question": "For the 2017 taxable year, did Alice file a joint return?"
+    }
+   ],
+   "formula": "alice_filed_joint_return_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.96,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-136",
+  "dataset": "sara_entailment",
+  "case": "s63_a_neg",
+  "claim": "Under section 63(a), Alice's taxable income in 2017 is equal to $31200.",
+  "label": 0,
+  "program": {
+   "id": "sara-136",
+   "elements": [
+    {
+     "name": "alice_taxable_income_2017_is_31200",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 (gross income minus allowed deductions other than the standard deduction) equal to $31,200?"
+    }
+   ],
+   "formula": "alice_taxable_income_2017_is_31200",
+   "handled": false
+  },
+  "jev_compiled": 0.52,
+  "luna_compiled": 0.11
+ },
+ {
+  "id": "sara-137",
+  "dataset": "sara_entailment",
+  "case": "s63_c_5_neg",
+  "claim": "Section 63(c)(5) applies to Bob's basic standard deduction in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-137",
+   "elements": [
+    {
+     "name": "bob_claimable_as_dependent_by_other_2017",
+     "kind": "fact",
+     "question": "In 2017, was Bob someone for whom a deduction under section 151 was allowable to another taxpayer for a taxable year beginning in 2017?"
+    }
+   ],
+   "formula": "bob_claimable_as_dependent_by_other_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.17,
+  "luna_compiled": 0.38
+ },
+ {
+  "id": "sara-138",
+  "dataset": "sara_entailment",
+  "case": "s1_b_iv_neg",
+  "claim": "Alice has to pay $24056 in taxes for the year 2017 under section 1(b)(iv).",
+  "label": 0,
+  "program": {
+   "id": "sara-138",
+   "elements": [
+    {
+     "name": "alice_2017_tax_is_24056",
+     "kind": "fact",
+     "question": "Was Alice's total tax liability for 2017 equal to $24,056?"
+    }
+   ],
+   "formula": "alice_2017_tax_is_24056",
+   "handled": false
+  },
+  "jev_compiled": 0.37,
+  "luna_compiled": 0.08
+ },
+ {
+  "id": "sara-139",
+  "dataset": "sara_entailment",
+  "case": "s2_b_2_C_neg",
+  "claim": "Section 2(b)(2)(C) applies to Bob in 2014.",
+  "label": 0,
+  "program": {
+   "id": "sara-139",
+   "elements": [
+    {
+     "name": "bob_spouse_died_2014",
+     "kind": "fact",
+     "question": "During 2014, did the spouse of Bob die during Bob's taxable year?"
+    },
+    {
+     "name": "bob_spouse_is_subparagraph_b_spouse_2014",
+     "kind": "fact",
+     "question": "In 2014, was Bob's deceased spouse a spouse described in subparagraph (B) of section 2(b)(2)?"
+    }
+   ],
+   "formula": "bob_spouse_died_2014 AND NOT bob_spouse_is_subparagraph_b_spouse_2014",
+   "handled": true
+  },
+  "jev_compiled": 0.49,
+  "luna_compiled": 0.6
+ },
+ {
+  "id": "sara-140",
+  "dataset": "sara_entailment",
+  "case": "s151_d_3_B_neg",
+  "claim": "Under section 151(d)(3)(B), the applicable percentage for Alice for 2015 is equal to 118.",
+  "label": 0,
+  "program": {
+   "id": "sara-140",
+   "elements": [
+    {
+     "name": "alice_2015_applicable_percentage_118",
+     "kind": "fact",
+     "question": "For 2015, does Alice's adjusted gross income produce an applicable percentage equal to 118 under section 151(d)(3)(B)?"
+    }
+   ],
+   "formula": "alice_2015_applicable_percentage_118",
+   "handled": false
+  },
+  "jev_compiled": 0.38,
+  "luna_compiled": 0.56
+ },
+ {
+  "id": "sara-141",
+  "dataset": "sara_entailment",
+  "case": "s152_c_3_neg",
+  "claim": "Bob satisfies section 152(c)(3) with Alice claiming Bob as a qualifying child for the year 2019.",
+  "label": 0,
+  "program": {
+   "id": "sara-141",
+   "elements": [
+    {
+     "name": "bob_younger_than_alice_2019",
+     "kind": "fact",
+     "question": "Was Bob younger than Alice, the taxpayer claiming him, in 2019?"
+    },
+    {
+     "name": "bob_under_25_end_of_2019",
+     "kind": "fact",
+     "question": "Was Bob less than 25 years old at the end of 2019?"
+    }
+   ],
+   "formula": "bob_younger_than_alice_2019 AND bob_under_25_end_of_2019",
+   "handled": true
+  },
+  "jev_compiled": 0.09,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-142",
+  "dataset": "sara_entailment",
+  "case": "s63_f_1_B_neg",
+  "claim": "Section 63(f)(1)(B) applies to Alice with Bob as the spouse in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-142",
+   "elements": [
+    {
+     "name": "bob_age_65_before_end_of_2017",
+     "kind": "fact",
+     "question": "Had Bob attained age 65 before the close of Alice's taxable year 2017?"
+    },
+    {
+     "name": "additional_exemption_for_bob_2017",
+     "kind": "fact",
+     "question": "For 2017, was an additional exemption allowable to Alice for Bob under section 151(b)?"
+    }
+   ],
+   "formula": "bob_age_65_before_end_of_2017 AND additional_exemption_for_bob_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.39,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-143",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_F_neg",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(F).",
+  "label": 0,
+  "program": {
+   "id": "sara-143",
+   "elements": [
+    {
+     "name": "bob_sibling_of_alices_parent",
+     "kind": "fact",
+     "question": "Is Bob a brother or sister of Alice's father or mother?"
+    }
+   ],
+   "formula": "bob_sibling_of_alices_parent",
+   "handled": true
+  },
+  "jev_compiled": 0.1,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-144",
+  "dataset": "sara_entailment",
+  "case": "s63_f_2_A_neg",
+  "claim": "Section 63(f)(2)(A) applies to Bob in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-144",
+   "elements": [
+    {
+     "name": "bob_blind_at_close_2017",
+     "kind": "fact",
+     "question": "Was Bob blind at the close of the 2017 taxable year?"
+    }
+   ],
+   "formula": "bob_blind_at_close_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.09,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-145",
+  "dataset": "sara_entailment",
+  "case": "s152_c_1_E_neg",
+  "claim": "Section 152(c)(1)(E) applies to Bob for the year 2019.",
+  "label": 0,
+  "program": {
+   "id": "sara-145",
+   "elements": [
+    {
+     "name": "bob_no_joint_return_2019",
+     "kind": "fact",
+     "question": "Did Bob fail to file a joint return with his spouse for the taxable year beginning in 2019 (other than only a claim for refund)?"
+    }
+   ],
+   "formula": "bob_no_joint_return_2019",
+   "handled": true
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-146",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_B_neg",
+  "claim": "Section 2(b)(1)(B) applies to Bob in 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-146",
+   "elements": [
+    {
+     "name": "bob_household_is_parent_abode_2018",
+     "kind": "fact",
+     "question": "Did Bob maintain a household in 2018 that was the principal place of abode of his father or mother?"
+    },
+    {
+     "name": "bob_entitled_parent_deduction_2018",
+     "kind": "fact",
+     "question": "Was Bob entitled to a deduction under section 151 for his father or mother for the 2018 taxable year?"
+    }
+   ],
+   "formula": "bob_household_is_parent_abode_2018 AND bob_entitled_parent_deduction_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.05,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-147",
+  "dataset": "sara_entailment",
+  "case": "s1_b_v_neg",
+  "claim": "Alice has to pay $57509 in taxes for the year 2017 under section 1(b)(v).",
+  "label": 0,
+  "program": {
+   "id": "sara-147",
+   "elements": [
+    {
+     "name": "alice_taxable_income_over_250000_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for the 2017 taxable year over $250,000?"
+    }
+   ],
+   "formula": "alice_taxable_income_over_250000_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-148",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_1_neg",
+  "claim": "Alice is an employer under section 3306(a)(1) for the year 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-148",
+   "elements": [
+    {
+     "name": "alice_paid_wages_threshold_2018",
+     "kind": "fact",
+     "question": "Did Alice pay wages of the threshold amount or more in a calendar quarter of 2018 or 2017 for domestic or other employment covered by section 3306?"
+    }
+   ],
+   "formula": "alice_paid_wages_threshold_2018",
+   "handled": false
+  },
+  "jev_compiled": 0.43,
+  "luna_compiled": 0.01
+ },
+ {
+  "id": "sara-149",
+  "dataset": "sara_entailment",
+  "case": "s2_b_2_A_neg",
+  "claim": "Section 2(b)(2)(A) applies to Alice and Bob in 2010.",
+  "label": 0,
+  "program": {
+   "id": "sara-149",
+   "elements": [
+    {
+     "name": "alice_bob_legally_separated_2010",
+     "kind": "fact",
+     "question": "Were Alice and Bob legally separated under a decree of divorce or of separate maintenance at any time during 2010?"
+    }
+   ],
+   "formula": "alice_bob_legally_separated_2010",
+   "handled": true
+  },
+  "jev_compiled": 0.04,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-150",
+  "dataset": "sara_entailment",
+  "case": "s152_c_1_neg",
+  "claim": "Under section 152(c)(1), Bob is a qualifying child of Alice for the year 2019.",
+  "label": 0,
+  "program": {
+   "id": "sara-150",
+   "elements": [
+    {
+     "name": "bob_relationship_to_alice_2019",
+     "kind": "fact",
+     "question": "Was Bob a child, stepchild, sibling, or descendant of such a relative of Alice in the 2019 taxable year?"
+    },
+    {
+     "name": "bob_younger_than_alice_2019",
+     "kind": "fact",
+     "question": "Was Bob younger than Alice in 2019?"
+    },
+    {
+     "name": "bob_lived_with_alice_over_half_2019",
+     "kind": "fact",
+     "question": "Did Bob have the same principal place of abode as Alice for more than half of the 2019 taxable year?"
+    },
+    {
+     "name": "bob_not_self_supporting_2019",
+     "kind": "fact",
+     "question": "Did Bob fail to provide over half of his own support for the 2019 taxable year?"
+    }
+   ],
+   "formula": "bob_relationship_to_alice_2019 AND bob_younger_than_alice_2019 AND bob_lived_with_alice_over_half_2019 AND bob_not_self_supporting_2019",
+   "handled": false
+  },
+  "jev_compiled": 0.22,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-151",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_neg",
+  "claim": "Section 2(b)(1) applies to Bob in 2016.",
+  "label": 0,
+  "program": {
+   "id": "sara-151",
+   "elements": [
+    {
+     "name": "bob_not_married_close_2016",
+     "kind": "fact",
+     "question": "Was Bob not married at the close of the 2016 taxable year?"
+    },
+    {
+     "name": "bob_not_surviving_spouse_2016",
+     "kind": "fact",
+     "question": "Was Bob not a surviving spouse for the 2016 taxable year?"
+    },
+    {
+     "name": "bob_maintained_qualifying_household_2016",
+     "kind": "fact",
+     "question": "Did Bob maintain a household in 2016 that was the principal place of abode of a qualifying child, or of his father or mother for whom he was entitled to a section 151 deduction?"
+    },
+    {
+     "name": "bob_paid_over_half_household_cost_2016",
+     "kind": "fact",
+     "question": "Did Bob furnish over half of the cost of maintaining that household during the 2016 taxable year?"
+    }
+   ],
+   "formula": "bob_not_married_close_2016 AND bob_not_surviving_spouse_2016 AND bob_maintained_qualifying_household_2016 AND bob_paid_over_half_household_cost_2016",
+   "handled": true
+  },
+  "jev_compiled": 0.52,
+  "luna_compiled": 0.09
+ },
+ {
+  "id": "sara-152",
+  "dataset": "sara_entailment",
+  "case": "s1_d_iii_neg",
+  "claim": "Alice has to pay $999 in taxes for the year 2017 under section 1(d)(iii).",
+  "label": 0,
+  "program": {
+   "id": "sara-152",
+   "elements": [
+    {
+     "name": "taxable_income_in_bracket",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $44,575 but not over $70,000?"
+    }
+   ],
+   "formula": "taxable_income_in_bracket",
+   "handled": false
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-153",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_10_A_i_neg",
+  "claim": "Section 3306(c)(10)(A)(i) applies to Alice's employment situation in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-153",
+   "elements": [
+    {
+     "name": "student_enrolled_regularly_attending",
+     "kind": "fact",
+     "question": "Was Alice a student who was enrolled and regularly attending classes at the school, college, or university that employed her during 2017?"
+    }
+   ],
+   "formula": "student_enrolled_regularly_attending",
+   "handled": true
+  },
+  "jev_compiled": 0.06,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-154",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_i_neg",
+  "claim": "Alice and her spouse have to pay $7208 in taxes for the year 2017 under section 1(a)(i).",
+  "label": 0,
+  "program": {
+   "id": "sara-154",
+   "elements": [
+    {
+     "name": "taxable_income_not_over_36900",
+     "kind": "fact",
+     "question": "Was the taxable income of Alice and her spouse for 2017 not over $36,900?"
+    }
+   ],
+   "formula": "taxable_income_not_over_36900",
+   "handled": false
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-155",
+  "dataset": "sara_entailment",
+  "case": "s1_d_iv_neg",
+  "claim": "Alice has to pay $5683 in taxes for the year 2017 under section 1(d)(iv).",
+  "label": 0,
+  "program": {
+   "id": "sara-155",
+   "elements": [
+    {
+     "name": "tax_below_bracket_minimum",
+     "kind": "given",
+     "value": false,
+     "why": "Under section 1(d)(iv) the tax is at least $17,964.25, which exceeds $5,683, so the assertion's amount cannot fall under this bracket."
+    }
+   ],
+   "formula": "tax_below_bracket_minimum",
+   "handled": true
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-156",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_D_neg",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(D) for the year 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-156",
+   "elements": [
+    {
+     "name": "bob_married_to_alice_parent_2018",
+     "kind": "fact",
+     "question": "During 2018, was Bob married to a parent of Alice, making Bob Alice's stepfather or stepmother?"
+    }
+   ],
+   "formula": "bob_married_to_alice_parent_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.07,
+  "luna_compiled": 0.05
+ },
+ {
+  "id": "sara-157",
+  "dataset": "sara_entailment",
+  "case": "s151_d_2_neg",
+  "claim": "Under section 151(d)(2), Bob's exemption amount for the year 2015 is equal to $2000.",
+  "label": 0,
+  "program": {
+   "id": "sara-157",
+   "elements": [
+    {
+     "name": "claimed_by_other_taxpayer_2015",
+     "kind": "fact",
+     "question": "For a taxable year beginning in 2015, was a deduction for Bob as a dependent allowable to another taxpayer?"
+    }
+   ],
+   "formula": "NOT claimed_by_other_taxpayer_2015",
+   "handled": false
+  },
+  "jev_compiled": 0.55,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-158",
+  "dataset": "sara_entailment",
+  "case": "s63_c_2_C_neg",
+  "claim": "Under section 63(c)(2)(C), Alice's basic standard deduction in 2017 is equal to $4400.",
+  "label": 0,
+  "program": {
+   "id": "sara-158",
+   "elements": [
+    {
+     "name": "excerpt_amount_is_4400",
+     "kind": "given",
+     "value": false,
+     "why": "Section 63(c)(2)(C) as excerpted states $3,000 for any other case, not $4,400."
+    }
+   ],
+   "formula": "excerpt_amount_is_4400",
+   "handled": true
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-159",
+  "dataset": "sara_entailment",
+  "case": "s151_c_neg",
+  "claim": "Alice can claim an exemption with Bob as the dependent for 2015 under section 151(c).",
+  "label": 0,
+  "program": {
+   "id": "sara-159",
+   "elements": [
+    {
+     "name": "bob_is_dependent_2015",
+     "kind": "fact",
+     "question": "For the 2015 taxable year, was Bob a dependent of Alice as defined in section 152?"
+    },
+    {
+     "name": "claimed_by_other_taxpayer_2015",
+     "kind": "fact",
+     "question": "For a taxable year beginning in 2015, was a deduction for Bob as a dependent allowable to another taxpayer?"
+    }
+   ],
+   "formula": "bob_is_dependent_2015 AND NOT claimed_by_other_taxpayer_2015",
+   "handled": false
+  },
+  "jev_compiled": 0.09,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-160",
+  "dataset": "sara_entailment",
+  "case": "s63_c_1_neg",
+  "claim": "Under section 63(c)(1), Alice's standard deduction in 2017 is equal to $4000.",
+  "label": 0,
+  "program": {
+   "id": "sara-160",
+   "elements": [
+    {
+     "name": "standard_deduction_defined_as_sum_of_amounts",
+     "kind": "given",
+     "value": true,
+     "why": "Section 63(c)(1) defines the standard deduction as a sum of amounts, so the $4000 figure depends on amounts outside this excerpt"
+    }
+   ],
+   "formula": "standard_deduction_defined_as_sum_of_amounts",
+   "handled": false
+  },
+  "jev_compiled": 1,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-161",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_iv_neg",
+  "claim": "Alice and her spouse have to pay $247647 in taxes for the year 2017 under section 1(a)(iv).",
+  "label": 0,
+  "program": {
+   "id": "sara-161",
+   "elements": [
+    {
+     "name": "joint_return_with_taxable_income_in_bracket",
+     "kind": "fact",
+     "question": "Did Alice and her spouse file a joint return for 2017 with taxable income over $140,000 but not over $250,000?"
+    }
+   ],
+   "formula": "joint_return_with_taxable_income_in_bracket",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-162",
+  "dataset": "sara_entailment",
+  "case": "s1_d_v_neg",
+  "claim": "Alice has to pay $20772 in taxes for the year 2017 under section 1(d)(v).",
+  "label": 0,
+  "program": {
+   "id": "sara-162",
+   "elements": [
+    {
+     "name": "taxable_income_over_125000_in_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $125,000?"
+    }
+   ],
+   "formula": "taxable_income_over_125000_in_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.99,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-163",
+  "dataset": "sara_entailment",
+  "case": "s7703_b_3_neg",
+  "claim": "Section 7703(b)(3) applies to Alice maintaining her home for the year 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-163",
+   "elements": [
+    {
+     "name": "spouse_not_in_household_last_6_months_2018",
+     "kind": "fact",
+     "question": "During the last 6 months of 2018, was Alice's spouse not a member of her household?"
+    }
+   ],
+   "formula": "spouse_not_in_household_last_6_months_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.67,
+  "luna_compiled": 0.98
+ },
+ {
+  "id": "sara-164",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_B_neg",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(B) for the year 2015.",
+  "label": 0,
+  "program": {
+   "id": "sara-164",
+   "elements": [
+    {
+     "name": "bob_is_sibling_of_alice_2015",
+     "kind": "fact",
+     "question": "In 2015, was Bob a brother, sister, stepbrother, or stepsister of Alice?"
+    }
+   ],
+   "formula": "bob_is_sibling_of_alice_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.04,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-165",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_10_B_neg",
+  "claim": "Section 3306(b)(10)(B) applies to the payment of $12980 that Alice made in 2019.",
+  "label": 0,
+  "program": {
+   "id": "sara-165",
+   "elements": [
+    {
+     "name": "alice_payment_under_employer_plan_2019",
+     "kind": "fact",
+     "question": "In 2019, did Alice make the $12,980 payment under a plan established by her employer that provides for its employees generally or a class or classes of its employees (or their dependents)?"
+    }
+   ],
+   "formula": "alice_payment_under_employer_plan_2019",
+   "handled": true
+  },
+  "jev_compiled": 0.04,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-166",
+  "dataset": "sara_entailment",
+  "case": "s152_b_1_neg",
+  "claim": "Section 152(b)(1) applies to Alice for the year 2015.",
+  "label": 0,
+  "program": {
+   "id": "sara-166",
+   "elements": [
+    {
+     "name": "alice_dependent_of_taxpayer_2015",
+     "kind": "fact",
+     "question": "Was Alice a dependent of another taxpayer for a taxable year of that taxpayer beginning in 2015?"
+    }
+   ],
+   "formula": "alice_dependent_of_taxpayer_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.14,
+  "luna_compiled": 0.49
+ },
+ {
+  "id": "sara-167",
+  "dataset": "sara_entailment",
+  "case": "s63_c_3_neg",
+  "claim": "Under section 63(c)(3), Alice's additional standard deduction in 2017 is equal to $300.",
+  "label": 0,
+  "program": {
+   "id": "sara-167",
+   "elements": [
+    {
+     "name": "alice_entitled_additional_amount_2017",
+     "kind": "fact",
+     "question": "In 2017, was Alice entitled to an additional amount under section 63(f) (aged or blind)?"
+    }
+   ],
+   "formula": "alice_entitled_additional_amount_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.49,
+  "luna_compiled": 0.86
+ },
+ {
+  "id": "sara-168",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_iii_neg",
+  "claim": "Alice and her spouse have to pay $44789 in taxes for the year 2017 under section 1(a)(iii).",
+  "label": 0,
+  "program": {
+   "id": "sara-168",
+   "elements": [
+    {
+     "name": "taxable_income_in_bracket",
+     "kind": "fact",
+     "question": "Was Alice and her spouse's taxable income for 2017 over $89,150 but not over $140,000?"
+    }
+   ],
+   "formula": "taxable_income_in_bracket",
+   "handled": false
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-169",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_1_A_i_neg",
+  "claim": "Section 3306(c)(1)(A)(i) applies to Alice employing Bob for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-169",
+   "elements": [
+    {
+     "name": "alice_paid_cash_wages_20000",
+     "kind": "fact",
+     "question": "Did Alice pay cash remuneration of $20,000 or more to individuals employed in agricultural labor during calendar year 2016 or 2017?"
+    },
+    {
+     "name": "bob_agricultural_employee",
+     "kind": "fact",
+     "question": "Was Bob employed by Alice in agricultural labor during 2017?"
+    }
+   ],
+   "formula": "alice_paid_cash_wages_20000 AND bob_agricultural_employee",
+   "handled": true
+  },
+  "jev_compiled": 0.04,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-170",
+  "dataset": "sara_entailment",
+  "case": "s152_c_2_B_neg",
+  "claim": "Bob bears a relationship to Alice under section 152(c)(2)(B).",
+  "label": 0,
+  "program": {
+   "id": "sara-170",
+   "elements": [
+    {
+     "name": "bob_qualifying_relative",
+     "kind": "fact",
+     "question": "Is Bob a brother, sister, stepbrother, or stepsister of Alice, or a descendant of any such relative?"
+    }
+   ],
+   "formula": "bob_qualifying_relative",
+   "handled": true
+  },
+  "jev_compiled": 0.34,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-171",
+  "dataset": "sara_entailment",
+  "case": "s151_a_neg",
+  "claim": "Alice's total exemption for 2015 under section 151(a) is equal to $6000.",
+  "label": 0,
+  "program": {
+   "id": "sara-171",
+   "elements": [
+    {
+     "name": "exemption_amount_is_6000",
+     "kind": "given",
+     "value": false,
+     "why": "The excerpt only says exemptions are allowed as deductions; it states no dollar amount, and the $6,000 figure would require law outside the excerpt and arithmetic on the amount for 2015."
+    }
+   ],
+   "formula": "exemption_amount_is_6000",
+   "handled": false
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-172",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_neg",
+  "claim": "Alice has to pay $24056 in taxes for the year 2017 under section 1(a).",
+  "label": 0,
+  "program": {
+   "id": "sara-172",
+   "elements": [
+    {
+     "name": "alice_joint_return_2017",
+     "kind": "fact",
+     "question": "Did Alice file a joint return with her spouse for 2017 as a married individual?"
+    }
+   ],
+   "formula": "alice_joint_return_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.05,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-173",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_2_A_neg",
+  "claim": "Under section 3306(a)(2)(A), Alice is an employer for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-173",
+   "elements": [
+    {
+     "name": "alice_paid_agri_wages_20000",
+     "kind": "fact",
+     "question": "Did Alice pay wages of $20,000 or more for agricultural labor during calendar year 2016 or 2017?"
+    }
+   ],
+   "formula": "alice_paid_agri_wages_20000",
+   "handled": true
+  },
+  "jev_compiled": 0.08,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-174",
+  "dataset": "sara_entailment",
+  "case": "s68_f_neg",
+  "claim": "Section 68(f) applies to Alice for the year 2014.",
+  "label": 0,
+  "program": {
+   "id": "sara-174",
+   "elements": [
+    {
+     "name": "year_2014_in_period",
+     "kind": "given",
+     "value": false,
+     "why": "The excerpt says section 68(f) does not apply to taxable years beginning after December 31, 2017 and before January 1, 2026; 2014 is outside that period, so the section's suspension does not reach it."
+    }
+   ],
+   "formula": "NOT year_2014_in_period",
+   "handled": true
+  },
+  "jev_compiled": 1,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-175",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_2_neg",
+  "claim": "Section 3306(c)(2) applies to Alice employing Bob for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-175",
+   "elements": [
+    {
+     "name": "bob_domestic_service_for_alice",
+     "kind": "fact",
+     "question": "Did Bob perform domestic service in a private home for Alice during 2017?"
+    },
+    {
+     "name": "alice_paid_domestic_cash_1000",
+     "kind": "fact",
+     "question": "Did Alice pay cash remuneration of $1,000 or more to individuals employed in domestic service during calendar year 2016 or 2017?"
+    }
+   ],
+   "formula": "bob_domestic_service_for_alice AND NOT alice_paid_domestic_cash_1000",
+   "handled": true
+  },
+  "jev_compiled": 0.050000000000000044,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-176",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_21_neg",
+  "claim": "Section 3306(c)(21) applies to Alice's employment situation in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-176",
+   "elements": [
+    {
+     "name": "alice_service_performed_while_committed_to_penal_institution_2017",
+     "kind": "fact",
+     "question": "During 2017, was Alice's service performed while she was committed to a penal institution?"
+    }
+   ],
+   "formula": "alice_service_performed_while_committed_to_penal_institution_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.09,
+  "luna_compiled": 0.01
+ },
+ {
+  "id": "sara-177",
+  "dataset": "sara_entailment",
+  "case": "s7703_b_1_neg",
+  "claim": "Section 7703(b)(1) applies to Alice for the year 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-177",
+   "elements": [
+    {
+     "name": "alice_married_on_last_day_2018",
+     "kind": "fact",
+     "question": "Was Alice married (within the meaning of section 7703(a)) as of the last day of 2018?"
+    },
+    {
+     "name": "alice_filed_separate_return_2018",
+     "kind": "fact",
+     "question": "Did Alice file a separate return for the 2018 taxable year?"
+    },
+    {
+     "name": "alice_household_principal_abode_child_over_half_2018",
+     "kind": "fact",
+     "question": "In 2018, did Alice maintain a household that was the principal place of abode of a child for more than one-half of the taxable year, with respect to whom Alice was entitled to a deduction under section 151 for 2018?"
+    }
+   ],
+   "formula": "alice_married_on_last_day_2018 AND alice_filed_separate_return_2018 AND alice_household_principal_abode_child_over_half_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-178",
+  "dataset": "sara_entailment",
+  "case": "s2_a_2_B_neg",
+  "claim": "Section 2(a)(2)(B) applies to Bob in 2014.",
+  "label": 0,
+  "program": {
+   "id": "sara-178",
+   "elements": [
+    {
+     "name": "bob_spouse_died_in_2014",
+     "kind": "fact",
+     "question": "Did Bob's spouse die during 2014?"
+    },
+    {
+     "name": "joint_return_could_have_been_made_bob_2014",
+     "kind": "fact",
+     "question": "Could Bob and his spouse have made a single joint return for 2014, given that neither spouse was a nonresident alien at any time during 2014?"
+    }
+   ],
+   "formula": "bob_spouse_died_in_2014 AND NOT joint_return_could_have_been_made_bob_2014",
+   "handled": true
+  },
+  "jev_compiled": 0.6799999999999999,
+  "luna_compiled": 0.99
+ },
+ {
+  "id": "sara-179",
+  "dataset": "sara_entailment",
+  "case": "s1_c_v_neg",
+  "claim": "Alice has to pay $65445 in taxes for the year 2017 under section 1(c)(v).",
+  "label": 0,
+  "program": {
+   "id": "sara-179",
+   "elements": [
+    {
+     "name": "alice_taxable_income_over_250000_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $250,000?"
+    }
+   ],
+   "formula": "alice_taxable_income_over_250000_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-180",
+  "dataset": "sara_entailment",
+  "case": "s2_a_1_A_neg",
+  "claim": "Section 2(a)(1)(A) applies to Bob in 2014.",
+  "label": 0,
+  "program": {
+   "id": "sara-180",
+   "elements": [
+    {
+     "name": "bob_spouse_died_2012_or_2013",
+     "kind": "fact",
+     "question": "Did Bob's spouse die during 2012 or 2013, the two years immediately preceding 2014?"
+    }
+   ],
+   "formula": "bob_spouse_died_2012_or_2013",
+   "handled": true
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-181",
+  "dataset": "sara_entailment",
+  "case": "s7703_a_2_neg",
+  "claim": "Section 7703(a)(2) applies to Alice for the year 2012.",
+  "label": 0,
+  "program": {
+   "id": "sara-181",
+   "elements": [
+    {
+     "name": "alice_legally_separated_decree_2012",
+     "kind": "fact",
+     "question": "Was Alice legally separated from her spouse under a decree of divorce or of separate maintenance as of the last day of 2012?"
+    }
+   ],
+   "formula": "alice_legally_separated_decree_2012",
+   "handled": true
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-182",
+  "dataset": "sara_entailment",
+  "case": "s2_b_3_B_neg",
+  "claim": "Section 2(b)(3)(B) applies to Bob in 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-182",
+   "elements": [
+    {
+     "name": "bob_dependent_only_by_152d2H_2018",
+     "kind": "fact",
+     "question": "For 2018, would the individual Bob relies on for head-of-household status fail to be a dependent but for subparagraph (H) of section 152(d)(2)?"
+    }
+   ],
+   "formula": "bob_dependent_only_by_152d2H_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.46,
+  "luna_compiled": 0.85
+ },
+ {
+  "id": "sara-183",
+  "dataset": "sara_entailment",
+  "case": "s1_c_ii_neg",
+  "claim": "Alice has to pay $1162 in taxes for the year 2017 under section 1(c)(ii).",
+  "label": 0,
+  "program": {
+   "id": "sara-183",
+   "elements": [
+    {
+     "name": "alice_taxable_income_22100_to_53500_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $22,100 but not over $53,500?"
+    }
+   ],
+   "formula": "alice_taxable_income_22100_to_53500_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-184",
+  "dataset": "sara_entailment",
+  "case": "s2_a_2_A_neg",
+  "claim": "Section 2(a)(2)(A) applies to Bob in 2014.",
+  "label": 0,
+  "program": {
+   "id": "sara-184",
+   "elements": [
+    {
+     "name": "bob_remarried_before_2014_close",
+     "kind": "fact",
+     "question": "Had Bob remarried at any time before the close of the 2014 taxable year?"
+    }
+   ],
+   "formula": "bob_remarried_before_2014_close",
+   "handled": true
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-185",
+  "dataset": "sara_entailment",
+  "case": "s1_b_ii_neg",
+  "claim": "Alice has to pay $1434 in taxes for the year 2017 under section 1(b)(ii).",
+  "label": 0,
+  "program": {
+   "id": "sara-185",
+   "elements": [
+    {
+     "name": "bracket_tax_equals_1434",
+     "kind": "given",
+     "value": false,
+     "why": "Under bracket (ii) the tax is at least the $4,440 base amount, which exceeds $1,434, so the tax under that bracket cannot be $1,434."
+    }
+   ],
+   "formula": "bracket_tax_equals_1434",
+   "handled": true
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-186",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_1_neg",
+  "claim": "Section 3306(c)(1) applies to Alice employing Bob for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-186",
+   "elements": [
+    {
+     "name": "alice_employed_bob_in_2017",
+     "kind": "fact",
+     "question": "Did Alice employ Bob during 2017?"
+    },
+    {
+     "name": "bob_work_was_agricultural_labor_2017",
+     "kind": "fact",
+     "question": "Was the work Bob performed for Alice during 2017 agricultural labor?"
+    }
+   ],
+   "formula": "alice_employed_bob_in_2017 AND bob_work_was_agricultural_labor_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.05,
+  "luna_compiled": 0.05
+ },
+ {
+  "id": "sara-187",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_10_A_ii_neg",
+  "claim": "Section 3306(c)(10)(A)(ii) applies to Bob's employment situation in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-187",
+   "elements": [
+    {
+     "name": "bob_employed_by_student_spouse_2017",
+     "kind": "fact",
+     "question": "Was Bob employed during 2017 by the spouse of a student enrolled and regularly attending classes?"
+    }
+   ],
+   "formula": "bob_employed_by_student_spouse_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.11,
+  "luna_compiled": 0.01
+ },
+ {
+  "id": "sara-188",
+  "dataset": "sara_entailment",
+  "case": "s152_c_1_B_neg",
+  "claim": "Section 152(c)(1)(B) applies to Bob with Alice as the taxpayer for the year 2015.",
+  "label": 0,
+  "program": {
+   "id": "sara-188",
+   "elements": [
+    {
+     "name": "bob_same_abode_as_alice_over_half_2015",
+     "kind": "fact",
+     "question": "Did Bob have the same principal place of abode as Alice for more than one-half of the 2015 taxable year?"
+    }
+   ],
+   "formula": "bob_same_abode_as_alice_over_half_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.47,
+  "luna_compiled": 0.82
+ },
+ {
+  "id": "sara-189",
+  "dataset": "sara_entailment",
+  "case": "s68_b_1_D_neg",
+  "claim": "Section 68(b)(1)(D) applies to Alice in 2016.",
+  "label": 0,
+  "program": {
+   "id": "sara-189",
+   "elements": [
+    {
+     "name": "alice_filed_separately_2016",
+     "kind": "fact",
+     "question": "Did Alice, as a married individual, file a separate return for the 2016 taxable year?"
+    }
+   ],
+   "formula": "alice_filed_separately_2016",
+   "handled": true
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-190",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_1_A_neg",
+  "claim": "Under section 3306(a)(1)(A), Alice is an employer for the year 2019.",
+  "label": 0,
+  "program": {
+   "id": "sara-190",
+   "elements": [
+    {
+     "name": "alice_paid_1500_wages_2018_or_2019",
+     "kind": "fact",
+     "question": "Did Alice pay wages of $1,500 or more during calendar year 2019 or calendar year 2018?"
+    }
+   ],
+   "formula": "alice_paid_1500_wages_2018_or_2019",
+   "handled": true
+  },
+  "jev_compiled": 0.14,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-191",
+  "dataset": "sara_entailment",
+  "case": "s63_d_2_neg",
+  "claim": "Alice's deduction for 2017 falls under section 63(d)(2).",
+  "label": 0,
+  "program": {
+   "id": "sara-191",
+   "elements": [
+    {
+     "name": "alice_2017_deduction_is_personal_exemption",
+     "kind": "fact",
+     "question": "Was the deduction Alice claimed for the 2017 taxable year a deduction for personal exemptions provided by section 151?"
+    }
+   ],
+   "formula": "alice_2017_deduction_is_personal_exemption",
+   "handled": true
+  },
+  "jev_compiled": 0.06,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-192",
+  "dataset": "sara_entailment",
+  "case": "s63_d_neg",
+  "claim": "Alice's deduction for 2017 falls under section 63(d).",
+  "label": 0,
+  "program": {
+   "id": "sara-192",
+   "elements": [
+    {
+     "name": "deduction_allowable_under_chapter",
+     "kind": "fact",
+     "question": "Was Alice's deduction for 2017 allowable under this chapter of the Internal Revenue Code?"
+    }
+   ],
+   "formula": "deduction_allowable_under_chapter",
+   "handled": false
+  },
+  "jev_compiled": 0.73,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-193",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_neg",
+  "claim": "Section 3306(b) applies to the payment in hay made by Alice to Bob for the year 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-193",
+   "elements": [
+    {
+     "name": "hay_payment_is_employment_remuneration",
+     "kind": "fact",
+     "question": "Was the hay that Alice gave to Bob in 2018 remuneration for employment performed for Alice?"
+    }
+   ],
+   "formula": "hay_payment_is_employment_remuneration",
+   "handled": false
+  },
+  "jev_compiled": 0.83,
+  "luna_compiled": 0.92
+ },
+ {
+  "id": "sara-194",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_15_neg",
+  "claim": "Section 3306(b)(15) applies to the payment that Alice made to Charlie in 2019.",
+  "label": 0,
+  "program": {
+   "id": "sara-194",
+   "elements": [
+    {
+     "name": "payment_to_survivor_or_estate_of_former_employee",
+     "kind": "fact",
+     "question": "Was Alice's 2019 payment to Charlie made to the survivor or estate of a former employee of Alice?"
+    },
+    {
+     "name": "former_employee_died_before_2019",
+     "kind": "fact",
+     "question": "Did the former employee whose survivor or estate received Alice's 2019 payment to Charlie die in a calendar year before 2019?"
+    }
+   ],
+   "formula": "payment_to_survivor_or_estate_of_former_employee AND former_employee_died_before_2019",
+   "handled": true
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-195",
+  "dataset": "sara_entailment",
+  "case": "s151_b_neg",
+  "claim": "Alice can receive an exemption for Bob under section 151(b) for the year 2015.",
+  "label": 0,
+  "program": {
+   "id": "sara-195",
+   "elements": [
+    {
+     "name": "bob_was_alice_spouse_2015",
+     "kind": "fact",
+     "question": "Was Bob married to Alice at any time during calendar year 2015?"
+    },
+    {
+     "name": "no_joint_return_2015",
+     "kind": "fact",
+     "question": "Did Alice and Bob fail to file a joint return for the taxable year beginning in 2015?"
+    },
+    {
+     "name": "bob_no_gross_income_2015",
+     "kind": "fact",
+     "question": "Did Bob have no gross income for calendar year 2015?"
+    },
+    {
+     "name": "bob_not_dependent_of_another_2015",
+     "kind": "fact",
+     "question": "Was Bob not the dependent of another taxpayer for calendar year 2015?"
+    }
+   ],
+   "formula": "bob_was_alice_spouse_2015 AND no_joint_return_2015 AND bob_no_gross_income_2015 AND bob_not_dependent_of_another_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.04,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-196",
+  "dataset": "sara_entailment",
+  "case": "s63_c_2_B_neg",
+  "claim": "Under section 63(c)(2)(B), Alice's basic standard deduction in 2017 is equal to $4400.",
+  "label": 0,
+  "program": {
+   "id": "sara-196",
+   "elements": [
+    {
+     "name": "excerpt_amount_is_2017_amount",
+     "kind": "given",
+     "value": false,
+     "why": "Section 63(c)(4) inflation-adjusts the basic standard deduction amounts for later years, so the 2017 head-of-household amount is not the $4,400 figure shown in the excerpt."
+    }
+   ],
+   "formula": "excerpt_amount_is_2017_amount",
+   "handled": false
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-197",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_2_B_neg",
+  "claim": "Section 3306(a)(2)(B) applies to Alice for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-197",
+   "elements": [
+    {
+     "name": "year_2017_within_test_period",
+     "kind": "given",
+     "value": true,
+     "why": "The test covers the current calendar year or the preceding calendar year, and 2017 is the year in question."
+    },
+    {
+     "name": "alice_five_agricultural_employees_10_days",
+     "kind": "fact",
+     "question": "Did Alice, on each of some 10 days during 2016 or 2017, each day in a different calendar week, employ at least 5 individuals in agricultural labor for some portion of the day?"
+    }
+   ],
+   "formula": "year_2017_within_test_period AND alice_five_agricultural_employees_10_days",
+   "handled": true
+  },
+  "jev_compiled": 0.7,
+  "luna_compiled": 0.56
+ },
+ {
+  "id": "sara-198",
+  "dataset": "sara_entailment",
+  "case": "s152_b_2_neg",
+  "claim": "Section 152(b)(2) applies to Alice for the year 2015.",
+  "label": 0,
+  "program": {
+   "id": "sara-198",
+   "elements": [
+    {
+     "name": "alice_joint_return_for_2015_taxable_year",
+     "kind": "fact",
+     "question": "Did Alice file a joint return with her spouse for the taxable year beginning in calendar year 2015?"
+    }
+   ],
+   "formula": "alice_joint_return_for_2015_taxable_year",
+   "handled": true
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-199",
+  "dataset": "sara_entailment",
+  "case": "s152_d_1_B_neg",
+  "claim": "Section 152(d)(1)(B) applies to Alice for the year 2015.",
+  "label": 0,
+  "program": {
+   "id": "sara-199",
+   "elements": [
+    {
+     "name": "alice_no_income_2015",
+     "kind": "fact",
+     "question": "Did Alice have no income for calendar year 2015?"
+    }
+   ],
+   "formula": "alice_no_income_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-200",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_10_A_neg",
+  "claim": "Section 3306(b)(10)(A) applies to the payment of $12980 that Alice made in 2019.",
+  "label": 0,
+  "program": {
+   "id": "sara-200",
+   "elements": [
+    {
+     "name": "payment_on_termination_due_to_death_or_disability",
+     "kind": "fact",
+     "question": "Was the $12,980 payment that Alice made in 2019 made upon the termination of an employee's employment because of that employee's death or retirement for disability?"
+    }
+   ],
+   "formula": "payment_on_termination_due_to_death_or_disability",
+   "handled": true
+  },
+  "jev_compiled": 0.23,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-201",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_7_neg",
+  "claim": "Section 3306(b)(7) applies to the payment Alice made to Bob.",
+  "label": 0,
+  "program": {
+   "id": "sara-201",
+   "elements": [
+    {
+     "name": "payment_made_in_non_cash_medium",
+     "kind": "fact",
+     "question": "Was the payment that Alice made to Bob paid in a medium other than cash?"
+    },
+    {
+     "name": "service_outside_employer_trade_or_business",
+     "kind": "fact",
+     "question": "Was Bob's service for which Alice made the payment performed outside the course of Alice's trade or business?"
+    }
+   ],
+   "formula": "payment_made_in_non_cash_medium AND service_outside_employer_trade_or_business",
+   "handled": true
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-202",
+  "dataset": "sara_entailment",
+  "case": "s63_c_6_A_neg",
+  "claim": "Section 63(c)(6)(A) applies to Alice for 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-202",
+   "elements": [
+    {
+     "name": "alice_married_filing_separate_return_2017",
+     "kind": "fact",
+     "question": "For 2017, was Alice a married individual filing a separate return?"
+    },
+    {
+     "name": "spouse_itemizes_deductions_2017",
+     "kind": "fact",
+     "question": "For 2017, did either spouse of Alice itemize deductions?"
+    }
+   ],
+   "formula": "alice_married_filing_separate_return_2017 AND spouse_itemizes_deductions_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-203",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_v_neg",
+  "claim": "Alice and her spouse have to pay $2600 in taxes for the year 2017 under section 1(a)(v).",
+  "label": 0,
+  "program": {
+   "id": "sara-203",
+   "elements": [
+    {
+     "name": "taxable_income_over_250000_2017",
+     "kind": "fact",
+     "question": "Was the taxable income of Alice and her spouse over $250,000 for 2017?"
+    }
+   ],
+   "formula": "taxable_income_over_250000_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-204",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_2_A_neg",
+  "claim": "Section 3306(b)(2)(A) applies to the payment Alice made to Bob for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-204",
+   "elements": [
+    {
+     "name": "payment_for_sickness_or_accident_disability",
+     "kind": "fact",
+     "question": "Was the payment Alice made to Bob in 2017 a payment for sickness or accident disability?"
+    }
+   ],
+   "formula": "payment_for_sickness_or_accident_disability",
+   "handled": true
+  },
+  "jev_compiled": 0.06,
+  "luna_compiled": 0.01
+ },
+ {
+  "id": "sara-205",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_5_neg",
+  "claim": "Section 3306(c)(5) applies to Alice employing Bob for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-205",
+   "elements": [
+    {
+     "name": "bob_spouse_or_child_of_alice_2017",
+     "kind": "fact",
+     "question": "In 2017, was Bob the spouse of Alice or the child of Alice?"
+    },
+    {
+     "name": "bob_child_under_21_2017",
+     "kind": "fact",
+     "question": "In 2017, was Bob a child of Alice who was under age 21?"
+    }
+   ],
+   "formula": "bob_spouse_or_child_of_alice_2017 OR bob_child_under_21_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.07,
+  "luna_compiled": 0.45
+ },
+ {
+  "id": "sara-206",
+  "dataset": "sara_entailment",
+  "case": "s63_c_7_ii_neg",
+  "claim": "Under section 63(c)(7)(ii), Alice's basic standard deduction in 2019 is equal to $3000.",
+  "label": 0,
+  "program": {
+   "id": "sara-206",
+   "elements": [
+    {
+     "name": "basic_standard_deduction_2019_equals_3000",
+     "kind": "given",
+     "value": false,
+     "why": "The excerpt substitutes $12,000 for $3,000 in subparagraph (C), so $3,000 is no longer the amount that subparagraph sets."
+    }
+   ],
+   "formula": "basic_standard_deduction_2019_equals_3000",
+   "handled": true
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-207",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_iii_neg",
+  "claim": "Alice has to pay $70640 in taxes for the year 2017 under section 1(a)(iii).",
+  "label": 0,
+  "program": {
+   "id": "sara-207",
+   "elements": [
+    {
+     "name": "taxable_income_over_89150_not_over_140000_2017",
+     "kind": "fact",
+     "question": "Was the taxable income of Alice over $89,150 but not over $140,000 for 2017?"
+    }
+   ],
+   "formula": "taxable_income_over_89150_not_over_140000_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-208",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_i_neg",
+  "claim": "Alice has to pay $14836 in taxes for the year 2017 under section 1(a)(i).",
+  "label": 0,
+  "program": {
+   "id": "sara-208",
+   "elements": [
+    {
+     "name": "taxable_income_within_first_bracket",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for the year 2017 not over $36,900?"
+    },
+    {
+     "name": "tax_liability_is_14836",
+     "kind": "fact",
+     "question": "Was Alice's total income tax liability for the year 2017 $14,836?"
+    }
+   ],
+   "formula": "taxable_income_within_first_bracket AND tax_liability_is_14836",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-209",
+  "dataset": "sara_entailment",
+  "case": "s1_a_1_ii_neg",
+  "claim": "Alice and her spouse have to pay $24543 in taxes for the year 2017 under section 1(a)(ii).",
+  "label": 0,
+  "program": {
+   "id": "sara-209",
+   "elements": [
+    {
+     "name": "joint_taxable_income_in_second_bracket",
+     "kind": "fact",
+     "question": "For the year 2017, was the taxable income of Alice and her spouse over $36,900 but not over $89,150?"
+    },
+    {
+     "name": "joint_tax_liability_is_24543",
+     "kind": "fact",
+     "question": "Was the total income tax liability of Alice and her spouse for the year 2017 $24,543?"
+    }
+   ],
+   "formula": "joint_taxable_income_in_second_bracket AND joint_tax_liability_is_24543",
+   "handled": false
+  },
+  "jev_compiled": 0.06,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-210",
+  "dataset": "sara_entailment",
+  "case": "s152_c_2_neg",
+  "claim": "Alice bears a relationship to Bob under section 152(c)(2).",
+  "label": 0,
+  "program": {
+   "id": "sara-210",
+   "elements": [
+    {
+     "name": "bob_is_sibling_or_sibling_descendant_of_alice",
+     "kind": "fact",
+     "question": "Is Bob a brother, sister, stepbrother, or stepsister of Alice, or a descendant of one of them?"
+    }
+   ],
+   "formula": "bob_is_sibling_or_sibling_descendant_of_alice",
+   "handled": true
+  },
+  "jev_compiled": 0.82,
+  "luna_compiled": 0.94
+ },
+ {
+  "id": "sara-211",
+  "dataset": "sara_entailment",
+  "case": "s2_b_2_B_neg",
+  "claim": "Section 2(b)(2)(B) applies to Bob in 2015.",
+  "label": 0,
+  "program": {
+   "id": "sara-211",
+   "elements": [
+    {
+     "name": "bob_spouse_nonresident_alien_in_2015",
+     "kind": "fact",
+     "question": "Was Bob's spouse a nonresident alien at any time during the year 2015?"
+    }
+   ],
+   "formula": "bob_spouse_nonresident_alien_in_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.1,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-212",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_ii_neg",
+  "claim": "Alice has to pay $22018 in taxes for the year 2017 under section 1(a)(ii).",
+  "label": 0,
+  "program": {
+   "id": "sara-212",
+   "elements": [
+    {
+     "name": "joint_taxable_income_in_second_bracket_2017",
+     "kind": "fact",
+     "question": "For the year 2017, was the taxable income of Alice and her spouse over $36,900 but not over $89,150?"
+    },
+    {
+     "name": "tax_liability_is_22018_2017",
+     "kind": "fact",
+     "question": "Was Alice's total income tax liability for the year 2017 $22,018?"
+    }
+   ],
+   "formula": "joint_taxable_income_in_second_bracket_2017 AND tax_liability_is_22018_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.15,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-213",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_11_neg",
+  "claim": "Section 3306(b)(11) applies to the payment that Alice made to Bob for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-213",
+   "elements": [
+    {
+     "name": "payment_is_agricultural_labor_remuneration",
+     "kind": "fact",
+     "question": "In 2017, was the payment Alice made to Bob for agricultural labor?"
+    },
+    {
+     "name": "paid_in_non_cash_medium",
+     "kind": "fact",
+     "question": "Was that 2017 payment from Alice to Bob made in a medium other than cash?"
+    }
+   ],
+   "formula": "payment_is_agricultural_labor_remuneration AND paid_in_non_cash_medium",
+   "handled": true
+  },
+  "jev_compiled": 0.42,
+  "luna_compiled": 0.08
+ },
+ {
+  "id": "sara-214",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_A_neg",
+  "claim": "Section 2(b)(1)(A) applies to Bob in 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-214",
+   "elements": [
+    {
+     "name": "bob_maintains_household_with_qualifying_person",
+     "kind": "fact",
+     "question": "For more than one-half of the year 2018, did Bob maintain as his home a household that was the principal place of abode of a qualifying individual who was a member of that household?"
+    }
+   ],
+   "formula": "bob_maintains_household_with_qualifying_person",
+   "handled": true
+  },
+  "jev_compiled": 0.62,
+  "luna_compiled": 0.06
+ },
+ {
+  "id": "sara-215",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_E_neg",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(E).",
+  "label": 0,
+  "program": {
+   "id": "sara-215",
+   "elements": [
+    {
+     "name": "bob_is_child_of_alices_sibling",
+     "kind": "fact",
+     "question": "Is Bob a son or daughter of a brother or sister of Alice?"
+    }
+   ],
+   "formula": "bob_is_child_of_alices_sibling",
+   "handled": true
+  },
+  "jev_compiled": 0.87,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-216",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_A_neg",
+  "claim": "Section 3306(c)(A) applies to Alice employing Bob for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-216",
+   "elements": [
+    {
+     "name": "alice_employed_bob_in_2017",
+     "kind": "fact",
+     "question": "Did Alice employ Bob during the year 2017, with Bob performing service for Alice as his employer?"
+    },
+    {
+     "name": "bob_service_performed_in_us_2017",
+     "kind": "fact",
+     "question": "Was the service Bob performed for Alice during 2017 performed within the United States?"
+    }
+   ],
+   "formula": "alice_employed_bob_in_2017 AND bob_service_performed_in_us_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-217",
+  "dataset": "sara_entailment",
+  "case": "s1_b_iii_neg",
+  "claim": "Alice has to pay $11489 in taxes for the year 2017 under section 1(b)(iii).",
+  "label": 0,
+  "program": {
+   "id": "sara-217",
+   "elements": [
+    {
+     "name": "alice_taxable_income_in_bracket_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $76,400 but not over $127,500?"
+    }
+   ],
+   "formula": "alice_taxable_income_in_bracket_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-218",
+  "dataset": "sara_entailment",
+  "case": "s63_f_3_neg",
+  "claim": "Under section 63(f)(3), Alice's additional standard deduction in 2017 is equal to $600.",
+  "label": 0,
+  "program": {
+   "id": "sara-218",
+   "elements": [
+    {
+     "name": "alice_married_or_surviving_spouse_2017",
+     "kind": "fact",
+     "question": "Was Alice either married or a surviving spouse for the year 2017?"
+    }
+   ],
+   "formula": "alice_married_or_surviving_spouse_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.45,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-219",
+  "dataset": "sara_entailment",
+  "case": "s1_c_i_neg",
+  "claim": "Alice has to pay $265413 in taxes for the year 2017 under section 1(c)(i).",
+  "label": 0,
+  "program": {
+   "id": "sara-219",
+   "elements": [
+    {
+     "name": "alice_taxable_income_not_over_22100_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 not over $22,100?"
+    }
+   ],
+   "formula": "alice_taxable_income_not_over_22100_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-220",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_13_neg",
+  "claim": "Section 3306(c)(13) applies to Alice's employment situation in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-220",
+   "elements": [
+    {
+     "name": "alice_student_nurse_service_2017",
+     "kind": "fact",
+     "question": "Did Alice perform service in 2017 as a student nurse in the employ of a hospital or a nurses' training school?"
+    },
+    {
+     "name": "alice_enrolled_regularly_attending_nursing_classes_2017",
+     "kind": "fact",
+     "question": "Was Alice enrolled in and regularly attending classes at a nurses' training school during 2017?"
+    }
+   ],
+   "formula": "alice_student_nurse_service_2017 AND alice_enrolled_regularly_attending_nursing_classes_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-221",
+  "dataset": "sara_entailment",
+  "case": "s68_a_1_neg",
+  "claim": "Section 68(a)(1) prescribes a reduction of Alice's itemized deductions for the year 2016 by $306.",
+  "label": 0,
+  "program": {
+   "id": "sara-221",
+   "elements": [
+    {
+     "name": "alice_agi_exceeds_applicable_amount_2016",
+     "kind": "fact",
+     "question": "Did Alice's adjusted gross income for 2016 exceed the applicable amount that triggers the itemized deduction reduction?"
+    }
+   ],
+   "formula": "alice_agi_exceeds_applicable_amount_2016",
+   "handled": false
+  },
+  "jev_compiled": 0.58,
+  "luna_compiled": 0.81
+ },
+ {
+  "id": "sara-222",
+  "dataset": "sara_entailment",
+  "case": "s68_a_2_neg",
+  "claim": "Section 68(a)(2) prescribes a reduction of Alice's itemized deductions for the year 2016 by $47000.",
+  "label": 0,
+  "program": {
+   "id": "sara-222",
+   "elements": [
+    {
+     "name": "alice_agi_exceeds_applicable_amount_2016_a2",
+     "kind": "fact",
+     "question": "Did Alice's adjusted gross income for 2016 exceed the applicable amount that triggers the itemized deduction reduction?"
+    }
+   ],
+   "formula": "alice_agi_exceeds_applicable_amount_2016_a2",
+   "handled": false
+  },
+  "jev_compiled": 0.56,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-223",
+  "dataset": "sara_entailment",
+  "case": "s1_c_iii_neg",
+  "claim": "Alice has to pay $3538 in taxes for the year 2017 under section 1(c)(iii).",
+  "label": 0,
+  "program": {
+   "id": "sara-223",
+   "elements": [
+    {
+     "name": "alice_taxable_income_in_bracket_2017_c",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $53,500 but not over $115,000?"
+    }
+   ],
+   "formula": "alice_taxable_income_in_bracket_2017_c",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-224",
+  "dataset": "sara_entailment",
+  "case": "s3301_neg",
+  "claim": "Alice has to pay $26362 in excise tax for the year 2016 under section 3301.",
+  "label": 0,
+  "program": {
+   "id": "sara-224",
+   "elements": [
+    {
+     "name": "alice_employer_in_2016",
+     "kind": "fact",
+     "question": "Was Alice an employer under section 3306(a) during calendar year 2016?"
+    }
+   ],
+   "formula": "alice_employer_in_2016",
+   "handled": false
+  },
+  "jev_compiled": 0.98,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-225",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_3_neg",
+  "claim": "Section 3306(a)(3) applies to Alice for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-225",
+   "elements": [
+    {
+     "name": "cash_domestic_wages_1000_plus",
+     "kind": "fact",
+     "question": "Did Alice pay cash wages of $1,000 or more for domestic service in a private home, local college club, or local chapter of a college fraternity or sorority during 2016 or 2017?"
+    }
+   ],
+   "formula": "cash_domestic_wages_1000_plus",
+   "handled": true
+  },
+  "jev_compiled": 0.18,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-226",
+  "dataset": "sara_entailment",
+  "case": "s1_d_neg",
+  "claim": "Alice has to pay $14836 in taxes for the year 2017 under section 1(d).",
+  "label": 0,
+  "program": {
+   "id": "sara-226",
+   "elements": [
+    {
+     "name": "alice_married_filing_separately_2017",
+     "kind": "fact",
+     "question": "Was Alice a married individual who did not file a joint return with her spouse for 2017?"
+    }
+   ],
+   "formula": "alice_married_filing_separately_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.54,
+  "luna_compiled": 0.74
+ },
+ {
+  "id": "sara-227",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_B_neg",
+  "claim": "Section 3306(c)(B) applies to Alice employing Bob for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-227",
+   "elements": [
+    {
+     "name": "bob_service_outside_us_by_citizen_for_alice",
+     "kind": "fact",
+     "question": "In 2017, did Bob perform service outside the United States, other than in a contiguous country with which the United States has an unemployment compensation agreement, as a United States citizen employed by Alice, an American employer?"
+    }
+   ],
+   "formula": "bob_service_outside_us_by_citizen_for_alice",
+   "handled": false
+  },
+  "jev_compiled": 0.25,
+  "luna_compiled": 0.51
+ },
+ {
+  "id": "sara-228",
+  "dataset": "sara_entailment",
+  "case": "s68_b_1_C_neg",
+  "claim": "Section 68(b)(1)(C) applies to Alice in 2016.",
+  "label": 0,
+  "program": {
+   "id": "sara-228",
+   "elements": [
+    {
+     "name": "alice_unmarried_not_surviving_spouse_or_hoh_2016",
+     "kind": "fact",
+     "question": "In 2016, was Alice an individual who was not married and was neither a surviving spouse nor a head of household?"
+    }
+   ],
+   "formula": "alice_unmarried_not_surviving_spouse_or_hoh_2016",
+   "handled": true
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-229",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_1_B_neg",
+  "claim": "Section 3306(c)(1)(B) applies to Alice employing Bob for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-229",
+   "elements": [
+    {
+     "name": "bob_labor_agricultural_for_alice_2017",
+     "kind": "fact",
+     "question": "In 2017, was the labor Bob performed for Alice agricultural labor?"
+    },
+    {
+     "name": "bob_h2a_alien_worker_2017",
+     "kind": "fact",
+     "question": "In 2017, was Bob an alien admitted to the United States to perform agricultural labor under sections 214(c) and 101(a)(15)(H) of the Immigration and Nationality Act?"
+    }
+   ],
+   "formula": "bob_labor_agricultural_for_alice_2017 AND bob_h2a_alien_worker_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.97,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-230",
+  "dataset": "sara_entailment",
+  "case": "s63_c_6_D_neg",
+  "claim": "Section 63(c)(6)(D) applies to the Walter Brown Family Trust II for 2021.",
+  "label": 0,
+  "program": {
+   "id": "sara-230",
+   "elements": [
+    {
+     "name": "brown_trust_is_estate_or_trust_type_2021",
+     "kind": "fact",
+     "question": "For tax year 2021, was the Walter Brown Family Trust II an estate, trust, common trust fund, or partnership?"
+    }
+   ],
+   "formula": "brown_trust_is_estate_or_trust_type_2021",
+   "handled": true
+  },
+  "jev_compiled": 0.57,
+  "luna_compiled": 0.41
+ },
+ {
+  "id": "sara-231",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_6_neg",
+  "claim": "Section 3306(c)(6) applies to Alice's employment situation in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-231",
+   "elements": [
+    {
+     "name": "alice_employment_is_us_government_2017",
+     "kind": "fact",
+     "question": "In 2017, was Alice's employment situation service performed in the employ of the United States Government?"
+    }
+   ],
+   "formula": "alice_employment_is_us_government_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.04,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-232",
+  "dataset": "sara_entailment",
+  "case": "s63_c_6_B_neg",
+  "claim": "Section 63(c)(6)(B) applies to Alice for 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-232",
+   "elements": [
+    {
+     "name": "alice_nonresident_alien_2017",
+     "kind": "fact",
+     "question": "Was Alice a nonresident alien individual at any time during 2017?"
+    }
+   ],
+   "formula": "alice_nonresident_alien_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.13,
+  "luna_compiled": 0.42
+ },
+ {
+  "id": "sara-233",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_v_neg",
+  "claim": "Alice has to pay $3834 in taxes for the year 2017 under section 1(a)(v).",
+  "label": 0,
+  "program": {
+   "id": "sara-233",
+   "elements": [
+    {
+     "name": "alice_taxable_income_over_250000_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $250,000?"
+    }
+   ],
+   "formula": "alice_taxable_income_over_250000_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-234",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_A_i_II_neg",
+  "claim": "Section 2(b)(1)(A)(i)(II) applies to Bob with Charlie as the qualifying child in 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-234",
+   "elements": [
+    {
+     "name": "charlie_qualifying_child_of_bob_2018",
+     "kind": "fact",
+     "question": "Was Charlie a qualifying child of Bob in 2018?"
+    },
+    {
+     "name": "charlie_not_dependent_by_152b_reason_2018",
+     "kind": "fact",
+     "question": "In 2018, was Charlie not a dependent of Bob by reason of section 152(b)(2) or 152(b)(3)?"
+    }
+   ],
+   "formula": "charlie_qualifying_child_of_bob_2018 AND charlie_not_dependent_by_152b_reason_2018",
+   "handled": false
+  },
+  "jev_compiled": 0.35,
+  "luna_compiled": 0.52
+ },
+ {
+  "id": "sara-235",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_iv_neg",
+  "claim": "Alice has to pay $220295 in taxes for the year 2017 under section 1(a)(iv).",
+  "label": 0,
+  "program": {
+   "id": "sara-235",
+   "elements": [
+    {
+     "name": "alice_taxable_income_140k_to_250k_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $140,000 but not over $250,000?"
+    }
+   ],
+   "formula": "alice_taxable_income_140k_to_250k_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.01,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-236",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_16_neg",
+  "claim": "Section 3306(c)(16) applies to Alice's employment situation in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-236",
+   "elements": [
+    {
+     "name": "alice_2017_service_for_international_org",
+     "kind": "fact",
+     "question": "Was Alice's employment in 2017 service performed in the employ of an international organization?"
+    }
+   ],
+   "formula": "alice_2017_service_for_international_org",
+   "handled": true
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0.05
+ },
+ {
+  "id": "sara-237",
+  "dataset": "sara_entailment",
+  "case": "s3306_a_1_B_neg",
+  "claim": "Section 3306(a)(1)(B) applies to Alice for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-237",
+   "elements": [
+    {
+     "name": "alice_employed_individuals_on_10_days_2017",
+     "kind": "fact",
+     "question": "During 2016 or 2017, did Alice, on each of some 10 days, each in a different calendar week, employ at least one individual in employment for some portion of the day?"
+    }
+   ],
+   "formula": "alice_employed_individuals_on_10_days_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.84,
+  "luna_compiled": 0.98
+ },
+ {
+  "id": "sara-238",
+  "dataset": "sara_entailment",
+  "case": "s1_b_neg",
+  "claim": "Alice has to pay $207772 in taxes for the year 2017 under section 1(b).",
+  "label": 0,
+  "program": {
+   "id": "sara-238",
+   "elements": [
+    {
+     "name": "alice_head_of_household_2017",
+     "kind": "fact",
+     "question": "Was Alice a head of household for 2017?"
+    }
+   ],
+   "formula": "alice_head_of_household_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0.02
+ },
+ {
+  "id": "sara-239",
+  "dataset": "sara_entailment",
+  "case": "s2_b_3_A_neg",
+  "claim": "Section 2(b)(3)(A) applies to Bob in 2019.",
+  "label": 0,
+  "program": {
+   "id": "sara-239",
+   "elements": [
+    {
+     "name": "bob_nonresident_alien_2019",
+     "kind": "fact",
+     "question": "Was Bob a nonresident alien at any time during 2019?"
+    }
+   ],
+   "formula": "bob_nonresident_alien_2019",
+   "handled": true
+  },
+  "jev_compiled": 0.07,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-240",
+  "dataset": "sara_entailment",
+  "case": "s7703_a_1_neg",
+  "claim": "Section 7703(a)(1) applies to Alice for the year 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-240",
+   "elements": [
+    {
+     "name": "statute_applies_to_any_taxable_year",
+     "kind": "given",
+     "value": true,
+     "why": "Section 7703(a)(1) states a general marital-status determination rule for any individual's taxable year, and 2018 is a taxable year."
+    }
+   ],
+   "formula": "statute_applies_to_any_taxable_year",
+   "handled": true
+  },
+  "jev_compiled": 1,
+  "luna_compiled": 1
+ },
+ {
+  "id": "sara-241",
+  "dataset": "sara_entailment",
+  "case": "s2_a_1_B_neg",
+  "claim": "Section 2(a)(1)(B) applies to Bob in 2020.",
+  "label": 0,
+  "program": {
+   "id": "sara-241",
+   "elements": [
+    {
+     "name": "bob_maintains_home_for_child_2020",
+     "kind": "fact",
+     "question": "In 2020, did Bob maintain a household that was the principal place of abode of a child, as a member of that household?"
+    },
+    {
+     "name": "child_is_bobs_son_or_daughter_dependent_2020",
+     "kind": "fact",
+     "question": "In 2020, was that child Bob's son, stepson, daughter, or stepdaughter who qualifies as Bob's dependent under section 152?"
+    },
+    {
+     "name": "bob_entitled_151_deduction_for_child_2020",
+     "kind": "fact",
+     "question": "For tax year 2020, was Bob entitled to a deduction under section 151 for that child?"
+    }
+   ],
+   "formula": "bob_maintains_home_for_child_2020 AND child_is_bobs_son_or_daughter_dependent_2020 AND bob_entitled_151_deduction_for_child_2020",
+   "handled": true
+  },
+  "jev_compiled": 0.44,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-242",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_10_B_neg",
+  "claim": "Section 3306(c)(10)(B) applies to Alice's employment situation in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-242",
+   "elements": [
+    {
+     "name": "alice_service_for_hospital_2017",
+     "kind": "fact",
+     "question": "In 2017, did Alice perform service in the employ of a hospital?"
+    },
+    {
+     "name": "alice_was_patient_of_that_hospital_2017",
+     "kind": "fact",
+     "question": "In 2017, was Alice a patient of that hospital at the time she performed the service?"
+    }
+   ],
+   "formula": "alice_service_for_hospital_2017 AND alice_was_patient_of_that_hospital_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.06,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-243",
+  "dataset": "sara_entailment",
+  "case": "s63_c_2_A_i_neg",
+  "claim": "Section 63(c)(2)(A)(i) applies to Alice in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-243",
+   "elements": [
+    {
+     "name": "alice_filed_joint_return_2017",
+     "kind": "fact",
+     "question": "Did Alice file a joint return for tax year 2017?"
+    }
+   ],
+   "formula": "alice_filed_joint_return_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-244",
+  "dataset": "sara_entailment",
+  "case": "s7703_b_2_neg",
+  "claim": "Section 7703(b)(2) applies to Alice maintaining her home for the year 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-244",
+   "elements": [
+    {
+     "name": "alice_furnished_over_half_household_cost_2018",
+     "kind": "fact",
+     "question": "During 2018, did Alice furnish more than one-half of the cost of maintaining her household?"
+    }
+   ],
+   "formula": "alice_furnished_over_half_household_cost_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.11,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-245",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_C_neg",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(C).",
+  "label": 0,
+  "program": {
+   "id": "sara-245",
+   "elements": [
+    {
+     "name": "bob_is_parent_or_ancestor_of_parent_of_alice",
+     "kind": "fact",
+     "question": "Is Bob Alice's father, mother, or an ancestor of Alice's father or mother (such as a grandparent)?"
+    }
+   ],
+   "formula": "bob_is_parent_or_ancestor_of_parent_of_alice",
+   "handled": true
+  },
+  "jev_compiled": 0.23,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-246",
+  "dataset": "sara_entailment",
+  "case": "s152_a_neg",
+  "claim": "Under section 152(a), Bob is a dependent of Alice for the year 2014.",
+  "label": 0,
+  "program": {
+   "id": "sara-246",
+   "elements": [
+    {
+     "name": "bob_qualifying_child_of_alice_2014",
+     "kind": "fact",
+     "question": "For tax year 2014, was Bob a qualifying child of Alice under section 152?"
+    },
+    {
+     "name": "bob_qualifying_relative_of_alice_2014",
+     "kind": "fact",
+     "question": "For tax year 2014, was Bob a qualifying relative of Alice under section 152?"
+    }
+   ],
+   "formula": "bob_qualifying_child_of_alice_2014 OR bob_qualifying_relative_of_alice_2014",
+   "handled": false
+  },
+  "jev_compiled": 0.39,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-247",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_A_ii_neg",
+  "claim": "Section 2(b)(1)(A)(ii) applies to Charlie as the dependent in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-247",
+   "elements": [
+    {
+     "name": "charlie_is_dependent_of_taxpayer_2017",
+     "kind": "fact",
+     "question": "In 2017, was Charlie a dependent of the taxpayer who claims him?"
+    },
+    {
+     "name": "taxpayer_entitled_151_deduction_for_charlie_2017",
+     "kind": "fact",
+     "question": "For tax year 2017, was the taxpayer entitled to a deduction under section 151 for Charlie?"
+    },
+    {
+     "name": "charlie_principal_abode_of_taxpayer_household_2017",
+     "kind": "fact",
+     "question": "In 2017, did Charlie live in the taxpayer's household as its principal place of abode?"
+    }
+   ],
+   "formula": "charlie_is_dependent_of_taxpayer_2017 AND taxpayer_entitled_151_deduction_for_charlie_2017 AND charlie_principal_abode_of_taxpayer_household_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.15,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-248",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_A_i_neg",
+  "claim": "Section 2(b)(1)(A)(i) applies to Bob in 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-248",
+   "elements": [
+    {
+     "name": "bob_has_qualifying_child_2018",
+     "kind": "fact",
+     "question": "Did Bob have a qualifying child, as defined in section 152(c), in 2018 who was not excluded by the exception in section 2(b)(1)(A)(i)?"
+    }
+   ],
+   "formula": "bob_has_qualifying_child_2018",
+   "handled": true
+  },
+  "jev_compiled": 0.27,
+  "luna_compiled": 0.12
+ },
+ {
+  "id": "sara-249",
+  "dataset": "sara_entailment",
+  "case": "s152_c_2_A_neg",
+  "claim": "Bob bears a relationship to Alice under section 152(c)(2)(A).",
+  "label": 0,
+  "program": {
+   "id": "sara-249",
+   "elements": [
+    {
+     "name": "bob_is_alice_child_or_descendant",
+     "kind": "fact",
+     "question": "Is Bob a child of Alice, or a descendant of a child of Alice?"
+    }
+   ],
+   "formula": "bob_is_alice_child_or_descendant",
+   "handled": true
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-250",
+  "dataset": "sara_entailment",
+  "case": "s1_a_2_neg",
+  "claim": "Alice has to pay $65445 in taxes for the year 2017 under section 1(a).",
+  "label": 0,
+  "program": {
+   "id": "sara-250",
+   "elements": [
+    {
+     "name": "alice_joint_or_surviving_spouse_2017",
+     "kind": "fact",
+     "question": "Did Alice file a joint return for 2017 as a married individual, or was she a surviving spouse for 2017?"
+    }
+   ],
+   "formula": "alice_joint_or_surviving_spouse_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-251",
+  "dataset": "sara_entailment",
+  "case": "s1_c_neg",
+  "claim": "Alice and her spouse have to pay $2600 in taxes for the year 2017 under section 1(c).",
+  "label": 0,
+  "program": {
+   "id": "sara-251",
+   "elements": [
+    {
+     "name": "alice_unmarried_individual_2017",
+     "kind": "given",
+     "value": false,
+     "why": "Section 1(c) applies only to unmarried individuals, but the assertion concerns Alice and her spouse, who are married."
+    }
+   ],
+   "formula": "alice_unmarried_individual_2017",
+   "handled": true
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-252",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_A_neg",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(A).",
+  "label": 0,
+  "program": {
+   "id": "sara-252",
+   "elements": [
+    {
+     "name": "alice_is_bob_child_or_descendant",
+     "kind": "fact",
+     "question": "Is Alice a child of Bob, or a descendant of a child of Bob?"
+    }
+   ],
+   "formula": "alice_is_bob_child_or_descendant",
+   "handled": true
+  },
+  "jev_compiled": 0.03,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-253",
+  "dataset": "sara_entailment",
+  "case": "s1_b_i_neg",
+  "claim": "Alice has to pay $442985 in taxes for the year 2017 under section 1(b)(i).",
+  "label": 0,
+  "program": {
+   "id": "sara-253",
+   "elements": [
+    {
+     "name": "tax_under_bracket_i_equals_442985",
+     "kind": "given",
+     "value": false,
+     "why": "Under section 1(b)(i) the tax is 15% of taxable income not over $29,600, so it can be at most $4,440, not $442,985."
+    }
+   ],
+   "formula": "tax_under_bracket_i_equals_442985",
+   "handled": true
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-254",
+  "dataset": "sara_entailment",
+  "case": "s63_c_2_A_ii_neg",
+  "claim": "Section 63(c)(2)(A)(ii) applies to Alice in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-254",
+   "elements": [
+    {
+     "name": "alice_surviving_spouse_2017",
+     "kind": "fact",
+     "question": "Was Alice a surviving spouse, as defined in section 2(a), for 2017?"
+    }
+   ],
+   "formula": "alice_surviving_spouse_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.08,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-255",
+  "dataset": "sara_entailment",
+  "case": "s63_c_7_i_neg",
+  "claim": "Under section 63(c)(7)(i), Alice's basic standard deduction in 2019 is equal to $4400.",
+  "label": 0,
+  "program": {
+   "id": "sara-255",
+   "elements": [
+    {
+     "name": "basic_deduction_2019_equals_4400",
+     "kind": "given",
+     "value": false,
+     "why": "The excerpt substitutes $18,000 for $4,400 in subparagraph (B), so the amount under section 63(c)(7)(i) is not $4,400."
+    }
+   ],
+   "formula": "basic_deduction_2019_equals_4400",
+   "handled": true
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-256",
+  "dataset": "sara_entailment",
+  "case": "s151_d_1_neg",
+  "claim": "Alice's exemption amount under section 151(d)(1) is equal to $0.",
+  "label": 0,
+  "program": {
+   "id": "sara-256",
+   "elements": [
+    {
+     "name": "default_amount_is_zero",
+     "kind": "given",
+     "value": false,
+     "why": "The excerpt sets the exemption amount at $2,000, not $0, though it defers to unstated exceptions."
+    }
+   ],
+   "formula": "default_amount_is_zero",
+   "handled": false
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-257",
+  "dataset": "sara_entailment",
+  "case": "s1_d_ii_neg",
+  "claim": "Alice has to pay $33653 in taxes for the year 2017 under section 1(d)(ii).",
+  "label": 0,
+  "program": {
+   "id": "sara-257",
+   "elements": [
+    {
+     "name": "taxable_income_in_second_bracket_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 over $18,450 but not over $44,575?"
+    }
+   ],
+   "formula": "taxable_income_in_second_bracket_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-258",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_G_neg",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(G) for the year 2018.",
+  "label": 0,
+  "program": {
+   "id": "sara-258",
+   "elements": [
+    {
+     "name": "bob_is_alice_in_law",
+     "kind": "fact",
+     "question": "During 2018, was Bob a son-in-law, daughter-in-law, father-in-law, mother-in-law, brother-in-law, or sister-in-law of Alice?"
+    }
+   ],
+   "formula": "bob_is_alice_in_law",
+   "handled": true
+  },
+  "jev_compiled": 0.05,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-259",
+  "dataset": "sara_entailment",
+  "case": "s2_b_1_A_i_I_neg",
+  "claim": "Section 2(b)(1)(A)(i)(I) applies to Charlie in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-259",
+   "elements": [
+    {
+     "name": "charlie_married_at_close_2017",
+     "kind": "fact",
+     "question": "Was Charlie married at the close of his taxable year 2017?"
+    }
+   ],
+   "formula": "charlie_married_at_close_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.05,
+  "luna_compiled": 0.14
+ },
+ {
+  "id": "sara-260",
+  "dataset": "sara_entailment",
+  "case": "s152_d_1_D_neg",
+  "claim": "Section 152(d)(1)(D) applies to Bob for the year 2015.",
+  "label": 0,
+  "program": {
+   "id": "sara-260",
+   "elements": [
+    {
+     "name": "bob_not_qualifying_child_2015",
+     "kind": "fact",
+     "question": "During 2015, was Bob not a qualifying child of any taxpayer for any taxable year beginning in 2015?"
+    }
+   ],
+   "formula": "bob_not_qualifying_child_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.14,
+  "luna_compiled": 0.13
+ },
+ {
+  "id": "sara-261",
+  "dataset": "sara_entailment",
+  "case": "s1_d_i_neg",
+  "claim": "Alice has to pay $17123 in taxes for the year 2017 under section 1(d)(i).",
+  "label": 0,
+  "program": {
+   "id": "sara-261",
+   "elements": [
+    {
+     "name": "taxable_income_in_first_bracket_2017",
+     "kind": "fact",
+     "question": "Was Alice's taxable income for 2017 not over $18,450?"
+    }
+   ],
+   "formula": "taxable_income_in_first_bracket_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.02,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-262",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_11_neg",
+  "claim": "Section 3306(c)(11) applies to Alice's employment situation in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-262",
+   "elements": [
+    {
+     "name": "alice_employed_by_foreign_government_2017",
+     "kind": "fact",
+     "question": "In 2017, was Alice's employment a service performed in the employ of a foreign government (including as a consular or other officer or employee, or a nondiplomatic representative)?"
+    }
+   ],
+   "formula": "alice_employed_by_foreign_government_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.1,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-263",
+  "dataset": "sara_entailment",
+  "case": "s63_f_2_B_neg",
+  "claim": "Section 63(f)(2)(B) applies to Alice in 2017 with Bob as the spouse.",
+  "label": 0,
+  "program": {
+   "id": "sara-263",
+   "elements": [
+    {
+     "name": "bob_blind_at_close_2017",
+     "kind": "fact",
+     "question": "Was Bob blind as of the close of 2017?"
+    },
+    {
+     "name": "bob_is_alice_spouse_2017",
+     "kind": "fact",
+     "question": "Was Bob Alice's spouse as of the close of 2017?"
+    },
+    {
+     "name": "alice_entitled_spouse_exemption_2017",
+     "kind": "fact",
+     "question": "For 2017, was an additional exemption under section 151(b) allowable to Alice for Bob?"
+    }
+   ],
+   "formula": "bob_blind_at_close_2017 AND bob_is_alice_spouse_2017 AND alice_entitled_spouse_exemption_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.14,
+  "luna_compiled": 0.5
+ },
+ {
+  "id": "sara-264",
+  "dataset": "sara_entailment",
+  "case": "s3306_c_7_neg",
+  "claim": "Section 3306(c)(7) applies to Alice's employment situation in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-264",
+   "elements": [
+    {
+     "name": "employment_for_state_or_political_subdivision",
+     "kind": "fact",
+     "question": "In 2017, was Alice's employment service performed in the employ of a State or a political subdivision of a State?"
+    }
+   ],
+   "formula": "employment_for_state_or_political_subdivision",
+   "handled": true
+  },
+  "jev_compiled": 0.05,
+  "luna_compiled": 0.01
+ },
+ {
+  "id": "sara-265",
+  "dataset": "sara_entailment",
+  "case": "s3306_b_2_C_neg",
+  "claim": "Section 3306(b)(2)(C) applies to the payment Alice made to the retirement fund for the year 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-265",
+   "elements": [
+    {
+     "name": "payment_on_account_of_death",
+     "kind": "fact",
+     "question": "Was the payment Alice made to the retirement fund in 2017 made on account of a death?"
+    }
+   ],
+   "formula": "payment_on_account_of_death",
+   "handled": false
+  },
+  "jev_compiled": 0.04,
+  "luna_compiled": 0.02
+ },
+ {
+  "id": "sara-266",
+  "dataset": "sara_entailment",
+  "case": "s63_f_1_A_neg",
+  "claim": "Section 63(f)(1)(A) applies to Bob in 2017.",
+  "label": 0,
+  "program": {
+   "id": "sara-266",
+   "elements": [
+    {
+     "name": "bob_attained_age_65_in_2017",
+     "kind": "fact",
+     "question": "Had Bob attained age 65 before the close of his taxable year 2017?"
+    }
+   ],
+   "formula": "bob_attained_age_65_in_2017",
+   "handled": true
+  },
+  "jev_compiled": 0.24,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-267",
+  "dataset": "sara_entailment",
+  "case": "s152_d_2_H_neg",
+  "claim": "Alice bears a relationship to Bob under section 152(d)(2)(H) for the year 2015.",
+  "label": 0,
+  "program": {
+   "id": "sara-267",
+   "elements": [
+    {
+     "name": "same_principal_abode_all_2015",
+     "kind": "fact",
+     "question": "Did Bob have the same principal place of abode as Alice for the whole of their taxable year 2015?"
+    },
+    {
+     "name": "member_of_household_2015",
+     "kind": "fact",
+     "question": "Was Bob a member of Alice's household for the taxable year 2015?"
+    },
+    {
+     "name": "bob_spouse_of_alice_in_2015",
+     "kind": "fact",
+     "question": "Was Bob at any time during 2015 the spouse of Alice?"
+    }
+   ],
+   "formula": "same_principal_abode_all_2015 AND member_of_household_2015 AND NOT bob_spouse_of_alice_in_2015",
+   "handled": true
+  },
+  "jev_compiled": 0.04,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-268",
+  "dataset": "sara_entailment",
+  "case": "s151_d_3_A_neg",
+  "claim": "Under section 151(d)(3)(A), Alice's exemption amount is reduced to $1900.",
+  "label": 0,
+  "program": {
+   "id": "sara-268",
+   "elements": [
+    {
+     "name": "agi_exceeds_applicable_amount",
+     "kind": "fact",
+     "question": "For the taxable year, did Alice's adjusted gross income exceed the applicable amount under section 68(b)?"
+    }
+   ],
+   "formula": "agi_exceeds_applicable_amount",
+   "handled": false
+  },
+  "jev_compiled": 0.71,
+  "luna_compiled": 0.58
+ },
+ {
+  "id": "sara-269",
+  "dataset": "sara_entailment",
+  "case": "s151_d_5_neg",
+  "claim": "The exemption amount of Alice's exemption is equal to $2000 under section 151(d)(5).",
+  "label": 0,
+  "program": {
+   "id": "sara-269",
+   "elements": [
+    {
+     "name": "exemption_zero_under_151d5",
+     "kind": "given",
+     "value": false,
+     "why": "Section 151(d)(5) sets the exemption amount to zero for taxable years 2018 through 2025, so under that paragraph it cannot equal $2000."
+    }
+   ],
+   "formula": "exemption_zero_under_151d5",
+   "handled": true
+  },
+  "jev_compiled": 0,
+  "luna_compiled": 0
+ },
+ {
+  "id": "sara-270",
+  "dataset": "sara_entailment",
+  "case": "s68_b_1_B_neg",
+  "claim": "Under section 68(b)(1)(B), Alice's applicable amount for 2016 is equal to $275000.",
+  "label": 0,
+  "program": {
+   "id": "sara-270",
+   "elements": [
+    {
+     "name": "alice_head_of_household_2016",
+     "kind": "fact",
+     "question": "Was Alice a head of household, as defined in section 2(b), for the taxable year 2016?"
+    }
+   ],
+   "formula": "alice_head_of_household_2016",
+   "handled": false
+  },
+  "jev_compiled": 0.1,
+  "luna_compiled": 0.13
+ },
+ {
+  "id": "sara-271",
+  "dataset": "sara_entailment",
+  "case": "s63_b_neg",
+  "claim": "Under section 63(b), Alice's taxable income in 2017 is equal to $31400.",
+  "label": 0,
+  "program": {
+   "id": "sara-271",
+   "elements": [
+    {
+     "name": "alice_does_not_itemize_2017",
+     "kind": "fact",
+     "question": "Did Alice elect not to itemize her deductions for the taxable year 2017?"
+    }
+   ],
+   "formula": "alice_does_not_itemize_2017",
+   "handled": false
+  },
+  "jev_compiled": 0.78,
+  "luna_compiled": 1
+ }
+]
