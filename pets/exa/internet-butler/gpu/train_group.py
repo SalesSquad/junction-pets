@@ -19,7 +19,8 @@ well their label is verified: generator blind pass and a second model family (re
 
 Outputs under --out: adapter/ or model/, metrics.json (valid and each test file: accuracy by attack,
 jurisdiction, language and label tier; calibration fitted on valid), judgments-<file>.jsonl
-("student|situation|clause" -> p) for bench/situations/tournament.mjs --student=...
+("student|situation|clause" -> p) for bench/situations/tournament.mjs --student=...; with --dump-scores also
+valid_scores.jsonl and <file>_scores.jsonl (raw per-clause scores for bench/situations/listwise/select_policy.py).
 
 Usage:
   python train_group.py --train train.jsonl --valid valid.jsonl --test test.jsonl --model /root/models/qwen3-1.7b \
@@ -46,6 +47,8 @@ ap.add_argument("--w-none", type=float, default=0.15, help="weight of items neit
 ap.add_argument("--ablate", choices=["", "situation", "clause"], default="", help="shortcut control: withhold one side of the input")
 ap.add_argument("--limit-train", type=int, default=0); ap.add_argument("--seed", type=int, default=5)
 ap.add_argument("--eval-only", action="store_true"); ap.add_argument("--adapter", default="")
+ap.add_argument("--dump-scores", action="store_true", help="also write the raw per-clause scores: valid_scores.jsonl and <test file>_scores.jsonl "
+                "(rows {gid, question, clauses, score}) for bench/situations/listwise/select_policy.py")
 a = ap.parse_args()
 random.seed(a.seed); torch.manual_seed(a.seed)
 os.makedirs(a.out, exist_ok=True)
@@ -177,6 +180,12 @@ def accuracy(rows, sc):
             n, c = by.get(key, (0, 0.0)); by[key] = (n + 1, c + o)
     return {k: {"n": n, "acc": round(c / n, 4)} for k, (n, c) in sorted(by.items())}
 
+def dump_scores(name, rows, sc):
+    """--dump-scores: the raw per-clause scores of one split (no calibration applied), one row per group."""
+    with open(f"{a.out}/{name}_scores.jsonl", "w", encoding="utf-8") as f:
+        for r, x in zip(rows, sc):
+            f.write(json.dumps({"gid": r.get("gid"), "question": r["question"], "clauses": r["clauses"], "score": x}, ensure_ascii=False) + "\n")
+
 def fit_calibration(rows, sc):
     """Listwise temperature (NLL over siblings) and, for point mode, a pointwise sigmoid((s - b) / T) fitted with BCE."""
     def nll(T):
@@ -261,6 +270,8 @@ cal = {"T_list": 1.0, "T": 1.0, "b": 0.0}
 if valid:
     sv = evaluate(valid)
     metrics["valid"] = accuracy(valid, sv)
+    if a.dump_scores:
+        dump_scores("valid", valid, sv)
     cal.update(fit_calibration(valid, sv))
     with open(f"{a.out}/judgments-valid.jsonl", "w", encoding="utf-8") as f:
         for r, x in zip(valid, sv):
@@ -272,6 +283,8 @@ metrics["temperature"] = cal.get("T", cal["T_list"])
 for name, rows in tests.items():
     st = evaluate(rows)
     metrics[name] = accuracy(rows, st)
+    if a.dump_scores:
+        dump_scores(name, rows, st)
     with open(f"{a.out}/judgments-{name}.jsonl", "w", encoding="utf-8") as f:
         for r, x in zip(rows, st):
             pl = torch.softmax(torch.tensor(x) / cal["T_list"], 0).tolist()
