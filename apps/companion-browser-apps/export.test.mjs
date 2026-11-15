@@ -14,11 +14,12 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     const apps = await exportApps(output);
     const catalog = JSON.parse(await readFile(join(output, 'catalog.json'), 'utf8'));
     assert.deepEqual(catalog.apps, apps);
-    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker','junction-aalto-university','junction-hostinger','junction-cala','junction-valio-aimo']));
+    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker','junction-aalto-university','junction-hostinger','junction-cala','junction-context-dev','junction-valio-aimo']));
     assert.equal(apps.filter(app=>app.petSlug==='junction-intel').length,2);
     const valio=apps.find(app=>app.petSlug==='junction-valio-aimo');
     assert.equal(valio.path,'/apps/aimo-trade/browser/dist/index.html');
     for(const asset of ['index.html','app.js','app.css','export.json','NOTICE.txt'])assert.ok((await readFile(join(output,'apps/aimo-trade/browser/dist',asset))).length>0);
+
 
     for (const app of apps) assert.match(await readFile(join(output, app.path), 'utf8'), /<html/i);
     assert.match(await readFile(join(output,'apps/spread-director/index.html'), 'utf8'), /Use synthetic example/);
@@ -35,6 +36,8 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     assert.match(recovery,/connect-src 'none'/); assert.match(recovery,/href="\.\/styles\.css"/);
     const traffic=await readFile(join(output,'apps/traffic-forensics/public/traffic/index.html'),'utf8');
     assert.match(traffic,/connect-src 'none'/); assert.match(traffic,/src="\.\/app\.mjs"/);
+    const replay=await readFile(join(output,'apps/supplypulse-replay/index.html'),'utf8');
+    assert.match(replay,/SYNTHETIC_REPLAY/); assert.match(replay,/connect-src 'none'/); assert.match(replay,/src="\.\/app\.mjs"/);
     const roundlens=join(output,'apps/roundlens');
     const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css'];
     const entries=await Promise.all(names.map(async name=>`${name}\0${createHash('sha256').update(await readFile(join(roundlens,name))).digest('hex')}\n`));
@@ -46,6 +49,8 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     assert.equal(artifact.embeddedClientDigest,expectedDigest);
     assert.match(artifact.upstreamProductSourceDigest,/^[0-9a-f]{64}$/);
     assert.equal(Object.hasOwn(artifact,'productSourceDigest'),false);
+    const index = await readFile(join(output,'index.html'),'utf8');
+    for (const app of apps) assert.ok(index.includes(`href="./${app.path.slice(1)}"`));
     await assert.rejects(exportApps(output), {code:'EEXIST'});
   } finally { await rm(temp, {recursive:true,force:true}); }
 });

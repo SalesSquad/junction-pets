@@ -101,6 +101,7 @@ export default function App() {
           <a className="wordmark" href={data ? `${data.config.canonicalOrigin}/studio` : '#collection-main'} aria-label="Chibi home">chibi.pet</a>
           <nav aria-label="Main navigation">
             <a href="#collection-main" aria-current="page">Junction</a>
+            <a href={publicAsset('apps/knowledge-os/index.html')}>Knowledge OS</a>
             {data && <a href={`${data.config.canonicalOrigin}/${data.config.locale}/den`}>My Chibi</a>}
           </nav>
         </header>

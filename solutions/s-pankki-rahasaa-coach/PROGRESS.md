@@ -1,6 +1,6 @@
 # Rahasää continuation
 
-Stage: building. Product API, router lab and chaos lab exist in SalesSquad/spankki-coach main `4eb0c564c25a4f80cd9c77e03635cb2f0cbd6bbf`.
+Stage: building. Product API, router lab and chaos lab exist in SalesSquad/spankki-coach main `26ced7e78fb4f8533961b9b3b69e88028fc719e4`.
 
 ## Next task
 
@@ -12,6 +12,16 @@ Stage: building. Product API, router lab and chaos lab exist in SalesSquad/spank
 - Acceptance command and expected result: prodeval regression shows no drop in judged quality; `npm run check` passes with the updated prompt hash
 - Blocker: none
 - Next action: add the sentence to `GROUNDING`, run prodeval with Sonnet + Haiku judges, then update the pinned hash
+
+Done 2026-11-15 (SalesSquad/spankki-coach #98–#101, main `26ced7e7`, local CI 483/0):
+- **Money features** (#98): payday warning, savings goal, recurring payments, bill calendar, time-machine savings slider.
+- **Fixed costs agree** (#99): safe to spend reserves at least the fixed bills expected before payday (young
+  persona 1 111,52 € → 272,75 €: rent 7.10. before the 15.10. payday was missed by the median of past cycles).
+- **Answer checks** (#100): count/date facts and a language re-ask on; a Haiku claim checker measured (2× cost,
+  +3.4 s, no judged gain) and left off. The "do not describe your tools" prompt sentence: two rounds, pooled judge
+  53.2 % for the current prompt, not shipped.
+- **Support features** (#101): support plan with free debt-advice links, buffer fund, alerts (duplicate charge,
+  price rise, new recurring charge), weekly review, own salary for irregular income.
 
 Done 2026-11-15: **speculative card** — `POST /api/customers/:id/peek` returns the local router's card for a first
 question, shown as "Pikavastaus – valmentaja tarkentaa" until the coach's reply replaces it

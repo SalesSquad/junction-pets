@@ -6,7 +6,7 @@ All paths are relative to `solutions/astrazeneca-care-equity/`. Every note is SY
 Gemma is not entered as the best reader. It is the **cheap, local first reader in a two-reader check**: Gemma 3 1B reads every note on the machine, a second reader (Nemotron) reads it independently, code computes the dates, and a field is pre-filled only when both agree. That pre-fills 684 of 700 test notes with 4 wrong and 220 of 308 stress notes with 3 wrong, while Gemma's own confidence alone would pre-fill all 308 stress notes with 85 wrong (`scribe/v4/RESULTS.md`). Everything the readers disagree on goes to a person.
 
 ## Problem
-Finnish county cancer-pathway delays can only be compared fairly if event dates are reliable. Many dates sit in free-text notes ("lähete lähetettiin kolme viikkoa sitten"). A scribe that misreads them manufactures fake county inequality: a county read by the raw scribe is flagged in 1.000 of 1,000 no-difference simulations, 0.003 with code-resolved dates (`DATA_COLLECTION.md` section 4; `README.md` track 1).
+Finnish county cancer-pathway delays can only be compared fairly if event dates are reliable. Many dates sit in free-text notes ("lähete lähetettiin kolme viikkoa sitten"). A scribe that misreads them manufactures fake county inequality: a county read by the raw scribe is flagged in 1,000 of 1,000 no-difference simulations, and in 3 of 1,000 with code-resolved dates (`DATA_COLLECTION.md` section 4; `README.md` track 1).
 
 ## What Gemma does
 - Gemma 3 (instruction-tuned, ungated Unsloth mirrors `unsloth/gemma-3-270m-it`, `-1b-it`) plus a LoRA adapter reads a Finnish note and copies each date phrase and event type as JSON (`TRAINING.md`, `serve/README.md`).
@@ -14,7 +14,7 @@ Finnish county cancer-pathway delays can only be compared fairly if event dates 
 - Output is a proposal only: a person confirms every event (`README.md` track 2).
 
 ## Why an open model (only what the code supports)
-- Small enough to run offline: the demo runs the 270M model with the merged adapter on CPU in one persistent process, with `HF_HUB_OFFLINE=1`, and the page calls no hosted model (`serve/demo/README.md`, `serve/demo/engine.py`). Notes never leave the machine in that path.
+- Small enough to run offline: the demo runs the 270M model with the merged adapter on CPU in one persistent process, with `HF_HUB_OFFLINE=1`; that Gemma path calls no hosted model (`serve/demo/README.md`, `serve/demo/engine.py`), so notes never leave the machine in it. The separate "Ask Nemotron live" button does send the SYNTHETIC note to the hosted Nemotron endpoint (`runs/nemotron-live-demo.jsonl`).
 - Fine-tunable: LoRA r16 on attention and MLP projections; the 270M adapter trains in 176 s on one A100 (`TRAINING.md` section on recommendation; `data/scribe/v2/ablation-v1.json`).
 - Not measured: cost per note, CPU latency in the demo beyond `data/scribe/demo/http-timing.json`, or privacy/compliance review. No claim is made for them.
 
