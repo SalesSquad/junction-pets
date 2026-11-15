@@ -43,6 +43,10 @@ V8_WEIGHTS_SHA = "07823dcc52ea85b64e18767e1b1af29e63e3236613598cb349610a6b4fd37d
 V8_RECEIPT_SHA = "dc22f5538f19ef346d6b9965e7b28beed15e813b4b149ae5711d7dfae1771e73"
 SCHEMA = "junction.rokoko.v13.fresh-519024-sustained-right.v1"
 PREFLIGHT_SHA = "099d8cc69d0d11bca1e21d0fe2b4c7c397b3f094a352d80ea3fcc52a2fddad29"
+# Pinned, source-derived aggregate over all 512 pre-registered resets. It
+# binds public observations/masks and 12-decimal scenario fingerprints from
+# the original ARM64 reference; native world hashes are retained separately.
+PORTABLE_PREFLIGHT_SHA = "c9a64e3b1582543ee1c96ad2c67a042fe106ca82aed1a09fdf0b61f26f57cc3e"
 CUTOFF = 1794762000  # 2026-11-15T17:00:00Z
 REVIEWED_PLAN_SHA = "93013025c9e19d94911f249f4dbf0cc034c767da23dca0273d8808323c0b173c"
 OBSERVED_PRODUCT_HEAD = "faec266d6d3a44af3a564f46e0778209c1dc3af1"
@@ -220,10 +224,47 @@ def verify_preflight(path):
 def verify_public_preflight(scans, cohort, survey):
     require(len({w["world_hash"] for w in scans}) == SCAN and
             sum(abs(w["observation"][7]) < .122 for w in scans) == 178 and
-            [{"seed": w["seed"], "world_hash": w["world_hash"],
-              "near": w["observed_corridor"]} for w in cohort] ==
-            survey["selected_first40_near8_clear"],
+            [{"seed": w["seed"], "near": w["observed_corridor"]} for w in cohort] ==
+            [{"seed": w["seed"], "near": w["near"]}
+             for w in survey["selected_first40_near8_clear"]] and
+            portable_scan_digest(scans) == PORTABLE_PREFLIGHT_SHA,
             "V13_FRESH_PUBLIC_WORLDS_DIFFER_FROM_KNOWN_PREFLIGHT")
+
+
+def portable_scenario_digest(env):
+    """Compare latent reset identity at 12 decimal places, never policy input."""
+    def rounded(value):
+        value = float(value)
+        require(np.isfinite(value), "V13_NONFINITE_PORTABLE_SCENARIO")
+        return round(value, 12)
+
+    def integer(value):
+        result = int(value)
+        require(not isinstance(value, (bool, np.bool_)) and result == value,
+                "V13_NONINTEGER_PORTABLE_SCENARIO")
+        return result
+
+    return digest({"initial_x": rounded(env.data.qpos[0]),
+                   "initial_y": rounded(env.data.qpos[1]),
+                   "mass": rounded(env.model.body_mass[env.obj]),
+                   "friction": rounded(env.model.geom_friction[env.og, 0]),
+                   "obstacle_y": rounded(env.model.geom_pos[env.bg, 1]),
+                   "amplitude": rounded(env.amplitude),
+                   "frequency": rounded(env.frequency),
+                   "phase": rounded(env.phase),
+                   "drop_start": integer(env.drop_start),
+                   "drop_len": integer(env.drop_len),
+                   "deadman_release": integer(env.release)})
+
+
+def portable_scan_digest(scans):
+    """Bind ordered seeds, near labels, scenario digests and full public ABI."""
+    return digest([{"seed": row["seed"],
+                    "near": bool(abs(float(row["observation"][7])) < .122),
+                    "portable_scenario_sha256": row["portable_scenario_sha256"],
+                    "public_state_sha256": digest({"observation": row["observation"],
+                                                   "mask": row["mask"]})}
+                   for row in scans])
 
 
 def scan_real_public_starts(env, signature):
@@ -235,6 +276,7 @@ def scan_real_public_starts(env, signature):
                 np.asarray(mask).shape == (7,) and
                 np.all(np.isfinite(obs)), "V13_ONLY_REAL_FINITE_PUBLIC_18D_AND_SEVEN_MASK")
         result.append({"seed": seed, "world_hash": str(signature(env)),
+                       "portable_scenario_sha256": portable_scenario_digest(env),
                        "observation": np.asarray(obs).tolist(),
                        "mask": np.asarray(mask, dtype=int).tolist()})
     return result
@@ -593,7 +635,8 @@ def independent_true_physics_replay(private, training, rows, factories, v7,
         obs = env.reset(seed=frame["seed"], ood=False)
         require(near(obs, frame["observation"]) and
                 [int(bit) for bit in env.mask(obs)] == frame["mask"] and
-                signature(env) == frame["world_hash"],
+                signature(env) == frame["world_hash"] and
+                portable_scenario_digest(env) == frame["portable_scenario_sha256"],
                 "V13_INDEPENDENT_MUJOCO_ALL512_INITIAL_PUBLIC_WORLDS_NOT_REPRODUCED")
     seen = set()
     ordered = iter((w["seed"], a) for w in training["cohort"] for a in ARMS)

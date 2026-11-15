@@ -95,10 +95,15 @@ Frozen inputs:
   `099d8cc69d0d11bca1e21d0fe2b4c7c397b3f094a352d80ea3fcc52a2fddad29`.
 
 The harness verifies all 512 public resets for seeds 519024..519535,
-178 near/334 clear, distinct world hashes, original finite 18D/7-mask ABI,
-and the known preflight's selected world hashes. It independently derives the
+178 near/334 clear, distinct native world hashes, original finite 18D/7-mask ABI,
+and the known preflight's selected seeds and strata. It independently derives the
 first 40 near and first 8 clear worlds, merged in ascending seed order.
 It refuses the executed/reserved V12 ranges and invalid 520000 range.
+The original ARM64 survey's native float-serialized hashes remain preserved;
+cross-platform preflight additionally verifies all 512 public states and
+12-decimal scenario fingerprints against a separately pinned aggregate.
+Native per-run hashes are still required to match during the Linux physics
+replay. See [the cross-platform preflight record](PREFLIGHT_CROSS_PLATFORM_20261115.md).
 The exact world-major arms are `frozen_v5`,
 `v12_phase_dwell_supported_actions`, `train_only_right4_burst2`,
 `train_only_right4_burst4`; at most 192 originals, V5 first on every world.

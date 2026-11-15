@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 import zipfile
@@ -34,11 +35,18 @@ def signature(env):
 
 class FakeEnv:
     def __init__(self, max_options=60):
-        pass
+        self.obj = self.og = 0
+        self.bg = 1
+        self.model = SimpleNamespace(body_mass=h.np.array([.08]),
+                                     geom_friction=h.np.array([[.4], [.5]]),
+                                     geom_pos=h.np.array([[0., 0.], [0., .1]]))
+        self.amplitude, self.frequency, self.phase = .02, .5, .2
+        self.drop_start, self.drop_len, self.release = 4, 2, 10
 
     def reset(self, seed, ood):
         assert ood is False
         self.seed = seed
+        self.data = SimpleNamespace(qpos=h.np.array([(seed-h.FIRST)*.000001, .1]))
         self.done = False
         self.dwell = self.steps = self.physics_steps = self.contacts = 0
         self.obs = [0.] * 18
@@ -116,6 +124,10 @@ class HarnessTests(unittest.TestCase):
         self.root = Path(self.tmp.name)
         self.private = self.root / 'private'
         self.scans = h.scan_real_public_starts(FakeEnv(), signature)
+        self.portable_pin = patch.object(h, 'PORTABLE_PREFLIGHT_SHA',
+                                        h.portable_scan_digest(self.scans))
+        self.portable_pin.start()
+        self.addCleanup(self.portable_pin.stop)
         self.cohort = Protocol.derive_cohort(self.scans, {})
         self.survey = dict(selected_first40_near8_clear=[
             dict(seed=r['seed'], world_hash=r['world_hash'], near=r['observed_corridor'])
@@ -183,6 +195,38 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(self.scans[-1]['seed'],519535)
         self.assertEqual(sum(abs(r['observation'][7])<.122 for r in self.scans),178)
         h.verify_public_preflight(self.scans,self.cohort,self.survey)
+
+    def test_portable_preflight_keeps_native_identity_and_rejects_drift(self):
+        # Another architecture can have a different exact native world hash;
+        # its independent replay must still reproduce that native hash.
+        scans = copy.deepcopy(self.scans)
+        scans[0]['world_hash'] = 'a' * 64
+        cohort = Protocol.derive_cohort(scans,{})
+        h.verify_public_preflight(scans,cohort,self.survey)
+        for field in ('observation', 'mask', 'portable_scenario_sha256'):
+            changed = copy.deepcopy(self.scans)
+            if field == 'observation': changed[0][field][0] += .0001
+            elif field == 'mask': changed[0][field][0] = 0
+            else: changed[0][field] = '0' * 64
+            with self.subTest(field=field), self.assertRaisesRegex(AssertionError,'DIFFER_FROM_KNOWN_PREFLIGHT'):
+                h.verify_public_preflight(changed,Protocol.derive_cohort(changed,{}),self.survey)
+        duplicate = copy.deepcopy(self.scans)
+        duplicate[0]['world_hash'] = duplicate[1]['world_hash']
+        with self.assertRaisesRegex(AssertionError,'DIFFER_FROM_KNOWN_PREFLIGHT'):
+            h.verify_public_preflight(duplicate,Protocol.derive_cohort(duplicate,{}),self.survey)
+        # An unselected world is still covered by the 512-world aggregate.
+        unselected = copy.deepcopy(self.scans)
+        unselected[-1]['portable_scenario_sha256'] = '0' * 64
+        with self.assertRaisesRegex(AssertionError,'DIFFER_FROM_KNOWN_PREFLIGHT'):
+            h.verify_public_preflight(unselected,Protocol.derive_cohort(unselected,{}),self.survey)
+
+    def test_portable_scenario_precision_and_real_change(self):
+        env=FakeEnv(); env.reset(h.FIRST,False)
+        original=h.portable_scenario_digest(env)
+        env.data.qpos[0] += 1e-15
+        self.assertEqual(h.portable_scenario_digest(env),original)
+        env.data.qpos[0] += 1e-6
+        self.assertNotEqual(h.portable_scenario_digest(env),original)
 
     def test_cohort_order(self):
         self.assertTrue(h.independent_first_public_cohort(self.scans,self.cohort))
@@ -276,6 +320,16 @@ class HarnessTests(unittest.TestCase):
         factories={a:lambda:lambda obs,mask:6 for a in h.ARMS}
         with self.assertRaisesRegex(AssertionError,'POLICY_ACTION'):
             h.independent_true_physics_replay(self.private,training,rows,factories,v7,FakeEnv,signature)
+
+    def test_independent_replay_rejects_portable_scenario_drift(self):
+        self.run_original(); training,_,_,rows=self.read_full()
+        class DriftScenario(FakeEnv):
+            def reset(self,seed,ood):
+                obs=super().reset(seed,ood)
+                self.data.qpos[0] += 1e-6
+                return obs
+        with self.assertRaisesRegex(AssertionError,'ALL512_INITIAL_PUBLIC_WORLDS_NOT_REPRODUCED'):
+            h.independent_true_physics_replay(self.private,training,rows,FACTORIES,v7,DriftScenario,signature)
 
     def test_forged_burst_mode_history_rejected_by_replay(self):
         self.run_original(); training,_,_,rows=self.read_full()
