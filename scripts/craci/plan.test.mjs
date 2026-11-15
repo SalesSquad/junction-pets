@@ -39,6 +39,14 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
          'portfolio-browser', 'new-products-browser'].includes(workload)) {
       input.source_sha = candidate;
     }
+    if (workload === 'rokoko-mujoco-v12-pilot') {
+      // Generic matrix inventory must use the uniquely reviewed product source,
+      // not the arbitrary override used to exercise other bounded workloads.
+      input.source_sha = 'c77158f9ae80acc2b1eafaf9284c4397426799b2';
+    }
+    if (workload === 'rokoko-mujoco-v13-pilot') {
+      input.source_sha = 'faec266d6d3a44af3a564f46e0778209c1dc3af1';
+    }
     if (['portfolio-browser', 'new-products-browser'].includes(workload)) input.product = 'all';
     const plan = resolvePlan(input, context);
     assert.ok(plan.jobCount >= 1 && plan.jobCount <= 12);
@@ -78,8 +86,10 @@ test('V12 source-trained 144-episode fresh pilot source and deadline are exact i
   const workload = 'rokoko-mujoco-v12-pilot';
   assert.ok(WORKLOADS.includes(workload));
   assert.throws(() => resolvePlan({workload}, context), /requires an explicit source_sha/);
-  const source = '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f';
+  const source = 'c77158f9ae80acc2b1eafaf9284c4397426799b2';
   const admitted = resolvePlan({workload, source_sha: source}, context);
+  assert.throws(() => resolvePlan({workload, source_sha: candidate}, context),
+    /V12 pilot requires exact reviewed source_sha/);
   assert.equal(admitted.jobCount, 1);
   assert.equal(admitted.maxParallel, 1);
   assert.deepEqual(admitted.matrix.include.map(x => x.source_sha), [source]);
@@ -107,4 +117,24 @@ test('V13 causal original TRAIN admission is a single pinned source and never au
   assert.throws(() => resolvePlan({workload, source_sha: exactSource}, {
     ...context, now: '2026-11-15T17:00:00Z',
   }), /deadline/);
+});
+
+test('V13 new 519024 physics 192-episode pilot requires exact prospective SHA and blocks old study', () => {
+  const workload='rokoko-mujoco-v13-pilot';
+  const source='faec266d6d3a44af3a564f46e0778209c1dc3af1';
+  assert.ok(WORKLOADS.includes(workload));
+  assert.throws(()=>resolvePlan({workload}, context), /requires an explicit source_sha/);
+  assert.throws(()=>resolvePlan({workload,source_sha:candidate}, context),
+    /V13 pilot requires exact prospective source_sha/);
+  assert.throws(()=>resolvePlan({workload,source_sha:'c77158f9ae80acc2b1eafaf9284c4397426799b2'}, context),
+    /V13 pilot requires exact prospective source_sha/);
+  const planned=resolvePlan({workload,source_sha:source},context);
+  assert.equal(planned.jobCount,1);
+  assert.equal(planned.maxParallel,1);
+  assert.deepEqual(planned.matrix.include.map(v=>v.source_sha),[source]);
+  assert.deepEqual(planned.matrix.include.map(v=>v.cell),[workload]);
+  assert.throws(()=>resolvePlan({workload,source_sha:source},
+    {...context,creditOpen:'false'}), /closed/);
+  assert.throws(()=>resolvePlan({workload,source_sha:source},
+    {...context,now:'2026-11-15T17:00:00Z'}), /deadline/);
 });
