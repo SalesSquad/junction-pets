@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+        }
+        .e-wrap {
+          position: absolute;
+          left: 96px;
+          top: 220px;
+          width: 1728px;
+        }
+        .e-word {
+          font-family: var(--serif);
+          font-size: 230px;
+          line-height: 0.9;
+          letter-spacing: -0.03em;
+          color: var(--ink);
+        }
+        .e-line {
+          margin-top: 34px;
+          width: 1400px;
+          font-family: var(--serif);
+          font-size: 56px;
+          line-height: 1.2;
+          color: var(--teal);
+        }
+        .e-rule {
+          margin-top: 44px;
+          width: 1728px;
+          height: 4px;
+          background: var(--ink);
+          transform-origin: left center;
+        }
+        .e-foot {
+          margin-top: 26px;
+          display: flex;
+          align-items: center;
+          gap: 26px;
+          font-family: var(--sans);
+          font-size: 28px;
+          color: var(--ink);
+        }
+        .e-src {
+          position: absolute;
+          left: 96px;
+          top: 960px;
+          font-family: var(--mono);
+          font-size: 20px;
+          color: var(--muted);
+        }
+      </style>
+
+      <div id="root" data-composition-id="s6-end" data-width="1920" data-height="1080">
+        <div class="e-wrap">
+          <div class="e-word" id="s6-word">SAMA</div>
+          <div class="e-line" id="s6-line">
+            The same pathway, wherever they live, whoever they are, however they enter care.
+          </div>
+          <div class="e-rule" id="s6-rule"></div>
+          <div class="e-foot" id="s6-foot">
+            <span class="chip syn">Synthetic</span>
+            <span>Patient-like data shown are SYNTHETIC. Research demo for Junction 2026.</span>
+          </div>
+        </div>
+        <div class="e-src" id="s6-src">Every number in this video is listed with its source file in submission/video/SOURCES.md.</div>
+      </div>
+
+      <script>
+        (function () {
+          window.__timelines = window.__timelines || {};
+          const tl = gsap.timeline({ paused: true });
+          tl.fromTo("#s6-word", { autoAlpha: 0, y: 50 }, { autoAlpha: 1, y: 0, duration: 0.7, ease: "expo.out" }, 0.1);
+          tl.fromTo("#s6-line", { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.4);
+          tl.fromTo("#s6-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power2.inOut" }, 0.5);
+          tl.fromTo("#s6-foot, #s6-src", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, stagger: 0.15 }, 0.9);
+          tl.fromTo("#s6-word", { scale: 1 }, { scale: 1.03, duration: 2.6, ease: "sine.inOut", transformOrigin: "left bottom", immediateRender: false }, 0.8);
+          window.__timelines["s6-end"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

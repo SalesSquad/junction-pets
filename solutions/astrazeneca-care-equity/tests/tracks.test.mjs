@@ -357,7 +357,7 @@ test('who, how and where: county gradients are labelled ECOLOGICAL with interval
   assert.equal(nums.filter((x) => !x.scope || !x.scope.chips.has(x.scope.kind)).length, 0, 'every number sits in a block that carries its own chip');
   const grads = app.analysis.gradients;
   const zero = grads.filter((g) => g.siiLow <= 0 && g.siiHigh >= 0).length;
-  if (zero === grads.length) assert.match(html, new RegExp(`All <span class="n">${grads.length}</span> county education gradients include zero`));
+  if (zero === grads.length) assert.match(html, new RegExp(`could be zero in all <span class="n">${grads.length}</span> indicators`));
   for (const g of grads) assert.ok(html.includes(`(<span class="n">${g.siiLow.toFixed(2)}</span> to <span class="n">${g.siiHigh.toFixed(2)}</span>)`.replace('-0.00', '0.00')), g.id);
   const ids = ['oecd-2025-survival-education', 'oecd-2025-breast-screening-education', 'oecd-2025-breast-screening-language', 'oecd-2025-cervical-screening-education', 'oecd-2025-cervical-screening-language', 'kuitunen-2026-route-medians'];
   for (const id of ids) {

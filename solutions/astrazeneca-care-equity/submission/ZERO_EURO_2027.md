@@ -36,7 +36,9 @@ it; `submission/check_numbers.py` recomputes them. Patient-like data in SAMA are
 
 - No effect size for a county: each KPI is measured in the pilot.
 - No new national spending; the roadmap measures keep their own budgets and owners.
-- The county owns the list, the letters and the care. No patient data leaves the county.
+- The county owns the list, the letters and the care. In the pilot no patient data leaves the
+  county: the second reader must run in a county-controlled environment (designed, not built), or a
+  person does that step.
 
 ## Sources
 

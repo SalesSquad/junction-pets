@@ -142,7 +142,8 @@ was read from).
    then the stored Nemotron 3.5 Super VL drafts (`data/planner/plans-v1.json`), labelled "Draft for a
    planner, drafted by Nemotron 3.5 Super VL; numbers checked". The build re-runs every stored tool
    call on the current data (`src/build.mjs` `plannerToolCheck`): 20 of 23 areas get identical tool
-   outputs; HVA05, HVA06 and HVA91 do not, and their drafts carry a "read with care" note.
+   outputs; HVA05, HVA06 and HVA91 do not, and their drafts carry a small caption "Drafted on an
+   earlier data build" (the tool names and the method sit in a folded block below the plan).
 6. **Analyst brief**, then the two SYNTHETIC tracks; the scribe section opens with the Gemma demo
    (`POST /api/scribe`; the stored CPU outputs in `data/scribe/demo/` are shown first and used when
    the route is unavailable), then "Gemma reads, code counts" (below), with the earlier versions,
@@ -308,7 +309,7 @@ and [runs/RUNLOG.md](runs/RUNLOG.md) for one line per run.
 - Every 42-day threshold is a placeholder for the OECD/EU-reported six-week target; Finnish law names
   no cancer-specific limit.
 - Nothing from simulated people or model-written notes is a finding about Finnish patients, and no
-  scribe result shows that the method works on real clinical text. Judges and auditors are models;
+  scribe result has been tested on real clinical text. Judges and auditors are models;
   their agreement is not ground truth.
 - The genomics benchmark is research only and sits on a separate appendix page: no variant
   classification, no clinical use.

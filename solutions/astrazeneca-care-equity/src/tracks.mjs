@@ -65,6 +65,8 @@ export const FILES = {
   planner: 'data/planner/plans-v1.json',
   plannerVision: 'data/planner/vision/vision-6b-v1.json',
   plannerRaw: 'data/planner/raw-v2',
+  // Post hoc vague-phrase gate (15 November, after the stress results were seen); shown as one labelled line.
+  vague: 'data/scribe/vague/results-v1.json',
 };
 
 // ------------------------------------------------------------------ required fields
@@ -658,6 +660,35 @@ export function buildEvaluation(res, file = FILES.evaluation) {
   };
 }
 
+// 7e. Post hoc vague-phrase gate (data/scribe/vague/results-v1.json): a frozen Finnish rule that sends a note with a vague
+// time phrase to "needs editing". Designed after the stress results were seen and scored on stored outputs only, so it is
+// never part of the preregistered result; the page shows it as one line labelled POST HOC.
+const VAGUE_REQUIRED = ['synthetic', 'post_hoc', 'label', 'rule.version', 'rule.frozen_at_utc', 'rule.matches_freeze', 'sets.stress.notes', 'sets.test.notes',
+  'sets.stress.detector_rule_v1.vague_notes_caught', 'sets.stress.detector_rule_v1.false_flags_on_notes_without_a_vague_fact',
+  'sets.stress.cascade_C_agreement.without_gate', 'sets.stress.cascade_C_agreement.with_gate_rule_v1',
+  'sets.test.cascade_C_agreement.without_gate', 'sets.test.cascade_C_agreement.with_gate_rule_v1',
+  'sets.stress.vague_facts.cascade_without_gate.sent_to_person', 'sets.stress.vague_facts.cascade_with_gate_rule_v1.sent_to_person'];
+export function buildVague(v, file = FILES.vague) {
+  needAll(v, VAGUE_REQUIRED, file);
+  if (v.synthetic !== true) throw new Error(`${file}: the vague-phrase gate result is not marked synthetic`);
+  if (v.rule.matches_freeze !== true) throw new Error(`${file}: the rule file no longer matches its freeze record`);
+  const arm = (x, where) => {
+    needAll(x, ['prefilled_for_one_click_confirmation', 'error_among_prefilled', 'needs_editing'], where);
+    return { prefilled: kci(x.prefilled_for_one_click_confirmation), wrong: kci(x.error_among_prefilled), needsEditing: kci(x.needs_editing) };
+  };
+  const set = (name) => {
+    const c = v.sets[name].cascade_C_agreement;
+    return { notes: v.sets[name].notes, without: arm(c.without_gate, `${file} sets.${name} without_gate`), withGate: arm(c.with_gate_rule_v1, `${file} sets.${name} with_gate_rule_v1`) };
+  };
+  const st = v.sets.stress, d = st.detector_rule_v1;
+  return {
+    source: src(file), label: v.label, postHoc: v.post_hoc, rule: { version: v.rule.version, frozenUtc: v.rule.frozen_at_utc },
+    stress: { ...set('stress'), caught: kci(d.vague_notes_caught), falseFlags: kci(d.false_flags_on_notes_without_a_vague_fact),
+      vagueToPerson: { without: kci(st.vague_facts.cascade_without_gate.sent_to_person), withGate: kci(st.vague_facts.cascade_with_gate_rule_v1.sent_to_person) } },
+    test: set('test'),
+  };
+}
+
 // 7d. Nemotron 3.5 Super VL as the escalation reader: one change at a time, on validation (data/scribe/nemotron/reader-v1.json).
 const READER_REQUIRED = ['synthetic', 'title', 'model', 'generated_utc', 'versions', 'selection_rule', 'validation', 'validation_ladder', 'validation_ladder_relative_dates',
   'selected_by_rule', 'test.version', 'test.run_once', 'test.notes', 'test.exact_match', 'test.by_writer', 'test.parse_failures_final', 'caveats', 'requests_ledger'];
@@ -742,8 +773,9 @@ export function buildTracks(regions = [], files = FILES) {
   const resolver = part('scribe.resolver', [F.resolver], (r) => buildResolver(r, F.resolver));
   const evaluation = part('scribe.evaluation', [F.evaluation], (r) => buildEvaluation(r, F.evaluation));
   const reader = part('scribe.reader', [F.reader], (r) => buildReader(r, F.reader));
+  const vague = part('scribe.vague', [F.vague], (r) => buildVague(r, F.vague));
   if (ablation || students || serving || teaching || history || gemmaAlone || resolver || evaluation || reader) {
-    out.scribe = { synthetic: true, statement: SYNTHETIC, gemmaAlone, resolver, evaluation, reader, ablation, students, serving, teaching, history,
+    out.scribe = { synthetic: true, statement: SYNTHETIC, gemmaAlone, resolver, evaluation, reader, vague, ablation, students, serving, teaching, history,
       provenance: history?.models?.provenance ?? null };
   } else problems.push({ track: 'scribe', problem: 'no scribe result file is present' });
 
