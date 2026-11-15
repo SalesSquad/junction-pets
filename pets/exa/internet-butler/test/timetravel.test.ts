@@ -343,3 +343,18 @@ test("Regulation 261/2004 Art. 7(1)(b) is two alternatives: a long flight within
   assert.equal(wantOf("Can I return a laptop I bought online 10 days ago?"), "duration");
   assert.equal(wantOf("How much compensation am I owed?"), "amount");
 });
+
+test("built-in rights: a named jurisdiction or the wrong kind of journey rules a right out", async () => {
+  const { jurisdictionCue, ruledOutBy, REGISTRY } = await import("../src/timetravel/timetravel.ts");
+  const by = (celex: string) => REGISTRY.find((k) => (k.ref as { celex?: string }).celex === celex)!;
+  const nmw = REGISTRY.find((k) => k.jurisdiction === "UK" && /Minimum Wage/.test(k.title))!;
+  assert.equal(jurisdictionCue("What's the federal minimum wage for tipped workers?"), "US");
+  assert.equal(jurisdictionCue("Frankfurt to New York in June, I paid $50 and €30"), undefined);
+  assert.equal(jurisdictionCue("I was paid £9.50 an hour"), "UK");
+  assert.equal(ruledOutBy("What's the federal minimum wage for tipped workers?", nmw), true);
+  assert.equal(ruledOutBy("I was paid £9.50 an hour at 24", nmw), false);
+  assert.equal(ruledOutBy("Mein Zug von Berlin nach München hatte 2 Stunden Verspätung", by("32004R0261")), true);
+  assert.equal(ruledOutBy("Mein Zug von Berlin nach München hatte 2 Stunden Verspätung", by("32021R0782")), false);
+  assert.equal(ruledOutBy("My train to Paris and then my flight were both delayed", by("32004R0261")), false);
+  assert.equal(ruledOutBy("My flight to Paris was delayed 4 hours", by("32021R0782")), true);
+});

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { relativeDate, spokenDate, voiceSupport } from "../src/ui/voice.ts";
+import { monthDate, relativeDate, spokenDate, voiceSupport } from "../src/ui/voice.ts";
 
 test("spoken dates in English, Finnish and German become ISO dates", () => {
   const cases: Array<[string, string | undefined]> = [
@@ -34,4 +34,16 @@ test("relative dates count back from today", () => {
   assert.equal(relativeDate("3 days ago I was bumped", today), "2026-11-12");
   assert.equal(relativeDate("vor 10 Tagen", today), "2026-11-05");
   assert.equal(relativeDate("I was bumped from a flight", today), undefined);
+});
+
+test("a month and a year alone mean the middle of that month; a full date still wins", () => {
+  assert.equal(spokenDate("I was paid £9.50 an hour in March 2024"), undefined);
+  assert.equal(monthDate("I was paid £9.50 an hour in March 2024"), "2024-03-15");
+  assert.equal(monthDate("Sain palkkaa maaliskuussa 2024"), "2024-03-15");
+  assert.equal(monthDate("Im März 2024 war der Zug spät"), "2024-03-15");
+  assert.equal(spokenDate("on 5 March 2024 and again in May 2025"), "2024-03-05");
+  assert.equal(monthDate("I may claim 2021 dollars"), undefined);
+  assert.equal(monthDate("I was paid £9.50/hour in March 2024. Legal?"), "2024-03-15");
+  assert.equal(monthDate("It happened in March 2024."), "2024-03-15");
+  assert.equal(monthDate("in 2024 I was paid less"), undefined);
 });
