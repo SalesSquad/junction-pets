@@ -1,5 +1,32 @@
 # Progress
 
+**Stage:** public-aggregate research demo; evidence/evaluation update under review.
+**Owner:** `astrazeneca`. **Merged baseline:** SalesSquad/junction-pets#113.
+**Integrated in:** `codex/j26-astra-equity-m2-20261115` (SalesSquad/junction-pets#275, which also carries #246). Last updated 15 November 2026.
+
+## Current follow-up — evidence and evaluation (15 November 2026)
+
+Work ID `junction.astrazeneca.evidence-evaluation-20261115`. Base
+`6d2efadb22678c259dfaf6817b43c883974a9eab`; branch
+`codex/sama-evidence-evaluation-20261115`. This is a task-owned draft change;
+Portfolio PR Recovery remains the integrator.
+
+- Added an actionable county decision view and matching export with named proposed
+  owner, 30/90-day plan, denominator, evidence, unknowns and human-review status.
+- Added source-scoped national lung recording context and Goal 3.1/3.2 mapping;
+  precision diagnostics/BioNeMo remain an unimplemented future direction.
+- Historical forecasts are withheld. Fixed validation/test target overlap,
+  calendar-gap windows, null-winner fallback and per-horizon export evidence.
+  The original forecast and GPU artifacts are unchanged.
+- Verification and reproducible demo route: [EVIDENCE_UPDATE.md](EVIDENCE_UPDATE.md).
+  Corrected public-data training/evaluation, clinical review and publication remain open.
+
+## Forecast evidence (from #246)
+
+The original sweep selected two transformers, five baselines and **no winner** for
+colorectal screening; its exporter incorrectly substituted persistence. Original
+forecast results have overlapping validation/test targets and are not qualified.
+
 ## Demo fixes after the first wave (15 November 2026, 01:20-01:55 UTC)
 
 Owner `deliv-polish` (log `runs/deliv-polish.jsonl`). No git, no model run, no hosted call. Page fixes

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "care-equity-forecast-audit-v1",
+  "reviewedAt": "2026-11-15",
+  "artifactSha256": "30befeb52603bcb9698ab41cff324b52fcd9ebd25b9ae2a0288c0be69a91e52c",
+  "status": "WITHHELD",
+  "reasons": [
+    "Historical validation horizon 2 and test horizon 1 both use target year 2023.",
+    "Historical predictions remain preserved for research; corrected evaluation has not yet been run."
+  ],
+  "indicators": {
+    "screen_colorectal": {
+      "reason": "No validation observations and no selected winner; the historical exporter substituted persistence and produced unsupported zero-width intervals and probabilities.",
+      "validationN": 0
+    }
+  },
+  "evidencePaths": [
+    "ml/artifacts/gpu-sweep/SWEEP_REPORT.md",
+    "ml/artifacts/gpu-sweep/selection.json",
+    "ml/artifacts/gpu-sweep/selected-screen_colorectal.json"
+  ]
+}

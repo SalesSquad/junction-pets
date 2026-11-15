@@ -5,6 +5,39 @@ Public THL Sotkanet annual observations, 2000–2025: eight target indicators an
 Fetch is standard-library-only; response URLs, retrieval times, byte counts and
 SHA256 digests are retained in `data/panel.json`. No private patient data.
 
+## Current qualification status — 15 November 2026
+
+The original artifacts below are historical, not a qualified holdout evaluation.
+Their validation target year 2023 was reused in test scoring. The original
+colorectal selection was null (zero validation observations), but the exporter
+substituted persistence and produced 44 collapsed bands across 22 counties.
+The audit in `../data/ml/forecast-v1-audit.json` is bound to the saved forecast's
+SHA-256; the demo withholds that artifact. It has not been edited or relabelled.
+
+The new `split_policy.py` fixes the calendar protocol before any new run:
+
+| Use | Origins | Target years |
+| --- | --- | --- |
+| Training | Through 2020 | Capped at 2021 |
+| Validation / selection / calibration | 2021 | 2022 and 2023 |
+| Test | 2023 | 2024 and 2025 |
+
+Window slots and targets now refer to calendar years; missing years remain missing.
+The exporter requires the evaluated panel digest and protocol, positive validation
+and test counts for each horizon, and effective training support for transformer or
+ridge. Persistence/drift do not require fitted-model training counts. A null winner
+stays null. Nonfinite, unordered or collapsed bands are not exported; interpolated
+quantile probabilities are not presented as calibrated risk.
+
+New default outputs are `ml/artifacts/target-year-disjoint-v1/` and
+`data/ml/forecast-v2.json`, leaving the historical runs untouched. The builder prefers
+v2 only when present and applies the same admission checks. Use a fresh `--tag` for a
+new experiment; do not point corrected runs at historical artifact directories.
+Indicators ending in 2024 may lack test h2 labels. Preserve n=0 and abstention.
+These already-inspected calendar years can support a corrected **development**
+evaluation; an untouched prospective performance claim requires new held-out data.
+No corrected public-data run or model improvement is claimed by this source change.
+
 ## Run
 
 Local Python 3.12 CPU setup:
@@ -39,30 +72,13 @@ covariates. Baselines: last value, mean last three observed adjacent annual
 changes, and pooled ridge with intercept and three recent annual values (missing
 recent values filled from the last observation). Ridge penalty is fixed at 1.
 
-Training origins end in 2020, with labels capped at 2021. Validation origin is
-2021; test origins are 2022 and 2023. Thus training never sees a test target.
-The specified validation h2 and test h1 share calendar year 2023: these are
-correlated, not independent cohorts. All four methods use identical finite test
-cells. Metrics report county and municipality groups separately, both horizons,
-MAE, pinball, 90% and 50% coverage, sample count and pre-conformal 90% coverage.
-Validation error quantiles supply baseline intervals. Nonnegative finite-sample
-split-conformal widening uses only validation scores; validation coverage is
-also reported. Tiny or empty cohorts cannot establish population calibration.
-
-Method selection uses lowest validation MAE pooled over units and horizons per
-indicator, with deterministic method-order ties. It does not select on test
-scores. Selected ridge is refit on all labeled origins; selected transformer is
-refit on all labeled origins using the backtest epoch budget, with no new future
-holdout. Backtest interval offsets/widening are retained for export. Each county
-forecast starts from its own latest observed target year, which may be old.
-Quantile-CDF interpolation has clipped tails [.02,.98]; ties use NumPy's
-rightmost quantile convention. Probabilities are coarse distribution summaries,
-not clinical risk or causal effects. No baseline win is disguised as a model win.
-
-`artifacts/metrics.json`, logs and checkpoints retain actual run evidence;
-`../data/ml/forecast-v1.json` is the product output. Unsupported indicators are
-listed by fetch; unavailable evaluation cells are null with n=0, never invented.
-CPU run configuration is reduced; the full GPU run remains unexecuted locally.
+The enforced split and output-admission rules are specified above. All methods use
+common finite cells; report category, horizon, MAE, pinball, coverage and sample count.
+Validation-based intervals are empirical and may not generalise. Selection is based
+only on validation scores, with stable baseline-first ties. Transformer/ridge
+candidates without effective training support cannot win. A selected model can be
+refitted on available labels for future prediction, but that refit is not a new
+holdout evaluation. Unsupported horizons remain unavailable.
 
 ## Bounded GPU sweep
 
@@ -76,7 +92,7 @@ The script reuses `ml/.venv`, installs the existing requirements, sets
 `CUBLAS_WORKSPACE_CONFIG=:4096:8`, fetches base and extended panels, runs
 14 configurations × 3 seeds on CUDA (100 maximum epochs, validation early
 stopping), then refits and exports validation-selected methods to
-`data/ml/forecast-v1.json`. A compatible NVIDIA driver and Python venv/pip
+`data/ml/forecast-v2.json`. A compatible NVIDIA driver and Python venv/pip
 support are prerequisites. Existing architecture-specific wheel guidance above
 still applies. This new full GPU sweep has **not been run locally**.
 
@@ -93,12 +109,12 @@ uses the requested 2000–2025 coverage metadata, not forecast error or outcomes
 for selection. It is retrospective feature availability, not proof of what
 would have been published at an historical forecast origin.
 
-Artifacts go under `ml/artifacts/gpu-sweep/`, preserving the earlier backtest:
+New sweep artifacts go under `ml/artifacts/target-year-disjoint-v1/gpu-sweep/`:
 `selection.json` is written before test scoring, `sweep.json` and
 `SWEEP_REPORT.md` contain the comparison, and each `config-NN/` retains
 its configuration, panel digest and seed ensemble checkpoint. Standalone
-`python ml/sweep.py` writes directly to `ml/artifacts/`; use `--tag NAME`
-to isolate a run. Reusing a tag intentionally replaces that run's artifacts.
+`python ml/sweep.py` writes to `ml/artifacts/target-year-disjoint-v1/`; use `--tag NAME`
+to isolate a run. Choose a fresh tag; do not overwrite retained evidence.
 
 The seven paired (base/extended) architectures are
 (window, width, layers): (5,64,2), (8,64,3), (12,64,2), (5,128,3),

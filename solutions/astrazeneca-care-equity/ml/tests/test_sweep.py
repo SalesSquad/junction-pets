@@ -71,10 +71,11 @@ class SweepTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             d=Path(directory)
             years=list(range(2000,2026))
+            # Preserve future-only mutation assertions; include real validation residuals.
             panel=dict(units=[dict(id='HVA01',category='HYVINVOINTIALUE',name='Synthetic county'),
                              dict(id='KU001',category='KUNTA',name='Synthetic municipality')],
                        indicators=[dict(id=1,key='screen_breast',isTarget=True)],
-                       years=years,values={'1':{u:{str(y):50+(y-2000)*.5+offset for y in years}
+                       years=years,values={'1':{u:{str(y):50+(y-2000)*.5+offset+((y-2000)%3)*.35 for y in years}
                                                for u,offset in [('HVA01',0),('KU001',5)]}},manifest=[])
             save(d/'panel.json',panel)
             extended=copy.deepcopy(panel)

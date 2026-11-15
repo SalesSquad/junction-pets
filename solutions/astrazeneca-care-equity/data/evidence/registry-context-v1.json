@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "care-equity-registry-context-v1",
+  "reviewedAt": "2026-11-15",
+  "records": [
+    {
+      "id": "fi-lung-extent-missing-2019-2023",
+      "kind": "observed_aggregate",
+      "title": "Extent at diagnosis: a national recording gap",
+      "source": {
+        "publisher": "Finnish Cancer Registry",
+        "url": "https://syoparekisteri.fi/assets/themes/ssy3/factsheets/keuhkosyoparaportti.html",
+        "locator": "Sections 3.1–3.3 and 4.1.3, Table 4",
+        "retrievedAt": "2026-11-15"
+      },
+      "scope": {
+        "population": "New primary lung and trachea cancer cases",
+        "cancerCodes": ["C33", "C34"],
+        "period": {"start": 2019, "end": 2023},
+        "geography": "Finland, national aggregate",
+        "regionId": null
+      },
+      "measure": {
+        "definition": "Cases without recorded extent-at-diagnosis information in this report",
+        "numerator": 7097,
+        "denominator": 14873,
+        "reportedValue": 47.7,
+        "unit": "%"
+      },
+      "limitations": [
+        "Missing registry information does not mean staging was not performed.",
+        "This national lung/trachea cohort does not estimate missingness in a selected county, other cancers or screening.",
+        "Do not subtract this percentage from a registry-coverage target with a different denominator."
+      ],
+      "comparability": "National context only; excluded from county scores and intervention effects.",
+      "strategyRefs": ["3.2"],
+      "nextEvidenceNeeded": "County and cancer-specific completeness, definitions and denominators before regional comparison."
+    },
+    {
+      "id": "fi-lung-mdt-recording-limit",
+      "kind": "source_limitation",
+      "title": "An absent MDT code is not evidence of absent review",
+      "source": {
+        "publisher": "Finnish Cancer Registry",
+        "url": "https://syoparekisteri.fi/assets/themes/ssy3/factsheets/keuhkosyoparaportti.html",
+        "locator": "Section 3.3, MDT extraction with WZC15/WZC20",
+        "retrievedAt": "2026-11-15"
+      },
+      "scope": {
+        "population": "New primary lung and trachea cancer cases",
+        "cancerCodes": ["C33", "C34"],
+        "period": {"start": 2019, "end": 2023},
+        "geography": "Finland, national aggregate",
+        "regionId": null
+      },
+      "measure": null,
+      "limitations": ["HILMO procedure recording centres on direct patient contacts and incompletely captures multidisciplinary review."],
+      "comparability": "Do not rank MDT provision from absent procedure codes.",
+      "strategyRefs": ["3.2"],
+      "nextEvidenceNeeded": "Validate recording practice against an agreed aggregate MDT denominator."
+    },
+    {
+      "id": "fi-goal3-comparable-pathways",
+      "kind": "strategy_target",
+      "title": "Goal 3: comparable outcomes and timely care",
+      "source": {
+        "publisher": "FICAN",
+        "url": "https://fican.fi/wp-content/uploads/2025/11/Presentation-of-the-Finnish-National-Cancer-Strategy.pdf",
+        "locator": "PDF pages 8 and 11; sub-objectives 3.1 and 3.2",
+        "retrievedAt": "2026-11-15"
+      },
+      "scope": {
+        "population": "National cancer-care strategy",
+        "cancerCodes": [],
+        "period": {"start": 2026, "end": 2035},
+        "geography": "Finland, national policy",
+        "regionId": null
+      },
+      "measure": null,
+      "limitations": ["A policy goal is not a measured result or proof of an intervention effect."],
+      "comparability": "Treatment-time performance needs cancer-specific targets, timestamps, eligible denominators and missingness.",
+      "strategyRefs": ["3.1", "3.2"],
+      "nextEvidenceNeeded": "Publish comparable county-level pathway coverage and time-to-treatment indicators."
+    }
+  ],
+  "future": {
+    "kind": "future_capability",
+    "title": "Precision-diagnostics access",
+    "status": "NOT_IMPLEMENTED",
+    "strategyRefs": ["4.3.2", "4.3.3", "4.3.4"],
+    "source": {
+      "publisher": "Ministry of Social Affairs and Health",
+      "url": "https://stm.fi/documents/1271139/1359637/Kansallinen_syopastrategia_toimeenpanon_tiekartta_2026_2031.pdf/",
+      "locator": "Printed pages 86–88",
+      "retrievedAt": "2026-11-15"
+    },
+    "proposal": "Compare indicated molecular testing and sample-to-result time after suitable aggregate data becomes available.",
+    "requiredEvidence": ["Indicated-test denominator", "Diagnostic and research tests separated", "Completion and missingness", "Comparable turnaround timestamps"],
+    "boundary": "A Goal 4.3 extension with a possible equity contribution. BioNeMo remains an unevaluated technical option; no molecular model or clinical benefit is claimed."
+  }
+}
