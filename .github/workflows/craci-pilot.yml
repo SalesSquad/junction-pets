@@ -131,7 +131,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   plan:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && (inputs.workload != 'rokoko-mujoco-v13-pilot' || vars.CRACI_V13_PILOT_SOURCE_REVIEWED == 'true') && (inputs.workload != 'rokoko-mujoco-v12-pilot' || vars.CRACI_V12_REPEAT_STUDY_AUTHORIZED == 'true') }}
     name: Admit exact sources and bounded matrix
     runs-on: craci
     timeout-minutes: 5
@@ -4931,7 +4931,7 @@ jobs:
     - plan
 
   rokoko-mujoco-v13-pilot:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v13-pilot' && github.event_name == 'workflow_dispatch' && github.run_attempt == 1 }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && vars.CRACI_V13_PILOT_SOURCE_REVIEWED == 'true' && inputs.workload == 'rokoko-mujoco-v13-pilot' && github.event_name == 'workflow_dispatch' && github.run_attempt == 1 }}
     name: Rokoko V13 519024 new 192-episode paired TRAIN sustained RIGHT4 bursts
     runs-on: craci
     timeout-minutes: 60
@@ -4950,6 +4950,7 @@ jobs:
       CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
       CRACI_WORKLOAD: rokoko-mujoco-v13-pilot
       CRACI_CREDIT_WINDOW_OPEN: ${{ vars.CRACI_CREDIT_WINDOW_OPEN }}
+      CRACI_MANUAL_SOURCE_REVIEWED: ${{ vars.CRACI_V13_PILOT_SOURCE_REVIEWED }}
       CRACI_CELL: ${{ matrix.cell }}
       CRACI_NEXT_OWNER: Portfolio PR Recovery
       CRACI_ALLOWED_SOURCE_CHANGES: '[]'
@@ -5001,6 +5002,11 @@ jobs:
       id: qualification
       run: |
         set -euo pipefail
+        # Admission uses a fresh credit balance immediately before the billable physics phase.
+        remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
+        test "$remaining" -ge 3600
+        export CRACI_CREDIT_REMAINING_SECONDS="$remaining"
+        test "$CRACI_MANUAL_SOURCE_REVIEWED" = 'true'
         node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- "$RUNNER_TEMP/mujoco-venv/bin/python" -B "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v13-original-qualification.py"
     - name: Rerun pinned independent evidence and qualifier contract checks
       id: packaging
@@ -5037,7 +5043,7 @@ jobs:
     - plan
 
   rokoko-mujoco-v12-pilot:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v12-pilot' && github.event_name == 'workflow_dispatch' && github.run_attempt == 1 }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && vars.CRACI_V12_REPEAT_STUDY_AUTHORIZED == 'true' && inputs.workload == 'rokoko-mujoco-v12-pilot' && github.event_name == 'workflow_dispatch' && github.run_attempt == 1 }}
     name: Rokoko V12 trained contact-to-dwell 518000 fresh 144-episode TRAIN pilot
     runs-on: craci
     timeout-minutes: 60
@@ -5077,7 +5083,7 @@ jobs:
         remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
         test "$remaining" -gt 3600
         printf 'CRACI_CREDIT_REMAINING_SECONDS=%s\n' "$remaining" >> "$GITHUB_ENV"
-        test "$CRACI_SOURCE_SHA" = 'c77158f9ae80acc2b1eafaf9284c4397426799b2'
+        test "$CRACI_SOURCE_SHA" = '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f'
         [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       with:
