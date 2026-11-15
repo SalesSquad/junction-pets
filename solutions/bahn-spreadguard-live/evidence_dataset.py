@@ -116,6 +116,10 @@ def build(root: Path, destination: Path) -> dict:
                 record = json.loads(line)
                 if record["world_id"] != world_id:
                     raise ValueError("Feature world does not match bundle")
+                for key, expected in [("seed_group", bundle["seed_group"]),
+                                      ("policy", bundle["policy"]), ("partition", partition)]:
+                    if key in record and record[key] != expected:
+                        raise ValueError("Feature metadata does not match bound world: " + key)
                 if record.get("quoted_price") is not None:
                     latest[(record["order_id"], record["option"])] = record
             # Reveal's last quote/outcome validates the feature join. It never supplies a feature.
@@ -135,6 +139,7 @@ def build(root: Path, destination: Path) -> dict:
                 all_rows.append({"world_id": world_id, "seed_group": bundle["seed_group"],
                                  "order_id": order_id, "policy": bundle["policy"],
                                  "partition": partition, "late": label["late"],
+                                 "source_sha": bundle.get("source", {}).get("source_sha", ""),
                                  "official_won_orders": score["wonOrders"],
                                  "official_on_time_orders": on_time,
                                  **{name: values[name] for name in FEATURE_NAMES}})
@@ -150,7 +155,7 @@ def build(root: Path, destination: Path) -> dict:
         writer.writerows(world_rows)
     # Always replace the task-owned CSV, including the empty case, so a previous
     # dataset cannot survive underneath a fresh summary claiming zero rows.
-    fields = ["world_id", "seed_group", "order_id", "policy", "partition", "late",
+    fields = ["world_id", "seed_group", "order_id", "policy", "partition", "late", "source_sha",
               "official_won_orders", "official_on_time_orders", *FEATURE_NAMES]
     with open(destination / "orders.csv", "w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)

@@ -154,8 +154,58 @@ class NoteBoundaryTests(unittest.TestCase):
     def test_tyres_in_boot_do_not_assert_driving_tyres(self):
         self.assertIsNone(parse_notes(request("Extra summer tyres in boot")).summerTyres)
 
+    def test_conditional_requirement_is_unknown(self):
+        self.assertIsNone(parse_notes(request("Call if no plates")).platesRequired)
+
     def test_day_abbreviation_does_not_split_sentence(self):
         self.assertEqual(parse_notes(request("Valmis to. klo 12")).readyAt, 3 * 1440 + 720)
+
+    def test_dotless_finnish_weekdays_with_clock_marker(self):
+        parsed = parse_notes(request("Noudettavissa aikaisintaan to klo 8. Perillä to klo 19 mennessä", 1))
+        self.assertEqual(parsed.readyAt, 3 * 1440 + 480)
+        self.assertEqual(parsed.noteDeadline, 3 * 1440 + 1140)
+        self.assertEqual(parse_notes(request("Voi noutaa ke klo 14.30 alkaen")).readyAt, 2 * 1440 + 870)
+        self.assertEqual(parse_notes(request("Perillä ma klo 20 mennessä", 2)).noteDeadline, 7 * 1440 + 1200)
+
+    def test_english_to_is_not_a_finnish_weekday(self):
+        parsed = parse_notes(request("Deliver to destination by 17:00"))
+        self.assertEqual(parsed.noteDeadline, 1020)
+
+    def test_swedish_short_weekday(self):
+        self.assertEqual(parse_notes(request("Måste vara framme senast mån kl 12.30", 4)).noteDeadline, 7 * 1440 + 750)
+
+    def test_observed_tomorrow_typo_does_not_fall_back_to_today(self):
+        self.assertEqual(parse_notes(request("Oltava perillä viimeistään huomnna klo 19.00", 3)).noteDeadline, 4 * 1440 + 1140)
+
+    def test_cargo_tyres_multilingual_and_observed_typos(self):
+        for text in ["Lisäksi 4 kesärengasta tavaratilassa", "Liskäsi 4 kesärengasta tavaratilassa", "Lisäksi 4 kesärengasta tavaraatilassa", "lisäksi 4 kesärengasta tavaratilasssa", "Lisäksi 4 kesärengasta tavaraitlassa", "Sommardäcken i bakluckan, följer med", "sommardäcken i bakuckan, följer med"]:
+            with self.subTest(text=text):
+                parsed = parse_notes(request(text))
+                self.assertIsNone(parsed.summerTyres)
+                self.assertTrue(parsed.unknown)
+
+    def test_buyer_pays_first_is_release_not_readiness(self):
+        parsed = parse_notes(request("Buyer pays first, pickup from tomorrow 11:30", 3))
+        self.assertEqual(parsed.releaseAt, 4 * 1440 + 690)
+        self.assertIsNone(parsed.readyAt)
+
+    def test_contact_filler_does_not_change_hours_scope(self):
+        parsed = parse_notes(request("Mille auki arkisin 7–20, soita asiakkaalle tuntia ennen perillä oloa"))
+        self.assertEqual(parsed.pickupHours, {"opens": 420, "closes": 1200, "weekdays": [0, 1, 2, 3, 4]})
+        self.assertIsNone(parsed.deliveryHours)
+
+    def test_contact_instruction_is_not_a_pickup_bound(self):
+        self.assertIsNone(parse_notes(request("Call before pickup at 14:00")).pickupBefore)
+        self.assertIsNone(parse_notes(request("Call before pickup at 14:00")).pickupHours)
+
+    def test_short_latest_and_contact_filler_preserve_deadline(self):
+        parsed = parse_notes(request("Toimitus perille viim. ma klo 15, soita asiakkaalle tuntia ennen perillä oloa", 3))
+        self.assertEqual(parsed.noteDeadline, 7 * 1440 + 900)
+
+    def test_observed_receiving_typo_preserves_hours_scope(self):
+        parsed = parse_notes(request("Vastaaanottava liike auki 7-20"))
+        self.assertEqual(parsed.deliveryHours, {"opens": 420, "closes": 1200})
+        self.assertIsNone(parsed.pickupHours)
 
 
 class NoteEvaluationTests(unittest.TestCase):
@@ -187,6 +237,11 @@ class NoteEvaluationTests(unittest.TestCase):
         self.assertIsNone(result["fields"]["manualRequired"]["assertion_precision"])
         self.assertEqual(result["sources"][0]["world_id"], "test-world")
         self.assertEqual(len(result["sources"][0]["bundle_sha256"]), 64)
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "bundle.json.gz"
+            source.write_bytes(gzip.compress(json.dumps(bundle).encode()))
+            with self.assertRaisesRegex(ValueError, "Duplicate world_id"):
+                evaluate([source, source])
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ from collections import Counter
 import gzip
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -45,11 +46,15 @@ def evaluate(paths: list[Path], sample_limit: int = 12) -> dict:
     totals = {name: Counter() for name in FIELDS}
     counts = Counter()
     sources, samples, per_world = [], [], []
+    seen_worlds = set()
     for path in paths:
         encoded = path.read_bytes()
         bundle = json.loads(gzip.decompress(encoded) if path.suffix == ".gz" else encoded)
         if "reveal" not in bundle:
             continue
+        if bundle["world_id"] in seen_worlds:
+            raise ValueError("Duplicate world_id would double-count note evidence: " + bundle["world_id"])
+        seen_worlds.add(bundle["world_id"])
         reveal = bundle["reveal"]
         requests = {row["request"]["id"]: row["request"] for row in reveal["requests"]}
         orders = {row["id"]: row for row in bundle["snapshot"]["orders"]}
@@ -67,6 +72,7 @@ def evaluate(paths: list[Path], sample_limit: int = 12) -> dict:
             counts[parsed.scope] += 1
             counts["orders_with_ambiguous_clauses"] += bool(parsed.ambiguous)
             counts["orders_with_unknown_clauses"] += bool(parsed.unknown)
+            counts["unevaluated_pickupBefore_assertions"] += parsed.pickupBefore is not None
             if parsed.scope != "single_leg":
                 continue
             if len(row["legs"]) != 1:
@@ -89,9 +95,21 @@ def evaluate(paths: list[Path], sample_limit: int = 12) -> dict:
     for name, counter in totals.items():
         tested = counter["correct"] + counter["false_assertion"]
         all_rows = sum(counter.values())
+        # Descriptive Wilson interval over asserted fields. Rows within a
+        # world are correlated, so this is not a cross-world confidence gate.
+        interval = None
+        if tested:
+            proportion, z = counter["correct"] / tested, 1.959963984540054
+            denominator = 1 + z * z / tested
+            centre = (proportion + z * z / (2 * tested)) / denominator
+            width = z * math.sqrt(proportion * (1 - proportion) / tested + z * z / (4 * tested * tested)) / denominator
+            interval = [max(0.0, centre - width), min(1.0, centre + width)]
         summary[name] = {"correct": counter["correct"], "false_assertion": counter["false_assertion"],
                          "unknown": counter["unknown"], "nonbinding": counter["nonbinding"],
                          "assertion_precision": counter["correct"] / tested if tested else None,
+                         "descriptive_wilson_95": interval,
+                         "evaluated_rows": all_rows,
+                         "emitted_assertions": tested + counter["nonbinding"],
                          "assertion_coverage": tested / all_rows if all_rows else None}
     return {"schemaVersion": 1, "parser_version": VERSION,
             "parser_sha256": hashlib.sha256(Path(__file__).with_name("typed_notes.py").read_bytes()).hexdigest(),
@@ -99,6 +117,8 @@ def evaluate(paths: list[Path], sample_limit: int = 12) -> dict:
             "sources": sources, "false_assertion_samples": samples,
             "limitations": ["Won-order cohort only; not all requests", "Unscoped multi-leg notes excluded from field accuracy",
                             "Unknowns do not count as correct", "Hours compare only explicitly asserted components",
+                            "pickupBefore has no direct reveal label and is not scored",
+                            "Descriptive field intervals assume independent rows; worlds contain correlated rows",
                             "No delivery-rate or neural-training claim", "Development evidence if these notes informed grammar"]}
 
 

@@ -44,7 +44,8 @@ def provenance(model: str | None = None) -> dict[str, Any]:
     result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=here,
                             capture_output=True, text=True)
     names = ["official_study.py", "dispatch.py", "discovery_experiment.py",
-             "admission_experiment.py", "reliability_experiment.py", "typed_notes.py"]
+             "admission_experiment.py", "reliability_experiment.py", "typed_notes.py",
+             "notes_experiment.py"]
     hashes = {name: hashlib.sha256((here / name).read_bytes()).hexdigest()
               for name in names if (here / name).exists()}
     return {"source_sha": result.stdout.strip() if result.returncode == 0 else None,
@@ -78,6 +79,8 @@ def resolve_configuration(args: argparse.Namespace) -> None:
     model = load_model(args.model) if args.model else None
     if args.policy == "learned" and model is None:
         raise ValueError("learned policy requires --model")
+    if args.policy == "notes" and model is not None:
+        raise ValueError("notes policy cannot be combined with a learned model")
     threshold = args.late_threshold
     if threshold is None and os.getenv("SPREAD_RELIABILITY_LATE_THRESHOLD"):
         threshold = float(os.environ["SPREAD_RELIABILITY_LATE_THRESHOLD"])
@@ -121,7 +124,13 @@ def run_practice(args: argparse.Namespace) -> None:
     print("WORLD_BOUND " + world.id + " " + args.policy + " " + args.seed, flush=True)
     snapshot = world.snapshot()
 
-    class RecordedDesk(ReliabilityDesk):
+    if args.policy == "notes":
+        from notes_experiment import NotesDesk
+        policy_class = NotesDesk
+    else:
+        policy_class = ReliabilityDesk
+
+    class RecordedDesk(policy_class):
         def quote(self, request: dict[str, Any]) -> None:
             if self.now < request["respondBy"]:
                 records = [{"world_id": world.id, "seed_group": args.seed,
@@ -167,6 +176,9 @@ def run_practice(args: argparse.Namespace) -> None:
         prior.update(state="completed", evidence=evidence, elapsed_seconds=time.monotonic() - elapsed,
                      events_handled=handled, max_handler_ms=max_decision_ms,
                      action_failures=action_failures, completed_at_unix=time.time())
+        prior["policy_counts"] = dict(desk.counts)
+        if hasattr(desk, "notes_summary"):
+            prior["notes"] = desk.notes_summary()
         atomic_json(receipt_path, prior)
         print("RUN_COMPLETE " + json.dumps(prior, sort_keys=True), flush=True)
     except BaseException as error:
@@ -185,7 +197,7 @@ def main() -> None:
     export.add_argument("--policy", required=True)
     run = subs.add_parser("run")
     run.add_argument("--seed", required=True)
-    run.add_argument("--policy", choices=["baseline", "deadline", "capacity", "learned", "trust"], required=True)
+    run.add_argument("--policy", choices=["baseline", "deadline", "capacity", "learned", "trust", "notes"], required=True)
     run.add_argument("--partition", choices=["development", "blind"], required=True)
     run.add_argument("--output", required=True)
     run.add_argument("--model")

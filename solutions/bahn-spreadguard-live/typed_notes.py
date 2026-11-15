@@ -15,7 +15,7 @@ import unicodedata
 from typing import Any
 
 DAY = 1440
-VERSION = "bounded-notes-1"
+VERSION = "bounded-notes-2"
 
 
 @dataclass
@@ -60,20 +60,20 @@ CORRECTION = re.compile(r"\b(?:correction|corrected|actually|sorry|rather|instea
 READY = re.compile(r"\b(?:ready|available|valmi\w*|klar\w*|noudettav\w*)\b")
 PICKUP = re.compile(r"\b(?:pickup|pick\s*up|collect\w*|collection|nou[dt]\w*|haettav\w*|hakea|hämt\w*|origin|yard|piha\w*|lähtö\w*)\b")
 DELIVERY = re.compile(r"\b(?:deliver\w*|destination|arriv\w*|receiv\w*|toimit\w*|perillä|perille|vastaanot\w*|kohde|kohtee\w*|lever\w*|framme|mottag\w*)\b")
-PAYMENT = re.compile(r"\b(?:payment|paid|paying|maksu\w*|makset\w*|betal\w*)\b")
+PAYMENT = re.compile(r"\b(?:payment|paid|paying|buyer\s+pays?\s+first|maksu\w*|makset\w*|betal\w*)\b")
 AFTER = re.compile(r"\b(?:after|from|earliest|not\s+before|jälkeen|alkaen|aikaisintaan|ei\s+ennen|efter|tidigast|inte\s+före|först|framåt)\b")
 BEFORE = re.compile(r"\b(?:before|by|latest|until|ennen|mennessä|viimeistään|asti|före|senast|till)\b")
 OPEN = re.compile(r"\b(?:open\w*|closed|closes|hours|auki\w*|kiinni|avoinna|öppet|öppna\w*|stäng\w*|arkisin|vardagar|weekdays)\b")
 DAILY = re.compile(r"\b(?:daily|every\s+day|weekdays|arkisin|joka\s+päivä|vardagar|varje\s+dag)\b")
 
 DAY_NAMES = [
-    (0, r"\b(?:monday|mon|maanantai\w*|måndag\w*)\b|\bma\."),
-    (1, r"\b(?:tuesday|tue|tues|tiistai\w*|tisdag\w*)\b|\bti\."),
-    (2, r"\b(?:wednesday|wed|keskiviik\w*|onsdag\w*)\b|\bke\."),
-    (3, r"\b(?:thursday|thu|thur|thurs|torstai\w*|torsdag\w*)\b|\bto\."),
-    (4, r"\b(?:friday|fri|perjantai\w*|fredag\w*)\b|\bpe\."),
-    (5, r"\b(?:saturday|sat|lauantai\w*|lördag\w*)\b|\bla\."),
-    (6, r"\b(?:sunday|sun|sunnuntai\w*|söndag\w*)\b|\bsu\."),
+    (0, r"\b(?:monday|mon|maanantai\w*|måndag\w*|mån)\b|\bma\."),
+    (1, r"\b(?:tuesday|tue|tues|tiistai\w*|tisdag\w*|tis)\b|\bti\."),
+    (2, r"\b(?:wednesday|wed|keskiviik\w*|onsdag\w*|ons)\b|\bke\."),
+    (3, r"\b(?:thursday|thu|thur|thurs|torstai\w*|torsdag\w*|tors)\b|\bto\."),
+    (4, r"\b(?:friday|fri|perjantai\w*|fredag\w*|fre)\b|\bpe\."),
+    (5, r"\b(?:saturday|sat|lauantai\w*|lördag\w*|lör)\b|\bla\."),
+    (6, r"\b(?:sunday|sun|sunnuntai\w*|söndag\w*|sön)\b|\bsu\."),
 ]
 DAY_AFTER = re.compile(r"\b(?:the\s+day\s+after\s+tomorrow|day\s+after\s+tomorrow|ylihuomenna|i\s+övermorgon)\b")
 TOMORROW = re.compile(r"\b(?:tomorrow|tmrw|huomenna|i\s+morgon|imorgon)\b")
@@ -86,7 +86,12 @@ def _has_day(text: str) -> bool:
 
 
 def _normalize(text: str) -> str:
-    return unicodedata.normalize("NFKC", text).casefold().replace("’", "'")
+    text = unicodedata.normalize("NFKC", text).casefold().replace("’", "'")
+    # Observed, unambiguous spelling variants only. This is not a general
+    # fuzzy matcher: unfamiliar day or stop words must not pick a time origin.
+    for typo, canonical in {"huomnna": "huomenna", "vastaaanottava": "vastaanottava"}.items():
+        text = re.sub(r"\b" + typo + r"\b", canonical, text)
+    return text
 
 
 def _minutes(hour: int, minute: int, ampm: str | None = None) -> int | None:
@@ -192,8 +197,13 @@ def parse_notes(request: dict[str, Any]) -> NoteConstraints:
     # Strip conventional clock abbreviation dots before sentence splitting.
     text = re.sub(r"\b(klo|kl)\.", r"\1", text)
     text = re.sub(r"\b([ap])\.m\.", r"\1m", text)
+    text = re.sub(r"\bviim\.(?=\s)", "viimeistään", text)
     abbreviations = {"ma": "maanantai", "ti": "tiistai", "ke": "keskiviikko", "to": "torstai", "pe": "perjantai", "la": "lauantai", "su": "sunnuntai"}
     text = re.sub(r"\b(ma|ti|ke|to|pe|la|su)\.(?=\s+(?:klo\b|kl\b|\d))",
+                  lambda match: abbreviations[match[1]], text)
+    # Dotless FI day abbreviations are scoped by a clock marker. Bare English
+    # "to" is not a Thursday; do not add it to the global weekday regex.
+    text = re.sub(r"\b(ma|ti|ke|to|pe|la|su)(?=\s+(?:klo|kl)\b)",
                   lambda match: abbreviations[match[1]], text)
     # Only a dot *between* two digits is part of a clock. A period after
     # 16.30 still ends its sentence; otherwise the next stop contaminates it.
@@ -205,9 +215,18 @@ def parse_notes(request: dict[str, Any]) -> NoteConstraints:
         result.evidence.setdefault(name, []).append(evidence)
 
     for original in clauses:
-        clause = _corrected_clause(original)
+        # A contact reminder does not make preceding yard hours delivery
+        # hours merely because it mentions arrival at the end of the clause.
+        clause = re.split(r",\s*(?:soita|call|ring|ilmoita)\b", original, maxsplit=1)[0]
+        if re.match(r"^(?:soita|call|ring|ilmoita)\b", clause):
+            result.unknown.append("contact_instruction: " + original)
+            continue
+        clause = _corrected_clause(clause)
         if re.search(r"\b(?:maybe|perhaps|probably|possibly|may|might|could|ehkä|ehka|mahdollisesti|kanske|möjligen|eventuellt)\b", clause):
             result.unknown.append("uncertain_statement: " + original)
+            continue
+        if re.search(r"\b(?:if|unless|jos|mikäli|om)\b", clause):
+            result.unknown.append("conditional_statement: " + original)
             continue
         seen = False
         # Negations of requirements are distinct from "no plates", which
@@ -237,7 +256,7 @@ def parse_notes(request: dict[str, Any]) -> NoteConstraints:
             seen = True
         summer = re.search(r"\b(?:summer\s+t[yi]res|kesären\w*|sommardäck\w*)\b", clause)
         winter = re.search(r"\b(?:winter\s+t[yi]res|talviren\w*|vinterdäck\w*)\b", clause)
-        tyre_cargo = re.search(r"\b(?:boot|trunk|spare|extra|takakont\w*|ylimääräi\w*|bagag\w*)\b", clause)
+        tyre_cargo = re.search(r"\b(?:boot|trunk|spare|extra|takakont\w*|tavar\w*|ylimääräi\w*|bagag\w*|bakl?uck\w*)\b", clause)
         if (summer or winter) and tyre_cargo:
             result.unknown.append("tyres_may_be_cargo: " + original)
             seen = True

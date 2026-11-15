@@ -9,7 +9,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from official_study import atomic_json
+from official_study import atomic_json, provenance, resolve_configuration
 
 
 def main() -> None:
@@ -30,6 +30,16 @@ def main() -> None:
         parser.error("Blind evaluation requires a frozen_candidate in the plan")
     if args.partition == "blind" and set(args.policies) != {"baseline", plan["frozen_candidate"]["policy"]}:
         parser.error("Blind evaluation must compare baseline and the frozen candidate only")
+    if args.partition == "blind":
+        frozen = plan["frozen_candidate"]
+        effective = argparse.Namespace(policy=frozen["policy"], model=args.model,
+                                       late_threshold=args.late_threshold)
+        resolve_configuration(effective)
+        observed = provenance(effective.model)
+        if observed["files_sha256"] != frozen.get("files_sha256") \
+                or observed["model_sha256"] != frozen.get("model_sha256") \
+                or effective.late_threshold != frozen.get("late_threshold"):
+            parser.error("Candidate source/model/threshold differs from its predeclared freeze")
     seeds = plan["partitions"][args.partition]
     if len(set(seeds)) != len(seeds) or set(plan["partitions"]["development"]) & set(plan["partitions"]["blind"]):
         parser.error("Seed groups must be unique and development/blind must be disjoint")
