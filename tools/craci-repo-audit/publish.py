@@ -61,8 +61,8 @@ def main():
             cloud.unpack(data, Path(tmp) / "checked", entry)
     frozen = (json.dumps(manifest, sort_keys=True, indent=2) + "\n").encode()
     manifest_path.write_bytes(frozen)
-    harness = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=cloud.TOOLS, text=True).strip()
-    existing = subprocess.run(["gh", "api", f"repos/{cloud.REPO}/releases/tags/{tag}"], capture_output=True)
+    harness = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=cloud.TOOLS, text=True, timeout=30).strip()
+    existing = subprocess.run(["gh", "api", f"repos/{cloud.REPO}/releases/tags/{tag}"], capture_output=True, timeout=90)
     if existing.returncode:
         # A provider failure is not treated as absence except for explicit404.
         error = existing.stdout + existing.stderr
