@@ -35,6 +35,7 @@ function readJSON(req) {
 }
 export function createServer({env=process.env,services=createServices({env})}={}) {
  const send=(res,status,data,method)=>{res.writeHead(status,{...headers,'Content-Type':'application/json; charset=utf-8'});res.end(method==='HEAD'?undefined:JSON.stringify(data));};
+ if(env.SIGNAL_DEPLOYMENT_PROVIDER==='hostinger'&&!/^https:\/\/[a-z0-9.-]+(?::\d+)?$/.test(env.SIGNAL_PUBLIC_ORIGIN||''))throw new Error('Hostinger deployment requires an exact HTTPS SIGNAL_PUBLIC_ORIGIN.');
  const server=http.createServer(async(req,res)=>{
   try {
    if(req.url==='/api/interpret'&&req.method==='POST') {

@@ -4,6 +4,7 @@ import {mkdtemp,readFile,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createServices,validateInterpretation} from '../services.mjs';
+import {preflight} from '../deploy.mjs';
 import {createServer} from '../server.mjs';
 const material='Act now before it is too late. We have not published the supporting evidence.';
 const env={HOSTINGER_AI_ROUTER_KEY:'DUMMY_HOSTINGER_KEY',HOSTINGER_AI_MODEL:'demo-model',SIGNAL_MAX_AI_REQUESTS:'1'};
@@ -42,7 +43,7 @@ test('simultaneous instances cannot both reserve the final request',async t=>{
 });
 test('invalid quota and backwards clock do not send requests',async t=>{
  const path=await setup(t);let calls=0;const opts={env,quotaPath:path,fetchImpl:async()=>{calls++;return response();}};
- await writeFile(path,'not JSON');await assert.rejects(createServices(opts).interpret({text:material,consent:true}));
+ await writeFile(path,'not JSON');await assert.rejects(createServices(opts).interpret({text:material,consent:true}),{code:'QUOTA_STORE_INVALID'});
  await writeFile(path,JSON.stringify({day:'2099-01-01',ai:0}));await assert.rejects(createServices(opts).interpret({text:material,consent:true}),{code:'CLOCK_MOVED_BACKWARDS'});assert.equal(calls,0);
 });
 test('HTTP API checks origin, content type, consent, size, private routes and returns no secrets',async t=>{
@@ -61,3 +62,7 @@ test('HTTP API checks origin, content type, consent, size, private routes and re
  const status=await(await fetch(base+'/api/status')).text();assert.ok(!status.includes(env.HOSTINGER_AI_ROUTER_KEY));
  const good=await post({text:material,consent:true});assert.equal(good.status,200);assert.equal((await good.json()).intent,'UNKNOWN');
 });
+
+test('an accidentally pasted combined access log is refused before any provider transfer',async t=>{const quotaPath=await setup(t);let calls=0;const s=createServices({env,quotaPath,fetchImpl:async()=>{calls++;return response();}});await assert.rejects(s.interpret({text:'192.0.2.1 - - [14/Nov/2026:09:00:00 +0000] "POST /login HTTP/1.1" 401 120 "-" "-"',consent:true}),{code:'ACCESS_LOG_TEXT_NOT_ALLOWED'});assert.equal(calls,0);});
+test('Hostinger mode refuses an absent public HTTPS origin at startup',()=>{assert.throws(()=>createServer({env:{SIGNAL_DEPLOYMENT_PROVIDER:'hostinger'}}),/HTTPS/);});
+test('deployment preflight rejects readable env files and mismatched origins without exposing keys',async t=>{const quota=await setup(t),folder=quota.slice(0,quota.lastIndexOf('/')),path=join(folder,'.env');const content='SIGNAL_DOMAIN=demo.example.test\nSIGNAL_PUBLIC_ORIGIN=https://demo.example.test\nSIGNAL_DEPLOYMENT_PROVIDER=hostinger\nSIGNAL_SOURCE_REVISION='+('a'.repeat(40))+'\nHOSTINGER_AI_ROUTER_KEY=\nHOSTINGER_AI_MODEL=\n';await writeFile(path,content,{mode:0o644});await assert.rejects(preflight(folder),/owner-only/);const {chmod}=await import('node:fs/promises');await chmod(path,0o600);assert.equal((await preflight(folder)).aiConfigured,false);await writeFile(path,content.replace('https://demo.example.test','https://other.example.test'));await assert.rejects(preflight(folder),/match SIGNAL_DOMAIN/);});

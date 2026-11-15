@@ -31,7 +31,9 @@ export function createServices({env=process.env,fetchImpl=fetch,clock=()=>new Da
       const day=clock().toISOString().slice(0,10);
       let state={day,ai:0};
       try {
-        const saved=JSON.parse(await readFile(quotaPath,'utf8'));
+        let saved;
+        const stored=await readFile(quotaPath,'utf8');
+        try{saved=JSON.parse(stored);}catch{fail(503,'QUOTA_STORE_INVALID');}
         if(typeof saved.day!=='string'||!Number.isSafeInteger(saved.ai)||saved.ai<0)fail(503,'QUOTA_STORE_INVALID');
         if(saved.day===day)state=saved;
         else if(saved.day>day)fail(503,'CLOCK_MOVED_BACKWARDS');
@@ -46,6 +48,7 @@ export function createServices({env=process.env,fetchImpl=fetch,clock=()=>new Da
   async function interpret({text,consent}) {
     if(consent!==true)fail(400,'EXPLICIT_PROVIDER_CONSENT_REQUIRED');
     if(typeof text!=='string'||text.trim().length<20||new TextEncoder().encode(text).length>4000)fail(400,'TEXT_MUST_BE_20_TO_4000_BYTES');
+    if(/\[\d{2}\/[A-Za-z]{3}\/\d{4}:[^\]]+\] \"(?:GET|POST|HEAD|PUT|PATCH|DELETE) [^\r\n]+ HTTP\/1\.[01]\" [1-5]\d{2}/.test(text))fail(400,'ACCESS_LOG_TEXT_NOT_ALLOWED');
     if(!configured)fail(503,'HOSTINGER_AI_ROUTER_NOT_CONFIGURED');
     if(busy)fail(429,'ONE_REVIEW_AT_A_TIME');
     busy=true;

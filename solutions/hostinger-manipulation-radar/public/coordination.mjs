@@ -39,6 +39,8 @@ const ordered = es => [...es].sort((a, b) => a.ms - b.ms || a.id.localeCompare(b
 export function analyzeCoordination(input, {omit = []} = {}) {
   const events = validate(input);
   const excluded = new Set(omit);
+  // The UI's joint trace ablation removes both permitted second-trace sources.
+  if (excluded.has('joint')) { excluded.add('url'); excluded.add('amplification'); }
   const rawById = new Map(input.map(e => [clean(e.id, 60), e]));
   // Resource keys are invocation-local and never returned or persisted.
   const keys = events.map(e => resourceKey(rawById.get(e.id)?.url));

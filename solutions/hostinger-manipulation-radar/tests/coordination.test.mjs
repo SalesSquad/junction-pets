@@ -87,6 +87,17 @@ test('ablation removes actual coaction requirements; stronger content support is
   for (const omit of [['text'], ['timing'], ['url']]) assert.equal(analyzeCoordination(make(), {omit}).findings.some(f => f.review), false);
   assert.equal(analyzeCoordination(make(4, {url: '', amplifies: 'shared-post'})).findings.some(f => f.review), true);
 });
+test('joint trace ablation removes destination and amplification support, including when both exist', () => {
+  for (const input of [make(), make(4, {url: '', amplifies: 'shared-post'}), make(4, {amplifies: 'shared-post'})]) {
+    assert.equal(analyzeCoordination(input).findings.some(f => f.review), true);
+    const withoutJoint = analyzeCoordination(input, {omit: ['joint']});
+    assert.equal(withoutJoint.findings.some(f => f.review), false);
+    assert.ok(withoutJoint.findings.every(f => f.links.length === 0 && f.score === 0));
+  }
+  // Individual source ablation still keeps the alternative source when available.
+  assert.equal(analyzeCoordination(make(4, {amplifies: 'shared-post'}), {omit: ['url']}).findings.some(f => f.review), true);
+  assert.equal(analyzeCoordination(make(4, {amplifies: 'shared-post'}), {omit: ['amplification']}).findings.some(f => f.review), true);
+});
 test('input validation bounds and empty input are inherited; maximum input completes deterministically', () => {
   assert.deepEqual(analyzeCoordination([]).findings, []);
   assert.throws(() => analyzeCoordination(make(401)), /400/);
