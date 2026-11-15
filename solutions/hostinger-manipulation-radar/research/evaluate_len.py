@@ -84,7 +84,9 @@ def run(source,output):
     here=Path(__file__).parent
     report={"schema":"signal-desk-len-evaluation-v1","protocol_sha256":hashlib.sha256((here/"len-protocol-v2.json").read_bytes()).hexdigest(),
             "source":{"url":data["source"],"sha256":data["source_sha256"],"bytes":data["source_bytes"],"extracted_at":data["extracted_at"]},
-            "feature_artifact_sha256":hashlib.sha256(source.read_bytes()).hexdigest(),"split_sha256":split_hash,
+            "feature_artifact_sha256":hashlib.sha256(source.read_bytes()).hexdigest(),
+            "evaluator_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "extractor_sha256":hashlib.sha256((Path(__file__).parent/"extract_len.py").read_bytes()).hexdigest(),"split_sha256":split_hash,
             "release_graphs":len(raw_rows),"unique_graphs":len(rows),"byte_identical_duplicates_removed":len(raw_rows)-len(rows),
             "label_basis":"provisional released filename campaign/noncampaign annotations; original label index not supplied",
             "counts":{k:{"n":len(v),"campaign":sum(r["label"] for r in v),"organic":sum(1-r["label"] for r in v)} for k,v in parts.items()},

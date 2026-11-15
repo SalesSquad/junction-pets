@@ -6,7 +6,7 @@ try{
  if(responses.some(r=>!r.ok))throw new Error('Unavailable');
  const [report,loaded]=await Promise.all(responses.map(r=>r.json()));model=loaded;
  const counts=report.counts;
- byId('split').textContent=counts.train.n+' training / '+counts.calibration.n+' calibration / '+counts.test.n+' held-out trend graphs. No test labels used for fitting or threshold choice.';
+ byId('split').textContent=counts.train.n+' training / '+counts.calibration.n+' calibration / '+counts.test.n+' held-out trend graphs ('+report.byte_identical_duplicates_removed+' byte-identical duplicates removed). No test labels used for fitting or threshold choice.';
  for(const [name,key] of [['Majority baseline','majority'],['Size-only baseline','size_only'],['Topology candidate','topology']]){
   const m=report.held_out[key],row=document.createElement('tr');
   for(const value of [name,pct(m.accuracy),pct(m.precision),pct(m.recall),m.fp+'/'+(m.fp+m.tn)+' ('+pct(m.false_positive_rate)+')']){
