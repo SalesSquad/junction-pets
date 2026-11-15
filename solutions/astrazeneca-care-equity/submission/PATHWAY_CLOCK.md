@@ -56,8 +56,8 @@ indicators under 3.1.4 (p. 58). SAMA's thresholds stay placeholders until they a
   "cannot be assessed yet", never "slow" or "fast".
 - Why: in a simulation on SYNTHETIC error profiles, a county whose dates are read from free text
   while the rest of the country uses structured fields is flagged as slow in **1.000** of runs with
-  nothing wrong, and in **0.001** with "Gemma reads, code counts"
-  (`runs/diagnose/interval-impact-v1.json`).
+  nothing wrong, and in **0.003** with "Gemma reads, code counts"
+  (`data/eventlog/design-study-v1.json`).
 - On real data the gate applies to areas, because stage completeness is published by area only:
   72% in Pirkanmaa, 60% in Sisä-Suomi and 33-42% elsewhere, against an aim of 70%.
 - Computed where the data live: NVIDIA FLARE federated statistics on 23 simulated county sites

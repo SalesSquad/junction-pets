@@ -10,7 +10,8 @@ const n = (v, d = 0, unit = '') => `<span class="n">${esc(f(v, d))}${unit}</span
 const raw = (v) => `<span class="n">${esc(v)}</span>`;
 const pc = (v, d = 1) => (v == null ? '<span class="n">n/a</span>' : n(100 * v, d, '%'));
 const pts = (v, d = 1) => (v == null ? '<span class="n">n/a</span>' : `<span class="n">${v > 0 ? '+' : ''}${esc(f(100 * v, d))}</span>`);
-const pv = (p) => (p == null ? '<span class="n">n/a</span>' : `<span class="n">${esc(p >= 0.001 ? f(p, 3) : p.toExponential(1))}</span>`);
+// p below 1e-6 (stored rounded to 0 in older result files) reads "< 1e-6", never 0.0e+0.
+const pv = (p) => (p == null ? '<span class="n">n/a</span>' : p < 1e-6 ? '&lt; <span class="n">1e-6</span>' : `<span class="n">${esc(p >= 0.001 ? f(p, 3) : p.toExponential(1))}</span>`);
 const sn = (v, d = 0, unit = '') => `<tspan class="n">${esc(f(v, d))}${unit}</tspan>`;
 const lohi = (w) => w.wilson95 ?? w.ci95;
 const ci = (w, d = 1) => (w?.value == null && w?.share == null ? '<span class="n">n/a</span>' : `${pc(w.value ?? w.share, d)} <span class="range">(${pc(lohi(w)[0], d)}–${pc(lohi(w)[1], d)}${w.n != null && w.k == null ? `; n = ${n(w.n)}` : ''})</span>`);
@@ -165,12 +166,14 @@ export function scribeHtml(app) {
   const s = app.scribe;
   if (!s) return `<p class="missing-label">The scribe is not in this build: ${esc(problemFor(app, 'scribe') || 'no scribe result file is present')}.</p>`;
   const K = 'SYNTHETIC', out = [
-    `<p>The dates the event log needs already sit in referral letters and visit notes. The idea tested here: a small open model (Gemma) with a trained adapter reads a Finnish note and proposes the dated pathway events and the entry route as structured data, and a person confirms each proposal. A large teacher model writes the training notes, two judge models check them, and a fourth model audits samples. Every note is written by a language model about simulated people.</p>`,
+    `<p>The dates the event log needs already sit in referral letters and visit notes. The idea tested here: a small open model (Gemma) with a trained adapter reads a Finnish note and proposes the events and their dates; for every relative phrase (“… sitten”) code recomputes the date from the phrase and Gemma's own date is discarded; a second reader checks the answer; and a person confirms every event. Gemma reads, code counts. Every note is written by a language model about simulated people, and the scribe reads Finnish notes only.</p>`,
     scope('p', K, `${esc(s.statement)} Nothing here shows that the idea works on real clinical text.`),
   ];
   const missing = problemFor(app, 'scribe');
   if (missing) out.push(`<p class="missing-label">Parts left out of this build: ${esc(missing)}.</p>`);
-  out.push(headlineHtml(s, K), ablationHtml(s.ablation, K), studentsHtml(s.students, K), servingHtml(s.serving, K), teachingHtml(s.teaching, K), historyHtml(s.history, K));
+  out.push(readsCountsHtml(s, K));
+  const earlier = [headlineHtml(s, K), ablationHtml(s.ablation, K), studentsHtml(s.students, K), servingHtml(s.serving, K), teachingHtml(s.teaching, K), historyHtml(s.history, K)].join('');
+  if (earlier) out.push(details(K, 'How the scribe got here: the earlier versions, the teacher, the judges and the first cascade', earlier, !(s.gemmaAlone || s.resolver || s.evaluation || s.reader)));
   const p = s.provenance;
   out.push(`<h3>Models and terms</h3>`, `<p class="caption">Student: Gemma 3 with LoRA adapters${s.ablation ? ` (selected run <code>${esc(s.ablation.selected.run)}</code>)` : ''}${p ? `, base converted from <code>${esc(p.base_model.upstream_repository)}</code>` : ''}. Teacher: NVIDIA Nemotron on Verda. Judges: TypeSafe Jev and OpenAI Decisions. Independent writer and auditor: Claude Haiku.${p ? ` Gemma and the adapters derived from it are subject to the <a href="${esc(p.terms.gemma_terms_of_use)}" target="_blank" rel="noopener noreferrer">Gemma Terms of Use</a> and the <a href="${esc(p.terms.gemma_prohibited_use_policy)}" target="_blank" rel="noopener noreferrer">Prohibited Use Policy</a>, which restricts automated decisions in healthcare.` : ''} Every extraction stays a proposal until a person confirms it. Research artefact, not a medical device. Details: <code>TRAINING.md</code>, <code>scribe/TEACHING.md</code>, <code>scribe/v2/RESULTS.md</code>.</p>`);
   return out.join('');
@@ -187,7 +190,65 @@ function headlineHtml(s, K) {
     const top = Math.max(st.reference.pooled.value, ...st.runs.map((r) => r.pooled.value));
     lines.push(`Even for the best run, ${pc(1 - top)} of the held-out notes are not exactly right (a wrong, missing or extra event, a wrong date or route, or no valid output), so every extraction goes to a person.`);
   }
-  return `<h3>Where the scribe stands now</h3><div class="headline-box" data-kind="${K}">${chip(K)}${lines.map((l) => `<p>${l}</p>`).join('')}</div>`;
+  return `<h3>Where the scribe stood before the code date resolver</h3><div class="headline-box" data-kind="${K}">${chip(K)}${lines.map((l) => `<p>${l}</p>`).join('')}</div>`;
+}
+
+// Shown above the "Try it" demo, so the preregistered result comes before any example: the stress test was not met,
+// and the demo's rewritten notes use phrasings the hand-written lexicon covers by design.
+export function scribeHeadlineHtml(app) {
+  const ev = app.scribe?.evaluation;
+  if (!ev?.primary || !ev.sets?.stress?.systems) return '';
+  const K = 'SYNTHETIC', p = ev.primary, S = ev.sets.stress.systems;
+  return `<div class="headline-box" data-kind="${K}">${chip(K)}<p><strong>Preregistered stress test: ${p.met ? 'met' : 'not met'}.</strong> On phrasings no training note used, the careful Finnish rule A' got ${kn(S["A'"].slices.heldout)} and the learned reader B ${kn(S.B.slices.heldout)} (exact McNemar p ${pv(p.p)}). The demo below runs the product adapter <code>C-270m-all-v2data</code> on SYNTHETIC validation notes; the first three were rewritten by code into phrasings the hand-written Finnish lexicon covers by design, so they do not test new phrasings. A note is pre-filled for one-click confirmation only when Nemotron's stored answer for the same note agrees; a person confirms every event. Details below the demo.</p></div>`;
+}
+
+// "Gemma reads, code counts": the adapter alone, the frozen resolver, the preregistered stress evaluation, the
+// Nemotron reader and the two-reader cascade. Every figure comes from app.scribe (src/tracks.mjs, parts 7a-7d).
+const SYSTEM_ORDER = ['A', "A'", 'B', 'C', 'v2data', 'nemotron'];
+const cfg = (ev, gemma, signal) => ev.cascade.configurations.find((c) => c.gemma === gemma && c.signal === signal);
+function readsCountsHtml(s, K) {
+  const g = s.gemmaAlone, r = s.resolver, ev = s.evaluation, rd = s.reader;
+  if (!g && !r && !ev && !rd) return '';
+  const nem = rd ? esc(rd.modelName) : 'the Nemotron reader';
+  const lines = [];
+  if (g) lines.push(`Asked to do the date arithmetic itself, the adapter <code>${esc(g.run)}</code> got ${kn(g.withRelativeDate)} of the test notes with a relative date (“… päivää sitten”, “… viikkoa sitten”) exactly right, against ${kn(g.withoutRelativeDate)} of the notes without one. So for every relative phrase code now recomputes the date from the phrase and Gemma's own date is discarded; a date written out in the note is taken from Gemma's answer. (The expression readers B and C below copy the phrase instead; they are not in the demo.)`);
+  if (r) lines.push(`With the frozen code date resolver (<code>${esc(r.rule)}</code>, frozen ${raw(r.frozenUtc)}) on the stored outputs of the same adapter: ${kn(r.validation.after)} validation notes exactly right instead of ${kn(r.validation.before)}, and ${kn(r.test.after)} test notes instead of ${kn(r.test.before)} (${esc(r.test.role)}). The rule made ${n(r.notesMadeWorse)} notes worse.`);
+  if (ev) {
+    const p = ev.primary, st = ev.sets.stress, S = st.systems;
+    lines.push(`<strong>A fresh test, frozen before scoring.</strong> A stress set of ${n(st.notes)} notes in phrasings no training note used, preregistered in <code>${esc(ev.preregistration.file)}</code> (${raw(ev.preregistration.frozenUtc)}) and read once by each system. Result: ${esc(p.headline)}. On the held-out phrasings the learned reader B got ${kn(S.B.slices.heldout)} and the careful Finnish rule A' ${kn(S["A'"].slices.heldout)} (exact McNemar p ${pv(p.p)}); B got ${kn(p.bStandard)} on standard phrasings. ${p.met ? 'B meets the preregistered criterion.' : p.aPrimeWins ? 'The careful rule beats the learned reader on these phrasings.' : S.B.slices.heldout.value < 0.5 && S["A'"].slices.heldout.value < 0.5 ? 'Neither small reader gets most of the new phrasings right.' : ''}`);
+    lines.push(`The larger expression reader C got ${kn(S.C.slices.heldout)} of the held-out notes and ${kn(S.C.exact)} of all stress notes; ${nem} got ${kn(S.nemotron.slices.heldout)} and ${kn(S.nemotron.exact)}, which is optimistic because it wrote these notes. For vague phrases (“pari viikkoa sitten”, “viime kuussa”) the rule sends ${kn(S["A'"].vague.sent_to_person)} to a person; B invents a precise date for ${kn(S.B.vague.invented_precise_date)} and C for ${kn(S.C.vague.invented_precise_date)}.`);
+    const ch = cfg(ev, ev.cascade.chosen.gemma, ev.cascade.chosen.signal), alone = cfg(ev, ev.cascade.chosen.gemma, 'gemma_confidence_alone'), b = ev.cascade.baseline;
+    const demoCfg = cfg(ev, 'v2data', ev.cascade.chosen.signal);
+    lines.push(`<strong>Two readers, one person.</strong> A note is pre-filled for one-click confirmation only when the code-resolved Gemma answer and ${nem} agree exactly; otherwise it needs editing. Chosen on validation notes only: <code>${esc(ch.gemma)}</code>${ch.gemma === 'C' ? ' (the larger expression reader <code>C-1b-expr-aug</code>, not in the demo)' : ''} with ${words(ch.signal)}. On the ${n(ch.test.prefilled.n)} test notes (read in earlier work, so post hoc) it pre-fills ${n(ch.test.prefilled.k)}, of which ${kn(ch.test.wrong)} are wrong, and ${n(ch.test.needsEditing.k)} need editing; the earlier rule pre-filled ${n(b.prefilled)} with ${n(b.wrong)} wrong.${ch.stress ? ` On the stress set it pre-fills ${n(ch.stress.prefilled.k)} of ${n(ch.stress.prefilled.n)}, ${n(ch.stress.wrong.k)} of them wrong${alone?.stress ? `; the model's own confidence alone would pre-fill ${n(alone.stress.prefilled.k)}, ${n(alone.stress.wrong.k)} of them wrong` : ''}.` : ''}${demoCfg ? ` The demo above runs the product adapter <code>C-270m-all-v2data</code>; with the same rule it pre-fills ${n(demoCfg.test.prefilled.k)} of the ${n(demoCfg.test.prefilled.n)} test notes, ${n(demoCfg.test.wrong.k)} of them wrong (post hoc).` : ''} ${esc(ev.personConfirms)}`);
+  } else if (r) lines.push(`The preregistered stress evaluation is not in this build, so the resolver figures above are the only ones: post hoc on notes that had been read before.`);
+  const out = [`<h3>Gemma reads, code counts</h3>`, `<div class="headline-box" data-kind="${K}">${chip(K)}${lines.map((l) => `<p>${l}</p>`).join('')}</div>`];
+  if (ev) {
+    const sys = SYSTEM_ORDER.filter((k) => ev.sets.val.systems[k] || ev.sets.test.systems[k] || ev.sets.stress.systems[k]);
+    const cell = (setName, k, get) => { const x = ev.sets[setName].systems[k]; return x ? kn(get(x)) : esc(ev.sets[setName].notScored[k] || 'not run'); };
+    out.push(table(K, `Whole note exactly right, Wilson 95% intervals. Validation: ${esc(ev.sets.val.role)}. Test: ${esc(ev.sets.test.role)}. Stress: ${esc(ev.sets.stress.role)}. Source: <code>${esc(ev.source.file)}</code>.`,
+      ['System', 'Validation', 'Test', 'Stress, all', 'Stress, held-out phrasings', 'Stress, standard phrasings', 'Stress, no event'],
+      sys.map((k) => [`<code>${esc(k)}</code>`, cell('val', k, (x) => x.exact), cell('test', k, (x) => x.exact), cell('stress', k, (x) => x.exact),
+        cell('stress', k, (x) => x.slices.heldout), cell('stress', k, (x) => x.slices.standard), cell('stress', k, (x) => x.slices.no_event)])));
+    out.push(`<ul class="caption">${sys.map((k) => scope('li', K, `<code>${esc(k)}</code>: ${esc(ev.systems[k])}`)).join('')}</ul>`);
+    const vs = ["A'", 'B', 'C', 'nemotron'].filter((k) => ev.sets.stress.systems[k]);
+    out.push(table(K, `Facts with a vague phrase on the stress set (${n(ev.sets.stress.systems["A'"].vague.facts)}). The right answer is to send them to a person.`, ['System', 'Sent to a person', 'Precise date invented', 'Month given without a flag', 'Left out'],
+      vs.map((k) => { const v = ev.sets.stress.systems[k].vague; return [`<code>${esc(k)}</code>`, kn(v.sent_to_person), kn(v.invented_precise_date), kn(v.month_without_flag), kn(v.dropped)]; })));
+    const confs = ev.cascade.configurations.filter((c) => c.stress);
+    out.push(table(K, `Two-reader cascade. ${esc(ev.cascade.rule)} Selection: ${esc(ev.cascade.selectionRule)} Leak guard: ${esc(ev.cascade.leakGuard)}. Earlier rule for comparison: ${esc(ev.cascade.baseline.source)}.`,
+      ['Gemma reader · signal', 'Validation: pre-filled, wrong', 'Test: pre-filled', 'Test: wrong among pre-filled', 'Stress: pre-filled', 'Stress: wrong among pre-filled'],
+      confs.map((c) => [`<code>${esc(c.gemma)}</code> · ${words(c.signal)}${c.gemma === ev.cascade.chosen.gemma && c.signal === ev.cascade.chosen.signal ? ' (chosen)' : ''}`, `${n(c.validation.accepted)} of ${n(c.validation.n)}, ${n(c.validation.wrong)} wrong`,
+        kn(c.test.prefilled), kn(c.test.wrong), kn(c.stress.prefilled), kn(c.stress.wrong)])));
+  }
+  if (rd) {
+    out.push(`<h3>${nem} as the second reader: how its output was improved</h3>`,
+      scope('p', K, `Each version changes one thing from the one before, measured on the ${n(rd.versions[0].exact.n)} validation notes. ${esc(rd.selectionRule)} Source: <code>${esc(rd.source.file)}</code>.`),
+      table(K, 'Versions of the reader on validation notes (whole note exactly right, Wilson 95% intervals).', ['Version', 'What changed', 'Exactly right', 'No valid answer', 'Output tokens per note', 'Seconds per note'],
+        rd.versions.map((v) => [`<code>${esc(v.id)}</code>${v.id === rd.selected ? ' (selected)' : ''}`, esc(v.what), kn(v.exact), n(v.parseFailures), n(v.completionTokensPerNote), n(v.meanSeconds, 2)])),
+      table(K, 'One change at a time, paired on the same validation notes (exact McNemar p). The rerun of an unchanged version is the noise floor.', ['Step', 'Notes fixed', 'Notes made worse', 'Exactly right before → after', 'Change, points', 'p', 'On notes with a relative date'],
+        rd.ladder.map((x) => { const rel = rd.ladderRelative.find((y) => y.step === x.step); return [`<code>${esc(x.step)}</code>`, n(x.gained), n(x.lost), `${n(x.before)} → ${n(x.after)}`, n(x.change_points, 1), pv(x.mcnemar_exact_p), rel ? `${n(rel.before)} → ${n(rel.after)} of ${n(rel.notes)}` : '']; })),
+      scope('p', K, `The selected version <code>${esc(rd.test.version)}</code> read the ${n(rd.test.notes)} test notes once: ${kn(rd.test.exact)} exactly right (${Object.entries(rd.test.byWriter).map(([w, v]) => `${esc(w.replace('_', ' '))} ${kn(v)}`).join(', ')}), ${n(rd.test.parseFailures)} without a valid answer. ${rd.caveats.map((c) => esc(c)).join(' ')}`));
+  }
+  return out.join('');
 }
 function ablationHtml(a, K) {
   if (!a) return '';
@@ -493,4 +554,53 @@ ${e.display_en ? `<p class="caption">${chip('MEASURED')} ${esc(e.display_en)}</p
 <p><strong>Governance.</strong> The county owns the list and the care. No patient data leaves the county. SAMA is sponsor-independent; any company role would be a documented, non-promotional collaboration owned by the county.</p>
 <p><strong>Regulation.</strong> A workflow aid: it copies what a clinician wrote, computes a date and a nurse decides. Its medical-device status is to be confirmed with Fimea before any pilot (not yet checked).</p>
 <p class="caption">${esc(c.dataNote_en)} Source: ${c.source?.url ? `<a href="${esc(c.source.url)}" target="_blank" rel="noopener noreferrer">${esc(c.source.titleEn)}</a>` : ''}; mapping <code>data/roadmap/mapping-v1.json</code>; snapshot ${esc(String(e.sourceSha256 || '').slice(0, 12))}.</p></article>`;
+}
+
+// ------------------------------------------------------------------ The insight: extraction errors manufacture fake inequality
+// Section 06. Every figure comes from app.insight (src/tracks.mjs buildInsight, from the design-study file) and,
+// for the closing line, from app.flareGate. SYNTHETIC simulation; no figure here is about Finnish patients.
+const rateCell = (x) => `${pc(x.rate, 1)} <span class="range">(${pc(x.ci95[0], 1)}–${pc(x.ci95[1], 1)})</span>`;
+export function insightHtml(app) {
+  const i = app?.insight;
+  if (!i) return `<p class="missing-label">The insight is not in this build: ${esc(problemFor(app || {}, 'insight') || 'data/eventlog/design-study-v1.json is missing')}.</p>`;
+  const K = 'SYNTHETIC', c = i.falseFlag.countyTextCountryStructured, w = i.falseFlag.writerStyle, ok = i.falseFlag.confirmed;
+  const gate = app.flareGate?.summary;
+  const stages = Object.keys(INTERVAL_NAME);
+  return [
+    `<div class="headline-box insight-box" data-kind="${K}">${chip(K)}<p class="insight-lead">${esc(i.headline)}</p>`
+      + `<p>Suppose no county is slower than any other. One county of ${n(i.countyEpisodes)} patient pathways has its dates read from free-text notes by the scribe as it was (<code>${esc(i.run)}</code>); the rest of the country reports structured dates. The detector flags that county as slower in ${rateCell(c.asIs)} of ${n(i.replications)} simulated runs. With the code date resolver it is flagged in ${rateCell(c.resolver)} of runs, close to the ${rateCell(ok)} when a person confirms every event.</p>`
+      + `<p>A difference in writing style is enough on its own: when both are read from notes, but the county's notes are written like the Haiku-written test notes and the country's like the Nemotron-written ones, the county is flagged in ${rateCell(w.asIs)} of runs as is and ${rateCell(w.resolver)} with the resolver.</p></div>`,
+    `<h3>Why it matters for equal care</h3>`,
+    scope('p', K, `A county that documents in free text would be reported as slow in every run, and help would go to the wrong place. That is why code recomputes the date of every relative phrase instead of taking Gemma's, a second reader checks the answer, and a person confirms every event; and why the <a href="#comparability-gate">comparability gate</a> above compares a county only where its clock can be read${gate ? `: with the scribe as is ${n(gate.raw.not_comparable)} of ${n(gate.raw.of)} counties are not comparable, with the resolver ${n(gate.resolver.not_comparable)} of ${n(gate.resolver.of)}` : ''}.`),
+    table(K, `No real difference anywhere: share of simulated runs in which the county is flagged, Wilson 95% intervals. ${n(i.countyEpisodes)} pathways in the county, ${n(i.replications)} runs per cell. ${esc(i.extraEventsModel)}`,
+      ['Where the dates come from', 'Scribe as is', 'With the code date resolver', 'As is, extra events modelled', 'Resolver, extra events modelled'],
+      [['One county read from notes, the rest of the country from structured fields', c], ['Both read from notes; county written like Haiku, country like Nemotron', w]].map(([label, x]) => [label, rateCell(x.asIs), rateCell(x.resolver), rateCell(x.asIsExtras), rateCell(x.resolverExtras)])
+        .concat([['Every event confirmed by a person', rateCell(ok), '', '', '']])),
+    table(K, `A real slowdown of <span class="n">${slow(i.located[0].slowdown)}</span> planted in one interval of one county of ${n(i.located[0].n)} pathways: share of runs in which the right interval is flagged, and the error of the county's median interval in days (primary care / diagnostic / treatment).`,
+      ['Dates', 'Right interval flagged', 'Median off by, days'],
+      i.located.map((r) => [esc(cap(r.label)), stages.map((k) => pc(r.intervals[k].located, 1)).join(' / '), stages.map((k) => n(r.intervals[k].medianBiasDays, 1)).join(' / ')])),
+    scope('p', K, `The resolver is the same frozen rule the scribe uses (frozen ${raw(i.resolverFrozenUtc)}). On the notes behind these error profiles it lifts whole-note exact match from ${kn(i.noteExactMatch.validation.as_is)} to ${kn(i.noteExactMatch.validation.resolver)} on validation notes and from ${kn(i.noteExactMatch.test.as_is)} to ${kn(i.noteExactMatch.test.resolver)} on test notes (${esc(i.noteExactMatch.test.role)}). ${esc(i.errorModel)}`),
+    `<ul>${i.limits.map((t) => scope('li', K, esc(t))).join('')}</ul>`,
+    scope('p', K, `${esc(i.statement)} Source: <code>${esc(i.source.file)}</code> (<code>${esc(i.code)}</code>); method in <code>${esc(i.document)}</code>. Checked against the earlier scratch simulation <code>${esc(i.agreement.source)}</code>: ${n(i.agreement.compared_rates)} rates compared, ${n(i.agreement.beyond_3_se)} more than three standard errors apart.`, ' class="caption"'),
+  ].join('');
+}
+
+// ------------------------------------------------------------------ Nemotron county planner: what the drafts are and how they were improved
+// Section 07, above the per-county draft (web/planner.mjs). Figures from app.planner (src/tracks.mjs buildPlanner,
+// buildPlannerVision; the tool re-check from src/build.mjs plannerToolCheck).
+const kept = (x) => `${n(x.kept)} of ${n(x.n)}`;
+export function plannerSummaryHtml(app) {
+  const p = app?.planner;
+  if (!p) return `<p class="missing-label">The county planner is not in this build: ${esc(problemFor(app || {}, 'planner') || 'data/planner/plans-v1.json is missing')}.</p>`;
+  const s = p.summary, v1 = s.promptComparison.v1, v2 = s.promptComparison.v2, tc = p.toolCheck, vi = p.vision;
+  const out = [
+    `<div class="planner-summary" data-kind="DRAFT"><p class="kicker">${chip('DRAFT')} ${esc(p.label)}</p>`
+      + `<p>The model called ${n(p.tools.length)} SAMA tools (${p.tools.map((t) => `<code>${esc(t)}</code>`).join(', ')}) and wrote an action plan per county. Code then checked every number against the tool outputs of the same run, and a judge model checked that each sentence is faithful and does not overclaim; a sentence that failed was dropped, never repaired. Across ${n(s.counties)} areas, ${n(s.keptSentences)} of ${n(s.sentences)} drafted sentences were kept; ${n(s.keptSentencesWithUnmatchedNumber)} kept sentences carry a number that is not in a tool output; roadmap measure ids confirmed by code: ${raw(s.roadmapMeasureCodeChecked)}.</p>`
+      + `<p><strong>How the output was improved.</strong> The first prompt kept ${n(v1.keptSentences)} of ${n(s.sentences)} sentences, with indicator lines ${kept(v1.keptByField.indicator)} and evidence-limit lines ${kept(v1.keptByField.evidence_does_not_support)}. The second prompt changed only the field formats and kept ${n(v2.keptSentences)} (indicator lines ${kept(v2.keptByField.indicator)}, evidence-limit lines ${kept(v2.keptByField.evidence_does_not_support)}) under the same check. The older check, which gave the judge every tool output at once, would have kept ${n(s.keptUnderGateV1)}. Both prompts ran on the same areas; there is no held-out set of areas.</p>`
+      + `<p><strong>Off-limits requests.</strong> ${n(s.offLimits.pass)} of ${n(s.offLimits.prompts)} produced no plan: ${n(s.offLimits.refusedByModel)} refused by the model, ${n(s.offLimits.blockedByCode)} blocked by code. The code guard (a plan only for the one known area the request names) was added after an answer under the first prompt; without it ${n(s.offLimits.passWithoutCodeGuard)} of ${n(s.offLimits.prompts)} pass.</p>`
+      + (tc?.checked ? `<p><strong>Still current?</strong> The drafts were written on an earlier build of this page's data. Every stored tool call was re-run on this build: ${n(tc.identical)} of ${n(tc.counties)} areas get identical tool outputs${tc.changed.length ? `; for ${tc.changed.map((x) => `<code>${esc(x.county)}</code> (${x.tools.map((t) => esc(t)).join(', ')})`).join(', ')} the outputs have changed, so read those drafts with care` : ''}.</p>` : '')
+      + `<p class="caption">Source: <code>${esc(p.source.file)}</code>, drafted ${raw(String(p.generatedAt).slice(0, 10))} with <code>${esc(p.model)}</code>, prompt <code>${esc(p.promptVersion)}</code>. ${esc(s.selectionRule)}</p></div>`,
+  ];
+  if (vi) out.push(scope('p', 'SYNTHETIC', `Image input was tested too: on ${n(vi.notes)} note pages rendered as images, ${n(vi.imageExact)} were read exactly right from the image against ${n(vi.textExact)} from the text of the same notes; ${n(vi.eitherMisread)} pages had a misread ä/ö or date string. Verdict: ${esc(vi.verdict)}; the product keeps text input. Source: <code>${esc(vi.source.file)}</code>.`, ' class="caption"'));
+  return out.join('');
 }

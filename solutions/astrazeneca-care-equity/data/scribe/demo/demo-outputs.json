@@ -1,7 +1,7 @@
 {
  "schema": "sama-scribe-demo-outputs-v1",
  "synthetic": true,
- "label": "Precomputed fallback for POST /api/scribe: the persistent CPU worker's output on the 20 SYNTHETIC demo notes. A person confirms every event.",
+ "label": "Precomputed fallback for POST /api/scribe: the persistent CPU worker's output on the 20 SYNTHETIC demo notes, with the two-reader rule applied from Nemotron's stored answers. A person confirms every event.",
  "generated_utc": "2026-11-14T22:34:11Z",
  "provenance": {
   "synthetic_training_data": true,
@@ -188,7 +188,7 @@
    },
    "flags": [],
    "errors": [],
-   "review": "pre-filled for one-click confirmation",
+   "review": "needs editing",
    "person_confirms": "a person confirms every event",
    "timing": {
     "generate_seconds": 6.497,
@@ -281,7 +281,18 @@
      "from_date": "2026-05-30",
      "to_date": "2026-06-13"
     }
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "second reader not run offline",
+    "source": null,
+    "available": false,
+    "prediction": null,
+    "agrees": null
+   },
+   "review_reason": "second reader not run offline"
   },
   "demo-02": {
    "schema": "sama-scribe-demo-v1",
@@ -379,7 +390,7 @@
    },
    "flags": [],
    "errors": [],
-   "review": "pre-filled for one-click confirmation",
+   "review": "needs editing",
    "person_confirms": "a person confirms every event",
    "timing": {
     "generate_seconds": 2.813,
@@ -462,7 +473,18 @@
      "from_date": "2026-05-14",
      "to_date": "2026-07-25"
     }
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "second reader not run offline",
+    "source": null,
+    "available": false,
+    "prediction": null,
+    "agrees": null
+   },
+   "review_reason": "second reader not run offline"
   },
   "demo-03": {
    "schema": "sama-scribe-demo-v1",
@@ -646,7 +668,7 @@
    },
    "flags": [],
    "errors": [],
-   "review": "pre-filled for one-click confirmation",
+   "review": "needs editing",
    "person_confirms": "a person confirms every event",
    "timing": {
     "generate_seconds": 6.366,
@@ -744,7 +766,18 @@
      "from_date": "2024-03-18",
      "to_date": "2024-03-18"
     }
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "second reader not run offline",
+    "source": null,
+    "available": false,
+    "prediction": null,
+    "agrees": null
+   },
+   "review_reason": "second reader not run offline"
   },
   "demo-04": {
    "schema": "sama-scribe-demo-v1",
@@ -1008,7 +1041,42 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-05-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-06-29",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2023-09-09",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2023-11-18",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-05": {
    "schema": "sama-scribe-demo-v1",
@@ -1237,7 +1305,37 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-07-12",
+       "precision": "DAY"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2023-09-23",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2024-01-06",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-06": {
    "schema": "sama-scribe-demo-v1",
@@ -1431,7 +1529,32 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-05-13",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2025-11-04",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-07": {
    "schema": "sama-scribe-demo-v1",
@@ -1625,7 +1748,32 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2024-03-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2024-08-06",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-08": {
    "schema": "sama-scribe-demo-v1",
@@ -1854,7 +2002,37 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2025-05-18",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2025-08-31",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-02-01",
+       "precision": "MONTH"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-09": {
    "schema": "sama-scribe-demo-v1",
@@ -2134,7 +2312,42 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "SYMPTOM_ONSET_REPORTED",
+       "date": "2023-04-25",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2023-08-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2023-11-18",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2023-12-26",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-10": {
    "schema": "sama-scribe-demo-v1",
@@ -2315,7 +2528,32 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": [
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-09-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-03-09",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-11": {
    "schema": "sama-scribe-demo-v1",
@@ -2496,7 +2734,32 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2023-12-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "PHYSICIAN_ASSESSMENT",
+       "date": "2024-01-09",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-12": {
    "schema": "sama-scribe-demo-v1",
@@ -2720,7 +2983,37 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2024-05-05",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2024-06-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2025-02-10",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-13": {
    "schema": "sama-scribe-demo-v1",
@@ -2971,7 +3264,42 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-02-21",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2026-06-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2026-07-10",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-08-16",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-14": {
    "schema": "sama-scribe-demo-v1",
@@ -3152,7 +3480,32 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-03-15",
+       "precision": "DAY"
+      },
+      {
+       "type": "DIAGNOSIS",
+       "date": "2025-04-19",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-15": {
    "schema": "sama-scribe-demo-v1",
@@ -3424,7 +3777,42 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "EMERGENCY",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2025-07-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2025-08-01",
+       "precision": "MONTH"
+      },
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2025-09-10",
+       "precision": "DAY"
+      },
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-12-22",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-16": {
    "schema": "sama-scribe-demo-v1",
@@ -3634,7 +4022,32 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "PUBLIC_PRIMARY",
+     "events": [
+      {
+       "type": "REFERRAL_SENT",
+       "date": "2024-02-03",
+       "precision": "DAY"
+      },
+      {
+       "type": "REFERRAL_RECEIVED",
+       "date": "2024-05-19",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-17": {
    "schema": "sama-scribe-demo-v1",
@@ -3796,7 +4209,27 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "MDT_DECISION",
+       "date": "2025-12-31",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-18": {
    "schema": "sama-scribe-demo-v1",
@@ -3993,7 +4426,32 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "SCREENING",
+     "events": [
+      {
+       "type": "FIRST_CONTACT",
+       "date": "2026-05-17",
+       "precision": "DAY"
+      },
+      {
+       "type": "TREATMENT_START",
+       "date": "2026-06-19",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": true
+   },
+   "review_reason": "both readers agree exactly"
   },
   "demo-19": {
    "schema": "sama-scribe-demo-v1",
@@ -4083,7 +4541,7 @@
    },
    "flags": [],
    "errors": [],
-   "review": "pre-filled for one-click confirmation",
+   "review": "needs editing",
    "person_confirms": "a person confirms every event",
    "timing": {
     "generate_seconds": 2.355,
@@ -4154,7 +4612,21 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "PRIVATE",
+     "events": []
+    },
+    "agrees": false
+   },
+   "review_reason": "readers disagree"
   },
   "demo-20": {
    "schema": "sama-scribe-demo-v1",
@@ -4206,7 +4678,7 @@
    },
    "flags": [],
    "errors": [],
-   "review": "pre-filled for one-click confirmation",
+   "review": "needs editing",
    "person_confirms": "a person confirms every event",
    "timing": {
     "generate_seconds": 0.721,
@@ -4283,7 +4755,45 @@
     "rewritten_by_code": false,
     "rewrite_kind": null,
     "rewrite": null
-   }
+   },
+   "single_reader_review": "pre-filled for one-click confirmation",
+   "second_reader": {
+    "model": "nemotron-3.5-super-vl",
+    "version": "v3",
+    "how": "stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the Verda-hosted endpoint before the demo was built; the page does not call it",
+    "source": "data/scribe/nemotron/val-v3.jsonl",
+    "available": true,
+    "prediction": {
+     "entry_route": "OCCUPATIONAL",
+     "events": [
+      {
+       "type": "SPECIALIST_VISIT",
+       "date": "2025-03-20",
+       "precision": "DAY"
+      }
+     ]
+    },
+    "agrees": false
+   },
+   "review_reason": "readers disagree"
   }
+ },
+ "two_reader": {
+  "rule": "pre-filled for one-click confirmation only when the Gemma answer (after the code resolver) is usable with no flag and equals the stored Nemotron v3 answer for the same SYNTHETIC note; otherwise needs editing; a person confirms every event",
+  "second_reader_file": "data/scribe/nemotron/val-v3.jsonl",
+  "notes": 20,
+  "pre_filled": 15,
+  "pre_filled_wrong": 0,
+  "needs_editing": 5,
+  "reasons": {
+   "both readers agree exactly": 15,
+   "readers disagree": 2,
+   "second reader not run offline": 3
+  },
+  "wrong_notes": {
+   "demo-19": "needs editing",
+   "demo-20": "needs editing"
+  },
+  "generated_utc": "2026-11-15T00:35:26Z"
  }
 }

@@ -11,6 +11,30 @@ const fmtDate = (d, precision) => {
   return precision === 'MONTH' ? `${Number(m[2])}/${m[1]}` : `${Number(m[3])}.${Number(m[2])}.${m[1]}`;
 };
 const PERSON = 'A person confirms every event.';
+const PREFILLED = 'pre-filled for one-click confirmation';
+const NEEDS_EDITING = 'needs editing';
+const NOT_RUN = 'second reader not run offline';
+const sameAnswer = (a, b) => !!a && !!b && a.entry_route === b.entry_route && Array.isArray(a.events) && Array.isArray(b.events)
+  && a.events.length === b.events.length
+  && a.events.every((e, i) => e.type === b.events[i].type && e.date === b.events[i].date && e.precision === b.events[i].precision);
+
+// Two-reader rule, same as serve/demo/engine.py apply_second_reader: pre-filled for one-click confirmation only when the
+// first reader's answer is usable with no flag AND the second reader's stored answer for the same note is exactly equal.
+// second: {available, prediction, how, source} or null (free text, or a note rewritten by code: never read by it).
+// Returns a new result; a person confirms every event either way.
+export function applySecondReader(result, second) {
+  const r = {...result};
+  const first = r.single_reader_review ?? r.review;
+  const available = !!second?.available;
+  const agrees = available && sameAnswer(r.resolved?.prediction, second.prediction);
+  r.single_reader_review = first;
+  r.second_reader = {model: 'nemotron-3.5-super-vl', version: 'v3', how: available ? second.how : NOT_RUN, source: available ? second.source ?? null : null,
+    available, prediction: available ? second.prediction ?? null : null, agrees: available ? agrees : null};
+  r.review = first === PREFILLED && agrees ? PREFILLED : NEEDS_EDITING;
+  r.review_reason = !available ? NOT_RUN : first !== PREFILLED ? `the first reader's answer needs editing (${[...(r.flags ?? []), ...(r.errors ?? [])].join(', ') || 'not usable'})`
+    : agrees ? 'both readers agree exactly' : 'readers disagree';
+  return r;
+}
 
 // The note text with every date phrase wrapped in <mark data-kind=...>; relative phrases carry the computed date.
 export function highlightNote(text, highlights) {
@@ -68,7 +92,7 @@ export function scribeDemoHtml(response) {
     ? `Run live on this computer's CPU: ${esc(t.total_seconds ?? '?')} s for this note${response?.server_seconds != null ? ` (${esc(response.server_seconds)} s at the server)` : ''}.`
     : `Precomputed output of the same CPU process${response?.fallback_reason ? ` (live run not used: ${esc(response.fallback_reason)})` : ''}.`;
   const rewrite = r.demo?.rewritten_by_code && r.demo.rewrite
-    ? `<p class="caption">This note was rewritten by code from a validation note: “${esc(r.demo.rewrite.from_phrase)}” became “${esc(r.demo.rewrite.to_phrase)}”, a phrasing the synthetic training notes never use.</p>` : '';
+    ? `<p class="caption">This note was rewritten by code from a validation note: “${esc(r.demo.rewrite.from_phrase)}” became “${esc(r.demo.rewrite.to_phrase)}”, a phrasing the hand-written Finnish lexicon of the code resolver covers by design (the synthetic training notes never use it).</p>` : '';
   const out = [];
   out.push(`<div class="scribe-demo" data-served="${esc(served)}">`);
   out.push(`<p class="kicker">${label} Gemma reads, code counts · ${esc(r.note.id ?? 'note')}</p>`);
@@ -85,9 +109,13 @@ export function scribeDemoHtml(response) {
   }
   if (r.resolved?.entry_route && events.length) out.push(`<p class="caption">Entry route proposed: ${esc(typeLabel(r.resolved.entry_route))}.</p>`);
   if (needs.length) out.push(`<p class="flag">A person sets the date for: ${needs.map((n) => `“${esc(n.phrase)}”`).join(', ')}.</p>`);
-  const review = r.review === 'pre-filled for one-click confirmation' ? 'Pre-filled for one-click confirmation' : 'Needs editing';
+  const review = r.review === PREFILLED && r.second_reader?.agrees === true ? 'Pre-filled for one-click confirmation' : 'Needs editing';
+  const sr = r.second_reader;
   out.push(`<div class="headline-box"><p class="large-claim">${esc(review)}. ${PERSON}</p>`);
-  if ((r.flags ?? []).length) out.push(`<p class="caption">Why: ${esc(r.flags.join(', '))}.</p>`);
+  if (r.review_reason) out.push(`<p class="caption">Why: ${esc(r.review_reason)}.</p>`);
+  else if ((r.flags ?? []).length) out.push(`<p class="caption">Why: ${esc(r.flags.join(', '))}.</p>`);
+  if (sr) out.push(`<p class="caption">Second reader, Nemotron 3.5 Super VL: ${sr.available ? `${sr.agrees ? 'same answer as Gemma' : 'a different answer from Gemma'} (${esc(sr.how)})` : 'not run for this text (it never read it; the page does not call a hosted model), so the note needs editing'}. A note is pre-filled only when both readers give exactly the same answer.</p>`);
+  else out.push(`<p class="caption">No second reader was applied to this result, so it needs editing.</p>`);
   if (r.answer_key) out.push(`<p class="caption">Against the note's SYNTHETIC answer key: ${r.exact_match_with_answer_key ? 'every event and date matches' : 'does not match; the person confirming would have to edit it'}.</p>`);
   out.push(`</div>`);
   out.push(`<p class="caption">${servedLine} Model: ${esc(p.base_model?.repo)} (revision ${esc(String(p.base_model?.revision ?? '').slice(0, 8))}) with the LoRA adapter ${esc(p.adapter?.run)}, ${esc(p.decoding?.dtype)} on ${esc(p.decoding?.device)}, greedy. Dates: ${esc(res.rule)}, arm ${esc(res.arm)}${res.frozen ? ' (frozen, hashes checked)' : ' (not the frozen arm)'}. Trained and tested on SYNTHETIC notes only; research demo, not a medical device.</p>`);

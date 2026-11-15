@@ -7,8 +7,8 @@ other models checked the labels. Nothing here has been tested on real clinical t
 confirms every extracted event. Every number comes from the file named next to it, and
 `submission/check_numbers.py` recomputes it.
 
-Placeholder to fill before submitting (delete the line if the file does not exist at code freeze):
-- [PENDING: data/scribe/v4/eval/results-v1.json]
+Stress-set figures come from `data/scribe/v4/eval/results-v1.json`: 308 SYNTHETIC notes frozen and
+preregistered before any system read them, each system scored once.
 
 ## The problem Gemma solves
 
@@ -69,35 +69,46 @@ let code compute every date, with held-out phrasings (number words seven to twel
 
 - Arm B met the rule we wrote down before training: at least 0.90, within 3 points of arm A,
   McNemar not significant (p = 0.70), under 1% parse failures.
-- It is weaker on notes written by the other model (46 against 53 of 60), which is why the frozen
+- On Haiku-written notes B trails A: 46 vs 53 of 60 on validation (exact McNemar p = 0.09, not
+  significant) and 154 vs 182 of 200 on the post hoc test set (p = 8e-6). That is why the frozen
   stress set, not validation, decides the headline.
-- **On the fresh stress set, frozen and hashed before any model saw it:**
-  [PENDING: data/scribe/v4/eval/results-v1.json]. The preregistered primary comparison is arm B
-  against the lexicon rule A'. If A' wins, that is the headline: a careful Finnish rule beats the
-  learned reader on those phrasings.
+- **On the fresh stress set, frozen and hashed before any model saw it** (308 notes,
+  `data/scribe/v4/eval/results-v1.json`), the preregistered success criterion for arm B is **not
+  met**. On the 143 notes with a held-out phrasing, B got **11 of 143** and the lexicon rule A'
+  **0 of 143** (exact McNemar p = 0.00098; +7.7 points against the 10 required), and B got 73 of 87
+  (83.9%) on standard phrasings against the 0.85 required. A' does not win either: its lexicon
+  leaves those phrasings out by design. The honest headline: neither 270M reader handles phrasings
+  it never saw. The 1B expression arm C got 95 of 143, and Nemotron 120 of 143 (optimistic: it wrote
+  the stress notes). On 29 vague phrases ("pari viikkoa sitten"), A' sends 29 of 29 to a person,
+  while B invents a precise date for 17 of 29.
 
 ## Why it matters for equity
 
-Simulation on SYNTHETIC error profiles, 1,000 runs per cell (`runs/diagnose/interval-impact-v1.json`):
+Simulation on SYNTHETIC error profiles, 1,000 runs per cell (`data/eventlog/design-study-v1.json`,
+`measured_interval_extraction`, the repository study the page reads):
 
 | Primary care / diagnostic / treatment interval | Gemma alone | Gemma reads, code counts |
 | --- | --- | --- |
-| Bias in a county's median interval | +17.4 / +15.6 / +12.6 days | +0.17 / +0.09 / +0.06 days |
-| Power to locate a 20% slowdown (every event confirmed: 0.765 / 0.770 / 0.758) | 0.234 / 0.131 / 0.080 | 0.743 / 0.742 / 0.751 |
-| County read from text, rest of country from structured fields: false flag | 1.000 | 0.001 |
+| Bias in a county's median interval | +17.6 / +15.6 / +12.5 days | +0.18 / +0.08 / +0.08 days |
+| Power to locate a 20% slowdown (every event confirmed: 0.786 / 0.745 / 0.759) | 0.232 / 0.127 / 0.049 | 0.772 / 0.704 / 0.708 |
+| County read from text, rest of country from structured fields: false flag | 1.000 | 0.003 |
 
 With Gemma alone, a county that documents in free text would be flagged as slow in every run when
-nothing is wrong. With the split, about once in a thousand. That is why SAMA compares a county only
+nothing is wrong. With the split, about 3 times in a thousand, the same rate as when a person
+confirms every event. That is why SAMA compares a county only
 when it can see itself. Extra predicted events are not modelled in this simulation.
 
 ## Gemma and Nemotron together
 
 Nemotron 3.5 Super VL reads each note a second time. When the two readers agree, the events are
-pre-filled for one-click confirmation; otherwise the note is marked "needs editing". On 700 test
-notes: 651 pre-filled with 4 wrong among them, and 49 needing editing; on the 200 Haiku-written test
+pre-filled for one-click confirmation; otherwise the note is marked "needs editing". Measured offline
+with the product's 270M adapter on 700 test notes (read before, so post hoc): 651 pre-filled with 4 wrong among them, and 49 needing editing; on the 200 Haiku-written test
 notes, 169 pre-filled with 0 wrong (`data/scribe/nemotron/cascade-agreement-v1.json`). Gemma stays
 the reader that can run inside the hospital; the second reader is self-hosted or replaced by a
-person in production.
+person in production. Recalibrated on validation notes only, with the 1B expression arm C as the
+Gemma reader (`data/scribe/v4/eval/results-v1.json`, `cascade`): 684 of 700 test notes pre-filled
+with 4 wrong (test set read before; post hoc), and 220 of 308 stress notes with 3 wrong, where C's own confidence alone would
+pre-fill 308 of 308 with 85 wrong.
 
 ## What else we learned
 

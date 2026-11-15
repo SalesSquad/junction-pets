@@ -31,6 +31,12 @@ A request names a demo note (`demo_id`, the server reads its text from `data/scr
 cannot answer, a demo note falls back to `data/scribe/demo/demo-outputs.json` (`served: "precomputed"`, with the
 reason); free text gets 503. `web/scribe-demo.mjs` `scribeDemoHtml(response)` renders a response.
 
+Two-reader rule: a result is pre-filled for one-click confirmation only when Gemma's answer (after the code resolver)
+has no flag and equals Nemotron 3.5 Super VL's stored v3 answer for the same SYNTHETIC validation note
+(`data/scribe/nemotron/val-v3.jsonl`; `engine.apply_second_reader`, mirrored by `applySecondReader` in
+`web/scribe-demo.mjs`). The page never calls a hosted model, so free text and the 3 notes rewritten by code have no
+second answer and need editing. A person confirms every event either way.
+
 The base model must already be in the local Hugging Face cache (the worker sets `HF_HUB_OFFLINE=1` and never downloads).
 
 ## Rebuild the demo data
@@ -38,6 +44,7 @@ The base model must already be in the local Hugging Face cache (the worker sets 
 ```sh
 scribe/.venv/bin/python serve/demo/precompute.py select       # data/scribe/demo/demo-notes.json
 scribe/.venv/bin/python serve/demo/precompute.py run          # demo-outputs.json, cpu-vs-cuda.json
+scribe/.venv/bin/python serve/demo/precompute.py second-reader  # two-reader rule from stored answers (run also does it)
 scribe/.venv/bin/python serve/demo/precompute.py compare-val  # cpu-vs-cuda-val310.json
 node --test serve/demo/tests/ && python3 -m unittest discover -s serve/demo/tests
 ```

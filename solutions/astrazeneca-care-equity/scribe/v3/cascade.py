@@ -1,5 +1,6 @@
-"""Cascade at inference: the student proposes events, a person confirms them, and a note may skip the person only
-when the error among skipped notes stays at or below a target on validation notes.
+"""Cascade at inference: the student proposes events and a person confirms every one. A note may be pre-filled for
+one-click confirmation only when the error among pre-filled notes stays at or below a target on validation notes;
+every other note needs editing.
 
   scribe/.venv/bin/python scribe/v3/cascade.py prepare
       choose ONE student by validation exact match, write the judge inputs and the plan (no request is sent)
@@ -850,7 +851,7 @@ def cmd_analyse(_args):
         not_for_clinical_use=True,
         generated_utc=now(),
         resolver=resolver_record(),
-        question="At the same target error among notes that skip review, does adding an independent judge let more notes skip review than the student's own confidence?",
+        question="At the same target error among notes pre-filled for one-click confirmation, does adding an independent judge let more notes be pre-filled than the student's own confidence?",
         student=plan["student"],
         inputs={rel(p): sha256_file(p) for p in [STUDENT / run / "result.json", STUDENT / run / "val-records.json",
                                                    STUDENT / run / "eval-test.json", PLAN, PAIRS["jev"], PAIRS["decisions"],
@@ -958,16 +959,16 @@ def verdict(res):
         eci = {s: e[s]["vs_student"]["error_difference95"] for s in ("jev", "student+jev")}
         peci = {s: pipe[s][k]["error_difference_vs_student95"] for s in ("jev", "student+jev")}
         if all(includes0(tci[s]) and includes0(pci[s]) for s in tci):
-            cov_word = "did not let measurably more notes skip review: every coverage difference is within noise"
+            cov_word = "did not let measurably more notes be pre-filled for one-click confirmation: every coverage difference is within noise"
         elif all(includes0(pci[s]) for s in pci) and any(tci[s][0] > 0 for s in tci):
-            cov_word = ("let more notes skip review on these test notes (outside test-sampling noise), but the gain is within "
+            cov_word = ("let more notes be pre-filled for one-click confirmation on these test notes (outside test-sampling noise), but the gain is within "
                         "noise once the thresholds are re-chosen on resampled validation notes")
         elif any(pci[s][0] > 0 for s in pci):
-            cov_word = "let more notes skip review, outside noise even when the thresholds are re-chosen"
+            cov_word = "let more notes be pre-filled for one-click confirmation, outside noise even when the thresholds are re-chosen"
         else:
-            cov_word = "did not let more notes skip review"
+            cov_word = "did not let more notes be pre-filled for one-click confirmation"
         lines.append(
-            f"{a}% target, all 700 test notes: adding Jev {cov_word}. Skip review: {NAMES['student']} {frac_s(cov['student'])}, "
+            f"{a}% target, all 700 test notes: adding Jev {cov_word}. Pre-filled for one-click confirmation: {NAMES['student']} {frac_s(cov['student'])}, "
             f"Jev alone {frac_s(cov['jev'])}, student + Jev {frac_s(cov['student+jev'])}. Coverage difference vs the student: "
             f"Jev {pp(e['jev']['vs_student']['coverage_difference'])} (test bootstrap 95% {ci_pp(tci['jev'])}; with threshold re-choice "
             f"{ci_pp(pci['jev'])}), student + Jev {pp(e['student+jev']['vs_student']['coverage_difference'])} ({ci_pp(tci['student+jev'])}; "
@@ -977,13 +978,13 @@ def verdict(res):
         hk = {s: allv[s][k]["test_haiku"]["error_among_accepted"] for s in e}
         nk = {s: allv[s][k]["test_nemotron"]["error_among_accepted"] for s in e}
         lines.append(
-            f"{a}% target, error among the notes that skipped review (pooled test): student {frac_s(err['student'])}, Jev "
+            f"{a}% target, error among the pre-filled notes (pooled test): student {frac_s(err['student'])}, Jev "
             f"{frac_s(err['jev'])}, student + Jev {frac_s(err['student+jev'])}. Difference vs the student, Jev: {ci_pp(eci['jev'])} "
             f"on these test notes ({noise_words(eci['jev'])}), {ci_pp(peci['jev'])} with threshold re-choice "
             f"({noise_words(peci['jev'])}); student + Jev: {ci_pp(eci['student+jev'])} ({noise_words(eci['student+jev'])}), "
             f"{ci_pp(peci['student+jev'])} ({noise_words(peci['student+jev'])}). The observed pooled test error was at or below the target for: {', '.join(held) or 'none'}; above it "
             f"for: {', '.join(missed) or 'none'}. Haiku-written test notes: student {frac_s(hk['student'])}, Jev "
-            f"{frac_s(hk['jev'])}, student + Jev {frac_s(hk['student+jev'])} wrong among skipped; Nemotron-written: "
+            f"{frac_s(hk['jev'])}, student + Jev {frac_s(hk['student+jev'])} wrong among pre-filled; Nemotron-written: "
             f"{frac_s(nk['student'])}, {frac_s(nk['jev'])}, {frac_s(nk['student+jev'])}.")
     au = {s: allv[s]["aurc"]["test_pooled"] for s in ("student", "jev", "student+jev")}
     ad = {s: allv[s]["aurc_difference_vs_student"]["test_pooled"] for s in ("jev", "student+jev")}
@@ -1024,12 +1025,12 @@ def render_md(res):
     s = res["student"]
     chosen = next(c for c in s["candidates"] if c["run"] == s["chosen"])
     d = res["design"]
-    L = ["# Cascade at inference: does a judge let more notes skip review?\n",
+    L = ["# Cascade at inference: does a judge let more notes be pre-filled for one-click confirmation?\n",
          f"Generated by `scribe/v3/cascade.py --resolve \"{RESOLVE}\" analyse`; every number is in `{rel(RESULT)}`. All notes are "
          "SYNTHETIC (simulated pathways, model-written notes). Nothing here is for clinical use or shows patient benefit, and a "
          "judge is a language model that gives a second opinion, not the truth.\n",
-         "The idea: the student proposes events and a person confirms them. A note may skip the person only if the error among "
-         "skipped notes stays at a target. The thresholds below were chosen on validation notes and are empirical, not "
+         "The idea: the student proposes events and a person confirms every one. A note may be pre-filled for one-click "
+         "confirmation only if the error among pre-filled notes stays at a target; every other note needs editing. The thresholds below were chosen on validation notes and are empirical, not "
          "guarantees: on test they can, and here sometimes did, give a higher error than the target.\n",
          "## Answer\n"]
     L += [f"- {x}" for x in res["verdict"]["lines"]]
@@ -1047,7 +1048,7 @@ def render_md(res):
     L.append(f"- Intervals: Wilson 95% for shares; {d['bootstrap']}. The pipeline bootstrap resamples validation and test notes "
              "together and re-chooses thresholds each time.\n")
     L.append("## Test results, all 700 notes\n")
-    L.append("| target | signal | set | skip review | error among skipped (Wilson 95%) | coverage vs student (95%) | error vs student (95%) |")
+    L.append("| target | signal | set | pre-filled for one-click confirmation | error among pre-filled (Wilson 95%) | coverage vs student (95%) | error vs student (95%) |")
     L.append("|---|---|---|---|---|---|---|")
     for a in ALPHA_PCT:
         for sig in ("student", "jev", "student+jev"):
@@ -1057,14 +1058,14 @@ def render_md(res):
                     L.append(f"| {a}% | {sig} | {g} | no threshold | | | |")
                     continue
                 r = e["error_among_accepted"]
-                err = f"{frac_s(r)}; {pct(r['wilson95'][0])} to {pct(r['wilson95'][1])}" if r["denominator"] else "none skipped"
+                err = f"{frac_s(r)}; {pct(r['wilson95'][0])} to {pct(r['wilson95'][1])}" if r["denominator"] else "none pre-filled"
                 v = e.get("vs_student")
                 L.append(f"| {a}% | {sig} | {g} | {frac_s(e['coverage'])} | {err} | "
                          f"{(pp(v['coverage_difference']) + ' (' + ci_pp(v['coverage_difference95']) + ')') if v else '-'} | "
                          f"{ci_pp(v['error_difference95']) if v else '-'} |")
     L.append("")
     L.append("Pipeline bootstrap (pooled test, thresholds and fit re-chosen on resampled validation notes):\n")
-    L.append("| target | signal | coverage vs student (95%) | error vs student (95%) | test error among skipped (95%) |")
+    L.append("| target | signal | coverage vs student (95%) | error vs student (95%) | test error among pre-filled (95%) |")
     L.append("|---|---|---|---|---|")
     for a in ALPHA_PCT:
         for sig in ("student", "jev", "student+jev"):
@@ -1076,7 +1077,7 @@ def render_md(res):
     sub = res["test"]["decisions_subset"]
     if sub.get("decisions"):
         L.append(f"## Decisions subset ({sub['_reference']['test_pooled']['notes']} test notes, pooled)\n")
-        L.append("| target | signal | skip review | error among skipped | coverage vs student (95%) | AURC |")
+        L.append("| target | signal | pre-filled for one-click confirmation | error among pre-filled | coverage vs student (95%) | AURC |")
         L.append("|---|---|---|---|---|---|")
         for a in ALPHA_PCT:
             for sig in ("student", "student@subset", "jev", "student+jev", "decisions", "student+jev+decisions"):
@@ -1136,6 +1137,22 @@ def render_md(res):
     return "\n".join(L) + "\n"
 
 
+def cmd_render(_args):
+    """Rebuild the plain-English verdict and RESULTS.md from the stored result file only: no judge request, no rescoring.
+    The question text is refreshed from the current wording; every number is read from the stored result."""
+    result = json.loads(RESULT.read_text())
+    result["question"] = ("At the same target error among notes pre-filled for one-click confirmation, does adding an "
+                          "independent judge let more notes be pre-filled than the student's own confidence?")
+    before = result.get("verdict", {}).get("lines")
+    result["verdict"] = verdict(result)
+    save_json(RESULT, result)
+    RESULTS_MD.write_text(render_md(result))
+    log("render", f"scribe/.venv/bin/python scribe/v3/cascade.py --resolve \"{RESOLVE}\" render", inputs=[rel(RESULT)],
+        outputs=[rel(RESULT), rel(RESULTS_MD)], metrics=dict(verdict_lines=len(result["verdict"]["lines"]),
+                                                             verdict_changed=before != result["verdict"]["lines"]), cost_usd=0.0)
+    print("\n".join(result["verdict"]["lines"]))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -1144,11 +1161,12 @@ def main():
     r.add_argument("--judge", choices=("jev", "decisions"), required=True)
     r.add_argument("--summary", required=True)
     sub.add_parser("analyse")
+    sub.add_parser("render")
     ap.add_argument("--resolve", choices=RESOLVE_ARMS, default="A'",
                     help="relative-date resolver arm applied before scoring (scribe/v3/resolve.py); off = recorded v1 analysis")
     a = ap.parse_args()
     use_resolver(a.resolve)
-    dict(prepare=cmd_prepare, record=cmd_record, analyse=cmd_analyse)[a.cmd](a)
+    dict(prepare=cmd_prepare, record=cmd_record, analyse=cmd_analyse, render=cmd_render)[a.cmd](a)
 
 
 if __name__ == "__main__":

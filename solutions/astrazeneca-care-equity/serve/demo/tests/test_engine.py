@@ -106,6 +106,28 @@ class Postprocess(unittest.TestCase):
         self.assertEqual(out["review"], engine.PREFILLED)
         self.assertEqual([e["date"] for e in out["resolved"]["events"]], ["2025-03-12", "2025-03-20"])
 
+    def test_two_reader_rule(self):
+        note = "Diagnoosi vahvistettiin 12. maaliskuuta 2025. Hoito aloitettiin 3 viikkoa sitten."
+        base = engine.postprocess(raw(("DIAGNOSIS", "2025-03-12", "DAY"), ("TREATMENT_START", "2025-03-25", "DAY")), note, NOTE_DATE, "A'")
+        same = json.loads(json.dumps(base["resolved"]["prediction"]))
+        other = json.loads(json.dumps(same))
+        other["events"][0]["date"] = "2025-03-13"
+        agree = engine.apply_second_reader(json.loads(json.dumps(base)), same, True, source="x")
+        self.assertEqual(agree["review"], engine.PREFILLED)
+        self.assertTrue(agree["second_reader"]["agrees"])
+        differ = engine.apply_second_reader(json.loads(json.dumps(base)), other, True, source="x")
+        self.assertEqual(differ["review"], engine.NEEDS_EDITING)
+        self.assertEqual(differ["review_reason"], "readers disagree")
+        missing = engine.apply_second_reader(json.loads(json.dumps(base)), None, False)
+        self.assertEqual(missing["review"], engine.NEEDS_EDITING)
+        self.assertEqual(missing["review_reason"], engine.NOT_RUN)
+        flagged = engine.postprocess(raw(("DIAGNOSIS", "2025-03-12", "DAY")), NOTE, NOTE_DATE, "A'")
+        flagged = engine.apply_second_reader(flagged, flagged["resolved"]["prediction"], True, source="x")
+        self.assertEqual(flagged["review"], engine.NEEDS_EDITING)  # agreement never overrides a flag
+        again = engine.apply_second_reader(agree, other, True, source="x")  # idempotent on the first reader's review
+        self.assertEqual(again["single_reader_review"], engine.PREFILLED)
+        self.assertEqual(again["review"], engine.NEEDS_EDITING)
+
     def test_unusable_answer_needs_editing(self):
         for bad in ("not json", '{"entry_route":"SCREENING"}', raw(("DIAGNOSIS", "2025-02-30", "DAY"))):
             out = engine.postprocess(bad, NOTE, NOTE_DATE, "A'")
@@ -167,11 +189,16 @@ class StoredDemo(unittest.TestCase):
         self.assertEqual(sorted(results), [n["demo_id"] for n in self.notes["notes"]])
         arm = self.outputs["provenance"]["resolver"]["arm"]
         self.assertEqual(arm, "A'")
+        second = engine.load_second_reader()
         for n in self.notes["notes"]:
             r = results[n["demo_id"]]
             self.assertEqual(r["note"]["note_text"], n["note_text"])
             again = engine.postprocess(r["model"]["raw"], n["note_text"], n["note_date"], arm)
-            for key in ("highlights", "model", "resolved", "date_resolution", "flags", "errors", "review", "person_confirms"):
+            # then the two-reader rule with Nemotron's stored answer (none for notes rewritten by code)
+            available = not n["rewritten_by_code"] and n["source_id"] in second
+            engine.apply_second_reader(again, second.get(n["source_id"]), available, source="data/scribe/nemotron/val-v3.jsonl")
+            for key in ("highlights", "model", "resolved", "date_resolution", "flags", "errors", "single_reader_review",
+                        "second_reader", "review", "review_reason", "person_confirms"):
                 self.assertEqual(json.loads(json.dumps(again[key])), r[key], f"{n['demo_id']}: {key}")
             self.assertEqual(r["exact_match_with_answer_key"], r["resolved"]["prediction"] == n["answer_key"])
             self.assertIn(r["review"], (engine.PREFILLED, engine.NEEDS_EDITING))

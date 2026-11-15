@@ -78,10 +78,10 @@ Simulated with the repository's own event-log detector, 1,000 runs per cell (`ru
 |---|---|---|---|
 | Bias in county median interval | 0 | +17.4 / +15.6 / +12.6 days | +0.17 / +0.09 / +0.06 days |
 | Power to locate a 20% slowdown (n = 473 / 513 / 347) | 0.765 / 0.770 / 0.758 | 0.234 / 0.131 / 0.080 | 0.743 / 0.742 / 0.751 |
-| False flag: one county documented in text, the rest from structured fields | - | 1.000 | 0.001 |
-| False flag: county notes written like Haiku's, country like Nemotron's (primary care) | - | 0.022 | 0.001 |
+| False flag: one county documented in text, the rest from structured fields | - | 1.000 | 0.003 |
+| False flag: county notes written like Haiku's, country like Nemotron's | - | 0.018 | 0.004 |
 
-The last two rows are an equity finding in their own right. Extraction errors can manufacture inequality between counties that does not exist, and so can a difference in documentation style. With the older v2-selected adapter, the writer-style row is 0.126 as is; S-1b plus the resolver is still 0.042.
+The last two rows were updated on 15 November 2026 to the repository study (`data/eventlog/design-study-v1.json`, `measured_interval_extraction`, 1,000 replications, extra events not modelled); the earlier scratch analysis in `runs/diagnose/interval-impact-v1.json` gave 0.001 and 0.022 (primary care only) with a different random stream. They are an equity finding in their own right. Extraction errors can manufacture inequality between counties that does not exist, and so can a difference in documentation style. With the older v2-selected adapter, the writer-style row is 0.126 as is; S-1b plus the resolver is still 0.042.
 
 `DATA_COLLECTION.md` section 4 still says "text extraction is not accurate enough to fill the county indicator without a person confirming every extracted date". That conclusion predates the resolver and needs a rerun before it changes.
 
@@ -260,7 +260,7 @@ It needs three parallel agent lanes plus the owner. New cloud money: none for th
   2. Build arm A': the same resolver plus a Finnish lexicon of about 20 lines (number words, "eilen", "toissapäivänä", "viikko sitten"). Write it from general Finnish, not from the stress set. Freeze it and record its sha256 **before** step 5 generates anything.
   3. Call the resolver in `serve/client.py` after schema validation, and in `scribe/v3/cascade.py` before scoring.
   4. Rerun the eventlog design study once (about 12 min of CPU), with the resolver profile and, if time allows, extra and missing events injected per writer. Regenerate the `STUDY:EXTRACTION` block of `DATA_COLLECTION.md` with `audit.py`. Never hand-edit numbers.
-  5. Write the "fake inequality" finding (1.000 to 0.001, and the writer-style row 0.022 to 0.001) as an Insight headline, labelled "simulation on SYNTHETIC error profiles; extra events not modelled" until the rerun covers them.
+  5. Write the "fake inequality" finding (1.000 to 0.003, and the writer-style row 0.018 to 0.004, per data/eventlog/design-study-v1.json) as an Insight headline, labelled "simulation on SYNTHETIC error profiles; extra events not modelled" until the rerun covers them.
 - NVIDIA: none. It runs on CPU after any engine, including vLLM on NVIDIA GPUs.
 - Success: repository code reproduces 289/310 validation and 651/700 test for C-270m-all-v2data, with 0 notes worse. The regenerated tables match `interval-impact-v1.json`. Validation is reported as the selection result, test as post hoc. `npm test` stays green (72 tests today).
 - Kill: not reproduced exactly by 23:00 means the numbers stay as a labelled analysis result in `runs/diagnose/`.

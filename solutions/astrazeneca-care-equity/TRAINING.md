@@ -315,7 +315,7 @@ start with a literal style label [*summary* `dataset.round2_added_to_train_start
 something else. Two concrete next runs: the recommended recipe at 1B, and the round-2 data at a fixed
 number of epochs instead of a fixed number of steps.
 
-## 7. Risk control: when may a note skip review?
+## 7. Risk control: when may a note be pre-filled for one-click confirmation?
 
 Rule tested: accept a note automatically when its confidence (mean token log-probability of the
 generated answer) reaches a threshold chosen with Learn-then-Test, so that the error rate among accepted

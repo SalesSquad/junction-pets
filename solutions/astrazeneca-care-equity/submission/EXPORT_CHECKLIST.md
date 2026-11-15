@@ -29,10 +29,12 @@ anything is pushed.
 - [ ] **Add `LICENSE`** (MIT, template in section 5). The copyright holder line is the team's choice.
 - [ ] **Add `NOTICE`** with the Gemma notice and the third-party list (template in section 5).
 - [ ] **Build the export tree from an explicit exclude list** (section 4), never by copying the
-      working folder as it is. `.gitignore` alone is not enough: `scribe/v4/artifacts/` (952 MB at
-      22:05 UTC and growing, including a Hugging Face cache of Gemma base-model weights and new
-      adapters) and `data/scribe/nemotron/cache/` (10 MB of model responses) are **not** covered by
-      it tonight.
+      working folder as it is. `scribe/v4/artifacts/` (952 MB at 22:05 UTC and growing, including a
+      Hugging Face cache of Gemma base-model weights and new adapters) and
+      `data/scribe/nemotron/cache/` (10 MB of model responses) are now listed in `.gitignore`
+      (lines 30 and 26, checked 00:44 UTC), but still build the export tree from the explicit
+      exclude list, and rerun the 22:05 UTC scans (path and name counts) on the final export tree;
+      those counts are not rerun yet.
 - [ ] **Scrub or accept personal traces:** the laptop host name (contains the owner's first name) in
       run logs, and absolute home paths in 19 files. Option: replace them with `<host>` and `<home>`
       in the export copy only, and say so in the README.

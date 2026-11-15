@@ -240,6 +240,55 @@ def postprocess(raw_text, note_text, note_date, arm, prompts=None, resolver=None
     }
 
 
+SECOND_READER_FILE = ROOT / "data" / "scribe" / "nemotron" / "val-v3.jsonl"
+SECOND_READER_MODEL = "nemotron-3.5-super-vl"
+SECOND_READER_HOW = ("stored output: Nemotron 3.5 Super VL (reader v3) read this same SYNTHETIC validation note on the "
+                     "Verda-hosted endpoint before the demo was built; the page does not call it")
+NOT_RUN = "second reader not run offline"
+
+
+def load_second_reader(path=SECOND_READER_FILE):
+    """{validation note id: Nemotron v3 prediction (None when its answer did not parse)} from the stored reader run."""
+    out = {}
+    path = pathlib.Path(path)
+    if not path.is_file():
+        return out
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            row = json.loads(line)
+            out[row["id"]] = row.get("prediction")
+    return out
+
+
+def apply_second_reader(result, second_prediction, available, how=SECOND_READER_HOW, source=None):
+    """Two-reader rule (NVIDIA_OPTIONS.md section 3): pre-filled for one-click confirmation only when the first reader's
+    answer is usable with no flag AND the second reader's stored answer for the same note is exactly equal. Otherwise
+    "needs editing". A person confirms every event either way. Mutates and returns result.
+
+    available False (free text, or a note rewritten by code, which the second reader never read): needs editing.
+    """
+    first = result.get("single_reader_review", result.get("review"))
+    prediction = (result.get("resolved") or {}).get("prediction")
+    agrees = bool(available) and second_prediction is not None and prediction == second_prediction
+    if not available:
+        reason = NOT_RUN
+    elif first != PREFILLED:
+        reason = "the first reader's answer needs editing (" + (", ".join(result.get("flags") or result.get("errors") or []) or "not usable") + ")"
+    elif agrees:
+        reason = "both readers agree exactly"
+    else:
+        reason = "readers disagree"
+    result["single_reader_review"] = first
+    result["second_reader"] = {
+        "model": SECOND_READER_MODEL, "version": "v3", "how": how if available else NOT_RUN,
+        "source": source if available else None, "available": bool(available),
+        "prediction": second_prediction if available else None, "agrees": agrees if available else None,
+    }
+    result["review"] = PREFILLED if first == PREFILLED and agrees else NEEDS_EDITING
+    result["review_reason"] = reason
+    return result
+
+
 def check_note(note_text, note_date):
     """Validate one request; raises ValueError with a short reason."""
     if not isinstance(note_text, str) or not note_text.strip():

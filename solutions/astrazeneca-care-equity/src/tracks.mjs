@@ -56,6 +56,15 @@ export const FILES = {
   genomics: 'data/genomics/brca1-evo2-v1.json',
   safetyNet: 'data/safetynet/safetynet-v1.json',
   flareGate: 'data/flare/gate-v1.json',
+  // NVIDIA_OPTIONS.md section 3 lanes (14-15 November): "Gemma reads, code counts", the Nemotron reader and
+  // county planner. The insight reads the same design-study file as the event-log track.
+  diagnose: 'runs/diagnose/diagnose-v1.json',
+  resolver: 'data/scribe/v4/resolver/reproduce-v1.json',
+  evaluation: 'data/scribe/v4/eval/results-v1.json',
+  reader: 'data/scribe/nemotron/reader-v1.json',
+  planner: 'data/planner/plans-v1.json',
+  plannerVision: 'data/planner/vision/vision-6b-v1.json',
+  plannerRaw: 'data/planner/raw-v2',
 };
 
 // ------------------------------------------------------------------ required fields
@@ -523,6 +532,188 @@ export function buildFlareGate(gate, regions = [], file = FILES.flareGate) {
   return { ...gate, statement: SYNTHETIC, source: src(file) };
 }
 
+// ------------------------------------------------------------------ 6. the "fake inequality" insight
+// From the event-log design study's measured_interval_extraction block (eventlog/extraction_intervals.py): the
+// county detector fed with the scribe's measured interval errors, as is and with the frozen code date resolver.
+// Every row the panel shows is looked up by its labels; a missing row fails the build.
+const INSIGHT_REQUIRED = ['synthetic', 'findings', 'measured_interval_extraction.run', 'measured_interval_extraction.rows', 'measured_interval_extraction.limits',
+  'measured_interval_extraction.error_model', 'measured_interval_extraction.extra_events_model', 'measured_interval_extraction.checks.recomputed_equals_stored',
+  'measured_interval_extraction.checks.product_default_arm_Aprime_equals_A_on_these_notes', 'measured_interval_extraction.checks.frozen_at_utc',
+  'measured_interval_extraction.note_exact_match.validation.as_is', 'measured_interval_extraction.note_exact_match.validation.resolver',
+  'measured_interval_extraction.note_exact_match.test.as_is', 'measured_interval_extraction.note_exact_match.test.resolver', 'measured_interval_extraction.note_exact_match.test.role',
+  'measured_interval_extraction.agreement_with_interval_impact_v1.compared_rates', 'measured_interval_extraction.agreement_with_interval_impact_v1.beyond_3_se',
+  'measured_interval_extraction.agreement_with_interval_impact_v1.source'];
+const FAKE_INEQUALITY = /^Extraction errors manufacture fake county inequality/;
+export function buildInsight(study, file = FILES.eventLog) {
+  needAll(study, INSIGHT_REQUIRED, file);
+  if (study.synthetic !== true) throw new Error(`${file}: the event-log study is not marked synthetic`);
+  const mx = study.measured_interval_extraction;
+  const finding = study.findings.find((f) => FAKE_INEQUALITY.test(f));
+  if (!finding) throw new Error(`${file}: the fake-inequality finding is missing from findings`);
+  const row = (kind, condition, arm, writer, extras, n) => {
+    const r = mx.rows.find((x) => x.kind === kind && x.condition === condition && x.arm === arm && x.writer === writer && x.extras_modelled === extras && (n == null || x.n === n));
+    if (!r) throw new Error(`${file}: measured_interval_extraction has no ${kind} row for ${condition}, arm ${arm}, writer ${writer}, extras ${extras}${n == null ? '' : `, n ${n}`}`);
+    return r;
+  };
+  const rate = (r) => ({ rate: need(r, 'county_false_positive_rate', file), ci95: need(r, 'county_false_positive_rate_ci95', file), n: need(r, 'n', file), replications: need(r, 'replications', file) });
+  const pair = (condition, writer) => ({ asIs: rate(row('null', condition, 'off', writer, false)), resolver: rate(row('null', condition, 'A', writer, false)),
+    asIsExtras: rate(row('null', condition, 'off', writer, true)), resolverExtras: rate(row('null', condition, 'A', writer, true)) });
+  const confirmed = row('null', 'confirmed', null, null, false);
+  const size = confirmed.n;
+  const located = [['confirmed', null], ['measured_everywhere', 'off'], ['measured_everywhere', 'A']].map(([condition, arm]) => {
+    const r = row('planted', condition, arm, 'all', false, size);
+    return { condition, arm, label: need(r, 'label', file), n: r.n, slowdown: need(r, 'slowdown', file), replications: need(r, 'replications', file),
+      intervals: Object.fromEntries(Object.keys(INTERVALS).map((k) => [k, { located: need(r, `intervals.${k}.located`, file), medianBiasDays: need(r, `intervals.${k}.median_bias_days`, file) }])) };
+  });
+  return {
+    synthetic: true, statement: SYNTHETIC, source: src(file), document: 'DATA_COLLECTION.md', code: 'eventlog/extraction_intervals.py',
+    run: mx.run, headline: finding.slice(0, finding.indexOf('. ') + 1) || finding, finding, countyEpisodes: size, replications: confirmed.replications,
+    falseFlag: { countyTextCountryStructured: pair('county_extracted_country_structured', 'all'), writerStyle: pair('county_haiku_like_country_nemotron_like', 'haiku vs nemotron'), confirmed: rate(confirmed) },
+    located,
+    noteExactMatch: { validation: mx.note_exact_match.validation, test: mx.note_exact_match.test },
+    resolverFrozenUtc: mx.checks.frozen_at_utc, recomputedEqualsStored: mx.checks.recomputed_equals_stored,
+    agreement: pick(mx.agreement_with_interval_impact_v1, ['source', 'compared_rates', 'beyond_3_se', 'largest_rate_difference']),
+    errorModel: mx.error_model, extraEventsModel: mx.extra_events_model, limits: mx.limits,
+  };
+}
+
+// ------------------------------------------------------------------ 7. Gemma reads, code counts
+// 7a. What the adapter does alone on notes with a relative date (runs/diagnose/diagnose-v1.json).
+const PRODUCT_RUN = 'C-270m-all-v2data';
+export function buildGemmaAlone(diag, file = FILES.diagnose) {
+  needAll(diag, ['synthetic', 'generated', `runs.${PRODUCT_RUN}.test.n`, `runs.${PRODUCT_RUN}.test.by_has_relative.True`, `runs.${PRODUCT_RUN}.test.by_has_relative.False`], file);
+  if (diag.synthetic !== true) throw new Error(`${file}: the diagnosis is not marked synthetic`);
+  const t = diag.runs[PRODUCT_RUN].test;
+  return { source: src(file), run: PRODUCT_RUN, generatedUtc: diag.generated, testNotes: t.n, withRelativeDate: t.by_has_relative.True, withoutRelativeDate: t.by_has_relative.False };
+}
+
+// 7b. The frozen code date resolver on the stored outputs of that adapter (data/scribe/v4/resolver/reproduce-v1.json).
+const RESOLVER_REQUIRED = ['synthetic', 'rule', 'freeze.frozen_at_utc', 'freeze.files', 'primary.run', 'primary.arm', 'primary.validation.k', 'primary.validation.n',
+  'primary.validation.wilson95', 'primary.validation.role', 'primary.validation.before', 'primary.test.k', 'primary.test.n', 'primary.test.wilson95', 'primary.test.role',
+  'primary.test.before', 'primary.test.by_writer', 'notes_made_worse_arm_A_all_runs', 'port_identical_to_diagnose_rule.notes_compared', 'port_identical_to_diagnose_rule.mismatches',
+  'arm_Aprime.lexicon', 'arm_Aprime.selection_rule', 'caveats'];
+export function buildResolver(rep, file = FILES.resolver) {
+  needAll(rep, RESOLVER_REQUIRED, file);
+  if (rep.synthetic !== true) throw new Error(`${file}: the resolver reproduction is not marked synthetic`);
+  const p = rep.primary, kw = (x) => pick(x, ['k', 'n', 'value', 'wilson95']);
+  return { source: src(file), rule: rep.rule, frozenUtc: rep.freeze.frozen_at_utc, frozenFiles: rep.freeze.files, run: p.run, arm: p.arm,
+    validation: { role: p.validation.role, before: kw(p.validation.before), after: kw(p.validation) },
+    test: { role: p.test.role, before: kw(p.test.before), after: kw(p.test), byWriter: p.test.by_writer },
+    notesMadeWorse: rep.notes_made_worse_arm_A_all_runs, port: rep.port_identical_to_diagnose_rule, lexicon: rep.arm_Aprime.lexicon, aPrimeRule: rep.arm_Aprime.selection_rule, caveats: rep.caveats };
+}
+
+// 7c. The preregistered evaluation on the frozen stress set, the test and validation notes, and the two-reader
+// cascade recalibrated on validation only (data/scribe/v4/eval/results-v1.json, Lane A step 8).
+const EVAL_SYSTEMS = ['A', "A'", 'B', 'C', 'v2data', 'nemotron'];
+const EVAL_REQUIRED = ['schema', 'synthetic', 'created_utc', 'person_confirms', 'verify.all_ok', 'preregistration.file', 'preregistration.sha256', 'preregistration.frozen_utc',
+  'preregistration.primary.success', 'systems', 'sets.val.role', 'sets.val.notes', 'sets.val.systems', 'sets.test.role', 'sets.test.notes', 'sets.test.systems',
+  'sets.stress.role', 'sets.stress.notes', 'sets.stress.systems', 'sets.stress.not_scored', 'comparisons.test', 'comparisons.stress_heldout', 'comparisons.stress_standard',
+  'primary_result.comparison', 'primary_result.a', 'primary_result.b', 'primary_result.n', 'primary_result.a_correct', 'primary_result.b_correct', 'primary_result.exact_mcnemar_p',
+  'primary_result.difference_b_minus_a_points', 'primary_result.B_standard_slice', 'primary_result.criterion', 'primary_result.met', 'primary_result.A_prime_wins', 'primary_result.headline',
+  'cascade.alpha_pct', 'cascade.rule', 'cascade.selection_rule', 'cascade.leak_guard', 'cascade.chosen.gemma', 'cascade.chosen.signal', 'cascade.configurations',
+  'cascade.baseline_today.prefilled', 'cascade.baseline_today.wrong', 'cascade.baseline_today.notes', 'cascade.baseline_today.source'];
+const kci = (x) => pick(x, ['k', 'n', 'value', 'ci95']);
+export function buildEvaluation(res, file = FILES.evaluation) {
+  needAll(res, EVAL_REQUIRED, file);
+  if (res.synthetic !== true) throw new Error(`${file}: the evaluation is not marked synthetic`);
+  if (res.verify.all_ok !== true) throw new Error(`${file}: the hash checks before scoring did not all pass`);
+  const system = (setName, name, s) => {
+    const where = `${file} sets.${setName}.systems.${name}`;
+    needAll(s, ['exact_match', 'parse_failures', 'by_writer'], where);
+    const out = { exact: kci(s.exact_match), parseFailures: kci(s.parse_failures), byWriter: Object.fromEntries(Object.entries(s.by_writer).map(([w, v]) => [w, kci(v)])) };
+    if (setName === 'stress') {
+      needAll(s, ['slices.heldout', 'slices.standard', 'slices.vague', 'slices.no_event', 'heldout_slice_by_family', 'vague_outcome.facts', 'vague_outcome.sent_to_person',
+        'vague_outcome.invented_precise_date', 'vague_outcome.month_without_flag', 'vague_outcome.dropped'], where);
+      out.slices = Object.fromEntries(['heldout', 'standard', 'vague', 'no_event'].map((k) => [k, kci(s.slices[k])]));
+      out.heldoutByFamily = Object.fromEntries(Object.entries(s.heldout_slice_by_family).map(([k, v]) => [k, kci(v)]));
+      out.vague = { facts: s.vague_outcome.facts, ...Object.fromEntries(['sent_to_person', 'invented_precise_date', 'month_without_flag', 'dropped'].map((k) => [k, kci(s.vague_outcome[k])])) };
+    }
+    return out;
+  };
+  const sets = Object.fromEntries(['val', 'test', 'stress'].map((setName) => {
+    const st = res.sets[setName];
+    const systems = Object.fromEntries(EVAL_SYSTEMS.filter((k) => k in st.systems).map((k) => [k, system(setName, k, st.systems[k])]));
+    return [setName, { role: st.role, notes: st.notes, notScored: st.not_scored ?? {}, systems }];
+  }));
+  for (const k of ['A', "A'", 'B', 'C', 'nemotron']) if (!sets.stress.systems[k]) throw new Error(`${file}: the stress set has no result for system ${k}`);
+  const cmp = (list) => list.map((c) => ({ a: c.a, b: c.b, n: c.n, aCorrect: c.a_correct, bCorrect: c.b_correct, aOnly: c.a_only_correct, bOnly: c.b_only_correct, p: c.exact_mcnemar_p, points: c.difference_b_minus_a_points }));
+  const part = (x) => (x ? { prefilled: kci(x.prefilled_for_one_click_confirmation), correct: kci(x.prefilled_and_correct), wrong: kci(x.error_among_prefilled),
+    needsEditing: kci(x.needs_editing), per100: x.per_100_notes_prefilled_correctly, haikuWritten: x.haiku_written ?? null } : null);
+  const configurations = res.cascade.configurations.map((c) => {
+    needAll(c, ['gemma', 'signal', 'validation.accepted', 'validation.wrong', 'validation.n', 'test.prefilled_for_one_click_confirmation', 'test.error_among_prefilled', 'test.needs_editing'], `${file} cascade configuration`);
+    return { gemma: c.gemma, signal: c.signal, validation: pick(c.validation, ['threshold', 'accepted', 'wrong', 'n', 'coverage', 'error']), test: part(c.test), stress: part(c.stress) };
+  });
+  const { gemma, signal } = res.cascade.chosen;
+  if (!configurations.some((c) => c.gemma === gemma && c.signal === signal)) throw new Error(`${file}: the chosen cascade configuration ${gemma} + ${signal} is not among the configurations`);
+  const pr = res.primary_result;
+  return {
+    source: src(file), createdUtc: res.created_utc, personConfirms: res.person_confirms, systems: pick(res.systems, EVAL_SYSTEMS),
+    preregistration: { file: res.preregistration.file, sha256: res.preregistration.sha256, frozenUtc: res.preregistration.frozen_utc, success: res.preregistration.primary.success },
+    primary: { comparison: pr.comparison, a: pr.a, b: pr.b, n: pr.n, aCorrect: pr.a_correct, bCorrect: pr.b_correct, p: pr.exact_mcnemar_p, points: pr.difference_b_minus_a_points,
+      bStandard: kci(pr.B_standard_slice), criterion: pr.criterion, met: pr.met, aPrimeWins: pr.A_prime_wins, headline: pr.headline },
+    sets,
+    comparisons: { test: cmp(res.comparisons.test), stressHeldout: cmp(res.comparisons.stress_heldout), stressStandard: cmp(res.comparisons.stress_standard) },
+    cascade: { alphaPct: res.cascade.alpha_pct, rule: res.cascade.rule, selectionRule: res.cascade.selection_rule, leakGuard: res.cascade.leak_guard, chosen: { gemma, signal },
+      baseline: pick(res.cascade.baseline_today, ['prefilled', 'wrong', 'notes', 'source']), configurations },
+  };
+}
+
+// 7d. Nemotron 3.5 Super VL as the escalation reader: one change at a time, on validation (data/scribe/nemotron/reader-v1.json).
+const READER_REQUIRED = ['synthetic', 'title', 'model', 'generated_utc', 'versions', 'selection_rule', 'validation', 'validation_ladder', 'validation_ladder_relative_dates',
+  'selected_by_rule', 'test.version', 'test.run_once', 'test.notes', 'test.exact_match', 'test.by_writer', 'test.parse_failures_final', 'caveats', 'requests_ledger'];
+export function buildReader(rd, file = FILES.reader) {
+  needAll(rd, READER_REQUIRED, file);
+  if (!/SYNTHETIC/.test(rd.synthetic)) throw new Error(`${file}: the reader results are not marked SYNTHETIC`);
+  const versions = Object.entries(rd.versions).map(([id, v]) => {
+    const x = rd.validation[id];
+    if (!x) throw new Error(`${file}: version ${id} has no validation result`);
+    needAll(x, ['exact_match', 'parse_failures_final', 'tokens_per_note.completion', 'latency_seconds.mean', 'calls_per_note', 'relative_date_slice'], `${file} validation.${id}`);
+    return { id, what: need(v, 'what', file), thinking: v.thinking, exact: kci(x.exact_match), parseFailures: x.parse_failures_final, completionTokensPerNote: x.tokens_per_note.completion,
+      meanSeconds: x.latency_seconds.mean, callsPerNote: x.calls_per_note };
+  });
+  const ladder = (o) => Object.entries(o).map(([step, s]) => ({ step, ...needAll(pick(s, ['change', 'notes', 'before', 'after', 'gained', 'lost', 'change_points', 'mcnemar_exact_p']),
+    ['notes', 'before', 'after', 'gained', 'lost', 'change_points', 'mcnemar_exact_p'], `${file} ladder ${step}`) }));
+  if (!versions.some((v) => v.id === rd.selected_by_rule)) throw new Error(`${file}: the selected version ${rd.selected_by_rule} has no validation result`);
+  return { source: src(file), title: rd.title, modelName: rd.title.split(' as ')[0], model: rd.model, generatedUtc: rd.generated_utc, versions, selectionRule: rd.selection_rule,
+    selected: rd.selected_by_rule, ladder: ladder(rd.validation_ladder), ladderRelative: ladder(rd.validation_ladder_relative_dates),
+    test: { version: rd.test.version, runOnce: rd.test.run_once, notes: rd.test.notes, exact: kci(rd.test.exact_match), parseFailures: rd.test.parse_failures_final,
+      byWriter: Object.fromEntries(Object.entries(rd.test.by_writer).map(([w, v]) => [w, kci(v)])) },
+    caveats: rd.caveats, requests: rd.requests_ledger };
+}
+
+// ------------------------------------------------------------------ 8. Nemotron county planner (summary for the page)
+// The full drafts stay in data/planner/plans-v1.json (fetched by the page); app.json carries what the panel says
+// about them, so a missing field fails the build here. Section 06b of the page also needs the image-input test.
+const PLANNER_REQUIRED = ['schemaVersion', 'label', 'generatedAt', 'model', 'route', 'promptVersion', 'tools', 'gate.rule', 'gate.version', 'notes', 'appSha256', 'counties',
+  'summary.counties', 'summary.countiesWithAtLeast3Kept', 'summary.sentences', 'summary.keptSentences', 'summary.droppedSentences', 'summary.sentencesFailingNumberCheck',
+  'summary.keptSentencesWithUnmatchedNumber', 'summary.roadmapMeasureCodeChecked', 'summary.keptByField', 'summary.offLimits.prompts', 'summary.offLimits.pass',
+  'summary.offLimits.passWithoutCodeGuard', 'summary.offLimits.refusedByModel', 'summary.offLimits.blockedByCode', 'summary.promptComparison.v1.keptSentences',
+  'summary.promptComparison.v1.keptByField', 'summary.promptComparison.v2.keptSentences', 'summary.promptComparison.v2.keptByField', 'summary.gateV1Comparison.keptV1',
+  'summary.selectionRule', 'summary.promptNote', 'summary.codeGuardNote', 'summary.gateNote', 'summary.jev.cost_usd', 'summary.jev.requests', 'summary.nemotron.ledgerRequestsAllRuns'];
+const VISION_REQUIRED = ['schemaVersion', 'model', 'synthetic', 'summary.notes', 'summary.image_exact', 'summary.text_exact', 'summary.relative_date_notes.image',
+  'summary.relative_date_notes.text', 'summary.relative_date_notes.n', 'summary.transcription.notes_with_umlaut_misread', 'summary.transcription.notes_with_date_misread',
+  'summary.notes_with_umlaut_or_date_misread', 'summary.kill_criterion', 'summary.verdict'];
+export function buildPlanner(plans, file = FILES.planner) {
+  needAll(plans, PLANNER_REQUIRED, file);
+  const s = plans.summary;
+  return { source: src(file), label: plans.label, model: plans.model, route: plans.route, generatedAt: plans.generatedAt, promptVersion: plans.promptVersion, tools: plans.tools,
+    gate: pick(plans.gate, ['rule', 'version']), notes: plans.notes, draftedOnAppSha256: plans.appSha256,
+    summary: { ...pick(s, ['counties', 'countiesWithAtLeast3Kept', 'sentences', 'keptSentences', 'droppedSentences', 'sentencesFailingNumberCheck', 'keptSentencesWithUnmatchedNumber',
+      'roadmapMeasureCodeChecked', 'keptByField', 'selectionRule', 'promptNote', 'codeGuardNote', 'gateNote']),
+    offLimits: pick(s.offLimits, ['prompts', 'pass', 'passWithoutCodeGuard', 'refusedByModel', 'blockedByCode']),
+    promptComparison: { v1: pick(s.promptComparison.v1, ['keptSentences', 'keptByField']), v2: pick(s.promptComparison.v2, ['keptSentences', 'keptByField']) },
+    keptUnderGateV1: s.gateV1Comparison.keptV1, jev: pick(s.jev, ['requests', 'cost_usd']), nemotronRequests: s.nemotron.ledgerRequestsAllRuns },
+    countyIds: Object.keys(plans.counties) };
+}
+export function buildPlannerVision(v, file = FILES.plannerVision) {
+  needAll(v, VISION_REQUIRED, file);
+  if (v.synthetic !== true && !/SYNTHETIC/.test(String(v.synthetic))) throw new Error(`${file}: the image-input test is not marked synthetic`);
+  const s = v.summary;
+  return { source: src(file), model: v.model, notes: s.notes, imageExact: s.image_exact, textExact: s.text_exact, relativeDateNotes: s.relative_date_notes,
+    umlautMisread: s.transcription.notes_with_umlaut_misread, dateMisread: s.transcription.notes_with_date_misread, eitherMisread: s.notes_with_umlaut_or_date_misread,
+    killCriterion: s.kill_criterion, verdict: s.verdict };
+}
+
 // ------------------------------------------------------------------ assembly
 // Optional keys for app.json. A part whose source file is absent is left out and reported; a part whose
 // file is present but lacks a required field throws, so the build fails loudly instead of guessing.
@@ -546,10 +737,26 @@ export function buildTracks(regions = [], files = FILES) {
   const history = part('scribe.history', [F.scribeEval], (ev) => buildScribeV1(ev, opt(F.scribePost), opt(F.scribeStats), opt(F.scribeProvenance),
     exists(F.scribeHaiku) ? load(F.scribeHaiku) : [], opt(F.scribeLabelAudit)));
   if (students && teaching) students.noResult = teaching.studentNoResult;
-  if (ablation || students || serving || teaching || history) {
-    out.scribe = { synthetic: true, statement: SYNTHETIC, ablation, students, serving, teaching, history,
+  // "Gemma reads, code counts" (NVIDIA_OPTIONS.md section 3): each part is left out on its own when its file is absent.
+  const gemmaAlone = part('scribe.gemmaAlone', [F.diagnose], (d) => buildGemmaAlone(d, F.diagnose));
+  const resolver = part('scribe.resolver', [F.resolver], (r) => buildResolver(r, F.resolver));
+  const evaluation = part('scribe.evaluation', [F.evaluation], (r) => buildEvaluation(r, F.evaluation));
+  const reader = part('scribe.reader', [F.reader], (r) => buildReader(r, F.reader));
+  if (ablation || students || serving || teaching || history || gemmaAlone || resolver || evaluation || reader) {
+    out.scribe = { synthetic: true, statement: SYNTHETIC, gemmaAlone, resolver, evaluation, reader, ablation, students, serving, teaching, history,
       provenance: history?.models?.provenance ?? null };
   } else problems.push({ track: 'scribe', problem: 'no scribe result file is present' });
+
+  // The insight panel (section 06): the same design-study file as the event-log track, its own required fields.
+  const insight = part('insight', [F.eventLog], (s) => buildInsight(s, F.eventLog));
+  if (insight) out.insight = insight;
+
+  // The Nemotron county planner (section 07): summary in app.json, full drafts fetched by the page.
+  const planner = part('planner', [F.planner], (p) => buildPlanner(p, F.planner));
+  if (planner) {
+    planner.vision = part('planner.vision', [F.plannerVision], (v) => buildPlannerVision(v, F.plannerVision));
+    out.planner = planner;
+  }
 
   const genomics = part('genomics', [F.genomics], (g) => buildGenomics(g, F.genomics));
   if (genomics) out.genomics = genomics;

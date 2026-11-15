@@ -26,13 +26,14 @@ under Discord's usual 2,000-character message limit.
 >    runs with results (2,122 s of training), an ablation inside a 35-minute budget, a vLLM 0.29.0
 >    structured-output serving test (100 of 100 valid JSON, p95 1.80 s, 5.74 notes/s), and a genomics
 >    benchmark for a separate research appendix (Evo 2 7B, 2,150 variants scored in 951 s).
-> 2. **Verda-hosted Nemotron 3.5 Super VL (120B parameters).** As a teacher it wrote 3,222 SYNTHETIC
->    Finnish training notes; one run made 3,551 requests in 268.8 s (about 13.2 a second). As a
+> 2. **Verda-hosted Nemotron 3.5 Super VL (120B parameters).** As a teacher it wrote 1,716 of the 2,354
+>    SYNTHETIC Finnish notes that trained the selected scribe; one run made 3,551 requests in 268.8 s (about 13.2 a second). As a
 >    second reader it got 690 of 700 SYNTHETIC test notes exactly right (2,602 requests, 0 errors).
 >    With tool calls it drafted an action plan for 23 of 23 areas from public data, every number
 >    checked against SAMA's tools.
 >
-> The laptop is the edge: the 270M-parameter scribe runs on a CPU with wifi off. Verda is where it
+> The laptop is the edge: the 270M-parameter scribe runs offline on a laptop CPU (no network
+> calls; HF_HUB_OFFLINE=1). Verda is where it
 > was trained, tested at serving speed, and checked by a 120B model.
 > Next step (planned, not deployed): the scribe as a Verda serverless container that scales to zero.
 > Real notes never go to a hosted endpoint; that tier would be self-hosted in a county-controlled
@@ -51,8 +52,8 @@ under Discord's usual 2,000-character message limit.
 | Gemma 3 LoRA fine-tuning (270M and 1B; 4B attempted) | GPU instance, 1x A100 80 GB, on demand | Seven runs and an ablation in one afternoon; the 1B run peaked at 39.8 GiB of GPU memory | 2,122 s of training across 7 runs with a result; ablation used 2,077 s of a 35-minute budget; recommended adapter trained in 176 s | `data/scribe/v2/training-figures-v1.json` (`gpu`) |
 | Serving test | same A100, vLLM 0.29.0 with xgrammar structured outputs | Throughput and latency at concurrency 8 | 100 of 100 valid JSON; p50 1.28 s, p95 1.80 s; 5.74 notes/s | `serve/smoke/smoke-guided.json` |
 | Evo 2 7B on BRCA1 (research appendix) | same A100 | A 7B genomic model under a 16 GiB memory cap | 2,150 of 3,893 variants scored in 951 s (stopped by its time budget) | `data/genomics/brca1-evo2-v1.json` (`runtime`) |
-| Teacher: SYNTHETIC Finnish notes | Nemotron 3.5 Super VL on the Verda-hosted event endpoint | A 120B-parameter model | 3,222 of the 3,860 training notes; round 2: 4,042 requests, 1,506 notes accepted by the TypeSafe Jev gate | `data/scribe/v3/dataset/train.parquet`, `data/scribe/v3/summary-v1.json`, `runs/teacher2.jsonl` |
-| Second reader | same endpoint | as above | 690/700 test notes exact; with Gemma, 651/700 pre-filled for one-click confirmation, 4 wrong among them | `data/scribe/nemotron/reader-v1.json`, `data/scribe/nemotron/cascade-agreement-v1.json` |
+| Teacher: SYNTHETIC Finnish notes | Nemotron 3.5 Super VL on the Verda-hosted event endpoint | A 120B-parameter model | 1,716 of the 2,354 notes that trained the selected scribe (and 3,222 of the 3,860 in the larger v3 set, whose adapter was not selected); round 2: 4,042 requests, 1,506 notes accepted by the TypeSafe Jev gate | `data/scribe/v3/dataset/train.parquet`, `data/scribe/v3/summary-v1.json`, `runs/teacher2.jsonl` |
+| Second reader | same endpoint | as above | 690/700 test notes exact; with the 270M product adapter, 651/700 pre-filled for one-click confirmation, 4 wrong among them (offline on stored outputs; test set read before, so post hoc) | `data/scribe/nemotron/reader-v1.json`, `data/scribe/nemotron/cascade-agreement-v1.json` |
 | County planner with tool calls | same endpoint | as above | 23 of 23 plans; 255 of 299 sentences kept; 0 kept numbers outside the tool outputs | `data/planner/plans-v1.json` |
 
 ### From first idea to working prototype

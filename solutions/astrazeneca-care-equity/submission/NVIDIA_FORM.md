@@ -5,10 +5,10 @@ and how you improved its outputs". Part 1 is ready to paste. Part 2 is the evide
 Every number comes from the file named next to it, and `submission/check_numbers.py` recomputes
 them. All notes are SYNTHETIC; the planner saw only public aggregate data.
 
-Before submitting: the NVIDIA minimum asks for Nemotron "in the working solution". Say "in the
-product" only if the planner panel (`web/planner.mjs`, cached `data/planner/plans-v1.json`) is on
-the page at code freeze (`BIG_PICTURE.md` must-ship item 1); otherwise say "run on SYNTHETIC notes
-and public data, shown as cached plans".
+Before submitting: the NVIDIA minimum asks for Nemotron "in the working solution". On the page,
+Nemotron's output appears as stored results only: the cached planner drafts (`web/planner.mjs`,
+`data/planner/plans-v1.json`) and its stored second-reader answers, which decide pre-fill in the scribe
+demo (`web/serve.mjs`, `serve/demo/engine.py` `apply_second_reader`). The page calls no hosted model.
 
 ---
 
@@ -20,37 +20,50 @@ OpenAI-compatible endpoint hosted by Verda for Junction, at temperature 0, with 
 
 **What it does in SAMA.** SAMA measures Finland's cancer pathway clock and turns it into action, so
 that the pathway is the same wherever people live, whoever they are and however they enter care.
-Nemotron does two jobs in the product and one in the data:
-1. **County planner.** For each of Finland's 23 areas it drafts an action plan by calling four SAMA
+Nemotron's work is on the page in two places, both as stored results (the page itself calls no hosted model),
+and it also wrote training data:
+1. **County planner (cached drafts on the page).** For each of Finland's 23 areas it drafts an action plan by calling four SAMA
    tools (county brief, budget portfolio, evidence, national roadmap measure). Each action names an
    owner, an indicator and the roadmap measure it serves, plus one line on what the evidence does not
    support. Every sentence goes through a code check that each number equals a tool output of the
    same run, then a TypeSafe faithfulness check; failed sentences are dropped, never repaired. A
    planner decides; the plans are labelled drafts.
-2. **Second reader.** It reads each SYNTHETIC Finnish note after our small Gemma scribe. When the two
-   agree, the pathway events are pre-filled for one-click confirmation; when they differ, the note is
-   marked "needs editing". A person confirms every event either way.
-3. **Teacher.** It wrote 3,222 of 3,860 SYNTHETIC Finnish notes that trained the Gemma scribe.
+2. **Second reader (stored answers).** It read the SYNTHETIC Finnish validation and test notes offline,
+   after our small Gemma scribe. In the scribe demo on the page, a note is pre-filled for one-click
+   confirmation only when Gemma's answer and Nemotron's stored answer for the same note agree exactly:
+   15 of the 20 demo notes, 0 of them wrong; the 2 demo notes Gemma gets wrong need editing because the
+   readers disagree. Free text and the 3 notes rewritten by code have no Nemotron answer, so they need
+   editing. A person confirms every event either way.
+3. **Teacher.** It wrote 1,716 of the 2,354 SYNTHETIC notes that trained the selected Gemma scribe (and
+   3,222 of 3,860 in the larger v3 set, whose adapter was not selected).
 
 **Why it matters.** Finland cannot yet see whether its cancer pathways meet their target. Planners
 need a plan they can check, and clinicians need fewer corrections. The planner wrote a plan for
 23 of 23 areas; 255 of 299 sentences survived the checks, and 0 kept sentences carry a number that
-is not in a tool output. On 700 SYNTHETIC test notes, the two-reader rule pre-fills 651 notes with 4
-wrong among them (0.6%) and marks 49 as needing editing; before tonight our best rule pre-filled 263
-notes with 7 errors.
+is not in a tool output. Measured offline on 700 SYNTHETIC test notes (read in earlier work, so post
+hoc), the two-reader rule with the product's Gemma 3 270M adapter (`C-270m-all-v2data`) pre-fills 651
+notes with 4 wrong among them (0.6%) and marks 49 as needing editing; before tonight our best rule
+pre-filled 263 notes with 7 errors. The validation-chosen pairing (the larger Gemma 3 1B expression
+reader `C-1b-expr-aug`, not in the demo) pre-fills 684/700 with 4 wrong (post hoc) and 220 of 308 fresh
+stress notes with 3 wrong.
 
 **How we improved its outputs.**
 - *Planner.* Prompt v1 kept 164/299 sentences, with 0 of 69 indicator lines surviving. Prompt v2
   changed only the field formats and kept 255/299 (indicator lines 67 of 69) under the same gate.
   Giving the faithfulness check only the tool output each field comes from kept 255 sentences
-  against 197. 10 of 10 off-limits requests (individual treatment advice, drug doses, an invented
-  county) produced no plan: the model refused 9 and a code guard blocked 1.
+  against 197. Off-limits requests (individual treatment advice, drug doses, an invented county): the
+  model refused 9 of 10; the 10th (an invented county, for which the model wrote a plan) is stopped by a
+  county guard added after seeing prompt v1's answers to these same prompts (post hoc). Without the
+  guard, 9 of 10.
 - *Second reader.* One change at a time on 310 validation notes, with an unchanged rerun as the
   noise floor: absolute dates with Nemotron doing the arithmetic 192/310 (61.9%); copying each date
   as written and letting code compute it 282/310 (91.0%), +29.0 points; schema validation with one
   repair retry 287/310; a code check that every date is printed in the note 290/310;
-  `enable_thinking` 304/310 (98.1%), +4.5 points (15 fixed, 1 worse, p = 0.00052). The chosen
-  version then read the 700 test notes once: 690/700; 199/200 on notes written by another model.
+  `enable_thinking` 304/310 (98.1%), +4.5 points (15 fixed, 1 worse, p = 0.00052). Schema
+  validation and the grounding check cut parse failures (11 to 2), but their accuracy gains are within
+  rerun noise (p = 0.30 and 0.55; an unchanged rerun moved 12 notes); the significant gains were the
+  code arithmetic (p < 1e-6) and `enable_thinking` (p = 0.00052). The chosen version then read the 700
+  test notes once: 690/700; 199/200 on notes written by another model.
 - *Vision, tested honestly.* Read from page images, 13 of 20 notes were exact against 19 of 20 from
   text; it misread ä or ö on 9 of 20 pages. Not good enough yet, so the product keeps text input.
 
@@ -65,9 +78,11 @@ Model: NVIDIA Nemotron 3.5 Super VL on the Verda-hosted endpoint, with tool call
 enable_thinking. What it does: SAMA measures Finland's cancer pathway clock and turns it into
 action. Nemotron drafts each area's action plan by calling SAMA's own tools: 23 of 23 plans, 255 of
 299 sentences kept after a code number check and a faithfulness check, 0 kept numbers outside the
-tool outputs, 10 of 10 off-limits requests with no plan. As a second reader after our Gemma scribe,
-it pre-fills 651/700 SYNTHETIC test notes for one-click confirmation (4 wrong); the rest need
-editing; a person confirms every event. How we improved it: field-format prompt 164/299 to 255/299
+tool outputs; it refused 9 of 10 off-limits requests (a county guard added post hoc stops the 10th).
+As a second reader after our Gemma scribe (stored answers; the page calls no hosted model), the
+scribe demo pre-fills a note only when both agree: 15 of 20 demo notes, 0 wrong; offline with the
+product's 270M adapter, 651/700 SYNTHETIC test notes (4 wrong, post hoc); the rest need editing; a
+person confirms every event. How we improved it: field-format prompt 164/299 to 255/299
 kept sentences; copying dates and computing them in code 192/310 to 282/310; enable_thinking
 304/310 (98.1%). Image input tested, not good enough yet. All notes SYNTHETIC.
 
@@ -83,14 +98,18 @@ kept sentences; copying dates and computing them in code 192/310 to 282/310; ena
 | Sentences kept of 299 | 164 | 255 |
 | Indicator lines kept of 69 | 0 | 67 |
 | Kept sentences with a number not in a tool output | 0 | 0 |
-| Off-limits requests with no plan, of 10 | 10 | 10 |
+| Off-limits requests with no plan, of 10 (with the post hoc county guard) | 10 | 10 |
+| Refused by the model, of 10 | 8 | 9 |
+| No plan without the county guard, of 10 | not in the file | 9 |
 
 - Roadmap measure ids confirmed by code against `get_roadmap_measure`: 69/69.
 - Selected version: 93 Nemotron calls (516,733 prompt and 26,788 completion tokens); TypeSafe Jev
   for the gate USD 0.1344. Nemotron cost is not stated because the endpoint price is unverified.
 - The selection rule (v2 only if it keeps more sentences, still 0 unmatched numbers, at least 20 of
   23 areas with 3 kept sentences, and 10 of 10 off-limits with no plan) was written before the
-  comparison; there is no separate held-out set of areas.
+  comparison; there is no separate held-out set of areas. The off-limits criterion was met only after
+  the county guard was added, and that guard was written after seeing prompt v1's answers to the same
+  10 prompts (post hoc). Without it, 9 of 10 for prompt v2.
 - Source: `data/planner/plans-v1.json` (`summary`), `runs/laneB-step6.jsonl`.
 
 ### Vision input (20 SYNTHETIC notes as page images; one rotated, one photo-like)
@@ -135,6 +154,9 @@ concurrency 8. Source: `data/scribe/nemotron/reader-v1.json` (`test`).
 
 ### Two-reader agreement with Gemma (rule fixed in advance, no threshold)
 
+Gemma reader here: the product adapter `C-270m-all-v2data` (Gemma 3 270M) + code resolver. The test
+set had been read in earlier work, so the test column is post hoc.
+
 | | Validation | Test |
 | --- | --- | --- |
 | Gemma 3 270M + code resolver exact | 289/310 | 651/700 |
@@ -147,7 +169,9 @@ concurrency 8. Source: `data/scribe/nemotron/reader-v1.json` (`test`).
 
 Haiku-written test notes: 169/200 pre-filled, 0 wrong. Baseline before tonight: 263/700 in the
 "no edit needed" group with 7 errors (TypeSafe Jev scores at a 5% error target). Measured offline
-on stored outputs; the product cascade is not claimed here.
+on stored outputs. The scribe demo applies the same rule to Nemotron's stored answers for its 20
+SYNTHETIC notes (15 pre-filled, 0 wrong; `data/scribe/demo/demo-outputs.json` `two_reader`); the page
+calls no hosted model.
 Source: `data/scribe/nemotron/cascade-agreement-v1.json`.
 
 ### Teacher (SYNTHETIC training data)
@@ -156,7 +180,9 @@ Source: `data/scribe/nemotron/cascade-agreement-v1.json`.
   back exactly by a blind second call of the same model. The TypeSafe Jev gate accepted 1,506.
 - The main run made 3,551 requests in 268.8 s on the Verda-hosted endpoint, about 13.2 requests a
   second.
-- Training set v3: 3,222 Nemotron-written and 638 Haiku-written notes.
+- Training set v3: 3,222 Nemotron-written and 638 Haiku-written notes (its adapter was not selected).
+  The selected scribe `C-270m-all-v2data` was trained on set v2: 1,716 Nemotron-written and 638
+  Haiku-written notes (`data/scribe/v2/dataset/train.parquet`).
 Source: `data/scribe/v3/summary-v1.json`, `runs/teacher2.jsonl`, `data/scribe/v3/dataset/train.parquet`.
 
 ### Tool calling and thinking preflight

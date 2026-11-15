@@ -160,8 +160,9 @@ coverage including stage, and 90% of clinical notifications automated by 2030. T
   reads "cannot be assessed yet", never "slow" or "fast".
 - **Why (simulation, SYNTHETIC error profiles, 1,000 runs per cell):** one county's dates read from
   free text by a small model, the rest of the country from structured fields, nothing actually
-  wrong. Model alone: flagged as slow in **1.000** of runs. Gemma reads, code counts: **0.001**.
-  Two counties that only *write* differently: **0.022**, and **0.001** with the fix.
+  wrong. Model alone: flagged as slow in **1.000** of runs. Gemma reads, code counts: **0.003**, the
+  same as when a person confirms every event. Two counties that only *write* differently: **0.018**,
+  and **0.004** with the fix.
 - **On real data, by area:** stage is recorded for 72% in Pirkanmaa, 60% in Sisä-Suomi and 33-42%
   elsewhere. Against the 70% aim, only Pirkanmaa's area could be compared on stage today. The pilot
   is how a county learns to see itself.
@@ -240,14 +241,17 @@ tested on 60 SYNTHETIC lines that the same step wrote from templates after freez
 - Moving the split into Gemma itself (it writes "3 weeks ago", code computes the date):
   **290 of 310** validation notes, against 293 of 310 for arm A, retrained tonight on this Mac with
   MLX to write absolute dates, plus the code rule (no significant difference, McNemar p = 0.70).
-- On a fresh stress set frozen before scoring: [PENDING: data/scribe/v4/eval/results-v1.json]
+- On a fresh stress set frozen before scoring (308 notes): the expression arm got **11 of 143**
+  notes with a new phrasing, the lexicon rule **0 of 143**; the preregistered criterion is **not met**.
+  Neither 270M reader handles phrasings it never saw; the 1B arm C got 95 of 143.
 - On the laptop CPU, through the product's own endpoint: **18 of 20** demo notes exact, median
   **4.8 s** per note.
 
 **Speaker note.** SYNTHETIC notes; Finnish notes only; other languages go to manual entry. Exact
 match is strict: one wrong date, type or route makes the whole note wrong. No result here has been
-tested on real clinical text. The expression arm was trained on this Mac with MLX; it is weaker than
-the absolute-date arm on Haiku-written validation notes (46 against 53 of 60).
+tested on real clinical text. The expression arm was trained on this Mac with MLX. On Haiku-written notes it
+trails the absolute-date arm: 46 vs 53 of 60 on validation (exact McNemar p = 0.09, not significant)
+and 154 vs 182 of 200 on the post hoc test set (p = 8e-6).
 
 **Sources.** `runs/diagnose/diagnose-v1.json` (`by_has_relative`);
 `data/scribe/v4/resolver/reproduce-v1.json`; `data/scribe/v4/mlx/validation-v1.json`;
@@ -262,13 +266,17 @@ the absolute-date arm on Haiku-written validation notes (46 against 53 of 60).
   computes it: validation exact match **192/310** with Nemotron doing the arithmetic, **282/310**
   with code doing it, **304/310** with `enable_thinking`. The chosen version then read the 700 test
   notes once: **690/700**.
-- **Two readers agree, or a person edits.** With Gemma on 700 SYNTHETIC test notes: **651/700**
-  pre-filled for one-click confirmation, **4** of them wrong; **49** need editing. Before tonight
-  our best rule gave 263/700 with 7 errors.
+- **Two readers agree, or a person edits.** With the product's Gemma 3 270M adapter on 700
+  SYNTHETIC test notes (post hoc, measured offline): **651/700** pre-filled for one-click
+  confirmation, **4** of them wrong; **49** need editing. The validation-chosen pairing (1B reader
+  C, not in the demo): 684/700 (post hoc), and 220 of 308 stress notes with 3 wrong. Before tonight
+  our best rule gave 263/700 with 7 errors. The scribe demo applies the rule to Nemotron's stored
+  answers: 15 of 20 demo notes pre-filled, 0 wrong.
 - **County planner.** Nemotron drafted a plan for **23 of 23** areas by calling four SAMA tools.
   Every sentence passed a code check that each number equals a tool output, then a TypeSafe check;
   failures were dropped, never repaired. **255 of 299** sentences kept, **0** with a number not in a
-  tool output; **10 of 10** off-limits requests produced no plan.
+  tool output; the model refused **9 of 10** off-limits requests; the 10th is stopped by a county
+  guard added after seeing prompt v1's answers to these same prompts (post hoc).
 - **Vision input, tested:** **13 of 20** page images read exactly, against **19 of 20** from text:
   not good enough yet, so the product keeps text input.
 
@@ -421,8 +429,11 @@ are SYNTHETIC; the pilot has not been run.
 - Arm A' adds a small Finnish lexicon, frozen at 21:37:24 UTC before any stress note existed; vague
   phrases such as "pari viikkoa sitten" go to a person.
 - Arm B met the preregistered validation rule (at least 0.90, within 3 points of A, McNemar not
-  significant, under 1% parse failures). Primary comparison on the frozen stress set:
-  [PENDING: data/scribe/v4/eval/results-v1.json]
+  significant, under 1% parse failures). Primary comparison on the frozen stress set (308 notes,
+  `data/scribe/v4/eval/results-v1.json`): B 11 of 143 against A' 0 of 143 on held-out phrasings,
+  exact McNemar p = 0.00098, +7.7 points; B 73 of 87 (83.9%) on standard phrasings. The
+  preregistered criterion is not met, and A' does not win. On the 700 test notes (post hoc) A' got
+  668 and B 636.
 - Source: `data/scribe/v4/resolver/reproduce-v1.json`, `data/scribe/v4/resolver/freeze.json`,
   `data/scribe/v4/mlx/validation-v1.json`.
 
@@ -430,13 +441,15 @@ are SYNTHETIC; the pilot has not been run.
 
 | Primary care / diagnostic / treatment interval | Every event confirmed | Scribe as is | Scribe + code resolver |
 | --- | --- | --- | --- |
-| Bias in county median interval, 500 episodes, planted 30% slowdown | 0 / 0 / 0 days | +17.4 / +15.6 / +12.6 days | +0.17 / +0.09 / +0.06 days |
-| Power to locate a 20% slowdown at 473 / 513 / 347 episodes | 0.765 / 0.770 / 0.758 | 0.234 / 0.131 / 0.080 | 0.743 / 0.742 / 0.751 |
-| False flag: county from text, country from structured fields | - | 1.000 | 0.001 |
-| False flag: county written like Haiku, country like Nemotron | - | 0.022 | 0.001 |
+| Bias in county median interval, 500 episodes, planted 30% slowdown | 0 / 0 / 0 days | +17.6 / +15.6 / +12.5 days | +0.18 / +0.08 / +0.08 days |
+| Power to locate a 20% slowdown at 473 / 513 / 347 episodes | 0.786 / 0.745 / 0.759 | 0.232 / 0.127 / 0.049 | 0.772 / 0.704 / 0.708 |
+| False flag: county from text, country from structured fields | 0.003 | 1.000 | 0.003 |
+| False flag: county written like Haiku, country like Nemotron | 0.003 | 0.018 | 0.004 |
 
 - 1,000 runs per cell. Extra predicted events are not modelled.
-- Source: `runs/diagnose/interval-impact-v1.json`.
+- Source: `data/eventlog/design-study-v1.json` (`measured_interval_extraction`; resolver arm A), the
+  repository study the page reads. An earlier scratch run (`runs/diagnose/interval-impact-v1.json`) gave
+  slightly different values and is no longer quoted.
 
 ## A7. Nemotron second reader: how we improved its outputs (SYNTHETIC)
 
@@ -472,7 +485,8 @@ are SYNTHETIC; the pilot has not been run.
 
 - Prompt v1 kept 164/299 sentences (indicator lines 0/69); prompt v2 changed only the field formats
   and kept 255/299 under the same gate. 69/69 roadmap measure ids confirmed by code. Off-limits:
-  the model refused 9 of 10 itself; code blocked 1 (an invented county).
+  the model refused 9 of 10 itself; code blocked 1 (an invented county) with a county guard added
+  after seeing prompt v1's answers to these same prompts (post hoc). Without it, 9 of 10.
 - 93 Nemotron calls in the selected version; TypeSafe Jev USD 0.1344 for the gate.
 - No patient data was sent: inputs were public aggregates, model scenarios, published evidence and
   roadmap text.
@@ -495,8 +509,10 @@ are SYNTHETIC; the pilot has not been run.
 - Gate: FLARE 2.9.1 simulator, 23 sites, precision 12; edge at 42.5 days so whole days up to 42
   count as within the placeholder. Real-data side: of the published areas, only Pirkanmaa reaches
   the 70% stage aim. Source: `data/flare/gate-v1.json`.
-- Still running: frozen stress set, expression arm against lexicon rule A':
-  [PENDING: data/scribe/v4/eval/results-v1.json]
+- Finished after the first deck draft: the frozen stress set (`data/scribe/v4/eval/results-v1.json`).
+  Expression arm against lexicon rule A': 11 of 143 against 0 of 143, criterion not met. Two-reader
+  cascade with arm C, chosen on validation notes only: 684 of 700 test notes pre-filled, 4 wrong
+  (test set read before; post hoc); 220 of 308 stress notes, 3 wrong.
 
 ## A12. Compute and spend recorded in files
 
