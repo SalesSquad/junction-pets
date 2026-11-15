@@ -32,6 +32,11 @@ def pilot_scans(first=518000):
              "mask":mask(3,4,6),"world_hash":f"verified-world-{s}"}
             for s in range(first,first+512)]
 
+def physical_receipt(goal):
+    """Original MuJoCo fields that must agree with success (see #230)."""
+    return {"dwell_ticks_final":250 if goal else 0,"contacts":1 if goal else 0,
+            "final_error":0.005 if goal else 0.2}
+
 
 class V12ActualEvidenceContractTest(unittest.TestCase):
     @classmethod
@@ -150,9 +155,12 @@ class V12ActualEvidenceContractTest(unittest.TestCase):
         trials=[]
         for w in cohort:
             for arm in protocol.PILOT_ARMS:
+                completed=arm=="frozen_v5" and w["seed"]==cohort[0]["seed"]
                 trials.append({"seed":w["seed"],"world_hash":w["world_hash"],
-                    "strategy":arm,"success":arm=="frozen_v5" and w["seed"]==cohort[0]["seed"],
-                    "unsafe":False,"abstained":False})
+                    "strategy":arm,"success":completed,"unsafe":False,"abstained":False,
+                    "dwell_ticks_final":250 if completed else 0,
+                    "contacts":1 if completed else 0,
+                    "final_error":0.005 if completed else 0.2})
         contract={"all_512_initial_public_worlds":scans,"plan":self.plan}
         readout=protocol.paired_physical_goal_readout(trials,cohort,"pilot",**contract)
         self.assertEqual(readout["candidateNovelSafeGoalWorldSeeds"],[])
@@ -165,6 +173,97 @@ class V12ActualEvidenceContractTest(unittest.TestCase):
             protocol.paired_physical_goal_readout(trials,cohort,"not-a-real-stage",**contract)
         with self.assertRaisesRegex(ValueError,"COHORT_NOT_REDERIVED"):
             protocol.paired_physical_goal_readout(trials,cohort[::-1],"pilot",**contract)
+
+    def test_true_goal250_requires_contact_dwell_and_real_geometry(self):
+        scans=pilot_scans()
+        cohort=protocol.derive_cohort(scans,self.plan,"pilot")
+        rows=[]
+        for w in cohort:
+            for arm in protocol.PILOT_ARMS:
+                rows.append({"seed":w["seed"],"world_hash":w["world_hash"],
+                    "strategy":arm,"success":False,"unsafe":False,"abstained":False,
+                    "dwell_ticks_final":0,"contacts":0,"final_error":0.2})
+        contract={"all_512_initial_public_worlds":scans,"plan":self.plan}
+        # Never accept a candidate's 250-tick win from a bare success flag.
+        index=next(i for i,r in enumerate(rows) if
+                   r["strategy"]==protocol.PILOT_ARMS[1] and
+                   r["seed"]==cohort[0]["seed"])
+        complete=dict(rows[index],success=True,dwell_ticks_final=250,
+                      contacts=1,final_error=.005)
+        cases=(
+          dict(complete,dwell_ticks_final=0),
+          dict(complete,dwell_ticks_final=249),
+          dict(complete,contacts=0),
+          dict(complete,final_error=.02),
+          dict(complete,final_error=float("nan")),
+          dict(complete,success=False),
+        )
+        for bad in cases:
+            with self.subTest(bad=bad):
+                amended=list(rows)
+                amended[index]=bad
+                with self.assertRaisesRegex(ValueError,"ORIGINAL_250TICK|PHYSICAL_GOAL"):
+                    protocol.paired_physical_goal_readout(
+                        amended,cohort,"pilot",**contract)
+        # Valid synthetic receipt is still only a preliminary, nonpromoting GO.
+        amended=list(rows)
+        amended[index]=complete
+        actual=protocol.paired_physical_goal_readout(amended,cohort,"pilot",**contract)
+        self.assertEqual(actual["candidateNovelSafeGoalWorldSeeds"],[cohort[0]["seed"]])
+        self.assertFalse(actual["hardStopNoFurtherPhysics"])
+        self.assertFalse(actual["independentPhysicsReplayQualified"])
+        self.assertFalse(actual["modelPromotionAuthorized"])
+
+
+    def test_right4_exploration_lost_v5_goal_hard_stops_despite_supported_gain(self):
+        scans=pilot_scans()
+        cohort=protocol.derive_cohort(scans,self.plan,"pilot")
+        base_winner=cohort[0]["seed"]
+        candidate_novel=cohort[1]["seed"]
+        trials=[]
+        for w in cohort:
+            seed=w["seed"]
+            for arm in protocol.PILOT_ARMS:
+                wins=(seed==base_winner) if arm=="frozen_v5" else (
+                    seed in (base_winner,candidate_novel)
+                    if arm=="v12_phase_dwell_supported_actions"
+                    else seed==candidate_novel
+                )
+                trials.append({"seed":seed,"world_hash":w["world_hash"],
+                    "strategy":arm,"success":wins,"unsafe":False,"abstained":False,
+                    **physical_receipt(wins)})
+        receipt=protocol.paired_physical_goal_readout(trials,cohort,"pilot",
+            all_512_initial_public_worlds=scans,plan=self.plan)
+        self.assertEqual(receipt["candidateNovelSafeGoalWorldSeeds"],[candidate_novel])
+        self.assertEqual(receipt["candidateLostV5GoalWorldSeeds"],[])
+        self.assertEqual(receipt["explorationOnlyUnsafeWorldSeeds"],[])
+        self.assertEqual(receipt["explorationOnlyLostV5GoalWorldSeeds"],[base_winner])
+        self.assertTrue(receipt["hardStopNoFurtherPhysics"])
+        self.assertEqual(receipt["scienceDecision"],"STOP")
+        self.assertFalse(receipt["modelPromotionAuthorized"])
+
+    def test_pilot_preliminary_positive_requires_no_loss_from_any_arm(self):
+        scans=pilot_scans()
+        cohort=protocol.derive_cohort(scans,self.plan,"pilot")
+        base_winner=cohort[0]["seed"]
+        novel=cohort[1]["seed"]
+        rows=[]
+        for w in cohort:
+            seed=w["seed"]
+            for arm in protocol.PILOT_ARMS:
+                wins=seed==base_winner or (
+                    arm=="v12_phase_dwell_supported_actions" and seed==novel)
+                rows.append({"seed":seed,"world_hash":w["world_hash"],
+                    "strategy":arm,"success":wins,"unsafe":False,"abstained":False,
+                    **physical_receipt(wins)})
+        receipt=protocol.paired_physical_goal_readout(rows,cohort,"pilot",
+            all_512_initial_public_worlds=scans,plan=self.plan)
+        self.assertEqual(receipt["candidateNovelSafeGoalWorldSeeds"],[novel])
+        self.assertEqual(receipt["explorationOnlyLostV5GoalWorldSeeds"],[])
+        self.assertFalse(receipt["hardStopNoFurtherPhysics"])
+        self.assertEqual(receipt["scienceDecision"],"REVIEW_FRESH_TRAIN_EVIDENCE_ONLY")
+        self.assertFalse(receipt["independentPhysicsReplayQualified"])
+        self.assertFalse(receipt["modelPromotionAuthorized"])
 
 
 if __name__=="__main__":unittest.main()

@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import math
 from pathlib import Path
 
 
@@ -126,6 +127,20 @@ def paired_physical_goal_readout(trials,cohort,stage,*,all_512_initial_public_wo
         require(arm not in choices and all(type(row[k]) is bool for k in
                    ("success","unsafe","abstained")),
                 "V12_DUPLICATE_OR_INVALID_ORIGINAL_PHYSICAL_RESULT")
+        # An original MuJoCo goal requires 250 consecutive dwell ticks within
+        # 20mm *and* physical contact. A bare producer success=True cannot turn
+        # a non-completing path into a novel goal and bypass the pilot STOP.
+        dwell=row.get("dwell_ticks_final")
+        contact=row.get("contacts")
+        error=row.get("final_error")
+        require(type(dwell) is int and dwell>=0 and
+                type(contact) is int and contact>=0 and
+                type(error) in (int,float) and math.isfinite(error) and error>=0,
+                "V12_ORIGINAL_PHYSICAL_GOAL_FIELDS_REQUIRED")
+        original_goal=bool(dwell>=250 and contact>0 and error<.02 and
+                           not row["unsafe"] and not row["abstained"])
+        require(row["success"] is original_goal,
+                "V12_ORIGINAL_250TICK_PHYSICAL_GOAL_MISMATCH")
         choices[arm]=row
     require(set(paired)==set(expected) and all(set(a)==set(arms) for a in paired.values()),
             "V12_PAIRED_FRESH_MUJOCO_WORLD_MATRIX_INCOMPLETE")
@@ -138,7 +153,11 @@ def paired_physical_goal_readout(trials,cohort,stage,*,all_512_initial_public_wo
     unsafe=sorted(s for s,a in paired.items() if a[candidate]["unsafe"])
     exploration_unsafe=sorted(s for s,a in paired.items() if
                    stage=="pilot" and a[arms[2]]["unsafe"])
-    stop=bool(lost or unsafe or exploration_unsafe or not novel)
+    # TRAIN-only probing cannot erase a frozen V5 real safe250tick win.
+    # The source-registered right-action probe has no supported model.
+    exploration_lost=sorted(s for s,a in paired.items() if
+                   stage=="pilot" and safe(a["frozen_v5"]) and not safe(a[arms[2]]))
+    stop=bool(lost or unsafe or exploration_unsafe or exploration_lost or not novel)
     return {"schema":"junction.rokoko.v12.preliminary-physical-goal250-readout.v1",
       "stage":stage,"totalOriginalRealEpisodes":len(trials),
       "frozenV5SafeGoals":sum(safe(a["frozen_v5"]) for a in paired.values()),
@@ -147,6 +166,7 @@ def paired_physical_goal_readout(trials,cohort,stage,*,all_512_initial_public_wo
       "candidateLostV5GoalWorldSeeds":lost,
       "candidateUnsafeWorldSeeds":unsafe,
       "explorationOnlyUnsafeWorldSeeds":exploration_unsafe,
+      "explorationOnlyLostV5GoalWorldSeeds":exploration_lost,
       "hardStopNoFurtherPhysics":stop,
       "scienceDecision":"STOP" if stop else "REVIEW_FRESH_TRAIN_EVIDENCE_ONLY",
       "goalDefinition":"original MuJoCo contact + object within 20mm for >=250 real ticks + zero unsafe",
