@@ -12,7 +12,7 @@ const KEEP = new Set([
   'IFCPROPERTYSET', 'IFCPROPERTYSINGLEVALUE', 'IFCSIUNIT', 'IFCUNITASSIGNMENT', 'IFCRELSPACEBOUNDARY',
   'IFCDOOR', 'IFCDOORSTANDARDCASE', 'IFCWINDOW', 'IFCWINDOWSTANDARDCASE', 'IFCWALL', 'IFCWALLSTANDARDCASE', 'IFCWALLELEMENTEDCASE',
   'IFCCOLUMN', 'IFCCOLUMNSTANDARDCASE', 'IFCSTAIR', 'IFCSTAIRFLIGHT', 'IFCSLAB', 'IFCSLABSTANDARDCASE', 'IFCBEAM', 'IFCROOF',
-  'IFCSANITARYTERMINAL', 'IFCFLOWTERMINAL', 'IFCRAILING', 'IFCCOVERING', 'IFCFURNISHINGELEMENT', 'IFCPLATE', 'IFCMEMBER',
+  'IFCSANITARYTERMINAL', 'IFCFLOWTERMINAL', 'IFCLIGHTFIXTURE', 'IFCBEAMSTANDARDCASE', 'IFCRELDEFINESBYTYPE', 'IFCRELFILLSELEMENT', 'IFCRELVOIDSELEMENT', 'IFCOPENINGELEMENT', 'IFCELEMENTASSEMBLY', 'IFCRAILING', 'IFCCOVERING', 'IFCFURNISHINGELEMENT', 'IFCPLATE', 'IFCMEMBER',
 ]);
 // Geometry needed for plan areas of spaces; parsed lazily because files hold many of these.
 const GEOMETRY = new Set([
@@ -72,7 +72,7 @@ export async function readIfc(path) {
     buf = buf ? buf + line : line;
     if (!buf.trimEnd().endsWith(';')) continue;
     const m = /^#(\d+)\s*=\s*([A-Z0-9_]+)\s*\(/.exec(buf);
-    if (m && (KEEP.has(m[2]) || GEOMETRY.has(m[2]))) {
+    if (m && (KEEP.has(m[2]) || GEOMETRY.has(m[2]) || m[2].endsWith('TYPE'))) {
       const body = buf.slice(m[0].length, buf.lastIndexOf(')'));
       entities.set(Number(m[1]), GEOMETRY.has(m[2]) ? lazyEntity(Number(m[1]), m[2], body) : { id: Number(m[1]), type: m[2], args: parseArgs(body) });
     }
@@ -86,15 +86,27 @@ function model(E, schema) {
   const get = r => (r && r.ref != null ? E.get(r.ref) : null);
   const of = (...types) => [...E.values()].filter(e => types.includes(e.type));
   const storeys = of('IFCBUILDINGSTOREY').map(e => ({ e, name: e.args[2], elevation: e.args[9] }));
-  const storeyOf = new Map(); // element id -> storey entity
-  for (const rel of of('IFCRELCONTAINEDINSPATIALSTRUCTURE')) {
-    const host = get(rel.args[5]);
-    for (const r of rel.args[4] ?? []) storeyOf.set(r.ref, host);
-  }
-  for (const rel of of('IFCRELAGGREGATES')) {
-    const host = get(rel.args[4]);
-    if (host?.type !== 'IFCBUILDINGSTOREY') continue;
-    for (const r of rel.args[5] ?? []) storeyOf.set(r.ref, host);
+  // Element id -> storey. Direct containment first; otherwise climb: aggregate parent, the
+  // space that contains it, or (doors/windows) the wall whose opening the element fills.
+  const container = new Map(), parent = new Map(), filledOpening = new Map(), openingHost = new Map();
+  for (const rel of of('IFCRELCONTAINEDINSPATIALSTRUCTURE')) for (const r of rel.args[4] ?? []) container.set(r.ref, rel.args[5]?.ref);
+  for (const rel of of('IFCRELAGGREGATES')) for (const r of rel.args[5] ?? []) parent.set(r.ref, rel.args[4]?.ref);
+  for (const rel of of('IFCRELFILLSELEMENT')) filledOpening.set(rel.args[5]?.ref, rel.args[4]?.ref);
+  for (const rel of of('IFCRELVOIDSELEMENT')) openingHost.set(rel.args[5]?.ref, rel.args[4]?.ref);
+  const resolve = (id, depth = 0) => {
+    if (id == null || depth > 8) return null;
+    const e = E.get(id);
+    if (e?.type === 'IFCBUILDINGSTOREY') return e;
+    const next = container.get(id) ?? parent.get(id) ?? openingHost.get(filledOpening.get(id));
+    return next == null ? null : resolve(next, depth + 1);
+  };
+  // Parts of another element (e.g. stair flights nested in a stair) are not separate objects.
+  const SPATIAL = new Set(['IFCPROJECT', 'IFCSITE', 'IFCBUILDING', 'IFCBUILDINGSTOREY', 'IFCSPACE']);
+  const isPart = new Set([...parent].filter(([, p]) => { const t = E.get(p)?.type; return t ? !SPATIAL.has(t) : true; }).map(([id]) => id));
+  const storeyOf = new Map();
+  for (const id of new Set([...container.keys(), ...parent.keys(), ...filledOpening.keys()])) {
+    const s = resolve(id);
+    if (s && s.id !== id) storeyOf.set(id, s);
   }
   const quantities = new Map(); // element id -> [{set, name, value, kind}]
   const props = new Map();      // element id -> [{set, name, value}]
@@ -114,11 +126,14 @@ function model(E, schema) {
   const assigned = (of('IFCUNITASSIGNMENT')[0]?.args[0] ?? []).map(get).filter(u => u?.type === 'IFCSIUNIT');
   const PREFIX = { MILLI: 1e-3, CENTI: 1e-2, DECI: 1e-1, KILO: 1e3 };
   const units = Object.fromEntries(assigned.map(u => [u.args[1], { prefix: u.args[2], name: u.args[3], factor: PREFIX[u.args[2]] ?? 1 }]));
+  // Element id -> its type object (IfcRelDefinesByType), e.g. IfcSanitaryTerminalType.
+  const typeOf = new Map();
+  for (const rel of of('IFCRELDEFINESBYTYPE')) { const t = get(rel.args[5]); for (const r of rel.args[4] ?? []) if (t) typeOf.set(r.ref, t); }
   const byType = new Map();
   for (const e of E.values()) if (!GEOMETRY.has(e.type)) byType.set(e.type, [...(byType.get(e.type) ?? []), e]);
   const ofFast = (...types) => types.flatMap(t => byType.get(t) ?? []);
   const lengthFactor = units.LENGTHUNIT?.factor ?? 1;
-  return { schema, entities: E, of: ofFast, get, storeys, storeyOf, quantities, props, units,
+  return { schema, entities: E, of: ofFast, get, storeys, storeyOf, isPart, quantities, props, units, typeOf,
     planArea: e => planArea(E, e, lengthFactor),
     project: ofFast('IFCPROJECT')[0], building: ofFast('IFCBUILDING')[0] };
 }

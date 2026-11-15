@@ -1,32 +1,41 @@
 /**
- * Deterministic IFC question answering (English, Estonian, Danish templates of the Stoa preview).
- * Counts come from typed elements contained in a storey; areas, lengths and volumes from the
- * model's stored base quantities (NetFloorArea, Length, NetSideArea, NetVolume), falling back to
- * an area property only when no quantity exists. Every answer cites IFC entity ids (#id) and GUIDs.
+ * Deterministic IFC question answering for the Stoa ifc_models templates in nine languages
+ * (EN, ET, DA, NL, DE, ES, PL, RO, IT). Counts come from typed elements contained in a storey;
+ * areas, lengths and volumes from the model's stored base quantities (NetFloorArea, Length,
+ * NetSideArea, NetVolume), else the measured plan area of the space geometry, else an area
+ * property. Every answer cites IFC entity ids (#id) and GUIDs.
  */
 const TYPES = {
   door: ['IFCDOOR', 'IFCDOORSTANDARDCASE'],
   window: ['IFCWINDOW', 'IFCWINDOWSTANDARDCASE'],
   wall: ['IFCWALL', 'IFCWALLSTANDARDCASE', 'IFCWALLELEMENTEDCASE'],
   column: ['IFCCOLUMN', 'IFCCOLUMNSTANDARDCASE'],
-  beam: ['IFCBEAM'],
+  beam: ['IFCBEAM', 'IFCBEAMSTANDARDCASE'],
   stair: ['IFCSTAIR'],
   slab: ['IFCSLAB', 'IFCSLABSTANDARDCASE'],
   space: ['IFCSPACE'],
   sanitary: ['IFCSANITARYTERMINAL', 'IFCFLOWTERMINAL'],
+  light: ['IFCLIGHTFIXTURE', 'IFCFLOWTERMINAL'],
 };
+const L = (...w) => new RegExp(`(^|[^\\p{L}])(${w.join('|')})($|[^\\p{L}])`, 'iu');
 const WORDS = [
-  ['door', /\b(doors?|døre?|uks|ust|uksi)\b/i],
-  ['window', /\b(windows?|vinduer|vindue|aken|akent|akna)\b/i],
-  ['wall', /\b(walls?|vægge?|sein|seina|seinu)\b/i],
-  ['column', /\b(columns?|søjler?|post|posti|poste)\b/i],
-  ['beam', /\b(beams?|bjælker?|tala|talasid)\b/i],
-  ['stair', /\b(stairs?|staircases?|trapper?|trepp|treppi|treppe)\b/i],
-  ['sanitary', /sanitary|sanitet|sanitaar/i],
-  ['space', /\b(rooms?|spaces?|rum|ruumi|ruume)\b/i],
+  ['light', /light fixtures?|corpuri de iluminat|verlichtingsarmaturen|leuchten|luminarias|lampade|oprawy|armaturer|valgusti/i],
+  ['sanitary', /sanitary|sanitaire|sanitär|sanitet|sanitaar|sanitari|sanitarios|sanitarne/i],
+  ['door', L('doors?', 'døre?', 'uks', 'ust', 'uksi', 'deuren', 'türen', 'puertas', 'porte', 'uși', 'usi', 'drzwi')],
+  ['window', L('windows?', 'vinduer', 'vindue', 'aken', 'akent', 'akna', 'ramen', 'fenster', 'ventanas', 'finestre', 'ferestre', 'okien', 'okna')],
+  ['wall', L('walls?', 'vægge?', 'sein', 'seina', 'seinu', 'wanden', 'wände', 'muros', 'muri', 'pereți', 'pereti', 'ścian', 'ściany')],
+  ['column', L('columns?', 'søjler?', 'post', 'posti', 'poste', 'kolommen', 'stützen', 'pilares', 'pilastri', 'colonne', 'stâlpi', 'stalpi', 'słupów', 'słupy')],
+  ['beam', L('beams?', 'bjælker?', 'tala', 'talasid', 'balken', 'träger', 'vigas', 'travi', 'grinzi', 'belek', 'belki')],
+  ['stair', L('stairs?', 'staircases?', 'trapper?', 'trepp', 'treppi', 'treppe', 'trappen', 'treppen', 'escaleras', 'scale', 'scări', 'scari', 'schodów', 'schody')],
+  ['space', L('rooms?', 'spaces?', 'rum', 'ruumi', 'ruume', 'ruimtes', 'räume', 'locales', 'locali', 'încăperi', 'incaperi', 'pomieszczeń', 'pomieszczen')],
 ];
+const COUNT = /how many|hvor mange|mitu|hoeveel|wie viele|cuál es el número|qual è il numero|care este numărul|^ile /i;
+const MODEL = /\b(model|modellen|mudelis|modell|modelo|modello|modelul|modelu)\b/i;
+const ROOM = L('room', 'rummet', 'ruumi', 'ruimte', 'raums', 'local', 'locale', 'pomieszczenia', 'încăperii');
+const AREA = /area|areal|pind|vloeroppervlakte|grundfläche|superficie|powierzchnia|suprafa/i;
 
-const quoted = q => [...q.matchAll(/'([^']+)'|„([^“]+)“|"([^"]+)"|«([^»]+)»/g)].map(m => m.slice(1).find(Boolean).trim());
+// Quoted spans: '…' (closing quote must end the span), „…“ / „…”, "…", «…».
+const quoted = q => [...q.matchAll(/'(.+?)'(?=[\s,?.]|$)|„([^“”]+)[“”]|"([^"]+)"|«\s*([^»]+?)\s*»/g)].map(m => m.slice(1).find(Boolean).trim());
 const ev = (m, e, detail) => ({ entityId: `#${e.id}`, guid: typeof e.args[0] === 'string' ? e.args[0] : null, kind: e.type, detail });
 const ok = (answer, explanation, evidence, metric) => ({ status: 'supported', answer: String(answer), explanation, evidence, metric, inference: 'deterministic; no external model' });
 const no = reason => ({ status: 'abstained', answer: null, explanation: reason, evidence: [], metric: null, inference: 'deterministic; no external model' });
@@ -52,27 +61,37 @@ function spaceArea(m, s) {
   return Number.isFinite(v) && v > 0 ? { value: v, source: `${p.set}/${p.name} (property)` } : null;
 }
 
+/** IFC2X3 exports sanitary and light fixtures as IfcFlowTerminal; their type object tells which. */
+function terminalKind(m, e) {
+  if (e.type === 'IFCSANITARYTERMINAL') return 'sanitary';
+  if (e.type === 'IFCLIGHTFIXTURE') return 'light';
+  const t = m.typeOf?.get(e.id)?.type ?? '';
+  return t.includes('SANITARY') ? 'sanitary' : t.includes('LIGHTFIXTURE') || t.includes('LAMP') ? 'light' : 'other';
+}
+
 export function answerIfc(m, question) {
   const q = question.toLowerCase();
   const [first, second] = quoted(question);
-  const storeyOf = name => m.storeys.find(s => s.name?.trim().toLowerCase() === name?.toLowerCase())?.e;
+  const norm = s => String(s ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const storeyOf = name => m.storeys.find(s => norm(s.name) === norm(name))?.e;
   // Whole-model counts use elements placed in the spatial structure; parts nested inside an
   // aggregate (e.g. stair components exported as IfcStair) are not separate objects.
   const elems = (kind, storey) => {
-    const all = m.of(...TYPES[kind]);
+    let all = m.of(...TYPES[kind]).filter(e => !m.isPart?.has(e.id));
+    if (kind === 'sanitary' || kind === 'light') all = all.filter(e => terminalKind(m, e) === kind);
     if (storey) return all.filter(e => m.storeyOf.get(e.id) === storey);
     const placed = all.filter(e => m.storeyOf.has(e.id));
     return placed.length ? placed : all;
   };
 
-  // Room area: "net floor area of the room 'LongName (Number)' on 'Storey'".
-  if (/\b(room|rummet|ruumi)\b/.test(q) && /area|areal|pind/.test(q) && second) {
+  // Room area: "net floor area of the room 'LongName (Number)' on 'Storey'" (any language).
+  if (ROOM.test(question) && AREA.test(q) && second && !/total|samlede|kõigi|totale|gesamte|łączna|útil total/i.test(q)) {
     const storey = storeyOf(second);
     if (!storey) return no(`Storey ${second} not found.`);
-    const label = first.toLowerCase();
+    const label = norm(first);
     const cands = elems('space', storey).filter(s => {
       const name = String(s.args[2] ?? '').trim(), long = String(s.args[7] ?? '').trim();
-      return [`${long} (${name})`, `${name} (${long})`, long, name].some(x => x.toLowerCase() === label);
+      return [`${long} (${name})`, `${name} (${long})`, long, name].some(x => norm(x) === label);
     });
     if (cands.length !== 1) return no(`Room ${first} on ${second} is ${cands.length ? 'ambiguous' : 'absent'}.`);
     const a = spaceArea(m, cands[0]);
@@ -80,21 +99,22 @@ export function answerIfc(m, question) {
     return ok(`${round(a.value, 2)} m²`, `Space ${first}: ${a.source}.`, [ev(m, cands[0], `IfcSpace ${first}`)], { type: 'area', value: round(a.value, 2), unit: 'm²' });
   }
 
-  const storeyName = /storey|floor plan|on '|plantegningen|korruse|på '|på „| on „/i.test(question) && !/model|modellen|mudelis/i.test(q) ? (second ?? first) : null;
+  const storeyName = !MODEL.test(q) && (first || second) ? (second ?? first) : null;
   const storey = storeyName ? storeyOf(storeyName) : null;
   if (storeyName && !storey) return no(`Storey ${storeyName} not found.`);
   const scope = storey ? `on ${storeyName}` : 'in the model';
 
   // Totals per storey (or model) from base quantities.
+  const WALLS = /walls|vægge|sein|wanden|wände|muros|muri|pereți|ścian/;
   const totals = [
-    [/(total|samlede|kogu|kõigi).*(net floor area|nettoareal|netopõrandapind)|(net floor area|nettoareal|netopõrandapind).*(kokku)/, 'space', ['NetFloorArea'], 'm²'],
-    [/(total|samlede|kogu).*(length|længde|pikkus).*(walls|vægge|sein)/, 'wall', ['Length'], 'm'],
-    [/(net side area|nettosideareal|netokülgpind)/, 'wall', ['NetSideArea'], 'm²'],
-    [/(net volume|nettovolumen|netomaht).*(walls|vægge|sein)/, 'wall', ['NetVolume'], 'm³'],
-    [/(net volume|nettovolumen|netomaht).*(slabs|dæk|plader|plaat)/, 'slab', ['NetVolume'], 'm³'],
+    [/(net floor area|nettoareal|netopõrandapind|vloeroppervlakte|grundfläche|superficie útil total|powierzchnia netto wszystkich|suprafața)/, 'space', ['NetFloorArea'], 'm²'],
+    [/(length|længde|lengte|wie lang|longitud|lunghezza|lungime|długość)/, 'wall', ['Length'], 'm', WALLS],
+    [/(net side area|nettosideareal|zijoppervlakte|seitenfläche|superficie lateral|powierzchnia boczna)/, 'wall', ['NetSideArea'], 'm²'],
+    [/(net volume|nettovolumen|netto volume|netto-volumen|volumen neto|volume netto|objętość)/, 'wall', ['NetVolume'], 'm³', WALLS],
+    [/(net volume|nettovolumen|netto volume|netto-volumen|volumen neto|volume netto|objętość)/, 'slab', ['NetVolume'], 'm³', /slabs|dæk|plader|vloeren|decken|bodenplatten|forjados|losas|solai|plăci|stropów|plaat/],
   ];
-  for (const [rx, kind, names, unit] of totals) {
-    if (!rx.test(q)) continue;
+  if (!COUNT.test(q)) for (const [rx, kind, names, unit, also] of totals) {
+    if (!rx.test(q) || (also && !also.test(q))) continue;
     const items = elems(kind, storey);
     let sum = 0; const used = [];
     for (const e of items) {
@@ -108,11 +128,11 @@ export function answerIfc(m, question) {
   }
 
   // Counts per storey or for the whole model.
-  if (/how many|hvor mange|mitu/.test(q)) {
+  if (COUNT.test(q)) {
     const kind = WORDS.find(([, rx]) => rx.test(question))?.[0];
     if (!kind) return no('Unsupported element class.');
     const items = elems(kind, storey);
-    return ok(items.length, `${items.length} ${TYPES[kind].join('/')} entities ${scope}.`, items.slice(0, 400).map(e => ev(m, e, kind)), { type: 'count', value: items.length, unit: kind });
+    return ok(items.length, `${items.length} ${kind} elements (${TYPES[kind].join('/')}) ${scope}.`, items.slice(0, 400).map(e => ev(m, e, kind)), { type: 'count', value: items.length, unit: kind });
   }
   return null;
 }
