@@ -37,6 +37,22 @@ class CloudBoundaries(unittest.TestCase):
         with self.assertRaises(ValueError):
             cloud.binding(receipt, "a" * 40, "124", "banking77", "word_svm")
 
+    def test_actions_context_is_required_and_exact(self):
+        context = {"GITHUB_REPOSITORY": cloud.REPO, "GITHUB_SHA": "a" * 40,
+                   "GITHUB_RUN_ID": "123", "GITHUB_REF": "refs/heads/main"}
+        with patch.dict("os.environ", context, clear=True):
+            cloud.identities("a" * 40, "123", cloud.TAG)
+        for key in context:
+            for replacement in (None, "different"):
+                changed = dict(context)
+                if replacement is None:
+                    changed.pop(key)
+                else:
+                    changed[key] = replacement
+                with self.subTest(key=key, replacement=replacement), patch.dict("os.environ", changed, clear=True):
+                    with self.assertRaises(ValueError):
+                        cloud.identities("a" * 40, "123", cloud.TAG)
+
     def package(self, root, extra=None):
         model = b"not executed: opaque skops test data"
         best = {"source_sha": "a" * 40, "run_id": "123", "dataset": "banking77", "lane": "word_svm",
@@ -58,6 +74,34 @@ class CloudBoundaries(unittest.TestCase):
             best = cloud.unpack_checkpoint(archive, root / "unpacked", "a" * 40, "123", "banking77", "word_svm", "m" * 64)
             self.assertEqual(best["dataset"], "banking77")
             self.assertTrue((root / "unpacked" / "best.skops").is_file())
+
+    def test_atomic_pack_repairs_old_partial_and_is_deterministic(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            destination = root / "checkpoint.tar.gz"
+            destination.write_bytes(b"old interrupted gzip")
+            archive = self.package(root)
+            digest = cloud.sha256(archive)
+            cloud.unpack_checkpoint(archive, root / "out", "a" * 40, "123", "banking77", "word_svm", "m" * 64)
+            self.package(root)
+            self.assertEqual(cloud.sha256(archive), digest)
+            # Dataset packing uses the same deterministic, atomic primitive.
+            data_pack = root / "datasets.tar.gz"
+            cloud.atomic_pack({"banking77/train.parquet": b"original dataset bytes"}, data_pack, 20_000_000)
+            data_digest = cloud.sha256(data_pack)
+            cloud.atomic_pack({"banking77/train.parquet": b"original dataset bytes"}, data_pack, 20_000_000)
+            self.assertEqual(cloud.sha256(data_pack), data_digest)
+
+    def test_interrupted_pack_never_replaces_valid_final_archive(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            archive = self.package(root)
+            original = archive.read_bytes()
+            with patch.object(tarfile.TarFile, "addfile", side_effect=OSError("interrupted compression")):
+                with self.assertRaises(OSError):
+                    cloud.pack_checkpoint({"best.json": b"new metadata"}, archive)
+            self.assertEqual(archive.read_bytes(), original)
+            self.assertFalse(list(root.glob("*.part")))
 
     def test_archive_path_traversal_and_unknown_members_refused(self):
         for name in ("../escape", "/tmp/escape", "extra.py"):

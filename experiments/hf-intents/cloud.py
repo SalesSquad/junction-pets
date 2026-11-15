@@ -108,7 +108,7 @@ def identities(source, run_id, tag):
         raise ValueError("Only the fixed authorized campaign tag is supported")
     for key, expected in (("GITHUB_REPOSITORY", REPO), ("GITHUB_SHA", source),
                           ("GITHUB_RUN_ID", run_id), ("GITHUB_REF", "refs/heads/main")):
-        if os.environ.get(key) and os.environ[key] != expected:
+        if os.environ.get(key) != expected:
             raise ValueError(f"Unexpected execution context: {key}")
 
 
@@ -346,16 +346,7 @@ def init(args, manifest):
         files += dataset_files(manifest, dataset, work / dataset,
                                list(manifest["datasets"][dataset]["files"]), True)
     pack = work / "datasets.tar.gz"
-    if not pack.exists():
-        with pack.open("xb") as raw, gzip.GzipFile(fileobj=raw, mode="wb", filename="", mtime=0) as zipped:
-            with tarfile.open(fileobj=zipped, mode="w") as archive:
-                for path in sorted(files):
-                    data = path.read_bytes()
-                    item = tarfile.TarInfo(str(path.relative_to(work)))
-                    item.mode, item.size = 0o600, len(data)
-                    archive.addfile(item, io.BytesIO(data))
-    if pack.stat().st_size > 20_000_000:
-        raise ValueError("Cloud dataset pack exceeds its size bound")
+    atomic_pack({str(path.relative_to(work)): path.read_bytes() for path in files}, pack, 20_000_000)
     before(CUTOFF)
     minutes = max(0, (instant(DEADLINE) - utcnow()).total_seconds() / 60)
     admission = {"schema_version": 1, "source_sha": args.source_sha, "run_id": args.run_id,
@@ -421,14 +412,30 @@ def checkpoint_members(out, source, run_id, dataset, lane, manifest_hash, sequen
     return result
 
 
+def atomic_pack(members, destination, limit):
+    """Regenerate the task cache, publishing only a fully closed bounded archive."""
+    destination = Path(destination)
+    if sum(map(len, members.values())) > limit:
+        raise ValueError("Uncompressed archive exceeds its bound")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    handle, name = tempfile.mkstemp(prefix=f".{destination.name}.", suffix=".part", dir=destination.parent)
+    temporary = Path(name)
+    try:
+        with os.fdopen(handle, "wb") as raw, gzip.GzipFile(fileobj=raw, mode="wb", filename="", mtime=0) as zipped:
+            with tarfile.open(fileobj=zipped, mode="w") as archive:
+                for name, data in sorted(members.items()):
+                    item = tarfile.TarInfo(name)
+                    item.mode, item.size = 0o600, len(data)
+                    archive.addfile(item, io.BytesIO(data))
+        if temporary.stat().st_size > limit:
+            raise ValueError("Compressed archive exceeds its bound")
+        os.replace(temporary, destination)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def pack_checkpoint(members, destination):
-    with tarfile.open(destination, "x:gz") as archive:
-        for name, data in members.items():
-            item = tarfile.TarInfo(name)
-            item.mode, item.size = 0o600, len(data)
-            archive.addfile(item, io.BytesIO(data))
-    if Path(destination).stat().st_size > MAX_ARCHIVE:
-        raise ValueError("Compressed checkpoint exceeds its bound")
+    atomic_pack(members, destination, MAX_ARCHIVE)
 
 
 def unpack_checkpoint(archive, destination, source, run_id, dataset, lane, manifest_hash):
@@ -565,8 +572,7 @@ def run(args, manifest):
             members = checkpoint_members(out, args.source_sha, args.run_id, args.dataset,
                                          args.lane, manifest_hash, sequence)
             checkpoint = work / f"{args.dataset}-{args.lane}-s{sequence:04d}.tar.gz"
-            if not checkpoint.exists():
-                pack_checkpoint(members, checkpoint)
+            pack_checkpoint(members, checkpoint)
             upload(checkpoint)
             published = best["model_sha256"]
             published_history = history_digest
