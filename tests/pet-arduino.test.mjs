@@ -4,11 +4,24 @@ import {readFileSync} from 'node:fs';
 import {reviewCompatibility} from '../pets/arduino/compatibility.mjs';
 
 const fixture = () => JSON.parse(readFileSync(new URL('../pets/arduino/example.json', import.meta.url), 'utf8'));
+const splitFixture = () => {
+  const x = fixture();
+  x.schemaVersion = 2;
+  for (const part of [x.board, ...x.sensors]) {
+    part.supplyVoltageMv = part.voltageMv;
+    part.logicVoltageMv = 1800;
+    delete part.voltageMv;
+  }
+  return x;
+};
 const rejected = x => {
   const r = reviewCompatibility(x);
   assert.equal(r.status, 'invalid');
   assert.deepEqual(r.issues, ['malformed-or-unsupported-input']);
   assert.equal(r.totals, null);
+  assert.equal(r.budgets, null);
+  assert.equal(r.inputSchema, null);
+  assert.ok(r.diagnostics.length >= 1);
   assert.equal(r.authorization, false);
   assert.equal(r.safetyCertification, false);
 };
@@ -30,6 +43,193 @@ test('fictional worked arithmetic and review boundary', () => {
   assert.ok(r.unknowns.length >= 3);
   assert.deepEqual(x, before);
   assert.deepEqual(reviewCompatibility(x), r);
+});
+
+test('split supply and logic voltages are independent and legacy remains explicit', () => {
+  const legacy = reviewCompatibility(fixture());
+  assert.equal(legacy.inputSchema, 'legacy-single-voltage');
+  assert.deepEqual(legacy.diagnostics, []);
+  const x = splitFixture(), r = reviewCompatibility(x);
+  assert.equal(r.status, 'consistent');
+  assert.equal(r.inputSchema, 'split-voltage-v2');
+  assert.deepEqual(r.issues, []);
+  assert.deepEqual(r.diagnostics, []);
+  assert.deepEqual(r.totals, {supplyMa: 14, signalMa: 3});
+  assert.equal(x.board.supplyVoltageMv, 3000);
+  assert.equal(x.board.logicVoltageMv, 1800);
+});
+
+test('documented split-voltage JSON example matches the published arithmetic', () => {
+  const x = JSON.parse(readFileSync(new URL('../pets/arduino/example-v2.json', import.meta.url), 'utf8'));
+  const r = reviewCompatibility(x);
+  assert.equal(r.status, 'consistent');
+  assert.equal(r.inputSchema, 'split-voltage-v2');
+  assert.equal(x.board.supplyVoltageMv, 5000);
+  assert.equal(x.board.logicVoltageMv, 3000);
+  assert.deepEqual(r.issues, []);
+  assert.deepEqual(r.diagnostics, []);
+  assert.deepEqual(r.totals, {supplyMa: 14, signalMa: 3});
+  assert.deepEqual(r.budgets, {
+    total: {demandMa: 17, limitMa: 30, headroomMa: 13},
+    signal: {demandMa: 3, limitMa: 6, headroomMa: 3},
+    pins: [
+      {pin: 'P0', demandMa: 1, limitMa: 4, headroomMa: 3},
+      {pin: 'P1', demandMa: 2, limitMa: 4, headroomMa: 2},
+    ],
+  });
+  assert.equal(r.authorization, false);
+  assert.equal(r.safetyCertification, false);
+});
+
+test('supply voltage regression reports the exact field and declared mismatch', () => {
+  const x = splitFixture(); x.sensors[0].supplyVoltageMv = 3300;
+  needsReview(x, ['voltage-mismatch:sensor-a']);
+  const [d] = reviewCompatibility(x).diagnostics;
+  assert.equal(d.code, 'voltage-mismatch:sensor-a');
+  assert.equal(d.path, 'sensors[0].supplyVoltageMv');
+  assert.equal(d.actual, 3300);
+  assert.ok(d.expected !== undefined);
+  assert.equal(typeof d.correction, 'string');
+  assert.ok(d.correction.length > 0);
+});
+
+test('logic voltage regression cannot be masked by matching supply voltage', () => {
+  const x = splitFixture(); x.sensors[0].logicVoltageMv = 2500;
+  needsReview(x, ['logic-voltage-mismatch:sensor-a']);
+  const [d] = reviewCompatibility(x).diagnostics;
+  assert.equal(d.code, 'logic-voltage-mismatch:sensor-a');
+  assert.equal(d.path, 'sensors[0].logicVoltageMv');
+  assert.equal(d.actual, 2500);
+  assert.ok(d.expected !== undefined);
+  assert.ok(d.correction.length > 0);
+});
+
+test('split voltage schema rejects mixed, omitted, unknown and malformed declarations', () => {
+  for (const mutate of [
+    x => x.schemaVersion = 1, x => x.schemaVersion = 3, x => x.schemaVersion = '2',
+    x => x.schemaVersion = null, x => delete x.schemaVersion,
+    x => x.board.voltageMv = 3000, x => x.sensors[0].voltageMv = 3000,
+    x => delete x.board.supplyVoltageMv, x => delete x.sensors[0].logicVoltageMv,
+    x => x.board.logicVoltageMv = null, x => x.sensors[0].supplyVoltageMv = 0,
+    x => x.board.supplyVoltageMv = 3.3,
+  ]) { const x = splitFixture(); mutate(x); rejected(x); }
+  const legacy = fixture(); legacy.schemaVersion = 2; rejected(legacy);
+});
+
+test('review budgets expose exact demand, limits and remaining current', () => {
+  const r = reviewCompatibility(splitFixture());
+  assert.deepEqual(r.budgets, {
+    total: {demandMa: 17, limitMa: 30, headroomMa: 13},
+    signal: {demandMa: 3, limitMa: 6, headroomMa: 3},
+    pins: [
+      {pin: 'P0', demandMa: 1, limitMa: 4, headroomMa: 3},
+      {pin: 'P1', demandMa: 2, limitMa: 4, headroomMa: 2},
+    ],
+  });
+  const x = splitFixture();
+  x.board.powerLimitMa = 16; x.board.totalPinLimitMa = 2; x.board.pinLimitMa = 1;
+  const excess = reviewCompatibility(x);
+  assert.deepEqual(excess.issues, ['pin-oversubscribed:P1', 'power-oversubscribed', 'signal-oversubscribed']);
+  assert.equal(excess.budgets.total.headroomMa, -1);
+  assert.equal(excess.budgets.signal.headroomMa, -1);
+  assert.equal(excess.budgets.pins[1].headroomMa, -1);
+  assert.equal(excess.budgets.pins[0].headroomMa, 0);
+});
+
+test('unknown budget limits remain null and zero limits stay known', () => {
+  for (const key of ['powerLimitMa', 'pinLimitMa', 'totalPinLimitMa']) {
+    const x = splitFixture(); x.board[key] = null;
+    needsReview(x, [`unknown-${key}`]);
+    const r = reviewCompatibility(x);
+    const budgets = key === 'powerLimitMa' ? [r.budgets.total] : key === 'totalPinLimitMa' ? [r.budgets.signal] : r.budgets.pins;
+    for (const b of budgets) {assert.equal(b.limitMa, null); assert.equal(b.headroomMa, null);}
+    delete x.board[key]; rejected(x);
+  }
+  const x = splitFixture(); x.board.powerLimitMa = 0;
+  assert.deepEqual(reviewCompatibility(x).budgets.total, {demandMa: 17, limitMa: 0, headroomMa: -17});
+});
+
+test('duplicate pin regression reports conflict and aggregates its declared demand', () => {
+  const x = splitFixture(); x.sensors[1].pins[0].pin = 'P0'; x.sensors[1].pins[0].mode = 'input';
+  needsReview(x, ['duplicate-pin:P0']);
+  const r = reviewCompatibility(x);
+  assert.deepEqual(r.budgets.pins, [{pin: 'P0', demandMa: 3, limitMa: 4, headroomMa: 1}]);
+  assert.ok(r.diagnostics.some(d => d.code === 'duplicate-pin:P0' && d.path === 'sensors[1].pins[0].pin'));
+});
+
+test('per-pin current regression reports demand and limit for that pin', () => {
+  const x = splitFixture(); x.sensors[1].pins[0].currentMa = 5;
+  needsReview(x, ['pin-oversubscribed:P1'], {supplyMa: 14, signalMa: 6});
+  const d = reviewCompatibility(x).diagnostics.find(d => d.code === 'pin-oversubscribed:P1');
+  assert.equal(d.path, 'sensors[1].pins[0].currentMa');
+  assert.equal(d.actual, 5);
+  assert.ok(d.expected !== undefined);
+  assert.ok(d.correction.length > 0);
+});
+
+test('total current regression counts signal demand in the supply budget', () => {
+  const x = splitFixture(); x.board.powerLimitMa = 16;
+  needsReview(x, ['power-oversubscribed']);
+  const r = reviewCompatibility(x);
+  assert.equal(r.budgets.total.demandMa, 17);
+  const d = r.diagnostics.find(d => d.code === 'power-oversubscribed');
+  assert.equal(d.path, 'board.powerLimitMa');
+  assert.equal(d.actual, 16);
+  assert.equal(d.expected, 'at least 17 mA for declared demand');
+});
+
+test('aggregate signal current regression retains its independent budget', () => {
+  const x = splitFixture(); x.board.totalPinLimitMa = 2;
+  needsReview(x, ['signal-oversubscribed']);
+  const r = reviewCompatibility(x);
+  assert.deepEqual(r.budgets.signal, {demandMa: 3, limitMa: 2, headroomMa: -1});
+  assert.equal(r.budgets.total.headroomMa, 13);
+  const d = r.diagnostics.find(d => d.code === 'signal-oversubscribed');
+  assert.equal(d.path, 'board.totalPinLimitMa');
+  assert.equal(d.actual, 2);
+  assert.equal(d.expected, 'at least 3 mA for declared demand');
+});
+
+test('malformed diagnostics identify missing, unknown, count and numeric fields safely', () => {
+  for (const [mutate, code, path] of [
+    [x => delete x.board.powerLimitMa, 'missing-field', 'board.powerLimitMa'],
+    [x => x.board.unrecognized = 1, 'unknown-field', 'board.unrecognized'],
+    [x => x.board.pinCount = 3, 'invalid-count', 'board.pinCount'],
+    [x => x.sensors[0].currentMa = -1, 'invalid-number', 'sensors[0].currentMa'],
+  ]) {
+    const x = splitFixture(); mutate(x); rejected(x);
+    const [d] = reviewCompatibility(x).diagnostics;
+    assert.equal(d.code, code); assert.equal(d.path, path);
+    assert.ok(d.expected !== undefined);
+    assert.equal(typeof d.correction, 'string'); assert.ok(d.correction.length > 0);
+    assert.ok(d.actual === null || ['string', 'number', 'boolean'].includes(typeof d.actual));
+  }
+});
+
+test('v2 schema selection and diagnostics never invoke getters, hooks or proxy traps', () => {
+  let calls = 0;
+  for (const mutate of [
+    x => Object.defineProperty(x, 'schemaVersion', {get() {calls++; throw Error('version getter');}}),
+    x => Object.defineProperty(x.board, 'logicVoltageMv', {get() {calls++; throw Error('voltage getter');}}),
+    x => x.board.logicVoltageMv = {toJSON() {calls++; throw Error('conversion hook');}},
+    x => x.sensors[0].logicVoltageMv = new Proxy({}, {get() {calls++; throw Error('proxy');}}),
+  ]) {
+    const x = splitFixture(); mutate(x); rejected(x);
+    const r = reviewCompatibility(x);
+    assert.doesNotThrow(() => JSON.stringify(r));
+  }
+  assert.equal(calls, 0);
+});
+
+test('budgets and diagnostics are isolated from inputs and subsequent results', () => {
+  const x = splitFixture(); x.sensors[0].logicVoltageMv = 2500;
+  const before = structuredClone(x), first = reviewCompatibility(x), second = reviewCompatibility(x);
+  first.budgets.total.demandMa = 999;
+  first.budgets.pins[0].pin = 'changed';
+  first.diagnostics[0].correction = 'changed';
+  first.unknowns[0] = 'changed';
+  assert.deepEqual(x, before);
+  assert.deepEqual(reviewCompatibility(x), second);
 });
 
 test('power and pin limits: exact boundary, zero, unknown and missing differ', () => {

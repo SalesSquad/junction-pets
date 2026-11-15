@@ -25,9 +25,13 @@ The companion should explain its reasoning, cite the relevant official sources a
 ## Current limits
 
 For an offline worked exercise, see [COMPATIBILITY.md](COMPATIBILITY.md),
-`example.json` and `compatibility.mjs`. The checker reviews declared fictional
-pin modes, voltage, current, ground and limits. It rejects malformed data and
-flags conflicts or unknown limits. A consistent result is neither authorization
+`example.json`, `example-v2.json` and `compatibility.mjs`. The checker reviews
+declared fictional pin modes, supply and logic voltages, current, ground and
+limits. It rejects malformed data, explains the affected fields, and shows
+declared demand, limits and remaining current headroom. Legacy single-voltage
+inputs remain supported. Targeted tests and a local mutation checker examine
+whether selected broken checks are detected; they do not verify real hardware.
+A consistent result is neither authorization
 nor physical safety certification; supplied declarations remain unverified.
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.

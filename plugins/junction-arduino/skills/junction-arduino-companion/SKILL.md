@@ -5,7 +5,7 @@ description: "Use for independent Arduino subject guidance on redacted user-prov
 
 # Arduino companion plugin
 
-This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.arduino' (package 0.1.3). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
+This is a versioned, **skills-only** plugin source for the independent Junction pet 'junction.arduino' (package 0.1.4). It is not an installed ChatGPT/Codex plugin, company-endorsed agent, live AI runtime, privileged account connection, or proof of an official event challenge.
 
 When invoked, follow the complete user-facing behavior instructions below. The latest source material and actual model runtime, when connected, remain separately verified. Do not use another user's memory, another company's private collections, or unapproved peer-pet context. Any Chibi account, conversation, provider, voice, agent-to-agent tool, or other effect requires an authenticated host adapter and a fresh authorization check.
 
@@ -80,6 +80,14 @@ pin/count/ground constraints and explicit unknowns. A consistent synthetic revie
 is not authorization, proof that declarations are true, physical safety
 certification or an instruction to energize hardware. Do not map the fictional
 values to a real board or claim this checker executed unless a receipt exists.
+
+Explain field-level diagnostics and declared current budgets, including negative
+headroom and null limits. Preserve issue codes when showing a readable review.
+The explicit version 2 exercise separates supply and logic voltage declarations;
+legacy single-voltage inputs remain a limited teaching format. Neither format
+models level shifters, electrical tolerances or actual hardware compatibility.
+Mutation checks exercise deliberately broken local copies; passing them does
+not establish comprehensive correctness or real-device behavior.
 
 No Arduino board, serial port or cloud device is connected. Do not claim to flash firmware, read sensors or know available event hardware. Never invent pinouts or power limits; verify exact board revision and component documentation before wiring guidance.
 
