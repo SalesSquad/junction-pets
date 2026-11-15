@@ -12,7 +12,7 @@ before(async () => {
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   base = `http://127.0.0.1:${server.address().port}`;
-  token = (await (await fetch(`${base}/api/demo/session`, { method: 'POST', body: JSON.stringify({ buyerId: 'helsinki-hotel-demo' }) })).json()).token;
+  token = (await (await fetch(`${base}/api/demo/session`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ buyerId: 'helsinki-hotel-demo' }) })).json()).token;
 });
 after(async () => { if (server) await new Promise((resolve) => server.close(resolve)); });
 const get = async (path) => {
@@ -75,10 +75,10 @@ test('over-budget baskets, unknown routes and JSON parsing have explicit error c
   assert.equal(refused.status, 409);
   assert.equal(refused.body.error.code, 'BUDGET_EXCEEDED');
   assert.equal((await get('/api/not-a-route')).body.error.code, 'NOT_FOUND');
-  const malformed = await fetch(`${base}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{ broken' });
+  const malformed = await fetch(`${base}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: '{ broken' });
   assert.equal(malformed.status, 400);
   assert.equal((await malformed.json()).error.code, 'INVALID_JSON');
-  const oversized = await fetch(`${base}/api/quotes`, { method: 'POST', body: 'x'.repeat(17000) });
+  const oversized = await fetch(`${base}/api/quotes`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: 'x'.repeat(17000) });
   assert.equal(oversized.status, 413);
   assert.equal((await oversized.json()).error.code, 'PAYLOAD_TOO_LARGE');
 });

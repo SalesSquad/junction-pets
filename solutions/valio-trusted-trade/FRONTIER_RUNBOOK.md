@@ -27,6 +27,7 @@ No LLM, anonymous browser button, or agent can grant itself spending rights. Pri
 cd solutions/valio-trusted-trade
 npm test
 npm start
+# Default HTTP state is private local SQLite; use VALIO_EPHEMERAL=1 for resettable memory.
 # Open http://127.0.0.1:4177/mission — responsive Mission Control
 # Open http://127.0.0.1:4177/ — snapshot-bound exception review (also /classic)
 # Optional OCR: install Tesseract CLI on this server. Camera barcode detection
@@ -113,3 +114,5 @@ The independent buyer agent uses only HTTP plus the shared canonical wire encode
 5. Use the existing **BankMatch `finance_core` / canonical `PaymentDraft`** for a future durable money/workspace/policy integration. This demo contains a disposable, order-scoped fictional-wallet projection for judging, **not** a second production ledger or a permission engine. Integrate an authorized PSP/PISP only after a separate mandate, regulatory review, real consent and explicit owner approval; never reinterpret demo session capability as banking authorization.
 
 **Principle:** strong demo mechanics now, no invented production integration claims.
+
+For current MCP, browser recovery, local persistence and sponsor read boundaries, see [the audit](AGENT_USAGE_AUDIT.md).

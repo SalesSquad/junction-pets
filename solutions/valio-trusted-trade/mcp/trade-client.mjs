@@ -1,0 +1,307 @@
+/** Independent buyer process for the local SYNTHETIC HTTP service. */
+import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, randomUUID, verify } from 'node:crypto';
+import { canonical, digest, makeDemoMandatePayload, signDemoEnvelope } from '../src/trust-envelope.mjs';
+import { verifyBuyerTerms, verifyBuyerBody } from '../src/buyer-terms.mjs';
+
+const BUYER = 'helsinki-hotel-demo';
+const clone = value => structuredClone(value);
+const fingerprint = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+export class BridgeError extends Error {
+  constructor(code, retryable = false) { super(code); this.code = code; this.retryable = retryable; }
+}
+const fail = (code, retryable) => { throw new BridgeError(code, retryable); };
+const phaseKey = (key, phase) => 'mcp-' + fingerprint([key, phase]).slice(0, 52);
+const entries = (state, name) => new Map(state[name]);
+function put(state, name, key, value) {
+  const map = entries(state, name);
+  if (!map.has(key) && map.size >= 1000) fail('CLIENT_STATE_CAPACITY');
+  map.set(key, value); state[name] = [...map];
+}
+const safeId = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(value);
+const validPairs = value => Array.isArray(value) && value.length <= 1000 && value.every(e => Array.isArray(e) && e.length === 2 && typeof e[0] === 'string') && new Set(value.map(e => e[0])).size === value.length;
+
+export async function createTradeClient({ baseUrl = 'http://127.0.0.1:4177', stateFile, fetchImpl = fetch, timeoutMs = 6000 } = {}) {
+  let base;
+  try { base = new URL(baseUrl); } catch { fail('LOCAL_URL_REQUIRED'); }
+  if (base.protocol !== 'http:' || !['127.0.0.1', 'localhost', '[::1]'].includes(base.hostname) ||
+      base.username || base.password || base.pathname !== '/' || base.search || base.hash) fail('LOCAL_URL_REQUIRED');
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30000) fail('INVALID_TIMEOUT');
+  const lifetime = stateFile ? 'PRIVATE_LOCAL_SQLITE' : 'MEMORY_NON_RESUMABLE';
+  const store = stateFile ? (await import('../src/local-state-store.mjs')).openLocalStateStore(stateFile) : null;
+  const initial = () => {
+    const pair = generateKeyPairSync('ed25519');
+    const jwk = pair.publicKey.export({ format: 'jwk' });
+    return { kind: 'synthetic-mcp-buyer', version: 1, baseUrl: base.origin, token: null,
+      privateKey: pair.privateKey.export({ format: 'der', type: 'pkcs8' }).toString('base64'),
+      publicJwk: { kty: jwk.kty, crv: jwk.crv, x: jwk.x }, kid: null,
+      runs: [], commands: [], challenges: [] };
+  };
+  const validate = state => {
+    if (!state || state.kind !== 'synthetic-mcp-buyer' || state.version !== 1 || state.baseUrl !== base.origin ||
+        !validPairs(state.runs) || !validPairs(state.commands) || !validPairs(state.challenges) ||
+        !(state.token === null || typeof state.token === 'string' && /^[0-9a-f-]{36}$/.test(state.token)) ||
+        typeof state.privateKey !== 'string' || state.privateKey.length > 1000 ||
+        state.publicJwk?.kty !== 'OKP' || state.publicJwk?.crv !== 'Ed25519' || typeof state.publicJwk.x !== 'string') fail('CLIENT_STATE_INVALID');
+    try {
+      const key = createPrivateKey({ key: Buffer.from(state.privateKey, 'base64'), format: 'der', type: 'pkcs8' });
+      if (key.asymmetricKeyType !== 'ed25519' || createPublicKey(key).export({ format: 'jwk' }).x !== state.publicJwk.x) fail('CLIENT_STATE_INVALID');
+    } catch { fail('CLIENT_STATE_INVALID'); }
+    return state;
+  };
+  let memory;
+  try {
+    if (store) store.transaction(true, row => ({ state: validate(row?.value ?? initial()), value: null }));
+    else memory = initial();
+  } catch (error) { store?.close(); throw error; }
+  const read = () => validate(store ? store.read().value : memory);
+  const update = fn => {
+    if (store) return store.transaction(true, row => { const state = validate(row.value); return { value: fn(state), state }; }).value;
+    return fn(memory);
+  };
+  const request = async (path, body, commandKey, authenticated = true) => {
+    const url = new URL(path, base);
+    if (url.origin !== base.origin) fail('CROSS_ORIGIN_REFUSED');
+    const controller = new AbortController();
+    let rejectDeadline;
+    const deadline = new Promise((_, reject) => { rejectDeadline = reject; });
+    deadline.catch(() => {});
+    const bounded = operation => Promise.race([operation, deadline]);
+    const timer = setTimeout(() => { controller.abort(); rejectDeadline(new BridgeError('HTTP_DEADLINE', true)); }, timeoutMs);
+    let reader;
+    try {
+      const token = authenticated ? await bounded(session()) : null;
+      const response = await bounded(fetchImpl(url, { method: body === undefined ? 'GET' : 'POST',
+        redirect: 'error', signal: controller.signal, headers: { Accept: 'application/json',
+          ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+          ...(token ? { Authorization: 'Bearer ' + token } : {}),
+          ...(commandKey ? { 'Idempotency-Key': commandKey } : {}) },
+        body: body === undefined ? undefined : JSON.stringify(body) }));
+      if (!/^application\/json(?:\s*;|$)/i.test(response.headers.get('content-type') ?? '')) fail('INVALID_HTTP_RESPONSE');
+      if (Number(response.headers.get('content-length') ?? 0) > 524288 || !response.body) fail('HTTP_RESPONSE_TOO_LARGE');
+      reader = response.body.getReader();
+      let bytes = 0; const chunks = [];
+      while (true) {
+        const part = await bounded(reader.read()); if (part.done) break;
+        bytes += part.value.byteLength;
+        if (bytes > 524288) fail('HTTP_RESPONSE_TOO_LARGE');
+        chunks.push(Buffer.from(part.value));
+      }
+      let data;
+      try { data = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { fail('INVALID_HTTP_RESPONSE'); }
+      if (!data || typeof data !== 'object' || Array.isArray(data)) fail('INVALID_HTTP_RESPONSE');
+      if (!response.ok) {
+        const code = data.error?.code;
+        fail(typeof code === 'string' && /^[A-Z0-9_]{1,80}$/.test(code) ? code : 'HTTP_REFUSED',
+          [408, 429, 503, 504].includes(response.status) || data.error?.details?.retryable === true);
+      }
+      return data;
+    } catch (error) {
+      if (error instanceof BridgeError) throw error;
+      fail(controller.signal.aborted ? 'HTTP_DEADLINE' : 'HTTP_UNAVAILABLE', true);
+    } finally { clearTimeout(timer); controller.abort(); reader?.cancel().catch(() => {}); }
+  };
+  const session = async () => {
+    const existing = read().token; if (existing) return existing;
+    const result = await request('/api/demo/session', { buyerId: BUYER }, null, false);
+    if (typeof result.token !== 'string' || !/^[0-9a-f-]{36}$/.test(result.token) || result.buyerId !== BUYER ||
+        result.mode !== 'SYNTHETIC_NOT_AUTHENTICATED') fail('INVALID_DEMO_SESSION');
+    return update(state => { state.token ??= result.token; return state.token; });
+  };
+  const command = (key, kind, args) => update(state => {
+    const fp = fingerprint([kind, args]); const prior = entries(state, 'commands').get(key);
+    if (prior && prior.fingerprint !== fp) fail('CLIENT_COMMAND_CONFLICT');
+    const record = prior ?? { kind, fingerprint: fp, nonce: randomUUID(), issuedAtMs: Date.now() };
+    put(state, 'commands', key, record); return clone(record);
+  });
+  const runRecord = id => { const saved = entries(read(), 'runs').get(id); if (!saved) fail('CALLER_INTENT_MISSING'); return clone(saved); };
+  const status = async (id, full = false) => {
+    if (!safeId(id)) fail('INVALID_RUN_ID');
+    const result = await request('/api/agent/runs/' + encodeURIComponent(id) + (full ? '?detail=full' : ''));
+    if (result.mode !== 'SYNTHETIC' || result.run?.id !== id) fail('INVALID_RUN_RESPONSE');
+    return result;
+  };
+  const terms = full => {
+    if (['QUOTE_STALE', 'QUOTE_EXPIRED'].includes(full.run.status)) fail(full.run.status);
+    const saved = runRecord(full.run.id), q = full.quote;
+    if (!q || !full.policy || q.buyerId !== BUYER || q.id !== full.run.quoteId) fail('QUOTE_NOT_AVAILABLE');
+    let ceiling = saved.budgetCents;
+    const exception = q.budgetException;
+    if (exception && q.totalCents > ceiling) {
+      if (exception.scope !== 'THIS_QUOTE_ONLY' || exception.originalBudgetCents !== ceiling ||
+          exception.proposedBudgetCents !== q.totalCents || exception.additionalCents !== q.totalCents - ceiling) fail('UNBOUND_BUDGET_EXCEPTION');
+      ceiling = q.totalCents;
+    }
+    try { verifyBuyerTerms(q, full.policy, { requirements: saved.requirements, budgetCents: ceiling }); }
+    catch { fail('BUYER_TERMS_REFUSED'); }
+    return { q, saved, ceiling, binding: fingerprint([q.id, q.snapshotId, q.totalCents, q.expiresAtMs, full.run.id]) };
+  };
+  const registerKey = async key => {
+    await session();
+    const state = read();
+    const expected = 'demo-buyer-' + createHash('sha256').update(state.publicJwk.x).digest('hex').slice(0, 16);
+    if (state.kid === expected) return expected;
+    const result = await request('/api/trust/buyer-key', { buyerId: BUYER, publicJwk: state.publicJwk }, phaseKey(key, 'register'));
+    if (result.kid !== expected) fail('BUYER_KEY_MISMATCH');
+    update(s => { s.kid = result.kid; }); return expected;
+  };
+  const verifyEnvelope = (envelope, kid, keys) => {
+    const jwk = keys.find(k => k.kid === kid);
+    if (!jwk || envelope?.protected?.kid !== kid || envelope.protected.alg !== 'EdDSA' ||
+        envelope.protected.typ !== 'kattely.demo.procurement-envelope.v1' || typeof envelope.signature !== 'string') fail('PROOF_REFUSED');
+    try {
+      if (!verify(null, Buffer.from(canonical(envelope.protected) + '.' + canonical(envelope.payload)),
+        createPublicKey({ key: jwk, format: 'jwk' }), Buffer.from(envelope.signature, 'base64url'))) fail('PROOF_REFUSED');
+    } catch { fail('PROOF_REFUSED'); }
+  };
+  return Object.freeze({
+    lifetime,
+    async search(query, limit) { return request('/api/products/search?q=' + encodeURIComponent(query) + '&limit=' + limit); },
+    async lookupValioMock(input) {
+      try { return await request('/api/suppliers/valio-mock/observe', input); }
+      catch (error) { if (error.code === 'INTEGRATION_NOT_CONFIGURED') error.retryable = false; throw error; }
+    },
+    async prepare(args) {
+      const { commandKey, ...intention } = args;
+      command(commandKey, 'prepare', intention);
+      const result = await request('/api/agent/prepare', { buyerId: BUYER, ...intention }, phaseKey(commandKey, 'prepare'));
+      if (result.mode !== 'SYNTHETIC' || !safeId(result.run?.id)) fail('INVALID_RUN_RESPONSE');
+      const existed = update(state => {
+        const saved = entries(state, 'runs').get(result.run.id);
+        if (saved) {
+          if (fingerprint([saved.requirements, saved.budgetCents]) !== fingerprint([intention.requirements, intention.budgetCents])) fail('CLIENT_COMMAND_CONFLICT');
+          return true;
+        }
+        put(state, 'runs', result.run.id, { ...clone(intention), acceptedScope: null });
+        return false;
+      });
+      return !result.quote ? status(result.run.id, true) : existed ? status(result.run.id) : result;
+    },
+    status,
+    async reviewContext(id) {
+      const full = await status(id, true); const checked = terms(full);
+      if (['APPROVED', 'AUTO_COMMIT_ELIGIBLE'].includes(checked.q.status)) {
+        if (checked.q.totalCents > checked.saved.budgetCents &&
+            checked.saved.acceptedScope?.binding !== checked.binding) fail('CALLER_APPROVAL_MISSING');
+      }
+      return { ...checked, full };
+    },
+    challenge(commandKey, kind, id, binding, message, extra = {}) {
+      command(commandKey, kind, { id, binding });
+      return update(state => {
+        const existing = entries(state, 'challenges').get(commandKey);
+        if (existing && (existing.kind !== kind || existing.id !== id || existing.binding !== binding)) fail('STALE_CONFIRMATION');
+        const challenge = existing ?? { kind, id, binding, token: randomUUID(), issuedAtMs: Date.now(), message, ...extra };
+        put(state, 'challenges', commandKey, challenge); return clone(challenge);
+      });
+    },
+    checkChallenge(commandKey, token, binding) {
+      const record = entries(read(), 'challenges').get(commandKey);
+      if (!record || record.token !== token || record.binding !== binding || Date.now() - record.issuedAtMs > 300000) fail('STALE_CONFIRMATION');
+      return clone(record);
+    },
+    authorizeChallenge(commandKey, token, binding, decision) {
+      this.checkChallenge(commandKey, token, binding);
+      if (!['approve', 'reject'].includes(decision)) fail('INVALID_DECISION');
+      update(state => {
+        const record = entries(state, 'challenges').get(commandKey);
+        if (record.authorization && record.authorization.decision !== decision) fail('CONFIRMATION_FINAL');
+        record.authorization ??= { decision, at: Date.now() };
+        put(state, 'challenges', commandKey, record);
+      });
+    },
+    async decide(id, commandKey, decision, binding) {
+      const full = await status(id, true), checked = terms(full);
+      if (checked.binding !== binding) fail('STALE_CONFIRMATION');
+      if (!['approve', 'reject'].includes(decision)) fail('INVALID_DECISION');
+      const authorization = entries(read(), 'challenges').get(commandKey)?.authorization;
+      if (authorization?.decision !== decision) fail('HUMAN_APPROVAL_REQUIRED');
+      if (decision === 'approve') update(state => {
+        const saved = entries(state, 'runs').get(id);
+        put(state, 'runs', id, { ...saved, acceptedScope: { binding, quoteId: checked.q.id, budgetCents: checked.ceiling } });
+      });
+      return request('/api/agent/runs/' + encodeURIComponent(id) + '/decision',
+        { buyerId: BUYER, decision, quoteId: checked.q.id, snapshotId: checked.q.snapshotId }, phaseKey(commandKey, 'decision'));
+    },
+    async commit(id, commandKey) {
+      command(commandKey, 'commit', { id });
+      const full = await status(id, true);
+      if (full.run.orderId) return status(id);
+      const { q, saved, binding } = terms(full);
+      if (q.totalCents > saved.budgetCents && saved.acceptedScope?.binding !== binding) fail('CALLER_APPROVAL_MISSING');
+      if (!['APPROVED', 'AUTO_COMMIT_ELIGIBLE'].includes(q.status)) fail('HUMAN_APPROVAL_REQUIRED');
+      const kid = await registerKey(commandKey);
+      const exported = await request('/api/quotes/' + encodeURIComponent(q.id) + '/body');
+      try { verifyBuyerBody(exported.body, q); } catch { fail('BUYER_BODY_REFUSED'); }
+      const { signedOffer } = await request('/api/quotes/' + encodeURIComponent(q.id) + '/offer',
+        { buyerId: BUYER }, phaseKey(commandKey, 'offer'));
+      const keys = (await request('/.well-known/trusted-trade/jwks.json')).keys;
+      verifyEnvelope(signedOffer, signedOffer?.protected?.kid, keys);
+      if (signedOffer.payload.quoteBodyDigest !== digest(exported.body) || signedOffer.payload.quoteId !== q.id ||
+          signedOffer.payload.totalCents !== q.totalCents || signedOffer.payload.buyerId !== BUYER ||
+          signedOffer.payload.audience !== 'https://supplier-demo.invalid') fail('PROOF_REFUSED');
+      let proof = full.proof;
+      if (!proof) {
+        const recorded = command(commandKey + ':mandate', 'mandate', { id, quoteId: q.id });
+        const signedMandate = signDemoEnvelope(createPrivateKey({ key: Buffer.from(read().privateKey, 'base64'), type: 'pkcs8', format: 'der' }),
+          kid, makeDemoMandatePayload({ quote: q, signedOffer, now: recorded.issuedAtMs, nonce: recorded.nonce }));
+        proof = (await request('/api/quotes/' + encodeURIComponent(q.id) + '/handshake',
+          { buyerId: BUYER, signedMandate }, phaseKey(commandKey, 'handshake'))).proof;
+      }
+      const refreshedKeys = keys;
+      verifyEnvelope(proof?.signedOffer, signedOffer.protected.kid, refreshedKeys);
+      verifyEnvelope(proof?.signedMandate, kid, refreshedKeys);
+      const mandate = proof.signedMandate.payload, offer = proof.signedOffer.payload, now = Date.now();
+      if (offer.quoteId !== q.id || offer.buyerId !== BUYER || offer.totalCents !== q.totalCents ||
+          offer.audience !== 'https://supplier-demo.invalid' ||
+          offer.quoteBodyDigest !== digest(exported.body) || mandate.signedOfferDigest !== digest(proof.signedOffer) ||
+          mandate.quoteId !== q.id || mandate.buyerId !== BUYER || mandate.maxTotalCents !== q.totalCents ||
+          mandate.audience !== offer.audience || mandate.allowedAction !== 'CREATE_ONE_SIMULATED_ORDER' ||
+          mandate.approval !== (q.approvalRequired ? 'SYNTHETIC_RECORDED_REVIEW' : 'WITHIN_DEMO_POLICY') ||
+          !/^[0-9a-f-]{36}$/.test(mandate.nonce) ||
+          ![q.createdAtMs, q.expiresAtMs, offer.issuedAtMs, offer.expiresAtMs, mandate.issuedAtMs, mandate.expiresAtMs].every(value => Number.isSafeInteger(value) && value >= 0) ||
+          q.createdAtMs >= q.expiresAtMs || offer.issuedAtMs >= offer.expiresAtMs || mandate.issuedAtMs >= mandate.expiresAtMs ||
+          offer.issuedAtMs < q.createdAtMs || mandate.issuedAtMs < offer.issuedAtMs || mandate.issuedAtMs > now ||
+          now >= q.expiresAtMs || now >= offer.expiresAtMs || now >= mandate.expiresAtMs ||
+          offer.expiresAtMs > q.expiresAtMs || mandate.expiresAtMs > offer.expiresAtMs) fail('PROOF_REFUSED');
+      return request('/api/agent/runs/' + encodeURIComponent(id) + '/commit',
+        { buyerId: BUYER, idempotencyKey: phaseKey(commandKey, 'order') }, phaseKey(commandKey, 'commit'));
+    },
+    async cancel(id, commandKey) {
+      runRecord(id); command(commandKey, 'cancel', { id });
+      return request('/api/agent/runs/' + encodeURIComponent(id) + '/cancel', { buyerId: BUYER }, phaseKey(commandKey, 'cancel'));
+    },
+    async paymentContext(id) {
+      const full = await status(id, true), { q, saved, binding } = terms(full);
+      if (!full.run.orderId) fail('ORDER_REQUIRED');
+      if (q.totalCents > saved.budgetCents && saved.acceptedScope?.binding !== binding) fail('CALLER_APPROVAL_MISSING');
+      const pay = await request('/api/orders/' + encodeURIComponent(full.run.orderId) + '/payment');
+      const proposal = pay.proposal;
+      const allocated = new Map();
+      for (const line of q.lines) allocated.set(line.supplierId, (allocated.get(line.supplierId) ?? 0) + line.totalCents);
+      for (const [field, account] of [['deliveryFeeCents', 'fictional-delivery-fee'], ['taxCents', 'fictional-tax-holding']]) {
+        if (q.costBreakdown[field]) allocated.set(account, q.costBreakdown[field]);
+      }
+      const expected = [...allocated].sort(([a], [b]) => a.localeCompare(b));
+      if (proposal?.orderId !== full.run.orderId || proposal.amountCents !== q.totalCents || proposal.currency !== 'EUR' ||
+          proposal.signedQuoteBodyDigest !== digest((await request('/api/quotes/' + encodeURIComponent(q.id) + '/body')).body) ||
+          JSON.stringify(proposal.allocations.map(a => [a.supplierId, a.amountCents]).sort(([a], [b]) => a.localeCompare(b))) !== JSON.stringify(expected)) fail('PAYMENT_TERMS_REFUSED');
+      const { digest: claimed, ...unsigned } = proposal;
+      if (claimed !== digest(unsigned)) fail('PAYMENT_TERMS_REFUSED');
+      return { full, pay, binding: fingerprint([id, proposal.digest]), message: 'Approve a separate SYNTHETIC payment of ' +
+        proposal.amountCents + ' EUR cents for order ' + full.run.orderId + '? No bank or supplier is connected.' };
+    },
+    async settle(id, commandKey, binding, proposalDigest) {
+      const context = await this.paymentContext(id);
+      if (context.binding !== binding || context.pay.proposal.digest !== proposalDigest) fail('STALE_CONFIRMATION');
+      if (context.pay.transfer) return status(id);
+      if (entries(read(), 'challenges').get(commandKey)?.authorization?.decision !== 'approve') fail('HUMAN_APPROVAL_REQUIRED');
+      const orderId = context.full.run.orderId;
+      await request('/api/orders/' + encodeURIComponent(orderId) + '/payment-approval',
+        { buyerId: BUYER, decision: 'approve', proposalDigest }, phaseKey(commandKey, 'payment-approval'));
+      await request('/api/orders/' + encodeURIComponent(orderId) + '/settlement',
+        { buyerId: BUYER, idempotencyKey: phaseKey(commandKey, 'transfer') }, phaseKey(commandKey, 'payment'));
+      return status(id);
+    },
+    close() { store?.close(); },
+  });
+}

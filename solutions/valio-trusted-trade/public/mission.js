@@ -1,8 +1,9 @@
+import { browserSession, restoredBearer } from './browser-session.js';
 /** The interactive command UI uses only local synthetic HTTP contracts. */
 const BUYER = 'helsinki-hotel-demo';
 const state = { token: null, plan: null, optionId: null, quote: null, proof: null, order: null,
   idempotencyKey: null, paymentKey: null, payment: null, wallet: null,
-  busy: false, browserVerified: false, buyerKey: null, buyerKid: null,
+  busy: true, recoveryBlocked: false, quoteInvalid: null, browserVerified: false, buyerKey: null, buyerKid: null,
   pendingRecipe: null, scanKey: null, scanInput: null };
 const $ = (id) => document.getElementById(id);
 const euro = (cents) => new Intl.NumberFormat('en-FI', { style: 'currency', currency: 'EUR' }).format(cents / 100);
@@ -12,6 +13,15 @@ const node = (tag, text, cls) => {
   if (cls) n.className = cls;
   return n;
 };
+
+const recoveryCache = browserSession('mission');
+const persistBrowser = () => recoveryCache.save({
+  token: state.token, plan: state.plan, optionId: state.optionId,
+  quoteId: state.quote?.id ?? null, snapshotId: state.quote?.snapshotId ?? null,
+  orderId: state.order?.id ?? null, idempotencyKey: state.idempotencyKey, paymentKey: state.paymentKey,
+  buyerKey: state.buyerKey, buyerKid: state.buyerKid, scanKey: state.scanKey, scanInput: state.scanInput,
+  form: Object.fromEntries(['dairy','oat','budget'].map(id => [id,$(id).value])),
+});
 
 async function api(path, payload) {
   const res = await fetch(path, { method: payload === undefined ? 'GET' : 'POST',
@@ -38,8 +48,10 @@ function timeline(headline, detail, warning = false) {
 }
 
 function selectOption(id) {
+  if (state.busy || state.recoveryBlocked || state.order?.status === 'SIMULATED_COMMITTED') return;
   state.optionId = id;
   state.quote = null;
+  state.quoteInvalid = null;
   state.proof = null;
   state.order = null;
   state.payment = null;
@@ -49,6 +61,7 @@ function selectOption(id) {
   renderOptions();
   renderTrust();
   renderPayment();
+  persistBrowser();
 }
 
 function appendMetric(parent, label, value, fill) {
@@ -114,17 +127,17 @@ function renderTrust() {
   $('trust-badge').classList.toggle('verified', Boolean(state.proof));
   $('approval-summary').textContent = q?.approval ? q.approval.decision.toUpperCase() + ' · synthetic reviewer' : q?.approvalRequired ? 'Explicit approval required' : q ? 'Within synthetic auto policy' : 'Human by exception';
   $('approval-description').textContent = state.order ? `${state.order.id} is a simulated order, no commercial side effect.` : q?.approval ? 'Decision is tied to this quote only, not to future replan.' : 'Changes of price or stock require new quote and decision.';
-  const deciding = q && q.status === 'AWAITING_HUMAN_APPROVAL' && !state.order;
-  const ready = q && ['APPROVED', 'AUTO_COMMIT_ELIGIBLE'].includes(q.status) && !state.order;
+  const deciding = q && !state.quoteInvalid && q.status === 'AWAITING_HUMAN_APPROVAL' && !state.order;
+  const ready = q && !state.quoteInvalid && Date.now() < q.expiresAtMs && ['APPROVED', 'AUTO_COMMIT_ELIGIBLE'].includes(q.status) && !state.order;
   $('quote-button').disabled = state.busy || !state.plan || !option || !!q;
   $('approve-button').disabled = state.busy || !deciding;
   $('reject-button').disabled = state.busy || !deciding;
-  $('handshake-button').disabled = state.busy || !ready || !!state.proof || !state.buyerKey;
+  $('handshake-button').disabled = state.busy || !ready || !!state.proof || !state.buyerKey || !state.buyerKid;
   $('commit-button').disabled = state.busy || !ready || !state.proof;
   $('replay-button').disabled = state.busy || !state.order;
   $('shock').disabled = state.busy || !state.plan || !!state.order;
   $('decision-badge').textContent = state.order ? 'ONE RECEIPT' : state.proof ? 'PROOF VERIFIED' : q ? q.status.replaceAll('_', ' ') : 'NO QUOTE';
-  $('trust-message').textContent = state.order ? `Simulated order ${state.order.id} was committed exactly once; replay may only return the same receipt.` :
+  $('trust-message').textContent = state.quoteInvalid && !state.order ? 'Current source or expiry invalidates this quote. Create a fresh plan and decision before commitment.' : state.order ? `Simulated order ${state.order.id} was committed exactly once; replay may only return the same receipt.` :
     state.proof ? 'Both synthetic signatures verified. The mandate authorizes precisely one simulated commitment.' :
     deciding ? 'The amount exceeds the demo auto-limit. A separate human decision must be recorded.' :
     q?.status === 'REJECTED' ? 'Decision refused; this fixed-price quote is terminal and cannot be committed.' :
@@ -142,7 +155,7 @@ function renderPayment() {
   $('payment-amount').textContent = order ? euro(order.totalCents) : '—';
   $('payment-approve-button').disabled = state.busy || !active || Boolean(pay?.approval);
   $('payment-send-button').disabled = state.busy || !active || pay?.approval?.decision !== 'approve' || Boolean(transfer);
-  $('payment-replay-button').disabled = state.busy || !transfer;
+  $('payment-replay-button').disabled = state.busy || !transfer || !state.paymentKey;
   $('payment-refund-button').disabled = state.busy || !active;
   $('payment-refund-button').textContent = transfer ? 'Cancel & reverse fictional payment' : 'Cancel unpaid demo order';
   $('payment-status').textContent = transfer?.status === 'SIMULATED_REFUNDED' ? 'REVERSED ✓' :
@@ -179,14 +192,15 @@ async function refreshAudit() {
 }
 
 async function act(label, callback) {
-  if (state.busy) return;
+  if (state.busy || state.recoveryBlocked) return;
   state.busy = true;
   alertError(null);
   renderOptions();
   renderTrust();
   renderPayment();
-  try { await callback(); }
+  try { await persistBrowser(); await callback(); }
   catch (error) {
+    if (['QUOTE_STALE','QUOTE_EXPIRED'].includes(error.code)) state.quoteInvalid = error.code;
     alertError(`${label} refused: ${error.code ?? 'ERROR'} · ${error.message}`);
     timeline(`${label} safely blocked`, `${error.code ?? 'ERROR'}: ${error.message}`, true);
   }
@@ -195,6 +209,8 @@ async function act(label, callback) {
     renderOptions();
     renderTrust();
     renderPayment();
+    await persistBrowser();
+    if (!recoveryCache.available) $('buyer-context').textContent = 'Demo capability · ephemeral tab; local recovery storage unavailable. Keep this tab open.';
     try { await refreshAudit(); } catch { /* Local server may have stopped. */ }
   }
 }
@@ -217,6 +233,7 @@ function setPlan(plan) {
   state.plan = plan;
   state.optionId = plan.recommendedOptionId;
   state.quote = null;
+  state.quoteInvalid = null;
   state.proof = null;
   state.order = null;
   state.payment = null;
@@ -431,6 +448,7 @@ $('mission-form').addEventListener('submit', (event) => {
 $('quote-button').addEventListener('click', () => act('Fixed-price quotation', async () => {
   const { quote } = await api(`/api/plans/${encodeURIComponent(state.plan.id)}/quotes`, { buyerId: BUYER, optionId: state.optionId });
   state.quote = quote;
+  state.quoteInvalid = null;
   state.proof = null;
   state.idempotencyKey = crypto.randomUUID();
   timeline('Supplier terms fixed', `${quote.id} · ${euro(quote.totalCents)} · ${quote.lines.length} stock-versioned lines`);
@@ -599,29 +617,78 @@ $('audit-refresh').addEventListener('click', () => act('Audit refresh', refreshA
 
 async function boot() {
   try {
-    const response = await api('/api/demo/session', { buyerId: BUYER });
-    state.token = response.token;
-    $('buyer-context').textContent = `Demo capability ${state.token.slice(0, 8)}… · NOT real authentication`;
-    if (crypto.subtle) {
-      try {
-        state.buyerKey = await crypto.subtle.generateKey('Ed25519', false, ['sign', 'verify']);
-        const jwk = await crypto.subtle.exportKey('jwk', state.buyerKey.publicKey);
-        const registered = await api('/api/trust/buyer-key', { buyerId: BUYER,
-          publicJwk: { kty: jwk.kty, crv: jwk.crv, x: jwk.x } });
-        state.buyerKid = registered.kid;
-      } catch (error) {
-        state.buyerKey = null;
-        timeline('Browser signing unavailable', `This browser cannot create an Ed25519 key (${error.message}); the separate Node buyer agent can still complete Kättely.`, true);
-      }
-    }
+    const { token, saved } = await restoredBearer(recoveryCache, BUYER);
+    state.token = token;
     const discovery = await api('/.well-known/trusted-trade');
     if (discovery.mode !== 'SYNTHETIC_NONCOMMERCIAL') throw Error('Wrong supplier mode; writes remain disabled.');
-    const [, wallet] = await Promise.all([api('/api/catalog'), api('/api/demo/wallet'), refreshAudit()]);
+    if (saved) {
+      const key = saved.buyerKey;
+      if (key?.privateKey?.type === 'private' && key.privateKey.extractable === false &&
+          key.privateKey.algorithm?.name === 'Ed25519' && key.publicKey?.type === 'public') {
+        state.buyerKey = key;
+      }
+      state.idempotencyKey = saved.idempotencyKey;
+      state.paymentKey = saved.paymentKey;
+      state.scanKey = saved.scanKey; state.scanInput = saved.scanInput;
+      if (saved.quoteId) {
+        const { quote } = await api('/api/quotes/' + encodeURIComponent(saved.quoteId));
+        if (quote.buyerId !== BUYER || quote.snapshotId !== saved.snapshotId) throw Error('Stored proposal does not match the current server source.');
+        state.quote = quote;
+        if (saved.plan?.id === quote.planId && saved.plan.snapshotId === quote.snapshotId) {
+          state.plan = saved.plan; state.optionId = saved.optionId;
+        }
+        const orderId = quote.orderId ?? saved.orderId;
+        if (orderId) {
+          const { order } = await api('/api/orders/' + encodeURIComponent(orderId));
+          if (order.quoteId !== quote.id || order.snapshotId !== quote.snapshotId || order.buyerId !== BUYER) throw Error('Stored receipt does not match current server terms.');
+          state.order = order;
+          state.payment = await api('/api/orders/' + encodeURIComponent(order.id) + '/payment');
+          state.wallet = state.payment.wallet;
+          if (!state.paymentKey && !state.payment.transfer) state.paymentKey = crypto.randomUUID();
+        }
+      }
+      for (const [id,value] of Object.entries(saved.form ?? {})) if (['dairy','oat','budget'].includes(id) && typeof value === 'string') $(id).value = value;
+    }
+    if (!state.buyerKey && !saved && crypto.subtle) {
+      try { state.buyerKey = await crypto.subtle.generateKey('Ed25519', false, ['sign','verify']); }
+      catch { timeline('Browser signing unavailable', 'This browser cannot create the independent demo key. A separate Node buyer can still sign.', true); }
+    }
+    // The nonextractable private key is cloned only into this origin's IndexedDB.
+    // Save before registration so an interrupted public-key ACK cannot lose its key.
+    await persistBrowser();
+    if (state.buyerKey) {
+      const jwk = await crypto.subtle.exportKey('jwk', state.buyerKey.publicKey);
+      const registered = await api('/api/trust/buyer-key', { buyerId: BUYER,
+        publicJwk: { kty:jwk.kty, crv:jwk.crv, x:jwk.x } });
+      state.buyerKid = registered.kid;
+    }
+    if (state.quote) {
+      const { proof, freshness } = await api('/api/quotes/' + encodeURIComponent(state.quote.id) + '/proof');
+      if (!state.order && freshness?.valid !== true) state.quoteInvalid = freshness?.code ?? 'FRESHNESS_UNVERIFIED';
+      state.proof = null; state.browserVerified = false;
+      if (proof && !state.quoteInvalid) {
+        try {
+          if (await verifyInBrowser(proof)) { state.proof = proof; state.browserVerified = true; }
+        } catch { /* An expired or changed proof cannot enable a new commitment. */ }
+      }
+    }
+    const wallet = await api('/api/demo/wallet');
     state.wallet = wallet.wallet;
-    timeline('Independent signing key registered', state.buyerKey ? 'Buyer private key remains in browser; supplier receives public key only.' : 'This browser does not support Ed25519; cryptographic handshake disabled.');
-  } catch (error) { alertError(`Demo backend unavailable: ${error.message}. Start npm start in solutions/valio-trusted-trade.`); }
-  renderOptions();
-  renderTrust();
-  renderPayment();
+    await refreshAudit();
+    await persistBrowser();
+    $('buyer-context').textContent = recoveryCache.available ?
+      'Demo capability · browser recovery stored locally; backend rechecked; NOT real authentication' :
+      'Demo capability · ephemeral tab; local recovery storage unavailable. Keep this tab open.';
+    timeline(saved ? 'Local demo session recovered' : 'Independent signing key registered',
+      saved ? 'Current quote, order, payment and proof were rechecked. No approval, order or payment was created by recovery.' :
+      state.buyerKey ? 'Buyer private key remains nonextractable in this browser; supplier receives public key only.' : 'Cryptographic handshake disabled in this browser.');
+  } catch (error) {
+    state.recoveryBlocked = true;
+    alertError('Recovery paused: ' + error.message + ' Reload when the original local backend is available; no purchasing action was taken.');
+  } finally {
+    state.busy = state.recoveryBlocked;
+    renderOptions(); renderTrust(); renderPayment();
+  }
 }
+renderOptions(); renderTrust(); renderPayment();
 boot();

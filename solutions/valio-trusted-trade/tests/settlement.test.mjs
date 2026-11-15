@@ -104,7 +104,7 @@ test('HTTP payment APIs bind synthetic session ownership, block tampering and ve
   const base = `http://127.0.0.1:${server.address().port}`;
   const call = async (path, payload, token) => {
     const response = await fetch(base + path, { method: payload === undefined ? 'GET' : 'POST',
-      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: payload === undefined ? undefined : JSON.stringify(payload) });
     return { status: response.status, ...await response.json() };
   };

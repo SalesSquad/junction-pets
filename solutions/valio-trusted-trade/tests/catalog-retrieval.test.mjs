@@ -177,7 +177,7 @@ test('HTTP product search requires demo capability, remains advisory, and keeps 
   try {
     const without = await fetch(`${base}/api/products/search?q=milk`);
     assert.equal(without.status, 403);
-    const session = await fetch(`${base}/api/demo/session`, { method: 'POST', body: JSON.stringify({ buyerId }) });
+    const session = await fetch(`${base}/api/demo/session`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ buyerId }) });
     const { token } = await session.json();
     const query = async (q) => {
       const response = await fetch(`${base}/api/products/search?q=${encodeURIComponent(q)}`, { headers: { Authorization: `Bearer ${token}` } });

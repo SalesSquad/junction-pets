@@ -49,7 +49,7 @@ if (scenario === 'refusal') {
     assert.equal(line.stockVersion, fact.version);
     assert.ok(line.quantityLitres <= fact.unitsAvailable);
   }
-  verifyBuyerTerms(quote, policy);
+  verifyBuyerTerms(quote, policy, { requirements: [need], budgetCents: quoteRequest.budgetCents });
   assert.equal(quote.lines.reduce((sum, line) => sum + line.quantityLitres, 0), need.quantityLitres);
   stdout.write(`SYNTHETIC ${quote.id}: ${quote.totalCents} EUR cents. ${quote.explanation}\n`);
   const interop = await api(`${routes.quotes}/${quote.id}/body`);

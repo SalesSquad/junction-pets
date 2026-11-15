@@ -41,7 +41,6 @@ assert.equal(discovery.mode, 'SYNTHETIC_NONCOMMERCIAL');
 const openapi = await call(discovery.openapi);
 for (const endpoint of Object.values(discovery.endpoints)) assert.ok(openapi.paths[endpoint], `Undocumented ${endpoint}`);
 const policy = await call(discovery.endpoints.policy);
-await call(discovery.endpoints.catalog);
 ({ token } = await call(discovery.endpoints.session, { buyerId: policy.buyerId }));
 
 // This private key exists only in the independent BUYER agent process.
@@ -65,7 +64,7 @@ if (scenario === 'refusal') {
   const fixedQuote = async (chosenPlan) => {
     const optionId = chosenPlan.recommendedOptionId;
     const { quote } = await call(`/api/plans/${chosenPlan.id}/quotes`, { buyerId: policy.buyerId, optionId });
-    verifyBuyerTerms(quote, policy);
+    verifyBuyerTerms(quote, policy, { requirements: intention.requirements, budgetCents: intention.budgetCents });
     if (quote.approvalRequired) {
       let decision = process.argv.find((x) => x.startsWith('--decision='))?.split('=')[1];
       if (!decision) {
