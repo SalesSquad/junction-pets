@@ -24,8 +24,8 @@ test('renders the stored gate with labels, both arms and kept raw values', { ski
   assert.match(t, /placeholder thresholds/);
   assert.match(t, /six months/);
   assert.match(t, /FLARE-ready, not run in FLARE/); // the median-bias column
-  assert.match(t, /If dates came from the raw scribe/);
-  assert.match(t, /With the code resolver/);
+  assert.match(t, /The model’s own dates/);
+  assert.match(t, /Gemma reads, code counts/);
   for (const p of FORBIDDEN) assert.ok(!t.toLowerCase().includes(p), p);
   const bad = (h.match(/data-gate="not-comparable"/g) || []).length;
   assert.equal(bad, GATE.summary.raw.not_comparable + GATE.summary.resolver.not_comparable);

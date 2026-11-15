@@ -1,5 +1,5 @@
 import http from 'node:http';
-import {readFile} from 'node:fs/promises';
+import {readFile,stat} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {applySecondReader} from './scribe-demo.mjs';
@@ -51,7 +51,10 @@ const secondFor=(demo)=>demo&&!demo.rewritten_by_code&&scribe.data.second.has(de
 async function scribeRoute(body){
  if(!body||typeof body!=='object'||Array.isArray(body))return [{error:'body must be a JSON object'},400];
  const mode=body.mode??'live';if(mode!=='live'&&mode!=='precomputed')return [{error:'mode must be "live" or "precomputed"'},400];
- if(!scribe.data){const read=(f)=>readFile(path.join(root,'data','scribe','demo',f),'utf8').then(JSON.parse).catch(()=>null);scribe.data={notes:await read('demo-notes.json'),outputs:await read('demo-outputs.json'),second:await readSecond()};}
+ // Reload the stored demo files whenever one of them changes on disk, so a server started before a data rebuild never
+ // serves stale verdicts (no restart needed).
+ const stamp=(await Promise.all([path.join(root,'data','scribe','demo','demo-notes.json'),path.join(root,'data','scribe','demo','demo-outputs.json'),path.join(root,SECOND_FILE)].map((f)=>stat(f).then((s)=>`${s.mtimeMs}:${s.size}`).catch(()=>'missing')))).join('|');
+ if(!scribe.data||scribe.dataStamp!==stamp){const read=(f)=>readFile(path.join(root,'data','scribe','demo',f),'utf8').then(JSON.parse).catch(()=>null);scribe.data={notes:await read('demo-notes.json'),outputs:await read('demo-outputs.json'),second:await readSecond()};scribe.dataStamp=stamp;}
  let note,demo=null;
  if(body.demo_id!==undefined){
   demo=typeof body.demo_id==='string'&&/^demo-\d{2}$/.test(body.demo_id)?(scribe.data.notes?.notes??[]).find((n)=>n.demo_id===body.demo_id):null;

@@ -1,5 +1,10 @@
 # SAMA: slide text for the PDF deck
 
+> **Presenter warning (15 Nov, 02:10 UTC):** this is the draft. The printed deck
+> `submission/deck/SAMA-deck.pdf` (built by `submission/deck/build.mjs` from the JSON files) is the
+> version to present and quote. Where this draft differs (for example 0.001 instead of 0.3% on slide 6,
+> or the earlier 651/700 two-reader pairing), the PDF and the JSON files win.
+
 Draft for Junction 2026, AstraZeneca "Equal Care Across Finland". Eleven slides for non-technical
 judges, then a technical appendix. Each slide has the words that go on it, a short speaker note and
 its sources. Rewritten on 14 November 2026, 23:00-01:30 UTC, to the story in `BIG_PICTURE.md`
@@ -209,7 +214,9 @@ inside each registry.
 - Each row shows episode code, age band, entry route, contact language (fi / sv / se / other,
   interpreter flag), days overdue and the missing step. Counts first; at most 3 unnamed SYNTHETIC
   rows on screen.
-- **Governance:** the county owns the list and the care. No patient data leaves the county. SAMA is
+- **Governance:** the county owns the list and the care. In the pilot no patient data leaves the
+  county: Gemma runs locally, and the second reader must run in a county-controlled environment
+  (designed, not built) or a person does that step. SAMA is
   sponsor-independent; any company role is a documented, non-promotional collaboration owned by
   the county.
 
@@ -266,10 +273,11 @@ and 154 vs 182 of 200 on the post hoc test set (p = 8e-6).
   computes it: validation exact match **192/310** with Nemotron doing the arithmetic, **282/310**
   with code doing it, **304/310** with `enable_thinking`. The chosen version then read the 700 test
   notes once: **690/700**.
-- **Two readers agree, or a person edits.** With the product's Gemma 3 270M adapter on 700
-  SYNTHETIC test notes (post hoc, measured offline): **651/700** pre-filled for one-click
-  confirmation, **4** of them wrong; **49** need editing. The validation-chosen pairing (1B reader
-  C, not in the demo): 684/700 (post hoc), and 220 of 308 stress notes with 3 wrong. Before tonight
+- **Two readers agree, or a person edits.** The pairing chosen on validation notes, Gemma 3 1B
+  with Nemotron (not in the demo): **220 of 308** frozen stress notes pre-filled for one-click
+  confirmation, **3** of them wrong, **88** need editing; on 700 SYNTHETIC test notes (post hoc)
+  **684/700**, 4 wrong. (An earlier pairing with the product's 270M adapter gave 651/700 on the test
+  notes, 4 wrong, **49** need editing; the PDF deck and the video do not use it.) Before tonight
   our best rule gave 263/700 with 7 errors. The scribe demo applies the rule to Nemotron's stored
   answers: 15 of 20 demo notes pre-filled, 0 wrong.
 - **County planner.** Nemotron drafted a plan for **23 of 23** areas by calling four SAMA tools.
@@ -469,7 +477,12 @@ are SYNTHETIC; the pilot has not been run.
 
 ## A8. Two-reader agreement (SYNTHETIC)
 
-| | Validation | Test |
+The PDF deck's A8 shows the chosen pairing, Gemma 3 1B + Nemotron (`data/scribe/v4/eval/results-v1.json`
+`cascade`): validation 300/310 pre-filled, 0 wrong; test (post hoc) 684/700, 4 wrong, 16 need editing;
+frozen stress set 220/308, 3 wrong, 88 need editing. The table below is the earlier pairing with the
+270M product adapter, kept for the record; do not quote it as the chosen rule.
+
+| Earlier 270M pairing | Validation | Test |
 | --- | --- | --- |
 | Pre-filled for one-click confirmation (both readers agree) | 286/310 | 651/700 |
 | Wrong among pre-filled | 0 | 4 (0.6%, Wilson 0.2-1.6) |
