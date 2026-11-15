@@ -91,3 +91,5 @@ check-only. Primary interfaces:
 [elicitation example](https://github.com/modelcontextprotocol/typescript-sdk/tree/main/examples/elicitation).
 
 Provider observations are read-only sponsor mock facts, never a promotion into fixture ordering authority. See [the full audit](../AGENT_USAGE_AUDIT.md) for the observed API and exact qualification scope.
+
+Sponsor lookup accepts only numeric catalog IDs (1–12 digits); never submit personal identifiers. Browser recovery omits free-text form inputs. Local bearer/key storage and host-mediated approval are suitable only for this synthetic prototype, not production identity or trusted human-presence evidence.

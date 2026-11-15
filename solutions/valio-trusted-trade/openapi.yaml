@@ -7205,8 +7205,8 @@
                     "uniqueItems": true,
                     "items": {
                       "type": "string",
-                      "minLength": 1,
-                      "maxLength": 200
+                      "pattern": "^[0-9]{1,12}$",
+                      "description": "Narrow local adapter accepts numeric catalog product IDs only; never submit personal identifiers."
                     }
                   },
                   "requestedDate": {

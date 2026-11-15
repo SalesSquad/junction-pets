@@ -119,3 +119,5 @@ varastokaupan mittakaavan tietokantaratkaisu.
 
 Lähdekoodin riippumaton riskikatselmointi ja täsmällinen toimitusversio
 löytyvät tämän työn PR:stä. Vanhat receiptit ja muut tuotteet jätettiin ennalleen.
+
+Riskikatselmuksessa rajattiin ulos vapaatekstin tallentaminen selaimeen sekä muu kuin 1–12 numeron katalogitunnus toimittajahauissa. Hylätyn maksukomennon uusi päätös tarvitsee uuden komentotunnuksen. Tarkat löydöskohtaiset ratkaisut ja jälkitarkistukset ovat toimitus-PR:ssä #298.

@@ -74,6 +74,7 @@ try {
   }
   await schemaRefused(active.client.callTool({ name: 'lookup_valio_mock', arguments: { ...input, products: ['8005803', '8005803'] } }));
   await schemaRefused(active.client.callTool({ name: 'lookup_valio_mock', arguments: { ...input, requestedDate: '2026-02-30' } }));
+  for (const product of ['name@example.invalid','https://example.invalid','1234567890123']) await schemaRefused(active.client.callTool({ name: 'lookup_valio_mock', arguments: { ...input, products: [product] } }));
   assert.equal(observerCalls, 0);
   const before = active.service.catalog();
   const result = await active.client.callTool({ name: 'lookup_valio_mock', arguments: input });

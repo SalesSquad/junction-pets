@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createValioMockPort } from '../src/valio-mock-port.mjs';
-const request = { products: ['P1'], requestedDate: '2026-11-16' };
+const request = { products: ['1001'], requestedDate: '2026-11-16' };
 const json = (value, status = 200, headers = {}) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json', ...headers } });
 const port = (fetchImpl, extra = {}) => createValioMockPort({ customer: 'fixed-test-customer', apiKey: () => 'test-key', fetchImpl, timeoutMs: 100, ...extra });
 
 test('sponsor request refuses caller authority/configuration and bulk or malformed reads', async () => {
   let calls = 0;
   const adapter = port(async () => { calls++; throw Error('must not call'); });
-  for (const invalid of [{ ...request, customer: 'other' }, { ...request, apiKey: 'other' }, { ...request, endpoint: 'https://elsewhere.invalid' }, { ...request, products: [] }, { ...request, products: Array.from({ length: 21 }, (_, i) => String(i)) }, { ...request, products: ['P1', 'P1'] }, { ...request, requestedDate: '2026-02-30' }]) await assert.rejects(adapter.observe(invalid), { code: 'INVALID_SPONSOR_REQUEST' });
+  for (const invalid of [{ ...request, customer: 'other' }, { ...request, apiKey: 'other' }, { ...request, endpoint: 'https://elsewhere.invalid' }, { ...request, products: [] }, { ...request, products: ['name@example.invalid'] }, { ...request, products: ['https://example.invalid'] }, { ...request, products: ['1234567890123'] }, { ...request, products: Array.from({ length: 21 }, (_, i) => String(i)) }, { ...request, products: ['1001', '1001'] }, { ...request, requestedDate: '2026-02-30' }]) await assert.rejects(adapter.observe(invalid), { code: 'INVALID_SPONSOR_REQUEST' });
   assert.equal(calls, 0);
   assert.equal(adapter.placeOrder, undefined);
 });
@@ -122,7 +122,7 @@ test('cache retains at most 128 observations and coalesces identical pending rea
   });
   await Promise.all([adapter.observe(request), adapter.observe(request)]);
   assert.equal(calls, 2);
-  for (let i = 0; i < 128; i++) await adapter.observe({ ...request, products: ['ID' + i] });
+  for (let i = 0; i < 128; i++) await adapter.observe({ ...request, products: [String(10000 + i)] });
   const before = calls;
   await adapter.observe(request);
   assert.equal(calls, before + 2);

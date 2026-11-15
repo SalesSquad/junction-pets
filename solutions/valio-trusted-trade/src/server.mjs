@@ -11,7 +11,7 @@ import { createFixtureCatalogSearch, RetrievalFault } from './catalog-retrieval.
 
 import { createAgentApi } from './agent-api.mjs';
 import { createHttpContext, createTradeRuntime } from './trade-runtime.mjs';
-import { createValioMockPort } from './valio-mock-port.mjs';
+import { createValioMockPort, isValioProductId } from './valio-mock-port.mjs';
 import { StateStoreError } from './local-state-store.mjs';
 import { catalogPage, auditPage, onlyQuery, recoveryFor } from './api-navigation.mjs';
 
@@ -345,7 +345,7 @@ export function createTradeHttpServer(initialService = createTradeService(), {
         const input = request.demoPayload;
         if (Object.keys(input).some(key => !['products','requestedDate'].includes(key)) ||
             !Array.isArray(input.products) || input.products.length < 1 || input.products.length > 20 ||
-            !input.products.every(id => typeof id === 'string' && id.length > 0 && id.length <= 200) ||
+            !input.products.every(isValioProductId) ||
             new Set(input.products).size !== input.products.length ||
             typeof input.requestedDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(input.requestedDate) ||
             !Number.isFinite(Date.parse(input.requestedDate)) || new Date(input.requestedDate).toISOString().slice(0,10) !== input.requestedDate) {

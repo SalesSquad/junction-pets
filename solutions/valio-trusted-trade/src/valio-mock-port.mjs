@@ -4,6 +4,7 @@ import { TradeError } from './core.mjs';
 const ORIGIN = 'https://junction26.valioaimo.fi';
 const PROVIDER = 'VALIO_JUNCTION_MOCK_API';
 const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+export const isValioProductId = value => typeof value === 'string' && /^[0-9]{1,12}$/.test(value);
 const text = (value) => typeof value === 'string' && value.length > 0 && value.length <= 200;
 const date = (value) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 const hash = (value) => createHash('sha256').update(value).digest('hex');
@@ -90,7 +91,7 @@ export function createValioMockPort({ customer, apiKey, fetchImpl = globalThis.f
   return Object.freeze({
     mode: 'SPONSOR_MOCK_READ_ONLY',
     observe: async (input = {}) => {
-      if (!object(input) || Object.keys(input).some((key) => !['products', 'requestedDate'].includes(key)) || !date(input.requestedDate) || !Array.isArray(input.products) || input.products.length < 1 || input.products.length > 20 || !input.products.every(text) || new Set(input.products).size !== input.products.length) throw fault('INVALID_SPONSOR_REQUEST', 'Provide one date and 1–20 distinct product IDs.', 400);
+      if (!object(input) || Object.keys(input).some((key) => !['products', 'requestedDate'].includes(key)) || !date(input.requestedDate) || !Array.isArray(input.products) || input.products.length < 1 || input.products.length > 20 || !input.products.every(isValioProductId) || new Set(input.products).size !== input.products.length) throw fault('INVALID_SPONSOR_REQUEST', 'Provide one date and 1–20 distinct numeric catalog product IDs (1–12 digits).', 400);
       const request = { customer, requestedDate: input.requestedDate, products: [...input.products] };
       const cacheKey = JSON.stringify(request);
       const now = clock();

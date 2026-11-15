@@ -109,12 +109,12 @@ export function createBridgeServer(client, requestContext = { era: 'modern' }) {
       sku: c.sku, name: c.name, family: c.family, provenance: c.provenance, requiresTradeCoreValidation: true })) ?? [] });
   });
   register('lookup_valio_mock', z.object({
-    products: z.array(z.string().min(1).max(200)).min(1).max(20)
+    products: z.array(z.string().regex(/^[0-9]{1,12}$/)).min(1).max(20)
       .refine(values => new Set(values).size === values.length, 'Product IDs must be distinct.'),
     requestedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value =>
       Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value, 'Use a valid ISO date.'),
   }).strict(),
-  'Read only the requested sponsor MOCK product/date observations through the configured local server. Units, prices and sentinel stock remain unqualified source facts; no order authority or fixture promotion. Never accepts credentials, customer or URL.',
+  'Read only the requested sponsor MOCK product/date observations through the configured local server. Units, prices and sentinel stock remain unqualified source facts; no order authority or fixture promotion. Accepts numeric catalog product IDs only (1–12 digits); never submit personal identifiers, credentials, customer or URL.',
   { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true }, async input => {
     const observed = await client.lookupValioMock(input);
     if (observed.mode !== 'SPONSOR_MOCK_READ_ONLY' || observed.requiresTradeCoreValidation !== true ||
@@ -197,7 +197,7 @@ export function createBridgeServer(client, requestContext = { era: 'modern' }) {
         { proposalDigest: context.pay.proposal.digest });
       const decision = await confirm(ctx, challenge, key);
       if (decision && typeof decision === 'object') return decision;
-      if (decision !== 'approve') return result({ ...compact(await client.status(runId)), paymentApproval: 'NOT_GRANTED' });
+      if (decision !== 'approve') return result({ ...compact(await client.status(runId)), paymentApproval: 'NOT_GRANTED', nextActions: ['A rejected command key stays rejected. Use a new commandKey only for a deliberate new payment decision.'] });
       return result(compact(await client.settle(runId, key, context.binding, context.pay.proposal.digest)));
     });
   return server;

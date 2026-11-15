@@ -267,7 +267,7 @@ openapi.paths['/api/quotes/{id}/proof']={parameters:[parameter('id')],get:operat
 successSchema('/api/quotes/{id}/proof','get',object({proof:{oneOf:[ref('TradeProof'),{type:'null'}]},freshness:object({valid:{type:'boolean'},code:{type:['string','null']}})}));
 openapi.paths['/api/integrations/status']={get:operation('Inspect configuration only; this makes no provider call and does not attest authentication')};
 openapi.paths['/api/suppliers/valio-mock/observe']={post:operation('Read narrowed sponsor mock price/availability facts; never grants ordering authority',object({
-  products:{type:'array',minItems:1,maxItems:20,uniqueItems:true,items:{type:'string',minLength:1,maxLength:200}},
+  products:{type:'array',minItems:1,maxItems:20,uniqueItems:true,items:{type:'string',pattern:'^[0-9]{1,12}$',description:'Narrow local adapter accepts numeric catalog product IDs only; never submit personal identifiers.'}},
   requestedDate:{type:'string',format:'date'},
 }),'200',true)};
 successSchema('/api/suppliers/valio-mock/observe','post',{type:'object',required:['mode','requiresTradeCoreValidation','provenance'],properties:{

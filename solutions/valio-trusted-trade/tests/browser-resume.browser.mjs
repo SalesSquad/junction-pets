@@ -101,9 +101,18 @@ try {
   assert.equal(missionEvents.filter(e=>e.event==='DEMO_PAYMENT_REVERSED').length,1);
 
   await page.goto(base+'/');
-  await enabled('find'); await page.selectOption('#budget','140000'); await click('find');
+  await enabled('find'); await page.selectOption('#need-mode','typed'); await page.selectOption('#budget','140000'); await click('find');
   await enabled('approve-exception');
-  const classicQuote = await page.locator('#quote-id').textContent();
+  let classicQuote = await page.locator('#quote-id').textContent();
+  await page.evaluate(() => { const field=document.getElementById('request-text');field.value='PRIVATE_INPUT_DO_NOT_PERSIST';field.dispatchEvent(new Event('input',{bubbles:true})); });
+  // Refresh the typed quote after the edit; ignored free text must never enter either cached form.
+  await click('find'); await enabled('approve-exception');
+  const cachedClassic = await page.evaluate(() => new Promise((resolve,reject) => {
+    const opened=indexedDB.open('trusted-trade-local-demo-v1',1);opened.onerror=()=>reject(opened.error);
+    opened.onsuccess=()=>{const db=opened.result;const tx=db.transaction('sessions');const get=tx.objectStore('sessions').get('classic');get.onsuccess=()=>resolve(JSON.stringify(get.result));tx.oncomplete=()=>db.close();};
+  }));
+  assert.equal(cachedClassic.includes('PRIVATE_INPUT_DO_NOT_PERSIST'),false);
+  classicQuote = await page.locator('#quote-id').textContent();
   const beforeClassicReload = {...counts};
   await page.reload(); await enabled('approve-exception');
   assert.equal(await page.locator('#quote-id').textContent(),classicQuote);
@@ -116,6 +125,12 @@ try {
   assert.equal(await page.locator('#policy-explanation').textContent(),classicReceipt);
   assert.deepEqual(counts,afterClassicOrder);
   await click('cancel'); await text('policy-title','cancelled');
+  await page.selectOption('#need-mode','legacy');
+  await click('find'); await enabled('approve-exception');
+  const beforeTextReload={...counts};
+  await page.reload(); await enabled('find');
+  assert.equal(await page.locator('#approve-exception').isDisabled(),true,'uncached free-text intent requires a fresh offer before consent');
+  assert.deepEqual(counts,beforeTextReload);
 
   await stop(); await start('reset.sqlite');
   const beforeResetReload = {...counts};

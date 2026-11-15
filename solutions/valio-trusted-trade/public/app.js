@@ -22,8 +22,10 @@ const sessionReady = restoredBearer(recoveryCache, DEMO_BUYER).then(({ token, sa
 const persistBrowser = () => recoveryCache.save({
   token: sessionToken, quoteId: state.quote?.id ?? null, snapshotId: state.quote?.snapshotId ?? null,
   review: state.review, orderId: state.order?.id ?? null, idempotencyKey: state.idempotencyKey,
-  dirty: state.dirty, stale: state.stale, quotedForm: state.quotedForm,
-  form: Object.fromEntries(['need-mode','family','quantity','request-text','budget'].map(id => [id,elements[id].value])),
+  dirty: state.dirty, stale: state.stale,
+  // Free text is deliberately absent from both cached form copies.
+  quotedForm: state.quotedForm ? Object.fromEntries(Object.entries(state.quotedForm).filter(([id]) => id !== 'request-text')) : null,
+  form: Object.fromEntries(['need-mode','family','quantity','budget'].map(id => [id,elements[id].value])),
 });
 const api = async (path, payload) => {
   await sessionReady;
@@ -317,9 +319,9 @@ async function bootClassic() {
         if (order.quoteId !== quote.id || order.snapshotId !== quote.snapshotId || order.buyerId !== DEMO_BUYER) throw Error('Stored receipt does not match current server terms.');
         state.order = order;
       }
-      for (const [id,value] of Object.entries(savedSession.form ?? {})) if (elements[id] && typeof value === 'string') elements[id].value = value;
-      state.quotedForm = savedSession.quotedForm ?? null;
-      state.dirty ||= !state.quotedForm || Object.keys(state.quotedForm).some(id => elements[id]?.value !== state.quotedForm[id]) ||
+      for (const [id,value] of Object.entries(savedSession.form ?? {})) if (['need-mode','family','quantity','budget'].includes(id) && typeof value === 'string') elements[id].value = value;
+      state.quotedForm = savedSession.quotedForm ? Object.fromEntries(Object.entries(savedSession.quotedForm).filter(([id]) => id !== 'request-text')) : null;
+      state.dirty ||= elements['need-mode'].value !== 'typed' || !state.quotedForm || Object.keys(state.quotedForm).some(id => elements[id]?.value !== state.quotedForm[id]) ||
         Number(elements.budget.value) !== quote.budgetCents || (elements['need-mode'].value === 'typed' &&
           (elements.family.value !== quote.requested.family || Number(elements.quantity.value) !== quote.requested.quantityLitres));
       elements['request-text'].disabled = elements['need-mode'].value === 'typed';
@@ -333,7 +335,7 @@ async function bootClassic() {
   } catch (error) {
     // Preserve the original cache on network failures; never autoapprove/recommit it.
     state.stale = true; state.recoveryBlocked = true;
-    showAlert('Recovery paused: ' + error.message + ' No purchasing action was taken.');
+    showAlert('Recovery paused: ' + error.message + ' Reload when the original local backend is available; no purchasing action was taken.');
   } finally { state.busy = state.recoveryBlocked; render(); }
 }
 bootClassic();
