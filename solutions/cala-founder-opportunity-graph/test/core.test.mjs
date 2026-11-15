@@ -42,11 +42,12 @@ test('canonical manifest is independently reproducible and any covered source ed
  const { pathToFileURL }=await import('node:url');
  const { createHash }=await import('node:crypto');
  const { PRODUCT_SOURCE_FILES, verifySourceDigest }=await import('../build.mjs');
- const expected=['cala-contract.d.ts','cala-contract.mjs','core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css','server.mjs'];
+ const expected=['cala-contract.d.ts','cala-contract.mjs','core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css','server.mjs','workspace/restore.mjs'];
  assert.deepEqual(PRODUCT_SOURCE_FILES,expected);
  const dir=await mkdtemp(`${tmpdir()}/cala-provenance-`), root=pathToFileURL(`${dir}/`);
  try {
   await mkdir(new URL('public/',root));
+  await mkdir(new URL('workspace/',root));
   let manifest='';
   for(const path of expected){const bytes=await readFile(new URL(`../${path}`,import.meta.url));await writeFile(new URL(path,root),bytes);manifest+=path+'\0'+createHash('sha256').update(bytes).digest('hex')+'\n';}
   assert.equal(await verifySourceDigest(root),createHash('sha256').update(manifest,'utf8').digest('hex'));
