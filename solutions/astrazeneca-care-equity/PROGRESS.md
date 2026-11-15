@@ -1,15 +1,16 @@
 # Progress
 
-**Stage:** public-aggregate research demo; evidence/evaluation update under review.
-**Owner:** `astrazeneca`. **Merged baseline:** SalesSquad/junction-pets#113.
-**Integrated in:** `codex/j26-astra-equity-m2-20261115` (SalesSquad/junction-pets#275, which also carries #246). Last updated 15 November 2026.
+**Stage:** public-aggregate research demo; evidence/evaluation update under review. Last updated 15 November 2026.
+**Merged in:** SalesSquad/junction-pets #275 and #282.
+
+## 15 November 2026, 03:00-05:30 UTC
+
+- Live Nemotron button: "Ask Nemotron live" under Note 4 (`POST /api/scribe/second`), 2.7 s on note 4.
+- Decision-first deck (`submission/deck/SAMA-deck.pdf`).
+- Local-pairs comparison: Gemma 1B + 270M pre-fills 92 of 308 stress notes, 6 wrong (post hoc).
+- Documentation pass: README quick start, wording of limits, numbers re-checked by `submission/check_numbers.py`.
 
 ## Current follow-up — evidence and evaluation (15 November 2026)
-
-Work ID `junction.astrazeneca.evidence-evaluation-20261115`. Base
-`6d2efadb22678c259dfaf6817b43c883974a9eab`; branch
-`codex/sama-evidence-evaluation-20261115`. This is a task-owned draft change;
-Portfolio PR Recovery remains the integrator.
 
 - Added an actionable county decision view and matching export with named proposed
   owner, 30/90-day plan, denominator, evidence, unknowns and human-review status.

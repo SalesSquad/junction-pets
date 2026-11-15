@@ -24,9 +24,10 @@ Numbers to quote exactly (the PDF deck `submission/deck/SAMA-deck.pdf` matches t
   "Nemotron sent 25 to a person".
 - **Two-reader rule:** the rule chosen on validation pairs Nemotron with Gemma 3 1B: **684 of 700**
   test notes pre-filled, 4 wrong (post hoc), and on the frozen stress set **220 of 308**, 3 wrong, 88
-  need editing. The PDF deck (slide 9, A8) and the video use these. `PATH_TO_SCALE.md` row 4a still
-  quotes 651 of 700 for the earlier 270M pairing; do not use it. (651 of 700 is also the code-rule A'
-  exact-match figure on the test set, a different measure.)
+  need editing. The PDF deck (slide 9, A8) and the video use these. `PATH_TO_SCALE.md` row 4a now leads with these
+  figures and mentions 651 of 700 only as the earlier pairing with the 270M product adapter. (651 of
+  700 also appears as the exact-match count of the 270M reader plus the code resolver on the test
+  set, a different measure from "pre-filled".)
 - **Fake-gap simulation:** the page and the PDF deck slide 6 both read `web/data/app.json`
   `insight.falseFlag`: **100.0% → 0.3%**. Only the `DECK.md` draft still says 0.001 (an older
   simulation, `runs/diagnose/interval-impact-v1.json`); quote 0.3%.
@@ -52,8 +53,8 @@ Source: `README.md` ("What it does not claim"); `data/roadmap/mapping-v1.json` (
 ### 2. Why synthetic data?
 *Asked by: THL statistician, AstraZeneca medical lead.*
 
-Real patient notes cannot legally leave a hospital without a permit, and we have not applied for
-one. Synthetic data let us publish every note, label and score,
+Secondary use of real patient notes needs a permit (in Finland, from Findata, the route we would
+use), and we have not applied for one. Synthetic data let us publish every note, label and score,
 freeze a test set before reading it, and let anyone rerun every check. The price is that we mostly
 test our own writers' phrasing; the frozen stress set was built to expose exactly that, and it did
 (question 3). Person-level pathway dates are not public either (THL's person-level waiting-list feed
@@ -125,8 +126,9 @@ The reading has to happen where the notes are, on ordinary county hardware with 
 endpoint, median 4.8 s per note. Gemma does the part code cannot: it finds each pathway event in free
 Finnish text, names its type and copies the date phrase; code then turns "kolme viikkoa sitten" into a
 calendar date. When Gemma did the subtraction itself it got 2 of 367 relative-date test notes right;
-with code doing it, 651 of 700 test notes (post hoc). The stress set shows the limit of 270M on unseen
-phrasings, so the chosen two-reader rule uses the 1B model, which got 95 of 143.
+with code doing it, 651 of 700 test notes exactly right with the 270M adapter (post hoc). The stress set shows the limit of 270M on unseen
+phrasings, so the chosen two-reader rule uses the larger Gemma 3 1B reader, which got 95 of 143. The laptop demo
+still runs the 270M model; the 85-wrong figure in Q5 is the 1B model alone, not the 270M.
 
 Source: `data/scribe/demo/http-timing.json`; `runs/diagnose/diagnose-v1.json` (`by_has_relative`);
 `data/scribe/v4/resolver/reproduce-v1.json`; `data/scribe/v4/eval/results-v1.json`.

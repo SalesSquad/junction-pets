@@ -2,8 +2,8 @@
 
 One slide, one table behind it. Every box is labelled **run** (executed in this project, with the
 file that shows it) or **design, not deployed** (a plan, with the document it rests on). Hosted
-endpoints receive SYNTHETIC text only; real patient notes never leave a county-controlled
-environment. A person confirms every extracted event and every worklist item. Thresholds are
+endpoints receive SYNTHETIC text only. The design is that real patient notes stay inside a
+county-controlled environment; this is designed so, and not built yet. A person confirms every extracted event and every worklist item. Thresholds are
 placeholders.
 
 

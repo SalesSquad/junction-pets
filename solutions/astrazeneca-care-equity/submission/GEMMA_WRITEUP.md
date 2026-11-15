@@ -10,6 +10,22 @@ confirms every extracted event. Every number comes from the file named next to i
 Stress-set figures come from `data/scribe/v4/eval/results-v1.json`: 308 SYNTHETIC notes frozen and
 preregistered before any system read them, each system scored once.
 
+## Results at a glance (SYNTHETIC notes)
+
+| Reader | 308 frozen stress notes, exact | 143 with new phrasings | Runs where |
+| --- | --- | --- | --- |
+| Gemma 3 270M, phrase copied, code counts (B) | 85 | 11 | laptop CPU (the demo) |
+| Gemma 3 1B, phrase copied, code counts (C) | 223 | 95 | laptop (MLX) |
+| Nemotron 3.5 Super VL (wrote these notes, so optimistic) | 280 | 120 | hosted endpoint |
+
+- Pre-filled only when Gemma 1B and Nemotron agree: 220 of 308 stress notes, 3 wrong; Gemma 1B
+  alone would pre-fill all 308 with 85 wrong (`results-v1.json`, `cascade`).
+- Two local Gemmas agreeing (1B and 270M, post hoc): 92 of 308 pre-filled, 6 wrong
+  (`data/scribe/v4/eval/local-pairs-posthoc-v1.json`). The size step from 270M to 1B is what made
+  Gemma usable on new phrasings; the second reader is what keeps its mistakes away from the record.
+- The preregistered goal for the 270M phrase model was not met (11 against 0 of 143 for the code
+  rule; it needed 10 points more). We report it as it is.
+
 ## The problem Gemma solves
 
 Finland's cancer strategy measures "treatment within target times", but no county can show it: the
