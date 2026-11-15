@@ -1,4 +1,12 @@
-# Trusted Trade · external buyer agent ↔ synthetic wholesaler
+# Trusted Trade · autonomous procurement with proof-carrying Kättely
+
+## Frontier v3 — Mission Control (14 November 2026)
+
+The new **[Frontier runbook](./FRONTIER_RUNBOOK.md)** is the main competition demo guide. Run `npm start` and open **http://127.0.0.1:4177/** for the new responsive procurement command center; the preserved previous flow is at **/classic**. All actors, catalog items, prices, risk/emission figures, approvals, signatures' identities and simulated orders are synthetic.
+
+The new independent buyer is `npm run demo:frontier -- shock --decision=approve` (or `happy`, `replay`, `refusal`, `reject`). It compares a two-family portfolio, applies real policy/stock constraints, proves the supplier offer and the browser/agent-held buyer mandate with **independent Ed25519 private keys**, recovers after fictional stock disruption, and independently verifies a SHA-256 hash-linked in-memory audit. This is not production Kättely, AP2, Valio Aimo API integration or identity authentication. **40 targeted tests** passed on the Mac, and the new desktop + mobile Chromium workflow was exercised end-to-end. The legacy single-family agent remains available below.
+
+---
 
 **Independent Junction 2026 prototype. Not a Valio Aimo product or endorsement.** Every supplier, buyer, catalog fact, price, stock count, approval and order is **SYNTHETIC / NONCOMMERCIAL**. Localhost HTTP is real; supplier commerce is simulated. Zero dependencies, credentials, payments or external provider writes.
 

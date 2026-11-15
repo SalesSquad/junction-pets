@@ -8,6 +8,7 @@
     "start": "node src/server.mjs",
     "test": "node --test tests/*.test.mjs",
     "demo:agent": "node src/buyer-agent.mjs",
+    "demo:frontier": "node src/frontier-agent.mjs",
     "contract:export": "node --input-type=module -e \"import {writeFile} from 'node:fs/promises'; import {openapi} from './src/contract.mjs'; await writeFile('openapi.yaml', JSON.stringify(openapi,null,2)+'\\n');\""
   },
   "engines": {
