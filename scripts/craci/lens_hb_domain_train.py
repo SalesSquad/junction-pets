@@ -89,18 +89,65 @@ def read_manifest(data_root:Path):
     if (len({r.get("source_png_sha256") for r in rows})!=n_expected or
         any(r.get("image_dimensions")!=[320,240] for r in rows)):
         raise ValueError("Source-frame digest or pixel geometry mismatch")
+    import re
+    from lens_hb_detector_data import sample_ids
+    by_scene={}
+    source_hashes=set()
+    parent=data_root.resolve()
     for r in rows:
-        if r["split"] not in selected_plan["sceneSplits"] or r["scene_id"] not in selected_plan["sceneSplits"][r["split"]]:
-            raise ValueError("Source scene leakage")
-        if r["split"]=="sealed" and (
-            "boxes_xyxy" in r or "object_class_ids_audit_only" in r):
-            raise ValueError("Sealed scene annotation leaked into training")
-        if r["split"]!="sealed" and (
-            not r.get("boxes_xyxy") or len(r["boxes_xyxy"])!=len(r["object_class_ids_audit_only"])):
-            raise ValueError("Train/validation object boxes missing")
-        path=data_root/r["file"]
-        if path.is_symlink() or not path.is_file() or file_sha256(path)!=r["resized_sha256"]:
-            raise ValueError("Image bytes changed after public source preparation")
+        split=r.get("split")
+        scene=r.get("scene_id")
+        frame=r.get("frame_id")
+        if (split not in selected_plan["sceneSplits"] or
+            type(scene) is not int or scene not in selected_plan["sceneSplits"][split] or
+            type(frame) is not int or not 0<=frame<340):
+            raise ValueError("Source scene/frame leakage")
+        count=selected_plan["framesPerScene"][split]
+        if frame not in sample_ids(340,count):
+            raise ValueError("Source sampled frame IDs were substituted")
+        by_scene.setdefault((split,scene),set())
+        if frame in by_scene[(split,scene)]:
+            raise ValueError("Duplicate source frame inside physical video")
+        by_scene[(split,scene)].add(frame)
+        filename=f"{split}_s{scene:02d}_f{frame:06d}.png"
+        if r.get("file")!=filename:
+            raise ValueError("Unsafe, substituted or path-traversing public image filename")
+        source_sha=r.get("source_png_sha256")
+        derived_sha=r.get("resized_sha256")
+        if (not isinstance(source_sha,str) or not re.fullmatch(r"[a-f0-9]{64}",source_sha) or
+            not isinstance(derived_sha,str) or not re.fullmatch(r"[a-f0-9]{64}",derived_sha) or
+            source_sha in source_hashes):
+            raise ValueError("Missing, malformed or duplicated real-frame SHA256")
+        source_hashes.add(source_sha)
+        if (r.get("image_dimensions")!=[320,240] or
+            not isinstance(r.get("source_dimensions"),list) or
+            len(r["source_dimensions"])!=2 or
+            any(type(v) is not int or not 200<=v<=3000 for v in r["source_dimensions"])):
+            raise ValueError("Invalid physical camera geometry")
+        if split=="sealed":
+            if "boxes_xyxy" in r or "object_class_ids_audit_only" in r:
+                raise ValueError("Sealed scene annotation leaked into training")
+        else:
+            boxes=r.get("boxes_xyxy")
+            labels=r.get("object_class_ids_audit_only")
+            if (not isinstance(boxes,list) or not isinstance(labels,list) or
+                not 1<=len(boxes)==len(labels)<=60):
+                raise ValueError("Train/validation object boxes missing")
+            for box,label in zip(boxes,labels):
+                if (not isinstance(box,list) or len(box)!=4 or
+                    any(type(x) is not int for x in box) or
+                    not 0<=box[0]<box[2]<=320 or not 0<=box[1]<box[3]<=240 or
+                    type(label) is not int or not 1<=label<=100):
+                    raise ValueError("Impossible public GT bbox/class metadata")
+        path=data_root/filename
+        if (path.is_symlink() or not path.is_file() or
+            path.resolve().parent!=parent or
+            file_sha256(path)!=derived_sha):
+            raise ValueError("Image bytes changed or source file escapes public task root")
+    for (split,scene),ids in by_scene.items():
+        expected_ids=set(sample_ids(340,selected_plan["framesPerScene"][split]))
+        if ids!=expected_ids:
+            raise ValueError("One or more deterministic source frames missing")
     return record,file_sha256(manifest)
 
 def xyxy_to_xywh(box):
@@ -207,6 +254,13 @@ def predict_rows(model,entries,root,device,include_targets=True):
                 print("CAL_FRAMES_INFERRED",i+1,flush=True)
     return records
 
+def require_full_diverse_pass(record:dict,max_steps:int,epochs:int)->None:
+    if record.get("plan")=="diverse":
+        needed=record["sourceFrameCounts"]["train"]
+        if max_steps<needed or epochs<1:
+            raise RuntimeError("Diverse training must cover every source frame in one full optimizer epoch")
+
+
 def train(opts):
     import torch
     from torchvision import __version__ as torchvision_version
@@ -228,6 +282,7 @@ def train(opts):
         raise RuntimeError("Train/cal split count changed")
     if opts.max_steps<5 or opts.max_steps>400:
         raise RuntimeError("Invalid bounded training steps")
+    require_full_diverse_pass(record,opts.max_steps,opts.epochs)
     warm_sha=None
     if record.get("plan")=="diverse":
         if opts.warm_start is None or not opts.warm_start.is_file():
@@ -255,10 +310,12 @@ def train(opts):
     model.train()
     losses=[]
     count=0
+    source_frames_seen=set()
     for epoch in range(opts.epochs):
         order=list(train_samples)
         random.Random(SEED+epoch).shuffle(order)
         for sample in order:
+            source_frames_seen.add(sample["file"])
             image=image_tensor(root/sample["file"],device)
             target=sample_target(sample,device)
             opt.zero_grad(set_to_none=True)
@@ -280,6 +337,9 @@ def train(opts):
             if count>=opts.max_steps:break
         if count>=opts.max_steps:break
     if count<5:raise RuntimeError("Not actually fitted")
+    if (record.get("plan")=="diverse" and
+        len(source_frames_seen)!=len(train_samples)):
+        raise RuntimeError("Diverse model did not actually train on all physical frames")
     # Freeze model BEFORE any novel sealed-scene evaluation. Only the
     # pre-registered CAL scene GT determines the detector score threshold.
     results=predict_rows(model,calibration,root,device)
@@ -315,6 +375,7 @@ def train(opts):
       "torchVersion":torch.__version__,"torchvisionVersion":torchvision_version,
       "device":opts.device,
       "trainingFrames":len(train_samples),"calibrationFrames":len(calibration),
+      "actualDistinctTrainingFramesSeen":len(source_frames_seen),
       "trainingOptimizerSteps":count,"epochsAllocated":opts.epochs,
       "maxTrainSteps":opts.max_steps,"seed":SEED,
       "initialTrainingLoss":round(losses[0],7),

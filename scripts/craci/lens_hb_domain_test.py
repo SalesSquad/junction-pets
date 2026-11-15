@@ -15,7 +15,7 @@ def fake_manifest(root):
     scenes=[("train",5,40),("train",9,40),("calibration",10,30),("sealed",12,30)]
     rows=[]
     for split,scene,count in scenes:
-        for idx in range(count):
+        for idx in source.sample_ids(340,count):
             file=f"{split}_s{scene:02d}_f{idx:06}.png"
             (root/file).write_bytes(b"PUBLIC_FAKE_FOR_UNIT_TEST")
             row={

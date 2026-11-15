@@ -69,6 +69,17 @@ class SealedV2(unittest.TestCase):
         self.assertEqual(result["recallIoU50_95pct"],[.5,.5])
         self.assertTrue(result["notMultiSceneFieldCertification"])
 
+    def test_paired_exact_same_scene_frame_only(self):
+        first=[dict(frame=i,matches=2,objects=4,proposals=4) for i in range(24)]
+        prior=[dict(frame=i,matches=1,objects=4,proposals=4) for i in range(24)]
+        report=v2.paired_frame_cluster_intervals(first,prior,60)
+        self.assertEqual(report["pairedRecallDifference95pct"],[.25,.25])
+        self.assertEqual(report["pairedPrecisionDifference95pct"],[.25,.25])
+        self.assertTrue(report["onlyOnePhysicalSceneNotFieldCertification"])
+        prior[0]["frame"]=99
+        with self.assertRaisesRegex(RuntimeError,"Mismatched"):
+            v2.paired_frame_cluster_intervals(first,prior,60)
+
 
 class PlanV2(unittest.TestCase):
     def _dataset(self,folder):
@@ -76,7 +87,7 @@ class PlanV2(unittest.TestCase):
         plan=preparer.PLANS["diverse"]
         for split,scenes in plan["splits"].items():
             for scene in scenes:
-                for i in range(plan["frames"][split]):
+                for i in preparer.sample_ids(340,plan["frames"][split]):
                     filename=f"{split}_s{scene:02}_f{i:06}.png"
                     (folder/filename).write_bytes(b"TEST_PUBLIC_RGB")
                     row=dict(file=filename,split=split,scene_id=scene,
@@ -132,6 +143,38 @@ class PlanV2(unittest.TestCase):
             with patch.object(trainer,"file_sha256",return_value="a"*64):
                 with self.assertRaisesRegex(ValueError,"Public archive"):
                     trainer.read_manifest(folder)
+
+
+    def test_source_frame_members_cannot_be_replaced_or_escape_root(self):
+        for mutate,pattern in (
+            (lambda rec:rec["samples"][0].update(
+                file="../other-family-photo.png"),"Unsafe, substituted"),
+            (lambda rec:rec["samples"][0].update(
+                frame_id=0),"Source sampled frame IDs"),
+            (lambda rec:rec["samples"][0].update(
+                boxes_xyxy=[[0,0,900,900]]),"Impossible public GT"),
+        ):
+            with tempfile.TemporaryDirectory() as scratch:
+                root=Path(scratch)
+                record=self._dataset(root)
+                mutate(record)
+                (root/"manifest.json").write_text(json.dumps(record))
+                with patch.object(trainer,"file_sha256",return_value="a"*64):
+                    with self.assertRaisesRegex(ValueError,pattern):
+                        trainer.read_manifest(root)
+
+    def test_sealed_gt_reveal_is_atomic_one_use_per_dataset(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            root=Path(scratch)
+            guard=v2.reserve_single_source_reveal(root,"a"*64,"b"*64,"c"*64,
+                                                "d"*64,"e"*64)
+            frozen=json.loads(guard.read_text())
+            self.assertEqual(frozen["frozenPredictionsSHA256"],"c"*64)
+            self.assertEqual(frozen["priorBaselinePredictionsSHA256"],"e"*64)
+            self.assertFalse(frozen["providerSigned"])
+            with self.assertRaises(FileExistsError):
+                v2.reserve_single_source_reveal(root,"a"*64,"b"*64,"c"*64,
+                                                "d"*64,"f"*64)
 
 
 if __name__=="__main__":
