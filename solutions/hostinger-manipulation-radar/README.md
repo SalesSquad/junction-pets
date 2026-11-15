@@ -1,12 +1,12 @@
 ## 15 November 2026 continuation — current source
 
-The owner explicitly requested coordination-quality improvements, PR193 traffic integration and a live Hostinger demo. This source now combines the three workspaces with a bounded optional Hostinger AI Router backend and Docker/TLS deployment configuration. Live hosting and AI remain unverified until the team coupon and provider activation are completed.
+The owner explicitly requested coordination-quality improvements, PR193 traffic integration and a live Hostinger demo. This source now combines four workspaces with a bounded optional Hostinger AI Router backend and Docker/TLS deployment configuration. Live hosting and AI remain unverified until the team coupon and provider activation are completed.
 
-V2 fixes weak transitive grouping, content-query URL equivalence and metadata-driven decisions while explicitly abstaining on intent. Original v1 detector bytes, labels and historical 512-case metrics remain unchanged. New v2 examples are **mechanistic contract validation, not a measured improvement in field precision/recall**. The traffic workflow remains entirely client-side.
+V2 fixes weak transitive grouping, content-query URL equivalence and metadata-driven decisions while explicitly abstaining on intent. Original v1 detector bytes, labels and historical 512-case metrics remain unchanged. New v2 examples are **mechanistic contract validation, not a measured improvement in field precision/recall**. The traffic workflow remains entirely client-side. A separate experimental graph screen at `/graph/index.html` uses the real released LEN corpus and reports held-out label agreement, precision, recall, false alarms and uncertainty. Released filename labels are provisional: the archive has 104 graphs while the paper describes 100, and its separate original label index is absent. See [the frozen research protocol and reproduction steps](research/README.md); aggregate results and model coefficients ship with the client, with no raw dataset records. This does not qualify v2 post coordination or production intent detection.
 
 Executed on the authorized MBP, Node v26.13.0: **56/56 solution-local tests passed, zero skips**, including local HTTP, privacy/alias normalization, rolling-window boundaries, exact-quote validation, origin/consent/size rejection and persistent quota admission across service instances. These include the original frozen v1 assertions. No real Hostinger or model request was substituted with a mock pass. See [HOSTINGER_DEPLOYMENT.md](HOSTINGER_DEPLOYMENT.md) for exact activation and operating steps.
 
-# Signal Desk — Hostinger Manipulation Radar
+# Historical v1 Radar — authored synthetic investigation
 
 An offline analyst dashboard for **possible coordinated campaigns**, with inspectable evidence, explicit counterevidence and an honest error ledger. **SYNTHETIC / OFFLINE_DETERMINISTIC. Maturity 2/6: functional local prototype, not field or live-host qualified.** No real AI or provider calls. Independent work, not Hostinger endorsement.
 
