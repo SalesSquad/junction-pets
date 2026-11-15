@@ -27,9 +27,11 @@ def model_config(a):
     return {k:getattr(a,k) for k in ("d_model","layers","heads","window","dropout")}
 
 def fit(w,y,meta,vw,vy,vm,cats,targets,a,epochs=None):
+    if not len(w): raise ValueError('No training windows in the prespecified calendar split')
     # Statistics use only the training input windows, never validation/test observations.
     count=np.isfinite(w).sum((0,1)); mean=np.nansum(w,(0,1))/np.maximum(count,1); std=np.sqrt(np.nansum((w-mean)**2,(0,1))/np.maximum(count,1)); std=np.where(std>1e-6,std,1)
     train,_=tensors(w,y,meta,cats,targets,mean,std,a.device); valid,_=tensors(vw,vy,vm,cats,targets,mean,std,a.device)
+    if not bool(torch.isfinite(train[3]).any()): raise ValueError('No effective supervised training targets in the prespecified split')
     models=[]; histories=[]; total=epochs or a.epochs
     for s in range(a.seeds):
         seed(s); model=Forecaster(w.shape[-1],len(targets),**model_config(a)).to(a.device); opt=torch.optim.AdamW(model.parameters(),lr=a.lr); schedule=torch.optim.lr_scheduler.CosineAnnealingLR(opt,total); best=float('inf'); state=None; patience=0; history=[]
@@ -57,8 +59,8 @@ def predict(bundle,w,meta,cats,targets,device):
     return np.mean(out,0)*bundle['std'][targets][None,:,None,None]+last[:,:,None,None]
 def main():
     a=args(); torch.set_num_threads(2); p,x,years,targets,cats=load(a.panel)
-    w,y,m=windows(x,years,targets,[t for t in years if t<=2020],window=a.window); y[np.array([t+2>2021 for _,t in m]),:,1]=np.nan
-    # Training labels end in 2021; validation origin 2021 labels begin in 2022.
-    vw,vy,vm=windows(x,years,targets,[2021],window=a.window); bundle=fit(w,y,m,vw,vy,vm,cats,targets,a)
+    w,y,m=split_windows(x,years,targets,'train',window=a.window)
+    vw,vy,vm=split_windows(x,years,targets,'validation',window=a.window); bundle=fit(w,y,m,vw,vy,vm,cats,targets,a)
+    bundle.update(split=split_manifest(years),panelSha256=__import__('hashlib').sha256(Path(a.panel).read_bytes()).hexdigest(),trainingSupport=support_by_target(p,targets,training_support(w,y,targets)))
     Path(a.artifacts).mkdir(parents=True,exist_ok=True); torch.save(bundle,Path(a.artifacts)/'backtest.pt')
 if __name__=='__main__': main()

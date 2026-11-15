@@ -16,6 +16,33 @@ SAMA answers the three questions of the brief on real public data, with a source
 It is decision support for planners. It makes no diagnosis, no patient-level inference and no
 causal claim about a county.
 
+## Decision and evidence update (15 November 2026)
+
+Start at **One county. One next step.** Select a county to see its measured mortality
+result, a separately labelled pathway question, and a proposed 30-day investigation
+with an accountable owner, denominator, missing-data rule and 90-day review. The
+investigation order is transparent; it is not an estimate of which action saves most
+lives. General healthcare access remains a proxy for cancer pathways. County and
+national observations must cover the same actual years before a signal enters this
+new decision view. The existing scenario optimiser remains a separate planning tool.
+
+The downloadable/printable brief includes source scope and limitations. National
+lung/trachea registry context is **7,097 of 14,873 cases (47.7%)** without recorded
+extent information in the 2019–2023 report; it is not assigned to counties, other
+cancers or model parameters. Missing extent/MDT records do not establish absent care.
+See [registry evidence](data/evidence/registry-context-v1.json) for the source tables.
+Goal 3.1/3.2 links the proposed measurement work to timely, comparable pathways.
+Precision diagnostics is a clearly unimplemented Goal 4.3 direction; BioNeMo has not
+been run on this product and no molecular or clinical benefit is claimed.
+
+**Historical forecasts are withheld from the demo.** The saved run reused 2023
+validation targets in test evaluation. Colorectal screening also had no validation
+winner but was exported as persistence with collapsed intervals. The original
+artifacts are preserved byte-for-byte. New code enforces disjoint target years,
+per-horizon training/validation/test evidence, and abstention for missing evidence.
+A corrected public-data evaluation has **not** yet been executed. See
+[the evaluation protocol](ml/README.md) and [historical audit](data/ml/forecast-v1-audit.json).
+
 ## What the data shows (snapshot of 14 November 2026)
 
 | Finding | Value | Source |
@@ -38,7 +65,7 @@ data, which is why the first recommended action is to record four pathway timest
 ## Run it
 
 ```bash
-npm test            # 50 tests: statistics, real-data analysis, optimiser, evidence binding, guardrails
+npm test            # Product checks: statistics, real-data analysis, optimiser, evidence binding, guardrails
 npm run data        # refetch the public snapshot (THL Sotkanet, Statistics Finland, NORDCAN)
 npm run build       # analysis + recommendations -> web/data/app.json
 npm start           # http://127.0.0.1:4179
@@ -68,11 +95,13 @@ server environment; without it the interface reports "not configured" and nothin
 - `src/narratives.mjs`: plain-language Finnish summaries written by Claude Haiku. A sentence is
   shown only if every number in it occurs in its source claims and the TypeSafe check passes;
   failed sentences are dropped, never repaired. Of 139 generated sentences 91 are shown.
-- `ml/`: an early-warning forecaster for the pathway indicators, trained on the THL municipal panel
-  with a rolling-origin backtest against persistence, drift and ridge baselines. A GPU sweep of 14
-  transformer configurations (3 seeds each, with and without 150 extra covariates) found none that
-  beats the best baseline by more than the seed-to-seed spread, so the product ships the validated
-  winner per indicator: a baseline for 6 of 8. For yearly indicators the limit is the data.
+- `src/decisions.mjs`: source-scoped county decision briefs; registry context does not feed the
+  optimiser. `src/forecast-integrity.mjs` admits only structurally supported forecast horizons.
+- `ml/`: research forecasting against persistence, drift and ridge. The historical 14-configuration
+  GPU sweep did not demonstrate an improvement beyond seed spread. Its overlap and no-winner
+  export defects prevent qualification; the demo withholds its forecasts. Historical selection
+  was two transformers, five baselines and one indicator with no winner. Corrected code alone
+  does not establish new forecast performance.
 - `web/`: static demo with a self-only content security policy.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the model equations and limits, and

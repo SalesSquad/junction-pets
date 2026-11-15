@@ -18,8 +18,11 @@ def summarize(pred,y,mask):
     return dict(mae=float(np.mean(abs(q[:,2]-v))),pinball=float(pinball(q,v).mean()),cov90=float(np.mean((v>=q[:,0])&(v<=q[:,4]))),cov50=float(np.mean((v>=q[:,1])&(v<=q[:,3]))),n=int(len(v)))
 def main():
     a=args(); p,x,years,targets,cats=load(a.panel); bundle=torch.load(Path(a.artifacts)/'backtest.pt',weights_only=False,map_location='cpu')
-    w,y,m=windows(x,years,targets,[t for t in years if t<=2020],window=a.window); y[np.array([t+2>2021 for _,t in m]),:,1]=np.nan
-    vw,vy,vm=windows(x,years,targets,[2021],window=a.window); tw,ty,tm=windows(x,years,targets,[2022,2023],window=a.window); ridge=fit_ridge(w,y,targets)
+    validate_manifest(bundle.get('split'))
+    if bundle.get('panelSha256')!=__import__('hashlib').sha256(Path(a.panel).read_bytes()).hexdigest(): raise ValueError('Panel changed since training')
+    w,y,m=split_windows(x,years,targets,'train',window=a.window)
+    vw,vy,vm=split_windows(x,years,targets,'validation',window=a.window); tw,ty,tm=split_windows(x,years,targets,'test',window=a.window); ridge=fit_ridge(w,y,targets)
+    support=support_by_target(p,targets,training_support(w,y,targets))
     vp={'transformer':predict(bundle,vw,vm,cats,targets,a.device)}; tp={'transformer':predict(bundle,tw,tm,cats,targets,a.device)}; offsets={}
     for method in METHODS[1:]:
         v=baseline(vw,targets,method,ridge); t=baseline(tw,targets,method,ridge); off=np.zeros((len(targets),2,5))
@@ -41,7 +44,9 @@ def main():
             validation_horizons[method].append({'h'+str(h+1):summarize(adjusted[:,j,h],vy[:,j,h],vcommon[:,j,h]) for h in range(2)})
             validation[method].append(summarize(adjusted[:,j].reshape(-1,5),vy[:,j].reshape(-1),vcommon[:,j].reshape(-1)))
     for j,k in enumerate(targets):
-        key=p['indicators'][k]['key']; candidates={method:validation[method][j]['mae'] for method in METHODS}; available={k:v for k,v in candidates.items() if v is not None}; chosen=min(available,key=available.get) if available else 'persistence'
+        key=p['indicators'][k]['key']; candidates={method:validation[method][j]['mae'] for method in [*METHODS[1:],METHODS[0]]}
+        available={method:value for method,value in candidates.items() if value is not None and np.isfinite(value) and (method not in ('transformer','ridge') or all(support[key][h]>0 for h in ('h1','h2') if validation_horizons[method][j][h]['n']>0))}
+        chosen=min(available,key=available.get) if available else None
         item=dict(chosen=chosen,validationMAE=candidates)
         for group,category in [('county',1),('municipality',0)]:
             item[group]={}
@@ -54,6 +59,6 @@ def main():
                 for method in METHODS: item[group]['h'+str(h+1)][method]['cov90Raw']=summarize(raw[method][:,j,h],ty[:,j,h],mask)['cov90']
         item['validation']={method:validation_horizons[method][j] for method in METHODS}
         metrics[key]=item
-    save(Path(a.artifacts)/'metrics.json',dict(split=dict(trainOriginsThrough=2020,trainLabelsThrough=2021,validationOrigins=[2021],testOrigins=[2022,2023]),metrics=metrics,validation=validation,limits=['Validation origin 2021 horizon 2 and test origin 2022 horizon 1 share target year 2023; training never sees test labels.','Coverage is empirical, not a population guarantee.'],configuration=vars(a),executedEpochs=[len(v) for v in bundle['histories']],panelSha256=__import__('hashlib').sha256(Path(a.panel).read_bytes()).hexdigest()))
+    save(Path(a.artifacts)/'metrics.json',dict(split=split_manifest(years),trainingSupport=support,metrics=metrics,validation=validation,limits=['Training targets end in 2021; validation targets 2022–2023 and test targets 2024–2025 are disjoint. Missing test horizons remain unavailable.','Coverage is empirical, not a population guarantee.'],configuration=vars(a),executedEpochs=[len(v) for v in bundle['histories']],panelSha256=__import__('hashlib').sha256(Path(a.panel).read_bytes()).hexdigest()))
     torch.save(dict(ridge=ridge,offsets=offsets,widths=widths),Path(a.artifacts)/'calibration.pt')
 if __name__=='__main__': main()

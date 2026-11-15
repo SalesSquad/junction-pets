@@ -51,32 +51,30 @@ Unit ids: `HVA<code>` for counties, `KU<code>` for municipalities, `FI` for the 
 
 ## Backtest (ml/evaluate.py)
 
-Rolling origin, split by origin year so that no test target year is ever seen in training:
-train origins <= 2020, validation origin 2021, test origins 2022 and 2023 (targets 2023..2025).
-Baselines on exactly the same test cells: (a) persistence, (b) drift = last value + mean of the
-last 3 yearly changes, (c) unit-pooled ridge regression on the last 3 values.
-Baseline intervals: empirical quantiles of that baseline's validation errors per indicator and horizon.
-Report per indicator and horizon, for county-level cells and separately for municipality cells:
-MAE of the median, mean pinball loss, empirical coverage of the 90% and 50% intervals, n.
-Then apply split-conformal widening on validation residuals so that the nominal 90% interval
-has >= 90% validation coverage, and report test coverage after it.
-Selection rule (honesty): for each target indicator choose the method with the lowest
-validation MAE; the product uses that method. Write `ml/artifacts/metrics.json`.
+The prespecified `target-year-disjoint-v1` protocol uses training origins through
+2020 with labels capped at 2021, validation origin 2021 (targets 2022/2023), and test
+origin 2023 (targets 2024/2025). Derive and check target-year sets before execution.
+Calendar gaps stay missing. The original overlapping protocol is preserved only in
+historical artifacts and must not qualify a new result.
+
+Report common-cell MAE, pinball, coverage and n by horizon and evaluation population.
+Candidate selection uses validation only, with baseline-first ties. Model support
+requires effective training deltas/design rows, not just finite labels. Missing
+validation/test evidence remains n=0, not a persistence fallback or a zero-error win.
 
 ## Product output (ml/export_forecasts.py)
 
-Refit the chosen method on all origins and write `data/ml/forecast-v1.json`:
-```
-{ "schemaVersion":"care-equity-forecast-v1", "generatedAt":..., "trainedOn":{"device":..., "seeds":..., "epochs":...},
-  "skippedIndicators":[...],
-  "metrics": { <key>: { "chosen":"transformer|persistence|drift|ridge", "h1":{ "<method>":{"mae":..,"pinball":..,"cov90":..,"cov50":..,"n":..}, ...}, "h2":{...} } },
-  "forecasts": { <key>: { "HVA01": { "lastYear":2024, "lastValue":..,
-        "h1":{"year":2025,"q05":..,"q25":..,"q50":..,"q75":..,"q95":..},
-        "h2":{"year":2026, ...},
-        "pBelowThreshold": {"h1":..,"h2":..} | null,      // screening indicators: P(value < 80), from the quantile curve
-        "pWorse": {"h1":..,"h2":..} } } } }               // P(indicator moves in the bad direction vs lastValue)
-```
-Probabilities come from linear interpolation of the predictive quantile function, clipped to [0.02, 0.98].
+New outputs default to `data/ml/forecast-v2.json`. Preserve the existing schemaVersion
+and add `evaluation` with the protocol, panel digest and per-indicator/per-horizon
+training, validation and test counts. Distinguish evaluation eligibility from actual
+export disposition. A null winner remains null; no supported output is a valid empty
+forecast object. Omit nonfinite, unordered and collapsed predictive bands. Do not
+supply calibrated-risk probabilities from quantile interpolation.
+
+The app checks these fields independently. Historical v1 output is byte-preserved
+and withheld by its digest-bound audit. The correction has no new performance result
+until a separate public-data evaluation is run. Reused years constitute development
+validation, not a new untouched prospective holdout.
 
 ## Tests (ml/tests, `python -m unittest`)
 

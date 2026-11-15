@@ -1,5 +1,11 @@
 # Architecture and method
 
+> **15 November evidence update:** the application now adds source-scoped decision
+> briefs (`src/decisions.mjs`) and forecast admission (`src/forecast-integrity.mjs`).
+> National recording-gap evidence never enters county scores or the optimiser.
+> Historical v1 forecasts below are preserved but withheld; a new v2 artifact must
+> carry disjoint-target evaluation evidence. See `ml/SPEC.md` for the current contract.
+
 ## Data flow
 
 ```

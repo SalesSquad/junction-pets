@@ -4,6 +4,8 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { analyse } from './analysis.mjs';
 import { recommend } from './recommend.mjs';
+import { validateRegistryContext } from './decisions.mjs';
+import { auditForecast } from './forecast-integrity.mjs';
 
 const at = (p) => new URL(p, import.meta.url);
 const readJson = (p) => JSON.parse(readFileSync(at(p), 'utf8'));
@@ -14,9 +16,14 @@ export function buildApp() {
   const evidence = readJson('../data/evidence/literature-v1.json');
   const analysis = analyse(snapshot);
   const recommendation = recommend(analysis);
-  const forecastPath = '../data/ml/forecast-v1.json';
-  const forecast = existsSync(at(forecastPath)) ? readJson(forecastPath) : null;
+  const forecastPath = existsSync(at('../data/ml/forecast-v2.json')) ? '../data/ml/forecast-v2.json' : '../data/ml/forecast-v1.json';
+  const savedForecast = existsSync(at(forecastPath)) ? readJson(forecastPath) : null;
   const optional = (path) => (existsSync(at(path)) ? readJson(path) : null);
+  const registryContext = validateRegistryContext(readJson('../data/evidence/registry-context-v1.json'));
+  const forecastAudit = optional('../data/ml/forecast-v1-audit.json');
+  const { forecast, ...forecastStatus } = auditForecast(savedForecast, {
+    sha256: savedForecast ? sha256(forecastPath) : null, historicalAudit: forecastAudit,
+  });
   const evalRun = optional('../data/claim-check/eval-v1.json');
   // Stored verdicts are only valid for the snapshot they were computed on.
   const claimCheck = evalRun && evalRun.snapshotSha256 === sha256('../data/snapshot/public-v1.json') && { service: evalRun.service, model: evalRun.model, ranAt: evalRun.ranAt, autoAccept: evalRun.autoAccept, cases: evalRun.cases, summary: evalRun.summary, overall: evalRun.overall, verdicts: evalRun.verdicts, note: evalRun.note };
@@ -38,10 +45,11 @@ export function buildApp() {
     builtAt: new Date().toISOString(),
     provenance: {
       dataClass: snapshot.dataClass, snapshotGeneratedAt: snapshot.generatedAt, snapshotSha256: sha256('../data/snapshot/public-v1.json'),
-      evidenceSha256: sha256('../data/evidence/literature-v1.json'), forecastSha256: forecast ? sha256(forecastPath) : null,
+      evidenceSha256: sha256('../data/evidence/literature-v1.json'), forecastSha256: savedForecast ? sha256(forecastPath) : null,
+      registryContextSha256: sha256('../data/evidence/registry-context-v1.json'),
       sources: snapshot.sources, requests: snapshot.manifest.length, notes: snapshot.notes,
     },
-    analysis, recommendation, forecast, claimCheck, narratives,
+    analysis, recommendation, forecast, forecastStatus, registryContext, claimCheck, narratives,
     evidence: evidence.rows, evidenceMethod: evidence.method,
   };
 }
