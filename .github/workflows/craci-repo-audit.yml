@@ -1,0 +1,162 @@
+name: CRACI repository bug and quality audit
+run-name: CRACI source audit batch ${{ inputs.batch }}
+'on':
+  workflow_dispatch:
+    inputs:
+      batch:
+        description: Fixed private source-snapshot batch
+        type: choice
+        required: true
+        options: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+      manifest_sha256:
+        description: SHA256 of the frozen private campaign manifest
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: craci-repo-audit-20261115
+  cancel-in-progress: false
+env:
+  AUDIT_TAG: craci-repo-audit-20261115-${{ inputs.batch }}
+  AUDIT_MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+  PYTHONUNBUFFERED: '1'
+  OMP_NUM_THREADS: '8'
+  OPENBLAS_NUM_THREADS: '8'
+jobs:
+  plan:
+    name: Verify private sources and reserve one bounded audit
+    if: ${{ github.ref == 'refs/heads/main' && vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
+    runs-on: craci
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, npm, pypi]
+            connections:
+              - tls:
+                  serverNamePatterns:
+                    - api.github.com
+                    - uploads.github.com
+                    - release-assets.githubusercontent.com
+                  ports: [443]
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - id: plan
+        name: Validate the frozen batch before matrix allocation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python tools/craci-repo-audit/cloud.py plan
+          --tag "$AUDIT_TAG" --manifest-sha256 "$AUDIT_MANIFEST_SHA256"
+          --work-dir "$RUNNER_TEMP/audit-plan"
+  scan:
+    name: Audit ${{ matrix.repository }}
+    needs: plan
+    if: ${{ github.ref == 'refs/heads/main' && vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
+    runs-on: craci
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '8'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, npm, pypi]
+            connections:
+              - tls:
+                  serverNamePatterns:
+                    - api.github.com
+                    - uploads.github.com
+                    - release-assets.githubusercontent.com
+                  ports: [443]
+      - name: Refuse late analysis before installing tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(date -u +%s)" -lt "$(date -ud '2026-11-15T16:25:00Z' +%s)"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install only hash-locked static analyzers
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv "$RUNNER_TEMP/audit-venv"
+          "$RUNNER_TEMP/audit-venv/bin/python" -m pip --disable-pip-version-check install --require-hashes --only-binary=:all: -r tools/craci-repo-audit/requirements.txt
+      - name: Install only locked JavaScript analyzers without lifecycle scripts
+        timeout-minutes: 5
+        run: npm ci --ignore-scripts --no-audit --no-fund --prefix tools/craci-repo-audit
+      - name: Scan pinned source as data and preserve findings privately
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUDIT_REPOSITORY: ${{ matrix.repository }}
+        run: >-
+          "$RUNNER_TEMP/audit-venv/bin/python" tools/craci-repo-audit/cloud.py scan
+          --tag "$AUDIT_TAG" --manifest-sha256 "$AUDIT_MANIFEST_SHA256"
+          --repository "$AUDIT_REPOSITORY" --work-dir "$RUNNER_TEMP/audit-scan"
+  collect:
+    name: Preserve combined findings and incomplete coverage
+    needs: [plan, scan]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
+    runs-on: craci
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, npm, pypi]
+            connections:
+              - tls:
+                  serverNamePatterns:
+                    - api.github.com
+                    - uploads.github.com
+                    - release-assets.githubusercontent.com
+                  ports: [443]
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Aggregate exact-source reports without auto-fixes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python tools/craci-repo-audit/cloud.py collect
+          --tag "$AUDIT_TAG" --manifest-sha256 "$AUDIT_MANIFEST_SHA256"
+          --work-dir "$RUNNER_TEMP/audit-collect"

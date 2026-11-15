@@ -1,0 +1,46 @@
+// Only harness dependencies are loaded. No project tsconfig, plugins, or imports.
+import parser from '@typescript-eslint/parser';
+
+export default [{
+  basePath: process.cwd(),
+  files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+  languageOptions: {
+    parser,
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    parserOptions: { project: false, projectService: false, ecmaFeatures: { jsx: true } },
+  },
+  linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: false },
+  rules: {
+    'array-callback-return': 'error',
+    'constructor-super': 'error',
+    'getter-return': 'error',
+    'no-async-promise-executor': 'error',
+    'no-compare-neg-zero': 'error',
+    'no-constant-binary-expression': 'error',
+    'no-constructor-return': 'error',
+    'no-dupe-args': 'error',
+    'no-dupe-class-members': 'error',
+    'no-dupe-else-if': 'error',
+    'no-duplicate-case': 'error',
+    'no-func-assign': 'error',
+    'no-import-assign': 'error',
+    'no-loss-of-precision': 'error',
+    'no-promise-executor-return': 'error',
+    'no-self-assign': 'error',
+    'no-sparse-arrays': 'error',
+    'no-unreachable': 'error',
+    'no-unreachable-loop': 'error',
+    'no-unsafe-finally': 'error',
+    'no-unsafe-optional-chaining': 'error',
+    'use-isnan': 'error',
+    'valid-typeof': 'error',
+    'complexity': ['warn', 25],
+    'max-depth': ['warn', 5],
+    'max-params': ['warn', 6],
+  },
+}, {
+  basePath: process.cwd(),
+  files: ['**/*.cjs'],
+  languageOptions: { sourceType: 'commonjs' },
+}];
