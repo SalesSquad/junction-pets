@@ -1,0 +1,5 @@
+import { review } from './admission.mjs';
+export const sources={north:'https://north.example.invalid/stock/desk-lamp',coast:'https://coast.example.invalid/stock/desk-lamp'};
+export const asOf='2026-11-14T12:00:00.000Z';
+export function record(id,scenario='before') {return {sourceId:id,requestedUrl:sources[id],finalUrl:sources[id],requestId:`synthetic-${id}`,observedAt:asOf,cacheOriginAt:asOf,httpStatus:200,partial:false,redirected:false,json:{success:true,data:{currency:'EUR',priceCents:id==='north'?1100:1250,shippingCents:1000,taxCents:2000,moq:1,inventory:id==='north'&&scenario==='after'?12:80,leadDays:3,confidence:95,confidenceProvenance:'operator-verified-extraction',text:scenario==='cosmetic'?'New banner':'Stock listing'}}};}
+export function replay(scenario='before',mutate=r=>r){return review({sources,asOf,consent:true,responseFormat:'CONTEXT_REST_JSON_V1',context:'40-ivory-desk-lamps',replay:true,client:async req=>JSON.stringify(mutate(record(Object.keys(sources).find(id=>sources[id]===req.url),scenario)))});}
