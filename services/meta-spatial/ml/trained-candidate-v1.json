@@ -1,0 +1,60 @@
+{
+  "bias": -0.264557805165,
+  "candidate_threshold": 0.773,
+  "featureNames": [
+    "visual",
+    "text",
+    "shape",
+    "quality",
+    "recency"
+  ],
+  "means": [
+    0.699223484378,
+    0.535196820848,
+    0.714164379596,
+    0.630169948891,
+    0.507037465137
+  ],
+  "modelKind": "synthetic-logistic-candidate-only",
+  "scales": [
+    0.199026800238,
+    0.240879318876,
+    0.174511718299,
+    0.216068978609,
+    0.289313232051
+  ],
+  "schemaVersion": 1,
+  "training": {
+    "domain": "purely-synthetic-score-features",
+    "epochs": 180,
+    "examples": 3000,
+    "seed": 117,
+    "separateShiftedTestCount": 1500,
+    "separateShiftedTestSeed": 1327,
+    "targetValidationFalseCandidateRate": 0.05,
+    "validationCount": 1000,
+    "validationSeed": 919
+  },
+  "validation": {
+    "abstainFraction": 0.708,
+    "brierScore": 0.119865,
+    "candidatePrecision": 0.907534,
+    "candidateThreshold": 0.773,
+    "correctAbstainOnNegative": 532,
+    "domain": "synthetic-only",
+    "falseCandidate": 27,
+    "falseCandidateRate": 0.048301,
+    "hardNegativeFalseCandidateRate": 0.092466,
+    "missedPositive": 176,
+    "positiveRecall": 0.600907,
+    "total": 1000,
+    "trueCandidate": 265
+  },
+  "weights": [
+    0.696864383711,
+    1.52563603241,
+    0.595699189554,
+    -0.208268214942,
+    0.021979230013
+  ]
+}
