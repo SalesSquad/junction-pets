@@ -87,3 +87,28 @@ test('public package carries no private host configuration and catalog copies on
   assert.doesNotMatch(producer, /cp\([^;]*host-adapter/);
   assert.match(navigation, /publicAsset\('apps\/knowledge-os\/index.html'\)/);
 });
+
+
+test('JSON input requires the exact media type while allowing parameters and casing', async () => {
+  for (const mediaType of ['application/jsonp', 'text/application/json', 'application/json-extra']) {
+    const request = new Request(searchRequest(), {headers: {'Content-Type': mediaType, Origin: 'https://app.example'}});
+    assert.equal((await createKnowledgeAppHandler(dependencies())(request)).status, 400);
+  }
+  const request = new Request(searchRequest(), {headers: {'Content-Type': 'Application/JSON; charset=utf-8', Origin: 'https://app.example'}});
+  assert.equal((await createKnowledgeAppHandler(dependencies())(request)).status, 200);
+});
+
+test('context GET denies explicit cross-origin signals without requiring an Origin header', async () => {
+  for (const headers of [
+    {Origin: 'https://foreign.example'}, {Origin: 'null'},
+    {'Sec-Fetch-Site': 'cross-site'}, {'Sec-Fetch-Site': 'same-site'},
+    {Origin: 'https://app.example', 'Sec-Fetch-Site': 'same-site'},
+  ]) {
+    calls.length = 0;
+    assert.equal((await createKnowledgeAppHandler(dependencies())(new Request(contextRequest(), {headers}))).status, 403);
+    assert.equal(calls.length, 0);
+  }
+  for (const headers of [{}, {Origin: 'https://app.example'}, {'Sec-Fetch-Site': 'same-origin'}, {'Sec-Fetch-Site': 'none'}]) {
+    assert.equal((await createKnowledgeAppHandler(dependencies())(new Request(contextRequest(), {headers}))).status, 200);
+  }
+});

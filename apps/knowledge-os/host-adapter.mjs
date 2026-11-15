@@ -50,7 +50,7 @@ function searchProjection(value, selector) {
   return {projectId: value.projectId, module: value.module, digest: value.digest, coverage: value.coverage, items, total: value.total, truncated: value.truncated, trust: 'Source-attributed metadata; not runtime or access authority.'};
 }
 async function inputJson(request) {
-  if (!request.headers.get('content-type')?.includes('application/json')) throw new Error('Invalid input');
+  if (request.headers.get('content-type')?.split(';', 1)[0].trim().toLowerCase() !== 'application/json') throw new Error('Invalid input');
   const reader = request.body?.getReader();
   if (!reader) throw new Error('Invalid input');
   const chunks = []; let bytes = 0;
@@ -76,6 +76,9 @@ export function createKnowledgeAppHandler(dependencies = {}) {
     if (typeof dependencies.readProject !== 'function' || typeof dependencies.listDatasets !== 'function' || typeof dependencies.searchDataset !== 'function') return response({error: 'Private readers are not configured.'}, 503);
     const url = new URL(request.url);
     if (request.method === 'GET' && url.pathname.endsWith('/api/context')) {
+      const origin = request.headers.get('origin');
+      const fetchSite = request.headers.get('sec-fetch-site')?.toLowerCase();
+      if ((origin !== null && origin !== url.origin) || fetchSite === 'cross-site' || fetchSite === 'same-site') return response({error: 'Cross-origin context request denied.'}, 403);
       const projectId = url.searchParams.get('projectId');
       if (!PROJECT.test(projectId ?? '') || [...url.searchParams.keys()].length !== 1) return response({error: 'Choose a valid project.'}, 400);
       try {
