@@ -1,6 +1,7 @@
+import { installWorkspace } from './workspace.js';
 const $ = id => document.getElementById(id);
 const svgNS = 'http://www.w3.org/2000/svg';
-const state = { drawing: null, result: null, selected: null, zoom: 1, busy: false };
+const state = { drawing: null, result: null, selected: null, zoom: 1, busy: false, answerId: null, review: null };
 const evidenceIds = () => new Set((state.result?.evidence || []).map(e => e.entityId));
 
 function node(tag, attrs = {}, text) {
@@ -166,12 +167,14 @@ function renderAnswer() {
   const supported = result?.status === 'supported';
   const abstained = result?.status === 'abstained';
   $('answer-card').classList.toggle('abstained', abstained);
-  $('answer-state').textContent = supported ? '✓ GROUNDED & TRACEABLE' : abstained ? '○ EVIDENCE INSUFFICIENT' : 'AWAITING QUESTION';
+  const levels = {source_observed:'SOURCE OBSERVED',derived:'DERIVED FROM SOURCE',geometry_measured:'GEOMETRY MEASURED',cross_checked:'CROSS-CHECKED'};
+  $('answer-state').textContent = supported ? `✓ ${levels[result.evidenceLevel] || 'SOURCE LINKED'}` : abstained ? '○ EVIDENCE INSUFFICIENT' : 'AWAITING QUESTION';
   $('answer-mark').textContent = supported ? '↗' : abstained ? '⊘' : '◎';
   $('answer-value').textContent = supported ? result.answer : abstained ? 'Not proven.' : 'Ask to begin.';
   $('answer-explanation').textContent = result?.explanation || 'Select a quick investigation or enter your own question. Unsupported requests fail closed.';
   const n = result?.evidence?.length || 0;
   $('answer-count').textContent = `${n} CITATION${n === 1 ? '' : 'S'}`;
+  workspace.render();
   $('evidence-count').textContent = `${n} ${state.drawing?.format === 'IFC STEP' ? 'RECORD' : 'REGION'}${n === 1 ? '' : 'S'}`;
 }
 function renderEvidence() {
@@ -212,11 +215,14 @@ async function ask(question) {
   state.busy = true;
   $('ask-button').disabled = true;
   $('answer-state').textContent = 'MEASURING…';
+  const requestedSource = state.drawing.id;
   try {
     const response = await fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ drawingId: state.drawing.id, question }) });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || 'Question service unavailable.');
+    if (state.drawing.id !== requestedSource) return;
+    state.answerId = payload.answerId; state.review = payload.review;
     state.result = payload.result;
     state.selected = state.result.evidence[0]?.entityId || null;
     renderAnswer(); renderEvidence(); renderDrawing();
@@ -226,16 +232,19 @@ async function ask(question) {
   } finally { state.busy = false; $('ask-button').disabled = false; }
 }
 async function useDemo() {
+  if (state.busy) throw new Error('Wait for the current question to finish before changing sources.');
   const response = await fetch('/api/demo');
   if (!response.ok) throw new Error('Demo drawing could not be loaded.');
   state.drawing = (await response.json()).drawing;
-  state.result = null; state.selected = null; state.zoom = 1;
+  state.result = null; state.selected = null; state.zoom = 1; state.answerId = null; state.review = null;
   renderSource(); renderAnswer(); renderEvidence(); renderDrawing();
   $('question').value = updateQuickQueries() || '';
+  await workspace.sources();
   if ($('question').value) await ask($('question').value);
 }
 async function importDrawing(file) {
   if (!file) return;
+  if (state.busy) throw new Error('Wait for the current question to finish before importing a source.');
   const isIfc = /\.ifc$/i.test(file.name);
   if (!/\.(dxf|ifc)$/i.test(file.name)) throw new Error('Choose an ASCII DXF or IFC STEP file.');
   const maxMiB = isIfc ? 16 : 6;
@@ -245,10 +254,11 @@ async function importDrawing(file) {
     'Content-Type': isIfc ? 'application/x-step' : 'application/dxf', 'X-Filename': encodeURIComponent(file.name) }, body: await file.arrayBuffer() });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error || 'DXF import failed.');
-  state.drawing = payload.drawing; state.result = null; state.selected = null; state.zoom = 1;
+  state.drawing = payload.drawing; state.result = null; state.selected = null; state.zoom = 1; state.answerId = null; state.review = null;
   $('import-message').textContent = `Imported ${state.drawing.entities.length} source entities. File is never stored on disk. Use an exact room/storey name or whole-source quantity question.`;
   renderSource(); renderAnswer(); renderEvidence(); renderDrawing();
   $('question').value = updateQuickQueries() || '';
+  await workspace.sources();
   if ($('question').value) await ask($('question').value);
 }
 
@@ -269,4 +279,5 @@ $('demo-button').addEventListener('click', () => useDemo().catch(error => $('imp
 $('zoom-in').addEventListener('click', () => { state.zoom = Math.min(3, state.zoom + .2); renderDrawing(); });
 $('zoom-out').addEventListener('click', () => { state.zoom = Math.max(.7, state.zoom - .2); renderDrawing(); });
 $('zoom-reset').addEventListener('click', () => { state.zoom = 1; renderDrawing(); });
+const workspace = installWorkspace({state, inspect: id => { state.selected = id; renderDrawing(); renderEvidence(); }, restored: () => { renderAnswer(); renderEvidence(); renderDrawing(); }});
 useDemo().catch(error => $('import-message').textContent = `Startup failed: ${error.message}`);

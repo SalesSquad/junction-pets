@@ -1,5 +1,10 @@
 # Next capabilities, ranked by user value
 
+Delivered in the review workspace: method-based evidence levels, canonical evidence export and
+verification, same-source/same-engine review recovery, revision comparisons, reversible human
+corrections and membership-based instance metrics. See [WORKSPACE.md](WORKSPACE.md). These tools
+are not measured sponsor accuracy, physical recognition or verified registration.
+
 This revision makes source evidence stricter and brings IFC into the local app. The next step
 should improve verifiable coverage, not silently loosen acceptance to regain a headline score.
 

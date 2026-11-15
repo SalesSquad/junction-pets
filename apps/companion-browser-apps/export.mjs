@@ -59,10 +59,19 @@ function adapt(kind, file, text) {
   if (kind === 'stoa' && file === 'public/index.html') {
     text = replaceOnce(text, 'href="/style.css"', 'href="./style.css"');
     text = replaceOnce(text, 'src="/app.js"', 'src="./app.js"');
-    text = replaceOnce(text, 'inspect its original source region.', 'inspect its original source region. Drawings stay in this browser; the example is synthetic. This version supports exact room labels, validated room areas and unit outlines; other questions are refused.');
+    text = replaceOnce(text, 'Import DXF / IFC', 'Import DXF');
+    text = replaceOnce(text, 'accept=".dxf,.ifc"', 'accept=".dxf"');
+    text = replaceOnce(text, 'Inspect source geometry for DXF and original entity records for IFC.', 'Inspect source geometry for DXF.');
+    text = replaceOnce(text, '<details id="revision-tools"', '<details hidden id="revision-tools"');
+    text = replaceOnce(text, '<details class="review-tools" id="review-tools">', '<details hidden class="review-tools" id="review-tools">');
+    text = replaceOnce(text, 'inspect its original source region.', 'inspect its original source region. Drawings stay in this browser; the example is synthetic. This version supports exact room labels, validated room areas and unit outlines; other questions are refused. IFC import, source comparison and review export require the local Stoa server.');
     return replaceOnce(text, '<head>', `<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
   }
-  if (kind === 'stoa' && file === 'public/app.js') return `import {createStoaLocalApi} from '../adapter/stoa-local-api.mjs';\nconst fetch=createStoaLocalApi();\n${text}`;
+  if (kind === 'stoa' && file === 'public/app.js') {
+    text = replaceOnce(text, "import { installWorkspace } from './workspace.js';", 'const installWorkspace = () => ({render() {}, async sources() {}});');
+    text = replaceOnce(text, "if (!/\\.(dxf|ifc)$/i.test(file.name)) throw new Error('Choose an ASCII DXF or IFC STEP file.');", "if (!/\\.dxf$/i.test(file.name)) throw new Error('Only ASCII DXF is available in this browser demo.');");
+    return `import {createStoaLocalApi} from '../adapter/stoa-local-api.mjs';\nconst fetch=createStoaLocalApi();\n${text}`;
+  }
   if (kind === 'stoa' && file === 'src/dxf.mjs') return replaceOnce(text, "Buffer.byteLength(input, 'utf8')", 'new TextEncoder().encode(input).byteLength');
   if (kind === 'chronicle' && file === 'studio/index.html') {
     text = replaceOnce(text, 'href="/style.css"', 'href="./style.css"');

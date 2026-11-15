@@ -42,7 +42,15 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     const traffic=await readFile(join(output,'apps/traffic-forensics/public/traffic/index.html'),'utf8');
     assert.match(traffic,/connect-src 'none'/); assert.match(traffic,/src="\.\/app\.mjs"/);
     const stoa=join(output,'apps/stoa-atlas');
-    assert.match(await readFile(join(stoa,'public/index.html'),'utf8'),/connect-src 'none'/);
+    const stoaHtml=await readFile(join(stoa,'public/index.html'),'utf8');
+    assert.match(stoaHtml,/connect-src 'none'/);
+    assert.match(stoaHtml,/IFC import, source comparison and review export require the local Stoa server/);
+    assert.match(stoaHtml,/<details hidden id="revision-tools"/);
+    assert.match(stoaHtml,/<details hidden class="review-tools"/);
+    assert.match(stoaHtml,/accept="\.dxf"/);
+    const stoaClient=await readFile(join(stoa,'public/app.js'),'utf8');
+    assert.doesNotMatch(stoaClient,/from '\.\/workspace\.js'/);
+    assert.match(stoaClient,/Only ASCII DXF is available in this browser demo/);
     const {createStoaLocalApi}=await import(pathToFileURL(join(stoa,'adapter/stoa-local-api.mjs')).href);
     const {makeDemo}=await import('../../solutions/stoa-blueprint-studio/src/demo.mjs');
     const {answerDrawing}=await import('../../solutions/stoa-blueprint-studio/src/grounding.mjs');
