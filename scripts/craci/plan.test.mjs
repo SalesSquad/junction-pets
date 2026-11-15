@@ -161,7 +161,11 @@ test('V13 prospective admission and V12 historical-repeat gates block CRACI setu
   assert.ok(qualifier.includes('env.get("CRACI_MANUAL_SOURCE_REVIEWED") == "true"'));
   assert.ok(v13Job.includes("test \"$CRACI_MANUAL_SOURCE_REVIEWED\" = 'true'"));
   assert.ok(v13Job.includes('export CRACI_CREDIT_REMAINING_SECONDS="$remaining"'));
-  assert.ok(v13Job.includes('test "$remaining" -ge 3600'));
+  // The first stage reserves 2h so the separately admitted qualifier still
+  // has its required 1h even at the end of this 60-minute job.
+  assert.ok(v13Job.includes('timeout-minutes: 60'));
+  assert.ok(v13Job.includes('test "$remaining" -ge 7200'));
+  assert.ok(v13Job.includes('test "$remaining" -gt 7200'));
   assert.ok(v13Job.indexOf('export CRACI_CREDIT_REMAINING_SECONDS="$remaining"') < v13Job.indexOf('run-receipt.mjs" run --'));
   assert.ok(v13Job.includes('faec266d6d3a44af3a564f46e0778209c1dc3af1'));
   assert.ok(v13Job.includes('93013025c9e19d94911f249f4dbf0cc034c767da23dca0273d8808323c0b173c'));

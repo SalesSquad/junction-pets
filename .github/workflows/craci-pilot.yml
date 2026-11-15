@@ -4973,7 +4973,9 @@ jobs:
         printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
         test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
         remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
-        test "$remaining" -gt 3600
+        # Reserve one hour for the bounded job and another for its separate
+        # qualifying process's unchanged one-hour admission check.
+        test "$remaining" -gt 7200
         printf 'CRACI_CREDIT_REMAINING_SECONDS=%s\n' "$remaining" >> "$GITHUB_ENV"
         test "$CRACI_SOURCE_SHA" = 'faec266d6d3a44af3a564f46e0778209c1dc3af1'
         [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
@@ -5002,9 +5004,9 @@ jobs:
       id: qualification
       run: |
         set -euo pipefail
-        # Admission uses a fresh credit balance immediately before the billable physics phase.
+        # Recalculate remaining time, not account credit, before physics.
         remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
-        test "$remaining" -ge 3600
+        test "$remaining" -ge 7200
         export CRACI_CREDIT_REMAINING_SECONDS="$remaining"
         test "$CRACI_MANUAL_SOURCE_REVIEWED" = 'true'
         node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- "$RUNNER_TEMP/mujoco-venv/bin/python" -B "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v13-original-qualification.py"
