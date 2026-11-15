@@ -2,7 +2,6 @@
 """LEN research extractor: stream public JSON; never persist raw records."""
 import argparse, collections, hashlib, json, math, tarfile, time, urllib.request
 from pathlib import Path
-import ijson
 FEATURES=["log_nodes","log_edges","density","zero_in_fraction","zero_out_fraction","reciprocal_fraction","in_gini","out_gini","max_in_share","max_out_share","in_hhi","out_hhi"]
 SOURCE="https://cse.buffalo.edu/~erdem/small_encoder_final.tar"
 def gini(values):
@@ -18,8 +17,8 @@ def topology(edges):
     n=len(nodes); m=len(unique)
     if n<2 or m<1: raise ValueError("Empty graph")
     iv=[incoming[v] for v in nodes]; ov=[outgoing[v] for v in nodes]
-    return [math.log1p(n),math.log1p(m),m/(n*(n-1)),iv.count(0)/n,ov.count(0)/n,
-            sum((b,a) in unique for a,b in unique)/m,gini(iv),gini(ov),
+    return [math.log1p(n),math.log1p(m),m/(n*n),iv.count(0)/n,ov.count(0)/n,
+            sum(a!=b and (b,a) in unique for a,b in unique)/m,gini(iv),gini(ov),
             max(iv)/m,max(ov)/m,sum((v/m)**2 for v in iv),sum((v/m)**2 for v in ov)],n,m
 class DigestReader:
     def __init__(self,raw): self.raw=raw; self.sha=hashlib.sha256(); self.bytes=0
@@ -37,12 +36,17 @@ def extract(output):
                 if not member.isfile() or not member.name.endswith(".json"): raise ValueError("Unsupported archive member")
                 if member.size>512*1024*1024: raise ValueError("Oversized member")
                 name=member.name.removeprefix("./small_encoder_final/")
-                if "_noncampaign_" in name: label=0
-                elif "_campaign_" in name: label=1
-                else: raise ValueError("Unknown source annotation")
+                markers=("_noncampaign_" in name,"_campaign_" in name)
+                if sum(markers)!=1: raise ValueError("Ambiguous source annotation")
+                label=int(markers[1])
                 reader=DigestReader(archive.extractfile(member))
-                edges=((edge["source"],edge["target"]) for edge in ijson.items(reader,"links.item"))
+                data=json.load(reader)  # Released unused embeddings contain non-standard NaN; stdlib accepts it.
+                if data.get("directed") is not True or data.get("multigraph") is not False or not isinstance(data.get("links"),list):
+                    raise ValueError("Unexpected source graph schema")
+                data.pop("nodes",None)  # Personal fields never retained or used.
+                edges=((edge["source"],edge["target"]) for edge in data["links"])
                 values,n,m=topology(edges)
+                del edges,data
                 if reader.bytes!=member.size: raise ValueError("Incomplete JSON consumption")
                 case=hashlib.sha256(("signal-desk-len-small-v1|"+name).encode()).hexdigest()
                 records.append({"case":case,"label":label,"source_sha256":reader.sha.hexdigest(),
@@ -51,7 +55,8 @@ def extract(output):
                 print(json.dumps({"graphs":len(records),"bytes":raw.bytes,"seconds":round(time.monotonic()-start,1)}),flush=True)
         while raw.read(1048576): pass
         if raw.bytes!=expected: raise ValueError("Incomplete source download")
-    if len(records)!=100: raise ValueError("LEN-small release count changed")
+    if len(records)!=100 or collections.Counter(r["label"] for r in records)!={0:49,1:51}:
+        raise ValueError("LEN-small released class counts changed")
     if len({r["case"] for r in records})!=len(records): raise ValueError("Duplicate case")
     result={"source":SOURCE,"source_sha256":raw.sha.hexdigest(),"source_bytes":raw.bytes,
             "extracted_at":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),"features":FEATURES,"records":records}
