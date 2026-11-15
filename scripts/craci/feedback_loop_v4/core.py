@@ -297,8 +297,12 @@ def _validate_rows(bundle):
     training,branches,events = bundle["training"],bundle["branches"],bundle["events"]
     failed = training["sourceFailureDiagnosis"]["v5FailedWorlds"]
     wins = training["sourceFailureDiagnosis"]["v5WinningWorlds"]
+    early = training["sourceFailureDiagnosis"]["v5FailedEarlyLegalAbstainWorlds"]
+    released = training["sourceFailureDiagnosis"]["v5FailedLiveDropAtOption17Worlds"]
     need(len(failed)==36 and len(wins)==12 and set(failed).isdisjoint(wins) and
-         set(failed)|set(wins)==set(bundle["worlds"]),
+         set(failed)|set(wins)==set(bundle["worlds"]) and
+         len(early)==26 and len(released)==10 and
+         set(early).isdisjoint(released) and set(early)|set(released)==set(failed),
          "V14_SOURCE_ONLY_SEEN_48_WORLD_SELECTION_DRIFT")
     need(len(branches)==training["recorded_branches"] and
          len(events)==training["durably_journaled_all_executed_option_events"],
@@ -418,7 +422,8 @@ def _validate_rows(bundle):
                              "body_out_of_original_bounds"]})
     return {"grouped":grouped,"firsts":firsts,"safety":safety,
             "completedBranches":len(branches),"completedOptions":sum(len(b["transitions"]) for b in branches),
-            "journaledOptions":len(events),"failed":failed,"wins":wins}
+            "journaledOptions":len(events),"failed":failed,"wins":wins,
+            "earlyAbstainWorlds":set(early),"deadmanReleaseWorlds":set(released)}
 
 
 def _beta_jeffreys_counts(wins,losses,ties):
@@ -499,13 +504,20 @@ def _compile_complete(bundle,validated):
         fork=branch["raw"]["source_prefix"]
         need(len(branch["raw"]["transitions"])>fork,
              "V14_WITNESS_WITHOUT_ANY_COUNTERFACTUAL_ACTION")
-        witness_by_action[branch["raw"]["transitions"][fork]["action"]].add(seed)
-    counts=Counter(row["action"] for row in firsts.values())
+        # Candidate below is specifically a V5 early-live-ABSTAIN rescue.
+        # A pre-option17 deadman-world witness cannot be used as causal
+        # support for that *different* public-state policy trigger.
+        if seed in validated["earlyAbstainWorlds"]:
+            witness_by_action[branch["raw"]["transitions"][fork]["action"]].add(seed)
+    counts=Counter(row["action"] for row in firsts.values()
+                   if row["seed"] in validated["earlyAbstainWorlds"])
     candidate_rows=[]
     for action in range(6):  # never proposal ABSTAIN as a new motor primitive
         support=counts[action]
         pair_worlds=defaultdict(list)
         for row in all_pairs:
+            if row["seed"] not in validated["earlyAbstainWorlds"]:
+                continue
             if row["actionA"]==action:
                 pair_worlds[row["seed"]].append(row["signedPublicOneOptionGoalProgressAminusB"])
             if row["actionB"]==action:
@@ -521,6 +533,7 @@ def _compile_complete(bundle,validated):
         ties=len(world_effects)-wins-losses
         posterior=_beta_jeffreys_counts(wins,losses,ties)
         candidate_rows.append({"action":action,"originalMaskedLegalDistinctWorldsExecuted":support,
+           "eligiblePublicSourceFailureClass":"EARLY_LIVE_ABSTAIN_ONLY",
            "actualSafe250WitnessWorlds":sorted(witness_by_action[action]),
            "actualSafe250WitnessWorldCount":len(witness_by_action[action]),
            "matchedWithinForkDistinctWorldCount":len(world_effects),**posterior})
