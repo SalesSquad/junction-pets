@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Blind listening page + taste learning.
 
-build   Make a self-contained page folder (index.html + audio/*.m4a + key.json) that plays
+build   Make a self-contained page folder (index.html + audio/*.mp3 + key.json) that plays
         scene pairs as X/Y in random order and voice pairs as A/B, and saves the owner's
         choices to the artifact's database (`db` capability; localStorage + copy fallback).
 ingest  Turn exported ratings + the private key into learned/taste.json: which system won,
@@ -27,9 +27,14 @@ HERE = Path(__file__).resolve().parent
 TASTE_FILE = HERE / "learned" / "taste.json"
 
 
+EXT = "mp3"   # artifact pages serve .mp3 as their own media; .m4a is refused (15 Nov)
+
+
 def m4a(src: Path, dst: Path) -> None:
+    """Encode a WAV for the page: MP3 64 kb/s with ffmpeg (the name stays for older callers)."""
     dst.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["afconvert", "-f", "m4af", "-d", "aac", "-b", "64000", str(src), str(dst)], check=True, capture_output=True, timeout=120)
+    subprocess.run([shutil.which("ffmpeg") or "ffmpeg", "-loglevel", "error", "-y", "-i", str(src), "-codec:a", "libmp3lame",
+                    "-b:a", "64k", str(dst)], check=True, capture_output=True, timeout=120)
 
 
 def load_run(run_id: str) -> list[dict]:
@@ -42,13 +47,20 @@ def load_run(run_id: str) -> list[dict]:
 
 
 def build(scene_pairs: list[tuple[str, str, str, str, str]], voice_pairs: list[tuple[str, str, Path, str, Path, str]],
-          out: Path, seed: int) -> dict:
-    """scene_pairs: (pair_id, title, setup, runA_label:runA, runB_label:runB); voice_pairs: (pet, text, wavA, labelA, wavB, labelB)."""
+          out: Path, seed: int, samples: list[tuple[str, Path]] | None = None) -> dict:
+    """scene_pairs: (pair_id, title, setup, runA_label:runA, runB_label:runB); voice_pairs: (pet, text, wavA, labelA, wavB, labelB);
+    samples: (pet, wav) — one designed-voice sample per pet, rated 👍/👎 with an optional note."""
     rng = random.Random(seed)
     if out.exists():
         shutil.rmtree(out)
     (out / "audio").mkdir(parents=True)
-    manifest, key = {"scenes": [], "voices": []}, {"createdAt": datetime.now(timezone.utc).isoformat(), "scenes": {}, "voices": {}}
+    manifest = {"scenes": [], "voices": [], "samples": []}
+    key = {"createdAt": datetime.now(timezone.utc).isoformat(), "scenes": {}, "voices": {}}
+    for pet, wav in samples or []:
+        rel = f"audio/sample-{pet}.{EXT}"
+        m4a(wav, out / rel)
+        manifest["samples"].append({"id": f"sample-{pet}", "pet": pet, "name": pv.persona(pet)["name"],
+                                    "language": pv.load_voices()[pet]["language"], "audio": rel})
     for pair_id, title, setup, a, b in scene_pairs:
         arms = [tuple(a.split(":", 1)), tuple(b.split(":", 1))]
         rng.shuffle(arms)
@@ -57,15 +69,15 @@ def build(scene_pairs: list[tuple[str, str, str, str, str]], voice_pairs: list[t
             turns = load_run(run_id)
             lines = []
             for t in turns:
-                rel = f"audio/{pair_id}-{letter}-{t['turn']:03d}.m4a"
+                rel = f"audio/{pair_id}-{letter}-{t['turn']:03d}.{EXT}"
                 m4a(pv.RUNS_DIR / run_id / "turns" / f"{t['turn']:03d}.wav", out / rel)
                 lines.append({"turn": t["turn"], "name": t.get("speakerName") or t.get("name"), "slug": t.get("speakerSlug") or t.get("slug"),
                               "language": t.get("language"), "text": t["text"], "audio": rel})
             full = out / "audio" / f"{pair_id}-{letter}.wav"
             full.write_bytes(pv.concat_wavs([(pv.RUNS_DIR / run_id / "turns" / f"{t['turn']:03d}.wav").read_bytes() for t in turns], 0.35))
-            m4a(full, full.with_suffix(".m4a"))
+            m4a(full, full.with_suffix(f".{EXT}"))
             full.unlink()
-            entry["versions"][letter] = {"audio": f"audio/{pair_id}-{letter}.m4a", "lines": lines}
+            entry["versions"][letter] = {"audio": f"audio/{pair_id}-{letter}.{EXT}", "lines": lines}
             key["scenes"].setdefault(pair_id, {})[letter] = {"label": label, "run": run_id}
         manifest["scenes"].append(entry)
     for pet, text, wav_a, label_a, wav_b, label_b in voice_pairs:
@@ -73,14 +85,15 @@ def build(scene_pairs: list[tuple[str, str, str, str, str]], voice_pairs: list[t
         rng.shuffle(opts)
         item = {"id": f"voice-{pet}", "pet": pet, "name": pv.persona(pet)["name"], "text": text, "options": {}}
         for letter, (label, wav) in zip("AB", opts):
-            rel = f"audio/voice-{pet}-{letter}.m4a"
+            rel = f"audio/voice-{pet}-{letter}.{EXT}"
             m4a(wav, out / rel)
             item["options"][letter] = rel
             key["voices"].setdefault(pet, {})[letter] = label
         manifest["voices"].append(item)
     (out / "index.html").write_text(PAGE.replace("__MANIFEST__", json.dumps(manifest, ensure_ascii=False).replace("</", "<\\/")))
     (out / "key.json").write_text(json.dumps(key, ensure_ascii=False, indent=1))  # private: never published
-    return {"scenes": len(manifest["scenes"]), "voices": len(manifest["voices"]), "files": len(list((out / "audio").iterdir()))}
+    return {"scenes": len(manifest["scenes"]), "voices": len(manifest["voices"]), "samples": len(manifest["samples"]),
+            "files": len(list((out / "audio").iterdir()))}
 
 
 def ingest(ratings: list[dict], key: dict, manifest_lines: dict) -> dict:
@@ -103,6 +116,18 @@ def ingest(ratings: list[dict], key: dict, manifest_lines: dict) -> dict:
         if rid.startswith("voice-") and choice in ("A", "B"):
             pet = rid.removeprefix("voice-")
             taste["voicePreference"][pet] = key.get("voices", {}).get(pet, {}).get(choice)
+        if rid.startswith("sample-"):
+            # Designed-voice samples: 👎 sends the pet back to its prebuilt voice until the voice is redesigned with
+            # the owner's note (scene.design_voices reads voiceNotes); the note stays with the pet, not the global notes.
+            pet = rid.removeprefix("sample-")
+            if choice in ("up", "down"):
+                taste.setdefault("voiceRating", {})[pet] = choice
+            note = str(r.get("note") or "").strip()
+            if note:
+                notes = taste["pets"].setdefault(pet, {"liked": [], "disliked": []}).setdefault("voiceNotes", [])
+                if note not in notes:
+                    notes.append(note[:300])
+            continue
         for line_key, verdict in (r.get("lines") or {}).items():
             line = manifest_lines.get(line_key)
             if line and verdict in ("up", "down"):
@@ -141,9 +166,10 @@ details{margin-top:8px}summary{cursor:pointer;color:var(--accent);font-size:14px
 .ln small{color:var(--mute)}.ln audio{margin:4px 0 0}.thumbs button{padding:4px 9px}.status{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#22262d;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--mute)}
 </style></head><body><main>
 <h1>Junction pets — sokkokuuntelu</h1>
-<p class="lead">Kuuntele kohtaukset. X ja Y ovat eri järjestelmien versioita satunnaisessa järjestyksessä — et näe kumpi on kumpi. Valintasi opettavat petit.</p>
+<p class="lead">Kuuntele kohtaukset. X ja Y ovat eri järjestelmien versioita satunnaisessa järjestyksessä — et näe kumpi on kumpi. Valintasi opettavat petit. Kaikki äänet ovat tekoälyn (Gemini) tuottamia.</p>
 <h2>Kohtaukset</h2><div id="scenes"></div>
-<h2>Äänet</h2><p class="lead">Kumpi ääni sopii hahmolle paremmin?</p><div id="voices"></div>
+<h2 class="vsec">Äänet</h2><p class="lead vsec">Sama repliikki kahdella äänellä. Kumpi sopii hahmolle paremmin?</p><div id="voices"></div>
+<h2 class="ssec">Jokaisen petin oma ääni</h2><p class="lead ssec">Gemini Voice designilla tehty ääni jokaiselle petille. 👍 pitää, 👎 vaihtaa takaisin vanhaan ääneen kunnes ääni suunnitellaan uudelleen — kirjoita mitä haluaisit toisin.</p><div id="samples"></div>
 <div class="status" id="status">Ladataan…</div>
 <div class="card" id="fallback" hidden><p class="lead">Tallennus tietokantaan ei ole käytössä tässä näkymässä. Kopioi tulokset ja liitä ne Claudelle.</p><button id="copy">Kopioi tulokset</button></div>
 </main>
@@ -192,6 +218,15 @@ function render() {
   M.voices.forEach(v => vo.append($("div", { class: "card" }, $("b", {}, v.name), $("div", { class: "setup" }, `“${v.text}”`),
     $("div", { class: "pair" }, ...["A", "B"].map(L => $("div", { class: "ver" }, $("b", {}, L), $("audio", { controls: "", preload: "none", src: v.options[L] })))),
     choiceRow(v.id, [["A", "A sopii paremmin"], ["B", "B sopii paremmin"]]))));
+  if (!M.voices.length) document.querySelectorAll(".vsec").forEach(e => e.hidden = true);
+  if (!(M.samples || []).length) document.querySelectorAll(".ssec").forEach(e => e.hidden = true);
+  const sa = document.getElementById("samples");
+  (M.samples || []).forEach(v => {
+    const note = $("input", { placeholder: "Mitä toisin? (vapaaehtoinen)", style: "width:100%;margin-top:8px;background:#111318;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit" });
+    note.addEventListener("change", () => { state[v.id] = { ...(state[v.id] || {}), note: note.value }; save(v.id); });
+    sa.append($("div", { class: "card" }, $("b", {}, v.name), $("small", { style: "color:var(--mute);margin-left:8px" }, v.language),
+      $("audio", { controls: "", preload: "none", src: v.audio }), choiceRow(v.id, [["up", "👍 sopii"], ["down", "👎 ei sovi"]]), note));
+  });
   document.getElementById("copy").addEventListener("click", async () => { try { await navigator.clipboard.writeText(JSON.stringify(Object.values({ ...local(), ...state }))); status("Kopioitu"); } catch (e) { status("Kopiointi estetty"); } });
 }
 render();
@@ -221,7 +256,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "build":
         spec = json.loads(Path(args.spec).read_text())
         voices = [(p, t, Path(a), la, Path(bb), lb) for p, t, a, la, bb, lb in spec.get("voices", [])]
-        print(json.dumps(build([tuple(s) for s in spec["scenes"]], voices, Path(args.out), args.seed), indent=1))
+        samples = [(p, Path(w)) for p, w in spec.get("samples", [])]
+        print(json.dumps(build([tuple(s) for s in spec["scenes"]], voices, Path(args.out), args.seed, samples), indent=1))
         return 0
     page = (Path(args.manifest_dir) / "index.html").read_text()
     manifest = json.loads(page.split("const M = ", 1)[1].split(";\nconst REASONS", 1)[0].replace("<\\/", "</"))

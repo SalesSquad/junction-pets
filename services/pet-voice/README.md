@@ -105,6 +105,8 @@ production line per turn:
 python3 scene.py design-voices --pets rokoko,bahn-express  # one designed voice per pet
 python3 scene.py run demo-crash-0312                       # audio scene, ~4 Gemini calls/turn
 python3 scene.py run all --text-only --tag test            # text only, no TTS quota
+python3 scene.py voice-script script.json --run-id base-x --prebuilt   # voice a fixed transcript (baselines)
+python3 scene.py design-voices --disliked                 # redesign voices the owner rated 👎, with their notes
 python3 listen.py build --spec spec.json --out /tmp/listen  # blind A/B listening page
 python3 listen.py ingest --ratings ratings.json --key /tmp/listen/key.json --manifest-dir /tmp/listen
 ```
@@ -115,6 +117,9 @@ order) and prebuilt vs designed voice per pet (A/B), writes `index.html` and a p
 `ingest` into `learned/taste.json`: system wins/losses, liked and disliked lines per pet,
 voice preference and notes. `scene.py` puts liked/disliked lines and notes into every writer
 prompt and uses the preferred voice type, so each listening round steers the next scene.
+The page also plays every pet's designed-voice sample (👍/👎 + note): a 👎 sends that pet back
+to its prebuilt voice until `design-voices --disliked` redesigns it with the note. Audio is
+MP3 (artifact pages refuse `.m4a`); `key.json` stays private until the ratings are ingested.
 Scene receipts (text, metrics, director decisions, no audio) go to `scene-evidence/`.
 
 ## Boundaries
