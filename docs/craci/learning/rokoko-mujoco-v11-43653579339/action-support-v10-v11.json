@@ -1,0 +1,65 @@
+{
+  "schema": "junction.rokoko.v10-v11.original-trace-action-support.v1",
+  "scienceRole": "train-only-descriptive-support-audit",
+  "publicObservationDimensions": 18,
+  "shieldedActionCount": 7,
+  "actions": [
+    {"id": 0, "name": "ALIGN"},
+    {"id": 1, "name": "PUSH_SLOW"},
+    {"id": 2, "name": "PUSH_MEDIUM"},
+    {"id": 3, "name": "SIDE_LEFT"},
+    {"id": 4, "name": "SIDE_RIGHT"},
+    {"id": 5, "name": "RETREAT"},
+    {"id": 6, "name": "ABSTAIN_TERMINAL"}
+  ],
+  "sources": [
+    {
+      "version": "v10",
+      "githubRun": 43649224059,
+      "sourceSha": "9cc583d3f0f24484b79c1929ba875c7a3b667806",
+      "harnessSha": "a64e6fcc73a1d47485fe052990e31c9d9e45100f",
+      "githubArtifactZipSha256": "c9bd2ae587d16111213ae7f3e142976d39575850605c312d66cc63ce5e125ccb",
+      "originalTransitionsSha256": "739c30a13ecacdecd404774fc9dadd887944f32df5cef14cfd2758a639460419",
+      "pairedTrainWorlds": 160,
+      "episodes": 800,
+      "optionEvents": 38569,
+      "executedPerAction": [650, 2145, 3982, 20608, 3, 236, 10945],
+      "maskLegalPerAction": [27802, 21675, 21101, 27797, 27802, 27802, 38569],
+      "distinctWorldsWithExecutedAction": [123, 160, 116, 160, 1, 104, 144],
+      "distinctEpisodesWithExecutedAction": [208, 365, 252, 641, 1, 104, 599],
+      "rightActionExecutedByStrategy": {"frozen_v6": 3}
+    },
+    {
+      "version": "v11",
+      "githubRun": 43653579339,
+      "sourceSha": "ab6df4054ef6ed350b479469590a48046a0c0a68",
+      "harnessSha": "b1938bee9dbca482f645b5dde3359de38e6c125e",
+      "githubArtifactZipSha256": "bbf94c662fab3ac0efab3448c9e917dcce473a2644efc82a3f4835dd85792bae",
+      "originalTransitionsSha256": "0a38081a43426ee4774d09d22886202aaf56d59f6b925a0a75cb2f2da14c848b",
+      "pairedTrainWorlds": 160,
+      "episodes": 800,
+      "optionEvents": 34992,
+      "executedPerAction": [297, 703, 4166, 15303, 0, 251, 14272],
+      "maskLegalPerAction": [20998, 15667, 15305, 20994, 20998, 20998, 34992],
+      "distinctWorldsWithExecutedAction": [123, 130, 113, 159, 0, 112, 155],
+      "distinctEpisodesWithExecutedAction": [127, 199, 328, 613, 0, 112, 715],
+      "rightActionExecutedByStrategy": {}
+    }
+  ],
+  "combined": {
+    "optionEvents": 73561,
+    "sideLeftExecuted": 35911,
+    "sideRightExecuted": 3,
+    "sideRightMaskLegal": 48800,
+    "sideRightDistinctWorlds": 1,
+    "sideRightLearningStatus": "UNTRAINED_INSUFFICIENT_EXECUTED_WORLD_SUPPORT"
+  },
+  "limits": [
+    "All source counts independently recomputed from retained original compressed full option trajectories; no sparse-only estimate and no fabricated unchosen-action labels.",
+    "Each observation event is not an independent world. Legal action under the original public safety mask does not imply causal benefit or physical success.",
+    "V10 and V11 cohorts are separate TRAIN observations and may have common environment dynamics; sample-count totals are not a statistically independent-world generalization claim.",
+    "Three actually executed side-right actions came from only one V10 frozen_v6 world. They cannot qualify a reliable action-conditioned dynamics model for side-right.",
+    "Action 6 is terminal abstention, not a normal physical motion option. Frozen V5 remains the protected baseline and no model is promoted."
+  ],
+  "nextExperimentAdvisory": "Fresh 518000+ public-only TRAIN pilot to acquire real safe-mask right-action outcomes under hard unsafe/V5-loss/zero-novel stops; no automatic dispatch."
+}

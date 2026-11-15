@@ -35,7 +35,12 @@ test('closed deadline, malformed source and unsupported sponsor override stop ad
 test('every fixed workload has bounded cells, full immutable sources and unique receipt keys', () => {
   for (const workload of WORKLOADS) {
     const input = {workload};
-    if (['product-browser', 'sbank-sponsor'].includes(workload)) input.source_sha = candidate;
+    // Main's frozen Meta R / Lens workloads pin their own harness and reject overrides.
+    const harnessPinned = workload.startsWith('meta-r-') || workload.startsWith('lens-');
+    if (!harnessPinned && !['tieto-sponsor', 'immune-tournament', 'chaos-lab',
+         'portfolio-browser', 'new-products-browser'].includes(workload)) {
+      input.source_sha = candidate;
+    }
     if (['portfolio-browser', 'new-products-browser'].includes(workload)) input.product = 'all';
     const plan = resolvePlan(input, context);
     const cap = workload === 'meta-r-hardshift-2x' ? 24 : 12;
@@ -159,4 +164,64 @@ test('new six-fold unknown risk ML has exact source, pilot and nonrepeating rema
                 /Unsupported HB unknown-ML fold/);
  assert.throws(()=>resolvePlan({workload:'lens-six-unknown-ml'},{...context,creditOpen:'false'}),/closed/);
  assert.throws(()=>resolvePlan({workload:'lens-six-unknown-ml'},{...context,now:'2026-11-15T17:00:00Z'}),/deadline/);
+});
+
+test('V8 prospective workload admits exactly one reviewed source and stops at credit cutoff', () => {
+  const workload = 'rokoko-mujoco-v8-prospective';
+  assert.throws(() => resolvePlan({workload}, context), /requires an explicit source_sha/);
+  const admitted = resolvePlan({workload, source_sha: candidate}, context);
+  assert.equal(admitted.jobCount, 1);
+  assert.deepEqual(admitted.matrix.include.map(x => x.source_sha), [candidate]);
+  assert.deepEqual(admitted.matrix.include.map(x => x.qualification), ['product-source']);
+  assert.throws(() => resolvePlan({workload, source_sha: candidate}, {
+    ...context, now: '2026-11-15T17:00:00Z'}), /deadline/);
+});
+
+test('V11 fresh real MuJoCo 800-episode workload requires one exact reviewed source', () => {
+  const workload = 'rokoko-mujoco-v11-prospective';
+  assert.ok(WORKLOADS.includes(workload));
+  assert.throws(() => resolvePlan({workload}, context), /requires an explicit source_sha/);
+  const admitted = resolvePlan({workload, source_sha: candidate}, context);
+  assert.equal(admitted.jobCount, 1);
+  assert.equal(admitted.maxParallel, 1);
+  assert.deepEqual(admitted.matrix.include.map(x => x.source_sha), [candidate]);
+  assert.deepEqual(admitted.matrix.include.map(x => x.qualification), ['product-source']);
+  assert.throws(() => resolvePlan({workload, source_sha: candidate}, {
+    ...context, now: '2026-11-15T17:00:00Z'
+  }), /deadline/);
+});
+
+test('V12 source-trained 144-episode fresh pilot source and deadline are exact inputs', () => {
+  const workload = 'rokoko-mujoco-v12-pilot';
+  assert.ok(WORKLOADS.includes(workload));
+  assert.throws(() => resolvePlan({workload}, context), /requires an explicit source_sha/);
+  const source = '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f';
+  const admitted = resolvePlan({workload, source_sha: source}, context);
+  assert.equal(admitted.jobCount, 1);
+  assert.equal(admitted.maxParallel, 1);
+  assert.deepEqual(admitted.matrix.include.map(x => x.source_sha), [source]);
+  assert.deepEqual(admitted.matrix.include.map(x => x.cell), [workload]);
+  assert.deepEqual(admitted.matrix.include.map(x => x.qualification), ['product-source']);
+  assert.throws(() => resolvePlan({workload, source_sha: source}, {
+    ...context, now: '2026-11-15T17:00:00Z'
+  }), /deadline/);
+});
+
+test('V13 causal original TRAIN admission is a single pinned source and never automatic promotion', () => {
+  const workload = 'rokoko-mujoco-v13-causal';
+  const exactSource = '0751d78b93855bf70820b03b0a543e123d218baf';
+  assert.ok(WORKLOADS.includes(workload));
+  assert.throws(() => resolvePlan({workload}, context), /requires an explicit source_sha/);
+  const plan = resolvePlan({workload, source_sha: exactSource}, context);
+  assert.equal(plan.jobCount, 1);
+  assert.equal(plan.maxParallel, 1);
+  assert.deepEqual(plan.matrix.include.map(x => x.source_sha), [exactSource]);
+  assert.deepEqual(plan.matrix.include.map(x => x.cell), [workload]);
+  assert.deepEqual(plan.matrix.include.map(x => x.qualification), ['product-source']);
+  assert.throws(() => resolvePlan({workload, source_sha: exactSource}, {
+    ...context, creditOpen: 'false',
+  }), /closed/);
+  assert.throws(() => resolvePlan({workload, source_sha: exactSource}, {
+    ...context, now: '2026-11-15T17:00:00Z',
+  }), /deadline/);
 });

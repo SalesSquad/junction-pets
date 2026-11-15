@@ -1,0 +1,73 @@
+{
+  "actual_real_option_transitions": 29923,
+  "candidate_v8_safe_goal_difference_vs_best_frozen_baseline": -9,
+  "dataset_sha256": "217bf81618cb6641dd106540b5dbc9f2ae7bd89d232684b7675d59479bc7ad4c",
+  "decision": "valid_prospective_train_only_evidence",
+  "dev_cal_test_ood_opened": false,
+  "dispatch_authorized": false,
+  "exact_source_sha": "87c91de52cef5c3e745115f737abc4ab8d654a32",
+  "experiment_complete": true,
+  "full_transition_archive_sha256": "cbaeacd5a7a2a46a30e6b63afeb12614552da032b68e78a6a90fa7d75c49101a",
+  "independentHoldout": false,
+  "independent_full_trace_public_mask_replay": true,
+  "independent_true_physics_positive_replay": {
+    "claim_verified": true,
+    "fully_replayed_positive_train_trials": 202,
+    "model_promotion_authorized": false,
+    "no_dev_cal_test_ood": true,
+    "positive_trial_keys_sha256": "98fad35b6df48a24048983cdd7c9585e98a8fcbc58d3755020f9e010b951a686",
+    "schema": "junction.rokoko.mujoco-v7-positive-replay.v1",
+    "selection_scan_replayed": 365,
+    "verified_near_corridor_success_worlds": 9,
+    "verified_obstacle_away_displacement_worlds": 85
+  },
+  "limits": "Real MuJoCo train-only probe; no test qualification or physical robot safety certificate",
+  "mechanism_positive": true,
+  "model_improvement_independently_verified": false,
+  "next_experiment_advisory": {
+    "new_train_seed_start": 514000,
+    "next_step": "scientific_review_then_independent_new_train_cohort",
+    "note": "No promotion based on TRAIN-only difference; no locked dev/test authorization"
+  },
+  "producer_exit_code": 0,
+  "promotion_authorized": false,
+  "prospective_train_only_paired_candidate_and_controls": {
+    "frozen_v5": {
+      "forward_reopen_worlds": 65,
+      "safe_lateral_ge_25mm": 14,
+      "safe_near_goals": 9,
+      "unsafe_near": 0
+    },
+    "frozen_v6": {
+      "forward_reopen_worlds": 90,
+      "safe_lateral_ge_25mm": 17,
+      "safe_near_goals": 2,
+      "unsafe_near": 0
+    },
+    "repeat_left": {
+      "forward_reopen_worlds": 94,
+      "safe_lateral_ge_25mm": 83,
+      "safe_near_goals": 0,
+      "unsafe_near": 0
+    },
+    "v8_hierarchical": {
+      "forward_reopen_worlds": 108,
+      "safe_lateral_ge_25mm": 80,
+      "safe_near_goals": 0,
+      "unsafe_near": 0
+    }
+  },
+  "schema": "junction.rokoko.mujoco-v8-prospective.craci.train.v1",
+  "selected_clear_worlds": 32,
+  "selected_near_worlds": 128,
+  "strategies": {
+    "frozen_v5": 160,
+    "frozen_v6": 160,
+    "repeat_left": 160,
+    "v8_hierarchical": 160
+  },
+  "train_only_seed_start": 513000,
+  "trials": 640,
+  "worlds_safe_corridor_success": 9,
+  "worlds_safe_lateral_displacement_ge_25mm": 85
+}

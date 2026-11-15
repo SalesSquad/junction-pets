@@ -29,11 +29,27 @@ const SPONSOR_PINS = Object.freeze({
   '2129': '083afd994c1c9a994cb2cd5aa0b6ad805a621457',
   '2297': 'a0aa5ab2de7f5a669d97e37184a89034c1de82b6',
 });
+const FRONTIER_PINS = Object.freeze({
+  'rokoko-heldout': '0390b87a54ad5cbc98fd5d781f828be0cfa8fbe8',
+  'arduino-proof-48': 'eb7ff4cb7fa6c867ced7d944385b4e0bd08d04c4',
+  'valio-settlement-browser': 'd45f450a38ec6c8fb2f73b96d181454458ae3928',
+  'valio-http-race': 'd45f450a38ec6c8fb2f73b96d181454458ae3928',
+  'valio-funding-race': 'd45f450a38ec6c8fb2f73b96d181454458ae3928',
+  'bahn-offline-sweep': 'a4396d5ead2acc3d3db5e9a456af7f48058bb358',
+  'rokoko-rl-cpu': '59479b42b177c1829a2e6678adfff1fb68aef09c',
+  'rokoko-rl-full': '59479b42b177c1829a2e6678adfff1fb68aef09c',
+  'aalto-consent-browser': '1a02a0bb650598571b63554312c7b5e82b323c7f',
+  'astra-equity-browser': 'ebff750c176838123311affed06082e8144001f5',
+  'rokoko-rl-seed-sweep': '59479b42b177c1829a2e6678adfff1fb68aef09c',
+  'rokoko-rl-ablations': '59479b42b177c1829a2e6678adfff1fb68aef09c',
+});
 export const WORKLOADS = Object.freeze([
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
   'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision', 'lens-hb-scene8-ood', 'lens-hb-six-feedback', 'lens-six-unknown-ml',
+  'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab',
+  'rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-mujoco-v12-pilot', 'rokoko-mujoco-v13-causal', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos',
 ]);
 
 function choose(value, choices, label) {
@@ -58,6 +74,8 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
   const shard = choose(input.shard || 'all', ['all', '0', '1', '2', '3'], 'shard');
   const toolchain = choose(input.tieto_toolchain || 'pinned', ['pinned', 'compatible'], 'Tieto toolchain');
   const revision = choose(input.sponsor_revision || 'base', ['base', '2283', '2234', '2129', '2297', 'heads', 'all'], 'sponsor revision');
+  const epoch = String(input.epoch || '1');
+  if (!/^(?:[1-9]|1[0-2])$/.test(epoch)) throw new Error('Immune epoch must be 1 through 12');
   const product = input.product || 'stoa';
   choose(product, ['stoa', 'valio', ...Object.keys(PRODUCT_PINS), 'all'], 'product');
   const include = [];
@@ -152,6 +170,35 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override && override !== harnessSha)
       throw new Error('HB scene8 OOD requires exact source/harness SHA');
     add('hb-scene8-ood-public', harnessSha, {scene: 8});
+  } else if (['rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-mujoco-v12-pilot', 'rokoko-mujoco-v13-causal', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos'].includes(workload)) {
+    // New portable product qualifications have no stale fallback pin; the caller
+    // must provide the exact reviewed task commit before CRACI reserves capacity.
+    if (!override) throw new Error(`${workload} requires an explicit source_sha`);
+    add(workload, override, {qualification: 'product-source'});
+  } else if (workload === 'immune-tournament') {
+    if (override && override !== harnessSha) throw new Error('Immune source must match pinned harness SHA');
+    for (let index = 0; index < 4; index++) {
+      add(`immune-${epoch}-${index}`, harnessSha, {epoch: Number(epoch), seed: Number(epoch) * 1009 + index * 17});
+    }
+  } else if (workload === 'chaos-lab') {
+    if (override && override !== harnessSha) throw new Error('Chaos source must match pinned harness SHA');
+    for (const [index, profile] of ['provenance', 'network', 'control', 'evidence'].entries()) {
+      add(`chaos-${epoch}-${profile}`, harnessSha, {epoch: Number(epoch), profile,
+        seed: Number(epoch) * 10007 + index * 73});
+    }
+  } else if (workload === 'rokoko-rl-ablations') {
+    for (const learnerSeed of [17,43]) add(`rokoko-ablation-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});
+  } else if (workload === 'rokoko-rl-seed-sweep') {
+    for (const learnerSeed of [17,23,31,43,59,67,73,89]) add(`rokoko-learner-${learnerSeed}`, override || FRONTIER_PINS[workload], {learner_seed: learnerSeed});
+  } else if (['aalto-consent-browser','astra-equity-browser'].includes(workload)) {
+    const clinicalProduct = workload === 'aalto-consent-browser' ? 'aalto' : 'astra';
+    for (const engine of selectedEngines) add(`${clinicalProduct}-${engine}`, override || FRONTIER_PINS[workload], {browser: engine, product: clinicalProduct});
+  } else if (workload === 'bahn-offline-sweep') {
+    for (let seedShard = 0; seedShard < 8; seedShard++) add(`bahn-offline-${seedShard}`, override || FRONTIER_PINS[workload], {seed_shard: seedShard});
+  } else if (workload === 'valio-settlement-browser') {
+    for (const engine of selectedEngines) add(`valio-settlement-${engine}`, override || FRONTIER_PINS[workload], {browser: engine, product: 'valio'});
+  } else if (Object.hasOwn(FRONTIER_PINS, workload)) {
+    add(workload, override || FRONTIER_PINS[workload]);
   } else {
     if (workload === 'sbank-sponsor' && !override) throw new Error('sbank-sponsor requires source_sha');
     const source = override || BASELINES[workload] || harnessSha;

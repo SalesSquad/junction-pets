@@ -36,6 +36,41 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - lens-hb-scene8-ood
         - lens-hb-six-feedback
         - lens-six-unknown-ml
+        - rokoko-heldout
+        - arduino-proof-48
+        - valio-settlement-browser
+        - bahn-offline-sweep
+        - rokoko-rl-cpu
+        - rokoko-rl-full
+        - aalto-consent-browser
+        - astra-equity-browser
+        - rokoko-rl-seed-sweep
+        - rokoko-rl-ablations
+        - valio-http-race
+        - valio-funding-race
+        - immune-tournament
+        - chaos-lab
+        - rokoko-action-necessity
+        - valio-postgres-crash
+        - rokoko-v2-lockbox
+        - rokoko-td-lockbox
+        - rokoko-mujoco-dev
+        - rokoko-mujoco-v2-dev
+        - rokoko-mujoco-v3-dev
+        - rokoko-mujoco-v3-cal
+        - rokoko-mujoco-v4-dev
+        - rokoko-mujoco-v5-train-dev
+        - rokoko-mujoco-v6-train-dev
+        - rokoko-mujoco-v7-feasibility
+        - rokoko-mujoco-v8-prospective
+        - rokoko-mujoco-v10-prospective
+        - rokoko-mujoco-v10-hybrid-prospective
+        - rokoko-mujoco-v11-prospective
+        - rokoko-mujoco-v12-pilot
+        - rokoko-mujoco-v13-causal
+        - rokoko-shared-tournament
+        - rokoko-shared-preflight
+        - valio-wal-chaos
       lane_slice:
         description: R8 only; pilot first, then seven unique remaining arms
         type: choice
@@ -114,6 +149,11 @@ run-name: CRACI ${{ inputs.workload }} / harness ${{ github.sha }}
         - '1'
         - '2'
         - '3'
+      epoch:
+        description: CRACI Immune distinct adversarial cohort 1-12
+        type: choice
+        default: '1'
+        options: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
 permissions:
   contents: read
 env:
@@ -3041,6 +3081,3943 @@ jobs:
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
       with:
         name: craci-hb-unknown-six-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+
+  rokoko-heldout:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-heldout' }}
+    name: Rokoko MegaSim / 10000 new worlds / 8 CPU shards
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-heldout-910000
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-heldout
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 16-vCPU isolated CRACI scientific compute
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '16'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Enforce credit cutoff before package downloads
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned MuJoCo wheels and base R
+      run: |
+        set -euo pipefail
+        # The runner's unrelated Microsoft apt feed is blocked (HTTP 403).
+        # Install only from Ubuntu's signed OS repos, covered by the ubuntu network preset.
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -f "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends r-base-core libdigest-sha-perl python3-venv
+        python3 -m venv "$RUNNER_TEMP/rokoko-venv"
+        "$RUNNER_TEMP/rokoko-venv/bin/python" -m pip install --only-binary=:all: --no-cache-dir mujoco==3.3.7 numpy==2.4.6
+        "$RUNNER_TEMP/rokoko-venv/bin/python" -c 'import mujoco,numpy; assert mujoco.__version__=="3.3.7"; assert numpy.__version__=="2.4.6"'
+        Rscript --version
+    - name: Solve 120 million MuJoCo steps and verify 20000 R bootstrap draws
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$CRACI_HARNESS_ROOT/scripts/craci/run-rokoko-heldout.sh"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  arduino-proof-48:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'arduino-proof-48' }}
+    name: Arduino Green Edge / 48-day synthetic risk matrix
+    runs-on: craci
+    timeout-minutes: 15
+    concurrency:
+      group: craci-arduino-proof-48
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: arduino-proof-48
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure bounded CRACI R and Node qualification
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, ubuntu]
+    - name: Enforce credit cutoff before package downloads
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install base R without external model or data services
+      run: |
+        set -euo pipefail
+        # The runner's unrelated Microsoft apt feed is blocked (HTTP 403).
+        # Install only from Ubuntu's signed OS repos, covered by the ubuntu network preset.
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -f "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends r-base-core
+        Rscript --version
+    - name: Evaluate 384 synthetic days with strict no-qualification guard
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$CRACI_HARNESS_ROOT/scripts/craci/run-arduino-proof-48.sh"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  valio-settlement-browser:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'valio-settlement-browser' }}
+    name: Valio V4 signed settlement / ${{ matrix.browser }} / two viewports
+    runs-on: craci
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+    - name: Configure browser installation networking
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm, ubuntu]
+          sources:
+            - apt:
+                urls:
+                  - https://packages.microsoft.com/ubuntu/24.04/prod
+          connections:
+            - tls:
+                serverNamePatterns:
+                  - cdn.playwright.dev
+                  - playwright.download.prss.microsoft.com
+                  - storage.googleapis.com
+                  - fwjydgxpttajiqpfmqtj.supabase.co
+                ports: [443]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - name: Check out the pinned harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out the pinned product
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Set up Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install the locked harness and selected browser
+      working-directory: harness
+      env:
+        BROWSER: ${{ matrix.browser }}
+      run: |
+        set -euo pipefail
+        start=$(date +%s)
+        npm ci --ignore-scripts
+        installed=$(date +%s)
+        npx --no-install playwright install --with-deps "$BROWSER"
+        ready=$(date +%s)
+        printf '{"dependencyInstallSeconds":%s,"browserInstallSeconds":%s,"browser":"%s"}\n' "$((installed-start))" "$((ready-installed))" "$BROWSER" > "$CRACI_RECEIPT_DIR/artifacts/setup-timing.json"
+    - name: Verify signed quote, payment consent, double-entry, replay and refund
+      working-directory: harness
+      env:
+        BROWSER: ${{ matrix.browser }}
+        CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        export CRACI_BROWSER_OUTPUT="$CRACI_RECEIPT_DIR/artifacts/valio-settlement-browser"
+        node scripts/craci/valio-settlement-browser.mjs "$BROWSER"
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+    env:
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: valio-settlement-browser
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+
+  bahn-offline-sweep:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'bahn-offline-sweep' }}
+    name: BAHN / 10000 new paired seeds / shard ${{ matrix.seed_shard }}
+    runs-on: craci
+    timeout-minutes: 15
+    concurrency:
+      group: craci-bahn-offline-${{ matrix.seed_shard }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_SHARD_INDEX: ${{ matrix.seed_shard }}
+      CRACI_WORKLOAD: bahn-offline-sweep
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure isolated CRACI BAHN offline calibration
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, ubuntu]
+    - name: Enforce credit cutoff before package downloads
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install signed Ubuntu base R for cluster bootstrap
+      run: |
+        set -euo pipefail
+        # The runner's unrelated Microsoft apt feed is blocked (HTTP 403).
+        # Install only from Ubuntu's signed OS repos, covered by the ubuntu network preset.
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -f "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends r-base-core
+        Rscript --version
+    - name: Audit 10000 paired seeds and R cluster uncertainty
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$CRACI_HARNESS_ROOT/scripts/craci/run-bahn-offline.sh"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-rl-cpu:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-rl-cpu' }}
+    name: Rokoko Double-DQN / CPU gradient training / sealed heldout
+    runs-on: craci
+    timeout-minutes: 20
+    concurrency:
+      group: craci-rokoko-rl-cpu-13
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-rl-cpu
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 8-vCPU source-bound CRACI training
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '8'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+          connections:
+            - tls:
+                serverNamePatterns:
+                  - download.pytorch.org
+                  - download-r2.pytorch.org
+                ports: [443]
+    - name: Enforce credit cutoff before package downloads
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned CPU PyTorch and MuJoCo from official package registries
+      run: |
+        set -euo pipefail
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -f "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends python3-venv
+        python3 -m venv "$RUNNER_TEMP/rokoko-rl-venv"
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -m pip install --no-cache-dir torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -m pip install --no-cache-dir --only-binary=:all: mujoco==3.3.7 numpy==2.4.6
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -c 'import torch,mujoco,numpy; assert torch.__version__.startswith("2.9.1"); assert mujoco.__version__=="3.3.7"; assert numpy.__version__=="2.4.6"; assert not torch.cuda.is_available()'
+    - name: Train real Double-DQN and audit locked test/OOD splits
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$CRACI_HARNESS_ROOT/scripts/craci/run-rokoko-rl-cpu.sh"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-rl-full:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-rl-full' }}
+    name: Rokoko Double-DQN / 1000 train + 400 eval / 60-option CPU
+    runs-on: craci
+    timeout-minutes: 20
+    concurrency:
+      group: craci-rokoko-rl-full-14
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-rl-full
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 8-vCPU source-bound CRACI training
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '8'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+          connections:
+            - tls:
+                serverNamePatterns:
+                  - download.pytorch.org
+                  - download-r2.pytorch.org
+                ports: [443]
+    - name: Enforce credit cutoff before package downloads
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned CPU PyTorch and MuJoCo from official package registries
+      run: |
+        set -euo pipefail
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -f "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends python3-venv
+        python3 -m venv "$RUNNER_TEMP/rokoko-rl-venv"
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -m pip install --no-cache-dir torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -m pip install --no-cache-dir --only-binary=:all: mujoco==3.3.7 numpy==2.4.6
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -c 'import torch,mujoco,numpy; assert torch.__version__.startswith("2.9.1"); assert mujoco.__version__=="3.3.7"; assert numpy.__version__=="2.4.6"; assert not torch.cuda.is_available()'
+    - name: Train 1000 new CPU episodes with feasible 60-option success horizon
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$CRACI_HARNESS_ROOT/scripts/craci/run-rokoko-rl-full.sh"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  aalto-consent-browser:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'aalto-consent-browser' }}
+    name: Aalto Recovery Compass privacy and consent / ${{ matrix.browser }} / two viewports
+    runs-on: craci
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+    - name: Configure browser installation networking
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm, ubuntu]
+          sources:
+            - apt:
+                urls:
+                  - https://packages.microsoft.com/ubuntu/24.04/prod
+          connections:
+            - tls:
+                serverNamePatterns:
+                  - cdn.playwright.dev
+                  - playwright.download.prss.microsoft.com
+                  - storage.googleapis.com
+                  - fwjydgxpttajiqpfmqtj.supabase.co
+                ports: [443]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - name: Check out the pinned harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out the pinned product
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Set up Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install the locked harness and selected browser
+      working-directory: harness
+      env:
+        BROWSER: ${{ matrix.browser }}
+      run: |
+        set -euo pipefail
+        start=$(date +%s)
+        npm ci --ignore-scripts
+        installed=$(date +%s)
+        npx --no-install playwright install --with-deps "$BROWSER"
+        ready=$(date +%s)
+        printf '{"dependencyInstallSeconds":%s,"browserInstallSeconds":%s,"browser":"%s"}\n' "$((installed-start))" "$((ready-installed))" "$BROWSER" > "$CRACI_RECEIPT_DIR/artifacts/setup-timing.json"
+    - name: Verify local privacy, consent, source and export boundaries
+      working-directory: harness
+      env:
+        BROWSER: ${{ matrix.browser }}
+        CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        export CRACI_BROWSER_OUTPUT="$CRACI_RECEIPT_DIR/artifacts/aalto-consent-browser"
+        node scripts/craci/synthetic-clinical-browser.mjs "$CRACI_CLINICAL_PRODUCT" "$BROWSER"
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+    env:
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_CLINICAL_PRODUCT: ${{ matrix.product }}
+      CRACI_WORKLOAD: aalto-consent-browser
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+
+
+
+  astra-equity-browser:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'astra-equity-browser' }}
+    name: AstraZeneca synthetic small-cohort decision gates / ${{ matrix.browser }} / two viewports
+    runs-on: craci
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+    - name: Configure browser installation networking
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm, ubuntu]
+          sources:
+            - apt:
+                urls:
+                  - https://packages.microsoft.com/ubuntu/24.04/prod
+          connections:
+            - tls:
+                serverNamePatterns:
+                  - cdn.playwright.dev
+                  - playwright.download.prss.microsoft.com
+                  - storage.googleapis.com
+                  - fwjydgxpttajiqpfmqtj.supabase.co
+                ports: [443]
+    - name: Enforce deadline and initialize bounded evidence
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - name: Check out the pinned harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out the pinned product
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Set up Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install the locked harness and selected browser
+      working-directory: harness
+      env:
+        BROWSER: ${{ matrix.browser }}
+      run: |
+        set -euo pipefail
+        start=$(date +%s)
+        npm ci --ignore-scripts
+        installed=$(date +%s)
+        npx --no-install playwright install --with-deps "$BROWSER"
+        ready=$(date +%s)
+        printf '{"dependencyInstallSeconds":%s,"browserInstallSeconds":%s,"browser":"%s"}\n' "$((installed-start))" "$((ready-installed))" "$BROWSER" > "$CRACI_RECEIPT_DIR/artifacts/setup-timing.json"
+    - name: Verify local privacy, consent, source and export boundaries
+      working-directory: harness
+      env:
+        BROWSER: ${{ matrix.browser }}
+        CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      run: |
+        set -euo pipefail
+        cat > "$RUNNER_TEMP/craci-qualification.sh" <<'CRACI_QUALIFICATION'
+        set -euo pipefail
+        export CRACI_BROWSER_OUTPUT="$CRACI_RECEIPT_DIR/artifacts/astra-equity-browser"
+        node scripts/craci/synthetic-clinical-browser.mjs "$CRACI_CLINICAL_PRODUCT" "$BROWSER"
+        CRACI_QUALIFICATION
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$RUNNER_TEMP/craci-qualification.sh"
+      id: qualification
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+    env:
+      PRODUCT_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_CLINICAL_PRODUCT: ${{ matrix.product }}
+      CRACI_WORKLOAD: astra-equity-browser
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+
+  rokoko-rl-seed-sweep:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-rl-seed-sweep' }}
+    name: Rokoko Double-DQN / learner seed ${{ matrix.learner_seed }} / 1000+400
+    runs-on: craci
+    timeout-minutes: 20
+    concurrency:
+      group: craci-rokoko-rl-seed-sweep-${{ matrix.learner_seed }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_LEARNER_SEED: ${{ matrix.learner_seed }}
+      CRACI_WORKLOAD: rokoko-rl-seed-sweep
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 8-vCPU source-bound CRACI training
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '8'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+          connections:
+            - tls:
+                serverNamePatterns:
+                  - download.pytorch.org
+                  - download-r2.pytorch.org
+                ports: [443]
+    - name: Enforce credit cutoff before package downloads
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned CPU PyTorch and MuJoCo from official package registries
+      run: |
+        set -euo pipefail
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -f "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends python3-venv
+        python3 -m venv "$RUNNER_TEMP/rokoko-rl-venv"
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -m pip install --no-cache-dir torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -m pip install --no-cache-dir --only-binary=:all: mujoco==3.3.7 numpy==2.4.6
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -c 'import torch,mujoco,numpy; assert torch.__version__.startswith("2.9.1"); assert mujoco.__version__=="3.3.7"; assert numpy.__version__=="2.4.6"; assert not torch.cuda.is_available()'
+    - name: Train 1000 new CPU episodes with feasible 60-option success horizon
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$CRACI_HARNESS_ROOT/scripts/craci/run-rokoko-rl-seed-sweep.sh"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-rl-ablations:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-rl-ablations' }}
+    name: Rokoko fresh-world policy ablations / learner seed ${{ matrix.learner_seed }} / 1000+500
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-rl-ablations-${{ matrix.learner_seed }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_LEARNER_SEED: ${{ matrix.learner_seed }}
+      CRACI_WORKLOAD: rokoko-rl-ablations
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 8-vCPU source-bound CRACI training
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '8'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+          connections:
+            - tls:
+                serverNamePatterns:
+                  - download.pytorch.org
+                  - download-r2.pytorch.org
+                ports: [443]
+    - name: Enforce credit cutoff before package downloads
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned CPU PyTorch and MuJoCo from official package registries
+      run: |
+        set -euo pipefail
+        ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+        test -f "$ubuntu_sources"
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+        sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends python3-venv
+        python3 -m venv "$RUNNER_TEMP/rokoko-rl-venv"
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -m pip install --no-cache-dir torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -m pip install --no-cache-dir --only-binary=:all: mujoco==3.3.7 numpy==2.4.6
+        "$RUNNER_TEMP/rokoko-rl-venv/bin/python" -c 'import torch,mujoco,numpy; assert torch.__version__.startswith("2.9.1"); assert mujoco.__version__=="3.3.7"; assert numpy.__version__=="2.4.6"; assert not torch.cuda.is_available()'
+    - name: Compare trained Q vs frozen untrained Q, constant PUSH_MEDIUM and controls
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$CRACI_HARNESS_ROOT/scripts/craci/run-rokoko-rl-ablations.sh"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  valio-http-race:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'valio-http-race' }}
+    name: Valio signed HTTP money / 1000 fixtures x 32 concurrent requests
+    runs-on: craci
+    timeout-minutes: 20
+    concurrency:
+      group: craci-valio-http-race-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: valio-http-race
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 4-vCPU source-bound CRACI HTTP stress
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce credit cutoff before synthetic HTTP stress
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1260 # 20m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Probe signed payment idempotency and cancel races over 32000+ parallel HTTP posts
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- node "$CRACI_HARNESS_ROOT/scripts/craci/valio-http-stress.mjs" --fixtures 1000 --width 32 --seed 20261114
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  valio-funding-race:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'valio-funding-race' }}
+    name: Valio two signed orders / 500 fixtures x 32 funding race
+    runs-on: craci
+    timeout-minutes: 20
+    concurrency:
+      group: craci-valio-funding-race-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: valio-funding-race
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 4-vCPU source-bound CRACI HTTP stress
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce credit cutoff before synthetic HTTP stress
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1260 # 20m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Race two signed orders for exact limited synthetic EUR, no overdraft
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- node "$CRACI_HARNESS_ROOT/scripts/craci/valio-funding-race.mjs" --fixtures 500 --width 32 --seed 20261114
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  # New action-necessity development qualification; synthetic teacher is NOT trained RL.
+  rokoko-action-necessity:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-action-necessity' }}
+    name: Rokoko frozen supervised fitted policy / independent test 300 and OOD 200
+    runs-on: craci
+    timeout-minutes: 20
+    concurrency:
+      group: craci-rokoko-action-necessity-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-action-necessity
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure source-bound CRACI 2-vCPU portable diagnostic
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce credit cutoff before source-bound synthetic arena
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1260 # 20m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Fit on fixed train seeds and score untouched test/OOD worlds
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-action-qualification.sh"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-v2-lockbox:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-v2-lockbox' }}
+    name: Rokoko nonlinear v2 DAgger / never-before-scored locked test 300 and OOD 200
+    runs-on: craci
+    timeout-minutes: 20
+    concurrency:
+      group: craci-rokoko-v2-lockbox-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-v2-lockbox
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure source-bound 2-vCPU supervised v2 lockbox
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce credit cutoff before independent v2 lockbox
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1260 # 20m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Evaluate frozen v2 fit on pristine test and OOD lockboxes
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-v2-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-td-lockbox:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-td-lockbox' }}
+    name: Rokoko genuine reward-TD Expected SARSA / novel locked test 300 and OOD 200
+    runs-on: craci
+    timeout-minutes: 25
+    concurrency:
+      group: craci-rokoko-td-lockbox-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-td-lockbox
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure source-bound 2-vCPU real reward-TD RL lockbox
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce credit cutoff before independent reward-TD RL lockbox
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1560 # 25m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Evaluate genuine 6k reward-trained TD policy on separate frozen test and OOD
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-td-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-dev:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-dev' }}
+    name: Rokoko REAL MuJoCo 3.3.7 moving-contact CPU dev smoke
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-mujoco-dev-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-dev
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU actual MuJoCo CPU physics
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Enforce credit cutoff before actual MuJoCo CPU simulation
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned MuJoCo wheel in isolated Python environment
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+
+    - name: Execute real mj_step physics on dev worlds only
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-dev-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v2-dev:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v2-dev' }}
+    name: Rokoko REAL MuJoCo 3.3.7 adaptive v2 development science gate
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-mujoco-v2-dev-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v2-dev
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU actual MuJoCo CPU physics
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Enforce credit cutoff before actual MuJoCo CPU simulation
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned MuJoCo wheel in isolated Python environment
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+
+    - name: Evaluate adaptive v2 versus constant and rejected teacher with real mj_step
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v2-dev-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v3-dev:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v3-dev' }}
+    name: Rokoko REAL MuJoCo 3.3.7 risk v3 development science gate
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-mujoco-v3-dev-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v3-dev
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU actual MuJoCo CPU physics
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Enforce credit cutoff before actual MuJoCo CPU simulation
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned MuJoCo wheel in isolated Python environment
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+
+    - name: Evaluate risk v3 versus constant and rejected teacher with real mj_step
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v3-dev-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v3-cal:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v3-cal' }}
+    name: Rokoko REAL MuJoCo 3.3.7 unchanged risk v3 independent 100-world calibration
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-mujoco-v3-cal-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v3-cal
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU actual MuJoCo CPU physics
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Enforce credit cutoff before actual MuJoCo CPU simulation
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned MuJoCo wheel in isolated Python environment
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+
+    - name: Evaluate risk v3 versus constant and rejected teacher with real mj_step
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v3-cal-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v4-dev:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v4-dev' }}
+    name: Rokoko REAL MuJoCo 3.3.7 safe swept-lane v4 fresh-development science gate
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-mujoco-v4-dev-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v4-dev
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU actual MuJoCo CPU physics
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Enforce credit cutoff before actual MuJoCo CPU simulation
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned MuJoCo wheel in isolated Python environment
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+
+    - name: Evaluate risk v3 versus constant and rejected teacher with real mj_step
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v4-dev-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v5-train-dev:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v5-train-dev' }}
+    name: Rokoko REAL MuJoCo v5 train / freeze weights / prospective paired dev
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-mujoco-v5-train-dev-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v5-train-dev
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU actual MuJoCo CPU physics
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Enforce credit cutoff before actual MuJoCo CPU simulation
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned MuJoCo wheel in isolated Python environment
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+
+    - name: Train a new candidate on train-only worlds and evaluate fresh paired dev
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v5-learning-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v6-train-dev:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v6-train-dev' }}
+    name: Rokoko REAL MuJoCo v6 observed-state contact planning / fresh paired dev
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-mujoco-v6-train-dev-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v6-train-dev
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU actual MuJoCo CPU physics
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Enforce credit cutoff before actual MuJoCo CPU simulation
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned MuJoCo wheel in isolated Python environment
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+
+    - name: Train an observation-only corridor macro policy and evaluate fresh paired dev
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v6-learning-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v7-feasibility:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v7-feasibility' }}
+    name: Rokoko REAL MuJoCo v7 train-only shielded option feasibility exploration
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-mujoco-v7-feasibility-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v7-feasibility
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU actual MuJoCo CPU physics
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Enforce credit cutoff before actual MuJoCo CPU simulation
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install pinned MuJoCo wheel in isolated Python environment
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+
+    - name: Probe 128 distinct hard contact worlds on train-only seeds; preserve safety evidence
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v7-feasibility-qualification.py"
+
+    - name: Retain exact V7 raw train data as bounded verified ZIP parts
+      id: packaging
+      run: |
+        set -euo pipefail
+        python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v7-retain-evidence.py" --mode pack --evidence-root "$RUNNER_TEMP/craci-evidence" --private-staging "$RUNNER_TEMP/craci-v7-private-originals"
+        python3 -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v7_retain_evidence.py'
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome == 'success' && steps.packaging.outcome == 'success' && 'success' || 'failure' }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+
+  rokoko-mujoco-v8-prospective:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v8-prospective' }}
+    name: Rokoko REAL MuJoCo frozen V8 vs paired baselines on fresh TRAIN worlds
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-mujoco-v8-prospective-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v8-prospective
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU MuJoCo physics for prospective TRAIN-only comparison
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Stop before credit expiry and demand an exact reviewed source
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install exact original MuJoCo and NumPy wheels
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+    - name: Run frozen V8 and all controls on identical fresh TRAIN-only MuJoCo worlds
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- "$RUNNER_TEMP/mujoco-venv/bin/python" "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v8-prospective-qualification.py"
+    - name: Preserve entire independently qualified V8 raw option stream in collector-safe ZIP parts
+      id: packaging
+      run: |
+        set -euo pipefail
+        python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v7-retain-evidence.py" --mode pack --artifact-name rokoko-mujoco-v8-prospective --evidence-root "$RUNNER_TEMP/craci-evidence" --private-staging "$RUNNER_TEMP/craci-v8-private-originals"
+        python3 -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v7_retain_evidence.py'
+    - id: receipt
+      name: Finalize exact source-bound V8 TRAIN-only CRACI receipt
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome == 'success' && steps.packaging.outcome == 'success' && 'success' || 'failure' }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          echo 'Pinned CRACI harness absent; cannot certify result' >&2
+          exit 1
+        fi
+    - name: Retain evidence whether science succeeds or fails
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v10-prospective:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v10-prospective' }}
+    name: Rokoko REAL MuJoCo V10 gradient vs frozen paired controls on fresh TRAIN worlds
+    runs-on: craci
+    timeout-minutes: 45
+    concurrency:
+      group: craci-rokoko-mujoco-v10-prospective-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v10-prospective
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU MuJoCo physics for prospective TRAIN-only comparison
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Stop before credit expiry and demand an exact reviewed source
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 3600
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install exact original MuJoCo and NumPy wheels
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+    - name: Run V10 and frozen controls on identical fresh TRAIN-only MuJoCo worlds; retain all raw private first
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- "$RUNNER_TEMP/mujoco-venv/bin/python" "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v10-prospective-qualification.py"
+    - id: receipt
+      name: Finalize exact source-bound V10 TRAIN-only CRACI receipt
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome == 'success' && 'success' || 'failure' }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          echo 'Pinned CRACI harness absent; cannot certify result' >&2
+          exit 1
+        fi
+    - name: Retain evidence whether science succeeds or fails
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v10-hybrid-prospective:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v10-hybrid-prospective' }}
+    name: Rokoko REAL MuJoCo pre-terminal V5/V8 hybrid vs placebo on fresh TRAIN worlds
+    runs-on: craci
+    timeout-minutes: 55
+    concurrency:
+      group: craci-rokoko-mujoco-v10-hybrid-prospective-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v10-hybrid-prospective
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU MuJoCo physics for prospective TRAIN-only comparison
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Stop before credit expiry and demand an exact reviewed source
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 4200
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install exact original MuJoCo and NumPy wheels
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+    - name: Run V5/V8 hybrid plus byte-identical V5 placebo on identical fresh TRAIN worlds
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- "$RUNNER_TEMP/mujoco-venv/bin/python" "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v10-hybrid-prospective-qualification.py"
+    - name: Preserve entire independently qualified V10 hybrid raw option stream in collector-safe ZIP parts
+      id: packaging
+      run: |
+        set -euo pipefail
+        python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v10-hybrid-retain-evidence.py" --mode pack --harness-root "$CRACI_HARNESS_ROOT" --evidence-root "$RUNNER_TEMP/craci-evidence" --private-staging "$RUNNER_TEMP/craci-hybrid-private-original"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v10_hybrid_prospective_qualification.py'
+    - id: receipt
+      name: Finalize exact source-bound V10 hybrid TRAIN-only CRACI receipt
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome == 'success' && steps.packaging.outcome == 'success' && 'success' || 'failure' }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          echo 'Pinned CRACI harness absent; cannot certify result' >&2
+          exit 1
+        fi
+    - name: Retain evidence whether science succeeds or fails
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v11-prospective:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v11-prospective' }}
+    name: Rokoko V11 source-trained goal-preserving rescue on new 517000 TRAIN MuJoCo worlds
+    runs-on: craci
+    timeout-minutes: 60
+    concurrency:
+      group: craci-rokoko-mujoco-v11-prospective-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v11-prospective
+      CRACI_CREDIT_WINDOW_OPEN: ${{ vars.CRACI_CREDIT_WINDOW_OPEN }}
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU MuJoCo physics for prospective TRAIN-only comparison
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Stop before credit expiry and demand an exact reviewed source
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
+        test "$remaining" -gt 3600
+        printf 'CRACI_CREDIT_REMAINING_SECONDS=%s\n' "$remaining" >> "$GITHUB_ENV"
+        test "$CRACI_SOURCE_SHA" = 'ab6df4054ef6ed350b479469590a48046a0c0a68'
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install exact original MuJoCo and NumPy wheels
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+    - name: Execute all 800 fresh TRAIN MuJoCo episodes and independent complete-source replay
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- "$RUNNER_TEMP/mujoco-venv/bin/python" -B "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v11-prospective-qualification.py"
+    - name: Rerun pinned independent evidence and qualifier contract checks
+      id: packaging
+      run: |
+        set -euo pipefail
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -B -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v11_*.py'
+    - id: receipt
+      name: Finalize exact source-bound V11 TRAIN-only CRACI receipt
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome == 'success' && steps.packaging.outcome == 'success' && 'success' || 'failure' }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          echo 'Pinned CRACI harness absent; cannot certify result' >&2
+          exit 1
+        fi
+    - name: Retain evidence whether science succeeds or fails
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-mujoco-v12-pilot:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v12-pilot' }}
+    name: Rokoko V12 trained contact-to-dwell 518000 fresh 144-episode TRAIN pilot
+    runs-on: craci
+    timeout-minutes: 60
+    concurrency:
+      group: craci-rokoko-mujoco-v12-pilot-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v12-pilot
+      CRACI_CREDIT_WINDOW_OPEN: ${{ vars.CRACI_CREDIT_WINDOW_OPEN }}
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU MuJoCo physics for prospective TRAIN-only comparison
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Stop before credit expiry and demand an exact reviewed source
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
+        test "$remaining" -gt 3600
+        printf 'CRACI_CREDIT_REMAINING_SECONDS=%s\n' "$remaining" >> "$GITHUB_ENV"
+        test "$CRACI_SOURCE_SHA" = '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f'
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install exact original MuJoCo and NumPy wheels
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+    - name: Compile immutable negative TRAIN science into V12 learning admission (no automatic dispatch)
+      run: |
+        set -euo pipefail
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -B "$CRACI_HARNESS_ROOT/scripts/craci/feedback_loop_v2/compile.py" \
+          --mode compile --require-git --expected-head "$CRACI_HARNESS_SHA" \
+          --repo-root "$CRACI_HARNESS_ROOT" \
+          --output-dir "$RUNNER_TEMP/craci-evidence/artifacts/rokoko-feedback-v2" \
+          --candidate v11 --credit-cutoff-utc "$CRACI_WINDOW_END"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import json,os; p=os.environ['RUNNER_TEMP']+'/craci-evidence/artifacts/rokoko-feedback-v2/feedback.json'; o=json.load(open(p)); assert o['decision']=='TRAIN_MORE_FOR_UNSUPPORTED_ACTION' and o['model_promotion_authorized'] is False and o['job_dispatch_authorized'] is False and o['sealed_splits_unopened'] is True and o['next_experiment']['pilot']['start']==518000 and o['next_experiment']['pilot']['end']==518511"
+    - name: Execute bounded 144-episode V12 fresh TRAIN pilot and independent full physics replay
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- "$RUNNER_TEMP/mujoco-venv/bin/python" -B "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v12-pilot-qualification.py"
+    - name: Rerun pinned independent evidence and qualifier contract checks
+      id: packaging
+      run: |
+        set -euo pipefail
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -B -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v12_*.py'
+    - id: receipt
+      name: Finalize exact source-bound V12 TRAIN-only CRACI receipt
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome == 'success' && steps.packaging.outcome == 'success' && 'success' || 'failure' }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          echo 'Pinned CRACI harness absent; cannot certify result' >&2
+          exit 1
+        fi
+    - name: Retain evidence whether science succeeds or fails
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+  rokoko-mujoco-v13-causal:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v13-causal' }}
+    name: Rokoko V13 causal reachability on audited original TRAIN worlds (unpromoted)
+    runs-on: craci
+    timeout-minutes: 60
+    concurrency:
+      group: craci-rokoko-mujoco-v13-causal-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-mujoco-v13-causal
+      CRACI_V13_ORIGINAL_MODE: regenerate-144-audited-trace-pins
+      CRACI_CREDIT_WINDOW_OPEN: ${{ vars.CRACI_CREDIT_WINDOW_OPEN }}
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure CRACI 4-vCPU MuJoCo physics for bounded causal TRAIN diagnostic
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, pypi, ubuntu]
+    - name: Stop before credit expiry and demand an exact reviewed source
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
+        test "$remaining" -gt 3600
+        printf 'CRACI_CREDIT_REMAINING_SECONDS=%s\n' "$remaining" >> "$GITHUB_ENV"
+        test "$CRACI_SOURCE_SHA" = '0751d78b93855bf70820b03b0a543e123d218baf'
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install exact original MuJoCo and NumPy wheels
+      run: |
+        set -euo pipefail
+        python3 -m venv "$RUNNER_TEMP/mujoco-venv"
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -m pip install --only-binary=:all: 'numpy==2.3.4' 'mujoco==3.3.7'
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import mujoco; assert mujoco.__version__ == '3.3.7'"
+    - name: Verify immutable V3 science STOP and original 144-trajectory digest pins (no dispatch)
+      run: |
+        set -euo pipefail
+        printf '%s  %s\n' 'f4c9f1c0b994d8c34cad0fcb63579c79f96439dedbfe6c12cb3df57b42fea79c' "$CRACI_HARNESS_ROOT/scripts/craci/feedback_loop_v3/next_training_decision.json" | sha256sum -c -
+        printf '%s  %s\n' '24460b2ed49635b33db66233dd854f84593e6f65484cde229ee17ec483dd0245' "$CRACI_HARNESS_ROOT/docs/craci/learning/rokoko-mujoco-v12-43657058944/trajectory-sha256.json" | sha256sum -c -
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -c "import json,sys; d=json.load(open(sys.argv[1])); assert d['decision']=='SCIENCE_STOP_NO_PROMOTION' and d['dispatch_authorized'] is False and d['model_promotion_authorized'] is False and d['science']['status']=='STOP' and len(d['science']['novel'])==0 and d['next_training_decision']['frozen_new_train_cohort']['first_seed']==519024" "$CRACI_HARNESS_ROOT/scripts/craci/feedback_loop_v3/next_training_decision.json"
+    - name: Execute bounded original TRAIN causal reachability with independent MuJoCo replay
+      id: qualification
+      run: |
+        set -euo pipefail
+        test "$CRACI_CREDIT_WINDOW_OPEN" = true
+        test "$CRACI_SOURCE_SHA" = '0751d78b93855bf70820b03b0a543e123d218baf'
+        remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
+        test "$remaining" -ge 3600
+        export CRACI_CREDIT_REMAINING_SECONDS="$remaining"
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- "$RUNNER_TEMP/mujoco-venv/bin/python" -B "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-mujoco-v13-causal-qualification.py"
+    - name: Rerun pinned independent evidence and qualifier contract checks
+      id: packaging
+      run: |
+        set -euo pipefail
+        "$RUNNER_TEMP/mujoco-venv/bin/python" -B -m unittest discover -q -s "$CRACI_HARNESS_ROOT/scripts/craci" -p 'test_rokoko_mujoco_v13_*.py'
+    - id: receipt
+      name: Finalize exact source-bound V13 TRAIN causal diagnostic receipt
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome == 'success' && steps.packaging.outcome == 'success' && 'success' || 'failure' }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          echo 'Pinned CRACI harness absent; cannot certify result' >&2
+          exit 1
+        fi
+    - name: Retain evidence whether science succeeds or fails
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-shared-tournament:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-shared-tournament' }}
+    name: Rokoko SAME-WORLD frozen DAgger v2 versus real TD / test500 OOD300
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-rokoko-shared-tournament-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-shared-tournament
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 4-vCPU exact-pair source checkout and independent tournament
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce cutoff before double-source frozen world comparison
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Check out frozen reward-TD comparator SHA
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        repository: SalesSquad/junction-pets
+        ref: f7b512d93ca46e6ddf7204f62f118eee800f285b
+        path: comparator
+        persist-credentials: false
+    - name: Check out frozen source-bound shared-world experiment evaluator
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        repository: SalesSquad/junction-pets
+        ref: 182c2381e1d9e145f94cbb39ff66f9ec3db1f217
+        path: experiment
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Compare two frozen policies on identical completely new worlds
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/rokoko-shared-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  rokoko-shared-preflight:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-shared-preflight' }}
+    name: Rokoko shared-world BOTH source hash / weights PRELOCK dev8 only
+    runs-on: craci
+    timeout-minutes: 15
+    concurrency:
+      group: craci-rokoko-shared-preflight-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: rokoko-shared-preflight
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 2-vCPU dev-only shared-source diagnostic
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github]
+    - name: Enforce cutoff before dev-only shared-source preflight
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 960 # 15m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Check out frozen reward-TD comparator SHA
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        repository: SalesSquad/junction-pets
+        ref: f7b512d93ca46e6ddf7204f62f118eee800f285b
+        path: comparator
+        persist-credentials: false
+    - name: Check out frozen source-bound shared-world experiment evaluator
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        repository: SalesSquad/junction-pets
+        ref: 182c2381e1d9e145f94cbb39ff66f9ec3db1f217
+        path: experiment
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Check both source trees and frozen model digests on DEV ONLY (no lockboxes)
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$GITHUB_WORKSPACE/experiment/experiments/rokoko-headtohead/tournament.py" --v2-root "$CRACI_SOURCE_ROOT" --td-root "$GITHUB_WORKSPACE/comparator" --split dev --episodes 8 --output "$CRACI_RECEIPT_DIR/artifacts/shared-preflight-dev.json"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  # One real disposable PostgreSQL cluster on an isolated CRACI runner; fictional cents only.
+  valio-postgres-crash:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'valio-postgres-crash' }}
+    name: Valio disposable PostgreSQL / 8 OS workers / post-COMMIT crash / 1000 requests
+    runs-on: craci
+    timeout-minutes: 25
+    concurrency:
+      group: craci-valio-postgres-crash-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: valio-postgres-crash
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 4-vCPU CRACI disposable PostgreSQL and npm
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm, ubuntu]
+    - name: Enforce remaining credit time before real local PG test
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1560 # 25m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install isolated PostgreSQL runtime and locked pg Node client
+      run: |
+        set -euo pipefail
+        test "$(git -C source rev-parse HEAD)" = "$CRACI_SOURCE_SHA"
+        if ! compgen -G '/usr/lib/postgresql/*/bin/initdb' > /dev/null; then
+          ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+          test -f "$ubuntu_sources"
+          sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends postgresql
+        fi
+        cd "$CRACI_SOURCE_ROOT/solutions/valio-trusted-trade/durable"
+        npm ci --ignore-scripts --no-audit --no-fund
+        node --test test/contract.test.mjs
+    - name: Run eight-worker serializable PostgreSQL crash, replay, outbox and refunds
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- python3 "$CRACI_HARNESS_ROOT/scripts/craci/valio-postgres-qualification.py"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  valio-wal-chaos:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'valio-wal-chaos' }}
+    name: Valio isolated WAL SIGKILL/restart / 8 workers / 10k distinct writes
+    runs-on: craci
+    timeout-minutes: 30
+    concurrency:
+      group: craci-valio-wal-chaos-${{ matrix.cell }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: valio-wal-chaos
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+    steps:
+    - name: Configure 4-vCPU CRACI disposable PostgreSQL and npm
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm, ubuntu]
+    - name: Enforce remaining credit before task-owned WAL SIGKILL and redo
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(date -u +%s)" -lt "$(date -ud "$CRACI_WINDOW_END" +%s)"
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 1860 # 30m execution cap + 1m drain
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Install disposable PG runtime, locked pg client and WAL guard tests
+      run: |
+        set -euo pipefail
+        test "$(git -C source rev-parse HEAD)" = "$CRACI_SOURCE_SHA"
+        if ! compgen -G '/usr/lib/postgresql/*/bin/initdb' > /dev/null; then
+          ubuntu_sources=/etc/apt/sources.list.d/ubuntu.sources
+          test -f "$ubuntu_sources"
+          sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::sourcelist="$ubuntu_sources" -o Dir::Etc::sourceparts=- install -y --no-install-recommends postgresql
+        fi
+        cd "$CRACI_SOURCE_ROOT/solutions/valio-trusted-trade/durable"
+        npm ci --ignore-scripts --no-audit --no-fund
+        node --test test/contract.test.mjs
+        node --test chaos/test/*.test.mjs
+    - name: Verify exact-source kill-9 recovery and 10k unique ledger changes
+      id: qualification
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- node "$CRACI_HARNESS_ROOT/scripts/craci/valio-wal-qualification.mjs"
+
+    - id: receipt
+      name: Finalize source-bound result and existing registry record
+      if: ${{ always() }}
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if [ -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" ]; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          # An absent harness cannot supply a registry-validated execution receipt.
+          # Preserve only explicit infrastructure metadata; never claim source verification.
+          python3 - <<'CRACI_INFRA'
+        import json,os,pathlib
+        env=os.environ
+        out=pathlib.Path(env['CRACI_RECEIPT_DIR'])/'upload'
+        out.mkdir(parents=True,exist_ok=False)
+        receipt={'schemaVersion':1,'result':'incomplete','evidence':'infrastructure-only',
+         'reason':'Pinned harness checkout unavailable; no qualification or registry import verified',
+         'workload':env['CRACI_WORKLOAD'],'cell':env['CRACI_CELL'],
+         'sourceRequested':env['CRACI_SOURCE_SHA'],'harnessRequested':env['CRACI_HARNESS_SHA'],
+         'sourceVerified':False,'harnessVerified':False,'actualCostEur':None,
+         'runId':env['GITHUB_RUN_ID'],'runAttempt':env['GITHUB_RUN_ATTEMPT']}
+        with (out/'infrastructure-receipt.json').open('x') as file:json.dump(receipt,file,sort_keys=True)
+        with open(env['GITHUB_OUTPUT'],'a') as file:file.write('upload_ready=true\n')
+        CRACI_INFRA
+          exit 1
+        fi
+    - name: Retain bounded evidence even after failure
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-${{ github.job }}-${{ env.CRACI_CELL }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+    needs:
+    - plan
+
+  # Three-hour, explicit owner-authorized counterfactual supply-chain campaign.
+  # All payloads are synthetic and benign; actual CRACI trace/SBOM is separate.
+  immune-tournament:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'immune-tournament' }}
+    needs: plan
+    name: "Immune epoch ${{ matrix.epoch }} / cohort ${{ matrix.seed }}"
+    runs-on: craci
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: immune-tournament
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+      CRACI_IMMUNE_STOP: '2026-11-14T18:00:00Z'
+    steps:
+    - name: CRACI package-aware locked network (4 vCPU)
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '4'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm]
+    - name: Enforce three-hour cutoff, leave room for completion
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(( $(date -ud "$CRACI_IMMUNE_STOP" +%s) - $(date -u +%s) ))" -gt 960
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 960
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+        test "$CRACI_SOURCE_SHA" = "$CRACI_HARNESS_SHA"
+    - name: Check out pinned harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out exact product source
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Install pinned Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Observe real CRACI package downloads and SBOM
+      working-directory: source
+      run: npm ci --ignore-scripts --no-audit
+    - name: Probe denied outbound to neutral example.com, never exfiltrate
+      id: egress
+      shell: bash
+      run: |
+        set -euo pipefail
+        set +e
+        curl --fail --silent --head --max-time 8 https://example.com -o /dev/null
+        rc=$?
+        set -e
+        printf '{"probe":"example.com","exitCode":%s,"claim":"transport failed; CRACI network trace required for policy attribution"}\n' "$rc" > "$CRACI_RECEIPT_DIR/artifacts/egress-probe.json"
+        if [ "$rc" -eq 0 ]; then
+          echo 'Unexpected egress success under deny-by-default policy'
+          exit 1
+        fi
+    - name: Seeded adversarial provenance graph and bounded counterfactual repair
+      id: qualification
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- node "$CRACI_HARNESS_ROOT/scripts/craci/immune-tournament.mjs" --epoch "${{ matrix.epoch }}" --seed "${{ matrix.seed }}" --cases 250000 --lockfile "$CRACI_SOURCE_ROOT/package-lock.json" --output "$CRACI_RECEIPT_DIR/artifacts/immune-${{ matrix.seed }}.json"
+    - id: receipt
+      name: Finalize bounded source-verified receipt even after failed assertions
+      if: ${{ always() }}
+      shell: bash
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          mkdir -p "$CRACI_RECEIPT_DIR/upload"
+          printf '%s\n' '{"schemaVersion":1,"result":"incomplete","evidence":"infrastructure-only","reason":"Pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+          printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+    - name: Save fixed receipts and bounded metrics
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-immune-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/craci-evidence/upload/
+        if-no-files-found: error
+        retention-days: 7
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+
+  chaos-lab:
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'chaos-lab' }}
+    needs: plan
+    name: "Chaos Lab / ${{ matrix.profile }} / seed ${{ matrix.seed }}"
+    runs-on: craci
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CRACI_SOURCE_SHA: ${{ matrix.source_sha }}
+      CRACI_HARNESS_SHA: ${{ github.sha }}
+      CRACI_HARNESS_ROOT: ${{ github.workspace }}/harness
+      CRACI_SOURCE_ROOT: ${{ github.workspace }}/source
+      CRACI_SOURCE_REPOSITORY: SalesSquad/junction-pets
+      CRACI_WORKLOAD: chaos-lab
+      CRACI_CELL: ${{ matrix.cell }}
+      CRACI_NEXT_OWNER: Portfolio PR Recovery
+      CRACI_ALLOWED_SOURCE_CHANGES: '[]'
+      CRACI_CHAOS_STOP: '2026-11-14T18:00:00Z'
+      CHAOS_PROFILE: ${{ matrix.profile }}
+      CHAOS_SEED: ${{ matrix.seed }}
+    steps:
+    - name: Configure monitored CRACI sandbox and default-deny networking
+      uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+      with:
+        size: '2'
+        image: ubuntu-24.04
+        network: |
+          default: deny
+          presets: [github, npm]
+    - name: Enforce bounded three-hour authorization before checkout
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/craci-evidence/artifacts"
+        printf 'CRACI_RECEIPT_DIR=%s/craci-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+        test "$(( $(date -ud "$CRACI_CHAOS_STOP" +%s) - $(date -u +%s) ))" -gt 960
+        test "$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))" -gt 960
+        [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+        test "$CRACI_SOURCE_SHA" = "$CRACI_HARNESS_SHA"
+    - name: Check out exact immutable harness
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: harness
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Check out exact immutable source
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      with:
+        path: source
+        ref: ${{ matrix.source_sha }}
+        persist-credentials: false
+    - name: Pin Node 22
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version: '22'
+    - name: Observe real CRACI-monitored npm resolution once per distinct wave
+      if: ${{ matrix.profile == 'network' }}
+      working-directory: source
+      run: npm ci --ignore-scripts --no-audit --no-fund
+    - name: Four profiles of fault-injection hooks and real isolated probes
+      id: qualification
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" run -- bash -euo pipefail -c '
+          node "$CRACI_HARNESS_ROOT/scripts/craci/chaos-lab.mjs" \
+            --seed "$CHAOS_SEED" --cases 25000 --profile "$CHAOS_PROFILE" \
+            --output "$CRACI_RECEIPT_DIR/artifacts/chaos-$CHAOS_PROFILE.json"
+          if [ "$CHAOS_PROFILE" = "network" ]; then
+            node "$CRACI_HARNESS_ROOT/scripts/craci/chaos-probes.mjs" \
+              --output "$CRACI_RECEIPT_DIR/artifacts/probes-$CHAOS_PROFILE.json"
+          fi
+          if [ "$CHAOS_PROFILE" = "evidence" ]; then
+            node --test "$CRACI_HARNESS_ROOT/scripts/craci/chaos-tests.test.mjs"
+            python3 "$CRACI_HARNESS_ROOT/scripts/craci/chaos-controller-test.py"
+          fi
+        '
+    - name: Probe neutral external HTTP with curl fail-on-HTTP-error
+      if: ${{ matrix.profile == 'network' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        set +e
+        http_code=$(curl --fail --silent --show-error --head --max-time 8 \
+          --write-out '%{http_code}' https://example.com -o /dev/null)
+        rc=$?
+        set -e
+        [[ "$http_code" =~ ^[0-9]{3}$ ]]
+        printf '{"probe":"https://example.com","exitCode":%s,"httpStatus":"%s","claim":"HTTP or transport failure observed; CRACI provider trace required for policy attribution"}\n' "$rc" "$http_code" > "$CRACI_RECEIPT_DIR/artifacts/egress-probe.json"
+        if [ "$rc" -eq 0 ]; then
+          echo 'Unexpected successful HTTP response under deny-by-default CRACI policy'
+          exit 1
+        fi
+    - id: receipt
+      name: Finalize source-bound receipt, including on assertion failure
+      if: ${{ always() }}
+      shell: bash
+      env:
+        CRACI_JOB_STATUS: ${{ job.status }}
+        CRACI_STAGE_OUTCOME: ${{ steps.qualification.outcome }}
+      run: |
+        set -euo pipefail
+        export CRACI_RECEIPT_DIR="$RUNNER_TEMP/craci-evidence"
+        if test -f "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs"; then
+          node "$CRACI_HARNESS_ROOT/scripts/craci/run-receipt.mjs" finalize
+        else
+          mkdir -p "$CRACI_RECEIPT_DIR/upload"
+          printf '%s\n' '{"schemaVersion":1,"result":"incomplete","evidence":"infrastructure-only","reason":"Pinned harness unavailable","actualCostEur":null}' > "$CRACI_RECEIPT_DIR/upload/infrastructure-receipt.json"
+          printf 'upload_ready=true\n' >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+    - name: Upload compact immutable chaos evidence
+      if: ${{ always() && steps.receipt.outputs.upload_ready == 'true' }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: craci-chaos-${{ matrix.cell }}-${{ github.run_id }}-${{ github.run_attempt }}
         path: ${{ runner.temp }}/craci-evidence/upload/
         if-no-files-found: error
         retention-days: 7

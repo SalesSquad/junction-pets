@@ -1,0 +1,67 @@
+{
+  "actual_real_option_transitions": 38569,
+  "candidate_unsafe_trials": 0,
+  "dataset_sha256": "ac101715484383b1b5add91eeaac5e8f1f532de7a476aca1e53393c5686469c1",
+  "decision": "valid_source_bound_five_way_train_only_evidence",
+  "dev_cal_test_ood_opened": false,
+  "dispatch_authorized": false,
+  "exact_source_sha": "9cc583d3f0f24484b79c1929ba875c7a3b667806",
+  "experiment_complete": true,
+  "full_transition_archive_sha256": "739c30a13ecacdecd404774fc9dadd887944f32df5cef14cfd2758a639460419",
+  "independentHoldout": false,
+  "independent_five_way_forward_reopen_worlds": {
+    "frozen_v5": 54,
+    "frozen_v6": 81,
+    "frozen_v8": 102,
+    "repeat_left": 100,
+    "v10_loss_informed": 102
+  },
+  "independent_full_trace_public_mask_replay": true,
+  "independent_true_physics_clear_goal_replay": {
+    "claim_verified": true,
+    "claimed_safe_clear_goal_trajectories": 67,
+    "dev_cal_test_ood_opened": false,
+    "model_promotion_authorized": false,
+    "replayed_safe_clear_goal_trajectories": 67,
+    "schema": "junction.rokoko.mujoco-v10-clear-goal-replay.v1",
+    "verified_clear_goal_trial_keys_sha256": "60b58404de90ed18ab2ccdea62634b152b492487ad982f08ef3d069de8278a44"
+  },
+  "independent_true_physics_positive_replay": {
+    "claim_verified": true,
+    "fully_replayed_positive_train_trials": 286,
+    "model_promotion_authorized": false,
+    "no_dev_cal_test_ood": true,
+    "positive_trial_keys_sha256": "e12442f34e38bc35bd80461ad69cc215c10ac0be610197db1dc98cf59c17867d",
+    "schema": "junction.rokoko.mujoco-v7-positive-replay.v1",
+    "selection_scan_replayed": 326,
+    "verified_near_corridor_success_worlds": 12,
+    "verified_obstacle_away_displacement_worlds": 85
+  },
+  "limits": "Real MuJoCo train-only probe; no test qualification or physical robot safety certificate",
+  "mechanism_positive": true,
+  "model_improvement_verified": false,
+  "next_experiment_advisory": {
+    "new_dev_seed_start": 129330,
+    "new_train_seed_start": 513000,
+    "next_step": "new_source_holdout_after_independent_review",
+    "note": "No discovery among tested strategies is not an impossibility theorem"
+  },
+  "producer_exit_code": 0,
+  "promotion_authorized": false,
+  "schema": "junction.rokoko.mujoco-v10-prospective.craci.train.v1",
+  "science_gate": "INDEPENDENT_PAIRED_GOAL_REVIEW_REQUIRED",
+  "science_warning": "Physical-goal delta is TRAIN-only and needs separate review",
+  "selected_clear_worlds": 32,
+  "selected_near_worlds": 128,
+  "strategies": {
+    "frozen_v5": 160,
+    "frozen_v6": 160,
+    "frozen_v8": 160,
+    "repeat_left": 160,
+    "v10_loss_informed": 160
+  },
+  "train_only_seed_start": 515000,
+  "trials": 800,
+  "worlds_safe_corridor_success": 12,
+  "worlds_safe_lateral_displacement_ge_25mm": 85
+}

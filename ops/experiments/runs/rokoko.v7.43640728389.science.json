@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "runId": "rokoko.v7.43640728389.science",
+  "projectId": "rokoko",
+  "taskId": "rokoko.mujoco-feasibility",
+  "kind": "synthetic-test",
+  "capturedAt": "2026-11-14T21:07:49.589Z",
+  "status": "succeeded",
+  "source": {
+    "repository": "SalesSquad/junction-pets",
+    "commit": "127ceb9be4374ba46908cd398ced6b740275a434"
+  },
+  "evidence": {
+    "level": "source-reported",
+    "ref": "https://github.com/SalesSquad/junction-pets/actions/runs/43640728389",
+    "receiptSha256": "546249d8ccc2929a58429c0c767e58b92eb9deaabb2d3f39c36761b4e27ae9a6"
+  },
+  "dataset": {
+    "sha256": "3888fd350c66f3a1ca6a2bebb7731097c86181b5644d921b0bb580855bae4d64",
+    "sampleSetSha256": "83fbcdb0a501be9c00a94194146036e99f519ab4b2d30f96b51f80d47246b43a",
+    "split": "train",
+    "sampleCount": 160,
+    "origin": "synthetic"
+  },
+  "evaluation": {
+    "kind": "train-option-feasibility",
+    "protocolSha256": "88b403e5246d2e496cf48a1e405708e6f86e1107d89185ebb615cf6af069f144",
+    "independentHoldout": false
+  },
+  "artifact": {
+    "type": "report",
+    "sha256": "2c371bc969d502bd1a64d6a5744012440deea961c22cfee7a173dbd72de5bc49"
+  },
+  "metrics": [
+    {"id": "safe-near-worlds", "value": 2, "unit": "count", "direction": "higher", "samples": 128},
+    {"id": "frozen-v5-safe-near", "value": 2, "unit": "count", "direction": "higher", "samples": 128},
+    {"id": "repeat-left-safe-near", "value": 0, "unit": "count", "direction": "higher", "samples": 128},
+    {"id": "repeat-left-lateral25", "value": 74, "unit": "count", "direction": "higher", "samples": 128},
+    {"id": "repeat-left-reopen-worlds", "value": 117, "unit": "count", "direction": "higher", "samples": 128},
+    {"id": "repeat-left-unsafe", "value": 0, "unit": "count", "direction": "lower", "samples": 128},
+    {"id": "repeat-right-unsafe", "value": 32, "unit": "count", "direction": "lower", "samples": 128},
+    {"id": "actual-option-transitions", "value": 68568, "unit": "count", "direction": "higher", "samples": 1280}
+  ],
+  "limitations": [
+    "Immutable source-reported MuJoCo 3.3.7 TRAIN feasibility, not an independent model evaluation.",
+    "The two near safe-world wins were produced by frozen V5/V6; six new macros had zero safe near-world wins.",
+    "Independent real MuJoCo replay verified 178 positive trials and all 338 pre-outcome seed scans.",
+    "No dev/cal/test/OOD worlds opened, no actual robot safety proof, no verified billing or release approval.",
+    "Full compressed raw transitions retained in GitHub Actions artifact 14131897536 for seven days."
+  ],
+  "policySha256": null
+}
