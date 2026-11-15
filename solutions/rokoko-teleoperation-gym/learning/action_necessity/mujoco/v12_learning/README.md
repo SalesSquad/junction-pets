@@ -43,8 +43,13 @@ training weight across its long/short sequences. The CAL 95% bound uses the
 **maximum prediction error per independent world**, not option count; the
 held diagnostic reports both world-max and event-level coverage, effective
 distinct world counts per action and a zero-motion baseline. Action 0 remains
-unqualified even though 947 executed samples exist. Trained action models:
-`[1, 2, 3, 5]`; unsupported `[0, 4, 6]`.
+unqualified even though 947 executed samples exist. World-calibrated,
+source-observed candidate action models: `[1, 2, 3, 5]`; unsupported
+`[0, 4, 6]`. **"Supported" means observed and calibrated, not proven better
+than every simpler predictor.** RETREAT5 has held-event mean position error
+**0.00269255m** versus zero-motion **0.00265510m** (slightly worse).
+Its advantage must be tested via prospective per-action ablation and actual
+MuJoCo goal completion; the 90% held-world coverage gate is no value proof.
 
 Frozen model `model.json` SHA-256:
 `82cfa42ba2240aff6d00ec3e2b15c06d78386d3c0682986a23e478977f2dbf9e`.
