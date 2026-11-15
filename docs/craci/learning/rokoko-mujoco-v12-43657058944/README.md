@@ -72,8 +72,9 @@ obstacle-away object displacement; this is an observed per-world outcome, not
 a learned counterfactual success label.
 
 Science decision: **STOP — zero novel safe goal250 outcomes.** Do not promote
-V12, train on these opened outcomes, or automatically dispatch the proposed
-`518512..519023` confirmation cohort. A new physical mechanism with a
+V12, treat these already-opened TRAIN outcomes as independent heldout
+confirmation, or automatically dispatch the proposed `518512..519023`
+confirmation cohort. A new physical mechanism with a
 separately reviewed TRAIN-only preregistration would be needed to justify
 further spending. All dev/cal/test/OOD splits remain sealed by the recorded
 manifest. Provider bill is unknown; the hosted receipt explicitly lacks a
