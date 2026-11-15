@@ -24,7 +24,8 @@ import urllib.parse
 import boto3
 from botocore.config import Config
 from botocore.exceptions import (ClientError, ConnectionClosedError, ConnectTimeoutError,
-                                 EndpointConnectionError, ReadTimeoutError)
+                                 EndpointConnectionError, IncompleteReadError, ReadTimeoutError,
+                                 ResponseStreamingError, SSLError)
 
 SOURCE = "8948b44454f1a5dd174395e6d69e1ae8b533688b"
 INPUT_SHA = "47a015b6cf7f2ef10ff246fbf325e3f63459aa277d8ab3bd4bd6f61b4e0ce25f"
@@ -35,7 +36,8 @@ SCALING = {"max_replica_count": 1, "queue_message_ttl_seconds": 3000, "deadline_
 MAX_HOURLY_USD = 2.22
 MAX_ESTIMATE_USD = 3.0
 MAX_ARCHIVE_BYTES = 512 * 1024 * 1024
-TRANSIENT_S3 = (ConnectionClosedError, ConnectTimeoutError, EndpointConnectionError, ReadTimeoutError, OSError)
+TRANSIENT_S3 = (ConnectionClosedError, ConnectTimeoutError, EndpointConnectionError,
+                IncompleteReadError, ReadTimeoutError, ResponseStreamingError, SSLError, OSError)
 
 
 def require(ok, reason):
