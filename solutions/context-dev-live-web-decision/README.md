@@ -37,6 +37,26 @@ allows ten refreshes maximum. Credit exhaustion stops further refreshes until
 restart; check provider balance first. Existing Context.dev credits/identity
 are separate from a source build or an installed chat connector.
 
+## Retailer news (second Context.dev endpoint)
+
+Each refresh also calls Context.dev **News Search**
+(`POST https://api.context.dev/v1/news/search`, documented at
+<https://docs.context.dev/api-reference/news/search.md> and
+<https://docs.context.dev/news/overview.md>) once per retailer, using an
+`entity`/`domain` search for the pinned domains `gigantti.fi` and `proshop.fi`,
+newest first, last 30 days, at most 5 articles. Headlines are scanned for
+retailer-risk terms (insolvency/konkurssi, layoffs/muutosneuvottelut, recall,
+data breach/tietomurto, strike, store closure, delivery problems, regulator
+action). Flagged headlines appear on the retailer card and as a verdict note
+("read before ordering"); they **never change the ordinary-price ranking**.
+News has its own 15-minute TTL, so price refreshes inside that window do not
+re-buy headlines (1 credit per 10 results; unknown company 404 costs 1 and is
+shown as "no coverage"). Same key handling as scrape: server-side
+`CONTEXT_DEV_API_KEY` only, fixed host, no caller-supplied domain or query.
+Without a key the page shows the saved capture and "news not retrieved".
+Only reduced headline metadata is kept (no authors, images or key metadata).
+**News Search is fixture-tested only; it has no recorded live run yet.**
+
 ## Product watches
 
 At **Product watches**, describe the product and your requirements, optionally
@@ -109,6 +129,7 @@ verified root-response adapter without inventing unavailable fields.
 
 ```sh
 node --test solutions/context-dev-live-web-decision/live/live.test.mjs \
+  solutions/context-dev-live-web-decision/live/news.test.mjs \
   solutions/context-dev-live-web-decision/engine.test.mjs \
   solutions/context-dev-live-web-decision/watch/watch.test.mjs
 ```
