@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "work_id": "bahn-reliability-20261115",
+  "reviewed_source_sha": "fa2c3b7fe3f6a9bbb4ba834b2902ad861e6af1ab",
+  "reviews": [
+    {
+      "reviewer": "/root/bahn_challenge_research",
+      "scope": "Read-only review of original binary confirmation CSV, R output, effective freeze, selected run receipts, prior splits and model.",
+      "findings": "No blocking count, provenance, configuration or split inconsistency found in the supplied artifacts. All ten runs completed, with five fresh paired seeds and the unchanged original model.\n\nCandidate: 564/567 on time (99.4709%); worst world 92/94 (97.8723%); margin €13,778.23. Baseline: 995/1,033 on time (96.3214%); worst world 94.3750%; margin €28,278.68.\nService improved in every pair and margin declined in every pair. Margin change: −€14,500.45 (−51.277%). Won orders: −466 (−45.111%). Absolute on-time deliveries: −431.\n\nThe 20,000-draw paired-seed bootstrap reports candidate aggregate 95% interval 98.6517–100%, one-sided lower bound 98.7448%, service improvement interval +2.0920 to +4.0981 percentage points, and total margin change interval −€18,571.09 to −€10,429.81.\nThese intervals resample five seed scenarios with three candidate late outcomes; they do not guarantee the secret final world, establish 99% population service, or establish 98% in every world.\n\nEvery CSV row matches its official score, dataset summary, selected run receipt and recorded evidence-bundle digest. Original CSV MD5 matches the R input. All five new seed groups and ten world IDs are disjoint from the prior six development and five version-1 blind seeds. Every run references the effective freeze; every learned run uses threshold 0.02 and the unchanged model.\n\nThe manifest records 16 baseline action failures and zero learned action failures. Both policies completed, but reasons are absent from this review set. Raw bundles were not included locally, so this audit verifies recorded digest bindings rather than rehashing the bundles. No files edited and no official worlds created.",
+      "input_sha256": {
+        "results.csv": "9f9d5b7a9a6d06727616a2edcfbaddb37c1e1f5f23fa668a6019487e9eaa09c1",
+        "dataset_summary.json": "9f3d6fc3c1837988a92fdcb0fccbba861b6a38d917a73579b4175ca6812a600f",
+        "learned_comparison.json": "080c90fd9fed1e18c28337e9471597846560fd1915569bb246ee11abc91830d3",
+        "effective_freeze.json": "34458043449b978e644c29e2a0d06ef33e908aea8ee7d40beb1af4189b88987d",
+        "run_manifest.json": "a50f2e755263e6df4f90b74c98d966492a894937c46dddf33a0edf03c1d8eed4"
+      },
+      "raw_findings_message": "Final audit passed: all10 completed runs /5 fresh pairs, scores/labels/CSV MD5, source/fa2c3b7, effective freeze hash, per-run .02, and unchanged model33115… reconcile; seed groups/world IDs disjoint from earlier6dev+5blind. Actual candidate564/567=99.4709%, worst92/94=97.8723%; baseline995/1033=96.3214%. Cost −€14,500.45 (−51.277%), won −466 (−45.111%), 431 fewer on-time orders. Bootstrap candidate95%98.6517–100%, one-sidedlower98.7448%; only5seed scenarios/3late, no final-world or per-world98% guarantee. No blocking inconsistency in supplied artifacts. Manifest also records baseline16 action failures vs learned0; reasons not included in this review set, so avoid claiming all runs were action-error-free."
+    },
+    {
+      "reviewer": "/root/bahn_failure_analysis",
+      "scope": "Read-only final source review of official_study.py, reliability_campaign.py and their targeted tests, plus confirmation receipt binding.",
+      "findings": "Molemmat aiemmat P2-löydökset on korjattu. Ei uusia konkreettisia blokkereita tässä rajatussa katselmoinnissa.\n\nofficial_study.py validoi policykohtaisen jäädytysmanifestin ennen maailman luontia tai jatkamista ja tarkistaa lähteen, mallin sekä manifestin uudelleen ennen tuloksen vientiä.\nreliability_campaign.py ratkaisee kaikkien policyjen konfiguraatiot ennen ajojen käynnistämistä, välittää mallin ja thresholdin eksplisiittisesti, poistaa ristiriitaiset ympäristöarvot sekä tarkistaa valmistuneiden lasten kuitit jäädytystä vasten.\n\nTarkistin lisäksi olemassa olevan vahvistusaineiston: kaikki 10/10 kuittia ovat completed ja vastaavat samaa manifestia, lähde-SHA:ta, mallia ja thresholdia 0.02. Paikalliset manifestiin sidotut ajotiedostot täsmäävät kaikki; poikkeamia ei löytynyt.\n\nKatselmointi oli vain luku: ei muutoksia, uusia maailmoja, uusintatestejä eikä tilastotulosten uudelleenarviointia.",
+      "input_sha256": {
+        "official_study.py": "a8e407336589ebc8f6a5e20ba88b088e5c615ccea6ab5a2c2bc9d5670a461fe6",
+        "reliability_campaign.py": "5193b47b6cf650c9f0523a04e74b0f4d2b641d0648964319dfde3b0e61997e5d",
+        "effective_freeze.json": "34458043449b978e644c29e2a0d06ef33e908aea8ee7d40beb1af4189b88987d"
+      },
+      "raw_findings_message": "Molemmat aiemmat P2-löydökset on korjattu. Ei uusia konkreettisia blokkereita tässä rajatussa katselmoinnissa.\n\nofficial_study.py validoi policykohtaisen jäädytysmanifestin ennen maailman luontia tai jatkamista ja tarkistaa lähteen, mallin sekä manifestin uudelleen ennen tuloksen vientiä.\nreliability_campaign.py ratkaisee kaikkien policyjen konfiguraatiot ennen ajojen käynnistämistä, välittää mallin ja thresholdin eksplisiittisesti, poistaa ristiriitaiset ympäristöarvot sekä tarkistaa valmistuneiden lasten kuitit jäädytystä vasten.\n\nTarkistin lisäksi olemassa olevan vahvistusaineiston: kaikki 10/10 kuittia ovat completed ja vastaavat samaa manifestia, lähde-SHA:ta, mallia ja thresholdia 0.02. Paikalliset manifestiin sidotut ajotiedostot täsmäävät kaikki; poikkeamia ei löytynyt.\n\nKatselmointi oli vain luku: ei muutoksia, uusia maailmoja, uusintatestejä eikä tilastotulosten uudelleenarviointia."
+    }
+  ],
+  "coordinator_note": "Review findings are retained as explicit summaries. The coordinator separately rehashed all ten confirmation bundles and all three fork bundles on the execution host; those checks are in verification/qualification.json."
+}
