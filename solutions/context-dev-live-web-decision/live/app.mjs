@@ -4,6 +4,18 @@ const when=s=>new Date(s).toLocaleString('en-FI',{timeZoneName:'short'});
 const el=(tag,text,cls)=>{const node=document.createElement(tag);node.textContent=text;if(cls)node.className=cls;return node;};
 let current=null,fetching=false,expiryTimer=null,cooldownTimer=null;
 const messages={CONNECTION_REQUIRED:'The server needs its own Context.dev API key to refresh. The saved MCP capture remains available as historical evidence.',PROVIDER_AUTH:'Context.dev rejected the server credential. Update the server connection, then retry.',PROVIDER_CREDITS_EXHAUSTED:'Context.dev credits are exhausted. Automatic retries are stopped; check the account before restarting.',PROVIDER_RATE_LIMIT:'Context.dev rate-limited this request. Wait before trying again.',REFRESH_COOLDOWN:'Please wait ten seconds between refreshes.',REFRESH_BUSY:'A refresh is already running.',SESSION_REFRESH_LIMIT:'This session reached its ten-refresh limit. Restart the server to start a new bounded session.',PROVIDER_TIMEOUT:'The source timed out. Retry when the service is available.'};
+const newsStatus={REVIEW_NEWS:'Read before ordering',NO_RISK_TERMS:'No risk terms in recent headlines',NO_RECENT_NEWS:'No articles in the last 30 days',NO_COVERAGE:'Context.dev has no news coverage for this domain',NOT_RETRIEVED:'Not retrieved yet · refresh to check',CONNECTION_REQUIRED:'Not retrieved · server has no Context.dev connection',ERROR:'News check failed'};
+function newsBlock(data,id){
+ const n=(data.news??[]).find(v=>v.sourceId===id);const box=el('section','','news'+(n?.status==='REVIEW_NEWS'?' flagged':''));
+ box.append(el('p','RETAILER NEWS · CONTEXT.DEV /v1/news/search · '+(n?.domain??''),'eyebrow'));
+ if(!n){box.append(el('p',newsStatus.NOT_RETRIEVED,'muted'));return box;}
+ box.append(el('p',(newsStatus[n.status]??n.status)+(n.status==='ERROR'&&n.code?' · '+n.code:'')+(n.flags?.length?' · '+n.flags.join(', '):''),n.status==='REVIEW_NEWS'?'signal':'muted'));
+ const items=el('ul','');
+ for(const a of n.articles.slice(0,3)){const li=el('li','');const link=el('a',a.title);link.href=a.url;link.target='_blank';link.rel='noopener noreferrer';li.append(link,el('span',' · '+a.source.name+(a.publishedAt?' · '+a.publishedAt.slice(0,10):'')+(a.flags.length?' · ⚑ '+a.flags.join(', '):''),'muted'));items.append(li);}
+ if(n.articles.length)box.append(items);
+ if(n.requestId)box.append(el('p','Request '+n.requestId+' · '+when(n.receivedAt),'muted'));
+ return box;
+}
 function render(data){
  current=data;
  const captured=data.offers.some(o=>o.transport==='CONTEXT_MCP_CAPTURE');
@@ -14,16 +26,16 @@ function render(data){
  if(cooldownTimer)clearTimeout(cooldownTimer);
  if(data.connection.refreshAfterMs>0)cooldownTimer=setTimeout(()=>load(),data.connection.refreshAfterMs+100);
  $('verdict').replaceChildren();const verdict=el('div','','verdict');verdict.append(el('div',data.winner?'↳':'!','mark'));
- const content=el('div','');content.append(el('h2',data.status==='REFUSE'?'Refresh evidence before choosing.':data.reason),el('p',data.rankingBasis));verdict.append(content);$('verdict').append(verdict);
+ const content=el('div','');content.append(el('h2',data.status==='REFUSE'?'Refresh evidence before choosing.':data.reason),el('p',data.rankingBasis));if(data.retailerSignal)content.append(el('p','⚑ '+data.retailerSignal.text,'signal'));verdict.append(content);$('verdict').append(verdict);
  $('cards').replaceChildren();
  for(const id of ['gigantti','proshop']){
   const o=data.offers.find(v=>v.id===id),error=data.errors.find(v=>v.id===id);const card=el('article','','card'+(data.winner===id?' selected':'')+(!o?' error':''));
   card.append(el('p',!o?'SOURCE UNAVAILABLE':o.fresh?'RETRIEVED · ≤5 MIN':'HISTORICAL · REFRESH REQUIRED','eyebrow'),el('h3',id==='gigantti'?'Gigantti':'Proshop'));
-  if(!o){card.append(el('p',messages[error?.code]??'No complete, matching product evidence. Refresh both sources.'),el('p',error?.code??'SOURCE_MISSING','muted'));$('cards').append(card);continue;}
+  if(!o){card.append(el('p',messages[error?.code]??'No complete, matching product evidence. Refresh both sources.'),el('p',error?.code??'SOURCE_MISSING','muted'),newsBlock(data,id));$('cards').append(card);continue;}
   card.append(el('div',euro(o.priceCents),'price'),el('p','Ordinary listed item price · delivery excluded','price-label'));
   const facts=el('dl','');for(const [label,value] of [['Availability',o.availability],['Member price',o.memberPriceCents===null?'Not supplied':euro(o.memberPriceCents)+' · excluded'],['Shipping from',euro(o.shippingFromCents)],['Arrival date','Unknown · address required']])facts.append(el('dt',label),el('dd',value));card.append(facts);
   const link=el('a','Review the retailer’s listing ↗','source-link');link.href=o.url;link.target='_blank';link.rel='noopener noreferrer';card.append(link);
-  const meta=el('div','','source-meta');const stamp=el('time',when(o.receivedAt));stamp.dateTime=o.receivedAt;meta.append(el('p','Product match · '+o.product.mpn+' / '+o.product.gtin),stamp,el('p','Request '+o.requestId),el('p','Retrieval '+(o.latencyMs/1000).toFixed(1)+'s · provider cache age 0ms'));card.append(meta);$('cards').append(card);
+  const meta=el('div','','source-meta');const stamp=el('time',when(o.receivedAt));stamp.dateTime=o.receivedAt;meta.append(el('p','Product match · '+o.product.mpn+' / '+o.product.gtin),stamp,el('p','Request '+o.requestId),el('p','Retrieval '+(o.latencyMs/1000).toFixed(1)+'s · provider cache age 0ms'));card.append(newsBlock(data,id),meta);$('cards').append(card);
  }
  $('changes').replaceChildren();for(const c of data.changes)$('changes').append(el('li',`${c.id}: ${c.status}${c.fields.length?' ('+c.fields.join(', ')+')':''}`));
  $('evidence').textContent=JSON.stringify(data,null,2);$('download').disabled=!data.offers.length;
@@ -39,7 +51,7 @@ $('refresh').addEventListener('click',async()=>{
  finally{fetching=false;await load();}
 });
 $('download').addEventListener('click',()=>{
- if(!current)return;const output=['SUPPLYPULSE — HUMAN REVIEW',`Comparison: ${current.asOf}`,current.reason,current.rankingBasis,...current.offers.map(o=>`${o.name}: ${euro(o.priceCents)}; ${o.availability}; retrieved ${o.receivedAt}; ${o.url}; request ${o.requestId}; evidence ${o.evidenceHash}`),...current.limitations,'No purchase authorized.','',JSON.stringify(current,null,2)].join('\n');
+ if(!current)return;const output=['SUPPLYPULSE — HUMAN REVIEW',`Comparison: ${current.asOf}`,current.reason,current.rankingBasis,...current.offers.map(o=>`${o.name}: ${euro(o.priceCents)}; ${o.availability}; retrieved ${o.receivedAt}; ${o.url}; request ${o.requestId}; evidence ${o.evidenceHash}`),...(current.news??[]).map(n=>`News ${n.domain}: ${n.status}${n.flags?.length?' ('+n.flags.join(', ')+')':''}${n.requestId?'; request '+n.requestId:''}`),...(current.retailerSignal?[current.retailerSignal.text]:[]),...current.limitations,'No purchase authorized.','',JSON.stringify(current,null,2)].join('\n');
  const url=URL.createObjectURL(new Blob([output],{type:'text/plain;charset=utf-8'}));const a=el('a','');a.href=url;a.download='SupplyPulse-sourcing-memo.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)load();});

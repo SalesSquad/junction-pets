@@ -1,0 +1,8 @@
+const invoices = [{name:'AI Studio (demo)', cents:1000},{name:'Neural Cloud (demo)',cents:2400},{name:'Model Labs (demo)',cents:750}];
+const money = cents => new Intl.NumberFormat('fi-FI',{style:'currency',currency:'EUR'}).format(cents/100);
+const list = document.querySelector('#invoices');
+for (const invoice of invoices) { const row=document.createElement('li'); const name=document.createElement('span'); const amount=document.createElement('strong'); name.textContent=invoice.name; amount.textContent=`${money(invoice.cents)} · avoin`; row.append(name,amount); list.append(row); }
+const dialog=document.querySelector('#approval'), result=document.querySelector('#result');
+document.querySelector('#request').addEventListener('click',()=>{const recipient=document.querySelector('#recipient').value.trim();const amount=Number(document.querySelector('#amount').value);if(!recipient||!Number.isFinite(amount)||amount<=0){result.textContent='Anna saaja ja nollaa suurempi summa.';return;} document.querySelector('#summary').textContent=`${recipient}: ${money(Math.round(amount*100))}. Tilin demosaldo on 0,00 €.`;result.textContent='';dialog.showModal();if(document.querySelector('#voice').checked && 'speechSynthesis' in window){const message=new SpeechSynthesisUtterance('Bankerin demomaksu odottaa hyväksyntää.');message.lang='fi-FI';window.speechSynthesis.speak(message);}});
+document.querySelector('#cancel').addEventListener('click',()=>{dialog.close();result.textContent='Demopyyntö hylätty.'});
+document.querySelector('#approve').addEventListener('click',()=>{dialog.close();result.textContent='Hyväksyntää kokeiltu. Maksua ei lähetetty, ja demosaldo on edelleen 0,00 €.'});

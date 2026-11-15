@@ -13,9 +13,9 @@ const ellipse = (cx, cy, rx, ry) => poly('FIXTURE', Array.from({ length: 12 }, (
 
 const entities = [
   // two rooms of apartment A and a balcony
-  rect('ROOM_OUTLINE', 0, 0, 4, 3), text(1, 1, '2.01'), text(1, 2, 'Cage d\'escalier'),
-  rect('ROOM_OUTLINE', 4, 0, 2, 3), text(5, 1, '2.02'), text(5, 2, 'Bain'),
-  rect('ROOM_OUTLINE', 0, 3, 6, 1), text(1, 3.5, '2.03'), text(3, 3.5, 'Balkon'),
+  rect('ROOM_OUTLINE', 0, 0, 4, 3), text(1, 1, '2.01'), text(1, 2, 'Cage d\'escalier'), text(2, 1, '12 m²'),
+  rect('ROOM_OUTLINE', 4, 0, 2, 3), text(5, 1, '2.02'), text(5, 2, 'Bain'), text(5, 0.5, '6 m²'),
+  rect('ROOM_OUTLINE', 0, 3, 6, 1), text(1, 3.5, '2.03'), text(3, 3.5, 'Balkon'), text(4, 3.5, '6 m²'),
   rect('UNIT_OUTLINE', 0, 0, 6, 4), text(3, 0.5, 'Whg. A'),
   // one single door (leaf + opening line + arc) and one double door (2 leaves + opening + 2 arcs)
   poly('DOOR', [[0, 0], [0.9, 0]]), poly('DOOR', [[0, 0], [0, 0.9]]), arc('DOOR', 0, 0, 0.9),
@@ -50,7 +50,7 @@ test('fixtures are classified by their own inner symbol', () => {
 
 test('room area comes from the smallest enclosing closed outline', () => {
   const r = ask("Qual è la superficie netta del locale 2.02 («Bain») in m²?");
-  assert.equal(r.answer, '6 m²');
+  assert.equal(r.answer, '6.00 m²');
   assert.equal(r.metric.value, 6);
 });
 

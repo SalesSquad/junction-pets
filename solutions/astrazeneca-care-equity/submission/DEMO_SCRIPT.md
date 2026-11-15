@@ -15,6 +15,9 @@ the two outcomes, nothing else.
 1. Start the product on a free port with the live model switched off (the stored outputs are the
    demo):
    `SAMA_SCRIBE_LIVE=0 PORT=4191 node web/serve.mjs`, then open `http://127.0.0.1:4191/`.
+   For the jury, open `http://127.0.0.1:4191/?jury` instead: the same page with only the sections of
+   the click path below (about 18 screens instead of 47 at 1440 px); "Open the full report" at the top
+   goes back to everything.
    Check `http://127.0.0.1:4191/api/health` answers `{"status":"OK"}`.
 2. **Use a server started after 01:30 UTC on 15 November.** Since then `web/serve.mjs` reloads
    `data/scribe/demo/demo-notes.json`, `demo-outputs.json` and the stored Nemotron answers whenever

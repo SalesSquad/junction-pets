@@ -10,7 +10,10 @@
     "demo:agent": "node src/buyer-agent.mjs",
     "demo:frontier": "node src/frontier-agent.mjs",
     "contract:export": "node --input-type=module -e \"import {writeFile} from 'node:fs/promises'; import {openapi} from './src/contract.mjs'; await writeFile('openapi.yaml', JSON.stringify(openapi,null,2)+'\\n');\"",
-    "state:backup": "node src/state-backup.mjs"
+    "state:backup": "node src/state-backup.mjs",
+    "demo:simulation": "node simulation/server.mjs",
+    "simulation:check": "node simulation/check.mjs",
+    "simulation:browser": "node simulation/browser.mjs"
   },
   "engines": {
     "node": ">=22.16"

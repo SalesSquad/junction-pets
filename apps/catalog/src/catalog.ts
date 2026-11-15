@@ -26,6 +26,7 @@ export function parseCatalogue(value:unknown):Catalogue {
   for(const pet of c.pets) {
     if(!pet || pet.schemaVersion!==1 || !slugPattern.test(pet.slug) || !pet.company || !slugPattern.test(pet.company.slug) || !pet.company.name || seen.has(pet.slug) || !Array.isArray(pet.capabilities) || !Array.isArray(pet.starterPrompts) || !Array.isArray(pet.sources) || !Number.isInteger(pet.artIndex) || pet.artIndex<0 || pet.artIndex>33) throw new Error('A companion profile needs to be checked before it can be shown.');
     seen.add(pet.slug);
+    if(pet.browserApps !== undefined && (!Array.isArray(pet.browserApps) || pet.browserApps.some(app=>!app || typeof app.name!=='string' || !app.name.trim() || typeof app.path!=='string' || !/^apps\/companions\/apps\/[a-z0-9-]+\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.html$/.test(app.path)))) throw new Error('A companion app link needs to be checked before it can be shown.');
   }
   return c;
 }

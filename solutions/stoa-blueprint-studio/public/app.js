@@ -69,6 +69,35 @@ function entityElements(entity, drawing) {
 function renderDrawing() {
   const d = state.drawing;
   if (!d) return;
+  const isIfc = d.format === 'IFC STEP';
+  $('blueprint').toggleAttribute('hidden', isIfc);
+  for (const id of ['zoom-in','zoom-out','zoom-reset']) $(id).disabled = isIfc;
+  if (isIfc) $('zoom-percent').textContent = 'RECORDS';
+  $('ifc-source').hidden = !isIfc;
+  $('drawing-legend').hidden = isIfc;
+  $('viewport-label').textContent = isIfc ? 'Source records' : 'Drawing viewport';
+  $('viewport-description').textContent = isIfc ? 'Inspect original IFC records, quantities and unit definitions.' : 'Inspect every cited geometry and text label at its exact source location.';
+  $('stage-stamp').textContent = isIfc ? 'IFC SOURCE RECORDS · NO FLOOR-PLAN PROJECTION' : 'VECTOR EVIDENCE · SOURCE COORDINATES';
+  if (isIfc) {
+    const list = $('ifc-source'); list.replaceChildren();
+    const heading = document.createElement('p');
+    heading.textContent = 'Original IFC entities and their stored quantities. Select a citation to inspect its record. This view does not project 3D geometry.';
+    list.appendChild(heading);
+    const ids = evidenceIds();
+    const rows = d.entities.filter(e => ids.has(e.id) || e.id === state.selected);
+    const shown = rows.length ? rows : d.entities.slice(0, 40);
+    const note = document.createElement('p'); note.textContent = `Showing ${shown.length} ${rows.length ? 'cited/selected' : 'initial'} records of ${d.entities.length}.`;
+    list.appendChild(note);
+    for (const e of shown) {
+      const button = document.createElement('button'); button.type = 'button';
+      button.className = `ifc-record ${e.id === state.selected ? 'selected' : ''}`;
+      const title = document.createElement('strong'); title.textContent = `${e.id} · ${e.type} · ${e.text}`;
+      const pre = document.createElement('pre'); pre.textContent = e.sourceText;
+      button.append(title, pre); button.addEventListener('click', () => { state.selected = e.id; renderDrawing(); renderEvidence(); });
+      list.appendChild(button);
+    }
+    return;
+  }
   const svg = $('blueprint');
   svg.replaceChildren(node('title', { id: 'blueprint-title' }, `Source geometry of ${d.filename}`));
   const geometry = node('g');
@@ -98,9 +127,19 @@ function renderSource() {
   const badge = $('source-badge');
   badge.textContent = real ? 'LOCAL IMPORT · VERIFY SOURCE' : 'SYNTHETIC · NOT VERIFIED';
   badge.classList.toggle('real', real);
-  $('drawing-stats').textContent = `${d.entities.length} vector/text entities · ${d.sha256 ? `SHA256 ${d.sha256.slice(0, 12)}…` : 'original demo fixture'}`;
+  $('drawing-stats').textContent = `${d.entities.length} ${d.format === 'IFC STEP' ? 'source records' : 'vector/text entities'} · ${d.sha256 ? `SHA256 ${d.sha256.slice(0, 12)}…` : 'original demo fixture'}`;
 }
 function updateQuickQueries() {
+  if (state.drawing.format === 'IFC STEP') {
+    const buttons = [...document.querySelectorAll('.suggestion')];
+    const storey = state.drawing.storeys[0];
+    const scope = storey && !/['"«»„“]/.test(storey) ? `on '${storey}'` : 'in the model';
+    for (const [i, q] of [`How many doors are there ${scope}?`, `What is the total net floor area of all rooms ${scope}?`, 'How many windows are there in the model?'].entries()) {
+      buttons[i].disabled = false; buttons[i].dataset.q = q; buttons[i].firstChild.textContent = q + ' ';
+    }
+    return buttons[0].dataset.q;
+  }
+  const fallback = document.querySelectorAll('.suggestion')[2]; fallback.dataset.q = 'How many doors are there?'; fallback.firstChild.textContent = 'Count doors ' ;
   const text = state.drawing.entities.filter(e => e.layer === 'ROOM_TEXT' && typeof e.text === 'string');
   const counts = new Map();
   for (const e of text) {
@@ -133,7 +172,7 @@ function renderAnswer() {
   $('answer-explanation').textContent = result?.explanation || 'Select a quick investigation or enter your own question. Unsupported requests fail closed.';
   const n = result?.evidence?.length || 0;
   $('answer-count').textContent = `${n} CITATION${n === 1 ? '' : 'S'}`;
-  $('evidence-count').textContent = `${n} REGION${n === 1 ? '' : 'S'}`;
+  $('evidence-count').textContent = `${n} ${state.drawing?.format === 'IFC STEP' ? 'RECORD' : 'REGION'}${n === 1 ? '' : 'S'}`;
 }
 function renderEvidence() {
   const list = $('evidence-list');
@@ -161,7 +200,7 @@ function renderEvidence() {
     const title = document.createElement('strong');
     title.textContent = cite.detail;
     const meta = document.createElement('small');
-    meta.textContent = `${cite.layer} · ${cite.entityId} · CLICK TO INSPECT`;
+    meta.textContent = `${cite.layer || cite.kind} · ${cite.entityId} · CLICK TO INSPECT`;
     copy.append(title, meta);
     button.append(badge, copy);
     button.addEventListener('click', () => { state.selected = cite.entityId; renderDrawing(); renderEvidence(); });
@@ -197,15 +236,17 @@ async function useDemo() {
 }
 async function importDrawing(file) {
   if (!file) return;
-  if (!/\.dxf$/i.test(file.name)) throw new Error('Please choose an ASCII DXF file.');
-  if (file.size > 6 * 1024 * 1024) throw new Error('Maximum supported file size is 6 MiB.');
+  const isIfc = /\.ifc$/i.test(file.name);
+  if (!/\.(dxf|ifc)$/i.test(file.name)) throw new Error('Choose an ASCII DXF or IFC STEP file.');
+  const maxMiB = isIfc ? 16 : 6;
+  if (file.size > maxMiB * 1024 * 1024) throw new Error(`Maximum supported file size is ${maxMiB} MiB.`);
   $('import-message').textContent = 'Reading file locally and mapping geometries…';
-  const response = await fetch('/api/import-dxf', { method: 'POST', headers: {
-    'Content-Type': 'application/dxf', 'X-Filename': encodeURIComponent(file.name) }, body: await file.arrayBuffer() });
+  const response = await fetch(isIfc ? '/api/import-ifc' : '/api/import-dxf', { method: 'POST', headers: {
+    'Content-Type': isIfc ? 'application/x-step' : 'application/dxf', 'X-Filename': encodeURIComponent(file.name) }, body: await file.arrayBuffer() });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error || 'DXF import failed.');
   state.drawing = payload.drawing; state.result = null; state.selected = null; state.zoom = 1;
-  $('import-message').textContent = `Imported ${state.drawing.entities.length} source entities. File is never stored on disk. Ask with an exact visible label or room number.`;
+  $('import-message').textContent = `Imported ${state.drawing.entities.length} source entities. File is never stored on disk. Use an exact room/storey name or whole-source quantity question.`;
   renderSource(); renderAnswer(); renderEvidence(); renderDrawing();
   $('question').value = updateQuickQueries() || '';
   if ($('question').value) await ask($('question').value);

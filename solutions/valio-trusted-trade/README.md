@@ -1,5 +1,17 @@
 # Trusted Trade · autonomous procurement with proof-carrying Kättely
 
+## Companion App
+
+The shared Junction companion App catalog registers this product as
+`junction-valio-aimo`. Its portable entry is
+`/apps/aimo-trade/browser/dist/index.html`; private Chibi imports the exact
+Junction commit through its existing browser-app sync producer. See
+[browser/README.md](browser/README.md) for the build and browser-local runtime.
+This App uses the existing trade domain with synthetic data. The Node/SQLite,
+host identity, MCP and HTTP simulation commands below retain their full
+server-backed implementation and separate runtime requirements.
+
+
 ## Frontier v3 — Mission Control (14 November 2026)
 
 The new **[Frontier runbook](./FRONTIER_RUNBOOK.md)** is the main competition demo guide. Run `npm start` and open **http://127.0.0.1:4177/mission** for the responsive procurement command center; snapshot-bound review stays at **/** (also **/classic**). All actors, catalog items, prices, risk/emission figures, approvals, signatures' identities and simulated orders are synthetic.
@@ -183,3 +195,7 @@ Sponsor lookup accepts only numeric catalog IDs (1–12 digits); never submit pe
 ## Buyer identity and supplier-order connection
 
 Optional host-authenticated mode verifies pinned-issuer JWTs, current operator buyer/workspace grants and separate exact host-signed human decisions before every protected effect/replay. Anonymous demo minting is disabled in this mode; core commerce stays synthetic. See [BUYER_IDENTITY.md](BUYER_IDENTITY.md) for configuration, custody, client integration and actual qualification limits. [VALIO_ORDER_CONNECTION.md](VALIO_ORDER_CONNECTION.md) records the fresh six-operation challenge schema and the still-unverified production order contract; owned committed receipts can be read as an explicitly non-sendable internal handoff.
+
+## Run the complete local simulation
+
+`npm --prefix identity ci --ignore-scripts` then `npm run demo:simulation` opens a dedicated loopback laboratory on port 4188. Its button executes seven real local scenarios: purchase/refund, signed rejection, price drift, revoked reviewer, two lost ACKs with restart, shortage without substitution, and expiry. Identities and trade are explicitly scripted fixtures. See [simulation/README.md](simulation/README.md); `npm run simulation:check` executes the same flows through the HTTP boundary.

@@ -121,3 +121,31 @@ The four completed original reviews and explicit dispositions above are retained
 the repaired source was author-read and its 30 focused checks passed.
 Recorded real MCP captures also normalized successfully through the repaired
 code at their actual historical observation time (not presented as a new fetch).
+
+## Retailer news live run (15 November 2026)
+
+Source: main `7f5cfde` plus the concurrency fix in this change, clean clone on
+the owner's MacBook Pro, server on 127.0.0.1:4391 with the host-only key file.
+
+1. First **Refresh both sources** (06:28 UTC): both scrapes succeeded
+   (request IDs `d3a9a5f0-a9dc-43b6-bf0c-b07148498e00`,
+   `1e4233f0-9f87-497e-9718-87ad7c624409`), but both news calls failed with
+   `PROVIDER_RATE_LIMIT`. A single diagnostic call showed the key is limited to
+   **2 concurrent requests** (`x-ratelimit-mode: concurrency`,
+   `x-ratelimit-limit: 2`) and the service had fired four at once. Fixed in
+   `live/service.mjs` (scrapes first, then news); `live/news.test.mjs` now
+   asserts at most two requests in flight (fails with 4 on the old code).
+2. Second refresh after the fix (06:29:49 UTC), no errors:
+
+| Call | Request ID | Result |
+|---|---|---|
+| scrape Gigantti | `50409bc9-7cf1-4c90-921e-be54851c987c` | EUR 109.00, member EUR 69.99 (excluded), InStock, unchanged |
+| scrape Proshop | `fb5f92f6-86d4-49ed-ab31-7bfe250ef259` | EUR 109.99, shipping from EUR 6.99, InStock, unchanged |
+| news gigantti.fi | `03fb6bef-f1cb-4bba-822f-3ddd97c14e36` | `NO_RECENT_NEWS` (0 articles in 30 days) |
+| news proshop.fi | none (404) | `NO_COVERAGE` (provider: no company found for domain) |
+
+Shortlist: Gigantti on ordinary item price; no risk flags. Diagnostic calls
+without the 30-day filter found only two loosely related Gigantti articles
+(one secondary match from 2022), so the empty result reflects provider
+coverage, not a bug. Credits remaining reported by the provider after the
+diagnostics: 903. No key value was printed or stored.

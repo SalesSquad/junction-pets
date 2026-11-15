@@ -1,25 +1,89 @@
-# Stoa Atlas — Verified delivery ledger
+# Stoa Atlas — Current reliability delivery
 
-Status: **local implementation + source-bound focused verification; branch/PR status tracked separately**.
+Base: `f64f6ac1322339ee2213737af9b00776ae67af0b`, isolated branch
+`codex/stoa-evidence-and-ifc`. Scope: `solutions/stoa-blueprint-studio/**` only.
 
-## Verified
+## Implemented in this revision
 
-- Sponsor Stoa `Make Blueprints Talk` brief from Junction challenge research and Space `page_57e6862bd6988191b1fb3aa3258f0e6d`: 25% accuracy, 25% highlighted source evidence, 25% creativity, 25% inference cost.
-- Sponsor Supabase dataset preview ZIP HTTP 206 range readable: 501,564,891 bytes, 924 files (123 PDFs, 66 DXFs, 14 IFCs, 306 PNGs, 374 JPEGs and supplementary formats), 7,990 QA entries. Full 501 MB archive intentionally not downloaded.
-- Exact original sample `data/swiss_dwellings/site1102_bldg2242_floor10281.dxf`, 168,987 uncompressed bytes, SHA-256 `4070c5f19eb921bc08e2f5a23e957086f76abcca03fafbb8b62ca30c8a60b58d`; Swiss Dwellings CC BY 4.0 with attribution. Sample was read from byte ranges into a local transient `/tmp` only, never committed.
-- Sponsor official Q&A verified with real DXF layer evidence: `Stanza` **9**, `Cucina` **2**, `Balcone` **2**, `Corridoio` **3**, apartments **2**. Geometric cross-check `room 5.02` polygon **15.8414 m²**, original label **15.84 m²** (difference under 2%).
-- Offline 100%-deterministic supported answer paths and **abstention** path for unsupported door counts, absent room numbers, ambiguous area names, scale errors, conflicting labels, and injection language.
-- Responsive front-end with SVG projection, click-to-highlight citations, evidence IDs, bounded memory upload, no external inference and source SHA provenance.
+- Active V2 room areas delegate to strict geometry + annotation validation; totals require all
+  contributing rooms to validate. Ambiguous apartment labels and boundaries abstain.
+- Unsupported room-scoped object counts, multiple English object classes, invalid/injection-like
+  questions and fixture counts without positive evidence abstain.
+- IFC quantities convert area/volume SI prefixes dimensionally, honour declared quantity units,
+  reject unknown units and refuse incomplete totals. Citations are no longer truncated at 400.
+- Local IFC STEP upload, source hashing and inspectable entity/quantity/property/unit records in
+  the browser, with exact quoted storey/room questions and exact scalar property lookup.
+- Upload parser bounds size/record/entity count/nesting and rejects malformed STEP lists/strings.
+- Single closed straight polyline HATCH ingestion with native source citations. Complex HATCH
+  paths/holes/curves reject; curved LWPOLYLINE is excluded from trusted area measurements.
+- Offline source/page-bound citation-box IoU, precision, recall and one-to-one matching.
+- Regression checks target V2 and the real HTTP routes, not just the older grounding helper.
 
-## Not yet verified / not claimed
+## Verification and limits
 
-- No inference across raster PDFs or non-DXF files, no per-question macrobenchmark over sponsor's whole dataset, no held-out geometric citation IoU, no third-party model/vision contract, no producer deployment. Sponsor licensing checked for this Swiss subset only.
-- Product workspace integration PR #82 is separate and may still be open; this branch only adds owned solution files.
+Local Node qualification: `node --test tests/*.test.mjs benchmark/*.test.mjs` — 53 passed,
+0 failed, 1 optional licensed-source skip (54 total). The historical benchmark CLI test exercises
+its fail-closed branch because the pinned old commit is absent in this shallow checkout; this
+is not a successful historical scored CLI replay. `node --check public/app.js` and
+`git diff --check` passed. Chromium browser flow passed locally; exact source is pinned in the PR. Synthetic fixtures only; the optional licensed sponsor test remains
+skipped. Browser checks cover DXF count/area/citation, IFC import/area/source selection, desktop
+and mobile rendering, and restoring the demo; zero page errors observed. No external inference,
+licensed dataset fetch, deployment, merge or shared-file edits.
 
-## Next competition-quality product upgrades
+The historical tables below are evidence for the older engine. **The stricter revision's real-data
+accuracy and coverage are unmeasured.** The region scorer has synthetic tests, not independent
+sponsor region annotations. IFC record inspection is not 2D/3D spatial projection. DWG, general
+free-form IFC questions and improved raster accuracy remain open; see `IMPROVEMENTS.md`.
 
-1. **Source catalog**: file/version/coordinate-frame manifest, native PDF+SVG+DWG+IFC connectors with per-file licence and page/element provenance.
-2. **Symbol topology**: detect door/window clusters, scale/orientation, nested room graph, cross-floor BIM quantities; never infer object counts from primitive counts.
-3. **Region evidence benchmark**: stratify official preview count/area/length/volume/text questions, ground-truth visual boxes and geometry, negative questions, exact-match/2%-tolerance plus citation IoU and cost per question.
-4. **Measured vision fallback**: cheap region-first retrieval, sparse VLM for uncertain visual classes, deterministic constraints and explicit abstain; report latency and monetary budget.
-5. **Competition demo**: verified real sponsor drawing imported in front of judges; query→measure→highlight under one interaction, no hidden fixture substitution, licence credit always visible.
+---
+
+## Historical state before this revision
+
+# Stoa Atlas — Progress
+
+Status: **measured on the official preview questions; numbers match the README table.**
+
+## Current verified state
+
+| Route | Result | Model cost |
+| --- | ---: | --- |
+| Swiss Dwellings DXF, `answerDrawingV2`, test split (35 drawings, 1,278 questions) | 96.4 % | none |
+| Same engine, dev split (30 drawings, 1,080 questions) | 98.0 % | none |
+| IFC (`src/ifc-qa.mjs`), 3 preview models, 1,049 questions | 97.7 % | none |
+| IFC, held-out half of the full dataset (14 models, 503 questions) | 97.2 % | none |
+| opening_design sheets, PDF text layer + Nemotron (64 questions) | 85.9 % | ≈16,700 tokens/question |
+| Same sheets, image only | 23.4 % | ≈15,200 tokens/question |
+| Same sheets as screenshots, local tiled OCR | 21.9 % | ≈21,700 tokens/question |
+| cubicasa5k PNG, Nemotron 3.5 Super VL (351 questions) | 63.2 % | ≈1,600 tokens/question |
+
+- Independent re-run: the coordinator ran `node bench/swiss-dxf.mjs --split test` on 2026-11-15 at 0ef075a and got 1232/1278 = 96.4%, 2 abstentions, 0 errors.
+- The split is self-made (salted SHA-256 of drawing path); the sponsor's final protocol is unpublished. Tuning used development drawings only.
+- Answers return entity IDs and source coordinates, and the UI highlights them on the imported drawing. Unsupported questions abstain.
+- Sponsor sample `data/swiss_dwellings/site1102_bldg2242_floor10281.dxf` (SHA-256 `4070c5f19eb921bc08e2f5a23e957086f76abcca03fafbb8b62ca30c8a60b58d`) is fetched by byte range into a local temp path and never committed.
+
+## Reproduce
+
+```sh
+cd solutions/stoa-blueprint-studio
+node --test tests/*.test.mjs
+node bench/swiss-dxf.mjs --split test
+node bench/ifc.mjs
+# raster and sheet routes: see raster/README.md
+```
+
+## Open limits
+
+- The DXF route covers 2,358 of the 7,990 preview questions (every Swiss PDF has a DXF of the same name).
+- The IFC rules were developed on the Esplanades model and one Molio storey, so 97.7 % is not strictly held-out; 97.2 % is.
+- The 249 free-form `ifc_bench` text questions are not attempted.
+- Raster PNG (63.2 %) is not more accurate than its baseline on held-out drawings; its benefit is roughly a third of the tokens.
+- OCR of screenshot sheets (about 22 %) is no better than image-only (23.4 %); the vector source is what makes the strong routes work.
+- No DWG decoder and no HATCH surface extraction. No citation IoU has been measured.
+- No deployment; the licence covers non-commercial Junction use only.
+
+## Next steps
+
+1. Measure citation IoU against ground-truth boxes.
+2. Attempt the free-form `ifc_bench` text questions.
+3. Improve raster and screenshot routes with region-first retrieval and sparse model calls, with deterministic constraints and abstention.
+4. Add DWG and HATCH ingestion.

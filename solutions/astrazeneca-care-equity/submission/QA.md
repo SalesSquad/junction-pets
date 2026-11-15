@@ -53,8 +53,10 @@ Source: `README.md` ("What it does not claim"); `data/roadmap/mapping-v1.json` (
 ### 2. Why synthetic data?
 *Asked by: THL statistician, AstraZeneca medical lead.*
 
-Secondary use of real patient notes needs a permit (in Finland, from Findata, the route we would
-use), and we have not applied for one. Synthetic data let us publish every note, label and score,
+Only the patient-level parts are synthetic: every county figure on the page is real public data (THL
+Sotkanet, Statistics Finland, NORDCAN). Secondary use of real patient notes needs a permit (in Finland,
+from Findata, the route we would use), and we have not applied for one; we found no open Finnish
+clinical-note corpus to use instead. Synthetic data let us publish every note, label and score,
 freeze a test set before reading it, and let anyone rerun every check. The price is that we mostly
 test our own writers' phrasing; the frozen stress set was built to expose exactly that, and it did
 (question 3). Person-level pathway dates are not public either (THL's person-level waiting-list feed
