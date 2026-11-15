@@ -6,19 +6,45 @@ study are official level-8 **unranked practice** worlds. The simulator's
 `score.ranked` flag means the score clears the eligibility rule; it does not
 mean that a leaderboard attempt was used.
 
-## Decision and current evidence
+## Decision and completed confirmation
 
-The learned risk gate achieved **986/1,001 = 98.50%** on six development
-seeds at a 0.05 late-risk threshold. Its gross margin was **€25,234.52**, versus
-**€33,560.29** for the frozen 139% / +240-minute baseline. That is a material
-service/volume/margin tradeoff, not a free improvement. The worst learned-policy
-world was **95.88%**. Development results cannot establish a 98–99% guarantee
-on a new world.
+The frozen learned risk gate at threshold **0.02** delivered **564/567 = 99.47%**
+on five fresh confirmation seeds. The paired frozen 139% / +240-minute baseline
+delivered **995/1,033 = 96.32%**. This meets the requested aggregate percentage
+in the observed sample, with a substantial commercial cost: **45.11% fewer won
+orders and 51.28% less gross margin**. There were also 431 fewer on-time
+deliveries in absolute terms. The candidate improved the percentage in every
+pair and reduced margin in every pair.
 
-The first primary candidate for the untouched five-seed comparison was the learned
-policy with threshold **0.05**, chosen to retain a cushion above the requested
-98% aggregate service target. The fitted model is frozen; the blind worlds are
-not used for fitting, threshold selection, or parser changes.
+| Fresh confirmation, five paired seeds | Frozen baseline | Learned risk ≤0.02 |
+| --- | ---: | ---: |
+| On time / won | 995 / 1,033 | 564 / 567 |
+| Aggregate service | 96.32% | **99.47%** |
+| Late orders | 38 | 3 |
+| Worst world | 94.38% | **97.87%** |
+| Worlds at least 98% | 0 / 5 | 4 / 5 |
+| Worlds at least 99% | 0 / 5 | 4 / 5 |
+| Gross margin | €28,278.68 | **€13,778.23** |
+
+**Recommendation:** keep the strict policy as an explicit service-priority
+option. Do not automatically replace the competition default: the sponsor
+maximizes gross margin subject to at least 90% service in each scored world,
+and both policies cleared that rule in all five confirmation worlds. Losing
+€14,500.45 of margin to raise the percentage is a poor trade for that objective
+on these observations. The strict policy does not establish 98–99% in every
+world, or a guarantee for the secret final world. No leaderboard/final entry
+was made and no policy was automatically promoted.
+
+The model was trained once on six development seed groups. No blind or
+confirmation outcomes were added to training. Threshold 0.02 is a decision
+score cutoff, not a certified 2% per-order risk bound.
+
+### Version history and the failed first qualification
+
+The first primary candidate used threshold **0.05**, after achieving
+986/1,001 = 98.50% on the six development seeds, with €25,234.52 margin versus
+€33,560.29 baseline and a 95.88% worst world. Those were training scenarios,
+so an untouched comparison was required.
 
 **Version 1 missed the target on five untouched paired seeds.** It delivered
 1,082/1,108 = **97.65%**, versus baseline 1,326/1,401 = **94.65%**. Gross margin
@@ -36,8 +62,61 @@ Its five fresh confirmation seeds are declared in
 and are not reused as fresh confirmation. This is an adaptive second version,
 not one prespecified experiment with a global 95% guarantee.
 
-**Version 2 confirmation and the conditional fork experiment: pending at this
-checkpoint.**
+### Version 2: fresh paired confirmation
+
+The second version was frozen at source
+`fa2c3b7fe3f6a9bbb4ba834b2902ad861e6af1ab`, using the original model and threshold
+0.02, before creating any confirmation world. The seed prefix below is
+`bahn-reliability-confirm-20261115-`; all five seeds are disjoint from the six
+training seeds and the five version-1 blind seeds.
+
+| Seed suffix | Baseline on time / won | Candidate on time / won | Baseline margin | Candidate margin |
+| --- | ---: | ---: | ---: | ---: |
+| 01 | 211 / 217 (97.24%) | 125 / 125 (100%) | €7,194.47 | €3,437.02 |
+| 02 | 249 / 255 (97.65%) | 125 / 126 (99.21%) | €7,219.59 | €3,092.20 |
+| 03 | 80 / 84 (95.24%) | 38 / 38 (100%) | €2,883.77 | €1,202.20 |
+| 04 | 304 / 317 (95.90%) | 184 / 184 (100%) | €6,984.29 | €4,182.88 |
+| 05 | 151 / 160 (94.38%) | 92 / 94 (97.87%) | €3,996.56 | €1,863.93 |
+
+The 20,000-draw paired-seed bootstrap gives a descriptive 95% interval of
+**98.65–100%** for candidate aggregate service and **+2.09 to +4.10 percentage
+points** for the service improvement. The point improvement is +3.15 points.
+The candidate's one-sided 95% lower bound is 98.74%. The corresponding total
+margin difference interval is **−€18,571.09 to −€10,429.81**.
+
+Only five scenarios and three candidate late outcomes underpin those intervals.
+They describe resampling of this limited sample. They do not establish 99%
+population service, 98% in every world, or a global prespecified 95% claim across
+the adaptive versions. The fifth candidate world itself falls below 98%.
+
+Original binary CSV, exact R output, dataset reconciliation, effective freeze
+and ten selected run receipts are retained in
+`evidence/reliability-20261115/confirm_v2/`. The effective freeze SHA-256 is
+`34458043449b978e644c29e2a0d06ef33e908aea8ee7d40beb1af4189b88987d`.
+Each receipt binds its configuration, source, model and raw bundle digest.
+Independent R review reconciled all counts, input hashes and disjoint splits.
+The coordinator additionally rehashed the raw bundles on the execution host.
+
+### Same-future fork experiment
+
+One additional parent practice world, `w9c80405de6143e9eac90`, was paused at
+minute 1,440 of 14,280. Its public snapshot and history were hashed before two
+children were created. Both children started from the same public state and
+the sponsor's documented same-future contract, and both completed before any
+reveal was inspected.
+
+| Child | On time / won | Service | Gross margin |
+| --- | ---: | ---: | ---: |
+| Baseline, `w7e9544e09e16e271cf82` | 182 / 187 | 97.33% | €5,877.25 |
+| Learned ≤0.02, `w5824febe43379fa67fda` | 147 / 150 | 98.00% | €4,160.38 |
+
+This conditional comparison improves service by 0.67 percentage points and
+reduces margin by €1,716.87, with 37 fewer orders. It is one shared-prefix
+scenario, not two new independent validation scenarios. Both children retain
+orders accepted in the common prefix. The parent was subsequently completed;
+its baseline score exactly matches the baseline child. No unfinished
+task-created practice world remains. Bounded receipts and bundle digests are
+retained under `evidence/reliability-20261115/fork_safety/`.
 
 ## Official development experiments
 
@@ -119,6 +198,11 @@ order, so a locally changed copy cannot accidentally hide the constraint from
 the actual API action. It keeps separate counts for eligible notes, added
 constraints and genuinely changed wire actions.
 
+Parser v3 was checked again against the same historical cohort with zero false
+field assertions; this remains a development check. The delivered learned
+policy does not enable the experimental notes adapter, so its confirmation
+score is not a qualification of that adapter.
+
 ### A fitted R risk model
 
 `fit_reliability.R` fits ridge logistic regression using base R. This is a real
@@ -195,12 +279,14 @@ Use the official `spread==0.1.0` SDK; the inspected wheel SHA-256 is
 `74f93ba5acd17edc17e484bb5ad5a6a200689587461374eb2b13f8af5a214b1c`.
 Supply credentials through the existing authorized host-side mechanism. No
 credential value belongs in source, datasets, artifacts or command logs.
+Run the commands from `solutions/bahn-spreadguard-live/`. The following starts
+one new unranked practice world with the strict service-priority option:
 
 ```bash
 python official_study.py run \
   --seed YOUR_NEW_DEVELOPMENT_SEED --policy learned --partition development \
   --model evidence/reliability-20261115/development_initial/model.json \
-  --late-threshold 0.05 --output /absolute/new-run-directory
+  --late-threshold 0.02 --output /absolute/new-run-directory
 
 python evidence_dataset.py --input /absolute/completed-runs \
   --output /absolute/new-analysis-directory
@@ -209,6 +295,23 @@ Rscript evaluate_reliability.R --input /absolute/paired-results.csv \
   --output /absolute/comparison.json --baseline baseline --candidate learned \
   --draws 20000
 ```
+
+To reproduce the reported confirmation analysis without creating any world:
+
+```bash
+Rscript evaluate_reliability.R \
+  --input evidence/reliability-20261115/confirm_v2/results.csv \
+  --output /absolute/confirmation-recheck.json \
+  --baseline baseline --candidate learned --draws 20000 --seed 20261115 \
+  --source-sha fa2c3b7fe3f6a9bbb4ba834b2902ad861e6af1ab
+```
+
+Existing campaign receipts are bound to the actual execution commit, not a
+later documentation commit. Reproducing that exact campaign requires source
+`fa2c3b7fe3f6a9bbb4ba834b2902ad861e6af1ab`. For a new experiment, use new output
+and seed names and a new explicit freeze; do not edit an old receipt to make a
+different source appear equivalent. A later evidence-only delivery commit
+leaves the decision code and model bytes unchanged.
 
 Historical worlds without live feature records remain a separate failure
 inventory. The R training/evaluation tools accept development/blind partitions;
@@ -219,10 +322,34 @@ the fresh-seed comparison.
 
 Initial development source: `31f7ae2098f3cee1800d1dec772b6836f46e4e34`.
 Second development source: `4fe55abc5d607dbf530e4865093b3c16cd5ecacb`.
-Portable checks ran against the pinned SDK in the cloud, and the Mac execution
-milestone passed 102 targeted checks. Actual fitting/evaluation used R 4.6.2 on
-the authorized Mac. Tests establish implementation contracts, not delivery
-performance. Final source verification is recorded with the delivered commit.
+First blind source: `74c551ede77caa613c1a5166f0a4f293318a9c89`.
+Safety confirmation and fork source:
+`fa2c3b7fe3f6a9bbb4ba834b2902ad861e6af1ab`.
+Portable checks ran against the pinned SDK in the cloud. The final executable
+source passed **114 targeted Python tests** on the Mac; the real R fitting and
+evaluation also completed with R 4.6.2. The source/model/threshold freeze was
+checked in every confirmation child before and after its run. Independent
+review verified the freeze fixes and all ten confirmation receipts. Tests
+establish implementation contracts, not delivery performance. The delivery
+PR records final-HEAD checks separately from hosted CI status.
+
+The owned run inventory contains **73 unique new official practice world IDs,
+all completed**: one baseline parity run, 18 initial development runs, one
+preserved interrupted/resumed run, 18 additional policy runs, six 0.075 runs,
+ten version-1 blind runs, six 0.02 development runs, ten fresh confirmation
+runs, and the fork parent plus two children. The ten historical exports are
+pre-existing and are not counted as newly created worlds. Repeated policies,
+repeated seeds and fork children do not multiply the number of independent
+scenarios.
+
+In the confirmation campaign the simulator rejected 16 baseline actions and
+zero candidate actions; both policies nevertheless completed all five worlds.
+The runner records rejection counts, not all rejected-response reasons. Do not
+describe these as error-free runs or infer a cause without the missing response
+detail. Each fork child had one rejected action. The maximum observed event
+handler time was approximately 556 ms across confirmation; that measurement
+can include synchronous SDK network calls and is not a final-environment
+latency guarantee.
 
 The sponsor returned HTTP 502 during one baseline development run. Its receipt
 and world were preserved, then the same world was resumed to completion. A
@@ -230,9 +357,13 @@ fresh uninterrupted control on the same seed replaced it in the paired
 analysis; the interrupted/resumed evidence remains outside the training input.
 No failed evidence was rewritten to appear as an uninterrupted run.
 
-This study is delivered through a task-owned draft PR stacked on #161. The
-Portfolio PR Recovery owner remains the integrator. A leaderboard/final entry
-and merging/releasing are separate decisions. No final-world result is claimed.
+This study is delivered through [draft PR #233](https://github.com/SalesSquad/junction-pets/pull/233),
+stacked on #161. The Portfolio PR Recovery owner remains the integrator. The
+task worktree and raw evidence are retained for imminent reproduction; pushed
+commits preserve the implementation and bounded evidence. No unrelated work
+or failed receipt was discarded. External call costs were not metered and
+remain unknown. A leaderboard/final entry and merging/releasing are separate
+decisions. No final-world result is claimed.
 
 Sponsor sources: [rules](https://spread.bahnexpress.com/kit/RULES.md),
 [handbook](https://spread.bahnexpress.com/kit/HANDBOOK.md),
