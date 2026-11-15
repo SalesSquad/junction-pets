@@ -14,7 +14,7 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     const apps = await exportApps(output);
     const catalog = JSON.parse(await readFile(join(output, 'catalog.json'), 'utf8'));
     assert.deepEqual(catalog.apps, apps);
-    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker','junction-aalto-university','junction-hostinger','junction-cala']));
+    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-banker','junction-aalto-university','junction-hostinger','junction-cala','junction-context-dev']));
     assert.equal(apps.filter(app=>app.petSlug==='junction-intel').length,2);
     for (const app of apps) assert.match(await readFile(join(output, app.path), 'utf8'), /<html/i);
     assert.match(await readFile(join(output,'apps/spread-director/index.html'), 'utf8'), /Use synthetic example/);
@@ -31,6 +31,8 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     assert.match(recovery,/connect-src 'none'/); assert.match(recovery,/href="\.\/styles\.css"/);
     const traffic=await readFile(join(output,'apps/traffic-forensics/public/traffic/index.html'),'utf8');
     assert.match(traffic,/connect-src 'none'/); assert.match(traffic,/src="\.\/app\.mjs"/);
+    const replay=await readFile(join(output,'apps/supplypulse-replay/index.html'),'utf8');
+    assert.match(replay,/SYNTHETIC_REPLAY/); assert.match(replay,/connect-src 'none'/); assert.match(replay,/src="\.\/app\.mjs"/);
     const roundlens=join(output,'apps/roundlens');
     const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css'];
     const entries=await Promise.all(names.map(async name=>`${name}\0${createHash('sha256').update(await readFile(join(roundlens,name))).digest('hex')}\n`));
