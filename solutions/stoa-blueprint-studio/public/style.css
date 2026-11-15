@@ -9,3 +9,16 @@
 .ifc-record { display: block; width: 100%; text-align: left; padding: 12px; margin: 10px 0; border: 1px solid #abb9c5; background: white; color: #132b40; border-radius: 6px; }
 .ifc-record.selected { outline: 3px solid #326f86; }
 .ifc-record pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+.review-tools,.revision-tools { border:1px solid #b9cbbb; border-radius:8px; padding:14px; margin-top:18px; color:#244b3a; font-size:12px; }
+.review-tools summary,.revision-tools summary { font-weight:700; cursor:pointer; }
+.review-tools p,.revision-tools p { line-height:1.6; overflow-wrap:anywhere; }
+.review-tools label,.revision-fields label { display:block; margin:12px 0; font-size:11px; font-weight:600; }
+.review-tools input,.review-tools textarea,.revision-fields input,.revision-fields select { width:100%; margin-top:5px; border:1px solid #afc5b2; background:#fff; padding:9px; color:#244b3a; border-radius:4px; font:inherit; }
+.review-actions { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+.review-tools button,.revision-tools button { border:1px solid #98b29e; background:#f5faee; color:#244b3a; padding:8px; border-radius:4px; font:inherit; cursor:pointer; }
+.review-tools button:disabled,.revision-tools button:disabled { opacity:.5; cursor:default; }
+.revision-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 14px; }
+.alignment-confirm { display:flex; gap:8px; align-items:flex-start; line-height:1.5; }
+.comparison-row { display:flex; align-items:center; justify-content:space-between; gap:12px; border-top:1px solid #c5d5c5; padding:10px 0; overflow-wrap:anywhere; }
+.comparison-row span { min-width:0; }
+@media(max-width:720px) { .revision-fields { grid-template-columns:1fr; } .comparison-row { align-items:flex-start; flex-direction:column; } .review-tools { grid-column:1/-1; } }

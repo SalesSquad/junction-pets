@@ -37,12 +37,39 @@
         <div id="drawing-stage" class="drawing-stage" aria-label="Source geometry showing cited regions"><div class="drawing-cross drawing-cross-one">+</div><div class="drawing-cross drawing-cross-two">+</div><svg id="blueprint" viewBox="0 0 940 620" aria-labelledby="blueprint-title"><title id="blueprint-title">Blueprint geometry and highlighted citations</title></svg><div id="ifc-source" hidden aria-label="IFC source entity records"></div><span id="stage-stamp" class="stage-stamp">VECTOR EVIDENCE <b>·</b> SOURCE COORDINATES</span></div>
         <div class="drawing-footer"><div id="drawing-legend" class="legend"><span><i class="legend-line room-legend"></i> Room boundaries</span><span><i class="legend-line unit-legend"></i> Unit outlines</span><span><i class="legend-dot"></i> Cited evidence</span></div><div id="drawing-stats">—</div></div>
       </div>
+      <details id="revision-tools" class="revision-tools">
+        <summary>Compare source revisions</summary>
+        <p>Import both versions, then choose the earlier source. Results describe source changes and matching proposals.</p>
+        <div class="revision-fields">
+          <label>Earlier source<select id="revision-before"><option value="">Import another source first</option></select></label>
+          <label>Comparison<select id="revision-mode"><option value="rooms">Room areas and boundaries</option><option value="primitives">DXF source primitives</option><option value="ifc">IFC product records by GUID</option></select></label>
+          <label id="revision-layer-field">DXF layer<input id="revision-layer" value="WINDOW" maxlength="80"></label>
+          <label id="revision-distance-field">Matching distance (m)<input id="revision-distance" type="number" min="0.001" max="10" step="0.05" value="0.25"></label>
+        </div>
+        <label id="revision-alignment-field" class="alignment-confirm"><input id="revision-aligned" type="checkbox"> I have checked that the DXF sources share an origin and orientation.</label>
+        <div class="review-actions"><button id="compare-revisions" type="button">Compare with current source</button><button id="export-comparison" type="button" disabled>Export comparison</button></div>
+        <p id="comparison-status" role="status"></p><div id="comparison-results"></div>
+      </details>
       <footer class="main-footer"><span>STOA ATLAS / RESEARCH PREVIEW</span><span>DRAWING COORDINATES ARE NOT MODEL INFERENCE.</span></footer>
     </main>
     <aside class="question-panel"><div class="panel-top"><div class="eyebrow muted">THE INTELLIGENCE LAYER</div><h2>Ask this drawing<span class="title-star">✳</span></h2><p>Inspect source geometry for DXF and original entity records for IFC.</p></div>
       <form id="question-form" class="question-form"><label for="question">YOUR QUESTION</label><textarea rows="3" id="question" maxlength="400" placeholder="e.g. How many rooms labelled Stanza?"></textarea><button id="ask-button" type="submit">Trace answer <span>↗</span></button></form>
       <div class="suggestions"><div class="suggestion-header">QUICK INVESTIGATIONS <span>TRY ONE</span></div><button class="suggestion" type="button" data-q="How many rooms labelled Stanza?">Count rooms labelled Stanza <span>↗</span></button><button class="suggestion" type="button" data-q="What is the area of room A-101?">Measure room A-101 <span>↗</span></button><button class="suggestion" type="button" data-q="How many doors are there?">Challenge unsupported counts <span>↗</span></button></div>
       <section id="answer-card" class="answer-card" aria-live="polite"><div class="answer-top"><span id="answer-state">AWAITING QUESTION</span><span id="answer-mark">◎</span></div><div class="answer-body"><span class="answer-label">EVIDENCE-BOUND RESULT</span><strong id="answer-value">Ask to begin.</strong><p id="answer-explanation">Select a quick investigation or enter your own question. Unsupported requests fail closed.</p></div><div class="answer-base"><span id="answer-cost">0 MODEL CALLS</span><span id="answer-count">0 CITATIONS</span></div></section>
+      <details class="review-tools" id="review-tools">
+        <summary>Review and export answer</summary>
+        <p id="review-status" role="status">Ask a question to start a source-bound review.</p>
+        <label>Reviewer name<input id="reviewer-name" maxlength="80" placeholder="Your name (locally declared)"></label>
+        <label>Review note<textarea id="review-note" rows="2" maxlength="1000"></textarea></label>
+        <label>Corrected answer<input id="review-answer" maxlength="400" placeholder="Original engine answer stays unchanged"></label>
+        <label>Correction source IDs<input id="review-ids" maxlength="2000" placeholder="e1, e2 or #20"></label>
+        <button id="use-selected-evidence" type="button">Add selected source to correction</button>
+        <div class="review-actions"><button id="confirm-answer" type="button" disabled>Confirm engine answer</button><button id="correct-answer" type="button" disabled>Record correction</button><button id="undo-review" type="button" disabled>Undo</button><button id="redo-review" type="button" disabled>Redo</button></div>
+        <div class="review-actions"><button id="export-evidence" type="button" disabled>Export evidence packet</button><button id="restore-review-button" type="button">Restore exported review</button></div>
+        <input id="restore-review-file" type="file" accept=".json" hidden>
+        <ol id="review-history" aria-label="Review history"></ol>
+        <p id="review-message" role="status">Reviews are local declarations. Export a packet to keep the answer, source excerpts and history.</p>
+      </details>
       <div class="evidence-header"><span>ORIGINAL EVIDENCE</span><span id="evidence-count">0 REGIONS</span></div><div id="evidence-list" class="evidence-list"><div class="evidence-empty">Source-linked regions appear here after a supported answer.</div></div>
       <div class="panel-bottom"><div class="panel-bottom-icon">♢</div><p><strong>Never a confident guess.</strong><br>If the drawing cannot prove it, Atlas tells you why.</p></div>
     </aside>
