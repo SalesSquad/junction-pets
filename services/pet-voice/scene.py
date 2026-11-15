@@ -107,11 +107,15 @@ def system_prompt(slug: str, cast: list[str], lang: str, memory_notes: list[str]
             "pace, volume, pitch and emotion only — never body movement.")
 
 
+def writer_order() -> list[str]:
+    return pv.route_filter(WRITERS)
+
+
 def gen_json(system: str, parts: list[dict], schema: dict, key: str, log: list, temperature: float = 1.0) -> tuple[dict, str, float]:
     body = {"systemInstruction": {"parts": [{"text": system}]}, "contents": [{"role": "user", "parts": parts}],
             "generationConfig": {"responseMimeType": "application/json", "responseSchema": schema, "temperature": temperature,
                                  "maxOutputTokens": 2048, "thinkingConfig": {"thinkingLevel": "low"}}}
-    for model in WRITERS:
+    for model in writer_order():
         if model in pv.EXHAUSTED:
             continue
         if model.startswith("openai:"):
@@ -133,6 +137,8 @@ def gen_json(system: str, parts: list[dict], schema: dict, key: str, log: list, 
             continue
         except ValueError as e:
             log.append({"model": model, "status": 200, "code": "BAD_JSON", "message": str(e)[:120]})
+    if pv.gemini_only():
+        raise pv.gemini_only_failure("writer")
     raise pv.ProviderError(0, "GEN_UNAVAILABLE", "no writer model answered")
 
 
@@ -807,7 +813,7 @@ def run_scene(scene_id: str, *, audio: bool, run_id: str, use_critic: bool = Tru
             notes = []
     commit, _ = pv.source_commit()
     report = {"schema": "junction.pet-voice.scene/v2", "runId": run_id, "scene": scene_id, "audio": audio, "finishedAt": now(),
-              "source": {"repository": "SalesSquad/junction-pets", "commit": commit}, "writers": WRITERS, "critic": use_critic,
+              "source": {"repository": "SalesSquad/junction-pets", "commit": commit}, "writers": writer_order(), "geminiOnly": pv.gemini_only(), "critic": use_critic,
               "complete": complete, "metrics": scene_metrics(history) if history else {}, "memoryNotes": notes,
               "turns": [{k: h.get(k) for k in ("turn", "name", "slug", "language", "move", "text", "voiceDirection", "respondsTo",
                                                "callbackNote", "director", "draft", "critic", "problems", "heard", "heardAccuracy",
@@ -826,6 +832,9 @@ def as_text(history: list[dict]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    GO = dict(action="store_true", default=argparse.SUPPRESS,
+              help="Gemini only: never call OpenAI (also PET_VOICE_GEMINI_ONLY=1); fail clearly if Gemini routes are exhausted")
+    ap.add_argument("--gemini-only", **{**GO, "default": False})
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run", help="play one or more scenes (comma list or 'all')")
     r.add_argument("scenes")
@@ -847,7 +856,11 @@ def main(argv: list[str] | None = None) -> int:
     m = sub.add_parser("memory", help="print continuity notes and habits")
     m.add_argument("--rebuild", action="store_true",
                    help="drop near-duplicate notes and rebuild opener/word habits from scene-evidence/ in time order")
+    for sp in sub.choices.values():
+        sp.add_argument("--gemini-only", **GO)
     args = ap.parse_args(argv)
+    if args.gemini_only:
+        pv.set_gemini_only()
     if args.cmd == "voice-script":
         spec = json.loads(Path(args.script).read_text())
         by_name = {pv.persona(s)["name"].casefold(): s for s in pv.all_pet_slugs()}

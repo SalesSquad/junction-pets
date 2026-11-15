@@ -1,7 +1,9 @@
 # Pet voice — Junction pets speak (Gemini) and answer each other by audio
 
+**Google DeepMind "Best Use of Gemini API" submission: [SUBMISSION.md](SUBMISSION.md)** — problem, Gemini integration, evidence, 2-minute demo (`--gemini-only`).
+
 Every one of the 34 Junction companion pets has a Google DeepMind Gemini TTS voice and a
-default language (`voices.json`, 17 languages). Pets talk **by audio**: the listener gets the
+default language (`voices.json`, 18 locales / 16 languages). Pets talk **by audio**: the listener gets the
 speaker's WAV, transcribes it with Gemini audio understanding, answers in its own persona
 (from `pets/<company>/pet.json`) and speaks the answer with its own voice.
 
@@ -21,6 +23,7 @@ cd services/pet-voice
 python3 pet_voice.py relay                       # all 34 pets + closing turn, ~70 Gemini calls
 python3 pet_voice.py talk meta nvidia --rounds 3 --reply-language heard
 python3 pet_voice.py say rokoko "Hej alle sammen" --play
+python3 pet_voice.py relay --gemini-only         # never call OpenAI; stops with GEMINI_ONLY_EXHAUSTED if Gemini is out
 ```
 
 Audio, `index.html` player and `transcript.md` go to
