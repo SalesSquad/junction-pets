@@ -277,6 +277,22 @@ class FeedbackContracts(unittest.TestCase):
             compile_fixture(credit_cutoff="2026-11-14T21:00:00Z",
                             clock="2026-11-14T21:01:00Z")
 
+    def test_31_minute_credit_admission_guard_exact_boundary(self):
+        cutoff="2026-11-15T17:00:00Z"
+        self.assertEqual(
+            compile_fixture(credit_cutoff=cutoff,
+                            clock="2026-11-15T16:28:59Z")["decision"],
+            "TRAIN_MORE_FOR_UNSUPPORTED_ACTION")
+        # At 16:29 UTC there are precisely 31 minutes remaining: STOP.
+        for now in ("2026-11-15T16:29:00Z",
+                    "2026-11-15T16:40:00Z",
+                    "2026-11-15T16:59:59Z",
+                    "2026-11-15T18:29:00+02:00"):
+            with self.subTest(now=now):
+                with self.assertRaisesRegex(fb.FeedbackStop,
+                                            "CREDIT_WINDOW_31MIN_ADMISSION_STOP"):
+                    compile_fixture(credit_cutoff=cutoff,clock=now)
+
     def test_current_credit_window_still_does_not_dispatch(self):
         out=compile_fixture(credit_cutoff="2026-11-15T21:00:00Z",
                             clock="2026-11-14T21:01:00Z")
