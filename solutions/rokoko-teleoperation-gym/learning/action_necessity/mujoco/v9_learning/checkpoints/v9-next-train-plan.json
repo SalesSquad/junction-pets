@@ -1,0 +1,45 @@
+{
+  "chronological_stage_funnel_counts": [
+    128,
+    75,
+    41,
+    0
+  ],
+  "decision_input": "V7_ONLY_V8_UNSEEN",
+  "decision_strategy": "repeat_left",
+  "focus_rule": "preregistered-first-sub-half-stage-transition-or-final-dwell",
+  "learner_readiness": {
+    "blocked_stages_on_train_diagnostic": [
+      3
+    ],
+    "never_select_by_dev_cal_test_ood": true,
+    "next_development_action": "first repair underfit/overfit stage heads using new qualified TRAIN teachers; then freeze revised candidate before running preregistered fresh physics",
+    "prospective_v9_episode_dispatch_authorized": false
+  },
+  "next_seed_policy": {
+    "cohort_clear": 32,
+    "cohort_near": 128,
+    "last_public_observation_selection_seed": 514511,
+    "no_future_result_relabeling": true,
+    "paired_real_physics_episodes": 800,
+    "selection": "first ascending seeds: public initial abs(observation[7]) < 0.122 for near; else clear",
+    "strategy_order": [
+      "frozen_v5",
+      "frozen_v6",
+      "repeat_left",
+      "frozen_v8",
+      "v9_stage_weighted"
+    ],
+    "train_seed_start": 514000
+  },
+  "qualification": {
+    "checkpoint_does_not_imply_control_improvement": true,
+    "frozen_v5_v6_preserved": true,
+    "new_physics_and_independent_positive_replay_required": true,
+    "no_dev_cal_test_ood": true,
+    "no_model_promotion_authorized": true,
+    "only_train_fresh_worlds": true,
+    "strict_original_7_mask": true
+  },
+  "selected_training_focus": "forward_reopen_to_250_tick_safe_goal_dwell"
+}

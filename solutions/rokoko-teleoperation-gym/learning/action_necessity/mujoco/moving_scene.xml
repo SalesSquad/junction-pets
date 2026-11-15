@@ -1,0 +1,29 @@
+<mujoco model="action-necessity-moving-contact">
+  <!-- Based on the existing Rokoko ContactEnv scene; this is a bounded CPU model,
+       not a physical robot or certified safe controller. -->
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="implicitfast"/>
+  <default>
+    <geom friction="0.4 0.005 0.0001" solref="0.01 1"/>
+  </default>
+  <worldbody>
+    <geom name="table" type="plane" size="0.5 0.5 0.02" friction="0.05 0.005 0.0001"/>
+    <!-- Explicit mocap body: control of mocap_pos is advanced before every
+         mj_step; contacts are resolved by MuJoCo, not by a kinematic toy. -->
+    <body name="moving_obstacle" mocap="true" pos="0.09 0 0.03">
+      <geom name="obstacle" type="box" pos="0 0.15 0" size="0.018 0.018 0.03"/>
+    </body>
+    <body name="object" pos="0 0 0.021">
+      <freejoint/>
+      <geom name="object_geom" type="cylinder" size="0.02 0.02" mass="0.08" rgba="0.9 0.5 0.2 1"/>
+    </body>
+    <body name="pusher" pos="-0.06 0 0.025">
+      <joint name="px" type="slide" axis="1 0 0" damping="10"/>
+      <joint name="py" type="slide" axis="0 1 0" damping="10"/>
+      <geom name="pusher_geom" type="sphere" size="0.012" mass="0.2"/>
+    </body>
+  </worldbody>
+  <actuator>
+    <position joint="px" kp="180" ctrlrange="-0.2 0.4" forcelimited="true" forcerange="-3 3"/>
+    <position joint="py" kp="180" ctrlrange="-0.2 0.2" forcelimited="true" forcerange="-3 3"/>
+  </actuator>
+</mujoco>

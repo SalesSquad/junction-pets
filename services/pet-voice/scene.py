@@ -471,10 +471,14 @@ def designed_voices() -> dict:
 
 def voice_for(slug: str) -> str:
     """The pet's designed voice unless the owner's blind A/B preferred the prebuilt one (taste.json)."""
-    prebuilt = pv.load_voices()[slug]["voice"]
-    if taste().get("voicePreference", {}).get(slug) == "prebuilt":
+    prebuilt, t = pv.load_voices()[slug]["voice"], taste()
+    designed = designed_voices().get(slug, {})
+    if t.get("voicePreference", {}).get(slug) == "prebuilt":
         return prebuilt
-    return designed_voices().get(slug, {}).get("id") or prebuilt
+    # 👎 on the designed sample counts until the voice is redesigned (a newer createdAt than the rating).
+    if t.get("voiceRating", {}).get(slug) == "down" and designed.get("createdAt", "") <= t.get("updatedAt", ""):
+        return prebuilt
+    return designed.get("id") or prebuilt
 
 
 def speak_line(slug: str, text: str, direction: str, key: str, tts_order: list[str], log: list, prefer: dict) -> dict:
@@ -482,12 +486,49 @@ def speak_line(slug: str, text: str, direction: str, key: str, tts_order: list[s
     voice, prebuilt = voice_for(slug), pv.load_voices()[slug]["voice"]
     style = direction or characters()[slug]["delivery"]
     if voice.startswith("voice_"):
+        # The model the voice was designed on goes first: the free tier gives each TTS model only ~10-15 calls a day,
+        # so a designed id sent to a model that cannot use it burns quota for nothing.
+        home = designed_voices().get(slug, {}).get("model")
+        order = ([home] if home else []) + [m for m in tts_order if m != home and not m.startswith("live:")]
         try:
-            out = pv.speak(text, voice, style, key, [m for m in tts_order if not m.startswith("live:")], log, prefer)
+            out = pv.speak(text, voice, style, key, order, log, prefer)
             return {**out, "voiceUsed": voice}
         except pv.ProviderError:
             pass
     return {**pv.speak(text, prebuilt, style, key, tts_order, log, prefer), "voiceUsed": prebuilt}
+
+
+def voice_script(lines: list[dict], run_id: str, prebuilt: bool = False, models: list[str] | None = None) -> list[dict]:
+    """Voice a fixed transcript ([{slug, text, direction?}]) into a run folder listen.py can read — for baselines and
+    voice A/B. Resumable: finished turns are kept. prebuilt=True skips the designed voice (Live fallback allowed);
+    `models` pins the TTS models (a fair voice A/B uses the same model for both voices)."""
+    key, learned = pv.read_key(), pv.load_learned()
+    tts_order, prefer = models or pv.model_order(learned, "tts", pv.DEFAULT_TTS_MODELS, None), learned.get("ttsVariant") or {}
+    turns_dir = pv.RUNS_DIR / run_id / "turns"
+    turns_dir.mkdir(parents=True, exist_ok=True)
+    out = []
+    for i, ln in enumerate(lines):
+        tf, wf = turns_dir / f"{i:03d}.json", turns_dir / f"{i:03d}.wav"
+        if tf.exists() and wf.exists() and json.loads(tf.read_text()).get("status") == "ok":
+            out.append(json.loads(tf.read_text()))
+            continue
+        slug, log = ln["slug"], []
+        p, style = pv.persona(slug), ln.get("direction") or characters()[slug]["delivery"]
+        if prebuilt:
+            spoken = {**pv.speak(ln["text"], pv.load_voices()[slug]["voice"], style, key, tts_order, log, prefer),
+                      "voiceUsed": pv.load_voices()[slug]["voice"]}
+        else:
+            spoken = speak_line(slug, ln["text"], style, key, tts_order, log, prefer)
+        wf.write_bytes(spoken["wav"])
+        turn = {"turn": i, "slug": slug, "speakerSlug": slug, "name": p["name"], "speakerName": p["name"],
+                "language": pv.load_voices()[slug]["language"], "text": ln["text"], "style": style, "status": "ok",
+                "voice": spoken["voiceUsed"], "ttsModel": spoken["model"], "ttsSpoken": spoken.get("spoken"),
+                "ttsFidelity": spoken.get("fidelity"), "audioSeconds": pv.wav_seconds(spoken["wav"]),
+                "audioSha256": pv.sha256(spoken["wav"]), "ttsEvents": log}
+        tf.write_text(json.dumps(turn, ensure_ascii=False, indent=1))
+        print(f"[{i:02d}] {p['name']:<12} {spoken['model']:<40} {ln['text'][:60]}", flush=True)
+        out.append(turn)
+    return out
 
 
 def api_post(path: str, body: dict, key: str, timeout: float = 120) -> dict:
@@ -518,8 +559,10 @@ def design_voices(slugs: list[str], force: bool = False, model: str = "gemini-3.
         c, lang = characters()[slug], voices[slug]["language"]
         desc = c["voice_design"]
         gender = "female" if re.search(r"\bwoman\b", desc, re.I) else "male" if re.search(r"\bman\b", desc, re.I) else None
+        owner = taste().get("pets", {}).get(slug, {}).get("voiceNotes", [])[-2:]
+        prompt = f"{desc} Baseline delivery: {c['delivery']}." + (f" The listener's notes on the last voice: {' / '.join(owner)}" if owner else "")
         voice = {"model": model, "type": "prompted", "display_name": f"Junction {pv.persona(slug)['name']}",
-                 "language_code": lang, "prompted": {"input": f"{desc} Baseline delivery: {c['delivery']}."}}
+                 "language_code": lang, "prompted": {"input": prompt}}
         if gender:
             voice["gender"] = gender
         try:
@@ -778,18 +821,33 @@ def main(argv: list[str] | None = None) -> int:
     dv = sub.add_parser("design-voices", help="create each pet's own Gemini voice (Voice design)")
     dv.add_argument("--pets", default="all")
     dv.add_argument("--force", action="store_true")
+    dv.add_argument("--disliked", action="store_true", help="redesign the voices the owner rated 👎, using their notes")
+    vs = sub.add_parser("voice-script", help="voice a fixed transcript into a run folder (baselines, voice A/B)")
+    vs.add_argument("script", help="JSON: {lines: [{slug|name, text, direction?}]}")
+    vs.add_argument("--run-id", required=True)
+    vs.add_argument("--prebuilt", action="store_true", help="prebuilt voices only (Live fallback allowed)")
+    vs.add_argument("--models", default="", help="comma list of TTS models to use, in order")
     m = sub.add_parser("memory", help="print continuity notes and habits")
     m.add_argument("--rebuild", action="store_true",
                    help="drop near-duplicate notes and rebuild opener/word habits from scene-evidence/ in time order")
     args = ap.parse_args(argv)
+    if args.cmd == "voice-script":
+        spec = json.loads(Path(args.script).read_text())
+        by_name = {pv.persona(s)["name"].casefold(): s for s in pv.all_pet_slugs()}
+        lines = [{**ln, "slug": ln.get("slug") or by_name[ln["name"].casefold()]} for ln in spec["lines"]]
+        voice_script(lines, args.run_id, args.prebuilt, [m for m in args.models.split(",") if m] or None)
+        return 0
     if args.cmd == "memory":
         if args.rebuild:
             rebuild_memory()
         print(json.dumps(load_memory(), ensure_ascii=False, indent=1))
         return 0
     if args.cmd == "design-voices":
-        slugs = pv.all_pet_slugs() if args.pets == "all" else [pv.resolve_slug(s) for s in args.pets.split(",")]
-        print(json.dumps(design_voices(slugs, args.force), indent=1))
+        if args.disliked:
+            slugs = [s for s, v in taste().get("voiceRating", {}).items() if v == "down"]
+        else:
+            slugs = pv.all_pet_slugs() if args.pets == "all" else [pv.resolve_slug(s) for s in args.pets.split(",")]
+        print(json.dumps(design_voices(slugs, args.force or args.disliked), indent=1))
         return 0
     ids = list(load("scenes.json")["scenes"]) if args.scenes == "all" else args.scenes.split(",")
     summary = {}

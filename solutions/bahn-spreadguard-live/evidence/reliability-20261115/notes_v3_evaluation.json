@@ -1,0 +1,263 @@
+{
+  "counts": {
+    "orders_with_ambiguous_clauses": 24,
+    "orders_with_note": 1125,
+    "orders_with_unknown_clauses": 907,
+    "orders_without_note": 1623,
+    "revealed_orders": 2748,
+    "single_leg": 1125,
+    "unevaluated_pickupBefore_assertions": 0
+  },
+  "false_assertion_samples": [],
+  "fields": {
+    "deliveryHours": {
+      "assertion_coverage": 0.06222222222222222,
+      "assertion_precision": 1.0,
+      "correct": 70,
+      "descriptive_wilson_95": [
+        0.9479769375897331,
+        1.0
+      ],
+      "emitted_assertions": 70,
+      "evaluated_rows": 1125,
+      "false_assertion": 0,
+      "nonbinding": 0,
+      "unknown": 1055
+    },
+    "manualRequired": {
+      "assertion_coverage": 0.025777777777777778,
+      "assertion_precision": 1.0,
+      "correct": 29,
+      "descriptive_wilson_95": [
+        0.8830302015002593,
+        1.0
+      ],
+      "emitted_assertions": 29,
+      "evaluated_rows": 1125,
+      "false_assertion": 0,
+      "nonbinding": 0,
+      "unknown": 1096
+    },
+    "noteDeadline": {
+      "assertion_coverage": 0.033777777777777775,
+      "assertion_precision": 1.0,
+      "correct": 38,
+      "descriptive_wilson_95": [
+        0.908190131774416,
+        0.9999999999999999
+      ],
+      "emitted_assertions": 70,
+      "evaluated_rows": 1125,
+      "false_assertion": 0,
+      "nonbinding": 32,
+      "unknown": 1055
+    },
+    "pickupHours": {
+      "assertion_coverage": 0.08444444444444445,
+      "assertion_precision": 1.0,
+      "correct": 95,
+      "descriptive_wilson_95": [
+        0.9611351464605271,
+        1.0
+      ],
+      "emitted_assertions": 95,
+      "evaluated_rows": 1125,
+      "false_assertion": 0,
+      "nonbinding": 0,
+      "unknown": 1030
+    },
+    "platesRequired": {
+      "assertion_coverage": 0.02311111111111111,
+      "assertion_precision": 1.0,
+      "correct": 26,
+      "descriptive_wilson_95": [
+        0.8712710781407846,
+        1.0
+      ],
+      "emitted_assertions": 26,
+      "evaluated_rows": 1125,
+      "false_assertion": 0,
+      "nonbinding": 0,
+      "unknown": 1099
+    },
+    "readyAt": {
+      "assertion_coverage": 0.08,
+      "assertion_precision": 1.0,
+      "correct": 90,
+      "descriptive_wilson_95": [
+        0.9590643744356734,
+        1.0
+      ],
+      "emitted_assertions": 90,
+      "evaluated_rows": 1125,
+      "false_assertion": 0,
+      "nonbinding": 0,
+      "unknown": 1035
+    },
+    "releaseAt": {
+      "assertion_coverage": 0.014222222222222223,
+      "assertion_precision": 1.0,
+      "correct": 16,
+      "descriptive_wilson_95": [
+        0.8063923194655637,
+        1.0
+      ],
+      "emitted_assertions": 16,
+      "evaluated_rows": 1125,
+      "false_assertion": 0,
+      "nonbinding": 0,
+      "unknown": 1109
+    },
+    "summerTyres": {
+      "assertion_coverage": 0.008,
+      "assertion_precision": 1.0,
+      "correct": 9,
+      "descriptive_wilson_95": [
+        0.7008549515804559,
+        1.0
+      ],
+      "emitted_assertions": 9,
+      "evaluated_rows": 1125,
+      "false_assertion": 0,
+      "nonbinding": 0,
+      "unknown": 1116
+    }
+  },
+  "limitations": [
+    "Won-order cohort only; not all requests",
+    "Unscoped multi-leg notes excluded from field accuracy",
+    "Unknowns do not count as correct",
+    "Hours compare only explicitly asserted components",
+    "pickupBefore has no direct reveal label and is not scored",
+    "Descriptive field intervals assume independent rows; worlds contain correlated rows",
+    "No delivery-rate or neural-training claim",
+    "Development evidence if these notes informed grammar"
+  ],
+  "parser_sha256": "73112136261ebc3a02f9436bbcd1894648b8d63a23be9b13e7c7ad22ca66aa8e",
+  "parser_version": "bounded-notes-3",
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "bundle_sha256": "38b810472c47d7b50dde2dead100562aee5dad5ae48b7364e27bbbd01a2c1e3a",
+      "policy": "admission139-slack240",
+      "seed_group": "historical-04",
+      "world_id": "w109698471181fb40d3b5"
+    },
+    {
+      "bundle_sha256": "33bf4c096b701b6d70944afb44b810f6edf002d8fa5be6274e71dbe3418ce948",
+      "policy": "admission139-slack240",
+      "seed_group": "historical-03",
+      "world_id": "w1543ca74476dee7c3ab9"
+    },
+    {
+      "bundle_sha256": "e204b22158b5dafa04dbbd8fa85754d3870aeda017ec18fc6b5d840af58bca14",
+      "policy": "admission139-slack240",
+      "seed_group": "historical-08",
+      "world_id": "w19e0f5713c8094fb8949"
+    },
+    {
+      "bundle_sha256": "42e65f39513cc00985fb86d2b07c49723efa645cefbaba7a1068148088a6e14f",
+      "policy": "admission139-slack240",
+      "seed_group": "historical-09",
+      "world_id": "w237db37afdc864c01127"
+    },
+    {
+      "bundle_sha256": "2615594047e29f96f6afc5fcff442810ca090d21c9530086a73130a3469c3493",
+      "policy": "admission139-slack240",
+      "seed_group": "historical-05",
+      "world_id": "w447a429f45391dccab58"
+    },
+    {
+      "bundle_sha256": "f5f02c1bee3bf8a4c589d1396232fb87272eada46b0c1b81d93d0410fe3fe628",
+      "policy": "admission139-slack240",
+      "seed_group": "historical-07",
+      "world_id": "w5341331c1a5bf6e6a0cf"
+    },
+    {
+      "bundle_sha256": "5ce4419a6bfdbb9f8018c888666133ff1006887e028a5ecd07b5e96c23219e61",
+      "policy": "admission139-slack240",
+      "seed_group": "historical-01",
+      "world_id": "w5f5406d5e1a2a60926d5"
+    },
+    {
+      "bundle_sha256": "49c2efc09db982be8a2b3e421077594676da7f18c947f5e76965eea0011046e0",
+      "policy": "admission139-slack240",
+      "seed_group": "historical-06",
+      "world_id": "wb783afee5f2c95100b1b"
+    },
+    {
+      "bundle_sha256": "e81e6bd95b136259bd9c0a7906a5770ae980fcc275035853cafad89a5b5e87d9",
+      "policy": "admission139-slack240",
+      "seed_group": "historical-02",
+      "world_id": "wf78478fad516f52764fc"
+    },
+    {
+      "bundle_sha256": "78630caae4255e59b94d9abf831cf00edc8343764971056aa5cb7132821e79fa",
+      "policy": "admission139-slack240",
+      "seed_group": "historical-10",
+      "world_id": "wf7d8c2b7c38b0e541cef"
+    }
+  ],
+  "worlds": [
+    {
+      "correct": 25,
+      "nonbinding": 2,
+      "unknown": 773,
+      "world_id": "w109698471181fb40d3b5"
+    },
+    {
+      "correct": 54,
+      "nonbinding": 2,
+      "unknown": 1096,
+      "world_id": "w1543ca74476dee7c3ab9"
+    },
+    {
+      "correct": 51,
+      "nonbinding": 9,
+      "unknown": 1028,
+      "world_id": "w19e0f5713c8094fb8949"
+    },
+    {
+      "correct": 34,
+      "nonbinding": 1,
+      "unknown": 837,
+      "world_id": "w237db37afdc864c01127"
+    },
+    {
+      "correct": 48,
+      "nonbinding": 6,
+      "unknown": 1026,
+      "world_id": "w447a429f45391dccab58"
+    },
+    {
+      "correct": 18,
+      "nonbinding": 1,
+      "unknown": 557,
+      "world_id": "w5341331c1a5bf6e6a0cf"
+    },
+    {
+      "correct": 49,
+      "nonbinding": 3,
+      "unknown": 1100,
+      "world_id": "w5f5406d5e1a2a60926d5"
+    },
+    {
+      "correct": 39,
+      "nonbinding": 2,
+      "unknown": 775,
+      "world_id": "wb783afee5f2c95100b1b"
+    },
+    {
+      "correct": 41,
+      "nonbinding": 5,
+      "unknown": 1042,
+      "world_id": "wf78478fad516f52764fc"
+    },
+    {
+      "correct": 14,
+      "nonbinding": 1,
+      "unknown": 361,
+      "world_id": "wf7d8c2b7c38b0e541cef"
+    }
+  ]
+}
