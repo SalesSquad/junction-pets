@@ -19,7 +19,7 @@ test('lint issue is repaired on haiku without escalation', async () => {
 });
 
 test('sensitive data stays on haiku by default; opt-in and tool-heavy requests escalate with reasons', async () => {
-  const sensitive = () => resp({ governance: { owner_role: 'dpo', approvals_needed: ['DPO'], data_classification: 'special_category' } });
+  const sensitive = () => resp({ answer: 'Keep the data in an EU region (residency).', governance: { owner_role: 'dpo', approvals_needed: ['DPO'], data_classification: 'special_category' } });
   const req = 'Load patient registry rows into ClickHouse in an EU region';
   assert.equal((await answerWithCascade({ request: req, claude: fake(sensitive).claude })).route, 'haiku');
   const r = await answerWithCascade({ request: req, claude: fake(sensitive).claude, escalateSensitive: true });
