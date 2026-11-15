@@ -9,6 +9,7 @@ import { buildArtifact, generateDeviceKey, verifyArtifact, type WarrantArtifact 
 import { Authority, type AgentGrant, type Authorization, type Proposal } from "../authority/authority.ts";
 import { dictate, monthDate, relativeDate, speak, spokenDate, stopSpeaking, voiceSupport, VOICE_LANGS } from "./voice.ts";
 import { copyText, dictationNote } from "./embed.ts";
+import { icsEvent, lastDay, timeVerdict } from "../timetravel/verdict.ts";
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
 const today = () => new Date().toISOString().slice(0, 10);
@@ -397,6 +398,7 @@ export function mountThenNow(root: HTMLElement): void {
         ${r ? `
         <div class="tt-provision small muted">${support.speak ? `<button id="tt-say" class="tt-mini">Read aloud</button> ` : ""}${esc(r.provision.title)} · found via ${esc(r.provision.via)} · clause chosen by ${esc((r.judges ?? [r.judge ?? "judge"]).join(", "))} (p = ${r.then.p.toFixed(2)}) ${agreementChip(r)}${r.computed ? `<div class="small">${esc(r.computed)}</div>` : ""}</div>
         ${trace(r)}
+        ${(() => { const v = timeVerdict(state.question, r.then.amount); return v ? `<p class="tt-verdict ${v.within ? "tt-ok" : "tt-warn"}"><b>${v.within ? "Still in time" : "Probably out of time"}.</b> ${esc(v.text.replace(/^(Still in time|Probably out of time)[:.]? ?/, "").replace(/^./, (c) => c.toUpperCase()))}${(() => { const last = lastDay(r.eventDate, r.then.amount); return last && v.within ? ` Last day: <b>${esc(last)}</b> <button id="tt-ics" class="tt-mini" data-last="${esc(last)}">Add to calendar</button>` : ""; })()}</p>` : ""; })()}
         <div class="tt-grid">
           ${moment("Then", r.then, `<blockquote>${esc(r.evidence.quote)}</blockquote>`)}
           ${moment("Now", r.now, r.changed ? `<div class="tt-warn">Changed since ${esc(r.eventDate)} — a date-blind answer would say ${esc(r.now.amount?.text ?? "something else")}.</div>` : `<div class="tt-ok">Unchanged since ${esc(r.eventDate)}.</div>`)}
@@ -454,6 +456,16 @@ export function mountThenNow(root: HTMLElement): void {
     root.querySelector("#tt-date")?.addEventListener("input", (ev) => { state.date = (ev.target as HTMLInputElement).value; state.dateTouched = true; });
     root.querySelector("#tt-run")?.addEventListener("click", () => void run());
     root.querySelector("#tt-steps-go")?.addEventListener("click", () => void workOutSteps());
+    root.querySelector("#tt-ics")?.addEventListener("click", (ev) => {
+      const last = (ev.currentTarget as HTMLElement).dataset.last;
+      if (!last || !r) return;
+      const ics = icsEvent({ summary: `Last day: ${r.provision.title.slice(0, 80)}`, date: last, description: `${r.then.amount?.text ?? ""} from ${r.eventDate}. Official text: ${r.then.url}`, uid: `${r.eventDate}-${last}@internet-butler`, stamp: new Date().toISOString() });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+      a.download = `last-day-${last}.ics`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    });
     root.querySelector("#tt-copy")?.addEventListener("click", () => { if (state.claim) void copyText(state.claim.letter); });
     root.querySelector("#tt-lookup-q")?.addEventListener("input", (ev) => (state.lookup.q = (ev.target as HTMLInputElement).value));
     root.querySelector("#tt-lookup-q")?.addEventListener("keydown", (ev) => { if ((ev as KeyboardEvent).key === "Enter") void lookup(); });

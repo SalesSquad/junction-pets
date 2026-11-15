@@ -11,6 +11,7 @@ import { IMAGES_HEADER, localDecisions, logprobDecisions, openaiDecisions, types
 import { amendmentsAfter, thenNowNext, OFFICIAL_DOMAINS, REGISTRY } from "../src/timetravel/timetravel.ts";
 import { announcedChanges, GOV_DOMAINS } from "../src/timetravel/announced.ts";
 import { nextSteps } from "../src/timetravel/nextSteps.ts";
+import { timeVerdict } from "../src/timetravel/verdict.ts";
 import { monthDate, relativeDate, spokenDate } from "../src/ui/voice.ts";
 import { isPointInTimeUrl, officialFetch } from "../src/warrant/pointInTime.ts";
 import { image } from "@typesafe-ai/sdk";
@@ -272,6 +273,7 @@ export function createRelay() {
           changed: r.changed,
           evidence: r.evidence,
           computed: r.computed ?? null,
+          verdict: timeVerdict(question, r.then.amount) ?? null,
           agreed: !!r.agreement?.agreed,
           reviewNeeded: !r.agreement?.agreed,
           asked,
