@@ -3,6 +3,7 @@ import {appendFile, mkdir, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 
+export const V12_SOURCE_SHA = '64c9a32bf983c26099ece11f1c3a0f6da5bc4f1d';
 export const WINDOW_END = '2026-11-15T17:00:00Z';
 const SHA = /^[0-9a-f]{40}$/;
 const ENGINES = ['chromium', 'firefox', 'webkit'];
@@ -44,6 +45,7 @@ const FRONTIER_PINS = Object.freeze({
   'rokoko-rl-ablations': '59479b42b177c1829a2e6678adfff1fb68aef09c',
 });
 export const WORKLOADS = Object.freeze([
+  'rokoko-mujoco-v12-pilot',
   'portable', 'product-browser', 'sbank-sponsor', 'portfolio-browser',
   'sbank-properties', 'tieto-sponsor', 'council-postgres', 'meta-seeds',
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
@@ -81,7 +83,11 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
   const add = (cell, sha, extra = {}) => include.push({cell, source_sha: commit(sha, 'resolved source'), source_repository: repository, ...extra});
   const selectedEngines = browser === 'all' ? ENGINES : [browser];
 
-  if (['portfolio-browser', 'new-products-browser', 'product-browser'].includes(workload)) {
+  if (workload === 'rokoko-mujoco-v12-pilot') {
+    if (Date.parse(WINDOW_END) - when.getTime() < 3600000) throw new Error('V12 requires at least 60 minutes remaining');
+    if (override !== V12_SOURCE_SHA) throw new Error('V12 requires exact pinned source_sha');
+    add(workload, V12_SOURCE_SHA, {qualification: 'product-source', stage: 'pilot', seed_first: 518000, seed_last: 518511});
+  } else if (['portfolio-browser', 'new-products-browser', 'product-browser'].includes(workload)) {
     const supported = workload === 'portfolio-browser' ? ['sbank', 'hostinger', 'espoo', 'exa']
       : workload === 'new-products-browser' ? ['cala', 'context'] : ['stoa', 'valio'];
     choose(product, workload === 'product-browser' ? supported : [...supported, 'all'], `${workload} product`);

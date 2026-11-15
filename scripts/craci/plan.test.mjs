@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {resolvePlan, WORKLOADS} from './plan.mjs';
+import {resolvePlan, WORKLOADS, V12_SOURCE_SHA} from './plan.mjs';
 
 const harnessSha = '1283d38c0352055fb487f0c2d7af06f86a915f9b';
 const candidate = '83c45015f475471a861d663677d060e26b2692c3';
@@ -40,6 +40,7 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
       input.source_sha = candidate;
     }
     if (['portfolio-browser', 'new-products-browser'].includes(workload)) input.product = 'all';
+    if (workload === 'rokoko-mujoco-v12-pilot') input.source_sha = V12_SOURCE_SHA;
     const plan = resolvePlan(input, context);
     assert.ok(plan.jobCount >= 1 && plan.jobCount <= 12);
     assert.ok(plan.maxParallel >= 1 && plan.maxParallel <= 8);
@@ -72,4 +73,21 @@ test('V11 fresh real MuJoCo 800-episode workload requires one exact reviewed sou
   assert.throws(() => resolvePlan({workload, source_sha: candidate}, {
     ...context, now: '2026-11-15T17:00:00Z'
   }), /deadline/);
+});
+
+
+test('V12 pilot requires independently pinned source and a full hour before cutoff', () => {
+  const input = {workload: 'rokoko-mujoco-v12-pilot', source_sha: V12_SOURCE_SHA};
+  const plan = resolvePlan(input, {...context, now: '2026-11-15T16:00:00Z'});
+  assert.equal(plan.jobCount, 1);
+  assert.equal(plan.maxParallel, 1);
+  assert.deepEqual(plan.matrix.include, [{cell: input.workload, source_sha: V12_SOURCE_SHA,
+    source_repository: 'SalesSquad/junction-pets', qualification: 'product-source',
+    stage: 'pilot', seed_first: 518000, seed_last: 518511}]);
+  assert.notEqual(plan.harnessSha, plan.matrix.include[0].source_sha);
+  for (const source_sha of ['', candidate, harnessSha]) {
+    assert.throws(() => resolvePlan({...input, source_sha}, context), /exact pinned/);
+  }
+  assert.throws(() => resolvePlan(input, {...context, now: '2026-11-15T16:00:00.001Z'}), /60 minutes/);
+  assert.throws(() => resolvePlan(input, {...context, creditOpen: 'false'}), /closed/);
 });
