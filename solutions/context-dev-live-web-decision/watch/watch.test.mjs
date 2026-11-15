@@ -108,7 +108,10 @@ test('search + mapping + structured product extraction produces real changes, no
 });
 test('search auth/credits failure pauses all schedules without automatic retry',async()=>{
   const store=new WatchStore(':memory:'),client=new FakeClient(),service=new WatchService({store,client,now:()=>NOW});client.fail='PROVIDER_CREDITS_EXHAUSTED';
-  try{const w=service.create(definition(),randomUUID());service.create(definition({name:'second'}),randomUUID());service.start(w.id);await service.settle();assert.equal(client.calls.length,1);assert(store.list().every(w=>w.status==='paused'));await service.tick();assert.equal(client.calls.length,1);assert.equal(store.detail(w.id).runs[0].errorCode,'PROVIDER_CREDITS_EXHAUSTED');}
+  try{const w=service.create(definition(),randomUUID());service.create(definition({name:'second'}),randomUUID());service.start(w.id);await service.settle();assert.equal(client.calls.length,1);assert(store.list().every(w=>w.status==='paused'));await service.tick();assert.equal(client.calls.length,1);assert.equal(store.detail(w.id).runs[0].errorCode,'PROVIDER_CREDITS_EXHAUSTED');
+    for(const kind of ['search','research'])assert.throws(()=>service.start(w.id,{kind}),{code:'PROVIDER_CREDITS_EXHAUSTED'});
+    assert.equal(store.get(w.id).runCount,1);assert.equal(store.budget(NOW).dailyRequestsUsed,1);
+    client.fail=null;service.action(w.id,store.get(w.id).revision,'resume');service.start(w.id);await service.settle();assert.equal(store.get(w.id).runCount,2);assert.equal(store.detail(w.id).runs[0].status,'completed');}
   finally{await service.close();}
 });
 test('provider client uses only fixed endpoints and never persists credential/account metadata',async()=>{

@@ -95,6 +95,7 @@ export class WatchStore {
     this.event(id,null,'limit','Daily search request limit reached','This slot was skipped. The next chosen schedule after the UTC budget reset is retained; no catch-up burst.',now);
   });}
   claim(id,trigger,kind,now){return this.tx(()=>{
+    const blocked=this.blocked();if(blocked)throw problem(blocked);
     const row=this.raw(id),def=decode(row.definition);
     if(row.status==='archived')throw problem('WATCH_ARCHIVED');
     if(trigger==='scheduled'&&(row.status!=='active'||!row.next_at||Date.parse(row.next_at)>now))throw problem('RUN_CANCELLED');
@@ -110,6 +111,7 @@ export class WatchStore {
     return {id:runId,watchId:id,revision:row.revision,definition:def,kind,trigger,previous:this.watch(row).lastSummary};
   });}
   beforeRequest(runId,now=Date.now()){return this.tx(()=>{
+    const blocked=this.blocked();if(blocked)throw problem(blocked);
     const row=this.db.prepare('SELECT * FROM runs WHERE id=?').get(runId);
     if(!row||row.status!=='running'||this.raw(row.watch_id).revision!==row.revision)throw problem('RUN_CANCELLED');
     if(row.budget_day!==instant(now).slice(0,10))throw problem('RUN_DAY_CHANGED');
