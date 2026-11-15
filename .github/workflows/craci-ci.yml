@@ -84,9 +84,6 @@ jobs:
     if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
     runs-on: craci
     timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: pets/exa/internet-butler
     env:
       CRACI_WINDOW_END: '2026-11-15T17:00:00Z'
     steps:
@@ -114,11 +111,14 @@ jobs:
           node-version: '24'
       - name: Install locked dependencies
         id: dependencies
+        working-directory: pets/exa/internet-butler
         run: npm ci --ignore-scripts
       - name: Typecheck
         if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        working-directory: pets/exa/internet-butler
         run: npm run typecheck
       # No keys and no network beyond GitHub and npm: the tests use recorded and fake services.
       - name: Run tests
         if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        working-directory: pets/exa/internet-butler
         run: npm test
