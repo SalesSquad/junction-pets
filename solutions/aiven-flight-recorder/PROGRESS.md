@@ -15,4 +15,6 @@ Stage: building. Rescued on 15 November 2026 from the laptop branch `rescue/mbp-
 
 ## Evidence
 
+- Offline comparison (author, `node solutions/aiven-flight-recorder/cli.mjs`): baseline 120/200 executed, 10 duplicates, 90 lost; flight recorder 200/200, 0 duplicates, 0 lost, 1 redelivery after the crash, 0 effects on full replay. Shared with every pet as `replayable-event-log` (`services/aiven-platform`).
+
 - Offline: `node --test solutions/aiven-flight-recorder/tests/core.test.mjs` → 3 passed (filing checkout).

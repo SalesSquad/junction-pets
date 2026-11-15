@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "aiven-decision-bridge",
+  "title": "Aiven decision bridge",
+  "objective": "Validate typed companion answers, check them with deterministic rules and map each change to a Chibi pending action for a human decision.",
+  "baseCommit": "0ef075a147e021d387f94fd8e1f5f843e89bb59d",
+  "challengeSlugs": [
+    "aiven"
+  ],
+  "agentIds": [
+    "junction.aiven"
+  ],
+  "stage": "building",
+  "ownedPaths": [
+    "solutions/aiven-decision-bridge/"
+  ],
+  "capabilityUses": [
+    {
+      "agentId": "junction.aiven",
+      "capabilityId": "integration-design",
+      "purpose": "Review proposals for ownership, rollback, risk and idempotency before a human decides.",
+      "status": "planned"
+    }
+  ]
+}
