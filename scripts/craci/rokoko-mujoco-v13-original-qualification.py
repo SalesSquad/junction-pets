@@ -95,13 +95,17 @@ def git_head_clean(root, expected, product=True):
             subprocess.check_output(["git", "-C", str(root), "status", "--porcelain=v1"],
                                     text=True).strip() == "",
             "V13_CLEAN_SOURCE_EXACT_FULL_HEAD_REQUIRED")
-    require(subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor",
-                            V10_SHA, "HEAD"], capture_output=True).returncode == 0,
-            "V13_FROZEN_V10_SOURCE_ANCESTOR_REQUIRED")
-    require(not product or subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor",
-                            "c77158f9ae80acc2b1eafaf9284c4397426799b2", "HEAD"],
-                           capture_output=True).returncode == 0,
-            "V13_KNOWN_PRODUCT_PARENT_REQUIRED")
+    if product:
+        # The product must descend from the original frozen sources. A
+        # separately pinned harness can legitimately have squash-merged
+        # history; its identity and clean bytes are checked above instead.
+        require(subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor",
+                                V10_SHA, "HEAD"], capture_output=True).returncode == 0,
+                "V13_FROZEN_V10_SOURCE_ANCESTOR_REQUIRED")
+        require(subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor",
+                                "c77158f9ae80acc2b1eafaf9284c4397426799b2", "HEAD"],
+                               capture_output=True).returncode == 0,
+                "V13_KNOWN_PRODUCT_PARENT_REQUIRED")
 
 
 def stage_frozen_models(source_root, private):
@@ -635,13 +639,18 @@ def independent_true_physics_replay(private, training, rows, factories, v7,
             "promotion_authorized": False, "dev_cal_test_ood_opened": False}
 
 
-def admission(env, now):
-    require(env.get("CRACI_WORKLOAD") == "rokoko-mujoco-v13-original" and
+def admission(env, now, stage="full"):
+    # The job has a hard 60-minute timeout. Reserve two hours before starting
+    # originals so the separate qualifier can still satisfy its unchanged
+    # one-hour admission gate even if originals occupy the entire job window.
+    require(stage in ("full", "original", "qualify"), "V13_INVALID_STAGE")
+    reserve = 3600 if stage == "qualify" else 7200
+    require(env.get("CRACI_WORKLOAD") == "rokoko-mujoco-v13-pilot" and
             env.get("CRACI_CREDIT_WINDOW_OPEN") == "true" and
-            float(env.get("CRACI_CREDIT_REMAINING_SECONDS", "0")) >= 3600 and
-            now + 3600 <= CUTOFF and
+            float(env.get("CRACI_CREDIT_REMAINING_SECONDS", "0")) >= reserve and
+            now + reserve <= CUTOFF and
             env.get("CRACI_MANUAL_SOURCE_REVIEWED") == "true",
-            "V13_MANUAL_REVIEW_CREDIT_CUTOFF_60MIN_RESERVE_REQUIRED")
+            "V13_MANUAL_REVIEW_CREDIT_CUTOFF_STAGE_RESERVE_REQUIRED")
 
 
 def main():
@@ -649,7 +658,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stage", choices=("full", "original", "qualify"), default="full")
     args = parser.parse_args()
-    admission(os.environ, time.time())
+    admission(os.environ, time.time(), args.stage)
     source_root = Path(os.environ["CRACI_SOURCE_ROOT"]).resolve(strict=True)
     harness_root = Path(os.environ["CRACI_HARNESS_ROOT"]).resolve(strict=True)
     receipt = Path(os.environ["CRACI_RECEIPT_DIR"]).resolve(strict=True)

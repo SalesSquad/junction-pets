@@ -49,7 +49,7 @@ export const WORKLOADS = Object.freeze([
   'new-products-browser', 'native-probe', 'cache-proof', 'mariadb-runtime', 'meta-browser',
   'meta-r-tournament', 'meta-r-robust', 'meta-r-hardshift-2x', 'lens-real-bop-train', 'lens-six-ml', 'lens-r8-meta', 'lens-r3-methods', 'lens-hb-vision', 'lens-hb-scene8-ood', 'lens-hb-six-feedback', 'lens-six-unknown-ml',
   'rokoko-heldout', 'arduino-proof-48', 'valio-settlement-browser', 'bahn-offline-sweep', 'rokoko-rl-cpu', 'rokoko-rl-full', 'aalto-consent-browser', 'astra-equity-browser', 'rokoko-rl-seed-sweep', 'rokoko-rl-ablations', 'valio-http-race', 'valio-funding-race', 'immune-tournament', 'chaos-lab',
-  'rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-mujoco-v12-pilot', 'rokoko-mujoco-v13-causal', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos',
+  'rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-mujoco-v12-pilot', 'rokoko-mujoco-v13-causal', 'rokoko-mujoco-v13-pilot', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos',
   'rokoko-r-tournament',
 ]);
 
@@ -171,10 +171,16 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     if (override && override !== harnessSha)
       throw new Error('HB scene8 OOD requires exact source/harness SHA');
     add('hb-scene8-ood-public', harnessSha, {scene: 8});
-  } else if (['rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-mujoco-v12-pilot', 'rokoko-mujoco-v13-causal', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos'].includes(workload)) {
+  } else if (['rokoko-action-necessity', 'valio-postgres-crash', 'rokoko-v2-lockbox', 'rokoko-td-lockbox', 'rokoko-mujoco-dev', 'rokoko-mujoco-v2-dev', 'rokoko-mujoco-v3-dev', 'rokoko-mujoco-v3-cal', 'rokoko-mujoco-v4-dev', 'rokoko-mujoco-v5-train-dev', 'rokoko-mujoco-v6-train-dev', 'rokoko-mujoco-v7-feasibility', 'rokoko-mujoco-v8-prospective', 'rokoko-mujoco-v10-prospective', 'rokoko-mujoco-v10-hybrid-prospective', 'rokoko-mujoco-v11-prospective', 'rokoko-mujoco-v12-pilot', 'rokoko-mujoco-v13-causal', 'rokoko-mujoco-v13-pilot', 'rokoko-shared-tournament', 'rokoko-shared-preflight', 'valio-wal-chaos'].includes(workload)) {
     // New portable product qualifications have no stale fallback pin; the caller
     // must provide the exact reviewed task commit before CRACI reserves capacity.
     if (!override) throw new Error(`${workload} requires an explicit source_sha`);
+    if (workload === 'rokoko-mujoco-v12-pilot' &&
+        override !== '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f')
+      throw new Error('V12 pilot requires exact reviewed source_sha');
+    if (workload === 'rokoko-mujoco-v13-pilot' &&
+        override !== 'faec266d6d3a44af3a564f46e0778209c1dc3af1')
+      throw new Error('V13 pilot requires exact prospective source_sha');
     add(workload, override, {qualification: 'product-source'});
   } else if (workload === 'immune-tournament') {
     if (override && override !== harnessSha) throw new Error('Immune source must match pinned harness SHA');
