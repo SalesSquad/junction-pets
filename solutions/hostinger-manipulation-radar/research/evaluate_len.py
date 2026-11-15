@@ -33,7 +33,7 @@ def interval(k,n):
     if not n: return None
     z=1.959963984540054; p=k/n; d=1+z*z/n
     mid=(p+z*z/(2*n))/d; spread=z*math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d
-    return [mid-spread,mid+spread]
+    return [max(0,mid-spread),min(1,mid+spread)]
 def metrics(labels,predictions):
     counts={"tp":0,"fp":0,"tn":0,"fn":0}
     for y,p in zip(labels,predictions): counts[("tp" if y else "fp") if p else ("fn" if y else "tn")]+=1
@@ -41,7 +41,7 @@ def metrics(labels,predictions):
     def ratio(a,b): return a/b if b else None
     return {**counts,"n":tp+fp+tn+fn,"accuracy":ratio(tp+tn,tp+fp+tn+fn),
             "precision":ratio(tp,tp+fp),"recall":ratio(tp,tp+fn),"false_positive_rate":ratio(fp,fp+tn),
-            "balanced_accuracy":(tp/(tp+fn)+tn/(tn+fp))/2,
+            "balanced_accuracy":(tp/(tp+fn)+tn/(tn+fp))/2 if tp+fn and tn+fp else None,
             "accuracy_wilson95":interval(tp+tn,tp+fp+tn+fn),"precision_wilson95":interval(tp,tp+fp),
             "recall_wilson95":interval(tp,tp+fn),"fpr_wilson95":interval(fp,fp+tn)}
 def threshold(model,calibration):
@@ -55,7 +55,7 @@ def threshold(model,calibration):
     return t,m
 def run(source,output):
     source=Path(source); output=Path(output); data=json.loads(source.read_text())
-    assert data["features"]==FEATURES
+    if data["features"]!=FEATURES: raise ValueError("Unexpected feature contract")
     raw_rows=data["records"]
     groups={}
     for row in raw_rows:

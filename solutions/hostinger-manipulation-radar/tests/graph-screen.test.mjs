@@ -116,3 +116,12 @@ test('finite coefficients that overflow the combined logit are rejected instead 
   const weights = Array(12).fill(0); weights[0] = 1e308; weights[1] = -1e308;
   assert.throws(() => graphScore(sample(), model({weights})), /Model unavailable/);
 });
+
+test('upper node boundary and explicit abstention threshold stay enforced',()=>{
+ const ring=n=>({edges:Array.from({length:n},(_,i)=>[i,(i+1)%n])});
+ assert.equal(graphFeatures(ring(8355)).nodes,8355);
+ assert.throws(()=>graphFeatures(ring(8356)),/edge list/);
+ assert.equal(graphScore(sample(),model({threshold:1.000000001})).review,false);
+ assert.throws(()=>graphScore(sample(),model({threshold:1.000000002})),/Model unavailable/);
+ assert.throws(()=>graphFeatures({edges:[['a','b'],['a','b']]},{enforceDomain:false}),/Duplicate/);
+});

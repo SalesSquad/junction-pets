@@ -1,8 +1,9 @@
 import {graphScore} from './core.mjs';
 const byId=id=>document.getElementById(id),pct=v=>v===null?'undefined':(100*v).toFixed(1)+'%';
 let model;
+const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000);
 try{
- const responses=await Promise.all(['./evaluation.json','./model.json'].map(p=>fetch(p)));
+ const responses=await Promise.all(['./evaluation.json','./model.json'].map(p=>fetch(p,{signal:controller.signal})));
  if(responses.some(r=>!r.ok))throw new Error('Unavailable');
  const [report,loaded]=await Promise.all(responses.map(r=>r.json()));model=loaded;
  const counts=report.counts;
@@ -19,6 +20,7 @@ try{
  byId('source').textContent='Source archive SHA-256: '+report.source.sha256;
  byId('analyze').disabled=false;
 }catch{byId('split').textContent='Evaluation unavailable. No performance claim can be made.';}
+finally{clearTimeout(timeout);}
 byId('analyze').addEventListener('click',async()=>{
  byId('result').textContent='';
  try{
