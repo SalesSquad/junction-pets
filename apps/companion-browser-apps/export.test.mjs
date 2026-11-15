@@ -73,5 +73,10 @@ test('Valio browser verification rejects stale shared source and modified assets
     const bundle=join(temp,'browser/dist/app.js');
     await writeFile(bundle,Buffer.concat([await readFile(bundle),Buffer.from('\n// changed bundle\n')]));
     await assert.rejects(verifyBrowserBuild(),{code:'BROWSER_BUILD_STALE'});
+    const packaged=join(temp,'packaged');await mkdir(packaged);
+    for(const path of [...manifest.assets.map(asset=>asset.path),'export.json'])await copyFile(new URL('browser/dist/'+path,source),join(packaged,path));
+    assert.equal((await verifyBrowserBuild({distRoot:packaged})).valid,true);
+    await writeFile(join(packaged,'app.js'),Buffer.from('modified exported bytes'));
+    await assert.rejects(verifyBrowserBuild({distRoot:packaged}),{code:'BROWSER_BUILD_STALE'});
   }finally{await rm(temp,{recursive:true,force:true});}
 });

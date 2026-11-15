@@ -100,6 +100,10 @@ export async function exportApps(output) {
       const data = app.adaptation && (file.endsWith('.html') || file.endsWith('.mjs')) ? adapt(app.adaptation, file, bytes.toString('utf8')) : bytes;
       await writeFile(dest, data, {flag:'wx'});
     }
+    if (app.solution === 'valio-trusted-trade') {
+      const {verifyBrowserBuild} = await import('../../solutions/valio-trusted-trade/browser/verify.mjs');
+      await verifyBrowserBuild({distRoot:join(target,'apps',app.directory,'browser/dist')});
+    }
     if (app.adaptation === 'roundlens') {
       // The embedded client differs from the original local-server package. Its
       // exported artifact names both the original package digest and a digest
