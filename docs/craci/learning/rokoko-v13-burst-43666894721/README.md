@@ -10,6 +10,22 @@
 
 All arms won the same eight seeds. Each candidate had **zero novel goals, zero lost V5 goals and zero observed unsafe episodes**. Original controller-mode evidence attributes 149 original-mask-legal RIGHT4 actions to active burst mode (61 in burst-2 and 88 in burst-4), not incidental V5 fallback. The science decision is **STOP** because there was no novel burst goal. This small selected TRAIN cohort does not demonstrate equivalence, population safety, real-device safety or generalization, and no model is promoted. The separate V13 continuation hypothesis is not evaluated by this four-arm burst study.
 
+The two burst arms activated in the **same 35 distinct near worlds**, all of
+which the frozen V5 failed; they did not activate in a V5-winning world.
+These are retrospective counts from this selected cohort, not evidence that
+the interventions caused the failures. The reproducible
+[coverage audit](coverage-audit.json) checks the original archive, nested
+files and all 192 trace hashes without running new physics. Its script is
+`scripts/craci/rokoko-v13-43666894721-coverage-audit.py` (SHA-256
+`1c196ff829b467e0eb22f82a6f39d973d0f046e6d05f4f5b0a9b53f494f7e791`);
+the summary SHA-256 is
+`21565205676cead722ac913439444d79deeb8e6aa9384d452314b65edea926bf`.
+
+Separately, the earlier [V13 causal experiment](../rokoko-mujoco-v13-43660619725/README.md)
+ended in a **real unsafe event** and an incomplete STOP after reaching two seen
+TRAIN worlds. Its safety stop is not cleared by the burst study's zero observed
+unsafe episodes.
+
 ## Why the workflow failed
 
 After the physics/replay step succeeded, the workflow ran the V13 unittest discovery from the GitHub workspace outside the harness checkout. One retention test imported `scripts.craci` as a package, which was not on that working directory's Python path. That produced `ModuleNotFoundError: No module named 'scripts'`, and receipt finalization correctly marked the overall job failed. The source-only correction loads the sibling fixture by exact file path; the complete V13 test suite was then run from outside the checkout with `PYTHONPATH` unset. This later test repair does **not** change the historical receipt or turn the failed workflow green. Do not rerun the same already-consumed seed range to repair this infrastructure error.
