@@ -168,6 +168,19 @@ parts if needed, without weakening its 20 MiB/file capture cap. This code
 does not assert independent physics replay or operational qualification;
 that is a separate evidence review after a real CRACI result.
 
+**V8 first-run capture repair:** CRACI run `43644437088` reached the 640-trial
+summary but refused the 19 MiB product cap because the old generic JSON
+writer pretty-indented the deeply nested *sparse* per-option records. The
+prospective producer now writes its `training.json` using the same
+lossless canonical compact representation as V7. It preserves the entire
+decoded object: all 640 paired trials, 60-option maximum, all sparse V7
+transition references, exact numeric values, dataset digest and full raw gzip.
+The independent worst-case 640×60 synthetic contract reproduces **31,283,604
+bytes pretty** versus **17,521,922 bytes compact**, below the unchanged
+19,922,944-byte application cap. No physics, safety, heldout or CRACI
+collector constraints were relaxed. The failed run does not count as a
+qualified new policy result; rerun only from a newly reviewed source HEAD.
+
 Only if fresh TRAIN worlds show genuinely promising safe completion should
 an independent reviewer preregister a future development-world comparison
 on still-unopened `129330..129409`. No success-loss or safety failures may
