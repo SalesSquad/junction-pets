@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Piiripöytä · Arduino-suunnitelman tarkastelu</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Siirry työpöytään</a>
+  <header class="masthead">
+    <a class="wordmark" href="/" aria-label="Piiripöytä, etusivu"><span class="brand-mark" aria-hidden="true">⊙</span> Piiripöytä<span class="brand-tag">PAIKALLINEN TYÖKALU</span></a>
+    <div class="header-actions"><span class="memory-note">Vain tämän välilehden muistissa</span><button id="reset-example" class="button secondary" type="button">Palauta esimerkki</button></div>
+  </header>
+  <main id="workspace">
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">ARDUINO · SYNTEETTINEN SUUNNITTELU</p><h1 id="page-title">Ajattele kytkentä<br><em>ennen kytkemistä.</em></h1><p class="intro-copy">Tutki ilmoitettuja pinnejä, jännitteitä ja virtabudjetteja. Muuta yhtä oletusta ja katso, mitä suunnitelmassa muuttuu.</p></div>
+      <aside class="scope-note"><span class="tiny-label">TÄMÄ ON ILMOITUSTEN TARKASTELU</span><p>Esimerkin luvut ovat keksittyjä. Tulos ei varmista lähtötietoja, fyysistä turvallisuutta tai lupaa käyttää laitteistoa.</p><span id="checker-version" class="mono">Tarkistin ladataan…</span></aside>
+    </section>
+
+    <section class="summary-strip" aria-label="Suunnitelman yhteenveto">
+      <div class="summary-cell"><span class="tiny-label">TARKASTELUN TILA</span><strong id="review-state">Ladataan</strong><span id="review-caption">Haetaan paikallista esimerkkiä</span></div>
+      <div class="summary-cell"><span class="tiny-label">KOKONAISVIRTA</span><strong id="summary-total">—</strong><span id="summary-total-limit">Odottaa tietoja</span></div>
+      <div class="summary-cell"><span class="tiny-label">VIRTAVARA</span><strong id="summary-headroom">—</strong><span>Ilmoitettu raja − tarve</span></div>
+      <div class="summary-cell"><span class="tiny-label">PINNIT</span><strong id="summary-pins">—</strong><span id="summary-pin-caption">Ilmoitetut varaukset</span></div>
+    </section>
+    <p id="app-status" role="status" aria-live="polite" aria-atomic="true">Ladataan työpöytää…</p>
+    <div id="error-banner" role="alert" hidden></div>
+
+    <div class="workspace-grid">
+      <div class="main-column">
+        <section class="panel pin-panel" aria-labelledby="pins-title">
+          <div class="panel-heading"><div><p class="eyebrow">01 / PINNIT</p><h2 id="pins-title">Suunnitelma näkyviin</h2></div><span class="pill">Kuvitteellinen kortti</span></div>
+          <div class="board-caption"><span id="voltage-summary">—</span><span class="tiny-label">VALITSE PINNI TARKASTELUUN</span></div>
+          <div id="pin-map" class="pin-map" aria-label="Kortin pinnit"></div>
+          <div id="pin-details" class="pin-details" aria-live="polite"><p>Valitse pinni nähdäksesi sen ilmoitetut varaukset ja rajat.</p></div>
+        </section>
+
+        <section class="panel" aria-labelledby="budgets-title">
+          <div class="panel-heading"><div><p class="eyebrow">02 / VIRTA</p><h2 id="budgets-title">Kokeile oletuksia</h2></div><span class="unit-label">mA · milliampeeria</span></div>
+          <p class="section-description">Anturin syöttövirta ei sisällä erikseen ilmoitettua pinnivirtaa. Muutokset tarkastetaan paikallisesti; mitään laitetta ei ohjata.</p>
+          <div id="sensor-controls" class="sensor-controls"></div>
+          <div class="divider"></div>
+          <h3>Ilmoitetut virtarajat</h3>
+          <div id="limit-controls" class="limit-controls"></div>
+          <div id="budget-bars" class="budget-bars" aria-label="Virtabudjettien käyttö"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="compare-title">
+          <div class="panel-heading"><div><p class="eyebrow">03 / VERTAILU</p><h2 id="compare-title">Mikä muuttui?</h2></div><button id="save-baseline" class="button secondary" type="button" disabled>Tallenna vertailutaso</button></div>
+          <p class="section-description">Ota nykyisestä suunnitelmasta muistissa säilyvä vertailutaso. Muokkaa sen jälkeen ehdotusta ja vertaa ilmoituksia sekä virtavaraa.</p>
+          <div id="compare-result" class="comparison" aria-live="polite"><p>Vertailutasoa ei ole vielä tallennettu.</p></div>
+        </section>
+
+        <section class="panel" aria-labelledby="evidence-title">
+          <div class="panel-heading"><div><p class="eyebrow">04 / LÄHTÖTIEDOT</p><h2 id="evidence-title">Mihin luvut perustuvat?</h2></div><span id="evidence-count" class="pill">0 merkintää</span></div>
+          <p class="section-description">Merkitse, onko kenttä kuvitteellinen, toimitettu vai itse tarkastamasi. Oma tarkastus on käyttäjän ilmoitus: työkalu ei avaa lähteitä tai todenna niitä.</p>
+          <form id="evidence-form">
+            <div class="form-grid"><label>Kenttä<select id="evidence-path" name="path" required></select></label><label>Tiedon tila<select id="evidence-status" name="status"><option value="fictional">Kuvitteellinen</option><option value="supplied">Toimitettu, ei tarkastettu</option><option value="reviewed">Oma tarkastus (ei varmennettu)</option></select></label></div>
+            <div class="form-grid"><label>Lähteen HTTPS-osoite<input id="evidence-url" name="url" type="url" placeholder="https://…" maxlength="2048"></label><label>Versio tai tarkka revisio<input id="evidence-revision" name="revision" maxlength="160" placeholder="Esim. dokumentin revisio"></label></div>
+            <label>Lähdeote<textarea id="evidence-excerpt" name="excerpt" rows="2" maxlength="2000" placeholder="Lyhyt ote, joka tukee juuri tätä kenttää"></textarea></label>
+            <label>Oma huomio<textarea id="evidence-note" name="note" rows="2" maxlength="1000" placeholder="Mitä tarkastit ja mikä on vielä epävarmaa?"></textarea></label>
+            <p id="evidence-help" class="field-help">Merkinnät eivät muuta tarkistimen tulosta eivätkä anna käyttöoikeuksia.</p>
+            <p id="evidence-error" class="field-error" role="alert" hidden></p>
+            <button id="add-evidence" class="button primary" type="submit">Lisää merkintä</button>
+          </form>
+          <div id="evidence-list" class="evidence-list" aria-live="polite"></div>
+        </section>
+      </div>
+
+      <aside class="side-column" aria-label="Tarkastelun tiedot ja raportti">
+        <section class="panel findings-panel" aria-labelledby="findings-title"><div class="panel-heading"><div><p class="eyebrow">TARKASTELUN HUOMIOT</p><h2 id="findings-title">Tiedä, mitä korjata</h2></div></div><div id="findings-list"><p>Tuloksia odotetaan.</p></div></section>
+        <section class="panel export-panel" aria-labelledby="export-title"><p class="eyebrow">05 / RAPORTTI</p><h2 id="export-title">Vie tarkastelu mukaan</h2><p class="section-description">Lataa tämän suunnitelman tuore tarkastelutulos, lähdemerkinnät ja rajoitukset.</p><button id="download-markdown" class="button primary full" type="button" disabled>Lataa luettava raportti (.md)</button><button id="download-json" class="button secondary full" type="button" disabled>Lataa raportin JSON</button><p id="export-help" class="field-help">Vienti on käytössä, kun viimeisin muutos on tarkastettu. Raportti ei ole turvallisuustodistus.</p></section>
+        <section class="panel editor-panel" aria-labelledby="editor-title"><details id="json-details"><summary id="editor-title">Suunnitelman JSON</summary><p class="section-description">Muokkaa koko suunnitelmaa tai tuo suunnitelmatiedosto (enintään 256 KiB). Tämä ei ole raporttien tuonti. Tuonti korvaa suunnitelman ja tyhjentää lähdemerkinnät.</p><label for="design-json">Suunnitelma</label><textarea id="design-json" class="json-editor" rows="15" spellcheck="false" aria-describedby="json-help"></textarea><p id="json-help" class="field-help">Muutokset tulevat voimaan painikkeesta. Keskeneräinen muokkaus estää raportin viennin.</p><div class="editor-actions"><button id="apply-json" class="button primary" type="button">Tarkasta JSON</button><label class="file-label">Tuo JSON<input id="import-json" type="file" accept=".json,application/json"></label></div></details></section>
+      </aside>
+    </div>
+    <footer><span>Piiripöytä · Itsenäinen Arduino-aiheinen työkalu</span><span>Ei laiteyhteyttä · Ei pysyvää tallennusta · Ei fyysisen turvallisuuden varmennusta</span></footer>
+  </main>
+</body>
+</html>

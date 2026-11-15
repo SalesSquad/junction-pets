@@ -24,6 +24,13 @@ The companion should explain its reasoning, cite the relevant official sources a
 
 ## Current limits
 
+The [local review app](APP.md) brings the fictional checker into a browser:
+inspect pins, adjust declared currents, compare two designs, record source notes
+and download a readable or JSON report. Sources remain user-asserted; no cited
+page is retrieved. Start it with `node pets/arduino/app/server.mjs` and open the
+loopback address printed by the server. No hardware or account connection is
+created, and an exported review is not a physical safety certificate.
+
 For an offline worked exercise, see [COMPATIBILITY.md](COMPATIBILITY.md),
 `example.json`, `example-v2.json` and `compatibility.mjs`. The checker reviews
 declared fictional pin modes, supply and logic voltages, current, ground and

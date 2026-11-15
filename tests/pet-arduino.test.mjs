@@ -354,3 +354,136 @@ test('sparse, extended and foreign-prototype data rejected', () => {
   ]) { const x = fixture(); mutate(x); rejected(x); }
   rejected(null); rejected([]); rejected(new Map());
 });
+
+const workspaceApi = () => import('../pets/arduino/app/workspace.mjs');
+const evidenceRow = overrides => ({
+  path: 'board.supplyVoltageMv', status: 'fictional', url: '', revision: '',
+  excerpt: '', note: 'Invented test declaration.', ...overrides,
+});
+
+test('workspace report is deterministic, complete and isolated without authorizing hardware', async () => {
+  const {buildWorkspace} = await workspaceApi();
+  const input = {design: splitFixture(), evidence: [evidenceRow()]};
+  const before = structuredClone(input), first = buildWorkspace(input), second = buildWorkspace(input);
+  assert.deepEqual(first, second);
+  assert.equal(typeof first.checkerVersion, 'string');
+  assert.ok(first.checkerVersion.length > 0);
+  assert.equal(first.review.status, 'consistent');
+  assert.equal(first.report.schemaVersion, 1);
+  assert.equal(first.report.checkerVersion, first.checkerVersion);
+  // Returned data may use null prototypes; exported JSON must retain the design.
+  assert.deepEqual(JSON.parse(JSON.stringify(first.report.design)), input.design);
+  assert.deepEqual(first.report.review, first.review);
+  assert.deepEqual(first.report.evidence, first.evidence);
+  assert.ok(first.report.limitations.length > 0);
+  assert.equal(first.report.synthetic, true);
+  assert.equal(first.report.authorization, false);
+  assert.equal(first.report.safetyCertification, false);
+  assert.equal(first.review.authorization, false);
+  assert.equal(first.review.safetyCertification, false);
+  assert.equal(typeof first.reportText, 'string');
+  assert.ok(first.reportText.includes(first.checkerVersion));
+  assert.doesNotThrow(() => JSON.parse(JSON.stringify(first.report)));
+  first.report.design.board.supplyVoltageMv = 999;
+  first.report.review.unknowns[0] = 'changed';
+  first.report.evidence[0].note = 'changed';
+  first.report.limitations[0] = 'changed';
+  assert.deepEqual(input, before);
+  assert.deepEqual(buildWorkspace(input), second);
+});
+
+test('evidence statuses remain explicit user assertions with no fetched verification', async () => {
+  const {buildWorkspace} = await workspaceApi();
+  for (const [status, attribution] of [
+    ['fictional', 'FICTIONAL declaration'],
+    ['supplied', 'USER-SUPPLIED unverified'],
+    ['reviewed', 'USER-ASSERTED reviewed'],
+  ]) {
+    const row = evidenceRow({status, url: 'https://example.invalid/specification',
+      revision: 'invented-revision-1', excerpt: 'Invented source excerpt.', note: 'Synthetic test only.'});
+    const x = buildWorkspace({design: splitFixture(), evidence: [row]});
+    assert.equal(x.evidence[0].status, status);
+    assert.equal(x.evidence[0].attribution, attribution);
+    assert.equal(x.evidence[0].path, row.path);
+    assert.equal(x.evidence[0].url, row.url);
+    assert.equal(x.evidence[0].revision, row.revision);
+    assert.equal(x.evidence[0].excerpt, row.excerpt);
+    assert.equal(x.evidence[0].note, row.note);
+    assert.equal(x.report.authorization, false);
+    assert.equal(x.report.safetyCertification, false);
+  }
+});
+
+test('evidence rejects unknown paths, fields, statuses and unsafe or credentialed URLs', async () => {
+  const {buildWorkspace} = await workspaceApi();
+  for (const override of [
+    {path: 'board.notAField'}, {path: 'board'}, {path: 'sensors[99].id'},
+    {path: '__proto__.polluted'}, {status: 'verified'}, {unexpected: true},
+    {url: 'http://example.invalid/specification'},
+    {url: 'https://user:secret@example.invalid/specification'},
+    {url: 'javascript:alert(1)'}, {url: 'file:///tmp/specification'},
+  ]) assert.throws(() => buildWorkspace({design: splitFixture(), evidence: [evidenceRow(override)]}));
+  for (const key of ['url', 'revision', 'excerpt', 'note']) {
+    const row = evidenceRow({status: 'reviewed', url: 'https://example.invalid/specification',
+      revision: 'invented-revision-1', excerpt: 'Invented excerpt.', note: 'Synthetic only.'});
+    row[key] = '';
+    assert.throws(() => buildWorkspace({design: splitFixture(), evidence: [row]}));
+  }
+  assert.throws(() => buildWorkspace({design: splitFixture(), evidence: Array.from({length: 101}, () => evidenceRow())}));
+});
+
+test('workspace validation rejects executable evidence without invoking caller code', async () => {
+  const {buildWorkspace} = await workspaceApi();
+  let calls = 0;
+  const getter = evidenceRow();
+  Object.defineProperty(getter, 'note', {get() {calls++; throw Error('evidence getter');}});
+  const proxy = new Proxy(evidenceRow(), {
+    getPrototypeOf() {calls++; throw Error('evidence proxy');},
+    ownKeys() {calls++; throw Error('evidence proxy');},
+  });
+  const hook = evidenceRow({note: {toJSON() {calls++; throw Error('evidence conversion');}}});
+  for (const row of [getter, proxy, hook]) {
+    assert.throws(() => buildWorkspace({design: splitFixture(), evidence: [row]}));
+  }
+  const sparse = [evidenceRow()]; delete sparse[0];
+  assert.throws(() => buildWorkspace({design: splitFixture(), evidence: sparse}));
+  const extra = [evidenceRow()]; extra.extra = true;
+  assert.throws(() => buildWorkspace({design: splitFixture(), evidence: extra}));
+  assert.equal(calls, 0);
+});
+
+test('design comparison reports issue changes and known headroom deltas without mutation', async () => {
+  const {compareDesigns} = await workspaceApi();
+  const baseline = splitFixture(), candidate = splitFixture();
+  baseline.sensors[0].ground = false;
+  candidate.sensors[0].logicVoltageMv = 2500;
+  candidate.board.powerLimitMa = 40;
+  const before = structuredClone({baseline, candidate});
+  const result = compareDesigns({baseline, candidate});
+  assert.deepEqual(result.resolvedIssues, ['missing-ground:sensor-a']);
+  assert.deepEqual(result.addedIssues, ['logic-voltage-mismatch:sensor-a']);
+  assert.deepEqual(result.budgetChanges.total, {
+    baselineHeadroomMa: 13, candidateHeadroomMa: 23, deltaHeadroomMa: 10,
+  });
+  assert.deepEqual(result.budgetChanges.signal, {
+    baselineHeadroomMa: 3, candidateHeadroomMa: 3, deltaHeadroomMa: 0,
+  });
+  assert.equal(result.baseline.authorization, false);
+  assert.equal(result.candidate.authorization, false);
+  assert.ok(result.limitations.length > 0);
+  assert.deepEqual({baseline, candidate}, before);
+});
+
+test('comparison preserves unknown versus zero headroom instead of inventing a delta', async () => {
+  const {compareDesigns} = await workspaceApi();
+  const baseline = splitFixture(), candidate = splitFixture();
+  baseline.board.powerLimitMa = null;
+  candidate.board.powerLimitMa = 0;
+  const r = compareDesigns({baseline, candidate});
+  assert.deepEqual(r.resolvedIssues, ['unknown-powerLimitMa']);
+  assert.deepEqual(r.addedIssues, ['power-oversubscribed']);
+  assert.deepEqual(r.budgetChanges.total, {
+    baselineHeadroomMa: null, candidateHeadroomMa: -17, deltaHeadroomMa: null,
+  });
+  assert.equal(r.budgetChanges.signal.deltaHeadroomMa, 0);
+});

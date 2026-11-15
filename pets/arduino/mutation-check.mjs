@@ -41,9 +41,13 @@ const summaries = [];
 try {
   await mkdir(join(scratch, 'tests'));
   await mkdir(join(scratch, 'pets/arduino'), {recursive: true});
+  await mkdir(join(scratch, 'pets/arduino/app'));
   await mkdir(join(scratch, 'mutants'));
   await copyFile(join(root, 'pets/arduino/example.json'), join(scratch, 'pets/arduino/example.json'));
   await copyFile(join(root, 'pets/arduino/example-v2.json'), join(scratch, 'pets/arduino/example-v2.json'));
+  await copyFile(join(root, 'pets/arduino/pet.json'), join(scratch, 'pets/arduino/pet.json'));
+  await copyFile(join(root, 'pets/arduino/app/workspace.mjs'), join(scratch, 'pets/arduino/app/workspace.mjs'));
+  await writeFile(join(scratch, 'pets/arduino/compatibility.mjs'), source);
   const importNeedle = "from '../pets/arduino/compatibility.mjs'";
   if (tests.split(importNeedle).length !== 2) throw Error('Expected one checker import in company tests');
   const copiedTest = join(scratch, 'tests/pet-arduino.test.mjs');

@@ -117,6 +117,12 @@ and verifies that relevant tests fail. Its scoped, finite artificial faults test
 the sensitivity of those assertions; mutation results are not comprehensive
 correctness or real-device evidence.
 
+Paikallinen selainsovellus, kenttäkohtaiset lähdemerkinnät, suunnitelmien vertailu
+ja raporttien vienti on kuvattu tiedostossa [APP.md](APP.md). Käynnistys:
+`node pets/arduino/app/server.mjs`, jonka jälkeen avaa
+`http://127.0.0.1:4177`. Tämä on paikallinen käyttöliittymä saman synteettisen
+tarkistimen ympärillä, ei laiteyhteys tai lähteiden verifiointipalvelu.
+
 Unknowns include whether any declarations are true, real revisions/ratings/wiring,
 transients, tolerances, thermal behavior and actual behavior. Splitting voltage
 fields does not model level shifting, signal direction, current physics, firmware,
