@@ -51,6 +51,17 @@ POLICIES = {
                   "SPREAD_MARGIN_FLOOR": "240", "SPREAD_MARGIN_BACKLOG": "0", "SPREAD_ADMISSION_EXTRA_SLACK": "0",
                   "SPREAD_MARGIN_BASE_BPS": "13200"},
 }
+_V360 = POLICIES["vol360"]
+POLICIES.update({
+    # Runtime switch controller (normal = vol360, tight 480/240, loose 240/0 Wed..Fri 12:00).
+    "switch": {**_V360, "SPREAD_MARGIN_SWITCH": "1"},
+    # The weekend is not slack: subtract Sat..Mon 07:00 and require 240 min more.
+    "v360wk240": {**_V360, "SPREAD_MARGIN_WEEKEND_EXTRA": "240"},
+    "switch_wk": {**_V360, "SPREAD_MARGIN_SWITCH": "1", "SPREAD_MARGIN_WEEKEND_EXTRA": "240"},
+    # Typed-decision model rules on borderline requests (vol360 refused, loose floor passed).
+    "ai_jev": {**_V360, "SPREAD_MARGIN_AI": "jev"},
+    "ai_openai": {**_V360, "SPREAD_MARGIN_AI": "openai"},
+})
 
 
 def main() -> None:

@@ -98,6 +98,28 @@ class MarginDesk(AdmissionDesk):
         self.win_times: deque[int] = deque()
         self.close_times: deque[int] = deque()
         self.closed_orders: set[str] = set()
+        # Switch controller: normal (= vol360 gates), tight (480/240) under
+        # service pressure, loose (240/0, no backlog veto) Wed..Fri 12:00 when
+        # service is comfortable. Off by default.
+        self.switch = os.getenv("SPREAD_MARGIN_SWITCH", "0") == "1"
+        self.mode = "normal"
+        self.mode_since = now
+        self.mode_checked = -10**9
+        # Extra slack (minutes) for options whose window spans the weekend;
+        # the weekend itself is not counted as slack. 0 = off.
+        self.weekend_extra = int(os.getenv("SPREAD_MARGIN_WEEKEND_EXTRA", "0"))
+        # Experimental typed-decision gate for borderline requests: "", jev, openai.
+        self.ai = os.getenv("SPREAD_MARGIN_AI", "")
+        self.ai_max = int(os.getenv("SPREAD_MARGIN_AI_MAX", "400"))
+        self.ai_accept = float(os.getenv("SPREAD_MARGIN_AI_ACCEPT", "0.6"))
+        self.ai_cache: dict[tuple, bool] = {}
+        self.ai_calls = 0
+        # Experimental: the typed model may refuse orders that pass the gates but span the weekend.
+        self.ai_risk = os.getenv("SPREAD_MARGIN_AI_RISK", "")
+        self.tight_share = float(os.getenv("SPREAD_MARGIN_SWITCH_TIGHT_SHARE", "0.94"))
+        if (self.ai not in ("", "jev", "openai") or self.ai_risk not in ("", "jev", "openai")
+                or not 0 <= self.weekend_extra <= 1440 or not 0.9 <= self.tight_share <= 0.99):
+            raise ValueError("switch/weekend/ai parameter outside its safe range")
         if not 60 <= self.fee_pct <= 120:
             raise ValueError("SPREAD_MARGIN_FEE_PCT outside 60..120")
         if not (0 <= self.trust_bps <= 120 and 0 <= self.region_cap <= 5000
@@ -161,22 +183,48 @@ class MarginDesk(AdmissionDesk):
             MARGIN_COUNTS["region_priced"] += 1
         slack_floor, extra_slack, backlog_veto = self._gates()
         eligible: list[tuple[int, dict[str, Any], int]] = []
+        borderline: list[tuple[int, dict[str, Any], int, int, str]] = []
+        buffer = self._booking_delay_buffer()
         for option in request["options"]:
             slack = self._slack(request, option)
-            floor = slack_floor + self._booking_delay_buffer()
-            if slack < floor:
-                continue
+            weekend = self._weekend_minutes(option["deadline"]) if self.weekend_extra else 0
+            if weekend:
+                slack -= weekend
+            floor = slack_floor + buffer
             if self.roster and nearby < 2:
-                continue
-            if backlog_veto and backlog >= 5 and slack < 900:
-                continue
-            if option["kind"] == "next_day" and slack < floor + extra_slack:
                 continue
             price = round_up_div(option["listPriceCents"] * factor_bps, 10000)
             if price * 100 < request["referenceFeeCents"] * 135:
                 continue
             projected = price - round_up_div(request["referenceFeeCents"] * 120, 100)
-            eligible.append((projected + min(300, slack // 10), option, price))
+            rank = projected + min(300, slack // 10)
+            veto = ""
+            if slack < floor:
+                veto = "slack_floor"
+            elif backlog_veto and backlog >= 5 and slack < 900:
+                veto = "local_backlog"
+            elif option["kind"] == "next_day" and slack < floor + extra_slack:
+                veto = "next_day_buffer"
+            elif weekend and slack < floor + extra_slack + self.weekend_extra:
+                veto = "weekend_buffer"
+                MARGIN_COUNTS["weekend_veto"] += 1
+            if (not veto and self.ai_risk and self.ai_calls < self.ai_max
+                    and self._weekend_minutes(option["deadline"]) > 0
+                    and not self._ai_take(request, option, price, slack, "spans_weekend",
+                                          backlog, nearby, provider=self.ai_risk)):
+                veto = "ai_weekend_risk"
+                MARGIN_COUNTS["ai_risk_refuse"] += 1
+            if not veto:
+                eligible.append((rank, option, price))
+            elif self.ai and slack >= 240 + buffer:
+                borderline.append((rank, option, price, slack, veto))
+        if not eligible and borderline and self.ai_calls < self.ai_max:
+            rank, option, price, slack, veto = max(borderline, key=lambda e: (e[0], e[1]["deadline"]))
+            if self._ai_take(request, option, price, slack, veto, backlog, nearby):
+                eligible.append((rank, option, price))
+                MARGIN_COUNTS["ai_take"] += 1
+            else:
+                MARGIN_COUNTS["ai_refuse"] += 1
         if eligible:
             _, option, price = max(eligible, key=lambda e: (e[0], e[1]["deadline"]))
             prices = {option["kind"]: price}
@@ -191,15 +239,121 @@ class MarginDesk(AdmissionDesk):
             MARGIN_COUNTS["declined"] += 1
         self.outbox.append({"type": "quote", "requestId": request["id"], "prices": prices})
 
-    def _gates(self) -> tuple[int, int, bool]:
-        if not self.adapt:
-            return self.slack_floor, self.extra_slack, self.backlog_veto
+    SWITCH_GATES = {"tight": (480, 240, True), "normal": (360, 120, True), "loose": (240, 0, False)}
+
+    def _recent(self) -> tuple[int, int]:
         horizon = self.now - DAY
         while self.win_times and self.win_times[0] < horizon:
             self.win_times.popleft()
         while self.close_times and self.close_times[0] < horizon:
             self.close_times.popleft()
-        won = len(self.win_times)
+        return len(self.win_times), len(self.close_times)
+
+    def _service(self) -> tuple[int, int]:
+        """(on time, late) over won orders that are delivered or already overdue."""
+        on_time = late = 0
+        for order in self.orders.values():
+            done = order["deliveredAt"]
+            if all(t is not None for t in done):
+                if max(done) <= order["deadline"]:
+                    on_time += 1
+                else:
+                    late += 1
+            elif order["deadline"] < self.now:
+                late += 1
+        return on_time, late
+
+    def _weekend_minutes(self, deadline: int) -> int:
+        """Minutes of Sat 00:00 .. Mon 07:00 between now and the deadline."""
+        total = 0
+        week = self.now // (7 * DAY)
+        while week * 7 * DAY < deadline:
+            start = week * 7 * DAY + 5 * DAY
+            end = week * 7 * DAY + 7 * DAY + ACTIVE_FROM
+            total += max(0, min(deadline, end) - max(self.now, start))
+            week += 1
+        return total
+
+    def _update_mode(self) -> None:
+        wins, closes = self._recent()
+        warn = closes / wins if wins >= 15 else 0.0
+        on_time, late = self._service()
+        share = on_time / (on_time + late) if on_time + late >= 20 else 1.0
+        loose_ok = 2 * DAY <= self.now < 4 * DAY + 12 * 60
+        mode = self.mode
+        if share < 0.94 or warn > 0.08:
+            mode = "tight"
+        elif mode == "tight":
+            if self.now - self.mode_since >= DAY and warn < 0.04:
+                mode = "normal"
+        elif mode == "loose":
+            if warn > 0.05 or share < 0.95 or not loose_ok:
+                mode = "normal"
+        elif loose_ok and wins >= 15 and share > 0.97 and warn < 0.03:
+            mode = "loose"
+        if mode != self.mode:
+            MARGIN_COUNTS[f"switch_{self.mode}_to_{mode}"] += 1
+            self.mode = mode
+            self.mode_since = self.now
+
+    def _ai_take(self, request: dict[str, Any], option: dict[str, Any], price: int, slack: int,
+                 veto: str, backlog: int, nearby: int) -> bool:
+        import ai_decide
+        wins, closes = self._recent()
+        on_time, late = self._service()
+        day, tod = divmod(self.now, DAY)
+        state = {
+            "weekday": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][day % 7],
+            "hour": tod // 60,
+            "option": option["kind"],
+            "veto": veto,
+            "slack_hours": round(slack / 60 * 2) / 2,
+            "weekend_before_deadline": self._weekend_minutes(option["deadline"]) > 0,
+            "deadline_days_ahead": option["deadline"] // DAY - day,
+            "legs": len(request["legs"]),
+            "local_backlog": min(backlog, 10),
+            "drivers_nearby": min(nearby, 10),
+            "warnings_per_win_24h": round(closes / wins, 2) if wins else 0.0,
+            "late_so_far": late,
+            "on_time_share_so_far": round(on_time / (on_time + late), 3) if on_time + late else 1.0,
+            "dealer_trust_orders": self.trust[request["dealerId"]],
+            "price_over_reference_fee": round(price / max(1, request["referenceFeeCents"]), 1),
+        }
+        key = tuple(sorted(state.items()))
+        if key in self.ai_cache:
+            MARGIN_COUNTS["ai_cache"] += 1
+            return self.ai_cache[key]
+        question = ai_decide.Question(
+            "take",
+            "A car-transport desk decides whether to quote this order. Gross margin only counts if the "
+            "world's on-time share stays at least 90%, and a late order halves this dealer's trust bonus. "
+            "`slack_hours` is the estimated buffer between a cautious delivery estimate and the promised "
+            "deadline; nights and weekends count as time although few drivers work then. The order failed "
+            "the desk's normal safety gate for the reason in `veto`. Should the desk quote it anyway?",
+            [("take", "Enough real working-hour buffer, drivers nearby, low recent warning rate and healthy "
+                      "service so far: expected margin outweighs the lateness risk."),
+             ("refuse", "Thin real buffer (night or weekend inflated slack, local backlog, few drivers) or "
+                        "service and warnings already under pressure: a late delivery is a real risk.")])
+        self.ai_calls += 1
+        try:
+            answers, _, _ = ai_decide.decide(self.ai, state, [question], timeout=6.0)
+            take = answers["take"].probabilities.get("take", 0.0) >= self.ai_accept
+        except Exception:  # noqa: BLE001 - fall back to the deterministic refusal
+            MARGIN_COUNTS["ai_error"] += 1
+            take = False
+        self.ai_cache[key] = take
+        return take
+
+    def _gates(self) -> tuple[int, int, bool]:
+        if self.switch:
+            if self.now - self.mode_checked >= 30:
+                self.mode_checked = self.now
+                self._update_mode()
+            MARGIN_COUNTS["gate_" + self.mode] += 1
+            return self.SWITCH_GATES[self.mode]
+        if not self.adapt:
+            return self.slack_floor, self.extra_slack, self.backlog_veto
+        won, _ = self._recent()
         if won < 15:
             MARGIN_COUNTS["gate_warmup"] += 1
             return 360, 120, True
