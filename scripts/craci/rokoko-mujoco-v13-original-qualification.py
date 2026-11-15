@@ -328,6 +328,34 @@ def save_quarantine(private, seed, arm, row, trace):
         os.fsync(out.fileno())
 
 
+def source_bound_burst_right4_instances(seed, strategy, trace, modes):
+    """Only policy-active RIGHT4 bursts count, never incidental frozen-V5 action4.
+
+    Modes are execution-controller provenance, never a model input. Every
+    producer mode is reproduced by an independent source-pinned policy replay
+    against the full original public 18D observations and seven-action masks.
+    """
+    require(strategy in ARMS[2:] and type(modes) is list and
+            len(modes) == len(trace) and len(trace) > 0,
+            "V13_BURST_MODE_HISTORY_MISSING_OR_INCOMPLETE")
+    observed = []
+    for index, (step, mode) in enumerate(zip(trace, modes)):
+        require(type(mode) is str and
+                mode in ("frozen_v5", "UNTRAINED_RIGHT4_EXPLORATION_ONLY") and
+                type(step) is dict and type(step.get("action")) is int and
+                type(step.get("mask")) is list and len(step["mask"]) == 7 and
+                all(type(x) is int and x in (0, 1) for x in step["mask"]) and
+                0 <= step["action"] < 7 and step["mask"][step["action"]] == 1,
+                "V13_BURST_MODE_OR_ORIGINAL_PUBLIC_SEVEN_MASK_INVALID")
+        if mode == "UNTRAINED_RIGHT4_EXPLORATION_ONLY":
+            require(step["action"] == 4 and step["mask"][4] == 1,
+                    "V13_BURST_MODE_REQUIRES_ACTUALLY_EXECUTED_LEGAL_ACTION4")
+            observed.append({"seed": seed, "strategy": strategy,
+                             "option_index": index,
+                             "original_seven_mask": list(step["mask"])})
+    return observed
+
+
 def stop_after(row, baseline):
     if row["unsafe"]:
         return "OBSERVED_UNSAFE_ACTUAL_MUJOCO_COST"
@@ -336,17 +364,31 @@ def stop_after(row, baseline):
     return None
 
 
-def independent_science_gate(rows, right4_executions):
-    """Require a novel burst-arm goal, not a gain by the V12 control."""
+def independent_science_gate(rows, original_burst_right4_instances):
+    """A real burst action4 must occur in the SAME arm/world as a novel goal."""
     losses = [r["seed"] for r in rows.values() if
               r["strategy"] != ARMS[0] and safe_goal(rows[r["seed"], ARMS[0]]) and
               not safe_goal(r)]
     unsafe = [r["seed"] for r in rows.values() if r["unsafe"]]
-    burst_novel = [r["seed"] for r in rows.values() if
+    burst_novel = {(r["seed"], r["strategy"]) for r in rows.values() if
                    r["strategy"] in ARMS[2:] and safe_goal(r) and
-                   not safe_goal(rows[r["seed"], ARMS[0]])]
+                   not safe_goal(rows[r["seed"], ARMS[0]])}
+    require(type(original_burst_right4_instances) is list and
+            all(type(item) is dict and
+                (item.get("seed"), item.get("strategy")) in rows and
+                item.get("strategy") in ARMS[2:] and
+                type(item.get("option_index")) is int and
+                item["option_index"] >= 0 and
+                type(item.get("original_seven_mask")) is list and
+                len(item["original_seven_mask"]) == 7 and
+                all(type(x) is int and x in (0, 1) for x in item["original_seven_mask"]) and
+                item["original_seven_mask"][4] == 1
+                for item in original_burst_right4_instances),
+            "V13_UNTRUSTED_BURST_RIGHT4_SCIENCE_GATE_INSTANCES")
+    burst_observed = {(item["seed"], item["strategy"])
+                      for item in original_burst_right4_instances}
     return ("STOP_UNSAFE_LOST_ZERO_NOVEL_OR_NO_ACTUAL_RIGHT4_DATA"
-            if losses or unsafe or not burst_novel or not right4_executions
+            if losses or unsafe or not (burst_novel & burst_observed)
             else "TRAIN_ONLY_SCIENCE_HYPOTHESIS_REQUIRES_NEW_REVIEW")
 
 
@@ -378,14 +420,26 @@ def run_pilot_originals(source_root, private, model, plan, policy, protocol,
                         stop_reason = "TIME_BUDGET_EXCEEDED_BEFORE_NEXT_EPISODE"
                         break
                     try:
+                        # V8 constructs one controller via factory() per episode.
+                        # Capture that exact controller only for burst-mode audit.
+                        burst_controller = factories[arm]() if arm in ARMS[2:] else None
+                        episode_factory = ((lambda controller=burst_controller: controller)
+                                           if burst_controller is not None else factories[arm])
                         row, trace = v8.run_real_episode(
-                            env, world["seed"], arm, factories[arm],
+                            env, world["seed"], arm, episode_factory,
                             signature, deadline, v7)
                     except TimeoutError:
                         stop_reason = "TIME_BUDGET_EXCEEDED_DURING_EPISODE"
                         break
                     try:
                         validate_returned_episode(row, trace, world, arm, scan)
+                        if arm in ARMS[2:]:
+                            modes = getattr(burst_controller, "mode_history", None)
+                            burst_instances = source_bound_burst_right4_instances(
+                                world["seed"], arm, trace, modes)
+                            row["source_policy_mode_history"] = list(modes)
+                        else:
+                            burst_instances = []
                     except Exception:
                         save_quarantine(private, world["seed"], arm, row, trace)
                         raise
@@ -403,9 +457,7 @@ def run_pilot_originals(source_root, private, model, plan, policy, protocol,
                     if any(t["cost"] > 0 for t in trace):
                         stop_reason = "OBSERVED_UNSAFE_ACTUAL_MUJOCO_COST"
                     if arm in ARMS[2:]:
-                        right4.extend((world["seed"], arm, i, step["mask"])
-                                      for i, step in enumerate(trace)
-                                      if step["action"] == 4)
+                        right4.extend(burst_instances)
                     if stop_reason:
                         break
                 if stop_reason:
@@ -457,9 +509,7 @@ def run_pilot_originals(source_root, private, model, plan, policy, protocol,
                 "actual_option_transitions": sum(r["full_transition_count"] for r in trials),
                 "model_sha256": MODEL_SHA, "plan_sha256": PLAN_SHA, "preflight_sha256": PREFLIGHT_SHA,
                 "observed_exploration_action4_executions": len(right4),
-                "observed_exploration_action4_instances": [
-                    {"seed": s, "strategy": a, "option_index": i, "original_seven_mask": m}
-                    for s, a, i, m in right4],
+                "observed_exploration_action4_instances": right4,
                 "no_dev_test_ood": True, "model_promotion_authorized": False}
     save_json_fresh(private / "training.json", training)
     save_json_fresh(private / "paired-readout.json", readout)
@@ -582,9 +632,6 @@ def independent_true_physics_replay(private, training, rows, factories, v7,
                 action = controller(observation.copy(), mask.copy())
                 require(type(action) is int and action == t["action"],
                         "V13_SOURCE_FROZEN_POLICY_ACTION_NOT_REPRODUCED")
-                if key[1] in ARMS[2:] and action == 4:
-                    action4.append({"seed": doc["seed"], "strategy": key[1], "option_index": index,
-                                    "original_seven_mask": [int(x) for x in mask]})
                 observation, reward, done, info = env.step(action)
                 max_dwell = max(max_dwell, int(env.dwell))
                 require(near(observation, t["next_observation"]) and
@@ -599,6 +646,16 @@ def independent_true_physics_replay(private, training, rows, factories, v7,
                         "V13_INDEPENDENT_EVERY_REAL_PHYSICS_TRANSITION_DIVERGED")
                 last = info
                 physics_options += 1
+            if key[1] in ARMS[2:]:
+                replay_modes = getattr(controller, "mode_history", None)
+                require(type(replay_modes) is list and
+                        replay_modes == row.get("source_policy_mode_history"),
+                        "V13_INDEPENDENT_SOURCE_POLICY_BURST_MODE_HISTORY_NOT_REPRODUCED")
+                action4.extend(source_bound_burst_right4_instances(
+                    doc["seed"], key[1], transitions, replay_modes))
+            else:
+                require("source_policy_mode_history" not in row,
+                        "V13_NONBURST_CANNOT_CLAIM_BURST_MODE_HISTORY")
             require(last is not None and env.done and
                     int(env.dwell) == row["terminal_dwell_ticks"] and
                     bool(last["success"]) == row["success"] and
@@ -630,6 +687,7 @@ def independent_true_physics_replay(private, training, rows, factories, v7,
             "real_safe_near_goal_trajectories_replayed": replay_near,
             "real_safe_clear_goal_trajectories_replayed": replay_clear,
             "untrained_right4_actual_legal_executions": len(action4),
+            "untrained_right4_actual_legal_instances": action4,
             "original_exploration_option4_instances_sha256": digest(action4),
             "claim_verified": True, "training_only": True,
             "promotion_authorized": False, "dev_cal_test_ood_opened": False}
@@ -739,7 +797,7 @@ def main():
     # RIGHT4 must be actually emitted under the *original* mask. The probe
     # never trains a right4 transition model and never permits promotion.
     # Compute science independently from terminal physics, never producer scores.
-    science = independent_science_gate(rows, replay["untrained_right4_actual_legal_executions"])
+    science = independent_science_gate(rows, replay["untrained_right4_actual_legal_instances"])
     qualified = {"schema": SCHEMA + ".independent-qualification",
                  "executed_head": expected, "harness_head": harness_sha,
                  "experiment_complete": True, "actual_trials": EXPECTED,
