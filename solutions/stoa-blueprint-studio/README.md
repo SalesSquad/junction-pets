@@ -112,7 +112,7 @@ Attribution: **Swiss Dwellings v3.0.0** (Matthias Standfest, Michael Franzen, Yv
 
 ## Non-goals and honest limitations
 
-- Supports **ASCII DXF** `LWPOLYLINE`, `LINE`, `TEXT`, `MTEXT`, `ARC`, `CIRCLE` ingestion. Door, window and fixture counts rely on the measured layer conventions documented in `src/quantities.mjs`; drawings that break them abstain. No DWG decoder, IFC/3D or HATCH surface extraction yet; raster plans go through the separate, model-based `raster/` evaluation.
+- Supports **ASCII DXF** `LWPOLYLINE`, `LINE`, `TEXT`, `MTEXT`, `ARC`, `CIRCLE` ingestion. Door, window and fixture counts rely on the measured layer conventions documented in `src/quantities.mjs`; drawings that break them abstain. No DWG decoder or HATCH surface extraction yet; IFC models go through `src/ifc-qa.mjs`, and raster plans go through the separate, model-based `raster/` evaluation.
 - A real sponsored drawing is ingested without persisting raw bytes; only the extracted geometry is kept in this process for at most 30 minutes (3 imports maximum). No deployment or external data transfer by this app. A malicious client could forge an on-screen drawing's import content; production needs signed storage/provenance.
 - Measured results cover the routes in the table above on a self-made split, not all 7,990 preview questions or the ~120,000 questions in the full corpus. The sponsor's final protocol is unpublished, so treat the figures as our own held-out measurements.
 - Unit-outline counts are only accepted from explicit `UNIT_OUTLINE` layer primitives; they must be manually confirmed if a different drawing convention uses other layers.
