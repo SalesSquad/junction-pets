@@ -141,6 +141,8 @@ class Run:
                 return response.status, json.loads(raw) if raw else {}
         except urllib.error.HTTPError as error:
             try:
+                if error.code != 400:
+                    return error.code, {"error": "provider_http_error"}
                 raw = error.read(16385)
                 value = json.loads(raw) if len(raw) <= 16384 else {}
                 diagnostics = {}
@@ -151,7 +153,9 @@ class Run:
                             rendered = json.dumps(item)
                             # Payload contains only code and public-image metadata;
                             # still suppress any provider-echoed credential pattern.
-                            if len(rendered) <= 6000 and not re.search(r"(?i)bearer |access_token|client_secret|x-amz-signature", rendered):
+                            if (len(rendered) <= 6000 and auth["access_token"] not in rendered
+                                    and cfg["verda_client_secret"] not in rendered
+                                    and not re.search(r"(?i)bearer |access_token|client_secret|x-amz-signature", rendered)):
                                 diagnostics[key] = item
                 return error.code, {"error": "provider_http_error", "diagnostics": diagnostics}
             except (ValueError, OSError):
