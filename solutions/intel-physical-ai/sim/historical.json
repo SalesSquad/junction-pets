@@ -1,0 +1,41 @@
+{
+  "historical_only": true,
+  "lab_source_sha256": "a23fbcc59afc28e31f56ddc6bdd4925d212c6bd88dc0f81c18f6964fc75fe45a",
+  "limits": "Historical injected scores/confidence are not reused as perception. Power integral is a proxy, not measured watts.",
+  "model_source_sha256": "cbae5c0f2bfcf23a87b160f1d83a06aa70971663aabb204f424545add8ab8935",
+  "rerun": false,
+  "result_sha256": "473cb898f5a092783e4f0b27928b01dd237103bcfd4be3d54e074b83346d63fa",
+  "seeds": [
+    7,
+    11,
+    19
+  ],
+  "summary": {
+    "actual_robot_sorting": false,
+    "baseline_post_fault_commands_changed": 1962,
+    "camera_frames_rendered": true,
+    "each_episode_frames": 180,
+    "fps": 30,
+    "guarded_post_latch_commands_changed": 0,
+    "label": "REAL_MUJOCO_CPU_PHYSICS_WITH_INJECTED_SYNTHETIC_SENSOR_FAULTS",
+    "license": "Apache-2.0",
+    "max_guarded_post_latch_physics_drift_rad": 0.001362,
+    "mean_baseline_motor_power_abs_integral_j_proxy": 37.643822,
+    "mean_guarded_motor_power_abs_integral_j_proxy": 14.111768,
+    "model_revision": "370c43965323c0944b433b202aac5058b5f907a9",
+    "model_source": "Google DeepMind MuJoCo Menagerie/robotstudio_so101",
+    "model_xml_sha256": "14c3826f23889587e63b88ef9a0e7d72318ffe13078fad8287c56dbdb9ba9ad8",
+    "mujoco_version": "4.0.1",
+    "note": "Positions and motors integrated by real MuJoCo. Faults, anomaly score, gripper/camera states and waypoints are injected synthetic stubs. Motion targets HOLD position; do not call this a physical E-stop. Single cube, no automatic grasp or bowl placement, no LeRobot policy.",
+    "paired_runs": 27,
+    "perception_model_inference": false,
+    "physical_emergency_stop": false,
+    "physical_qualification": false,
+    "physics_hz": 200.0,
+    "scenarios": 9,
+    "seeds": 3,
+    "severe_fault_cases": 18,
+    "wall_cpu_seconds": 7.46
+  },
+  "summary_sha256": "c460eb4b55662d9e75f8d6d7bc6cd99ed5caf08bcae055f17093b310a0c3e90c"
+}
