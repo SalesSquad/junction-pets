@@ -96,6 +96,11 @@ class V13SyntheticContractTest(unittest.TestCase):
         self.assertEqual(result["actions"],[2,2])
         self.assertEqual(len(result["traceSha256"]),64)
         self.assertEqual(result["status"],"ORIGINAL_PHYSICS_TERMINAL")
+        # A fake/constructor-injected environment can NEVER self-certify
+        # physical MuJoCo qualification. Hosted independently replays it.
+        self.assertFalse(result["newRealMuJoCoExecuted"])
+        self.assertTrue(result["sourceOnlyUnattestedExecution"])
+        self.assertTrue(result["physicsQualificationPending"])
 
     def test_bad_public_prefix_rejected_not_repaired(self):
         original=fake_original_trace(2,6)
@@ -152,15 +157,22 @@ class V13SyntheticContractTest(unittest.TestCase):
                 "rows":{(42,forensic.ARM_V5):{"world_hash":"test-world-42"}},
                 "traces":{(42,forensic.ARM_V5):fake_original_trace(2,6)}}
         journal=[]
+        completed_options=[]
         with patch.object(forensic,"source_failure_diagnosis",
                           return_value={"v5FailedWorlds":[42]}):
             output=causal.run_budgeted_diagnostic(source,factory,signature,
-                            on_branch=lambda b:journal.append(b))
+                            on_branch=lambda b:journal.append(b),
+                            on_step=lambda step:completed_options.append(step))
         self.assertEqual(output["status"],"TRAIN_ONLY_DIAGNOSTIC_COMPLETE")
         self.assertEqual(journal,output["rawBranches"])
         self.assertGreaterEqual(len(journal),2)
         self.assertEqual(output["worldResults"][0]["status"],"WITNESS")
         self.assertTrue(journal[-1]["actualGoalSuccess250Tick"])
+        self.assertEqual(len(completed_options),sum(len(b["trace"]) for b in journal))
+        self.assertEqual(completed_options[0]["phase"],"ORIGINAL_PREFIX")
+        self.assertEqual(completed_options[-1]["phase"],"COUNTERFACTUAL")
+        self.assertEqual(completed_options[-1]["branchId"],journal[-1]["branchId"])
+        self.assertTrue(all(s["physicsQualificationPending"] for s in completed_options))
 
     def test_lossless_journal_failure_hard_stops_after_previous_receipt(self):
         source={"sourceSha":forensic.SOURCE_HEAD,
@@ -169,6 +181,7 @@ class V13SyntheticContractTest(unittest.TestCase):
                 "rows":{(42,forensic.ARM_V5):{"world_hash":"test-world-42"}},
                 "traces":{(42,forensic.ARM_V5):fake_original_trace(2,6)}}
         journal=[]
+        option_journal=[]
         def append_or_fail(branch):
             if journal:raise OSError("DURABLE_JOURNAL_UNAVAILABLE_STOP")
             journal.append(branch)
@@ -176,13 +189,56 @@ class V13SyntheticContractTest(unittest.TestCase):
                           return_value={"v5FailedWorlds":[42]}):
             with self.assertRaisesRegex(OSError,"JOURNAL_UNAVAILABLE_STOP"):
                 causal.run_budgeted_diagnostic(source,factory,signature,
-                                               on_branch=append_or_fail)
+                    on_branch=append_or_fail,
+                    on_step=lambda event:option_journal.append(event))
         self.assertEqual(len(journal),1)
         self.assertEqual(journal[0]["actions"],[2])
+        self.assertGreater(len(option_journal),len(journal))
 
     def test_journal_must_be_callable_if_supplied(self):
         with self.assertRaisesRegex(ValueError,"PREREGISTERED_FINITE"):
-            causal.run_budgeted_diagnostic({},factory,signature,on_branch="unsafe")
+            causal.run_budgeted_diagnostic({},factory,signature,
+                on_branch="unsafe",on_step=lambda event:None)
+
+    def test_midbranch_timeout_preserves_complete_option_journal(self):
+        original=fake_original_trace(2,3,6)
+        step_journal=[]
+        # No state mutation by the callback; a clean timeout AFTER one prefix
+        # and one counterfactual option retains both complete physical steps.
+        with patch.object(causal.time,"monotonic",side_effect=[0,0,2]):
+            with self.assertRaisesRegex(TimeoutError,"DEADLINE"):
+                causal.replay_actions(factory,signature,42,original,"test-world-42",1,
+                   additional_actions=[3,3,3],deadline=1.,branch_id="partial-42",
+                   on_step=lambda event:step_journal.append(event))
+        self.assertEqual(len(step_journal),2)
+        self.assertEqual([e["optionIndexZeroBased"] for e in step_journal],[0,1])
+        self.assertEqual([e["phase"] for e in step_journal],
+                         ["ORIGINAL_PREFIX","COUNTERFACTUAL"])
+        self.assertEqual({e["branchId"] for e in step_journal},{"partial-42"})
+        self.assertEqual([e["transition"]["action"] for e in step_journal],[2,3])
+
+    def test_default_1200_second_internal_deadline_stops_and_preserves_partial(self):
+        source={"sourceSha":forensic.SOURCE_HEAD,
+                "fullTransitionsSha256":forensic.RAW_SHAS["full_transitions.jsonl.gz"],
+                "independentReplayQualified":True,
+                "rows":{(42,forensic.ARM_V5):{"world_hash":"test-world-42"}},
+                "traces":{(42,forensic.ARM_V5):fake_original_trace(2,6)}}
+        step_journal=[];branch_journal=[]
+        # clock: internal deadline=1200, world precheck=600, first option=900,
+        # next *branch* option=1300 >1200 => incomplete, first branch kept.
+        clock=iter((0.,600.,900.,1300.))
+        with patch.object(forensic,"source_failure_diagnosis",
+                          return_value={"v5FailedWorlds":[42]}),\
+             patch.object(causal.time,"monotonic",side_effect=lambda:next(clock)):
+            output=causal.run_budgeted_diagnostic(source,factory,signature,
+                      on_branch=branch_journal.append,on_step=step_journal.append)
+        self.assertEqual(output["status"],"INCOMPLETE")
+        self.assertEqual(output["hardStopReason"],"V13_FINITE_DEADLINE")
+        self.assertFalse(output["allWorldsComplete"])
+        self.assertEqual(len(branch_journal),1)
+        self.assertEqual(len(step_journal),1)
+        self.assertEqual(branch_journal,output["rawBranches"])
+        self.assertTrue(step_journal[0]["sourceOnlyUnattestedExecution"])
 
     def test_new_future_seeds_under_original_guard_and_disjoint(self):
         self.assertEqual(protocol.FRESH_SCAN,(519024,519535))
