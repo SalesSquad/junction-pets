@@ -471,6 +471,35 @@ def independent_true_physics_replay(private, training, rows, factories, v7,
             "promotion_authorized": False, "dev_cal_test_ood_opened": False}
 
 
+
+def independent_exploration_only_lost_v5_goals(rows, cohort):
+    """Recompute the original78f V12 RIGHT4 regression from verified raw episode rows.
+
+    Frozen 78f protocol returns candidateLoss/unsafe but deliberately does NOT
+    have an exploration-loss key. Never assume an absent key means no regression.
+    Only complete paired world/arm evidence with strict booleans is admissible.
+    """
+    require(len(cohort) == 48 and len(rows) == EXPECTED,
+            "V12_EXPLORATION_LOSS_REQUIRES_COMPLETE_48x3_PAIRED_ROWS")
+    seeds = [world["seed"] for world in cohort]
+    require(len(set(seeds)) == 48 and
+            set(rows) == {(seed, arm) for seed in seeds for arm in ARMS},
+            "V12_EXPLORATION_LOSS_MISSING_DUPLICATED_OR_UNPAIRED_ARM")
+    losses = []
+    for world in cohort:
+        seed = world["seed"]
+        for arm in ARMS:
+            row = rows[(seed, arm)]
+            require(row["seed"] == seed and row["strategy"] == arm and
+                    row["world_hash"] == world["world_hash"] and
+                    all(type(row.get(k)) is bool for k in
+                        ("success", "unsafe", "abstained")),
+                    "V12_EXPLORATION_LOSS_RAW_WORLD_OR_GOAL_BOOLEAN_MISMATCH")
+        if safe_goal(rows[(seed, ARMS[0])]) and not safe_goal(rows[(seed, ARMS[2])]):
+            losses.append(seed)
+    return sorted(losses)
+
+
 def main():
     source_root = Path(os.environ["CRACI_SOURCE_ROOT"]).resolve(strict=True)
     harness_root = Path(os.environ["CRACI_HARNESS_ROOT"]).resolve(strict=True)
@@ -536,7 +565,10 @@ def main():
     unsafe = (readout["candidateUnsafeWorldSeeds"] +
               readout["explorationOnlyUnsafeWorldSeeds"])
     novel = readout["candidateNovelSafeGoalWorldSeeds"]
-    exploration_lost = readout["explorationOnlyLostV5GoalWorldSeeds"]
+    # Source78f has no exploration-loss field: derive from complete original
+    # paired trial rows after independent original MuJoCo replay, never default.
+    exploration_lost = independent_exploration_only_lost_v5_goals(
+        rows, training["cohort"])
     stop = bool(lost or unsafe or exploration_lost or
                 readout["hardStopNoFurtherPhysics"] or not novel or
                 replay["untrained_right4_actual_legal_executions"] == 0)
