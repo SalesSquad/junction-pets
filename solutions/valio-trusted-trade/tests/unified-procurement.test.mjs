@@ -126,3 +126,47 @@ test('stalled image upload has a wall deadline and never holds the OCR worker', 
     assert.equal((await fetch(base + '/api/health')).status, 200);
   } finally { socket?.destroy(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 });
+
+test('independent buyer process checks charged packed quotes through real HTTP', { timeout: 15000 }, async () => {
+  const { execFile } = await import('node:child_process');
+  const { promisify } = await import('node:util');
+  const { fileURLToPath } = await import('node:url');
+  for (const agent of ['buyer-agent.mjs', 'frontier-agent.mjs']) {
+    const service = createTradeService({ policy: chargedPolicy,
+      initialCatalog: FIXTURE_CATALOG.map(p => ({ ...p, packLitres: p.sku === 'DEMO-LF-1' ? 6 : 1 })) });
+    const server = createTradeHttpServer(service);
+    server.listen(0, '127.0.0.1'); await once(server, 'listening');
+    try {
+      const args = agent === 'buyer-agent.mjs' ? ['success', '--decision=approve'] :
+        ['happy', '--decision=approve', '--payment-decision=approve', '--refund-demo'];
+      const result = await promisify(execFile)(process.execPath,
+        [fileURLToPath(new URL('../src/' + agent, import.meta.url)), ...args],
+        { env: { ...process.env, SUPPLIER_URL: 'http://127.0.0.1:' + server.address().port }, timeout: 10000 });
+      assert.ok(result.stdout.includes('SYNTHETIC'));
+      assert.equal(service.audit().filter(e => e.event === 'ORDER_SIMULATED').length, 1);
+      if (agent === 'frontier-agent.mjs') {
+        assert.equal(service.demoWallet().buyerBalanceCents, 250000);
+        assert.equal(service.paymentJournalVerify().valid, true);
+      }
+    } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
+  }
+});
+
+test('independent buyer terms reject a forged price, partial pack and understated financial body', async () => {
+  const { verifyBuyerTerms, verifyBuyerBody } = await import('../src/buyer-terms.mjs');
+  const service = createTradeService({ policy: chargedPolicy });
+  const q = service.requestQuote({ buyerId, need, budgetCents: 250000 });
+  verifyBuyerTerms(q, chargedPolicy);
+  verifyBuyerBody(unsignedQuoteBody(q), q);
+  for (const mutate of [
+    x => { x.totalCents -= 1; },
+    x => { x.costBreakdown.deliveryFeeCents = 0; },
+    x => { x.lines[0].packs += 1; },
+    x => { x.lines[0].unitPriceCents += 1; },
+  ]) {
+    const altered = structuredClone(q); mutate(altered);
+    assert.throws(() => verifyBuyerTerms(altered, chargedPolicy));
+  }
+  const alteredBody = unsignedQuoteBody(q); alteredBody.cost_breakdown.tax_cents = 0;
+  assert.throws(() => verifyBuyerBody(alteredBody, q));
+});

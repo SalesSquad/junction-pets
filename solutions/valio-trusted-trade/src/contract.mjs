@@ -35,7 +35,7 @@ export const openapi = {
     [endpoints.scanOcr]: { post: { summary: 'OPTIONAL demo-server Tesseract image OCR. No image storage; text is untrusted until user confirms.',
       security: [{ demoCapability: [] }],
       requestBody: { required: true, content: { 'image/png': { schema: { type: 'string', format: 'binary' } }, 'image/jpeg': { schema: { type: 'string', format: 'binary' } } } },
-      responses: { '200': { description: 'OCR text and advisory typed recipe candidates; never an order or approval' }, '403': { description: 'Session required' }, '413': { description: 'Image too large' }, '503': { description: 'Local OCR unavailable or busy' } } } },
+      responses: { '200': { description: 'OCR text and advisory typed recipe candidates; never an order or approval' }, '403': { description: 'Session required' }, '408': { description: 'Image upload deadline exceeded' }, '413': { description: 'Image too large' }, '503': { description: 'Local OCR unavailable or busy' } } } },
     [endpoints.buyerKey]: { post: operation('Register independent buyer agent PUBLIC Ed25519 key in its demo session', object({ buyerId: str, publicJwk: object({ kty: { const: 'OKP' }, crv: { const: 'Ed25519' }, x: str }) }), '201', true) },
     [endpoints.policy]: { get: operation('Read server-owned demo budget and approval threshold') },
     [endpoints.wallet]: { get: operation('Read fictional buyer and supplier wallet balances; demo session required', null, '200', true) },
@@ -188,6 +188,9 @@ Object.assign(openapi.components.schemas.Product.properties, { packLitres: int, 
 openapi.components.schemas.Product.required.push('packLitres', 'minOrderPacks');
 Object.assign(openapi.components.schemas.QuoteLine.properties, { packLitres: int, minOrderPacks: int, packs: int });
 Object.assign(openapi.components.schemas.Quote.properties, { costBreakdown: ref('PricingBreakdown') });
+Object.assign(openapi.components.schemas.PortfolioOption.properties, { costBreakdown: ref('PricingBreakdown') });
+openapi.components.schemas.PortfolioOption.required.push('costBreakdown');
+Object.assign(openapi.components.schemas.Order.properties, { costBreakdown: ref('PricingBreakdown') });
 openapi.components.schemas.Quote.required.push('costBreakdown');
 openapi.components.schemas.SourceSnapshot.properties.constraints = {
   oneOf: [ref('BuyingNeed'), object({ requirements: { type: 'array', items: ref('BuyingNeed') }, mode: { const: 'TYPED_PORTFOLIO' } })],

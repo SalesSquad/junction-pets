@@ -6,7 +6,6 @@ import {fork} from 'node:child_process';
 import {randomBytes,createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
-import pg from 'pg';
 import {createLabSchema,seedAccounts,auditLab} from '../index.mjs';
 import {payment,refund,createWalWorkload,flightApplicationNames} from './plan.mjs';
 import {createOwnedCluster,startOwnedCluster,sigkillOwnedPostmaster,
@@ -133,7 +132,9 @@ export async function runWalChaos({requests=10000,seed=20261114,workerCount=8,
   if(!Number.isInteger(workerCount)||workerCount<3||workerCount>8)throw new Error('Workers must be 3..8.');
   if(!Number.isFinite(maxMinutes)||maxMinutes<5||maxMinutes>25)
     throw new Error('Bounded time budget must be 5..25 minutes.');
+  // Refusal guards must run without installing the optional PostgreSQL lab driver.
   const plan=createWalWorkload({requests,seed});
+  const {default:pg}=await import('pg');
   const startedAt=new Date().toISOString(),deadline=Date.now()+maxMinutes*60_000;
   const t0=performance.now();
   let c=null,pool=null,workers=[],cleanup=null,failure=null,failureStage='INITDB';

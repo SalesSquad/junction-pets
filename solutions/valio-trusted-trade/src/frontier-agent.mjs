@@ -8,6 +8,7 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { createPublicKey, generateKeyPairSync, randomUUID, verify } from 'node:crypto';
 import assert from 'node:assert/strict';
+import { verifyBuyerTerms, verifyBuyerBody } from './buyer-terms.mjs';
 import { canonical, digest, makeDemoMandatePayload, signDemoEnvelope } from './trust-envelope.mjs';
 
 const scenario = process.argv.find((x) => ['happy', 'shock', 'reject', 'replay', 'refusal'].includes(x)) ?? 'happy';
@@ -64,7 +65,7 @@ if (scenario === 'refusal') {
   const fixedQuote = async (chosenPlan) => {
     const optionId = chosenPlan.recommendedOptionId;
     const { quote } = await call(`/api/plans/${chosenPlan.id}/quotes`, { buyerId: policy.buyerId, optionId });
-    assert.equal(quote.totalCents, quote.lines.reduce((sum, line) => sum + line.unitPriceCents * line.quantityLitres, 0));
+    verifyBuyerTerms(quote, policy);
     if (quote.approvalRequired) {
       let decision = process.argv.find((x) => x.startsWith('--decision='))?.split('=')[1];
       if (!decision) {
@@ -101,6 +102,9 @@ if (scenario === 'refusal') {
     assert.ok(verify(null, proofBytes, supplierKey, Buffer.from(signedOffer.signature, 'base64url')));
     assert.equal(signedOffer.payload.quoteId, quote.id);
     assert.equal(signedOffer.payload.totalCents, quote.totalCents);
+    const exported = await call(`/api/quotes/${quote.id}/body`);
+    verifyBuyerBody(exported.body, quote);
+    assert.equal(signedOffer.payload.quoteBodyDigest, digest(exported.body));
     const signedMandate = signDemoEnvelope(privateKey, registration.kid,
       makeDemoMandatePayload({ quote, signedOffer, now: Date.now(), nonce: randomUUID() }));
     assert.equal(signedMandate.payload.signedOfferDigest, digest(signedOffer));

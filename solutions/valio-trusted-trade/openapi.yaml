@@ -494,6 +494,9 @@
           "403": {
             "description": "Session required"
           },
+          "408": {
+            "description": "Image upload deadline exceeded"
+          },
           "413": {
             "description": "Image too large"
           },
@@ -2351,6 +2354,9 @@
               "string",
               "null"
             ]
+          },
+          "costBreakdown": {
+            "$ref": "#/components/schemas/PricingBreakdown"
           }
         }
       },
@@ -2774,7 +2780,8 @@
           "lines",
           "withinBudget",
           "carbonKgEstimate",
-          "riskScorePct"
+          "riskScorePct",
+          "costBreakdown"
         ],
         "properties": {
           "id": {
@@ -2823,6 +2830,9 @@
           "supplierCount": {
             "type": "integer",
             "minimum": 1
+          },
+          "costBreakdown": {
+            "$ref": "#/components/schemas/PricingBreakdown"
           }
         }
       },

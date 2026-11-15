@@ -119,8 +119,8 @@ export function planProcurementPortfolio({ catalog, requirements, budgetCents, d
   ];
   const candidates = modes.map((mode) => {
     const lines = selectLines(catalog, typed, mode.id);
-    const costBreakdown = calculateBasketTotals({ subtotalCents: lines.reduce((sum, line) => sum + line.totalCents, 0), deliveryFeeCents, taxBps });
-    const totalCents = costBreakdown.totalCents;
+    const { totalCents, pricingModel, ...costBreakdown } = calculateBasketTotals({
+      subtotalCents: lines.reduce((sum, line) => sum + line.totalCents, 0), deliveryFeeCents, taxBps });
     const grams = lines.reduce((sum, line) => sum + line.quantityLitres * line.emissionsGramsPerL, 0);
     const supplierUnits = new Map();
     for (const line of lines) supplierUnits.set(line.supplierId, (supplierUnits.get(line.supplierId) ?? 0) + line.quantityLitres);
