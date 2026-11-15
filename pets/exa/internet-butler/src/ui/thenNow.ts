@@ -10,6 +10,7 @@ import { Authority, type AgentGrant, type Authorization, type Proposal } from ".
 import { dictate, monthDate, relativeDate, speak, spokenDate, stopSpeaking, voiceSupport, VOICE_LANGS } from "./voice.ts";
 import { copyText, dictationNote } from "./embed.ts";
 import { icsEvent, lastDay, timeVerdict } from "../timetravel/verdict.ts";
+import { buildPacket } from "./packet.ts";
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
 const today = () => new Date().toISOString().slice(0, 10);
@@ -423,7 +424,7 @@ export function mountThenNow(root: HTMLElement): void {
           ${!c.sent ? `<button id="tt-approve" class="primary">Approve with this device and send</button>` : `
           <div class="${c.receiver?.decision === "ACCEPT" ? "tt-ok" : "tt-bad"}"><b>Receiver: ${esc(c.receiver?.decision)}</b>${c.sent.reference ? ` · reference ${esc(c.sent.reference)}` : ""}<br/><span class="small">checked: ${esc(c.receiver?.checked.join(", "))}${c.receiver?.reasons.length ? ` · ${esc(c.receiver.reasons.join("; "))}` : ""}</span></div>
           <p class="small muted">Ledger: ${esc(c.ledger.join(" → "))}</p>
-          <div class="row">${whereUrl() ? `<a class="tt-linkbtn" href="${esc(safeUrl(whereUrl()))}" target="_blank" rel="noreferrer">Open the claim page</a>` : ""}<button id="tt-copy">Copy the claim text</button><a class="tt-linkbtn" id="tt-warrant" download="warrant.json" href="data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(c.artifact ?? {}, null, 1))}">Download the Warrant</a></div>
+          <div class="row">${whereUrl() ? `<a class="tt-linkbtn" href="${esc(safeUrl(whereUrl()))}" target="_blank" rel="noreferrer">Open the claim page</a>` : ""}<button id="tt-copy">Copy the claim text</button><button id="tt-packet">Download the claim packet</button><a class="tt-linkbtn" id="tt-warrant" download="warrant.json" href="data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(c.artifact ?? {}, null, 1))}">Download the Warrant</a></div>
           <p class="small muted">The receiver above is a simulation of what a counterparty can check. Nothing has been sent to the real one: you submit it yourself on their page.</p>
           ${r.changed ? `<button id="tt-blind">What if the receiver read today's page instead?</button>${c.dateBlind ? `<div class="tt-bad small"><b>${esc(c.dateBlind.decision)}</b> — ${esc(c.dateBlind.reasons.join("; "))}. Pinning the official version is what makes the claim checkable.</div>` : ""}` : ""}`}`}
         </div>` : ""}
@@ -456,6 +457,16 @@ export function mountThenNow(root: HTMLElement): void {
     root.querySelector("#tt-date")?.addEventListener("input", (ev) => { state.date = (ev.target as HTMLInputElement).value; state.dateTouched = true; });
     root.querySelector("#tt-run")?.addEventListener("click", () => void run());
     root.querySelector("#tt-steps-go")?.addEventListener("click", () => void workOutSteps());
+    root.querySelector("#tt-packet")?.addEventListener("click", () => {
+      if (!r) return;
+      const v = timeVerdict(state.question, r.then.amount);
+      const html = buildPacket({ r, question: state.question, letter: state.claim?.letter, verdict: v, lastDay: lastDay(r.eventDate, r.then.amount), steps: state.steps?.steps, warrantDigest: state.claim?.artifact?.signature ? `signature ${state.claim.artifact.signature.slice(0, 32)}…` : undefined, generated: new Date().toISOString() });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
+      a.download = `claim-packet-${r.eventDate}.html`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    });
     root.querySelector("#tt-ics")?.addEventListener("click", (ev) => {
       const last = (ev.currentTarget as HTMLElement).dataset.last;
       if (!last || !r) return;
