@@ -68,6 +68,7 @@ identifier, not a supplier signature or authenticated commercial identity.
 - A budget exception retains the **original** requested budget and records
   the exact additional cents with scope `THIS_QUOTE_ONLY`. Even below the
   normal automatic threshold it requires an explicit simulated decision.
+  Without a budget exception, the existing low-value auto-commit rule remains.
 - `POST /api/reviews/{id}/decision` requires `buyerId`, `decision`,
   `snapshotId` and `quoteId`. The session must own both review and quote.
   Altered, missing, foreign or expired bindings are refused; the legacy

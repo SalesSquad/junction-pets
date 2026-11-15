@@ -155,6 +155,7 @@ test('HTTP review ownership, decision identifiers and forged authority fields ar
   assert.equal((await call(path, { ...body, budgetCents: 999999 }, token)).error.code, 'INVALID_REVIEW_DECISION');
   assert.equal((await call('/api/quotes/' + result.quote.id + '/approval', { buyerId, decision: 'approve' }, token)).error.code, 'REVIEW_CONFIRMATION_REQUIRED');
   assert.equal((await call(path, body, token)).quote.status, 'APPROVED');
+  assert.equal((await call('/api/orders', { buyerId, quoteId: result.quote.id, idempotencyKey: 'foreign-review-order' }, other)).error.code, 'BUYER_MISMATCH');
   assert.equal((await call('/api/orders', { buyerId, quoteId: result.quote.id, idempotencyKey: 'http-exact-review' }, token)).status, 201);
 }));
 
@@ -186,3 +187,12 @@ test('malformed request target returns a bounded 400 and the same server stays h
   assert.equal(health.status, 200);
   assert.equal((await health.json()).status, 'ok');
 }));
+
+test('normal low-value review preserves automatic buying only within the original budget and policy', () => {
+  const service = createTradeService();
+  const result = service.requestReview({ ...request, need: { ...need, quantityLitres: 10 }, budgetCents: 2000 });
+  assert.equal(result.quote.budgetException, null);
+  assert.equal(result.quote.approvalRequired, false);
+  assert.equal(result.quote.totalCents, 1740);
+  assert.equal(service.commitOrder({ buyerId, quoteId: result.quote.id, idempotencyKey: 'bounded-auto-review' }).totalCents, 1740);
+});
