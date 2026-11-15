@@ -13,3 +13,18 @@
 .activity-section{margin:0;padding:3rem 6%;border-bottom:1px solid var(--line);background:var(--card);color:var(--white)}.activity-section h2{font-size:clamp(29px,3vw,45px);letter-spacing:-.055em;margin-top:12px}.activity-section p{color:var(--muted)}.activity-section p{max-width:75ch;line-height:1.6}#activity{padding-left:1.4rem;max-height:22rem;overflow:auto}#activity li{margin:.7rem 0;line-height:1.5;overflow-wrap:anywhere}#interop-body{max-width:100%;max-height:22rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.75rem}button:focus-visible,select:focus-visible,input:focus-visible,pre:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
 
 .audit-events small{overflow-wrap:anywhere}.input-card select{min-width:0}@media(max-width:560px){.activity-section{padding:3rem 5%}}
+
+/* Quote-scoped exception review, using the existing palette and native controls. */
+.snapshot-summary{padding:12px 14px;border:1px solid var(--line);border-radius:7px;font-size:11px!important}
+.exception-card{margin:0 0 24px;padding:22px;border:1px solid #8baa5b;border-radius:12px;background:#1b3327;overflow-wrap:anywhere}
+.exception-card h3{margin:10px 0 12px}.exception-card p{margin-bottom:14px}.exception-card .form-label{margin:22px 0 10px}
+.exception-amounts{margin:20px 0;border-top:1px solid #4d6745}
+.exception-amounts>div{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #4d6745}
+.exception-amounts dt{font-size:12px;color:#c5d6bd}.exception-amounts dd{margin:0;font-size:18px;font-weight:800;white-space:nowrap}
+.exception-amounts .exception-delta dd{font-size:25px;color:var(--mint)}
+.exception-constraints{padding-left:19px;font-size:12px;line-height:1.8;color:#deebd5}
+.exception-actions{display:grid;gap:10px}.exception-actions button{min-height:46px}
+.exception-card details{font-size:11px;color:var(--muted)}.exception-card summary{cursor:pointer;padding:10px 0}
+.exception-card code{display:block;overflow-wrap:anywhere;word-break:break-all;font-size:10px}
+.exception-card :focus-visible{outline:3px solid var(--mint);outline-offset:4px}
+@media(max-width:560px){.exception-card{padding:17px}.exception-amounts>div{flex-wrap:wrap;gap:5px}.exception-amounts dt{flex:1 0 100%}}

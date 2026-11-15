@@ -36,13 +36,16 @@ export function createTradeHttpServer(service = createTradeService()) {
   const sessions = new Map();
   const quoteOwners = new Map();
   const orderOwners = new Map();
+  const reviewOwners = new Map();
   return createServer(async (request, response) => {
-    const url = new URL(request.url ?? '/', 'http://localhost');
+    let url;
     const send = (status, body) => {
       response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'" });
       response.end(JSON.stringify(body));
     };
     try {
+      try { url = new URL(request.url ?? '/', 'http://localhost'); }
+      catch { throw new TradeError('INVALID_URL', 'Invalid request target.', 400); }
       if (request.headers.origin && request.headers.origin !== `http://${request.headers.host}`) throw new TradeError('ORIGIN_REFUSED', 'Cross-origin demo writes forbidden.', 403);
       if (request.method === 'GET' && url.pathname === '/.well-known/trusted-trade') return send(200, metadata);
       if (request.method === 'GET' && url.pathname === '/openapi.json') return send(200, openapi);
@@ -59,6 +62,8 @@ export function createTradeHttpServer(service = createTradeService()) {
         if (!sessions.has(token)) throw new TradeError('BUYER_CAPABILITY_REQUIRED', 'Obtain an ephemeral synthetic session first.', 403);
         if (payload.buyerId !== undefined && payload.buyerId !== sessions.get(token)) throw new TradeError('BUYER_MISMATCH', 'Capability does not match buyer.', 403);
         const boundQuote = url.pathname.match(/^\/api\/quotes\/([^/]+)\/approval$/)?.[1] ?? payload.quoteId;
+        const boundReview = url.pathname.match(/^\/api\/reviews\/([^/]+)\/decision$/)?.[1];
+        if (boundReview && reviewOwners.get(boundReview) !== token) throw new TradeError('BUYER_MISMATCH', 'This demo session does not own this review.', 403);
         const boundOrder = url.pathname.match(/^\/api\/orders\/([^/]+)\/cancel$/)?.[1];
         if ((boundQuote && quoteOwners.get(boundQuote) !== token) || (boundOrder && orderOwners.get(boundOrder) !== token)) throw new TradeError('BUYER_MISMATCH', 'This demo session does not own these terms.', 403);
         request.demoPayload = payload;
@@ -85,6 +90,18 @@ export function createTradeHttpServer(service = createTradeService()) {
         quoteOwners.set(quote.id, token);
         return send(201, { quote });
       }
+      if (request.method === 'POST' && url.pathname === '/api/reviews') {
+        if (Object.keys(request.demoPayload).some((key) => !['buyerId', 'requestText', 'need', 'budgetCents'].includes(key))) throw new TradeError('INVALID_REQUEST', 'Review request contains unsupported fields.');
+        const result = service.requestReview(request.demoPayload);
+        reviewOwners.set(result.review.id, token);
+        if (result.quote) quoteOwners.set(result.quote.id, token);
+        return send(201, result);
+      }
+      const reviewDecision = url.pathname.match(/^\/api\/reviews\/([^/]+)\/decision$/);
+      if (request.method === 'POST' && reviewDecision) {
+        if (Object.keys(request.demoPayload).some((key) => !['buyerId', 'decision', 'snapshotId', 'quoteId'].includes(key))) throw new TradeError('INVALID_REVIEW_DECISION', 'Only the displayed review, quote and snapshot may be confirmed.');
+        return send(200, service.decideReview({ ...request.demoPayload, reviewId: reviewDecision[1] }));
+      }
       const bodyExport = url.pathname.match(/^\/api\/quotes\/([^/]+)\/body$/);
       if (request.method === 'GET' && bodyExport) return send(200, { mode: 'SYNTHETIC', signature: 'UNSIGNED', body: unsignedQuoteBody(service.quote(bodyExport[1])) });
       const approval = url.pathname.match(/^\/api\/quotes\/([^/]+)\/approval$/);
@@ -104,7 +121,7 @@ export function createTradeHttpServer(service = createTradeService()) {
       return send(404, { error: { code: 'NOT_FOUND', message: 'Unknown demo route.' } });
     } catch (error) {
       const isTrade = error instanceof TradeError;
-      service.recordRefusal(isTrade ? error.code : 'INTERNAL_ERROR', url.pathname);
+      service.recordRefusal(isTrade ? error.code : 'INTERNAL_ERROR', url?.pathname ?? '[invalid request target]');
       return send(isTrade ? error.httpStatus : 500, {
         error: { code: isTrade ? error.code : 'INTERNAL_ERROR', message: isTrade ? error.message : 'Unexpected demo error.', details: isTrade ? error.details : null },
       });

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Trusted Trade — implemented SYNTHETIC localhost API",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "All parties, stock, prices, approvals and orders invented. No commercial effects. Demo capabilities are not verified identities."
   },
   "servers": [
@@ -185,6 +185,138 @@
                   "properties": {
                     "quote": {
                       "$ref": "#/components/schemas/Quote"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/reviews": {
+      "post": {
+        "summary": "Diagnose and propose a fixed quote from one coherent synthetic source snapshot; creates no approval",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "review",
+                    "quote"
+                  ],
+                  "properties": {
+                    "review": {
+                      "$ref": "#/components/schemas/ProcurementReview"
+                    },
+                    "quote": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/Quote"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid terms"
+          },
+          "403": {
+            "description": "Buyer capability or approval refused"
+          },
+          "409": {
+            "description": "Budget, stock, expiry, state or replay conflict"
+          }
+        }
+      }
+    },
+    "/api/reviews/{id}/decision": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Decide the exact displayed quote/snapshot; any budget exception applies only to that quote",
+        "security": [
+          {
+            "demoCapability": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Synthetic result only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "review",
+                    "quote"
+                  ],
+                  "properties": {
+                    "review": {
+                      "$ref": "#/components/schemas/ProcurementReview"
+                    },
+                    "quote": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/Quote"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   }
                 }
@@ -775,7 +907,12 @@
           "status",
           "createdAtMs",
           "expiresAtMs",
-          "explanation"
+          "explanation",
+          "snapshotId",
+          "sourceSnapshot",
+          "reviewId",
+          "budgetCents",
+          "budgetException"
         ],
         "properties": {
           "id": {
@@ -849,6 +986,56 @@
                 }
               }
             }
+          },
+          "snapshotId": {
+            "type": "string"
+          },
+          "sourceSnapshot": {
+            "$ref": "#/components/schemas/SourceSnapshot"
+          },
+          "reviewId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "budgetCents": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "budgetException": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "originalBudgetCents",
+                  "proposedBudgetCents",
+                  "additionalCents",
+                  "scope"
+                ],
+                "properties": {
+                  "originalBudgetCents": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "proposedBudgetCents": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "additionalCents": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "scope": {
+                    "const": "THIS_QUOTE_ONLY"
+                  }
+                }
+              }
+            ]
           }
         }
       },
@@ -916,6 +1103,141 @@
           },
           "deliverBy": {
             "const": "2026-11-16"
+          }
+        }
+      },
+      "ReviewDecision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "buyerId",
+          "decision",
+          "snapshotId",
+          "quoteId"
+        ],
+        "properties": {
+          "buyerId": {
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "approve",
+              "reject"
+            ]
+          },
+          "snapshotId": {
+            "type": "string"
+          },
+          "quoteId": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "observedAtMs",
+          "mode",
+          "stockReserved",
+          "products",
+          "policy",
+          "constraints"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "observedAtMs": {
+            "type": "integer"
+          },
+          "mode": {
+            "const": "INVENTED_FIXTURE"
+          },
+          "stockReserved": {
+            "const": false
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          },
+          "policy": {
+            "type": "object"
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/BuyingNeed"
+          }
+        }
+      },
+      "ProcurementReview": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "buyerId",
+          "snapshotId",
+          "sourceSnapshot",
+          "requested",
+          "originalBudgetCents",
+          "diagnosis",
+          "quoteId",
+          "status",
+          "expiresAtMs"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "buyerId": {
+            "type": "string"
+          },
+          "snapshotId": {
+            "type": "string"
+          },
+          "sourceSnapshot": {
+            "$ref": "#/components/schemas/SourceSnapshot"
+          },
+          "requested": {
+            "$ref": "#/components/schemas/BuyingNeed"
+          },
+          "originalBudgetCents": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "diagnosis": {
+            "type": "object",
+            "required": [
+              "outcome",
+              "minimumCostCents",
+              "additionalBudgetCents",
+              "missingLitres",
+              "sourceVersions"
+            ],
+            "properties": {
+              "outcome": {
+                "enum": [
+                  "FEASIBLE_AT_SNAPSHOT",
+                  "BUDGET_REVIEW_NEEDED",
+                  "POLICY_LIMIT_EXCEEDED",
+                  "STOCK_SHORTFALL"
+                ]
+              }
+            }
+          },
+          "quoteId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "expiresAtMs": {
+            "type": "integer"
           }
         }
       },

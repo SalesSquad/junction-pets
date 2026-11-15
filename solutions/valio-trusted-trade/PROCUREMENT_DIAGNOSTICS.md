@@ -46,10 +46,45 @@ authorization header. Only plain localhost HTTP is accepted; redirects, external
 discovery origins and unlabelled catalogs are refused. Reads are individually
 bounded by a five-second timeout and a 1 MiB response limit.
 
-No server, authorization, payment, existing buyer or UI files are changed. The
-new files are independent of the pending Frontier, settlement, scanning,
-retrieval and PostgreSQL PR stack. Portfolio PR Recovery retains integration
-and merge ownership.
+The standalone CLI remains read-only. The existing browser now uses the
+server-owned review flow below. Portfolio PR Recovery retains integration and
+merge ownership; the pending Frontier/settlement branches need to retain these
+new core, server, contract and browser changes during reconciliation.
+
+## Snapshot-bound quote and exception card
+
+Open the existing local browser workspace and select the EUR 1400 budget.
+The server diagnoses the exact need and builds any viable quote in the same
+synchronous source read. Only the requested product family is inspected.
+The immutable source identifier covers those product facts, the constraints,
+the server policy and an ephemeral service-instance namespace. It is a revision
+identifier, not a supplier signature or authenticated commercial identity.
+
+- `POST /api/reviews` uses the existing synthetic buyer capability and accepts
+  the same bounded request as `POST /api/quotes`. It returns a diagnosis, a
+  coherent source snapshot and either a fixed quote or `quote: null`.
+- Missing exact stock or a minimum exceeding the existing policy ceiling has
+  no approvable quote. These constraints cannot be waived by the card.
+- A budget exception retains the **original** requested budget and records
+  the exact additional cents with scope `THIS_QUOTE_ONLY`. Even below the
+  normal automatic threshold it requires an explicit simulated decision.
+- `POST /api/reviews/{id}/decision` requires `buyerId`, `decision`,
+  `snapshotId` and `quoteId`. The session must own both review and quote.
+  Altered, missing, foreign or expired bindings are refused; the legacy
+  approval endpoint cannot approve a review-backed quote.
+- The card shows original budget, exact basket total, extra budget, unchanged
+  product/diet/date/quantity constraints, validity and the no-reservation limit.
+  Editing form inputs disables consent to the previous displayed terms.
+- Approval covers that one quote and does not raise the buyer policy ceiling.
+  Current relevant source facts, policy, expiry and decision bindings are
+  rechecked before commitment. New quotes never inherit old approval.
+- Same-key order replay still returns the existing receipt without another
+  stock deduction. A new request is disabled while an active simulated order
+  still needs cancellation, preserving its visible receipt and cancel action.
+
+The browser may automatically request a fresh proposal, but cannot approve
+it. All actors and decisions remain explicitly unauthenticated synthetic demo
+data; no real procurement authority is introduced.
 
 ## Limits
 
@@ -71,3 +106,16 @@ The checks include an exhaustive small-inventory minimum-cost oracle, hard
 diet/date exclusions, unknown-source refusals and a separate real Node buyer
 process proving only GETs occur while catalog, policy and audit remain unchanged.
 No browser, deployment, real buyer identity or sponsor integration is qualified.
+
+Snapshot/consent boundary verification:
+
+```sh
+node --test tests/snapshot-review.test.mjs tests/core.test.mjs tests/http.test.mjs tests/agent-boundaries.test.mjs tests/procurement-diagnostics.test.mjs
+node tests/approval-card.browser.mjs
+```
+
+The optional browser check uses the repository's Playwright dependency; an
+existing isolated module and Chromium executable can instead be selected with
+`PLAYWRIGHT_MODULE` and `PLAYWRIGHT_CHROMIUM_PATH`. It runs only against its
+own ephemeral localhost server, closes its own browser/server, and can write
+temporary card captures to `VALIO_REVIEW_SCREENSHOT_DIR`.
