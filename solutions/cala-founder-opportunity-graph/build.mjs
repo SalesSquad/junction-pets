@@ -8,8 +8,7 @@ import { PRODUCT_SOURCE_DIGEST } from './source-meta.mjs';
 // lowercase SHA256(raw file bytes) + LF per file. Hash the UTF-8 manifest.
 export const PRODUCT_SOURCE_FILES = Object.freeze([
   'cala-contract.d.ts', 'cala-contract.mjs', 'core.mjs', 'fixture.mjs',
-  'public/app.mjs', 'public/index.html', 'public/style.css', 'server.mjs',
-  'workspace/restore.mjs'
+  'public/app.mjs', 'public/index.html', 'public/style.css', 'server.mjs'
 ]);
 export async function computeSourceDigest(root = new URL('./', import.meta.url)) {
   const entries = await Promise.all([...PRODUCT_SOURCE_FILES].sort().map(async path =>

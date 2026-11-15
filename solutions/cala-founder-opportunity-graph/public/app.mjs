@@ -1,6 +1,5 @@
 import { fixture } from '/fixture.mjs';
 import { DEFAULT_GOAL, rank, validateGoal, escapeHTML as h, safeURL, makeArtifact, safeJSON } from '/core.mjs';
-import { recoverArchive, MAX_ARCHIVE_BYTES } from '/restore.mjs';
 const $ = s => document.querySelector(s);
 let goal = {...DEFAULT_GOAL}, rows = [], selected, reviews = new Map();
 const link = (url,label) => safeURL(url) ? `<a href="${h(safeURL(url))}" target="_blank" rel="noopener noreferrer">${h(label)} <span aria-hidden="true">↗</span><span class="sr-only"> (fictional source, new tab)</span></a>` : '<span>Unsafe or missing URL — withheld</span>';
@@ -28,30 +27,4 @@ function updateDownload(){ $('#download').disabled=!reviews.size||[...reviews.va
 function build(){ rows=rank(fixture,goal); selected=rows[0]?.entity.id; renderCandidates(); renderDetail(); renderReview(); }
 $('#goal-form').addEventListener('submit',ev=>{ev.preventDefault();try{goal=validateGoal({...Object.fromEntries(new FormData(ev.currentTarget)),stage:'Seed'},fixture.asOf);reviews.clear();build();$('#status').textContent='Evidence graph updated. Previous reviews cleared for this goal.';}catch(e){$('#status').textContent=e.message;}});
 $('#download').addEventListener('click',()=>{try{const artifact=makeArtifact(fixture,goal,[...reviews.values()]);const url=URL.createObjectURL(new Blob([safeJSON(artifact)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='roundlens-fictional-reviewed-shortlist.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('#export-status').textContent='Approved JSON prepared locally with exact citations. No data sent.';}catch(e){$('#export-status').textContent=e.message;}});
-$('#restore-file').addEventListener('change', async ev => {
-  const input = ev.currentTarget;
-  const file = input.files?.[0];
-  if (!file) return;
-  const status = $('#restore-status');
-  try {
-    if (file.size > MAX_ARCHIVE_BYTES) throw Error('ARCHIVE_TOO_LARGE_OR_INVALID');
-    const restored = recoverArchive(await file.text(), fixture);
-    const nextRows = rank(fixture, restored.goal);
-    // Transactional: no user-visible state changes before every check passes.
-    goal = restored.goal;
-    rows = nextRows;
-    reviews = new Map(restored.reviews.map(r => [r.id, r]));
-    selected = restored.reviews[0]?.id ?? rows[0]?.entity.id;
-    for (const key of ['sector','geography','from','to'])
-      $('#goal-form').elements.namedItem(key).value = goal[key];
-    renderCandidates(); renderDetail(); renderReview();
-    $('#status').textContent = 'Recovered source-bound local fixture evidence. No network request.';
-    status.textContent = 'Restored ' + restored.reviews.length +
-      ' notes. All previous approvals are revoked; inspect each source and approve again.';
-    $('#restore-status').focus();
-  } catch (e) {
-    status.textContent = 'Could not recover: ' + (/^ARCHIVE_[A-Z_]+$/.test(e?.message) ? e.message : 'FILE_READ_FAILED') +
-      '. Your existing review was preserved.';
-  } finally { input.value = ''; }
-});
 build();

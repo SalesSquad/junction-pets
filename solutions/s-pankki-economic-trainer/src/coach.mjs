@@ -9,8 +9,6 @@ const requiredColumns = [
 const categoryRules = new Map(Object.entries({
   RENT: ['mandatory-regular', 'Housing'],
   MORTGAGE: ['mandatory-regular', 'Housing'],
-  // Sponsor's exact category with transaction_type=housing_payment.
-  HOUSING: ['mandatory-regular', 'Housing'],
   UTILITIES: ['mandatory-regular', 'Utilities'],
   ELECTRICITY: ['mandatory-regular', 'Utilities'],
   INSURANCE: ['mandatory-regular', 'Insurance'],
@@ -31,10 +29,6 @@ const categoryRules = new Map(Object.entries({
   INCOME: ['non-spending', 'Income'],
   INTERNAL_TRANSFER: ['non-spending', 'Transfers'],
   TRANSFER: ['non-spending', 'Transfers'],
-  INVEST_DEPOSIT: ['non-spending', 'Savings movements'],
-  INVEST_WITHDRAW: ['non-spending', 'Savings movements'],
-  SALARY_SWEEP: ['non-spending', 'Savings movements'],
-  OTHER_INCOME: ['non-spending', 'Income'],
 }));
 
 export const BASKETS = [
@@ -85,35 +79,8 @@ function validDay(day) {
   return !Number.isNaN(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === day;
 }
 
-// The official sponsor CSV uses Oracle-style DDMONYY:HH:MM:SS, while
-// standalone fixtures may use ISO 8601. Bind the two-digit year and calendar
-// date to the separate source tx_date: never guess a century or accept drift.
-const sponsorNonConsumptionTypes = new Set(['INVESTMENT_DEPOSIT', 'INVESTMENT_WITHDRAWAL', 'SALARY_SWEEP']);
-const sponsorMonths = Object.freeze({
-  JAN: 1, FEB: 2, MAR: 3, APR: 4, MAY: 5, JUN: 6,
-  JUL: 7, AUG: 8, SEP: 9, OCT: 10, NOV: 11, DEC: 12,
-});
-export function parseTransactionTimestamp(value, expectedDay = null) {
+export function parseTransactionTimestamp(value) {
   const raw = String(value ?? '').trim();
-  const sponsor = /^(\d{2})([A-Z]{3})(\d{2}):(\d{2}):(\d{2}):(\d{2})$/i.exec(raw);
-  if (sponsor) {
-    if (!validDay(String(expectedDay ?? ''))) throw new Error('Sponsor timestamp requires a valid tx_date');
-    const [year, month, day] = String(expectedDay).split('-').map(Number);
-    const hour = Number(sponsor[4]), minute = Number(sponsor[5]), second = Number(sponsor[6]);
-    const sourceMonth = sponsorMonths[sponsor[2].toUpperCase()];
-    if (!sourceMonth || Number(sponsor[1]) !== day || sourceMonth !== month ||
-        Number(sponsor[3]) !== year % 100 || hour > 23 || minute > 59 || second > 59) {
-      throw new Error('Sponsor timestamp conflicts with tx_date or has invalid clock time');
-    }
-    // Sponsor timestamp has no timezone; UTC is an explicit deterministic
-    // interpretation, NOT an assertion about Finnish bank-local posting time.
-    const epoch = Date.UTC(year, month - 1, day, hour, minute, second);
-    if (!Number.isFinite(epoch) ||
-        new Date(epoch).toISOString().slice(0, 10) !== expectedDay) {
-      throw new Error('Invalid sponsor timestamp calendar date');
-    }
-    return epoch;
-  }
   const match = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2}):(\d{2})(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})?$/i.exec(raw);
   if (!match || !validDay(match[1]) || Number(match[2]) > 23 || Number(match[3]) > 59 || Number(match[4]) > 59) {
     throw new Error('Invalid transaction timestamp: expected YYYY-MM-DD HH:MM:SS with optional timezone');
@@ -135,16 +102,11 @@ export function readTransactions(rows) {
     const customerId = String(row.customer_id);
     const accountId = String(row.bank_account_id);
     if (!customerId || !accountId) throw new Error('Missing customer or account ID');
-    const timestampMs = parseTransactionTimestamp(row.tx_timestamp, String(row.tx_date));
+    const timestampMs = parseTransactionTimestamp(row.tx_timestamp);
     const cents = eurosToCents(row.tx_amount_eur);
     const balanceCents = eurosToCents(row.balance_after_eur);
     const classification = categoryRules.get(normalise(row.category)) ?? ['unclassified', String(row.category).slice(0, 42)];
-    // These exact types were observed in the SHA-verified, sponsor-provided
-    // SYNTHETIC CSV. Savings sweeps/deposits are account outflows, not consumer
-    // spending. The account's reported balance must STILL include them.
-    const type = normalise(row.transaction_type);
-    const transfer = sponsorNonConsumptionTypes.has(type) ||
-      /TRANSFER|SIIRTO/i.test(String(row.transaction_type)) || normalise(row.category).includes('TRANSFER');
+    const transfer = /TRANSFER|SIIRTO/i.test(String(row.transaction_type)) || normalise(row.category).includes('TRANSFER');
     const refund = /REFUND|REVERSAL|PALAUTUS/i.test(String(row.transaction_type));
     const basket = transfer ? 'non-spending' : classification[0];
     const amountCents = basket === 'non-spending' ? 0 : cents < 0 ? -cents : refund ? -cents : 0;

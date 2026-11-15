@@ -22,24 +22,6 @@ npm run test:http
 
 `PORT=4174 npm start` selects another unprivileged localhost port. Server always binds IPv4 loopback; Host is allowlisted. Native ES modules need no installation/bundler. Build rejects stale product source metadata, checks JS syntax and static asset presence; no generated files. Stop with Ctrl-C. All runtime actions are local. Fictional citation links are explicit opt-in navigations to reserved `example.invalid` (not real evidence); they do not resolve. There are no real source websites to fetch.
 
-## Resume an earlier saved review safely
-
-RoundLens can now recover **notes only** from its own downloaded
-\`roundlens-fictional-reviewed-shortlist.json\` file. Choose the file in
-the local review panel: all original entity IDs, rounds, source citations,
-source dates, ranking and goal are rebuilt from the local fixture and compared
-against the entire original archive. Any mismatch rejects the file without
-changing the open review. The previous published product digest is explicitly
-supported **only** for the unchanged fixture/evidence contract; later unknown
-digests and external Cala exports are refused.
-
-**All imported approvals reset to unchecked**, including historical approvals.
-Reopen the source cards and reapprove before creating another export.
-The file is read locally with a 256 KiB cap, no upload, API call, browser
-storage or automatic outreach. Files from other Cala tools, altered source
-claims, stale/unknown versions and external investor data are not supported.
-This is still \`FICTIONAL_FIXTURE\`, **not an authenticated Cala integration**.
-
 ## Evidence policy
 
 - Deterministic score: 10 per supported economic round matching sector, seed stage, geography and inclusive date window. Equal scores sort by stable entity ID. Score is evidence coverage, never suitability or predicted investment willingness.

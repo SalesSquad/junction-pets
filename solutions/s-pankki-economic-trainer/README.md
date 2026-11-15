@@ -34,29 +34,7 @@ Open the locally served browser demo and select `data/customer.json` under **Ope
 
 The source schema has `customer_id`, `bank_account_id`, `tx_date`, `tx_timestamp`, `category`, `tx_amount_eur`, `balance_after_eur`, `transaction_type`, `merchant_id`, `mcc_code`. Inputs have a UTF-8 BOM and amounts must have no more than two fractional digits. Ambiguous categories are deliberately **unclassified** until an explicit reviewed rule is added. Other customer IDs in a multi-customer JSON trigger a refusal.
 
-**Historical M2 sponsor-source status (2026-11-14; superseded by verified local acquisition below):** Checked official repo at `fbdecdedf1a1f49dd641c2e6b9f2b62d0dc0cc8f`. Its LFS pointer Git blob is `a9e792b4004c0e54a96857dd72d91539124ba0be`; the referenced real CSV is 362,796,501 bytes with SHA-256 `49b3265d8e44e751de305a074dcffcda732bb79aa1e07b46fcca774ce76f1e63`. The authorized GitHub fetch returned only that pointer, and outbound GitHub raw HTTP timed out. The actual CSV contents were **not** retrieved or run. `tests/synthetic-acceptance.test.mjs` therefore contains **30 cent-exact, source-row-asserted question/answer cases on a clearly fictional sponsor-schema fixture**—useful offline product regression evidence, *not sponsor-dataset qualification*. See [SPONSOR_SOURCE.md](SPONSOR_SOURCE.md) for evidence and a reproducible sponsor check when real bytes become available.
-
-
-
-### Sponsor-synthetic source now actually qualified (15 November 2026)
-
-The official 362,796,501-byte LFS CSV was downloaded from the organizer's
-public repository, byte-verified against its SHA-256 and streamed locally:
-**3,626,755 transactions**. This exposed two actual integration defects:
-the CSV timestamps are `DDMONYY:HH:MM:SS` rather than ISO, and
-`investment_deposit` / `salary_sweep` outflows were wrongly counted as
-consumer spending. Both are corrected without changing historical balances
-or inventing category semantics. A first-source-customer, deterministic
-**581-row / 24-month** offline check matched **all 24 independent monthly
-cent totals and 533 original source-line citations**. Exact source hash,
-limitations and reproducibility are in [SPONSOR_SOURCE.md](SPONSOR_SOURCE.md).
-
-The official file is **synthetic**, not live bank/customer data. Actual
-customer identities, CSV and row examples are kept out of Git. The app's
-historical default remains its clearly labelled fictional fixture; to try
-the official cohort locally use the existing private `src/import-sponsor.mjs`
-workflow with organizer-authorized downloaded bytes. Real bank availability,
-bank API, sponsor grading and customer usability are still **unverified**.
+**M2 sponsor-source status (2026-11-14):** Checked official repo at `fbdecdedf1a1f49dd641c2e6b9f2b62d0dc0cc8f`. Its LFS pointer Git blob is `a9e792b4004c0e54a96857dd72d91539124ba0be`; the referenced real CSV is 362,796,501 bytes with SHA-256 `49b3265d8e44e751de305a074dcffcda732bb79aa1e07b46fcca774ce76f1e63`. The authorized GitHub fetch returned only that pointer, and outbound GitHub raw HTTP timed out. The actual CSV contents were **not** retrieved or run. `tests/synthetic-acceptance.test.mjs` therefore contains **30 cent-exact, source-row-asserted question/answer cases on a clearly fictional sponsor-schema fixture**—useful offline product regression evidence, *not sponsor-dataset qualification*. See [SPONSOR_SOURCE.md](SPONSOR_SOURCE.md) for evidence and a reproducible sponsor check when real bytes become available.
 
 ## Trust contract
 
@@ -70,7 +48,7 @@ bank API, sponsor grading and customer usability are still **unverified**.
 
 ## Product roadmap beyond this first working slice
 
-1. **Acquisition and one data-bound cohort completed locally on 15 November:** official source hash, two accounting fixes and 24 monthly source/cent comparisons. Still needed: independently specified ≥30 held-out questions from a disjoint sponsor-synthetic customer and classified category semantics. Existing 30 fixed Q&As are from authored fictional fixtures, not an official benchmark.
+1. Retrieve and verify sponsor's actual LFS CSV hash, validate official categories and balance semantics against one real **sponsor synthetic** customer sample, and add official-data-bound Q&A. Current 30 verified Q&As are on locally invented sponsor-schema rows only.
 2. Extend through a code-validated natural-language *intent proposal*, with model output unable to invent figures or action authority; add Finnish language and ambiguity follow-ups.
 3. Expand the current 7/14/30-day educational scenario into richer goal and recurring-commitment explorations, while continuing to separate user assumptions from actual historical evidence.
 4. Commission UX/usability tests with actual target users and mobile Safari; refine dynamic type, accessibility and visuals. Current browser visuals and local server are not a deployed S-mobiili integration.
