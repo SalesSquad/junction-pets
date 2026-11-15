@@ -58,7 +58,8 @@ For each, write strict, checkable mustInclude (2-4) and mustNotClaim (1-3), and 
 }
 
 const files = arg('cases').split(',');
-const cases = files.flatMap(f => { const s = JSON.parse(readFileSync(f, 'utf8')); return s.cases.map(c => ({ ...c, challenger: c.challenger ?? s.author })); });
+const cases = files.flatMap(f => { const s = JSON.parse(readFileSync(f, 'utf8')); return s.cases.map(c => ({ ...c, challenger: c.challenger ?? s.author })); })
+  .filter((c, i, all) => all.findIndex(x => x.id === c.id) === i); // a case listed in several files runs once
 const arms = arg('arms', 'allmodules,repair').split(','), models = arg('models', 'haiku').split(','), judges = arg('judges', 'opus,sonnet').split(',');
 const repeats = Number(arg('repeats', '2')), concurrency = Number(arg('concurrency', '8'));
 const fullSystem = companyContext(aiven);
