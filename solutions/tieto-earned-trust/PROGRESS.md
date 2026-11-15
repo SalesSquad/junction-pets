@@ -1,3 +1,32 @@
+# Portable review milestone — implemented, local handoff
+
+- Work: `J26-PF-TIETO-REVIEW-20261115`; owner: this isolated product writer.
+- Source: `2e8d16686eecc47d0bdea104b541b1af88691739`; clean baseline.
+- Branch: `codex/j26-tieto-portable-review-20261115`.
+- Exclusive edits: `solutions/tieto-earned-trust/**` only.
+- Scope: offline browser import, conservative evidence display, explicit human
+  request/refusal/demo declaration and exact-byte SHA256 export. No native edits.
+- Acceptance: `node --test solutions/tieto-earned-trust/review.test.mjs`,
+  `node --check` for owned ESM files and `git diff --check`.
+- No workers, dependencies, model calls, commits, pushes or PRs. Coordinator owns delivery.
+- Implemented: bounded exact-byte import, immutable source IDs, full literal source,
+  MP-2283 requirement mapping, pass/fail/unknown gates, compatibility disclosure,
+  green-build counterexample, required human decision/rationale and local JSON export.
+- Verification: 10/10 focused Node tests passed on Node v26.13.0; all three ESM
+  syntax checks and `git diff --check` passed. See `evidence/portable-review.json`.
+- Localhost HTTP smoke: BLOCKED, Python 3.13 `socket.bind` returned
+  `PermissionError: [Errno 1] Operation not permitted` in this managed sandbox.
+  No server remained running. No browser, download or assistive-technology pass claimed.
+- Optional native `packet.json` import intentionally unsupported; only exact run-003
+  differential bytes accepted. Neither source identity nor human identity is verified.
+- Next: coordinator exercises README walkthrough in an authorized localhost browser,
+  then owns commit/PR delivery. Work deliberately remains uncommitted and unpushed.
+- No independent review, original .NET rerun, live GitHub refresh or release claim.
+  Source/ownership admission used the work order's authenticated snapshot.
+- Design lookup: configured newcomp checkout absent; no assets/dependencies imported.
+
+---
+
 # Earned Trust continuation
 
 Stage: demonstrated native reference; private repository integration in progress.
@@ -57,3 +86,18 @@ it through its authorized merge workflow. For the challenge, use the two-minute
 walkthrough with a real named engineer, record their actual decision and measure
 review time against a plain diff. That human evaluation is the next new evidence;
 repeating unchanged native or .NET runs does not supply it.
+
+## Final coordinator correction and bounded host evidence — 15 November 2026
+
+The author-completed task source was independently read-only reviewed on the
+exact pre-correction bytes with no P0/P1/P2 identified. The coordinator then
+found a malformed closing `<option>` in `desk/index.html`, repaired the three
+review-action options and added an explicit HTML-structure negative regression.
+Ten affected Node tests, ES-module syntax and `git diff --check` passed on the
+repaired source. A separate authorized Mac Mini one-shot HTTP server returned
+200 for the four desk assets and 404 for a nonexistent path; it was stopped.
+The original sandbox socket refusal is retained as a failed environment attempt,
+not rewritten or called a browser pass. The original frozen .NET receipt is
+untouched. No real browser interaction, authenticated reviewer, sponsor
+acceptance, merge, deploy, purchase or submission. Final-source hashes are in
+`evidence/portable-final.json`, with original author receipt retained.
