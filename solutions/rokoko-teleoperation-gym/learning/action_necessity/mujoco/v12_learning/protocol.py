@@ -138,7 +138,11 @@ def paired_physical_goal_readout(trials,cohort,stage,*,all_512_initial_public_wo
     unsafe=sorted(s for s,a in paired.items() if a[candidate]["unsafe"])
     exploration_unsafe=sorted(s for s,a in paired.items() if
                    stage=="pilot" and a[arms[2]]["unsafe"])
-    stop=bool(lost or unsafe or exploration_unsafe or not novel)
+    # TRAIN-only probing cannot erase a frozen V5 real safe250tick win.
+    # The source-registered right-action probe has no supported model.
+    exploration_lost=sorted(s for s,a in paired.items() if
+                   stage=="pilot" and safe(a["frozen_v5"]) and not safe(a[arms[2]]))
+    stop=bool(lost or unsafe or exploration_unsafe or exploration_lost or not novel)
     return {"schema":"junction.rokoko.v12.preliminary-physical-goal250-readout.v1",
       "stage":stage,"totalOriginalRealEpisodes":len(trials),
       "frozenV5SafeGoals":sum(safe(a["frozen_v5"]) for a in paired.values()),
@@ -147,6 +151,7 @@ def paired_physical_goal_readout(trials,cohort,stage,*,all_512_initial_public_wo
       "candidateLostV5GoalWorldSeeds":lost,
       "candidateUnsafeWorldSeeds":unsafe,
       "explorationOnlyUnsafeWorldSeeds":exploration_unsafe,
+      "explorationOnlyLostV5GoalWorldSeeds":exploration_lost,
       "hardStopNoFurtherPhysics":stop,
       "scienceDecision":"STOP" if stop else "REVIEW_FRESH_TRAIN_EVIDENCE_ONLY",
       "goalDefinition":"original MuJoCo contact + object within 20mm for >=250 real ticks + zero unsafe",
