@@ -18,9 +18,12 @@ test('lint issue is repaired on haiku without escalation', async () => {
   assert.equal(r.route, 'haiku+repair'); assert.deepEqual(f.calls, ['haiku', 'haiku']);
 });
 
-test('personal data or high-risk proposals escalate to sonnet with reasons', async () => {
-  const f = fake(m => resp({ governance: { owner_role: 'dpo', approvals_needed: ['DPO'], data_classification: 'special_category' } }));
-  const r = await answerWithCascade({ request: 'Load patient registry rows into ClickHouse in an EU region', claude: f.claude });
+test('sensitive data stays on haiku by default; opt-in and tool-heavy requests escalate with reasons', async () => {
+  const sensitive = () => resp({ governance: { owner_role: 'dpo', approvals_needed: ['DPO'], data_classification: 'special_category' } });
+  const req = 'Load patient registry rows into ClickHouse in an EU region';
+  assert.equal((await answerWithCascade({ request: req, claude: fake(sensitive).claude })).route, 'haiku');
+  const r = await answerWithCascade({ request: req, claude: fake(sensitive).claude, escalateSensitive: true });
   assert.equal(r.route, 'sonnet'); assert.ok(r.reasons.includes('personal or special-category data'));
-  assert.deepEqual(escalationReasons(resp({ action_proposals: [{ risk: 'high' }] }), 'x', []), ['high-risk proposal']);
+  assert.deepEqual(escalationReasons(resp({ action_proposals: [{ risk: 'high' }] }), 'x', [], { escalateSensitive: true }), ['high-risk proposal']);
+  assert.deepEqual(escalationReasons(resp(), 'x', [], { toolHeavy: true }), ['tool-heavy request']);
 });
