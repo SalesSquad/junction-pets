@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.exa",
   "slug": "junction-exa",
-  "version": "0.1.3",
+  "version": "0.1.2",
   "agentName": "Exa",
   "displayName": "Exa companion",
   "company": {
@@ -69,28 +69,12 @@
         "source references, dependencies and explicitly unverified actions"
       ],
       "requiresConnection": false
-    },
-    {
-      "id": "rights-on-a-date",
-      "title": "Hand a dated rights question to the Internet Butler",
-      "description": "Prepare a bounded handoff for a question of the form 'what was I owed on that day': the person's situation in their own words, the event date and the country if stated. The package owner's Internet Butler finds the provision that applies, reads the official text as it stood on that date and as it stands today, and returns the amount with pinned official versions for the person to approve. It runs on the owner's machine: without a host connection, give the manual steps and label every amount unverified.",
-      "kind": "connection-required",
-      "inputs": [
-        "situation in the person's own words",
-        "event date",
-        "country, if stated"
-      ],
-      "outputs": [
-        "handoff proposal; when connected, the provision, the amount then and now, and the pinned official versions"
-      ],
-      "requiresConnection": true
     }
   ],
   "starterPrompts": [
     "Plan a source-backed primary-source errand finisher task for this challenge.",
     "Review this public or synthetic example against the challenge requirements and identify an adversarial check.",
-    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns.",
-    "What was I owed on the day it happened? Prepare a dated rights question for the Internet Butler from my situation and date."
+    "Prepare a bounded peer-agent handoff with input evidence, expected output, source revision and explicit unknowns."
   ],
   "sources": [
     {
@@ -108,38 +92,6 @@
       "publisher": "Junction2026 / Exa",
       "checkedAt": "2026-11-13",
       "summary": "Official challenge text captured from the signed-in participant platform on 13 November 2026. Primary-source errand finisher. Required proof and limitations are recorded in the source-bound challenge packet."
-    },
-    {
-      "id": "ecfr-api",
-      "title": "eCFR API documentation",
-      "url": "https://www.ecfr.gov/developers/documentation/api/v1",
-      "publisher": "US Office of the Federal Register",
-      "checkedAt": "2026-11-15",
-      "summary": "Official programmatic access to the Code of Federal Regulations, including the versions of a section by date. Used to read a US rule as it stood on the day of an event."
-    },
-    {
-      "id": "legislation-gov-uk-uris",
-      "title": "legislation.gov.uk URI guide",
-      "url": "https://www.legislation.gov.uk/developer/uris",
-      "publisher": "The National Archives (UK)",
-      "checkedAt": "2026-11-15",
-      "summary": "Official address scheme for UK legislation, including a provision as it stood on a given date and the note that prospective changes may not be in force."
-    },
-    {
-      "id": "eur-lex",
-      "title": "EUR-Lex",
-      "url": "https://eur-lex.europa.eu/",
-      "publisher": "Publications Office of the European Union",
-      "checkedAt": "2026-11-15",
-      "summary": "Official access to EU law and the Official Journal, with dated consolidated versions of regulations. The home page was opened on the check date; no deeper help page is cited."
-    },
-    {
-      "id": "exa-search-reference",
-      "title": "Exa search API reference",
-      "url": "https://exa.ai/docs/reference/search",
-      "publisher": "Exa",
-      "checkedAt": "2026-11-15",
-      "summary": "Official reference for the search endpoint: domain filters, published-date ranges, result categories and highlights. These are the controls the field notes on dated questions rely on."
     }
   ],
   "sourceEvidence": {
