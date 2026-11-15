@@ -69,8 +69,19 @@ class Protocol:
         return dict(synthetic_only=True, count=len(trials))
 
 
+class FakeController:
+    def __init__(self, action):
+        self.action = action
+        self.mode_history = []
+
+    def __call__(self, obs, mask):
+        self.mode_history.append('UNTRAINED_RIGHT4_EXPLORATION_ONLY'
+                                 if self.action == 4 else 'frozen_v5')
+        return self.action
+
+
 FACTORIES = {a: (lambda action=(4 if a in h.ARMS[2:] else 0):
-                  lambda: (lambda obs, mask: action))() for a in h.ARMS}
+                  lambda: FakeController(action))() for a in h.ARMS}
 
 
 class Producer:
@@ -85,7 +96,7 @@ class Producer:
         self.calls.append((seed, arm))
         unsafe = len(self.calls) == self.unsafe_at
         success = len(self.calls) != self.fail_at and not unsafe
-        action = 4 if arm in h.ARMS[2:] else 0
+        action = factory()(obs, [1]*7)
         t = dict(observation=obs, next_observation=obs, mask=[1]*7, action=action,
                  reward=1., cost=int(unsafe), done=True, contacts_cumulative=1,
                  success_info=success, dwell_ticks_current=251 if success else 0,
@@ -116,13 +127,15 @@ class HarnessTests(unittest.TestCase):
                     'final_error': .01 if win else .1,
                     'terminal_dwell_ticks': 250 if win else 0}
         rows = {(42, arm): trial(arm, arm == h.ARMS[1]) for arm in h.ARMS}
-        self.assertTrue(h.independent_science_gate(rows, 1).startswith('STOP'))
+        evidence = [{'seed': 42, 'strategy': h.ARMS[2], 'option_index': 0,
+                     'original_seven_mask': [1]*7}]
+        self.assertTrue(h.independent_science_gate(rows, evidence).startswith('STOP'))
         rows[(42, h.ARMS[2])] = trial(h.ARMS[2], True)
-        self.assertEqual(h.independent_science_gate(rows, 1),
+        self.assertEqual(h.independent_science_gate(rows, evidence),
                          'TRAIN_ONLY_SCIENCE_HYPOTHESIS_REQUIRES_NEW_REVIEW')
-        self.assertTrue(h.independent_science_gate(rows, 0).startswith('STOP'))
+        self.assertTrue(h.independent_science_gate(rows, []).startswith('STOP'))
         rows[(42, h.ARMS[3])] = trial(h.ARMS[3], False, unsafe=True)
-        self.assertTrue(h.independent_science_gate(rows, 1).startswith('STOP'))
+        self.assertTrue(h.independent_science_gate(rows, evidence).startswith('STOP'))
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -262,6 +275,20 @@ class HarnessTests(unittest.TestCase):
         factories={a:lambda:lambda obs,mask:6 for a in h.ARMS}
         with self.assertRaisesRegex(AssertionError,'POLICY_ACTION'):
             h.independent_true_physics_replay(self.private,training,rows,factories,v7,FakeEnv,signature)
+
+    def test_forged_burst_mode_history_rejected_by_replay(self):
+        self.run_original(); training,_,_,rows=self.read_full()
+        burst_key=next(key for key in rows if key[1] == h.ARMS[2])
+        rows[burst_key]['source_policy_mode_history'] = ['frozen_v5']
+        with self.assertRaisesRegex(AssertionError,'BURST_MODE_HISTORY_NOT_REPRODUCED'):
+            h.independent_true_physics_replay(self.private,training,rows,FACTORIES,v7,FakeEnv,signature)
+
+    def test_baseline_cannot_claim_burst_mode_history(self):
+        self.run_original(); training,_,_,rows=self.read_full()
+        baseline_key=next(key for key in rows if key[1] == h.ARMS[0])
+        rows[baseline_key]['source_policy_mode_history'] = ['UNTRAINED_RIGHT4_EXPLORATION_ONLY']
+        with self.assertRaisesRegex(AssertionError,'NONBURST_CANNOT_CLAIM_BURST_MODE_HISTORY'):
+            h.independent_true_physics_replay(self.private,training,rows,FACTORIES,v7,FakeEnv,signature)
 
     def test_raw_hash_tamper(self):
         self.run_original()
