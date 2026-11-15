@@ -89,7 +89,7 @@ test('100-node ring plus chords satisfies the declared domain; small and oversiz
   assert.throws(() => graphFeatures({edges: Array.from({length: 100}, (_, i) => [i, (i + 1) % 100])}), /edge list/);
   assert.throws(() => graphFeatures({edges: Array.from({length: 99}, (_, i) =>
     [1, 2, 3].map(offset => [i, (i + offset) % 99])).flat()}), /edge list/);
-  assert.throws(() => graphFeatures({edges: Array.from({length: 10609}, (_, i) => [i, i + 1])}), /edge list/);
+  assert.throws(() => graphFeatures({edges: Array.from({length: 10683}, (_, i) => [i%300,(i%300+1+Math.floor(i/300))%300])}), /edge list/);
 });
 
 test('valid logistic score has exact declared output and abstains on actor intent', () => {
@@ -120,8 +120,8 @@ test('finite coefficients that overflow the combined logit are rejected instead 
 
 test('upper node boundary and explicit abstention threshold stay enforced',()=>{
  const ring=n=>({edges:Array.from({length:n},(_,i)=>[i,(i+1)%n])});
- assert.equal(graphFeatures(ring(8355)).nodes,8355);
- assert.throws(()=>graphFeatures(ring(8356)),/edge list/);
+ assert.equal(graphFeatures(ring(8352)).nodes,8352);
+ assert.throws(()=>graphFeatures(ring(8353)),/edge list/);
  assert.equal(graphScore(sample(),model({threshold:1.000000001})).review,false);
  assert.throws(()=>graphScore(sample(),model({threshold:1.000000002})),/Model unavailable/);
  assert.throws(()=>graphFeatures({edges:[['a','b'],['a','b']]},{enforceDomain:false}),/Duplicate/);

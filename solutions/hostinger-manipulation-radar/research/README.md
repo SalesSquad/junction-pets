@@ -78,3 +78,5 @@ artifact, frozen protocol, split and exact evaluator/extractor file hashes.
 The private numeric cache is unnecessary to run the demo, and is excluded from
 Git and Docker. Fresh inference on live feeds and Hostinger deployment remain
 separate qualification steps.
+
+The measured release has 103 byte-distinct graphs after removing one exact duplicate. Active endpoints range from 100 to 8352; directed unique edges range from 206 to 10682. Runtime bounds follow this actual release audit. The frozen test has 22 graphs, with 11 of each class; performance is descriptive agreement with the provisional labels. The topology candidate produced 3/11 false positives, exceeding the 10% calibration target on held-out data. It remains experimental and does not qualify field deployment.
