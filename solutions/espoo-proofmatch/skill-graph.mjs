@@ -91,12 +91,12 @@ export function conversation(role, candidate, asOf, graph = builtin) {
 }
 
 // Language is presentation; codes and args remain inspectable facts.
-export function renderEvidence(item) {
+export function renderEvidence(item, displaySkill = id => id) {
   const a = item.args;
   switch (item.code) {
-    case 'skill_match': return `${a.skill}: exact skill label on self-provided material (${a.sources.map(s => `${s.id}, ${s.sourceType}`).join('; ')}). Proficiency is unverified.`;
-    case 'related_skill_match': return `${a.via} → ${a.skill}: a seeded transferable relation, not an exact match. Ask how the experience transfers.`;
-    case 'skill_unknown': return `${a.skill}: no eligible exact or related material supplied. Ability is unknown.`;
+    case 'skill_match': return `${displaySkill(a.skill)}: exact skill label on self-provided material (${a.sources.map(s => `${s.id}, ${s.sourceType}`).join('; ')}). Proficiency is unverified.`;
+    case 'related_skill_match': return `${displaySkill(a.via)} → ${displaySkill(a.skill)}: a seeded transferable relation, not an exact match. Ask how the experience transfers.`;
+    case 'skill_unknown': return `${displaySkill(a.skill)}: no eligible exact or related material supplied. Ability is unknown.`;
     case 'role_interest_matches_intent': return 'Candidate explicitly chose this event conversation topic. Confirm together before meeting.';
     case 'role_interest_unknown': return 'Role interest not supplied. Ask the candidate; unknown interest never hides a person.';
     case 'role_interest_other': return 'The candidate listed other event topics. Ask whether this conversation would be useful; they remain selectable.';

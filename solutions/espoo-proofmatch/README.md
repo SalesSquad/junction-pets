@@ -39,14 +39,18 @@ tab memory and vanish on reload/reset; the cache never stores meeting records.
    documentation evidence is separate from required skills.
 3. Select **Ren**. No portfolio and unknown interest remain visible; offer a
    conversation or shared exercise. Ren's authored availability has no common
-   time with either role. Lack of time does not remove the candidate.
-4. Change the event role. Candidate-declared topic interest, other stated
+   time with any role. Lack of time does not remove the candidate.
+4. Choose **Explore a repair-device prototype**. C++ is required and C# is
+   preferred. Mira's fictional C++ card does not count as C#, and Ari's C#
+   card does not count as C++; the missing label stays unknown. These are
+   distinct identifiers and self-provided examples, not verified skills.
+5. Change the event role. Candidate-declared topic interest, other stated
    interests and unknown preference are explained without filtering anyone.
    Inspect structured reasons/cautions or use the human-authored questions.
-5. Select Mira and the repair role. Choose a shared UTC time and use
+6. Select Mira and the repair role. Choose a shared UTC time and use
    **Simulate employer: Propose 15-minute meeting**. The notebook shows
    **SIMULATED · PENDING**; no candidate acceptance is implied.
-6. In the separate **Simulate candidate · Mira** controls, choose **Accept** or
+7. In the separate **Simulate candidate · Mira** controls, choose **Accept** or
    **Decline**. Either intended party can **Cancel** a pending or accepted
    proposal. Pending/accepted hold time across roles for both parties;
    declined/cancelled release it and permit a new proposal. An active pair
@@ -65,9 +69,8 @@ node --check solutions/espoo-proofmatch/skill-graph.mjs
 node --check solutions/espoo-proofmatch/event-meetings.mjs
 ```
 
-Current local result: **39 passed, 0 failed** (21 new checks plus the preserved
-18 matcher tests). All 12 local JS files also passed `node --check`. Exact scope,
-executor and unavailable HTTP/browser checks are recorded in `PROGRESS.md`.
+The original W2 result was **39 passed, 0 failed** (21 checks plus the preserved
+18 matcher tests). See `PROGRESS.md` for the latest source-specific results.
 
 The unchanged v1 `matcher.mjs` and its 18 tests remain compatibility fixtures;
 the UI uses the new `skill-graph.mjs` and `event-meetings.mjs`. V1 scheduling is
