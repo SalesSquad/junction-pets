@@ -82,7 +82,10 @@ test('public package carries no private host configuration and catalog copies on
   ]);
   assert.match(html, /Source snapshot/);
   assert.match(app, /digest: \$\('snapshot'\).value/);
-  assert.doesNotMatch(html + app, /ervamaamikael|siwc_bypass|OAI-Sites-Authorization|Bearer\s|page_[a-f0-9]{32}|\/Users\//);
+  const privateAppUrl = 'https://mikael-workspace.ervamaamikael.chatgpt.site/apps/knowledge-os/index.html';
+  assert.match(html, /Open private workspace/);
+  assert.equal(html.includes(privateAppUrl), true);
+  assert.doesNotMatch(html.replace(privateAppUrl, '') + app, /ervamaamikael|siwc_bypass|OAI-Sites-Authorization|Bearer\s|page_[a-f0-9]{32}|\/Users\//);
   assert.match(producer, /apps\/knowledge-os\/public/);
   assert.doesNotMatch(producer, /cp\([^;]*host-adapter/);
   assert.match(navigation, /publicAsset\('apps\/knowledge-os\/index.html'\)/);
