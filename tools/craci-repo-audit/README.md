@@ -23,7 +23,12 @@ Frozen bundles, rules and reports live in a dated private research prerelease
 `craci-repo-audit-20261115-01` (later batches use 02–12). Nothing is published to
 a public repository or a hosted scanning service. The source archive retains
 excluded-path reasons so incomplete coverage cannot be reported as clean code.
+Excluded-path names are hashed to avoid copying personal filenames into the
+cloud inventory. Secret candidates retain code locations, never values.
 Repositories containing owner records/archives are excluded from discovery.
+If sensitive content is discovered after publication, stop the campaign and
+use the owner's GitHub asset-deletion control with the required deletion
+approval. Tool immutability does not remove that owner recovery path.
 
 ## Bounded execution
 

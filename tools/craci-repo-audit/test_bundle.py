@@ -61,7 +61,7 @@ class SourceSnapshotBoundaries(unittest.TestCase):
         files, contents, _ = bundle.filtered_sources([("large.py", pointer)], excluded)
         self.assertFalse(files)
         self.assertFalse(contents)
-        self.assertEqual(excluded, [{"path": "large.py", "reason": "lfs-pointer-not-source"}])
+        self.assertEqual(excluded, [{"path": "[excluded-path-3b10abbfceff5c26]", "reason": "lfs-pointer-not-source"}])
 
     def test_payload_bound_includes_manifest_and_refuses_unsafe_member(self):
         with tempfile.TemporaryDirectory() as folder:

@@ -10,6 +10,9 @@ import urllib.request
 
 import cloud
 
+# Public rulepack independently retrieved before source publication on15Nov2026.
+RULEPACK_SHA256 = "ea8f32f673b7d8c80684120cad8bde59cac4e02aab7f778c89ec82e34ac44816"
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -33,9 +36,13 @@ def main():
             rules = response.read(5_000_001)
         if not 0 < len(rules) <= 5_000_000 or not rules.startswith(b"rules:"):
             raise ValueError("Unexpected public rulepack")
+        if cloud.digest(rules) != RULEPACK_SHA256:
+            raise ValueError("Public rulepack differs from the reviewed campaign digest")
         with rule_path.open("xb") as out:
             out.write(rules)
     rule_data = rule_path.read_bytes()
+    if cloud.digest(rule_data) != RULEPACK_SHA256:
+        raise ValueError("Cached public rulepack differs from the reviewed campaign digest")
     manifest.update({"schema_version": 1, "deadline": cloud.DEADLINE, "max_parallel": 10,
                      "vcpu_per_job": 8, "max_job_minutes": 45, "max_estimated_eur": 100,
                      "rules": {"asset": rule_path.name, "sha256": cloud.digest(rule_data), "bytes": len(rule_data),

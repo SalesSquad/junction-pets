@@ -131,6 +131,12 @@ def report_path(value):
     return value
 
 
+def excluded_path(value):
+    # Excluded records/assets may have personal names or IDs in their filenames.
+    # Preserve coverage counts/reasons without copying those filenames to cloud.
+    return "[excluded-path-" + hashlib.sha256(value.encode()).hexdigest()[:16] + "]"
+
+
 def secret_candidates(text, path):
     result = []
     for rule_id, pattern in SECRET_RULES:
@@ -169,7 +175,7 @@ def selected_tree(tree):
         if not reason and (len(selected) >= MAX_FILES or size + count > MAX_SOURCE):
             reason = "repository-source-bound"
         if reason:
-            excluded.append({"path": report_path(path), "reason": reason})
+            excluded.append({"path": excluded_path(path), "reason": reason})
         else:
             if not re.fullmatch(r"[a-f0-9]{40}", entry.get("sha", "")):
                 raise ValueError("Tree contains an invalid immutable blob identifier")
@@ -198,25 +204,25 @@ def filtered_sources(blobs, excluded):
     files, contents, candidates = [], {}, []
     for path, data in blobs:
         if data.startswith(b"version https://git-lfs.github.com/spec/v1\n"):
-            excluded.append({"path": report_path(path), "reason": "lfs-pointer-not-source"})
+            excluded.append({"path": excluded_path(path), "reason": "lfs-pointer-not-source"})
             continue
         if b"\0" in data:
-            excluded.append({"path": report_path(path), "reason": "binary-content"})
+            excluded.append({"path": excluded_path(path), "reason": "binary-content"})
             continue
         try:
             text = data.decode("utf-8-sig")
         except UnicodeDecodeError:
-            excluded.append({"path": report_path(path), "reason": "non-utf8-content"})
+            excluded.append({"path": excluded_path(path), "reason": "non-utf8-content"})
             continue
         if any(ord(c) < 32 and c not in "\n\r\t" for c in text):
-            excluded.append({"path": report_path(path), "reason": "non-text-content"})
+            excluded.append({"path": excluded_path(path), "reason": "non-text-content"})
             continue
         matches = secret_candidates(text, path)
         if matches:
             remaining = max(0, 5000 - len(candidates))
             candidates.extend(matches[:remaining])
             reason = "likely-secret" if remaining >= len(matches) else "likely-secret;candidate-report-bound"
-            excluded.append({"path": report_path(path), "reason": reason})
+            excluded.append({"path": excluded_path(path), "reason": reason})
             continue
         contents[path] = data
         files.append({"path": path, "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data)})
