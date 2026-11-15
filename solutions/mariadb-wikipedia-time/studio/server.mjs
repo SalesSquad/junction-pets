@@ -1,5 +1,5 @@
 import {createServer} from 'node:http';
-import {readFile} from 'node:fs/promises';
+import {readFile, stat} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {loadDataset, inspect, reverts, utc} from '../src/chronicle.mjs';
@@ -7,6 +7,7 @@ import {loadDataset, inspect, reverts, utc} from '../src/chronicle.mjs';
 // Read-only loopback studio. This is NOT an authenticated MariaDB/Wikipedia host.
 export const MAX_REQUEST_BYTES = 2048;
 export const LABEL = 'SYNTHETIC_REPLAY_NO_MARIADB';
+const mode = d => d.provenance === 'WIKIPEDIA_API_SNAPSHOT' ? 'REAL_LOCAL_SNAPSHOT_NO_MARIADB' : LABEL;
 const fixturePath = fileURLToPath(new URL('../fixtures/synthetic.json', import.meta.url));
 const assets = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
@@ -35,7 +36,9 @@ export function makeCatalog(dataset) {
     });
   }
   return {
-    status: 'OK', mode: LABEL, live: false,
+    status: 'OK', mode: mode(dataset), live: false,
+    retrieved_at:dataset.retrieved_at || null, snapshot_sha256:dataset.snapshot_sha256 || null,
+    attribution:dataset.attribution || null, window:dataset.window || null, has_more:dataset.has_more ?? null,
     dataset_id: dataset.dataset_id, dataset_license: dataset.dataset_license,
     provenance: dataset.provenance,
     pages: [...pages].map(([page_id, rows]) => {
@@ -62,7 +65,7 @@ export function evaluate(dataset, request) {
   const known = dataset.revisions.filter(r => r.ms <= now);
   return {
     ...snapshot,
-    mode: LABEL,
+    mode: mode(dataset),
     verified_live_source: false,
     suspected_reverts: reverts({...dataset, revisions: known}, request.page_id),
     as_of_boundary: request.as_of,
@@ -84,8 +87,7 @@ async function readJson(req) {
   try { return JSON.parse(Buffer.concat(parts).toString('utf8')); }
   catch { throw new Error('INVALID_JSON'); }
 }
-export function createStudioServer(dataset) {
-  const catalog = makeCatalog(dataset);
+export function createStudioServer(dataset, realSnapshot = null) {
   return createServer(async (req, res) => {
     try {
       const serverPort = req.socket.localPort;
@@ -95,13 +97,18 @@ export function createStudioServer(dataset) {
       if (req.headers.origin &&
           !allowedHost.some(h => req.headers.origin === 'http://' + h))
         return json(res, 403, {status:'REFUSED', reason:'ORIGIN_REFUSED'});
-      const pathname = new URL(req.url, 'http://127.0.0.1').pathname;
+      const url = new URL(req.url, 'http://127.0.0.1');
+      const pathname = url.pathname;
+      const selected = url.searchParams.get('source') || 'synthetic';
+      if (!['synthetic','real'].includes(selected)) return json(res,422,{status:'REFUSED',reason:'UNKNOWN_SOURCE'});
+      const active = selected === 'real' ? realSnapshot : dataset;
+      if (!active) return json(res,422,{status:'REFUSED',reason:'NO_ADMITTED_REAL_SNAPSHOT'});
       if (req.method === 'GET' && pathname === '/api/catalog')
-        return json(res, 200, catalog);
+        return json(res, 200, makeCatalog(active));
       if (req.method === 'POST' && pathname === '/api/compare') {
         if ((req.headers['content-type'] || '').split(';')[0].trim() !== 'application/json')
           return json(res, 415, {status:'REFUSED', reason:'JSON_REQUIRED'});
-        try { return json(res, 200, evaluate(dataset, await readJson(req))); }
+        try { return json(res, 200, evaluate(active, await readJson(req))); }
         catch (err) {
           const reason = err.message || 'INVALID_REQUEST';
           return json(res, reason === 'REQUEST_TOO_LARGE' ? 413 : 422,
@@ -122,9 +129,17 @@ export function createStudioServer(dataset) {
 }
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
   try {
-    const server = createStudioServer(await loadFixture());
+    const args = process.argv.slice(2);
+    if (args.length && (args.length !== 2 || args[0] !== '--snapshot')) throw new Error('USAGE: [--snapshot LOCAL_FILE]');
+    let real = null;
+    if (args.length) {
+      if ((await stat(args[1])).size > 4 * 1048576) throw new Error('SNAPSHOT_TOO_LARGE');
+      real = loadDataset(JSON.parse(await readFile(args[1], 'utf8')));
+      if (real.provenance !== 'WIKIPEDIA_API_SNAPSHOT') throw new Error('REAL_SNAPSHOT_REQUIRED');
+    }
+    const server = createStudioServer(await loadFixture(), real);
     server.listen(4177, '127.0.0.1', () => {
-      process.stdout.write('Chronicle Studio: http://127.0.0.1:4177 (synthetic, loopback only)\n');
+      process.stdout.write('Chronicle Studio: http://127.0.0.1:4177 (local read-only snapshots, loopback only)\n');
     });
   } catch (err) {
     process.stderr.write('STUDIO_START_REFUSED: ' + err.message + '\n');
