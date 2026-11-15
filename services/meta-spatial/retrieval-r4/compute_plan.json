@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "work_id": "META-LENS-R4-COVERAGE93-20261114",
+  "observed_at": "2026-11-14T20:33:32Z",
+  "executed_r4_compute": {
+    "executor": "existing authorized MacBook Pro",
+    "fit": "base R pairwise logistic ranking; CPU",
+    "features": "preserved real-image SigLIP2 features from prior A100 execution",
+    "new_gpu_instances": 0,
+    "new_persistent_volumes": 0,
+    "new_pixel_inference": false,
+    "provider_inference_calls": 0,
+    "new_cloud_compute_usd": 0,
+    "agent_token_cost_usd": null,
+    "agent_token_cost_qualification": "not provided by execution tools"
+  },
+  "historical_meta_budget_records": {
+    "original_cap_usd": 50,
+    "r2_estimated_attributed_compute_usd": 1.10677029,
+    "r3_inherited_planning_remainder_usd": 48.89,
+    "qualification": "provider quotes and historical planning records; not reconciled actual billing or a new spending grant",
+    "r2_retained_os_volume": "provider-observed deleted; old reuse-only runner cannot be used unchanged"
+  },
+  "next_gpu_experiment_proposal_not_executed": {
+    "purpose": "new image evidence for exact variants: source-bound global and regional image features with verified hard negatives",
+    "encoder": "google/siglip2-base-patch16-224",
+    "encoder_revision": "75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2",
+    "maximum_instances": 1,
+    "proposed_type": "A100 80GB / 1A100.22V",
+    "proposed_compute_limit_hours": 2,
+    "observed_quote_gpu_usd_per_hour": 2.386,
+    "observed_quote_100gb_os_usd_per_hour": 0.0274,
+    "two_hour_quote_usd": 4.8268,
+    "three_hour_guard_reserve_quote_usd": 7.2402,
+    "invoice_or_budget_reconciliation": false,
+    "availability_must_be_rechecked": true,
+    "admitted_for_launch": false,
+    "required_before_launch": [
+      "Pinned source and admitted original-image/patch manifest; crops are not new viewpoints.",
+      "Verified family-disjoint training/calibration data and a newly collected independent qualification set.",
+      "Explicit bounded new-volume ownership, retention and cleanup plan; stopping a GPU does not end storage charges.",
+      "Applicable spending authority and a source-bound controller job with an actual stop mechanism."
+    ]
+  },
+  "nvidia_skills_reviewed": [
+    "tao-generate-image-embeddings: maintain one encoder and its revision; do not silently replace pinned SigLIP2 with example SigLIP",
+    "tao-mine-nearest-neighbors: deduplicated source paths are not query/candidate score pairs",
+    "tao-run-dinov3-ssl-deft: requires a separately qualified Data Services version; not introduced into R4"
+  ],
+  "qualification": false
+}
