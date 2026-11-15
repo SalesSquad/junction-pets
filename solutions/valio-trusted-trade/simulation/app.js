@@ -3,6 +3,26 @@ const node=(tag,text,className)=>{const element=document.createElement(tag);if(t
 const labels={PASS:'Läpäisty',FAIL:'Virhe',RUNNING:'Käynnissä',NOT_RUN:'Odottava'};
 let state=null,selected='purchase',pending=false,pollTimer=null;
 const safeText=value=>typeof value==='string'?value:JSON.stringify(value);
+const euros=value=>new Intl.NumberFormat('fi-FI',{style:'currency',currency:'EUR'}).format(value/100);
+const refusalText={HOST_ASSERTION_INVALID:'Vanhentunut allekirjoitus torjuttiin.',QUOTE_EXPIRED:'Vanhentuneella tarjouksella ei voi tilata.',QUOTE_STALE:'Tarjouksen lähde on muuttunut. Vanhaa hyväksyntää ei käytetä.',IDENTITY_REVOKED:'Hyväksyjän oikeus ei ole enää voimassa. Tilaus estettiin.',CALLER_APPROVAL_MISSING:'Hyväksyntä puuttuu. Agentti ei saanut tilata.',HUMAN_APPROVAL_REQUIRED:'Tilaukselta puuttuu vaadittu hyväksyntä.',HTTP_UNAVAILABLE:'Kuittaus katosi. Toteutunut tila tarkistetaan ennen uusintaa.',HTTP_DEADLINE:'Kuittausta ei saatu ajoissa. Toteutunut tila tarkistetaan ennen uusintaa.'};
+const observation=(value,passed)=>{
+  if(!value||typeof value!=='object')return safeText(value);
+  if(value.code)return refusalText[value.code]??(passed?'Odotettu torjunta toteutui.':'Tarkistus epäonnistui.');
+  if(value.identity)return 'Testiagentin allekirjoitus tarkistettiin paikallisesti. Kaupankäynti on simuloitu.';
+  if(Number.isSafeInteger(value.totalCents))return 'Tarjous '+euros(value.totalCents)+'. Budjetti '+euros(value.budgetCents)+'. Vain tämän tarjouksen lisävaltuus '+euros(value.additionalBudgetCents)+'.';
+  if(value.status==='APPROVED')return 'Hyväksyntä koskee vain tätä tarjousta. Ostajan yleinen budjetti ei muutu.';
+  if(value.status==='REJECTED')return 'Ehdotus hylättiin. Tilausta tai maksua ei hyväksytty.';
+  if(value.missingLitres)return 'Maitoa puuttuu '+value.missingLitres.toLocaleString('fi-FI')+' litraa. Korvauksia: '+value.substitutions+'.';
+  if(value.availableLitres===0)return 'Maidon saatavuus asetettiin nollaan testikatalogissa.';
+  if(value.serverRestarted&&value.buyerRestarted)return 'Palvelin ja ostaja palautettiin samoista tallennetuista tiedoista.';
+  if(value.newSnapshot)return 'Uusi lähdeversio sai uuden hyväksynnän. Testitilaus '+value.orderId+' peruttiin lopuksi.';
+  if(value.newUnitPriceCents)return 'Testihinnaksi muuttui '+euros(value.newUnitPriceCents)+' litralta.';
+  if(Number.isSafeInteger(value.balanceCents))return 'Testilompakossa '+euros(value.balanceCents)+'. Tilauksia '+value.orders+', maksusiirtoja '+value.transfers+', palautuksia '+value.refunds+'.'+(value.journalValid?' Kirjanpito täsmää.':'');
+  if(Number.isSafeInteger(value.amountCents))return 'Erillinen testimaksu '+euros(value.amountCents)+'. Tilauksia '+value.orders+', maksusiirtoja '+value.transfers+'.';
+  if(value.orderId)return 'Testikuitti '+value.orderId+'. Luotuja tilauksia '+value.orders+'.';
+  if(value.orders!==undefined)return 'Tilauksia '+value.orders+', maksusiirtoja '+value.transfers+', palautuksia '+value.refunds+'.';
+  return passed?'Palvelun vastaus täytti tarkistuksen.':'Tarkistus epäonnistui.';
+};
 const request=async(path,body)=>{
   const response=await fetch(path,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(120000)});
   const value=await response.json();if(!response.ok)throw Error(value.error==='SIMULATION_BUSY'?'Edellinen simulaatio on vielä käynnissä.':'Ajoa ei voitu tarkistaa. Yritä uudelleen.');
@@ -41,17 +61,18 @@ function render(){
     for(const item of result.steps??[]){
       const li=node('li');li.append(node('span',item.outcome==='PASS'?'✓':'!','step-mark'+(item.outcome==='FAIL'?' fail':'')));
       const detail=node('div');detail.append(node('h3',item.title));
-      if(item.expected!==undefined)detail.append(node('p','Odotus: '+safeText(item.expected)));
-      if(item.observed!==undefined)detail.append(node('p',safeText(item.observed),'observed'));
+      if(item.expected!==undefined)detail.append(node('p','Odotus: '+(Array.isArray(item.expected)?item.expected.map(value=>refusalText[value]??value).join(' / '):safeText(item.expected))));
+      if(item.observed!==undefined){detail.append(node('p',observation(item.observed,item.outcome==='PASS')));const technical=node('details',undefined,'technical');technical.append(node('summary','Tekninen tulos'),node('pre',safeText(item.observed),'observed'));detail.append(technical);}
       li.append(detail);steps.append(li);
     }
   }else{
     const li=node('li',undefined,'empty'),detail=node('div');li.append(node('span',busy?'◌':'◎'));detail.append(node('h3',busy?'Testitoimijat suorittavat ostopolkua':'Tämä tilanne odottaa ajoa'),node('p',busy?'Tulos tulee näkyviin, kun palvelun tarkistukset valmistuvat.':'Suorita kaikki tai aja valittu skenaario.'));li.append(detail);steps.append(li);
   }
   const receipt=$('receipt');receipt.replaceChildren();receipt.hidden=!result?.summary;
-  const summaryLabels={orderId:'Testitilaus',quoteId:'Tarjous',totalCents:'Testisumma',amountCents:'Testisumma',orderCount:'Luodut tilaukset',orders:'Luodut tilaukset',transferCount:'Maksusiirrot',transfers:'Maksusiirrot',refundBalanced:'Alkusaldo palautui',walletRestored:'Alkusaldo palautui',missingLitres:'Puuttuva määrä (L)',externalProviderCalls:'Ulkoiset toimittajakutsut'};
+  const summaryLabels={orderId:'Testitilaus',quoteId:'Tarjous',totalCents:'Testisumma',budgetGapCents:'Tarjouksen lisävaltuus',orders:'Luodut tilaukset',transfers:'Maksusiirrot',refunds:'Palautukset',initialBalanceCents:'Testilompakon alkusaldo',finalBalanceCents:'Testilompakon loppusaldo',missingLitres:'Puuttuva määrä (L)',serverRestarts:'Palvelimen uudelleenkäynnistykset',lostOrderAcks:'Kadonneet tilauskuittaukset',lostPaymentAcks:'Kadonneet maksukuittaukset',advancedClockMs:'Testikellon siirto (s)',resourcesClosed:'Testiresurssit suljettu'};
   for(const [key,value]of Object.entries(result?.summary??{})){
-    const text=['totalCents','amountCents'].includes(key)&&Number.isSafeInteger(value)?new Intl.NumberFormat('fi-FI',{style:'currency',currency:'EUR'}).format(value/100):typeof value==='boolean'?(value?'Kyllä':'Ei'):safeText(value);
+    if(!Object.hasOwn(summaryLabels,key))continue;
+    const text=key.endsWith('Cents')&&Number.isSafeInteger(value)?new Intl.NumberFormat('fi-FI',{style:'currency',currency:'EUR'}).format(value/100):key==='advancedClockMs'?String(value/1000):typeof value==='boolean'?(value?'Kyllä':'Ei'):safeText(value);
     receipt.append(node('dt',summaryLabels[key]??key),node('dd',text));
   }
   const commit=state.source?.commit;
