@@ -1,0 +1,65 @@
+{
+  "accepted_coverage_measured": false,
+  "attempts": [
+    {
+      "attempt": 1,
+      "create_http_status": 400,
+      "feature_archive_verified": false,
+      "inference_calls": 0
+    },
+    {
+      "attempt": 2,
+      "create_http_status": 201,
+      "elapsed_seconds": 1231.1146819591522,
+      "execution_orchestration_commit": "5945cd900c9db81b79344ab6f41b20fc202eee43",
+      "feature_archive_verified": false,
+      "inference_calls": 1,
+      "inference_http_status": 202,
+      "paused_verified": true,
+      "provider_status_error": true,
+      "terminal_application_http_status": 404
+    }
+  ],
+  "expected_extraction_images": 6993,
+  "input_manifest_sha256": "47a015b6cf7f2ef10ff246fbf325e3f63459aa277d8ab3bd4bd6f61b4e0ce25f",
+  "new_model_fits_completed": 0,
+  "numerical_source_commit": "8948b44454f1a5dd174395e6d69e1ae8b533688b",
+  "ocr_transcription_accuracy_measured": false,
+  "planned_linear_fits": 12,
+  "planned_nonlinear_fits": 4,
+  "qualification": false,
+  "retry": {
+    "actual_itemized_cost_known": false,
+    "allocation_cap_usd": 3.0,
+    "compute": "L40S",
+    "created": false,
+    "explicit_compute_authorization_required": true,
+    "invoked": false,
+    "max_replicas": 1,
+    "provider_deadline_seconds": 3300,
+    "request_ttl_seconds": 3000
+  },
+  "schema": "meta_r8_execution_status_v1",
+  "source_sha256": {
+    ".gitignore": "4cad133d4f0a6cf4bba15f1b8bbae48d6a55f20b94f75487c51a93cc6a5af59f",
+    "README.md": "d91fbb6158350ef92210a94939e0154b5959433a6009cf228fb1eef83f49b5ea",
+    "batch_worker.py": "d055db9c988ff7e9affdb61c75eef0ec8229954fcebb3ba15e6bc14be82e203e",
+    "bootstrap.sh": "18957401b24477d052073216b96d08a3637761c0a950bd1fac028169e3c6f548",
+    "finish_training.py": "2b76f151830fd66590f2fd27352800659e21b6bfec992d20dc083223f3d2072b",
+    "nonlinear_protocol.json": "0b88c1bb51bb6aef93fa2a7eb384c187e5fc30bbed7aea59f0ab6568ab417efa",
+    "run_batch.py": "dc8054ed745370a3c9279d571e35998c42bfb6da0f4824e50ca9e59475596dd9",
+    "summarize_results.py": "f764214be87bb5ca0a1cc8f4068697b2df0f991ecfae6ce286ee9b6cbe7e4c85",
+    "train_nonlinear_features.py": "e5d2e571b1bf4c57c9cbca7599a2a6421514eb7f2c3ec885e0b4beead4eea118"
+  },
+  "status": "corrected_source_ready_retry_blocked",
+  "target_coverage_fraction": 0.93,
+  "verification": {
+    "held_out_qualification_performed": false,
+    "independent_source_review": "PASS",
+    "real_corrected_worker_execution_verified": false,
+    "source_ast_pass": true,
+    "targeted_synthetic_route_status_and_deadline_checks": "PASS"
+  },
+  "verified_extraction_images": 0,
+  "work_id": "META-LENS-R8-20261115"
+}
