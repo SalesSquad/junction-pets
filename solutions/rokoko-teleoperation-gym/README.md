@@ -2,6 +2,13 @@
 
 **Status:** executable offline training-gym milestone. **Maturity 2/6; not a Rokoko SDK or robot integration.** Main challenge [M326](https://hackjunction.app/participate/45/challenges/326), source snapshot 2026-11-14, runtime agent junction.rokoko / partnerEvidenceKey rokoko; latestClarification was null, earlier 2026-11-13 sponsor guidance read.
 
+## G1 Moves research belongs to Rokoko
+
+The separate [G1 Moves handoff](learning/G1_MOVES.md) assigns this public
+humanoid motion-data work and its offline forecast results to the Rokoko lane.
+CRACI was the compute executor for that experiment and has its own independent
+build-provenance challenge lane. No Rokoko hardware or live capture is implied.
+
 ## Real user job
 
 A robotics engineer records a fragile-object movement, sees every safe proposal and tracking anomaly, deliberately re-arms only after two fresh frames plus acknowledgement, and exports an inspectable demonstration receipt. The operator can compare reference time, path length, target error and refusals before deciding whether a demonstration is eligible for offline training. This does **not** imply that a robot moved or that fragile grasp success was achieved. It separates a clean synthetic sample from an unsafe interrupted sample.
