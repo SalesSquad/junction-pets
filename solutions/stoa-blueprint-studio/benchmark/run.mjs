@@ -11,10 +11,12 @@ export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 export const PREVIEW_SHA = '4070c5f19eb921bc08e2f5a23e957086f76abcca03fafbb8b62ca30c8a60b58d';
 export const BASE = '79d998af372c26cb05907ad9a4aa8e0662caeaf8';
 const here = dirname(fileURLToPath(import.meta.url));
+// System shared temp root: /private/tmp on macOS (realpath of /tmp), /tmp on Linux CI.
+export const PRIVATE_TMP = process.platform === 'darwin' ? '/private/tmp' : '/tmp';
 const fail = message => { throw new Error(message); };
 export async function tempPath(path) {
   const absolute = resolve(path);
-  if (await realpath(dirname(absolute)) !== '/private/tmp') fail('Output must be directly under /private/tmp');
+  if (await realpath(dirname(absolute)) !== PRIVATE_TMP) fail(`Output must be directly under ${PRIVATE_TMP}`);
   return absolute;
 }
 export async function immutableJson(path, value) {
@@ -101,7 +103,7 @@ export async function run(args) {
   const suite = JSON.parse(suiteBytes);
   if (suite.status === 'NO_REAL_HELDOUT_SOURCE') fail('NO_REAL_HELDOUT_SOURCE: no real evaluation admitted');
   const drawingPath = resolve(args[1]);
-  if (await realpath(dirname(drawingPath)) !== '/private/tmp') fail('Drawing must be directly under /private/tmp');
+  if (await realpath(dirname(drawingPath)) !== PRIVATE_TMP) fail(`Drawing must be directly under ${PRIVATE_TMP}`);
   const bytes = await boundedRead(drawingPath, DXF_LIMITS.bytes);
   // Source pin catches accidental engine changes without modifying the application.
   const appFiles = ['dxf.mjs','grounding.mjs']; const appHashes = {};

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile, unlink, stat } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { deflateRawSync } from 'node:zlib';
-import { evaluate, sha256, run, immutableJson } from './run.mjs';
+import { evaluate, sha256, run, immutableJson, PRIVATE_TMP } from './run.mjs';
 import { validateEntry, unpack, crc32, inspect, parseDirectory, MAX_RANGE } from './fetch-holdout.mjs';
 import { answerDrawing } from '../src/grounding.mjs';
 const bytes = Buffer.from('0\nSECTION\n2\nHEADER\n9\n$INSUNITS\n70\n6\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n0\nTEXT\n8\nROOM_TEXT\n1\nOffice\n10\n1\n20\n2\n0\nTEXT\n8\nROOM_TEXT\n1\nOffice\n10\n4\n20\n5\n0\nTEXT\n8\nROOM_TEXT\n1\nLobby\n10\n8\n20\n9\n0\nENDSEC\n0\nEOF\n');
@@ -63,10 +63,10 @@ test('missing answer is incorrect; unsupported answer to negative is incorrect',
 test('no real source means no real score',async()=>{
   const s=JSON.parse(await readFile(new URL('./holdout-source-v1.json',import.meta.url)));
   assert.throws(()=>evaluate(bytes,s),/NO_REAL_HELDOUT_SOURCE/);
-  await assert.rejects(run(['--drawing','/private/tmp/absent.dxf','--suite',new URL('./holdout-source-v1.json',import.meta.url).pathname,'--output','/private/tmp/no-score.json']),/NO_REAL_HELDOUT_SOURCE/);
+  await assert.rejects(run(['--drawing',PRIVATE_TMP+'/absent.dxf','--suite',new URL('./holdout-source-v1.json',import.meta.url).pathname,'--output',PRIVATE_TMP+'/no-score.json']),/NO_REAL_HELDOUT_SOURCE/);
 });
 test('CLI runs pinned application and creates private immutable report',async t=>{
-  const stem='/private/tmp/stoa-m3-test-'+randomUUID(); const input=stem+'.dxf', manifest=stem+'.suite.json', output=stem+'.result.json';
+  const stem=PRIVATE_TMP+'/stoa-m3-test-'+randomUUID(); const input=stem+'.dxf', manifest=stem+'.suite.json', output=stem+'.result.json';
   const {writeFile}=await import('node:fs/promises');
   t.after(async()=>{for(const p of [input,manifest,output])await unlink(p).catch(()=>{});});
   await writeFile(input,bytes,{flag:'wx',mode:0o600});await immutableJson(manifest,suite());
@@ -74,7 +74,7 @@ test('CLI runs pinned application and creates private immutable report',async t=
   const report=JSON.parse(await readFile(output));assert.equal(report.metrics.correct,2);assert.equal(report.app.baseCommit,'79d998af372c26cb05907ad9a4aa8e0662caeaf8');
   assert.equal((await stat(output)).mode & 0o777,0o600);
   await assert.rejects(immutableJson(output,{}),/EEXIST/);
-  await assert.rejects(immutableJson('/private/tmp/../bad.json',{}),/private\/tmp/);
+  await assert.rejects(immutableJson(PRIVATE_TMP+'/../bad.json',{}),/must be directly under/);
 });
 const entry=()=>({path:'junction-dataset-preview/data/swiss_dwellings/site2_bldg3_floor4.dxf',flags:0,method:8,compressed:10,raw:20,disk:0});
 test('archive paths, bombs, encryption and ranges reject unsafe entries',()=>{
