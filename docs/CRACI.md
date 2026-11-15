@@ -1,5 +1,23 @@
 # CRACI CI for Junction
 
+## Independent CRACI challenge lane
+
+**Logical owner:** `junction-dev-craci`. This lane owns CRACI's own
+[Best use of CRACI](https://hackjunction.app/participate/45/tech-challenges/42)
+challenge work: build provenance, SBOM completeness, advisory triage and
+reproducible fixes with source-bound evidence. The independently existing
+[synthetic SBOM review](../pets/craci/SBOM_REVIEW.md) is a starting point,
+not authenticated provenance or a vulnerability fix. The provider UI
+observation of a complete SBOM for Valio job `132303896493` is documented
+below; the SBOM bytes were not independently exported or validated.
+
+The next proposed CRACI-owned step is a synthetic transitive dependency update
+and advisory-match comparison, followed separately by obtaining and validating
+real build evidence when available. These are proposals, not running work.
+CRACI can also be the compute executor for other lanes: for example, G1 Moves
+belongs to [Rokoko's motion research](../solutions/rokoko-teleoperation-gym/learning/G1_MOVES.md).
+Provider identity does not change the research owner.
+
 ## Active owner-authorized CRACI window — 14 November 2026
 
 Work ID: `CRACI-ACTIVATE-20261114`. Mikael explicitly requested substantial use
