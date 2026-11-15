@@ -1,3 +1,5 @@
+import { siUnit } from './ifc.mjs';
+import { questionRejection } from './grounding.mjs';
 /**
  * Deterministic IFC question answering for the Stoa ifc_models templates in nine languages
  * (EN, ET, DA, NL, DE, ES, PL, RO, IT). Counts come from typed elements contained in a storey;
@@ -36,7 +38,7 @@ const AREA = /area|areal|pind|vloeroppervlakte|grundfläche|superficie|powierzch
 
 // Quoted spans: '…' (closing quote must end the span), „…“ / „…”, "…", «…».
 const quoted = q => [...q.matchAll(/'(.+?)'(?=[\s,?.]|$)|„([^“”]+)[“”]|"([^"]+)"|«\s*([^»]+?)\s*»/g)].map(m => m.slice(1).find(Boolean).trim());
-const ev = (m, e, detail) => ({ entityId: `#${e.id}`, guid: typeof e.args[0] === 'string' ? e.args[0] : null, kind: e.type, detail });
+const ev = (m, e, detail) => ({ entityId: `#${e.id}`, guid: typeof e.args[0] === 'string' ? e.args[0] : null, kind: e.type, detail, quantitySources: (m.quantities.get(e.id) ?? []).map(q => ({ entityId: `#${q.entityId}`, name: q.name, value: q.value, kind: q.kind })) });
 const ok = (answer, explanation, evidence, metric) => ({ status: 'supported', answer: String(answer), explanation, evidence, metric, inference: 'deterministic; no external model' });
 const no = reason => ({ status: 'abstained', answer: null, explanation: reason, evidence: [], metric: null, inference: 'deterministic; no external model' });
 const round = (v, d = 3) => Math.round(v * 10 ** d) / 10 ** d;
@@ -49,16 +51,20 @@ function quantity(m, e, names) {
   }
   return null;
 }
-const toSI = (m, q) => (q.kind === 'IFCQUANTITYLENGTH' ? q.value * (m.units.LENGTHUNIT?.factor ?? 1) : q.value);
+const toSI = (m, q) => {
+  const kind = { IFCQUANTITYLENGTH: 'LENGTHUNIT', IFCQUANTITYAREA: 'AREAUNIT', IFCQUANTITYVOLUME: 'VOLUMEUNIT' }[q.kind];
+  const unit = q.unitDeclared ? siUnit(q.unit) : m.units[kind];
+  return unit?.kind === kind && Number.isFinite(unit?.factor) && Number.isFinite(q.value) && q.value >= 0 ? q.value * unit.factor : null;
+};
 
 function spaceArea(m, s) {
   const q = quantity(m, s, ['NetFloorArea']);
-  if (q) return { value: toSI(m, q), source: q.source };
+  if (q) { const value = toSI(m, q); if (value != null) return { value, source: q.source }; return null; }
   const g = m.planArea(s);
   if (g != null && g > 0) return { value: g, source: 'measured plan area of the space body geometry' };
   const p = (m.props.get(s.id) ?? []).find(x => /pindala|net.?area|nettoareal|^area$/i.test(String(x.name).replace(/^\d+_/, '')));
   const v = p ? Number(String(p.value).replace(',', '.')) : NaN;
-  return Number.isFinite(v) && v > 0 ? { value: v, source: `${p.set}/${p.name} (property)` } : null;
+  return Number.isFinite(v) && v > 0 && m.units.AREAUNIT?.factor ? { value: v * m.units.AREAUNIT.factor, source: `${p.set}/${p.name} (property)` } : null;
 }
 
 /** IFC2X3 exports sanitary and light fixtures as IfcFlowTerminal; their type object tells which. */
@@ -70,7 +76,20 @@ function terminalKind(m, e) {
 }
 
 export function answerIfc(m, question) {
+  const rejected = questionRejection(question);
+  if (rejected) return no(rejected);
   const q = question.toLowerCase();
+  const propertyQuery = /^what is (?:the )?property ['"]([^'"]{1,100})['"] (?:of|on) (?:entity )?#(\d+)\??$/i.exec(question.trim());
+  if (propertyQuery) {
+    const entity = m.entities.get(Number(propertyQuery[2]));
+    if (!entity) return no('That IFC entity does not exist.');
+    const properties = (m.props.get(entity.id) ?? []).filter(p => String(p.name).toLowerCase() === propertyQuery[1].toLowerCase());
+    if (properties.length !== 1 || !['string', 'number', 'boolean'].includes(typeof properties[0].value)) return no('The property is absent, ambiguous or not a scalar source value.');
+    const p = properties[0];
+    const value = p.value;
+    return ok(String(value), `Literal stored property ${p.set}/${p.name}; units and semantics are not inferred.`,
+      [ev(m, entity, `Entity #${entity.id}`), ...(m.entities.has(p.entityId) ? [ev(m, m.entities.get(p.entityId), `${p.set}/${p.name}`)] : [])], { type: 'text', value });
+  }
   const [first, second] = quoted(question);
   const norm = s => String(s ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
   const storeyOf = name => m.storeys.find(s => norm(s.name) === norm(name))?.e;
@@ -119,12 +138,13 @@ export function answerIfc(m, question) {
     let sum = 0; const used = [];
     for (const e of items) {
       const v = kind === 'space' ? spaceArea(m, e) : (x => x && { value: toSI(m, x), source: x.source })(quantity(m, e, names));
-      if (v) { sum += v.value; used.push(e); }
+      if (v && Number.isFinite(v.value)) { sum += v.value; used.push(e); }
     }
     if (!used.length) return no(`No stored ${names.join('/')} quantities ${scope}.`);
+    if (used.length !== items.length) return no(`Incomplete ${names.join('/')} coverage: ${used.length} of ${items.length} elements have valid quantities and units.`);
     const v = round(sum, 3);
     return ok(`${v} ${unit}`, `Sum of ${names.join('/')} over ${used.length} of ${items.length} ${kind} elements ${scope}.`,
-      used.slice(0, 400).map(e => ev(m, e, kind)), { type: unit === 'm' ? 'length' : unit === 'm³' ? 'volume' : 'area', value: v, unit });
+      used.map(e => ev(m, e, kind)), { type: unit === 'm' ? 'length' : unit === 'm³' ? 'volume' : 'area', value: v, unit });
   }
 
   // Counts per storey or for the whole model.
@@ -132,7 +152,7 @@ export function answerIfc(m, question) {
     const kind = WORDS.find(([, rx]) => rx.test(question))?.[0];
     if (!kind) return no('Unsupported element class.');
     const items = elems(kind, storey);
-    return ok(items.length, `${items.length} ${kind} elements (${TYPES[kind].join('/')}) ${scope}.`, items.slice(0, 400).map(e => ev(m, e, kind)), { type: 'count', value: items.length, unit: kind });
+    return ok(items.length, `${items.length} ${kind} elements (${TYPES[kind].join('/')}) ${scope}.`, items.map(e => ev(m, e, kind)), { type: 'count', value: items.length, unit: kind });
   }
   return null;
 }
