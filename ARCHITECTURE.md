@@ -1,6 +1,6 @@
 # Junction Pets — architecture and source-of-truth map
 
-**Audience:** agents joining any company lane, integrators, reviewers and the human owner. **Scope:** the private [`SalesSquad/junction-pets`](https://github.com/SalesSquad/junction-pets) monorepo; **runtime boundary:** the separate private [`SalesSquad/chibi`](https://github.com/SalesSquad/chibi). Read [`AGENTS.md`](AGENTS.md) for mandatory development behavior and [`docs/CLOUD_DEVELOPER_PLAYBOOK.md`](docs/CLOUD_DEVELOPER_PLAYBOOK.md) for continuity.
+**Audience:** agents joining any company lane, integrators, reviewers and the human owner. **Scope:** the public [`SalesSquad/junction-pets`](https://github.com/SalesSquad/junction-pets) monorepo; **runtime boundary:** the separate private [`SalesSquad/chibi`](https://github.com/SalesSquad/chibi). Read [`AGENTS.md`](AGENTS.md) for mandatory development behavior and [`docs/CLOUD_DEVELOPER_PLAYBOOK.md`](docs/CLOUD_DEVELOPER_PLAYBOOK.md) for continuity.
 
 ## Architecture at a glance
 
@@ -32,6 +32,10 @@ Solid arrows show intended data/interface relationships, **not proof of live con
 | Chibi runtime | Separate [`SalesSquad/chibi`](https://github.com/SalesSquad/chibi) | Accounts, invitation, offers, entitlement, consent, tenant isolation, Cedar policy enforcement, real provider calls, money, private chat/memory and signed host receipts. **Never vendor its private code or credentials into this repo.** |
 
 The four files in each `pets/<company>/` package are `pet.json` (machine identity/behavior metadata), `AGENTS.md` (runtime persona and constraints), `STORY.md` (user-facing narrative and Finnish summary) and `evals.json` (six **authored**, not executed, model test definitions). Root [`AGENTS.md`](AGENTS.md) and [`ops/AGENTS.md`](ops/AGENTS.md) are **developer instructions**, not runtime prompts.
+
+## Pet-to-app discovery
+
+`apps/companion-browser-apps/catalog.json` selects browser slices from existing solutions. `lib/browser-apps.mjs` binds each app to a real pet selected by its solution manifest; product names never create new pet identities. The existing exporter retains its explicit file allowlists and adaptations. The catalog producer packages that same export under `apps/companions/` and attaches only local app links to the matching pet. This is browser-demo discovery, not adoption, authenticated runtime or a deployment. `scripts/repo-map.mjs` derives the source navigation table from the same manifests without relocating implementations.
 
 ## Identity, permissions and execution
 

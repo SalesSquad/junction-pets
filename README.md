@@ -1,6 +1,6 @@
 # Junction Company Companions
 
-**34 independently authored, versioned company companions for Junction, with one auditable monorepo and a separate Chibi runtime.** This is the private source repository [`SalesSquad/junction-pets`](https://github.com/SalesSquad/junction-pets). A companion can explain public technical documentation, inspect material supplied by its user and suggest a bounded next step. It is **not** an official company representative, endorsement, published ChatGPT agent or automatically functioning Chibi account.
+**34 independently authored, versioned company companions for Junction, with one auditable monorepo and a separate Chibi runtime.** This is the public source repository [`SalesSquad/junction-pets`](https://github.com/SalesSquad/junction-pets). A companion can explain public technical documentation, inspect material supplied by its user and suggest a bounded next step. It is **not** an official company representative, endorsement, published ChatGPT agent or automatically functioning Chibi account.
 
 
 ## Junction 2026 submission
@@ -16,6 +16,10 @@ Where to look: [`pets/`](pets) for the agents, [`plugins/`](plugins) for their s
 Everything here is an independent hackathon prototype. Company data, accounts, prices and orders in demos are synthetic, and nothing is an official company product or endorsement. What is and is not verified is listed under [Source-bound status](#source-bound-status).
 
 Start with [ARCHITECTURE.md](ARCHITECTURE.md) for boundaries, [AGENTS.md](AGENTS.md) for contributor rules, and the [cloud developer playbook](docs/CLOUD_DEVELOPER_PLAYBOOK.md) for assigning and continuing independent company work. Finnish overview: *34 yrityskohtaista, itsenäisesti laadittua kumppania; yritys- tai Chibi-julkaisua ei pidä päätellä valmiista lähdekoodista.*
+
+## Find every pet and app
+
+[Repository map](docs/REPOSITORY_MAP.md) links every pet, plugin, solution and browser app to its canonical source. The catalog pet pages now link their bundled browser apps. Regenerate the map with `node scripts/repo-map.mjs --write`; check source associations with `npm run validate`. Companion metadata, full solutions, shared services and generated exports stay in their existing directories.
 
 ## Challenge research —13 November2026
 
@@ -61,7 +65,7 @@ Historical evidence is preserved separately: W3 commit [`be3b9f6`](https://githu
 
 ## Quick start
 
-Requires Node.js 22+, npm and access to this private repository:
+Requires Node.js 22+, npm and access to this repository:
 
 ```sh
 npm ci --ignore-scripts
@@ -103,4 +107,4 @@ This repository owns independently authored companion content, the catalog, type
 
 The next recipient-facing proof is one exact version of one companion passing the full **Chibi sign-in → explicit offer acceptance → permitted activation → real bounded task → auditable receipt** path. Until then, label catalog, Council, model and adoption examples as authored/synthetic/test-only. See [CHIBI_INTEGRATION.md](docs/CHIBI_INTEGRATION.md), [JUNCTION_SUBMISSION.md](docs/JUNCTION_SUBMISSION.md), [EVENT_GUIDE.md](docs/EVENT_GUIDE.md), the [34 companions](docs/COMPANIONS.md) and [the private worker system](docs/DEVELOPMENT_SYSTEM.md).
 
-The Junction package source is private. Any challenge submission, public export, licensing change, Chibi installation, spend, merge or deployment requires its own approved workflow; a passing build is not that approval.
+The Junction package source is public. Any challenge submission, public export, licensing change, Chibi installation, spend, merge or deployment requires its own approved workflow; a passing build is not that approval.

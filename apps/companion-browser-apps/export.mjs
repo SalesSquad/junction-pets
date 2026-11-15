@@ -2,6 +2,7 @@ import {readFile, mkdir, writeFile} from 'node:fs/promises';
 import {resolve, join, dirname, isAbsolute, relative} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
+import {loadBrowserApps} from '../../lib/browser-apps.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const safe = value => typeof value === 'string' && value.length > 0 && !isAbsolute(value) && !value.split('/').some(part => !part || part === '.' || part === '..' || part.includes('\\'));
@@ -119,8 +120,7 @@ export async function exportApps(output) {
   const target = resolve(output);
   const rel = relative(root, target);
   if (!rel || (!rel.startsWith('..') && !isAbsolute(rel))) throw new Error('Export must be outside the Junction source tree');
-  const catalog = JSON.parse(await readFile(new URL('./catalog.json', import.meta.url), 'utf8'));
-  if (catalog.schemaVersion !== 1 || !Array.isArray(catalog.apps)) throw new Error('Invalid app catalog');
+  const catalog = {schemaVersion:1, apps:await loadBrowserApps(root)};
   const directories = new Set();
   for (const app of catalog.apps) {
     if (!/^junction-[a-z0-9-]+$/.test(app.petSlug) || !app.name || !safe(app.solution) || (app.source !== undefined && !(typeof app.source === 'string' && /^(solutions|apps)\/[a-z0-9-]+$/.test(app.source))) || !safe(app.directory) || !safe(app.entry) || !Array.isArray(app.files) || !app.files.includes(app.entry) || app.files.some(file => !safe(file)) || directories.has(app.directory)) throw new Error('Invalid app entry');
