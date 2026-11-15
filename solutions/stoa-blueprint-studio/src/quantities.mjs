@@ -21,12 +21,13 @@ const UNIT_LABEL = /^(Whg|App|Apt|Log|Wohnung|Appartamento|Appartement)\.?\s+([A
 
 const ev = (e, detail) => ({ entityId: e.id, layer: e.layer, kind: e.type, detail });
 const ok = (drawing, answer, explanation, evidence, metric) => ({
+  evidenceLevel: metric?.type === 'area' ? 'cross_checked' : 'derived', method: metric?.type === 'area' ? 'dxf.cross-checked-room-aggregate/v1' : 'dxf.layer-convention-quantities/v1',
   status: 'supported', answer: String(answer), explanation, metric, evidence,
   source: { filename: drawing.filename, sha256: drawing.sha256 || null, format: drawing.format, units: drawing.unitsLabel },
   inference: 'deterministic; no external model',
 });
 const no = (drawing, reason) => ({
-  status: 'abstained', answer: null, explanation: reason, metric: null, evidence: [],
+  evidenceLevel: 'unavailable', method: 'dxf.layer-convention-quantities/v1', status: 'abstained', answer: null, explanation: reason, metric: null, evidence: [],
   source: { filename: drawing.filename, sha256: drawing.sha256 || null }, inference: 'deterministic; no external model',
 });
 
@@ -195,8 +196,10 @@ export function answerQuantities(drawing, question) {
   if (what.kind === 'labelCount') {
     const target = what.label.toLowerCase();
     const hits = E.filter(e => e.layer === 'ROOM_TEXT' && e.text?.trim().toLowerCase() === target);
-    return ok(drawing, hits.length, `${hits.length} ROOM_TEXT labels read exactly “${what.label}”. Each label position is highlighted.`,
+    const result = ok(drawing, hits.length, `${hits.length} ROOM_TEXT labels read exactly “${what.label}”. Each label position is highlighted.`,
       hits.map(e => ev(e, `ROOM_TEXT: ${e.text}`)), { type: 'count', value: hits.length, unit: what.label });
+    result.evidenceLevel = 'source_observed'; result.method = 'dxf.exact-room-labels/v1';
+    return result;
   }
   const all = rooms(drawing);
   const cite = rs => [...new Map(rs.flatMap(r => r.verified.evidence).map(e => [e.entityId, e])).values()];

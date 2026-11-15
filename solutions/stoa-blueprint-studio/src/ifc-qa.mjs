@@ -39,8 +39,8 @@ const AREA = /area|areal|pind|vloeroppervlakte|grundfläche|superficie|powierzch
 // Quoted spans: '…' (closing quote must end the span), „…“ / „…”, "…", «…».
 const quoted = q => [...q.matchAll(/'(.+?)'(?=[\s,?.]|$)|„([^“”]+)[“”]|"([^"]+)"|«\s*([^»]+?)\s*»/g)].map(m => m.slice(1).find(Boolean).trim());
 const ev = (m, e, detail) => ({ entityId: `#${e.id}`, guid: typeof e.args[0] === 'string' ? e.args[0] : null, kind: e.type, detail, quantitySources: (m.quantities.get(e.id) ?? []).map(q => ({ entityId: `#${q.entityId}`, name: q.name, value: q.value, kind: q.kind })) });
-const ok = (answer, explanation, evidence, metric) => ({ status: 'supported', answer: String(answer), explanation, evidence, metric, inference: 'deterministic; no external model' });
-const no = reason => ({ status: 'abstained', answer: null, explanation: reason, evidence: [], metric: null, inference: 'deterministic; no external model' });
+const ok = (answer, explanation, evidence, metric) => ({ evidenceLevel: 'source_observed', method: 'ifc.typed-entities-and-quantities/v1', status: 'supported', answer: String(answer), explanation, evidence, metric, inference: 'deterministic; no external model' });
+const no = reason => ({ evidenceLevel: 'unavailable', method: 'ifc.typed-entities-and-quantities/v1', status: 'abstained', answer: null, explanation: reason, evidence: [], metric: null, inference: 'deterministic; no external model' });
 const round = (v, d = 3) => Math.round(v * 10 ** d) / 10 ** d;
 
 function quantity(m, e, names) {
@@ -61,7 +61,7 @@ function spaceArea(m, s) {
   const q = quantity(m, s, ['NetFloorArea']);
   if (q) { const value = toSI(m, q); if (value != null) return { value, source: q.source }; return null; }
   const g = m.planArea(s);
-  if (g != null && g > 0) return { value: g, source: 'measured plan area of the space body geometry' };
+  if (g != null && g > 0) return { value: g, source: 'measured plan area of the space body geometry', measured: true };
   const p = (m.props.get(s.id) ?? []).find(x => /pindala|net.?area|nettoareal|^area$/i.test(String(x.name).replace(/^\d+_/, '')));
   const v = p ? Number(String(p.value).replace(',', '.')) : NaN;
   return Number.isFinite(v) && v > 0 && m.units.AREAUNIT?.factor ? { value: v * m.units.AREAUNIT.factor, source: `${p.set}/${p.name} (property)` } : null;
@@ -115,7 +115,9 @@ export function answerIfc(m, question) {
     if (cands.length !== 1) return no(`Room ${first} on ${second} is ${cands.length ? 'ambiguous' : 'absent'}.`);
     const a = spaceArea(m, cands[0]);
     if (!a) return no('The space carries no stored net floor area.');
-    return ok(`${round(a.value, 2)} m²`, `Space ${first}: ${a.source}.`, [ev(m, cands[0], `IfcSpace ${first}`)], { type: 'area', value: round(a.value, 2), unit: 'm²' });
+    const result = ok(`${round(a.value, 2)} m²`, `Space ${first}: ${a.source}.`, [ev(m, cands[0], `IfcSpace ${first}`)], { type: 'area', value: round(a.value, 2), unit: 'm²' });
+    if (a.measured) { result.evidenceLevel = 'geometry_measured'; result.method = 'ifc.space-plan-area/v1'; }
+    return result;
   }
 
   const storeyName = !MODEL.test(q) && (first || second) ? (second ?? first) : null;
@@ -143,8 +145,10 @@ export function answerIfc(m, question) {
     if (!used.length) return no(`No stored ${names.join('/')} quantities ${scope}.`);
     if (used.length !== items.length) return no(`Incomplete ${names.join('/')} coverage: ${used.length} of ${items.length} elements have valid quantities and units.`);
     const v = round(sum, 3);
-    return ok(`${v} ${unit}`, `Sum of ${names.join('/')} over ${used.length} of ${items.length} ${kind} elements ${scope}.`,
+    const result = ok(`${v} ${unit}`, `Sum of ${names.join('/')} over ${used.length} of ${items.length} ${kind} elements ${scope}.`,
       used.map(e => ev(m, e, kind)), { type: unit === 'm' ? 'length' : unit === 'm³' ? 'volume' : 'area', value: v, unit });
+    result.evidenceLevel = 'derived'; result.method = 'ifc.complete-quantity-aggregate/v1';
+    return result;
   }
 
   // Counts per storey or for the whole model.

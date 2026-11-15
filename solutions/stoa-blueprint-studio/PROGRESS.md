@@ -1,3 +1,31 @@
+# Review workspace delivery — 15 Nov 2026
+
+Parent: reliability PR #325, source `36e252231c8ca094bce3db2c7031e93cc560ff7e`.
+Task branch: `codex/stoa-review-and-revisions`; only `solutions/stoa-blueprint-studio/**`.
+
+Delivered: method-based evidence levels; canonical source/engine-bound packet export and CLI
+verification; source-bound human confirmations/corrections with idempotent operations, revision
+conflicts, Undo/Redo and same-source/same-engine packet restore; DXF room/primitive and IFC GUID
+revision comparison; split/merge-aware instance metrics with a synthetic CLI example. Imported
+sources and associated reviews now expire by timer, and closing the server clears the cache.
+
+Qualification: 62 passed, 0 failed, 1 optional licensed-source skip (63 tests total), including
+80 assignment graphs compared with exhaustive independent optima. The historical benchmark CLI
+test exercises fail-closed behavior because its old pinned commit is absent in this shallow
+checkout; this is not a scored historical replay. Chromium checked confirmation, correction,
+Undo/Redo, packet download/restore, guarded revision comparison (12 -> 15 m², +3), citation
+inspection, comparison export and mobile layout without horizontal overflow or page errors.
+The existing DXF/IFC browser flow also passed during development. Both downloaded JSON packets
+passed CLI integrity checks and matched the final engine digest. JS syntax and whitespace checks
+passed. No sponsor data, inference, deployment or merge.
+
+Unsigned hashes prove consistency, not authenticity. Reviewer identities and source alignment are
+local declarations. No physical-change verification, real-data recognition score or new sponsor
+accuracy/IoU is claimed. Review state is in-memory and needs export for durable recovery. Full
+instructions, budgets, API behavior, Valmet source pins and remaining limits: `WORKSPACE.md`.
+
+---
+
 # Stoa Atlas — Current reliability delivery
 
 Base: `f64f6ac1322339ee2213737af9b00776ae67af0b`, isolated branch

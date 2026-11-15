@@ -28,3 +28,15 @@
 ## Source ownership
 
 All code lives only under `solutions/stoa-blueprint-studio/`. Shared root workspace files, legacy pets, services, CI and other challenge product slices are untouched. `solution.json` is compatible with the staged product workspace contract of integration PR #82, but no integration/merge is claimed.
+
+## Source-bound review workspace
+
+Each server instance owns its import/answer/review cache. Imports expire by timer; the server
+resolves citation IDs canonically and hashes the actual engine module bytes. `evidence.mjs`
+builds unsigned packets; `review.mjs` applies source-bound, revision-checked commands without
+mutating engine answers. Restore recomputes an answer and validates/replays the history before
+retaining it. `revisions.mjs` compares unique room IDs or IFC GUID records and uses
+`assignment.mjs` for bounded minimum-cost primitive correspondence. Declared alignment and
+physical identities remain unverified. `public/workspace.js` owns the review/compare UI through
+the same localhost API. `benchmark/instances.mjs` independently scores source memberships.
+See `WORKSPACE.md` for commands, formats, limits and design-source pins.
