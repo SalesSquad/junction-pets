@@ -32,6 +32,16 @@ archive location is `iCloud Drive/Junction/CRACI/rokoko-v12-43657058944-github-a
 the copy to iCloud has **not been independently verified**. Do not treat that
 path as evidence until byte equality to the ZIP SHA-256 above is confirmed.
 
+The companion [`trajectory-sha256.json`](trajectory-sha256.json) is a **public
+identifier/hash index only**: 48 `(seed, world_hash)` entries and 144 exact
+`(seed, strategy, full_transition_sha256)` entries from the verified originals.
+Its canonical sorted compact JSON SHA-256 is
+`24460b2ed49635b33db66233dd854f84593e6f65484cde229ee17ec483dd0245`.
+No raw 18D observations, masks, actions, private logs, or reward traces are
+committed in this index. V13 can check deterministic regeneration against
+these hashes; hashes **do not** establish unobserved action counterfactuals,
+nor are they model training labels.
+
 ## Recomputed original outcome
 
 | Contract / result | Recomputed value |
@@ -81,6 +91,8 @@ python3 -m unittest discover -s scripts/craci \
   -p test_audit_rokoko_mujoco_v12_pilot.py -q
 python3 scripts/craci/audit_rokoko_mujoco_v12_pilot.py \
   /private/scratch/original-artifact.zip /private/scratch/extracted \
+  --verify-trajectory-index \
+  docs/craci/learning/rokoko-mujoco-v12-43657058944/trajectory-sha256.json \
   --output-summary /private/scratch/v12-original-recomputed.json
 sha256sum /private/scratch/v12-original-recomputed.json
 ```
@@ -89,7 +101,8 @@ For the frozen original artifact, the canonical emitted summary SHA-256 is
 `95e758a454bce9cdc806eddbf7d47daa2715b6bae069d5736fca46dea6d1d2f8`.
 The output path must be new and outside the original evidence tree; the script
 uses exclusive creation and refuses to overwrite source evidence. On any
-identity, source-head, mask, 512-seed selection, event-chain, raw SHA, goal250,
+identity, source-head, mask, 512-seed selection, trajectory-index drift,
+event-chain, raw SHA, goal250,
 unsafe/abstain, or result mismatch, the verifier fails closed.
 
 ### Receipt chronology and limitations
