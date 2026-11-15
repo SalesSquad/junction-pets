@@ -51,7 +51,46 @@ POLICIES = {
                   "SPREAD_MARGIN_FLOOR": "240", "SPREAD_MARGIN_BACKLOG": "0", "SPREAD_ADMISSION_EXTRA_SLACK": "0",
                   "SPREAD_MARGIN_BASE_BPS": "13200"},
 }
+_V360 = POLICIES["vol360"]
+POLICIES.update({
+    # Runtime switch controller (normal = vol360, tight 480/240, loose 240/0 Wed..Fri 12:00).
+    "switch": {**_V360, "SPREAD_MARGIN_SWITCH": "1"},
+    # The weekend is not slack: subtract Sat..Mon 07:00 and require 240 min more.
+    "v360wk240": {**_V360, "SPREAD_MARGIN_WEEKEND_EXTRA": "240"},
+    "switch_wk": {**_V360, "SPREAD_MARGIN_SWITCH": "1", "SPREAD_MARGIN_WEEKEND_EXTRA": "240"},
+    # Typed-decision model rules on borderline requests (vol360 refused, loose floor passed).
+    "ai_jev": {**_V360, "SPREAD_MARGIN_AI": "jev"},
+    "ai_openai": {**_V360, "SPREAD_MARGIN_AI": "openai"},
+    "v360wk480": {**_V360, "SPREAD_MARGIN_WEEKEND_EXTRA": "480"},
+    # Subtract the weekend from slack, no extra buffer beyond the normal gates.
+    "wk_sub": {**_V360, "SPREAD_MARGIN_WEEKEND_EXTRA": "1"},
+    "switch_wk_t96": {**_V360, "SPREAD_MARGIN_SWITCH": "1", "SPREAD_MARGIN_WEEKEND_EXTRA": "240",
+                      "SPREAD_MARGIN_SWITCH_TIGHT_SHARE": "0.96"},
+    # The typed model may refuse gate-passing orders whose window spans the weekend.
+    "risk_jev": {**_V360, "SPREAD_MARGIN_AI_RISK": "jev", "SPREAD_MARGIN_AI_MAX": "900",
+                 "SPREAD_MARGIN_AI_ACCEPT": "0.5"},
+    "risk_openai": {**_V360, "SPREAD_MARGIN_AI_RISK": "openai", "SPREAD_MARGIN_AI_MAX": "900",
+                    "SPREAD_MARGIN_AI_ACCEPT": "0.5"},
+})
 
+# Grid around the weekend gate: slack floor x next-day buffer x weekend buffer (vol360 otherwise).
+for _f in (300, 360):
+    for _n in (120, 240):
+        for _w in (240, 480):
+            POLICIES[f"g{_f}n{_n}w{_w}"] = {**_V360, "SPREAD_MARGIN_FLOOR": str(_f),
+                                             "SPREAD_ADMISSION_EXTRA_SLACK": str(_n),
+                                             "SPREAD_MARGIN_WEEKEND_EXTRA": str(_w)}
+for _w in (240, 480):
+    POLICIES[f"g360n120w{_w}nd"] = {**_V360, "SPREAD_MARGIN_WEEKEND_EXTRA": str(_w),
+                                    "SPREAD_MARGIN_WEEKEND_KINDS": "next_day"}
+# Weekend gate only while the world's service is under pressure.
+POLICIES["wkp96"] = {**_V360, "SPREAD_MARGIN_WEEKEND_EXTRA": "240", "SPREAD_MARGIN_WEEKEND_IF_BELOW": "0.96"}
+POLICIES["wkp975"] = {**_V360, "SPREAD_MARGIN_WEEKEND_EXTRA": "240", "SPREAD_MARGIN_WEEKEND_IF_BELOW": "0.975"}
+POLICIES["wkp96w6"] = {**_V360, "SPREAD_MARGIN_WEEKEND_EXTRA": "240", "SPREAD_MARGIN_WEEKEND_IF_BELOW": "0.96",
+                       "SPREAD_MARGIN_WEEKEND_WARN_ABOVE": "0.06"}
+# Guard: weekend gate + tight mode under service pressure, never loose.
+POLICIES["guard_wk"] = {**_V360, "SPREAD_MARGIN_SWITCH": "1", "SPREAD_MARGIN_SWITCH_LOOSE": "0",
+                        "SPREAD_MARGIN_WEEKEND_EXTRA": "240"}
 
 def main() -> None:
     seed, policy = sys.argv[1], sys.argv[2]
