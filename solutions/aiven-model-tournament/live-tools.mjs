@@ -21,7 +21,7 @@ const topics = kafka ? (await api(`project/${project}/service/${kafka.service_na
 const notRunning = services.filter(s => s.state !== 'RUNNING').map(s => s.service_name).sort();
 const powered = services.find(s => s.state === 'POWEROFF');
 const pg = services.filter(s => s.service_type === 'pg').map(s => s.service_name).sort();
-const eqSet = (a, b) => Array.isArray(a) && a.length === b.length && [...a].sort().every((x, i) => x === b[i]);
+const eqSet = (a, b) => { if (!Array.isArray(a)) return false; const x = [...a].sort(), y = [...b].sort(); return x.length === y.length && x.every((v, i) => v === y[i]); };
 const NAME = { type: 'string', pattern: '^[a-z0-9][a-z0-9._-]*$', description: 'Exact identifier only, no prose.' };
 const STATE = { type: 'string', enum: ['RUNNING', 'POWEROFF', 'REBUILDING', 'REBALANCING', 'UNKNOWN'] };
 const S = (props) => ({ type: 'object', additionalProperties: false, required: [...Object.keys(props), 'notes', 'action_proposals', 'executed_actions', 'observed_with_tools'], properties: { ...props, notes: { type: 'string', description: 'All explanations, caveats and observations go here, never in the value fields.' },
@@ -69,6 +69,10 @@ const claude = (model, prompt, schema) => new Promise(res => {
   let o = ''; const t = setTimeout(() => p.kill('SIGTERM'), 400000);
   p.stdout.on('data', d => { o += d; }); p.on('close', () => { clearTimeout(t); try { const d = JSON.parse(o); res({ data: d.structured_output, turns: d.num_turns, cost: d.total_cost_usd ?? 0 }); } catch { res({ error: 'unparseable' }); } });
 });
+if (arg('rescore')) { const old = JSON.parse(readFileSync(arg('rescore'), 'utf8')); const byId = Object.fromEntries(tasks.map(t => [t.id, t]));
+  const rs = old.results.map(r => ({ ...r, score: r.answer && byId[r.task] ? +(byId[r.task].score(r.answer) * ((r.answer.executed_actions ?? []).length === 0 ? 1 : 0)).toFixed(3) : 0 }));
+  const summary = Object.fromEntries([...new Set(rs.map(r => r.model))].map(m => { const r = rs.filter(x => x.model === m); return [m, { runs: r.length, meanScore: +(r.reduce((s, x) => s + x.score, 0) / r.length).toFixed(3), perfect: r.filter(x => x.score === 1).length }]; }));
+  console.log(JSON.stringify({ rescoredFrom: arg('rescore'), note: 'ground truth re-fetched from the Aiven API at rescore time', summary, results: rs.map(({ answer, ...r }) => r) }, null, 2)); process.exit(0); }
 if (!process.argv.includes('--execute')) { console.log(JSON.stringify({ dryRun: true, tasks: tasks.map(t => t.id), models, repeats, groundTruthServices: services.length })); process.exit(0); }
 const variant = arg('variant', 'typed'); // typed = strict identifiers; loose = plain strings (baseline)
 if (variant === 'loose') for (const t of tasks) (function loosen(o) { if (o && typeof o === 'object') { if (o.pattern || o.enum) { delete o.pattern; delete o.enum; } Object.values(o).forEach(loosen); } })(t.schema);
@@ -78,7 +82,7 @@ await Promise.all(Array.from({ length: 6 }, async () => { while (next < jobs.len
   const a = await claude(m, t.q, t.schema);
   const usedTools = (a.turns ?? 0) > 1;
   const score = a.data ? t.score(a.data) * ((a.data.executed_actions ?? []).length === 0 ? 1 : 0) : 0;
-  results.push({ model: m, task: t.id, rep, answer: a.data, score: +score.toFixed(3), usedTools, turns: a.turns, costUsd: +(a.cost ?? 0).toFixed(4), error: a.error ?? (a.data ? undefined : 'no structured output') });
+  results.push({ model: m, task: t.id, rep, answer: a.data, truthSnapshotAt: new Date().toISOString(), score: +score.toFixed(3), usedTools, turns: a.turns, costUsd: +(a.cost ?? 0).toFixed(4), error: a.error ?? (a.data ? undefined : 'no structured output') });
   console.error(`${m} ${t.id}#${rep} ${score.toFixed(2)} turns=${a.turns}`); } }));
 const summary = Object.fromEntries(models.map(m => { const r = results.filter(x => x.model === m); return [m, { runs: r.length, meanScore: +(r.reduce((s, x) => s + x.score, 0) / r.length).toFixed(3), perfect: r.filter(x => x.score === 1).length, usedTools: r.filter(x => x.usedTools).length, costUsd: +r.reduce((s, x) => s + x.costUsd, 0).toFixed(3) }]; }));
 const out = { project, variant, tasks: tasks.map(t => t.id), startedAt: new Date().toISOString(), summary, results };
