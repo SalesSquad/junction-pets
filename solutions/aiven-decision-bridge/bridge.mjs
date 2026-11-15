@@ -37,8 +37,8 @@ export function validateResponse(r, schema = 'governance' in (r ?? {}) ? RESPONS
 }
 
 // One Chibi PendingAction per proposal. Identity/authority values come from the host.
-export function toPendingActions(response, ctx) {
-  const errors = validateResponse(response);
+export function toPendingActions(response, ctx, opts = {}) {
+  const errors = validateResponse(response, undefined, opts);
   if (errors.length) throw new TypeError('invalid companion response: ' + errors.join('; '));
   return response.action_proposals.map((p, i) => {
     const payload = canonical({ operation: p.operation, target: p.target, parameters: p.parameters });

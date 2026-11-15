@@ -4,6 +4,13 @@ Päiväys 14.11.2026. Lähtötaso mitattu haarassa `agent/junction-aiven-stack-c
 (viimeisin `38a87ae`). Kaikki mittaukset ovat kehittäjämittauksia Claude CLI:llä, eivät Chibi-isännän
 tai Aiven AI gatewayn ajoja.
 
+## Tila 15.11.2026
+
+Vaihe 1 ajettu, tulokset: [`RESULTS-20261115-phase1.md`](../../solutions/aiven-model-tournament/RESULTS-20261115-phase1.md).
+Turvallisuusportti täyttyy. Haiku + korjaus täyttää WS3:n kustannustavoitteen. WS2 (84–90 %) ja WS4 (Haiku 0,91)
+ovat lähellä mutta eivät vielä täytä porttia. Kolmas arvioija odottaa AI gatewayn pääsyä. Pilotit (WS6) aloitettu
+etuajassa: Valio 62,5 % → 93,8 %, S-Pankki 75 % → 75 %, AstraZeneca 68,8 % → 75 %.
+
 ## 1. Lähtötaso ja tavoite
 
 | Mittari | Nyt (uusi lukematon 5 haastajan sarja) | Kierroksen tavoite |

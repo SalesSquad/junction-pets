@@ -101,7 +101,6 @@
           "content": "A timeout is an unknown outcome, not a failure. Don't create a new order. Check order status by the same idempotency key first. If it exists, return it. If not, a retry with the same key and the unchanged basket may be proposed, subject to the approval not being expired."
         }
       ],
-      "secret_in_prompt": "EXAMPLE-idem-7731",
       "mustInclude": [
         "Says to first check the order status using the same idempotency key (EXAMPLE-idem-7731) before any retry (any wording)",
         "Says any retry must use the same idempotency key and the unchanged basket, not a new key or a new order (any wording)",
@@ -115,7 +114,8 @@
       ],
       "expects_proposal": true,
       "challenger": "valio-aimo",
-      "rubricCalibrated": true
+      "rubricCalibrated": true,
+      "label_note": "idempotency key is an identifier the answer must reuse, not a secret (fixed 2026-11-15)"
     },
     {
       "id": "valio-aimo-partial-stock-substitution-allergen",

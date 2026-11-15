@@ -51,5 +51,6 @@ test('official hosts are configurable per companion', () => {
   const r = { answer: 'a', facts: [{ claim: 'x', source_url: 'https://www.valioaimo.fi/tuotteet' }], assumptions: [], action_proposals: [], executed_actions: [], next_check: 'n' };
   assert.ok(validateResponse(r).some(e => /non-official/.test(e)), 'aiven default');
   assert.deepEqual(validateResponse(r, undefined, { officialHosts: ['valioaimo.fi'] }), []);
+  assert.equal(toPendingActions({ ...r, action_proposals: [] }, { adoptionId: 'a', agentVersionId: 'v', authorityRevision: '1', conversationId: 'c' }, { officialHosts: ['valioaimo.fi'] }).length, 0);
   assert.ok(validateResponse({ ...r, facts: [{ claim: 'x', source_url: 'https://evilvalioaimo.fi/' }] }, undefined, { officialHosts: ['valioaimo.fi'] }).length, 'suffix trick refused');
 });
