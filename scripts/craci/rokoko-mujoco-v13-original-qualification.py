@@ -636,7 +636,7 @@ def independent_true_physics_replay(private, training, rows, factories, v7,
 
 
 def admission(env, now):
-    require(env.get("CRACI_WORKLOAD") == "rokoko-mujoco-v13-original" and
+    require(env.get("CRACI_WORKLOAD") == "rokoko-mujoco-v13-pilot" and
             env.get("CRACI_CREDIT_WINDOW_OPEN") == "true" and
             float(env.get("CRACI_CREDIT_REMAINING_SECONDS", "0")) >= 3600 and
             now + 3600 <= CUTOFF and
