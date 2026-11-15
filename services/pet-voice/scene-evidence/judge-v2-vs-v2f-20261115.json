@@ -1,0 +1,39 @@
+{
+  "schema": "junction.pet-voice.blind-judge/v1",
+  "date": "2026-11-15",
+  "judge": "Claude Haiku as cloud subagents (blind X/Y, both orders, no tools)",
+  "question": "Score each transcript 1-10 on distinct, not_generic, natural, listen, ensemble; pick a winner; quote the 3 worst lines.",
+  "arms": {
+    "v2": "scene-<id>-text-v2-20261115 (#223 engine, before the #228 quality fixes)",
+    "v2f": "scene-<id>-text-v2f-20261115 (#228: shape-based tic checks, non-sequitur test, fading callbacks, habit ledger, balanced director; Gemini 3.5 Flash-Lite writer, OpenAI fallback off)"
+  },
+  "judgments": [
+    {"scene": "robot-dog-stage", "X": "v2", "Y": "v2f", "winner": "v2f",
+     "scores": {"v2": [6, 4, 5, 5, 5], "v2f": [7, 6, 7, 6, 7]},
+     "verdict": "v2f reads more like a group; v2 is a fire-and-tea routine with unconnected stat jokes."},
+    {"scene": "robot-dog-stage", "X": "v2f", "Y": "v2", "winner": "v2",
+     "scores": {"v2f": [6, 5, 6, 6, 8], "v2": [7, 5, 6, 7, 7]},
+     "verdict": "v2's Arduino/Atech bickering escalates; v2f's NVIDIA lines are abstract filler."},
+    {"scene": "demo-crash-0312", "X": "v2", "Y": "v2f", "winner": "v2",
+     "scores": {"v2": [7, 6, 6, 6, 8], "v2f": [6, 5, 5, 6, 7]},
+     "verdict": "v2's lines answer each other (waltz, rhythm debate); v2f's DeepMind line is a brochure flourish."},
+    {"scene": "demo-crash-0312", "X": "v2f", "Y": "v2", "winner": "v2",
+     "scores": {"v2f": [7, 6, 6, 6, 6], "v2": [6, 5, 7, 7, 8]},
+     "verdict": "v2 wins on ensemble and listenability; v2f has tidy one-liners that mostly don't answer each other."},
+    {"scene": "lunch-cheating", "X": "v2", "Y": "v2f", "winner": "v2f",
+     "scores": {"v2": [8, 6, 5, 7, 8], "v2f": [7, 6, 8, 8, 6]},
+     "verdict": "v2f builds on itself (magic-trick callback, ditch callback); neither answers the cheating question or the admission."},
+    {"scene": "lunch-cheating", "X": "v2f", "Y": "v2", "winner": "v2f",
+     "scores": {"v2f": [8, 7, 7, 8, 7], "v2": [7, 6, 7, 7, 8]},
+     "verdict": "v2f narrowly: sharper voices and a real callback; v2 spreads lines evenly but leans on mixed metaphors."}
+  ],
+  "scoreOrder": ["distinct", "not_generic", "natural", "listen", "ensemble"],
+  "summary": {
+    "v2f_wins": 3, "v2_wins": 3,
+    "mean_total_of_50": {"v2f": 32.7, "v2": 32.0},
+    "mean": {"v2f": {"not_generic": 5.83, "natural": 6.5, "ensemble": 6.83}, "v2": {"not_generic": 5.33, "natural": 6.0, "ensemble": 7.33}},
+    "metrics_v2f": "0 open problems and 0 non-sequitur lines in all three scenes; 1 and 2 callbacks used (demo-crash, lunch)",
+    "lesson": "The #228 checks removed the measurable faults, but a blind judge sees no overall gain (3/6, 32.7 vs 32.0). The owner also rated baseline vs v2 audio as ties (2/2). The limit is no longer tics: scenes ignore their own beats (no one answers the cheating question or the admission), DeepMind still opens with 'Fascinating.', NVIDIA drifts into brochure abstraction, and Bahn said Danish 'Rytmen' in a German line.",
+    "next": ["beat obligations: the line after a beat must react to it", "per-pet signature-opener cooldown across scenes", "language-purity check for Latin-script borrowings"]
+  }
+}

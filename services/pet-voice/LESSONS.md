@@ -72,6 +72,23 @@ _Updated 2026-11-15T06:32:17Z from 4 run(s), 78/78 turns ok._
   passed first time. The free tier gives each TTS model only ~10–15 calls a day, so the
   designed voice's own model goes first and Live (separate quota) voices fixed transcripts
   for listening tests: 40 lines, fidelity 0.99. (2026-11-15)
+- **Fixing the measurable faults did not make better scenes.** With the #228 checks, v2f had 0
+  open problems and 0 non-sequiturs, but a blind judge split 3/6 against v2 (mean 32.7 vs
+  32.0 of 50; v2 won the crash scene 2/2, v2f lunch 2/2). The owner rated baseline vs v2 audio
+  as ties, 2/2. The limit now is story, not tics: nobody answers the lunch question or reacts
+  to the admission beat, DeepMind still opens with "Fascinating.", NVIDIA drifts into brochure
+  abstraction, and Bahn said Danish "Rytmen" in a German line. Next: beat obligations (the line
+  after a beat must react to it), a cross-scene cooldown for signature openers, and a
+  language-purity check for Latin-script borrowings. `scene-evidence/judge-v2-vs-v2f-20261115.json`.
+  (2026-11-15)
+- **Voice design previews are mostly English.** Transcribing six previews: only Bahn (German)
+  and Featherless (Japanese) spoke their own language; Rokoko (Danish), Aalto (Finnish) and
+  Wendy (Spanish) spoke English. A 👍/👎 on a preview judges timbre, not the language; judge
+  language on scene lines. Designed voices work on `gemini-3.8-flash-tts` and
+  `gemini-3.8-flash-lite-tts` only (3.1-flash-tts-preview returned 500, 2.5-flash-preview-tts
+  rejects the voice id), and on this free key each of the two stopped after ~8–10 calls on
+  15 Nov. So one day buys about 18 designed-voice lines: 8 of the 10 crash-scene lines and 6
+  A/B lines got voiced; the rest waits for the next reset. (2026-11-15)
 - **A paid fallback must stay last by construction.** OpenAI is now the final step for speech
   and text, but the learning loop ranks models by reliability, and OpenAI would soon win and
   become the default spend. `model_order()` therefore always appends `openai:` models after
