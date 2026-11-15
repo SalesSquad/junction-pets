@@ -35,5 +35,16 @@ of the collection subset used: documents and indexes written, reopen/rehydrate, 
 idempotency and revision rules, `WatchService` on the store, error handling that never leaks the
 URI, and a missing-driver message. The `mongodb` import shape (`{MongoClient}`) was checked in a temp dir.
 
+## Verified against a real MongoDB server (15 Nov 2026)
+On the owner's MacBook Pro, `mongo:8` (server 8.3.17) in OrbStack on 127.0.0.1, official `mongodb`
+driver, source main `7f5cfde`. One script created a watch for the MX Master 3S, ran it once live
+(Context.dev search `af3b8453-d6b9-4121-9042-0977942ae360` and two scrapes
+`6024fdba-991f-4408-8100-9fab83e6b94b`, `1179c863-4a78-46aa-9676-2a8b792b1f8c`, 2 offers), closed
+the store, reopened it from MongoDB and got the same watch back with 1 run and 5 events. Collections
+after the run: watches 1, runs 1, events 5, budgets 1. Indexes as designed: `{status,nextAt}`,
+`{token}`, events `{watchId,_id}` and a TTL index on `expireAt`. Total 19.6 s.
+
 ## Not yet verified
-No live Atlas run has been done. That needs the owner's Atlas account and connection string.
+No run against MongoDB **Atlas** itself; the same code only needs an Atlas `MONGODB_URI`, which needs
+the owner's Atlas account. Note: in this monorepo `npm i --no-save mongodb` installs at the workspace
+root, which Node still resolves from the solution directory.

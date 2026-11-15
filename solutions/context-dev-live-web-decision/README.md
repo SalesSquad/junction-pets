@@ -55,7 +55,7 @@ shown as "no coverage"). Same key handling as scrape: server-side
 `CONTEXT_DEV_API_KEY` only, fixed host, no caller-supplied domain or query.
 Without a key the page shows the saved capture and "news not retrieved".
 Only reduced headline metadata is kept (no authors, images or key metadata).
-**News Search is fixture-tested only; it has no recorded live run yet.**
+News Search has a recorded live run (LIVE_EVIDENCE.md, 15 Nov 2026); Context.dev has little news coverage for these two retailers.
 
 ## Product watches
 

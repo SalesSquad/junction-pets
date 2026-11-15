@@ -49,7 +49,10 @@ export function createLiveService({apiKey=process.env.CONTEXT_DEV_API_KEY,captur
       try {
         // News has its own 15-minute TTL so price refreshes do not re-buy headlines.
         const newsDue=SOURCES.filter(s=>{const n=newsById.get(s.id);return !n||n.status==='ERROR'||!n.receivedAt||now()-Date.parse(n.receivedAt)>=newsTtlMs;});
-        const [outcomes,newsOutcomes]=await Promise.all([Promise.allSettled(SOURCES.map(s=>scrape(s.id,{apiKey}))),Promise.allSettled(newsDue.map(s=>news(s.id,{apiKey})))]);
+        // Context.dev keys can be concurrency-limited (observed live 15 Nov 2026: x-ratelimit-mode concurrency, limit 2),
+        // so the two scrapes run first and News Search only after they settle; never four requests at once.
+        const outcomes=await Promise.allSettled(SOURCES.map(s=>scrape(s.id,{apiKey})));
+        const newsOutcomes=await Promise.allSettled(newsDue.map(s=>news(s.id,{apiKey})));
         newsOutcomes.forEach((o,i)=>{
           const s=newsDue[i];
           if(o.status==='fulfilled')newsById.set(s.id,o.value);

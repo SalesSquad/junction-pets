@@ -25,7 +25,7 @@ nothing is purchased.
 | Endpoint | Why | Live run? |
 |---|---|---|
 | `POST /v1/web/scrape` (markdown + JSON-LD, `maxAgeMs:0`) | Core flow: fresh retailer product pages; price/identity come from publisher JSON-LD | **Yes**, recorded in [LIVE_EVIDENCE.md](LIVE_EVIDENCE.md) and [watch/EVIDENCE.md](watch/EVIDENCE.md) |
-| `POST /v1/news/search` (entity by domain, newest, 30 days, limit 5) | Retailer-risk signal next to each offer (insolvency, layoffs, recall, breach, strike, closure, delivery, regulator action). Advisory: never changes the price ranking | **No: fixture-tested only** (`live/news.test.mjs`). Needs one live run with the owner's key before submission |
+| `POST /v1/news/search` (entity by domain, newest, 30 days, limit 5) | Retailer-risk signal next to each offer (insolvency, layoffs, recall, breach, strike, closure, delivery, regulator action). Advisory: never changes the price ranking | **Yes**, 15 Nov 2026 08:29 EET, see [LIVE_EVIDENCE.md](LIVE_EVIDENCE.md#retailer-news-live-run-15-november-2026): Gigantti returned no articles in the 30-day window, Proshop is not a known company (404 → "no news coverage") |
 | `POST /v1/web/search` | Watches: find candidate product pages at selected retailers | Yes, [watch/EVIDENCE.md](watch/EVIDENCE.md) |
 | `GET /v1/web/urls` (map) | Watches: optional catalogue expansion for one retailer | Yes, [watch/EVIDENCE.md](watch/EVIDENCE.md) |
 | `POST /v1/web/answers` | Watches: explicit "Research alternatives" (advisory) | Yes, [watch/EVIDENCE.md](watch/EVIDENCE.md) |
@@ -35,10 +35,14 @@ News contract source: <https://docs.context.dev/api-reference/news/search.md>,
 <https://docs.context.dev/news/filter-and-sort.md>, costs at
 <https://docs.context.dev/account/credits.md>.
 
-**Before submitting:** start the server with the owner's key, click Refresh
-once and record both news request IDs and statuses (or the `NO_COVERAGE` /
-error code) in LIVE_EVIDENCE.md. If news returns 404 for a retailer domain,
-the card says "no news coverage" and the price flow is unaffected.
+**What the live run showed.** News Search works end to end, but Context.dev has
+almost no coverage for these two Finnish retailers, so in the demo the news
+blocks will say "no recent news" (Gigantti) and "no news coverage" (Proshop).
+Present it as the risk check that stays quiet when there is nothing to read,
+or pin a retailer with coverage if you want a flagged headline on stage.
+The live key is limited to **2 concurrent requests** (`x-ratelimit-mode:
+concurrency`) and had about 900 credits left, so SupplyPulse now runs the two
+scrapes first and the news calls after them; keep demo refreshes few.
 
 **Boundaries.** Key is server-side only (`CONTEXT_DEV_API_KEY`), fixed HTTPS
 host, pinned sources/domains, no caller URLs, single-flight refresh, 10 s
