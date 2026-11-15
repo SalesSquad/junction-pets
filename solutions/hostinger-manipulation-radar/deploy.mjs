@@ -2,7 +2,10 @@ import {lstat,readFile} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 import {createConnection} from 'node:net';
 import {fileURLToPath} from 'node:url';
-import {dirname} from 'node:path';
+import {dirname,join} from 'node:path';
+import {verifySourceSeal} from './source-seal.mjs';
+const permittedEnv=new Set(['SIGNAL_DOMAIN','SIGNAL_PUBLIC_ORIGIN','SIGNAL_DEPLOYMENT_PROVIDER','SIGNAL_SOURCE_REVISION','HOSTINGER_AI_ROUTER_KEY','HOSTINGER_AI_MODEL','SIGNAL_MAX_AI_REQUESTS','SIGNAL_QUOTA_FILE']);
+export function safeComposeEnvironment(env=process.env) {return Object.fromEntries(Object.entries(env).filter(([k])=>!k.startsWith('COMPOSE_')));}
 export async function preflight(folder=dirname(fileURLToPath(import.meta.url))) {
   const path=folder+'/.env',info=await lstat(path);
   if(!info.isFile()||info.isSymbolicLink()||(info.mode&0o077)!==0)throw Error('The .env file must be a regular owner-only file (chmod 600 .env).');
@@ -11,6 +14,7 @@ export async function preflight(folder=dirname(fileURLToPath(import.meta.url))) 
     if(!line.trim()||line.trim().startsWith('#'))continue;
     const match=/^([A-Z][A-Z0-9_]*)=([^\r\n]*)$/.exec(line);
     if(!match)throw Error('Use simple KEY=value environment entries; no quotes or expansion.');
+    if(!permittedEnv.has(match[1])||Object.hasOwn(values,match[1]))throw Error('Unsupported or duplicate environment key.');
     if(/[$\x00-\x1f]/.test(match[2]))throw Error('Environment values must not contain expansion or control characters.');
     values[match[1]]=match[2];
   }
@@ -29,7 +33,7 @@ export function portOccupied(port) {
  });
 }
 function docker(args,folder,{capture=false}={}) {
- const result=spawnSync('docker',args,{cwd:folder,stdio:capture?'pipe':'inherit',encoding:'utf8',timeout:300000});
+ const result=spawnSync('docker',args,{cwd:folder,stdio:capture?'pipe':'inherit',encoding:'utf8',env:safeComposeEnvironment(),timeout:300000});
  if(result.error)throw Error(result.error.code==='ENOENT'?'Docker is not installed or available in PATH.':'Docker execution failed: '+result.error.code);
  if(result.status!==0)throw Error('Docker operation failed; no successful deployment is claimed.');
  return result.stdout?.trim()||'';
@@ -37,8 +41,10 @@ function docker(args,folder,{capture=false}={}) {
 if(process.argv[1]&&fileURLToPath(import.meta.url)===process.argv[1]) {
  try {
   const ready=await preflight();
-  const appOnly=process.argv.includes('--app-only'),args=['compose',...(appOnly?[]:['--profile','tls'])];
+  const sourceSeal=await verifySourceSeal(ready.folder,ready.sourceRevision);
+  const appOnly=process.argv.includes('--app-only'),args=['compose','--file',join(ready.folder,'compose.yaml'),...(appOnly?[]:['--profile','tls'])];
   docker([...args,'config','--quiet'],ready.folder);
+  console.log('Export verified locally: '+sourceSeal.verifiedFiles+' pinned source files. This is not a provider/GitHub attestation.');
   console.log('Preflight passed. AI configuration: '+(ready.aiConfigured?'present, not probed':'absent, local workspaces only')+'.');
   if(!process.argv.includes('--apply'))console.log('Dry run only. Use --apply for the explicitly authorized deployment; --app-only preserves an existing ingress.');
   else {

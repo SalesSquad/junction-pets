@@ -8,6 +8,7 @@ COPY --chown=node:node public ./public
 COPY --chown=node:node fixtures ./fixtures
 COPY --chown=node:node stress ./stress
 COPY --chown=node:node server.mjs services.mjs benchmark.mjs evaluation-v2.mjs ./
+COPY --chown=node:node SOURCE_SEAL.json ./SOURCE_SEAL.json
 USER node
 EXPOSE 4173
 HEALTHCHECK --interval=30s --timeout=3s CMD node -e "fetch('http://127.0.0.1:4173/api/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"

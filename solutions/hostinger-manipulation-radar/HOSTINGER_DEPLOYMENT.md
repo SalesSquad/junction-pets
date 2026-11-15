@@ -16,6 +16,46 @@ Use Node 22 or later. No dependencies are required.
 
 The server binds loopback by default. Production containers explicitly set HOST=0.0.0.0 behind Caddy. Raw traffic logs are parsed entirely in the visitor's browser and are never sent to either server or model. Text review is a separate optional action with an explicit provider-transfer checkbox. Its exact quotes are checked locally against submitted text; model explanations and intent remain unverified.
 
+## Reproducible source export and exact deploy-byte check
+
+A 40-character SHA in `.env` alone does **not** bind an image to any source bytes.
+Before copying the app to the VPS, start from the **authorized clean source
+checkout** and export an immutable Git commit into a **new empty destination
+outside the checkout**. The tool rejects tracked symlinks, unexpected assets,
+missing runtime files, invalid commits and any existing output destination.
+It exports only this product's explicit deployment files, public assets, fixtures
+and runtime stress code. Research archives, local tests, other product files,
+monorepo metadata and secrets are **excluded**; an unexpected tracked secret
+environment file aborts packaging.
+
+```sh
+REV=$(git rev-parse HEAD)                 # choose the reviewed full commit
+node solutions/hostinger-manipulation-radar/source-seal.mjs --commit "$REV" --out "/tmp/signal-desk-$REV"
+```
+
+Move that resulting directory through the approved channel to the already
+authorized operator host. **No transfer or deployment is performed by this tool.**
+Create the owner-only `.env` on that host, using `SIGNAL_SOURCE_REVISION=$REV`.
+Run `node deploy.mjs` from the exported directory for the existing dry-run
+validation; it now requires `SOURCE_SEAL.json`, verifies every bundled file
+and denies extra assets/symlinks/stale commit labels **before invoking Docker**.
+The same validation gates `--apply` and a previously sealed rollback bundle.
+
+The environment file accepts only the documented eight keys and rejects
+duplicates or Compose control variables. The deployment helper supplies the
+exact sealed `compose.yaml` with `--file` and removes inherited `COMPOSE_*`
+overrides for its Docker subprocess, while leaving the operator-selected Docker
+context unchanged. Verify the operator Docker context separately.
+
+This prevents an accidental wrong-commit deployment or a modified build context.
+The SHA-256 manifest is **not signed**, and cannot independently authenticate
+who prepared it, GitHub's remote origin or what image a third-party host actually
+runs. Verify the published source commit and OCI image digest via the existing
+operator/deployment review. The offline check does not prove Hostinger access,
+HTTP reachability or public launch. Raw traffic logs and provider keys remain
+outside the exported source. Do not bypass a failed seal with a fabricated
+manifest; fetch a fresh reviewed commit/export.
+
 ## Hostinger activation
 
 1. Obtain the team's dedicated Decode the Noise coupon at the Hostinger booth.
