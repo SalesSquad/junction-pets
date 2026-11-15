@@ -23,6 +23,18 @@ test('changing any reviewed byte changes the binding', () => {
   assert.notEqual(a.payload_hash, b.payload_hash);
 });
 
+test('invalid schema data and missing host authority cannot become pending actions', () => {
+  const missingParameters = { ...base, action_proposals: [{ ...scale, parameters: null }] };
+  assert.ok(validateResponse(missingParameters).some(e => /parameters/.test(e)));
+  assert.throws(() => toPendingActions(missingParameters, ctx), /invalid companion response/);
+  assert.ok(validateResponse({ ...base, facts: 'not-an-array' }).length > 0);
+  assert.throws(() => toPendingActions({ ...base, action_proposals: [scale] }, {}), /missing host context/);
+  assert.throws(() => toPendingActions({ ...base, action_proposals: [scale] }, { ...ctx, authorityRevision: ' ' }), /missing host context/);
+  assert.throws(() => toPendingActions({ ...base, action_proposals: [{ ...scale, parameters: { plan: NaN } }] }, ctx), /bounded JSON/);
+  const parameters = {}; Object.defineProperty(parameters, 'plan', { enumerable: true, get() { throw new Error('getter executed'); } });
+  assert.throws(() => toPendingActions({ ...base, action_proposals: [{ ...scale, parameters }] }, ctx), /bounded JSON/);
+});
+
 test('the bridge refuses executed actions, unknown operations, low-risk deletes and unofficial sources', () => {
   assert.ok(validateResponse({ ...base, executed_actions: ['aiven_service_update'] }).some(e => /empty/.test(e)));
   assert.ok(validateResponse({ ...base, action_proposals: [{ ...scale, operation: 'drop_everything' }] }).some(e => /unknown operation/.test(e)));
@@ -51,6 +63,6 @@ test('official hosts are configurable per companion', () => {
   const r = { answer: 'a', facts: [{ claim: 'x', source_url: 'https://www.valioaimo.fi/tuotteet' }], assumptions: [], action_proposals: [], executed_actions: [], next_check: 'n' };
   assert.ok(validateResponse(r).some(e => /non-official/.test(e)), 'aiven default');
   assert.deepEqual(validateResponse(r, undefined, { officialHosts: ['valioaimo.fi'] }), []);
-  assert.equal(toPendingActions({ ...r, action_proposals: [] }, { adoptionId: 'a', agentVersionId: 'v', authorityRevision: '1', conversationId: 'c' }, { officialHosts: ['valioaimo.fi'] }).length, 0);
+  assert.equal(toPendingActions({ ...r, action_proposals: [] }, { adoptionId: 'a', agentVersionId: 'v', authorityRevision: '1', conversationId: 'c', chibi: 'c' }, { officialHosts: ['valioaimo.fi'] }).length, 0);
   assert.ok(validateResponse({ ...r, facts: [{ claim: 'x', source_url: 'https://evilvalioaimo.fi/' }] }, undefined, { officialHosts: ['valioaimo.fi'] }).length, 'suffix trick refused');
 });

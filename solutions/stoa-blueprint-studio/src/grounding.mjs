@@ -31,10 +31,10 @@ const evidence = (e, detail) => ({ entityId: e.id, layer: e.layer, kind: e.type,
 const supportedUnits = Object.freeze({ 1: 0.0254, 2: 0.3048, 4: 0.001, 5: 0.01, 6: 1 });
 
 function answer(answer, explanation, drawing, sourceEntities, metric) {
-  return { status: 'supported', answer, explanation, metric, evidence: sourceEntities, source: { filename: drawing.filename, sha256: drawing.sha256 || null, format: drawing.format, units: drawing.unitsLabel }, inference: 'deterministic; no external model' };
+  return { evidenceLevel: metric?.type === 'area' ? 'cross_checked' : 'source_observed', method: metric?.type === 'area' ? 'dxf.annotation-geometry-agreement/v1' : 'dxf.source-entities/v1', status: 'supported', answer, explanation, metric, evidence: sourceEntities, source: { filename: drawing.filename, sha256: drawing.sha256 || null, format: drawing.format, units: drawing.unitsLabel }, inference: 'deterministic; no external model' };
 }
 function abstain(reason, drawing) {
-  return { status: 'abstained', answer: null, explanation: reason, metric: null, evidence: [], source: { filename: drawing.filename, sha256: drawing.sha256 || null }, inference: 'deterministic; no external model' };
+  return { evidenceLevel: 'unavailable', method: 'dxf.source-entities/v1', status: 'abstained', answer: null, explanation: reason, metric: null, evidence: [], source: { filename: drawing.filename, sha256: drawing.sha256 || null }, inference: 'deterministic; no external model' };
 }
 
 export function questionRejection(question) {

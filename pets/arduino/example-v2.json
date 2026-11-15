@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "board": {
+    "supplyVoltageMv": 5000,
+    "logicVoltageMv": 3000,
+    "powerLimitMa": 30,
+    "pinLimitMa": 4,
+    "totalPinLimitMa": 6,
+    "pinCount": 2,
+    "pins": [{"id": "P0", "modes": ["input"]}, {"id": "P1", "modes": ["analog-input"]}]
+  },
+  "sensors": [
+    {"id": "sensor-a", "supplyVoltageMv": 5000, "logicVoltageMv": 3000, "currentMa": 8, "ground": true, "pinCount": 1,
+      "pins": [{"pin": "P0", "mode": "input", "currentMa": 1}]},
+    {"id": "sensor-b", "supplyVoltageMv": 5000, "logicVoltageMv": 3000, "currentMa": 6, "ground": true, "pinCount": 1,
+      "pins": [{"pin": "P1", "mode": "analog-input", "currentMa": 2}]}
+  ]
+}

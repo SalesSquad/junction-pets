@@ -59,10 +59,19 @@ function adapt(kind, file, text) {
   if (kind === 'stoa' && file === 'public/index.html') {
     text = replaceOnce(text, 'href="/style.css"', 'href="./style.css"');
     text = replaceOnce(text, 'src="/app.js"', 'src="./app.js"');
-    text = replaceOnce(text, 'inspect its original source region.', 'inspect its original source region. Drawings stay in this browser; the example is synthetic. This version supports exact room labels, validated room areas and unit outlines; other questions are refused.');
+    text = replaceOnce(text, 'Import DXF / IFC', 'Import DXF');
+    text = replaceOnce(text, 'accept=".dxf,.ifc"', 'accept=".dxf"');
+    text = replaceOnce(text, 'Inspect source geometry for DXF and original entity records for IFC.', 'Inspect source geometry for DXF.');
+    text = replaceOnce(text, '<details id="revision-tools"', '<details hidden id="revision-tools"');
+    text = replaceOnce(text, '<details class="review-tools" id="review-tools">', '<details hidden class="review-tools" id="review-tools">');
+    text = replaceOnce(text, 'inspect its original source region.', 'inspect its original source region. Drawings stay in this browser; the example is synthetic. This version supports exact room labels, validated room areas and unit outlines; other questions are refused. IFC import, source comparison and review export require the local Stoa server.');
     return replaceOnce(text, '<head>', `<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
   }
-  if (kind === 'stoa' && file === 'public/app.js') return `import {createStoaLocalApi} from '../adapter/stoa-local-api.mjs';\nconst fetch=createStoaLocalApi();\n${text}`;
+  if (kind === 'stoa' && file === 'public/app.js') {
+    text = replaceOnce(text, "import { installWorkspace } from './workspace.js';", 'const installWorkspace = () => ({render() {}, async sources() {}});');
+    text = replaceOnce(text, "if (!/\\.(dxf|ifc)$/i.test(file.name)) throw new Error('Choose an ASCII DXF or IFC STEP file.');", "if (!/\\.dxf$/i.test(file.name)) throw new Error('Only ASCII DXF is available in this browser demo.');");
+    return `import {createStoaLocalApi} from '../adapter/stoa-local-api.mjs';\nconst fetch=createStoaLocalApi();\n${text}`;
+  }
   if (kind === 'stoa' && file === 'src/dxf.mjs') return replaceOnce(text, "Buffer.byteLength(input, 'utf8')", 'new TextEncoder().encode(input).byteLength');
   if (kind === 'chronicle' && file === 'studio/index.html') {
     text = replaceOnce(text, 'href="/style.css"', 'href="./style.css"');
@@ -107,7 +116,14 @@ function adapt(kind, file, text) {
   }
   if (kind === 'roundlens' && file === 'public/app.mjs') {
     text = replaceOnce(text, "from '/fixture.mjs'", "from '../fixture.mjs'");
+    text = replaceOnce(text, "from '/restore.mjs'", "from '../workspace/restore.mjs'");
     return replaceOnce(text, "from '/core.mjs'", "from '../core.mjs'");
+  }
+  if (kind === 'roundlens' && file === 'workspace/restore.mjs') {
+    text = replaceOnce(text, "import { PRODUCT_SOURCE_DIGEST }", "import { PRODUCT_SOURCE_DIGEST, EMBEDDED_CLIENT_DIGEST }");
+    text = replaceOnce(text, "archived.schema !== 'roundlens.shortlist.v1'", "archived.schema !== 'roundlens.shortlist.embedded.v1'");
+    text = replaceOnce(text, "if (![PRODUCT_SOURCE_DIGEST, ...LEGACY_FIXTURE_DIGESTS].includes(archived.productSourceDigest))", "if (archived.upstreamProductSourceDigest !== PRODUCT_SOURCE_DIGEST || archived.embeddedClientDigest !== EMBEDDED_CLIENT_DIGEST)");
+    return replaceOnce(text, '  reconstructed.productSourceDigest = archived.productSourceDigest;', '  // Embedded recovery accepts only this exact adapted client.');
   }
   if (kind === 'roundlens' && file === 'core.mjs') {
     text = replaceOnce(text, "import { PRODUCT_SOURCE_DIGEST }", "import { PRODUCT_SOURCE_DIGEST, EMBEDDED_CLIENT_DIGEST }");
@@ -182,7 +198,7 @@ export async function exportApps(output) {
       // The embedded client differs from the original local-server package. Its
       // exported artifact names both the original package digest and a digest
       // over exactly these adapted browser bytes, never the old digest as its own.
-      const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css'];
+      const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css','workspace/restore.mjs'];
       const entries=await Promise.all(names.map(async name=>`${name}\0${createHash('sha256').update(await readFile(join(target,'apps',app.directory,name))).digest('hex')}\n`));
       const digest=createHash('sha256').update(entries.join('')).digest('hex');
       const meta=join(target,'apps',app.directory,'source-meta.mjs');

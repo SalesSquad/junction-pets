@@ -495,14 +495,17 @@ def voice_for(slug: str) -> str:
     return designed.get("id") or prebuilt
 
 
-def speak_line(slug: str, text: str, direction: str, key: str, tts_order: list[str], log: list, prefer: dict) -> dict:
-    """Own designed voice first; Live models only know prebuilt names, so they get the prebuilt fallback voice."""
+def speak_line(slug: str, text: str, direction: str, key: str, tts_order: list[str], log: list, prefer: dict,
+               pinned: bool = False) -> dict:
+    """Own designed voice first; Live models only know prebuilt names, so they get the prebuilt fallback voice.
+    pinned=True keeps the caller's TTS models as given (a fair voice A/B needs the same model for both voices)."""
     voice, prebuilt = voice_for(slug), pv.load_voices()[slug]["voice"]
     style = direction or characters()[slug]["delivery"]
     if voice.startswith("voice_"):
         # The model the voice was designed on goes first: the free tier gives each TTS model only ~10-15 calls a day,
-        # so a designed id sent to a model that cannot use it burns quota for nothing.
-        home = designed_voices().get(slug, {}).get("model")
+        # so a designed id sent to a model that cannot use it burns quota for nothing. 15 Nov: designed voices also
+        # work on gemini-3.8-flash-lite-tts, which doubles the daily designed-voice budget.
+        home = None if pinned else designed_voices().get(slug, {}).get("model")
         order = ([home] if home else []) + [m for m in tts_order if m != home and not m.startswith(("live:", "openai:"))]
         try:
             out = pv.speak(text, voice, style, key, order, log, prefer)
@@ -541,7 +544,7 @@ def voice_script(lines: list[dict], run_id: str, prebuilt: bool = False, models:
                               openai_voice=openai_voice(slug))
             spoken["voiceUsed"] = f"openai:{spoken['openaiVoice']}" if spoken.get("openaiVoice") else pv.load_voices()[slug]["voice"]
         else:
-            spoken = speak_line(slug, ln["text"], style, key, tts_order, log, prefer)
+            spoken = speak_line(slug, ln["text"], style, key, tts_order, log, prefer, pinned=bool(models))
         wf.write_bytes(spoken["wav"])
         turn = {"turn": i, "slug": slug, "speakerSlug": slug, "name": p["name"], "speakerName": p["name"],
                 "language": pv.load_voices()[slug]["language"], "text": ln["text"], "style": style, "status": "ok",

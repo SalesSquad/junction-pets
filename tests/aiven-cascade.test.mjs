@@ -12,7 +12,7 @@ test('plain request stays on haiku', async () => {
 });
 
 test('lint issue is repaired on haiku without escalation', async () => {
-  const prop = { operation: 'service_update_plan', target: 'pg', parameters: {}, reason: 'r', risk: 'medium', reversible: true, owner_role: 'o', rollback: 'down' };
+  const prop = { operation: 'service_update_plan', target: 'pg', parameters: {}, reason: 'r', risk: 'medium', reversible: true, owner_role: 'platform owner', rollback: 'downgrade' };
   const f = fake((m, n) => n === 1 ? resp() : resp({ action_proposals: [prop], risks_and_side_effects: ['cost'] }));
   const r = await answerWithCascade({ request: 'Scale pg to business-8', claude: f.claude });
   assert.equal(r.route, 'haiku+repair'); assert.deepEqual(f.calls, ['haiku', 'haiku']);

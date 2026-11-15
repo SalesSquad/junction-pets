@@ -42,7 +42,15 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     const traffic=await readFile(join(output,'apps/traffic-forensics/public/traffic/index.html'),'utf8');
     assert.match(traffic,/connect-src 'none'/); assert.match(traffic,/src="\.\/app\.mjs"/);
     const stoa=join(output,'apps/stoa-atlas');
-    assert.match(await readFile(join(stoa,'public/index.html'),'utf8'),/connect-src 'none'/);
+    const stoaHtml=await readFile(join(stoa,'public/index.html'),'utf8');
+    assert.match(stoaHtml,/connect-src 'none'/);
+    assert.match(stoaHtml,/IFC import, source comparison and review export require the local Stoa server/);
+    assert.match(stoaHtml,/<details hidden id="revision-tools"/);
+    assert.match(stoaHtml,/<details hidden class="review-tools"/);
+    assert.match(stoaHtml,/accept="\.dxf"/);
+    const stoaClient=await readFile(join(stoa,'public/app.js'),'utf8');
+    assert.doesNotMatch(stoaClient,/from '\.\/workspace\.js'/);
+    assert.match(stoaClient,/Only ASCII DXF is available in this browser demo/);
     const {createStoaLocalApi}=await import(pathToFileURL(join(stoa,'adapter/stoa-local-api.mjs')).href);
     const {makeDemo}=await import('../../solutions/stoa-blueprint-studio/src/demo.mjs');
     const {answerDrawing}=await import('../../solutions/stoa-blueprint-studio/src/grounding.mjs');
@@ -102,7 +110,7 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     const saved=JSON.parse(await readFile(join(output,'apps/supplypulse/evidence.json'),'utf8'));
     assert.equal(saved.mode,'HISTORICAL_CAPTURE');assert.equal(saved.offers.length,2);assert(!('winner' in saved));
     const roundlens=join(output,'apps/roundlens');
-    const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css'];
+    const names=['core.mjs','fixture.mjs','public/app.mjs','public/index.html','public/style.css','workspace/restore.mjs'];
     const entries=await Promise.all(names.map(async name=>`${name}\0${createHash('sha256').update(await readFile(join(roundlens,name))).digest('hex')}\n`));
     const expectedDigest=createHash('sha256').update(entries.join('')).digest('hex');
     const core=await import(pathToFileURL(join(roundlens,'core.mjs')).href);
@@ -112,6 +120,16 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     assert.equal(artifact.embeddedClientDigest,expectedDigest);
     assert.match(artifact.upstreamProductSourceDigest,/^[0-9a-f]{64}$/);
     assert.equal(Object.hasOwn(artifact,'productSourceDigest'),false);
+    assert.match(await readFile(join(roundlens,'public/app.mjs'),'utf8'), /from '\.\.\/workspace\/restore\.mjs'/);
+    const {recoverArchive}=await import(pathToFileURL(join(roundlens,'workspace/restore.mjs')).href);
+    const recovered=recoverArchive(core.safeJSON(artifact),fixture);
+    assert.equal(recovered.approvalsRevoked,true);
+    assert.equal(recovered.reviews[0].approved,false);
+    const altered=structuredClone(artifact); altered.embeddedClientDigest='0'.repeat(64);
+    assert.throws(()=>recoverArchive(core.safeJSON(altered),fixture),/ARCHIVE_SOURCE_NOT_SUPPORTED/);
+    const sourceArtifact={...artifact,schema:'roundlens.shortlist.v1'};
+    assert.throws(()=>recoverArchive(core.safeJSON(sourceArtifact),fixture),/ARCHIVE_FORMAT_NOT_SUPPORTED/);
+
     const index = await readFile(join(output,'index.html'),'utf8');
     for (const app of apps) assert.ok(index.includes(`href="./${app.path.slice(1)}"`));
     await assert.rejects(exportApps(output), {code:'EEXIST'});

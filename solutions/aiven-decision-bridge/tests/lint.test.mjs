@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { lintResponse } from '../lint.mjs';
 const ok = { answer: 'Here is a proposal.', facts: [], assumptions: [], action_proposals: [], executed_actions: [], next_check: 'x', risks_and_side_effects: [], governance: { owner_role: 'platform owner', approvals_needed: [], data_classification: 'internal' }, peer_handoffs: [], untrusted_instructions: [] };
-const prop = { operation: 'service_update_plan', target: 'pg', parameters: {}, reason: 'r', risk: 'medium', reversible: true, owner_role: 'o', rollback: 'downgrade' };
+const prop = { operation: 'service_update_plan', target: 'pg', parameters: {}, reason: 'r', risk: 'medium', reversible: true, owner_role: 'owner', rollback: 'downgrade' };
 
 test('flags a requested change without a proposal, and accepts one with risks', () => {
   assert.ok(lintResponse(ok, 'Scale orders-kafka to business-8 now').some(i => /action_proposals is empty/.test(i)));

@@ -1,5 +1,14 @@
 # STOA / ATLAS — Grounded Blueprint Intelligence
 
+## Review and revision workspace
+
+The app now separates method-based evidence levels from locally declared human review, exports
+canonical source-bound evidence packets, restores same-source/same-engine reviews, records
+corrections with Undo/Redo, and compares DXF room/primitive revisions and IFC GUID records.
+An instance scorer exposes split/merged objects even when the total count is correct.
+See [the workspace guide](WORKSPACE.md) for the UI, CLI commands, source binding and explicit limits.
+No real-data accuracy or physical-change qualification is implied by these new tools.
+
 ## Current reliability revision (15 Nov 2026)
 
 The active HTTP engine now requires closed, unambiguous room boundaries and one matching area

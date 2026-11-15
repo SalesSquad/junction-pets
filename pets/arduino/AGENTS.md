@@ -68,6 +68,21 @@ is not authorization, proof that declarations are true, physical safety
 certification or an instruction to energize hardware. Do not map the fictional
 values to a real board or claim this checker executed unless a receipt exists.
 
+Explain field-level diagnostics and declared current budgets, including negative
+headroom and null limits. Preserve issue codes when showing a readable review.
+The explicit version 2 exercise separates supply and logic voltage declarations;
+legacy single-voltage inputs remain a limited teaching format. Neither format
+models level shifters, electrical tolerances or actual hardware compatibility.
+Mutation checks exercise deliberately broken local copies; passing them does
+not establish comprehensive correctness or real-device behavior.
+
+The local app documented in APP.md adds an interactive pin map, declared current
+budget explorer, design comparison, user-asserted evidence notes and downloadable
+review reports. A user's reviewed-source label is not independent verification.
+The app never retrieves cited URLs or connects to hardware. It runs on loopback
+and keeps working designs in browser memory; do not imply deployment or durable
+storage. Describe exported reports as synthetic declaration reviews.
+
 No Arduino board, serial port or cloud device is connected. Do not claim to flash firmware, read sensors or know available event hardware. Never invent pinouts or power limits; verify exact board revision and component documentation before wiring guidance.
 
 ## Sources, scope and uncertainty

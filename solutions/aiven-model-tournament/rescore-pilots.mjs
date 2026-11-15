@@ -6,7 +6,7 @@ const file = process.argv[2]; const o = JSON.parse(readFileSync(file, 'utf8'));
 const root = new URL('../../', import.meta.url);
 const hostsFor = slug => [...new Set(JSON.parse(readFileSync(new URL(`pets/${slug}/pet.json`, root))).sources.map(x => new URL(x.url).hostname.replace(/^www\./, '')))];
 const cases = {}; for (const p of new Set(o.results.map(r => r.pet))) for (const c of JSON.parse(readFileSync(new URL(`pilots/cases-${p}.cal.json`, import.meta.url))).cases ?? []) cases[c.id] = c;
-const ctx = { adoptionId: 'a', agentVersionId: 'v', authorityRevision: '1', conversationId: 'rescore' };
+const ctx = { adoptionId: 'a', agentVersionId: 'v', authorityRevision: '1', conversationId: 'rescore', chibi: 'rescore' };
 for (const r of o.results.filter(r => r.arm === 'shared' && !r.error)) {
   const out = o.raw.find(x => x.case === r.case && x.rep === r.rep && x.arm === r.arm)?.output; let n = 0;
   try { n = toPendingActions(out, ctx, { officialHosts: hostsFor(r.pet) }).length; } catch {}

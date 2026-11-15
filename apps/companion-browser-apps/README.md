@@ -27,7 +27,9 @@ original localhost servers and their response headers are not included.
 Stoa's DXF parser and conservative evidence-bound question engine run inside
 the browser and keep imported drawings in tab memory. Room-label counts,
 validated room areas and unit outlines are supported; unsupported object counts
-are refused. Chronicle Witness runs its original comparison engine
+are refused. IFC import, source revision comparisons and review exports require
+the separately run local Stoa server and are not available in the browser bundle.
+Chronicle Witness runs its original comparison engine
 on the bundled synthetic fixture only; it has no live Wikipedia or MariaDB
 connection. Both embedded pages block outgoing connections.
 SAMA includes its existing public-data snapshot and synthetic, precomputed
@@ -40,7 +42,7 @@ RoundLens's embedded client has changed paths, so its downloaded artifact uses
 `roundlens.shortlist.embedded.v1`: `upstreamProductSourceDigest` names the
 original package, and `embeddedClientDigest` identifies the adapted client.
 The latter hashes a UTF-8 manifest of sorted paths `core.mjs`, `fixture.mjs`,
-`public/app.mjs`, `public/index.html`, `public/style.css`; each entry is path,
+`public/app.mjs`, `public/index.html`, `public/style.css`, `workspace/restore.mjs`; each entry is path,
 NUL, lowercase SHA-256 of file bytes, then LF. `source-meta.mjs` contains the
 result but is excluded from the digest to avoid recursion.
 
@@ -65,3 +67,7 @@ that producer when the shared domain changes. The original Node/SQLite service,
 host JWT adapter, MCP bridge and HTTP simulation lab remain in the solution;
 their runtime and real supplier integration are not provided by this static
 bundle.
+
+Embedded RoundLens recovery accepts only its current embedded schema and exact
+upstream/client digests; original-server and older embedded files are refused.
+Imported notes retain no approvals.

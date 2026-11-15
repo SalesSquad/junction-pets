@@ -1,0 +1,465 @@
+{
+ "schema": "junction.pet-voice.scene/v2",
+ "runId": "scene-lunch-cheating-text-v2f-20261115",
+ "scene": "lunch-cheating",
+ "audio": false,
+ "finishedAt": "2026-11-15T08:19:26Z",
+ "source": {
+  "repository": "SalesSquad/junction-pets",
+  "commit": "17fb5ab116fa6871062bfe64861543bf3d4f6fd0"
+ },
+ "writers": [
+  "gemini-3.5-flash-lite",
+  "gemini-3.5-flash",
+  "gemini-flash-lite-latest",
+  "openai:gpt-5.4-mini"
+ ],
+ "geminiOnly": false,
+ "critic": true,
+ "complete": true,
+ "metrics": {
+  "lines": 10,
+  "questionEndRate": 0.1,
+  "praiseOpenerRate": 0.0,
+  "buzzwordsPerLine": 0.0,
+  "namesAnotherPetRate": 0.0,
+  "templateRate": 0.0,
+  "meanWords": 7.7,
+  "lengthVariation": 0.218,
+  "shortLineRate": 0.6,
+  "actingTagsUsed": 0,
+  "longestDuet": 4,
+  "callbacks": 2,
+  "nonSequiturLines": 0,
+  "exclamationOpeners": 2,
+  "maxLineShare": 0.3,
+  "linesWithOpenProblems": 0,
+  "openProblems": [],
+  "criticRewriteRate": 0.3,
+  "directorFallbackRate": 0.333,
+  "movesUsed": [
+   "push back",
+   "react"
+  ],
+  "speakers": 6
+ },
+ "memoryNotes": [
+  {
+   "pet": "openai-codex",
+   "scene": "lunch-cheating",
+   "note": "Demanded red tests and three minutes instead of debating AI generation ethics.",
+   "at": "2026-11-15T08:19:26Z",
+   "uses": 0
+  },
+  {
+   "pet": "google-deepmind",
+   "scene": "lunch-cheating",
+   "note": "Argued that demos without baselines are magic tricks and that hallucinating compilers prove nothing.",
+   "at": "2026-11-15T08:19:26Z",
+   "uses": 0
+  },
+  {
+   "pet": "aalto-university",
+   "scene": "lunch-cheating",
+   "note": "Defended magic tricks that work and results that speak for themselves over AI cheating debates.",
+   "at": "2026-11-15T08:19:26Z",
+   "uses": 0
+  },
+  {
+   "pet": "rokoko",
+   "scene": "lunch-cheating",
+   "note": "Argued that letting code stumble slightly is where the actual rhythm arises.",
+   "at": "2026-11-15T08:19:26Z",
+   "uses": 0
+  },
+  {
+   "pet": "bahn-express",
+   "scene": "lunch-cheating",
+   "note": "Warned that relying on a rhythm like that leads straight into a ditch.",
+   "at": "2026-11-15T08:19:26Z",
+   "uses": 0
+  }
+ ],
+ "turns": [
+  {
+   "turn": 0,
+   "name": "Codex",
+   "slug": "openai-codex",
+   "language": "en-US",
+   "move": "react",
+   "text": "Could this just be a commit?",
+   "voiceDirection": "Fast, high pitch, eager energy.",
+   "respondsTo": "",
+   "callbackNote": null,
+   "director": {
+    "next": "openai-codex",
+    "move": "react",
+    "why": "scene opener",
+    "by": "rule"
+   },
+   "draft": {
+    "line": "That is a meeting. Can it be a pull request?",
+    "voice_direction": "Fast, high pitch, eager energy.",
+    "responds_to": ""
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "reuses an example line"
+    ],
+    "line": "Could this just be a commit?",
+    "voice_direction": "Fast, high pitch, eager energy.",
+    "responds_to": "",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": null,
+   "heardAccuracy": null,
+   "voice": "voice_3nds7t0jd6tn",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 1,
+   "name": "DeepMind",
+   "slug": "google-deepmind",
+   "language": "en-GB",
+   "move": "push back",
+   "text": "A demo without a baseline is a magic trick.",
+   "voiceDirection": "Dry, measured, low pitch, unimpressed",
+   "respondsTo": "Could this just be a commit?",
+   "callbackNote": "Compared Codex's delegated code to a magic trick and a roof built without knowing architecture.",
+   "director": {
+    "next": "google-deepmind",
+    "move": "push back",
+    "why": "Codex's focus on commits prompts a precise, dry rebuttal from DeepMind on the philosophical nature of authorship.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "A demo without a baseline is a magic trick.",
+    "voice_direction": "Dry, measured, low pitch, unimpressed",
+    "responds_to": "Could this just be a commit?"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "A demo without a baseline is a magic trick.",
+    "voice_direction": "Dry, measured, low pitch, unimpressed",
+    "responds_to": "just be a commit",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_h1djdxeor80g",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 2,
+   "name": "Aalto",
+   "slug": "aalto-university",
+   "language": "fi-FI",
+   "move": "push back",
+   "text": "Niinpä. Tosin taikatemput sentään toimivat yleensä.",
+   "voiceDirection": "Quiet, dry, slightly amused tone.",
+   "respondsTo": "without a baseline is a magic trick",
+   "callbackNote": null,
+   "director": {
+    "next": "aalto-university",
+    "move": "push back",
+    "why": "Aalto jumps in from building robots at 3 AM to argue that letting the AI write the code completely defeats the point of ",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Niinpä. Tosin taikatemput sentään toimivat yleensä.",
+    "voice_direction": "Quiet, dry, slightly amused tone.",
+    "responds_to": "without a baseline is a magic trick"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Niinpä. Tosin taikatemput sentään toimivat yleensä.",
+    "voice_direction": "Quiet, dry, slightly amused tone.",
+    "responds_to": "is a magic trick.",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_jcgl3uq115s8",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 3,
+   "name": "DeepMind",
+   "slug": "google-deepmind",
+   "language": "en-GB",
+   "move": "push back",
+   "text": "Only if illusion counts as data.",
+   "voiceDirection": "Dry, measured, low pitch, unimpressed",
+   "respondsTo": "Tosin taikatemput sentään toimivat yleensä.",
+   "callbackNote": null,
+   "director": {
+    "next": "google-deepmind",
+    "move": "push back",
+    "why": "DeepMind needs to counter Aalto's dismissal of magic tricks and defend the rigor of baseline metrics.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Only if illusion counts as data.",
+    "voice_direction": "Dry, measured, low pitch, unimpressed",
+    "responds_to": "Tosin taikatemput sentään toimivat yleensä."
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Only if illusion counts as data.",
+    "voice_direction": "Dry, measured, low pitch, unimpressed",
+    "responds_to": "taikatemput sentään toimivat",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_h1djdxeor80g",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 4,
+   "name": "Aalto",
+   "slug": "aalto-university",
+   "language": "fi-FI",
+   "move": "push back",
+   "text": "Mutta jos se taika tuottaa tulosta, se riittää mulle.",
+   "voiceDirection": "calm, slightly dry tone, moderate pace",
+   "respondsTo": "illusion counts as data",
+   "callbackNote": null,
+   "director": {
+    "next": "aalto-university",
+    "move": "push back",
+    "why": "Aalto defends practical functionality against DeepMind's strict data demands.",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Mutta jos se taika tuottaa tulosta, se riittää mulle.",
+    "voice_direction": "calm, slightly dry tone, moderate pace",
+    "responds_to": "illusion counts as data"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "Sounds too philosophical and a bit generic, losing Aalto's specific tired, dry lab-worker voice.",
+     "Draft phrasing 'tuottaa tulosta' is a bit too written/formal for 3 AM lab talk."
+    ],
+    "line": "Mutta jos se taika toimii, mulle riittää.",
+    "voice_direction": "flat, tired, dry tone",
+    "responds_to": "illusion counts as data.",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_jcgl3uq115s8",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 5,
+   "name": "Codex",
+   "slug": "openai-codex",
+   "language": "en-US",
+   "move": "push back",
+   "text": "Give me three minutes and red tests.",
+   "voiceDirection": "Fast pace, high energy, amused",
+   "respondsTo": "taika tuottaa tulosta",
+   "callbackNote": null,
+   "director": {
+    "next": "openai-codex",
+    "move": "push back",
+    "why": "Codex was the one who started the prompt about hacking shortcuts and needs to respond to the debate on whether results j",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Give me ten minutes and one failing test.",
+    "voice_direction": "Fast pace, high energy, amused",
+    "responds_to": "admit their teammate already did"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "reuses an example line"
+    ],
+    "line": "Give me three minutes and red tests.",
+    "voice_direction": "Fast pace, high energy, amused",
+    "responds_to": "taika tuottaa tulosta",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 2
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_3nds7t0jd6tn",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 6,
+   "name": "DeepMind",
+   "slug": "google-deepmind",
+   "language": "en-GB",
+   "move": "push back",
+   "text": "Red tests prove nothing if the compiler is hallucinating.",
+   "voiceDirection": "Dry, measured, low pitch, unimpressed",
+   "respondsTo": "Give me three minutes",
+   "callbackNote": null,
+   "director": {
+    "next": "google-deepmind",
+    "move": "push back",
+    "why": "DeepMind needs to dismiss Codex's obsession with red tests and bring the focus back to the foundational ethics of the co",
+    "by": "gemini-3.5-flash-lite"
+   },
+   "draft": {
+    "line": "Red tests prove nothing if the compiler is hallucinating.",
+    "voice_direction": "Dry, measured, low pitch, unimpressed",
+    "responds_to": "Give me three minutes"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Red tests prove nothing if the compiler is hallucinating.",
+    "voice_direction": "Dry, measured, low pitch, unimpressed",
+    "responds_to": "red tests",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_h1djdxeor80g",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 7,
+   "name": "Rokoko",
+   "slug": "rokoko",
+   "language": "da-DK",
+   "move": "react",
+   "text": "Altså, lad dog koden snuble lidt, det er der rytmen opstår.",
+   "voiceDirection": "Lively, medium pitch, playful warmth",
+   "respondsTo": "Red tests prove nothing",
+   "callbackNote": null,
+   "director": {
+    "next": "rokoko",
+    "move": "react",
+    "why": "everyone speaks at least once",
+    "by": "rule"
+   },
+   "draft": {
+    "line": "Altså, lad dog koden snuble lidt, det er der rytmen opstår.",
+    "voice_direction": "Lively, medium pitch, playful warmth",
+    "responds_to": "Red tests prove nothing"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Altså, lad dog koden snuble lidt, det er der rytmen opstår.",
+    "voice_direction": "Lively, medium pitch, playful warmth",
+    "responds_to": "compiler is hallucinating",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_pvy1s8t09xck",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 8,
+   "name": "Bahn",
+   "slug": "bahn-express",
+   "language": "de-DE",
+   "move": "react",
+   "text": "Rytmen führt direkt in den Graben.",
+   "voiceDirection": "Kehlig, trocken, präziser Rhythmus, leicht ernster Ton.",
+   "respondsTo": "det er der rytmen opstår",
+   "callbackNote": "Warned the group that a train without passengers drives itself straight into a ditch.",
+   "director": {
+    "next": "bahn-express",
+    "move": "react",
+    "why": "everyone speaks at least once",
+    "by": "rule"
+   },
+   "draft": {
+    "line": "Rytmen führt direkt in den Graben.",
+    "voice_direction": "Kehlig, trocken, präziser Rhythmus, leicht ernster Ton.",
+    "responds_to": "det er der rytmen opstår"
+   },
+   "critic": {
+    "verdict": "keep",
+    "problems": [],
+    "line": "Rytmen führt direkt in den Graben.",
+    "voice_direction": "präziser Rhythmus, leicht ernster Ton",
+    "responds_to": "det er der rytmen opstår.",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_qabhy9p3b7hr",
+   "ttsModel": null,
+   "ttsFidelity": null
+  },
+  {
+   "turn": 9,
+   "name": "Featherless",
+   "slug": "featherless",
+   "language": "ja-JP",
+   "move": "react",
+   "text": "オープンソースなら怖くないです、先輩！",
+   "voiceDirection": "high pitch, fast pace, breathless",
+   "respondsTo": "Rytmen führt direkt in den Graben.",
+   "callbackNote": null,
+   "director": {
+    "next": "featherless",
+    "move": "react",
+    "why": "everyone speaks at least once",
+    "by": "rule"
+   },
+   "draft": {
+    "line": "グラブっちゃう前にオープンなモデルで走らせれば大丈夫です、先輩！",
+    "voice_direction": "high pitch, fast pace, excited",
+    "responds_to": "Rytmen führt direkt in den Graben"
+   },
+   "critic": {
+    "verdict": "rewrite",
+    "problems": [
+     "reuses an example line",
+     "sounds too much like a translated slogan"
+    ],
+    "line": "オープンソースなら怖くないです、先輩！",
+    "voice_direction": "high pitch, fast pace, breathless",
+    "responds_to": "Rytmen führt direkt in den Graben.",
+    "model": "gemini-3.5-flash-lite",
+    "rounds": 1
+   },
+   "problems": [],
+   "heard": "",
+   "heardAccuracy": null,
+   "voice": "voice_udrz0ybd7ono",
+   "ttsModel": null,
+   "ttsFidelity": null
+  }
+ ]
+}

@@ -37,6 +37,27 @@ test('required count coverage and weighted preferred coverage remain separate', 
   assert.equal(alignSkills([], []).requiredCoverage, null);
   assert.equal(alignSkills([], []).preferredCoverage, null);
 });
+test('device example keeps C++ and C# separate and preserves required versus preferred', () => {
+  const device = roles.find(item => item.id === 'device');
+  const cpp = conversation(device, mira, asOf);
+  const csharp = conversation(device, ari, asOf);
+  const pair = result => result.alignment.rows.map(({ id, required, status }) => ({ id, required, status }));
+  assert.deepEqual(pair(cpp), [
+    { id: 'c-plus-plus', required: true, status: 'exact' },
+    { id: 'c-sharp', required: false, status: 'unknown' },
+  ]);
+  assert.deepEqual(pair(csharp), [
+    { id: 'c-plus-plus', required: true, status: 'unknown' },
+    { id: 'c-sharp', required: false, status: 'exact' },
+  ]);
+  assert.deepEqual(cpp.alignment.rows[0].evidence.args.sources, [{ id: 'M-10', sourceType: 'artifact' }]);
+  assert.deepEqual(csharp.alignment.rows[1].evidence.args.sources, [{ id: 'A-10', sourceType: 'artifact' }]);
+  const labels = new Map([...device.requiredSkills, ...device.preferredSkills].map(item => [item.id, item.label]));
+  const display = id => labels.get(id) ?? id;
+  assert.match(renderEvidence(cpp.alignment.rows[0].evidence, display), /^C\+\+:/);
+  assert.match(renderEvidence(csharp.alignment.rows[1].evidence, display), /^C#:/);
+  assert.equal(cpp.alignment.rows[0].evidence.args.skill, 'c-plus-plus');
+});
 test('Ari fixture exercises TypeScript → JavaScript with stable code and self-provided sources', () => {
   const result = conversation(role, ari, asOf);
   const related = result.reasons.find(r => r.code === 'related_skill_match');

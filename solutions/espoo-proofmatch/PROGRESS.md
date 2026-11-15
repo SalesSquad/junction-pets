@@ -1,5 +1,26 @@
 # J26-ESPOO-WORKBASE-REUSE-20261114 — writer handoff
 
+## ProofMatch skill identity demonstration — 2026-11-15
+
+Based on Junction main `17fb5ab116fa6871062bfe64861543bf3d4f6fd0`.
+The fictional device-prototype role shows required C++ and preferred C# with
+separate canonical IDs. Mira's fictional C++ card and Ari's fictional C# card
+make exact versus unknown evidence visible in both directions. Display labels
+are used in the UI while structured evidence retains the IDs. No Workbase
+database, service, private data or code was transferred into this demo. The
+legacy two-case illustrative benchmark is explicitly limited to its two
+originally labelled roles.
+
+Checks on these working-tree bytes, Node 24.22.1, local Linux:
+
+- Three focused matching/meeting suites: **40 passed**.
+- ESCO catalog and loopback HTTP suites: **6 passed**.
+- Headless system Chromium via Playwright: **1440 × 900 and 390 × 844 passed**
+  role selection, separate C++/C# evidence, simulated proposal/acceptance,
+  offline reload, five visible candidates and no horizontal overflow.
+- `git diff --check`: passed. This is a synthetic demo, not a real-person,
+  real-consent, Workbase integration or production-release verification.
+
 ## Source and ownership
 
 - ProofMatch base/current HEAD: `92d3f48efe94c9547a77963371f49102bee4fb61`.
