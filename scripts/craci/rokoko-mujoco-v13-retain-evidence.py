@@ -24,6 +24,7 @@ COMPLETE_PROOFS = ("manifest.json", "paired-readout.json",
                    "independent-qualification.json")
 PARTIAL_SOURCES = ("partial_training.json", "full_transitions.jsonl.gz")
 PARTIAL_PROOFS = ("early_stop.json",)
+QUARANTINE = "quarantine.json"
 CHUNK_BYTES = 6 * 1024 * 1024
 MAX_FILE_BYTES = 20 * 1024 * 1024
 MAX_COLLECTOR_BYTES = 63 * 1024 * 1024
@@ -110,8 +111,9 @@ def complete_source_proof(private):
 
 
 def incomplete_source_proof(private):
-    require(set(p.name for p in private.iterdir()) ==
-            set(PARTIAL_SOURCES + PARTIAL_PROOFS),
+    names = set(p.name for p in private.iterdir())
+    sources = PARTIAL_SOURCES + ((QUARANTINE,) if QUARANTINE in names else ())
+    require(names == set(sources + PARTIAL_PROOFS),
             "V13_INCOMPLETE_PARTIAL_ORIGINALS_AND_STOP_ONLY")
     stop = json_file(private / "early_stop.json")
     partial = json_file(private / "partial_training.json")
@@ -129,8 +131,8 @@ def incomplete_source_proof(private):
             stop.get("promotion_authorized") is False and
             partial.get("promotion_authorized") is False and
             partial.get("no_automatic_retry_or_seed_fishing") is True and
-            set(hashes) == set(PARTIAL_SOURCES) and
-            all(sha(private / name) == hashes[name] for name in PARTIAL_SOURCES),
+            set(hashes) == set(sources) and
+            all(sha(regular(private / name)) == hashes[name] for name in sources),
             "V13_PARTIAL_CANNOT_PRETEND_COMPLETE_ORIGINAL_RUN")
     validate_original_rows(partial, partial["complete_real_trial_rows"], private)
     return stop["executed_head"], hashes
@@ -203,9 +205,11 @@ def verify_reassembled(published, manifest):
         require(sha(published / name) == expected and
                 (published / name).stat().st_size < MAX_FILE_BYTES,
                 "V13_SMALL_SOURCE_PROOF_REBOUND_OR_OVERSIZED")
-    require(len(manifest["sources"]) == 2 and
-            set(src["name"] for src in manifest["sources"]) ==
-            set(PARTIAL_SOURCES if "partial_training.json" in manifest["original_sha256"] else COMPLETE_SOURCES),
+    source_names = set(src["name"] for src in manifest["sources"])
+    allowed_sources = (set(PARTIAL_SOURCES), set(PARTIAL_SOURCES) | {QUARANTINE}) if partial else (set(COMPLETE_SOURCES),)
+    require(source_names in allowed_sources and
+            source_names <= set(manifest["original_sha256"]) and
+            len(manifest["sources"]) == len(source_names),
             "V13_LOSSLESS_UNEXPECTED_PRIVATE_ORIGINAL_SET")
     size = sum((published / name).stat().st_size for name in
                manifest["proof_sha256"])
@@ -321,13 +325,15 @@ def publish_qualified(private, collector):
 
 
 def publish_early_stop(private, collector):
+    sources = PARTIAL_SOURCES + ((QUARANTINE,) if (Path(private) / QUARANTINE).exists() else ())
     return _publish(private, collector, "INCOMPLETE_STOP",
-                    PARTIAL_SOURCES, PARTIAL_PROOFS, incomplete_source_proof)
+                    sources, PARTIAL_PROOFS, incomplete_source_proof)
 
 
 def failure_source_proof(private):
     names = set(p.name for p in private.iterdir())
-    sources, proofs = ((PARTIAL_SOURCES, (*PARTIAL_PROOFS, "failure.json"))
+    partial_sources = PARTIAL_SOURCES + ((QUARANTINE,) if QUARANTINE in names else ())
+    sources, proofs = ((partial_sources, (*PARTIAL_PROOFS, "failure.json"))
                        if "partial_training.json" in names else
                        (COMPLETE_SOURCES, ("manifest.json", "paired-readout.json", "failure.json")))
     require(names == set(sources + proofs), "V13_FAILURE_EXACT_RAW_SOURCE_SET_REQUIRED")
@@ -341,7 +347,8 @@ def failure_source_proof(private):
 
 def publish_failure(private, collector):
     partial = (Path(private) / "partial_training.json").exists()
+    partial_sources = PARTIAL_SOURCES + ((QUARANTINE,) if (Path(private) / QUARANTINE).exists() else ())
     return _publish(private, collector, "UNQUALIFIED_FAILURE",
-                    PARTIAL_SOURCES if partial else COMPLETE_SOURCES,
+                    partial_sources if partial else COMPLETE_SOURCES,
                     (*PARTIAL_PROOFS, "failure.json") if partial else
                     ("manifest.json", "paired-readout.json", "failure.json"), failure_source_proof)
