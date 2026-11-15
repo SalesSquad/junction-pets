@@ -26,6 +26,7 @@ MODEL="82cfa42ba2240aff6d00ec3e2b15c06d78386d3c0682986a23e478977f2dbf9e"
 PLAN="8074f8f8978e2e55bdf201eeb9713888e44befe1d93856da44c1830bb86cfc48"
 ARMS=("frozen_v5","v12_phase_dwell_supported_actions",
       "v12_right_side_action4_exploration_train_only")
+TRACE_SCHEMA="craci.rokoko.mujoco.v12.public-trajectory-index.v1"
 
 def demand(value,reason):
     if not value:raise AssertionError(reason)
@@ -160,6 +161,64 @@ def derive_public_cohort(scans):
     selected=sorted([*near,*clear],key=lambda r:r["seed"])
     demand(len(selected)==48,"FRESH_COHORT_HANDPICKED_OR_UNDERFILLED")
     return selected
+
+
+def build_public_trajectory_index(training):
+    """Frozen hashes/identifiers only; intentionally excludes private 18D traces.
+
+    Valid only after `audit` independently verifies the original full stream.
+    Policy counterfactuals or outcomes cannot be inferred from these digests.
+    """
+    demand(training["executed_head"]==SOURCE and
+           training["model_sha256"]==MODEL and training["plan_sha256"]==PLAN,
+           "TRAJECTORY_INDEX_SOURCE_MISMATCH")
+    selected=derive_public_cohort(training["all_512_public_initial_scans"])
+    expected={s["seed"]:s["world_hash"] for s in selected}
+    cohorted={row["seed"]:row["world_hash"] for row in training["cohort"]}
+    demand(cohorted==expected and len(training["cohort"])==48,
+           "TRAJECTORY_INDEX_COHORT_BAD")
+    trials={}
+    for row in training["trials"]:
+        key=(row["seed"],row["strategy"])
+        digest=row["full_transition_sha256"]
+        demand(key not in trials and row["seed"] in expected and
+               row["strategy"] in ARMS and row["world_hash"]==expected[row["seed"]] and
+               isinstance(digest,str) and len(digest)==64 and
+               all(c in "0123456789abcdef" for c in digest),
+               "TRAJECTORY_INDEX_TRIAL_OR_DIGEST_BAD")
+        trials[key]=digest
+    expected_keys={(seed,arm) for seed in expected for arm in ARMS}
+    demand(set(trials)==expected_keys and len(trials)==144,
+           "TRAJECTORY_INDEX_TRIAL_GRID_BAD")
+    return {
+       "schema":TRACE_SCHEMA,
+       "hosted_run":43657058944,
+       "artifact_zip_sha256":EXPECTED_ARTIFACT_SHA,
+       "executed_product_head":SOURCE,
+       "executed_harness_head":HARNESS,
+       "train_only":True,
+       "contains_original_18d_observations":False,
+       "contains_original_mask_or_action_history":False,
+       "worlds":[{"seed":seed,"world_hash":expected[seed]} for seed in sorted(expected)],
+       "trajectories":[{"seed":seed,"strategy":arm,
+                        "full_transition_sha256":trials[(seed,arm)]}
+                       for seed in sorted(expected) for arm in ARMS],
+    }
+
+
+def check_public_trajectory_index(path,index):
+    demand(path.is_file() and not path.is_symlink() and
+           path.read_bytes()==canonical(index)+b"\n",
+           "PUBLIC_TRAJECTORY_INDEX_MISSING_OR_DRIFTED")
+
+
+def exclusive_output(target,data,artifact_zip,extracted_root):
+    demand(not target.is_symlink() and
+           not target.resolve().is_relative_to(extracted_root.resolve()) and
+           target.resolve()!=artifact_zip.resolve(),
+           "EVIDENCE_MUST_NEVER_BE_OVERWRITTEN")
+    with target.open("xb") as output:
+        output.write(data)
 
 
 def validate_terminal_goal250(row,events):
@@ -382,17 +441,25 @@ if __name__=="__main__":
     parser.add_argument("extracted_wrapper_root",type=Path)
     parser.add_argument("--output-summary",type=Path,
                         help="optional NEW file outside the original evidence directory")
+    parser.add_argument("--write-trajectory-index",type=Path,
+                        help="write NEW public hash index, exclusively outside original evidence")
+    parser.add_argument("--verify-trajectory-index",type=Path,
+                        help="byte-verify a pre-existing canonical public hash index")
     args=parser.parse_args()
     result=audit(args.original_artifact_zip,args.extracted_wrapper_root)
     encoded=canonical(result)+b"\n"
     if args.output_summary:
-        target=args.output_summary
-        demand(not target.is_symlink() and
-               not target.resolve().is_relative_to(args.extracted_wrapper_root.resolve()) and
-               target.resolve()!=args.original_artifact_zip.resolve(),
-               "EVIDENCE_MUST_NEVER_BE_OVERWRITTEN")
-        with target.open("xb") as output:
-            output.write(encoded)
+        exclusive_output(args.output_summary,encoded,args.original_artifact_zip,
+                         args.extracted_wrapper_root)
+    if args.write_trajectory_index or args.verify_trajectory_index:
+        originals=unpack(args.original_artifact_zip,args.extracted_wrapper_root)[-1]
+        index=build_public_trajectory_index(json.loads(originals["training.json"]))
+        if args.verify_trajectory_index:
+            check_public_trajectory_index(args.verify_trajectory_index,index)
+        if args.write_trajectory_index:
+            exclusive_output(args.write_trajectory_index,canonical(index)+b"\n",
+                             args.original_artifact_zip,args.extracted_wrapper_root)
+        print("canonical_public_trajectory_index_sha256="+sha(canonical(index)+b"\n"))
     print(json.dumps({k:result[k] for k in
           ("science","paired_real_muJoCo_3_3_7_episodes","real_public_18D_seven_mask_events",
            "baseline_safe_goal250","candidate_safe_goal250","explore_safe_goal250",
