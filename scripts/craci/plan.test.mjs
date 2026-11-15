@@ -89,3 +89,22 @@ test('V12 source-trained 144-episode fresh pilot source and deadline are exact i
     ...context, now: '2026-11-15T17:00:00Z'
   }), /deadline/);
 });
+
+test('V13 causal original TRAIN admission is a single pinned source and never automatic promotion', () => {
+  const workload = 'rokoko-mujoco-v13-causal';
+  const exactSource = '0751d78b93855bf70820b03b0a543e123d218baf';
+  assert.ok(WORKLOADS.includes(workload));
+  assert.throws(() => resolvePlan({workload}, context), /requires an explicit source_sha/);
+  const plan = resolvePlan({workload, source_sha: exactSource}, context);
+  assert.equal(plan.jobCount, 1);
+  assert.equal(plan.maxParallel, 1);
+  assert.deepEqual(plan.matrix.include.map(x => x.source_sha), [exactSource]);
+  assert.deepEqual(plan.matrix.include.map(x => x.cell), [workload]);
+  assert.deepEqual(plan.matrix.include.map(x => x.qualification), ['product-source']);
+  assert.throws(() => resolvePlan({workload, source_sha: exactSource}, {
+    ...context, creditOpen: 'false',
+  }), /closed/);
+  assert.throws(() => resolvePlan({workload, source_sha: exactSource}, {
+    ...context, now: '2026-11-15T17:00:00Z',
+  }), /deadline/);
+});
