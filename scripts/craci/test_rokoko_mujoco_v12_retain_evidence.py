@@ -159,6 +159,46 @@ class V12RetentionTests(unittest.TestCase):
             self.assertFalse((collector / "independent-qualification.json").exists())
             self.assertEqual(len(receipt["sources"]), 2)
 
+    def test_final_144th_train_only_right4_lost_v5_goal_preserves_originals(self):
+        """P1: the last executed RIGHT4 may lose V5 goal; never lose raw evidence."""
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            original = incomplete_fixture(base)
+            arms = ("frozen_v5", "v12_phase_dwell_supported_actions",
+                    "v12_right_side_action4_exploration_train_only")
+            rows = []
+            with gzip.open(original / "full_transitions.jsonl.gz", "wt",
+                           encoding="utf8") as out:
+                for index in range(144):
+                    row = {"seed": 518000 + index // 3,
+                           "strategy": arms[index % 3],
+                           "full_transition_count": 1}
+                    rows.append(row)
+                    out.write(json.dumps({"seed": row["seed"],
+                        "strategy": row["strategy"],
+                        "transitions": [{"mask": [1, 0, 0, 0, 0, 0, 0],
+                                         "action": 0}]}) + "\n")
+            reason = "TRAIN_ONLY_RIGHT4_LOST_ACTUAL_FROZEN_V5_GOAL"
+            partial = json.loads((original / "partial_training.json").read_text())
+            partial.update(stop_reason=reason, real_completed_episodes=144,
+                raw_real_option_transitions=144, complete_real_trial_rows=rows)
+            save(original / "partial_training.json", partial)
+            stop = json.loads((original / "early_stop.json").read_text())
+            stop["reason"] = reason
+            stop["completed_episodes"] = 144
+            stop["raw_sha256"] = {n: pack.sha(original / n)
+                                  for n in pack.PARTIAL_SOURCES}
+            save(original / "early_stop.json", stop)
+            collector = base / "collector"
+            report = pack.publish_early_stop(original, collector)
+            self.assertEqual(report["exact_source_sha"], "b" * 40)
+            receipt = json.loads((collector / "retention-manifest.json").read_text())
+            self.assertEqual(receipt["status"], "INCOMPLETE_STOP")
+            self.assertEqual(receipt["original_sha256"]["full_transitions.jsonl.gz"],
+                             pack.sha(original / "full_transitions.jsonl.gz"))
+            self.assertFalse((collector / "independent-qualification.json").exists())
+            self.assertEqual(len(receipt["sources"]), 2)
+
     def test_partial_dropped_raw_trace_is_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
             base = Path(folder)
@@ -199,6 +239,27 @@ class V12RetentionTests(unittest.TestCase):
             original = incomplete_fixture(Path(folder))
             with self.assertRaisesRegex(AssertionError, "NEW_SEPARATE_PRIVATE"):
                 pack.publish_early_stop(original, original / "collector")
+
+    def test_symlinked_alias_to_private_root_cannot_hide_collector_inside_it(self):
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            original = incomplete_fixture(base)
+            alias = base / "private-alias"
+            alias.symlink_to(original, target_is_directory=True)
+            with self.assertRaisesRegex(AssertionError, "NEW_SEPARATE_PRIVATE"):
+                pack.publish_early_stop(original, alias / "collector")
+            self.assertFalse((original / "collector").exists())
+
+    def test_dangling_collector_symlink_is_not_a_new_directory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            original = incomplete_fixture(base)
+            target = base / "missing-collector"
+            alias = base / "collector-link"
+            alias.symlink_to(target, target_is_directory=True)
+            with self.assertRaisesRegex(AssertionError, "NEW_SEPARATE_PRIVATE"):
+                pack.publish_early_stop(original, alias)
+            self.assertFalse(target.exists())
 
 
 if __name__ == "__main__":
