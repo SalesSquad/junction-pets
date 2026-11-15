@@ -55,6 +55,49 @@ function adapt(kind, file, text) {
     text = replaceOnce(text, 'href="/" class="brand"', 'href="./index.html" class="brand"');
     return replaceOnce(text, '<meta charset="utf-8">', `<meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
   }
+  if (kind === 'stoa' && file === 'public/index.html') {
+    text = replaceOnce(text, 'href="/style.css"', 'href="./style.css"');
+    text = replaceOnce(text, 'src="/app.js"', 'src="./app.js"');
+    text = replaceOnce(text, 'inspect its original source region.', 'inspect its original source region. Drawings stay in this browser; the example is synthetic. This version supports exact room labels, validated room areas and unit outlines; other questions are refused.');
+    return replaceOnce(text, '<head>', `<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
+  }
+  if (kind === 'stoa' && file === 'public/app.js') return `import {createStoaLocalApi} from '../adapter/stoa-local-api.mjs';\nconst fetch=createStoaLocalApi();\n${text}`;
+  if (kind === 'stoa' && file === 'src/dxf.mjs') return replaceOnce(text, "Buffer.byteLength(input, 'utf8')", 'new TextEncoder().encode(input).byteLength');
+  if (kind === 'chronicle' && file === 'studio/index.html') {
+    text = replaceOnce(text, 'href="/style.css"', 'href="./style.css"');
+    text = replaceOnce(text, 'src="/app.js"', 'src="./app.js"');
+    text = replaceOnce(text, '<option value="real">Admitted local Wikipedia snapshot</option>', '');
+    text = replaceOnce(text, 'Data never leaves this loopback app.', 'This synthetic demonstration runs in your browser. Live Wikipedia snapshots and MariaDB are not connected.');
+    return replaceOnce(text, '<head>', `<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
+  }
+  if (kind === 'chronicle' && file === 'studio/app.js') return `import {createChronicleLocalApi} from '../adapter/chronicle-local-api.mjs';\nconst fetch=createChronicleLocalApi();\n${text}`;
+  if (kind === 'chronicle' && file === 'src/chronicle.mjs') {
+    text = replaceOnce(text, "import {createHash} from 'node:crypto';", "import {sha256} from '../adapter/fixture-hashes.mjs';");
+    text = replaceOnce(text, "import {admitSnapshot} from './wikipedia.mjs';", "const admitSnapshot=()=>{throw new Error('REAL_SNAPSHOT_UNAVAILABLE_IN_BROWSER');};");
+    return replaceOnce(text, "export const sha256 = s => createHash('sha256').update(s,'utf8').digest('hex');", 'export {sha256};');
+  }
+  if (kind === 'sama' && (file === 'web/index.html' || file === 'web/research.html')) {
+    text = replaceOnce(text, 'href="/icon.svg"', 'href="./icon.svg"');
+    text = replaceOnce(text, 'href="/styles.css"', 'href="./styles.css"');
+    text = replaceOnce(text, file.endsWith('research.html')?'src="/research.mjs"':'src="/app.mjs"', file.endsWith('research.html')?'src="./research.mjs"':'src="./app.mjs"');
+    text = text.replaceAll('href="/"','href="./index.html"');
+    if(file.endsWith('/index.html')) {
+      text = replaceOnce(text,'href="/research.html"','href="./research.html"');
+      text = replaceOnce(text,'<main>','<main><p role="note"><strong>Research demonstration:</strong> patient notes are synthetic; the model outputs and public-data snapshot are saved examples. Live model calls and source verification are unavailable here. Do not enter patient information. Not for clinical decisions.</p>');
+    }
+    return replaceOnce(text,'<head>',`<head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">`);
+  }
+  if (kind === 'sama' && (file === 'web/app.mjs' || file === 'web/research.mjs')) {
+    text = text.replaceAll("fetch('/data/app.json'", "fetch('./data/app.json'").replaceAll("fetch('/data/counties.geo.json'", "fetch('./data/counties.geo.json'");
+    if(file === 'web/app.mjs') {
+      text = replaceOnce(text,"from '/src/decisions.mjs'","from '../src/decisions.mjs'");
+      text = replaceOnce(text,"from '/src/claims.mjs'","from '../src/claims.mjs'");
+      for(const data of ['planner/plans-v1.json','scribe/demo/demo-notes.json','scribe/demo/demo-outputs.json']) text=replaceOnce(text,`fetch('/data/${data}'`,`fetch('../data/${data}'`);
+      for(const endpoint of ['scribe','scribe/second','verify-claims']) text=replaceOnce(text,`fetch('/api/${endpoint}'`,`unavailable('/api/${endpoint}'`);
+      text=`import {unavailable} from '../adapter/unavailable.mjs';\n${text}`;
+    }
+    return text;
+  }
   if (kind === 'roundlens' && file === 'public/index.html') {
     text = replaceOnce(text, 'href="/style.css"', 'href="./style.css"');
     text = replaceOnce(text, 'src="/app.mjs"', 'src="./app.mjs"');
@@ -87,9 +130,7 @@ export async function exportApps(output) {
   await mkdir(target);
   const exported = [];
   for (const app of catalog.apps) {
-    // Valio bundles shared domain modules. Refuse stale source or modified assets
-    // before exporting its browser build; verification needs only Node builtins.
-    if (app.solution === 'valio-trusted-trade') {
+    if (app.solution === 'valio-trusted-trade' && app.directory === 'aimo-trade') {
       const {verifyBrowserBuild} = await import('../../solutions/valio-trusted-trade/browser/verify.mjs');
       await verifyBrowserBuild();
     }
@@ -97,12 +138,45 @@ export async function exportApps(output) {
       const bytes = await readFile(join(root, app.source ?? join('solutions', app.solution), file));
       const dest = join(target, 'apps', app.directory, file);
       await mkdir(dirname(dest), {recursive:true});
-      const data = app.adaptation && (file.endsWith('.html') || file.endsWith('.mjs')) ? adapt(app.adaptation, file, bytes.toString('utf8')) : bytes;
+      const data = app.adaptation && (file.endsWith('.html') || file.endsWith('.mjs') || file.endsWith('.js')) ? adapt(app.adaptation, file, bytes.toString('utf8')) : bytes;
       await writeFile(dest, data, {flag:'wx'});
     }
-    if (app.solution === 'valio-trusted-trade') {
-      const {verifyBrowserBuild} = await import('../../solutions/valio-trusted-trade/browser/verify.mjs');
-      await verifyBrowserBuild({distRoot:join(target,'apps',app.directory,'browser/dist')});
+    if (app.adaptation === 'stoa') {
+      const dest=join(target,'apps',app.directory,'adapter/stoa-local-api.mjs');
+      await mkdir(dirname(dest),{recursive:true});
+      await writeFile(dest,await readFile(new URL('./adapters/stoa-local-api.mjs',import.meta.url)),{flag:'wx'});
+    }
+    if (app.adaptation === 'chronicle') {
+      const fixture=JSON.parse(await readFile(join(root,'solutions/mariadb-wikipedia-time/fixtures/synthetic.json'),'utf8'));
+      if (fixture.provenance !== 'SYNTHETIC' || !Array.isArray(fixture.revisions)) throw new Error('Chronicle requires the synthetic fixture');
+      const hashes=Object.fromEntries(fixture.revisions.map(revision=>[revision.body,createHash('sha256').update(revision.body,'utf8').digest('hex')]));
+      const adapterDir=join(target,'apps',app.directory,'adapter');
+      await mkdir(adapterDir,{recursive:true});
+      await writeFile(join(adapterDir,'fixture.mjs'),`export default ${JSON.stringify(fixture)};\n`,{flag:'wx'});
+      await writeFile(join(adapterDir,'fixture-hashes.mjs'),`const hashes=new Map(${JSON.stringify(Object.entries(hashes))});\nexport function sha256(value){if(!hashes.has(value))throw new Error('UNKNOWN_FIXTURE_BODY');return hashes.get(value);}\n`,{flag:'wx'});
+      const server=await readFile(join(root,'solutions/mariadb-wikipedia-time/studio/server.mjs'),'utf8');
+      const start='export function makeCatalog(dataset) {';
+      const end='function json(res, status, body) {';
+      if (server.split(start).length!==2 || server.split(end).length!==2 || server.indexOf(end)<server.indexOf(start)) throw new Error('Chronicle server functions changed');
+      const functions=server.slice(server.indexOf(start),server.indexOf(end));
+      const template=await readFile(new URL('./adapters/chronicle-local-api.mjs',import.meta.url),'utf8');
+      await writeFile(join(adapterDir,'chronicle-local-api.mjs'),replaceOnce(template,'/* STUDIO_FUNCTIONS */',functions),{flag:'wx'});
+    }
+    if (app.adaptation === 'sama') {
+      const dest=join(target,'apps',app.directory,'adapter/unavailable.mjs');
+      await mkdir(dirname(dest),{recursive:true});
+      await writeFile(dest,await readFile(new URL('./adapters/sama-unavailable.mjs',import.meta.url)),{flag:'wx'});
+    }
+    if (app.adaptation === 'valio-planner') {
+      const base=join(target,'apps',app.directory);
+      for(const file of ['procurement-planner.mjs','purchase-units.mjs']) {
+        const dest=join(base,'src',file);
+        await mkdir(dirname(dest),{recursive:true});
+        await writeFile(dest,await readFile(join(root,'solutions/valio-trusted-trade/src',file)),{flag:'wx'});
+      }
+      const {FIXTURE_CATALOG}=await import(pathToFileURL(join(root,'solutions/valio-trusted-trade/src/core.mjs')).href);
+      if(!Array.isArray(FIXTURE_CATALOG)||FIXTURE_CATALOG.some(item=>!String(item.sku).startsWith('DEMO-'))) throw new Error('Expected only the fictional Valio fixture');
+      await writeFile(join(base,'valio-planner/fixture.mjs'),`export default ${JSON.stringify(FIXTURE_CATALOG)};\n`,{flag:'wx'});
     }
     if (app.adaptation === 'roundlens') {
       // The embedded client differs from the original local-server package. Its
@@ -114,6 +188,11 @@ export async function exportApps(output) {
       const meta=join(target,'apps',app.directory,'source-meta.mjs');
       const original=await readFile(meta,'utf8');
       await writeFile(meta,`${original}\nexport const EMBEDDED_CLIENT_DIGEST = '${digest}';\n`);
+    }
+    // Verify the bytes actually copied, including their exported manifest.
+    if (app.solution === 'valio-trusted-trade' && app.directory === 'aimo-trade') {
+      const {verifyBrowserBuild} = await import('../../solutions/valio-trusted-trade/browser/verify.mjs');
+      await verifyBrowserBuild({distRoot:join(target,'apps',app.directory,'browser/dist')});
     }
     exported.push({petSlug:app.petSlug,name:app.name,path:`/apps/${app.directory}/${app.entry}`,solution:app.solution});
   }
