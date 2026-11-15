@@ -98,6 +98,9 @@ export function resolvePlan(input, {harnessSha, now = new Date(), creditOpen, re
     // New portable product qualifications have no stale fallback pin; the caller
     // must provide the exact reviewed task commit before CRACI reserves capacity.
     if (!override) throw new Error(`${workload} requires an explicit source_sha`);
+    if (workload === 'rokoko-mujoco-v12-pilot' &&
+        override !== 'c77158f9ae80acc2b1eafaf9284c4397426799b2')
+      throw new Error('V12 pilot requires exact reviewed source_sha');
     add(workload, override, {qualification: 'product-source'});
   } else if (workload === 'immune-tournament') {
     if (override && override !== harnessSha) throw new Error('Immune source must match pinned harness SHA');

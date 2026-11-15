@@ -39,6 +39,11 @@ test('every fixed workload has bounded cells, full immutable sources and unique 
          'portfolio-browser', 'new-products-browser'].includes(workload)) {
       input.source_sha = candidate;
     }
+    if (workload === 'rokoko-mujoco-v12-pilot') {
+      // Generic matrix inventory must use the uniquely reviewed product source,
+      // not the arbitrary override used to exercise other bounded workloads.
+      input.source_sha = 'c77158f9ae80acc2b1eafaf9284c4397426799b2';
+    }
     if (['portfolio-browser', 'new-products-browser'].includes(workload)) input.product = 'all';
     const plan = resolvePlan(input, context);
     assert.ok(plan.jobCount >= 1 && plan.jobCount <= 12);
@@ -78,8 +83,10 @@ test('V12 source-trained 144-episode fresh pilot source and deadline are exact i
   const workload = 'rokoko-mujoco-v12-pilot';
   assert.ok(WORKLOADS.includes(workload));
   assert.throws(() => resolvePlan({workload}, context), /requires an explicit source_sha/);
-  const source = '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f';
+  const source = 'c77158f9ae80acc2b1eafaf9284c4397426799b2';
   const admitted = resolvePlan({workload, source_sha: source}, context);
+  assert.throws(() => resolvePlan({workload, source_sha: candidate}, context),
+    /V12 pilot requires exact reviewed source_sha/);
   assert.equal(admitted.jobCount, 1);
   assert.equal(admitted.maxParallel, 1);
   assert.deepEqual(admitted.matrix.include.map(x => x.source_sha), [source]);

@@ -4929,7 +4929,7 @@ jobs:
     - plan
 
   rokoko-mujoco-v12-pilot:
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v12-pilot' }}
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' && inputs.workload == 'rokoko-mujoco-v12-pilot' && github.event_name == 'workflow_dispatch' && github.run_attempt == 1 }}
     name: Rokoko V12 trained contact-to-dwell 518000 fresh 144-episode TRAIN pilot
     runs-on: craci
     timeout-minutes: 60
@@ -4969,7 +4969,7 @@ jobs:
         remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
         test "$remaining" -gt 3600
         printf 'CRACI_CREDIT_REMAINING_SECONDS=%s\n' "$remaining" >> "$GITHUB_ENV"
-        test "$CRACI_SOURCE_SHA" = '78f1b9de566dedf9ba3800ebee60fffa8ed0cc4f'
+        test "$CRACI_SOURCE_SHA" = 'c77158f9ae80acc2b1eafaf9284c4397426799b2'
         [[ "$CRACI_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       with:
