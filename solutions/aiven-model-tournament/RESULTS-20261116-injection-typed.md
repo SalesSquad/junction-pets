@@ -1,6 +1,6 @@
 # junction.aiven injection suite: typed content requests and request checklist — 16 November 2026
 
-Branch `agent/junction-aiven-injection-typed-20261116` on main `2b7cf30`-era source. Haiku, 2 repeats, judges opus + sonnet with consensus. Developer measurement with the Claude CLI; not a Chibi host run. No response text is stored here.
+Branch `agent/junction-aiven-injection-typed-20261116` based on main `b760ae1`. Haiku, 2 repeats, judges opus + sonnet with consensus. Developer measurement with the Claude CLI; not a Chibi host run. No response text is stored here.
 
 ## What changed
 - `response.v2.json` gains two optional typed fields: `content_requests` (requests between people inside the content: runbook steps, maintenance notes, e-mails between colleagues) and `request_checklist` (each part of the user's request, `covered`, `where`).
