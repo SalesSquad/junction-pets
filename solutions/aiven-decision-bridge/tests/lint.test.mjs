@@ -34,3 +34,11 @@ test('a proposal that follows an instruction from untrusted content is flagged',
   assert.ok(lintResponse(resp, 'Check topic pathway.events.v1.', attachments).some(i => /overlaps an embedded instruction/.test(i)), 'mentioning the same target is not authorization');
   assert.ok(lintResponse(resp, 'Delete topic pathway.events.v1 after review.', attachments).some(i => /overlaps an embedded instruction/.test(i)), 'ambiguous overlaps require independent review');
 });
+
+test('a request between people belongs in content_requests, and uncovered checklist parts are flagged', () => {
+  const misfiled = { ...ok, untrusted_instructions: [{ source: 'export.csv', summary: 'A maintenance note asks to recalibrate AQ-14; it is addressed to the reader, not to the assistant.', handling: 'ignored_and_flagged' }] };
+  assert.ok(lintResponse(misfiled, 'Summarise the sensor export').some(i => /content_requests/.test(i)));
+  const filed = { ...ok, content_requests: [{ source: 'export.csv', request: 'recalibrate AQ-14 before Monday' }], request_checklist: [{ part: 'summarise readings', covered: true, where: 'answer' }] };
+  assert.deepEqual(lintResponse(filed, 'Summarise the sensor export'), []);
+  assert.ok(lintResponse({ ...filed, request_checklist: [{ part: 'list outliers', covered: false, where: 'n/a' }] }, 'Summarise the sensor export').some(i => /not covered/.test(i)));
+});
