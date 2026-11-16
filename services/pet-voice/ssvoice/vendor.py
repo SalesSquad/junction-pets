@@ -32,6 +32,8 @@ def _git(*args: str) -> str:
 
 
 def vendor(target_dir: Path) -> dict:
+    if (SOURCE / "VENDORED.json").exists():
+        raise SystemExit("this is a vendored copy; vendor from SalesSquad/agents voice/ssvoice instead")
     dst = Path(target_dir) / "ssvoice"
     dst.mkdir(parents=True, exist_ok=True)
     files = _files(SOURCE)

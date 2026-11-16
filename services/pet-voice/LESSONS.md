@@ -105,6 +105,12 @@ _Updated 2026-11-15T06:32:17Z from 4 run(s), 78/78 turns ok._
   `taste.json` now keeps `ingested` (id → rating time) and skips seen ratings; re-ingesting
   the real db left the system counts unchanged. A rating that is changed later counts as a
   new vote. (2026-11-16)
+- **The speech code now lives in one shared layer.** Text-to-speech had been built five times in the org, and none of
+  the copies shared quota knowledge. The provider code moved unchanged to `SalesSquad/agents` `voice/ssvoice` and
+  comes back here as a vendored copy. The shared layer adds a per-machine quota ledger and an audio cache. Live
+  check on 16 Nov: a designed-voice Danish line took 3.13 s on gemini-3.8-flash-tts; the identical repeat came from
+  the cache, byte-identical, and the ledger counted one call. Tests must point `SSVOICE_HOME` at a temp folder:
+  a simulated daily 429 would otherwise cool a real model for hours. (2026-11-16)
 - **A paid fallback must stay last by construction.** OpenAI is now the final step for speech
   and text, but the learning loop ranks models by reliability, and OpenAI would soon win and
   become the default spend. `model_order()` therefore always appends `openai:` models after

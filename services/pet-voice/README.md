@@ -9,6 +9,10 @@ speaker's WAV, transcribes it with Gemini audio understanding, answers in its ow
 
 - `pet_voice.py` — stdlib-only CLI: `status`, `say`, `talk` (two pets), `relay` (all pets in a
   ring, each hears the previous one and replies), `learn`.
+- `ssvoice/` — the shared SalesSquad voice layer, vendored (do not edit here; source and docs in
+  `SalesSquad/agents` `voice/`, pin in `ssvoice/VENDORED.json`). It provides Gemini TTS, Live and Voice design,
+  the OpenAI fallback, a per-machine quota ledger (cooling models are tried last) and an audio cache.
+  `python3 -m ssvoice status` shows today's calls per model, cooling models and the cache size.
 - `PLAYBOOK.md` — how to give any agent a voice; Google and OpenAI speech notes.
 - `LESSONS.md` + `learned/voice-scores.json` — the learning loop (see below).
 - `evidence/<run>.json` — text/hash/metric receipts of real runs (no audio).
