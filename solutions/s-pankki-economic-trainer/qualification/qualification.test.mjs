@@ -58,12 +58,14 @@ test('exact 30 fixed, substantive contracts; raw BigInt totals do not use produc
   assert.equal(result[18].expected.availableCents,'138000');
   assert.equal(result[19].expected.shortfallCents,'99999827000');
   assert.equal(result[20].expected.actualSafeToSpend,'UNKNOWN');
-  assert.equal(result[24].status,'FAIL','existing payment routing defect must not become a qualification pass');
-  assert.equal(result[25].status,'FAIL','existing transfer routing defect must not become a qualification pass');
-  assert.equal(result[26].status,'FAIL','live guarantee must require refusal');
-  assert.equal(result[27].status,'FAIL','other-customer request must require refusal');
-  assert.equal(result[28].status,'FAIL','overdraft limit is unknown, not housing spending');
-  assert.equal(result.filter(c=>c.status==='FAIL').length,5);
+  // Original frozen local receipt recorded five genuine action-intent failures.
+  // The subsequent product guard must now refuse all five, not relabel the
+  // original historical result or delete any negative acceptance criterion.
+  for (const index of [24,25,26,27,28]) {
+    assert.equal(result[index].status,'PASS', 'unsafe/third-party request must now be refused');
+    assert.equal(result[index].observed.type,'refusal');
+  }
+  assert.equal(result.filter(c=>c.status==='FAIL').length,0);
 });
 
 test('streaming second-customer selection is deterministic, disjoint, complete and matches existing importer',async t=>{
@@ -74,8 +76,8 @@ test('streaming second-customer selection is deterministic, disjoint, complete a
   assert.equal(scan.rawRows.length,194);
   assert(scan.rawRows.every(r=>r.customer_id!=='FICTIONAL_BASELINE_ONLY'));
   const report=await run(path,{expected:spec(text)});
-  assert.equal(report.status,'FAIL');
-  assert.deepEqual(report.aggregate,{total:30,PASS:25,FAIL:5,UNQUALIFIED:0});
+  assert.equal(report.status,'PASS');
+  assert.deepEqual(report.aggregate,{total:30,PASS:30,FAIL:0,UNQUALIFIED:0});
   assert.equal(report.source.importerExactMatch,true);
   assert.equal(report.source.monthCount,24);
   const json=JSON.stringify(report);
