@@ -102,8 +102,13 @@ def ingest(ratings: list[dict], key: dict, manifest_lines: dict) -> dict:
         taste = json.loads(TASTE_FILE.read_text())
     except (OSError, ValueError):
         taste = {"schema": "junction.pet-voice.taste/v1", "pets": {}, "systems": {}, "voicePreference": {}, "notes": []}
+    seen = taste.setdefault("ingested", {})   # id -> the rating's `at`: the page db keeps every rating, so re-ingesting is a no-op
     for r in ratings:
         rid, choice = r.get("id", ""), r.get("choice")
+        stamp = r.get("at") or json.dumps(r, sort_keys=True, ensure_ascii=False)
+        if seen.get(rid) == stamp:
+            continue
+        seen[rid] = stamp
         if rid in key.get("scenes", {}) and choice in ("X", "Y", "tie"):
             arms = key["scenes"][rid]
             if choice == "tie":
