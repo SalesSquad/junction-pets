@@ -54,8 +54,22 @@ if "PET_VOICE_" not in _config.ENV_PREFIXES:
     _config.ENV_PREFIXES.append("PET_VOICE_")
 EXHAUSTED = _config.EXHAUSTED            # models that returned a per-day quota error in this process
 GEMINI_ONLY = _config.GEMINI_ONLY
-gemini_only, route_filter, gemini_only_failure = _config.gemini_only, route.route_filter, route.gemini_only_failure
-model_order, speak = route.model_order, route.speak
+gemini_only, gemini_only_failure = _config.gemini_only, route.gemini_only_failure
+# Pets speak synthetic companion dialogue, so their requests are public: after free Gemini they may use the OpenAI
+# organization enrolled for complimentary tokens (text only) before any paid call. Never pass private data through here.
+PRIVACY = "public"
+
+
+def route_filter(models: list[str], privacy: str = PRIVACY) -> list[str]:
+    return route.route_filter(models, privacy)
+
+
+def model_order(learned: dict, kind: str, defaults: list[str], override: list[str] | None, privacy: str = PRIVACY) -> list[str]:
+    return route.model_order(learned, kind, defaults, override, privacy)
+
+
+def speak(*a, privacy: str = PRIVACY, **k) -> dict:
+    return route.speak(*a, privacy=privacy, **k)
 
 
 def set_gemini_only(on: bool = True) -> None:

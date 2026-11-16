@@ -238,6 +238,20 @@ class OpenAIFallback(unittest.TestCase):
         self.assertTrue(sent["body"]["text"]["format"]["strict"])
 
 
+    def test_text_only_calls_use_complimentary_tokens_before_paid(self):
+        def no_quota(model, *a, **k):
+            raise pv.ProviderError(429, "RESOURCE_EXHAUSTED", "per day", daily=True)
+        projects = []
+
+        def fake_post(path, timeout=90, payload=None, multipart=None, project="paid"):
+            projects.append(project)
+            reply = {"next": "rokoko", "move": "tease", "why": "quiet too long"}
+            return json.dumps({"output": [{"type": "message", "content": [{"type": "output_text", "text": json.dumps(reply)}]}]}).encode()
+        pv.gemini.call, pv.oa.post = no_quota, fake_post
+        data, model, _ = scene.gen_json("sys", [{"text": "Who speaks next?"}], scene.DIRECT_SCHEMA, "k", [])
+        self.assertEqual((model, data["next"], projects), ("openai-shared:gpt-5.4-mini", "rokoko", ["shared"]))
+
+
 class VoiceSamples(unittest.TestCase):
     def test_thumbs_down_on_a_designed_voice_falls_back_until_redesign(self):
         import tempfile

@@ -20,12 +20,13 @@ OPENAI_PREFIXES = (PAID, SHARED)
 
 
 def route_filter(models: list[str], privacy: str = "private") -> list[str]:
-    """Drop every OpenAI model when gemini-only is on, and the data-sharing project unless the request is public."""
+    """Drop every OpenAI model when gemini-only is on, and the data-sharing route unless the request is public.
+    When the paid key is itself in the data-sharing organization, a private request gets no OpenAI route at all."""
     out = list(models)
     if config.gemini_only():
         out = [m for m in out if not m.startswith(OPENAI_PREFIXES)]
     if privacy != "public":
-        out = [m for m in out if not m.startswith(SHARED)]
+        out = [m for m in out if not m.startswith(OPENAI_PREFIXES if oa.paid_shares_data() else SHARED)]
     return out
 
 

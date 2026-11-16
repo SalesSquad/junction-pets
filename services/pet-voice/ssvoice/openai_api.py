@@ -2,15 +2,19 @@
 
 paid   — the owner's ordinary key (Keychain "OpenAI API Key" / "openai", or OPENAI_API_KEY). Always the last resort,
          behind a per-process call cap (SSVOICE_OPENAI_MAX_CALLS, default 150).
-shared — a separate project with data sharing enabled, whose traffic earns OpenAI's complimentary daily tokens on the
-         listed text models (e.g. gpt-5.4-mini). OpenAI uses that traffic for evaluation and training, so the router
-         only sends `privacy="public"` requests here (synthetic dialogue, demos), never private data. Speech, Realtime
-         and transcription are not on the complimentary list, so this project is text-only. Keychain item
-         "OpenAI API Key (data sharing)" / "openai-shared" (or SSVOICE_OPENAI_SHARED_API_KEY); a daily token budget
-         (SSVOICE_OPENAI_SHARED_DAILY_TOKENS, default 2,000,000 — under the 2.5M lower-tier group) stops it before
-         usage would be billed.
+shared — a project in an organization enrolled for OpenAI's complimentary daily tokens (data sharing on). Its traffic
+         is used by OpenAI for evaluation and training, so the router only sends `privacy="public"` requests here
+         (synthetic dialogue, demos), never private data. Complimentary tokens cover text models only (e.g.
+         gpt-5.4-mini); speech, Realtime and transcription are billed, so this route is text-only. A daily token budget
+         (SSVOICE_OPENAI_SHARED_DAILY_TOKENS, default 2,000,000 — under the 2.5M lower-tier group) stops it before usage
+         would be billed. Key: SSVOICE_OPENAI_SHARED_API_KEY, else the Keychain item named by the setting
+         OPENAI_SHARED_KEYCHAIN ("service|account"), else "OpenAI API Key (data sharing)" / "openai-shared".
 
-SSVOICE_OPENAI=0 disables both; SSVOICE_OPENAI_SHARED=0 disables only the shared project.
+When the paid key itself belongs to the enrolled organization (OPENAI_PAID_SHARES_DATA=1), its text tokens draw on the
+same complimentary pool and its traffic is shared too: the budget then counts both routes, and the router keeps
+private requests off OpenAI entirely.
+
+SSVOICE_OPENAI=0 disables both; SSVOICE_OPENAI_SHARED=0 disables only the shared route.
 gpt-4o-mini-tts on /v1/audio/speech shuts down 6 Jan 2027 (migrate to the Realtime API).
 """
 from __future__ import annotations
@@ -47,6 +51,21 @@ def shared_budget() -> int:
     return int(config.env("OPENAI_SHARED_DAILY_TOKENS", "2000000"))
 
 
+def paid_shares_data() -> bool:
+    """The paid key is in the enrolled organization: its traffic is shared and its tokens use the same pool."""
+    return config.flag("OPENAI_PAID_SHARES_DATA")
+
+
+def shared_tokens_today() -> int:
+    used = ledger.today(PREFIX["shared"])["tokens"]
+    return used + (ledger.today(PREFIX["paid"])["tokens"] if paid_shares_data() else 0)
+
+
+def _keychain(project: str) -> tuple[str, str]:
+    service, _, account = (config.env(f"OPENAI_{project.upper()}_KEYCHAIN") or "|".join(KEYCHAIN[project])).partition("|")
+    return service, account
+
+
 def read_key(project: str = "paid") -> str | None:
     """None disables that project. Never printed or written."""
     if config.env("OPENAI", "1") == "0" or (project == "shared" and config.env("OPENAI_SHARED", "1") == "0"):
@@ -54,7 +73,7 @@ def read_key(project: str = "paid") -> str | None:
     if project not in _KEYS:
         key = (os.environ.get("OPENAI_API_KEY", "") if project == "paid" else config.env("OPENAI_SHARED_API_KEY", "")).strip()
         if not key:
-            service, account = KEYCHAIN[project]
+            service, account = _keychain(project)
             try:
                 r = subprocess.run(["/usr/bin/security", "find-generic-password", "-s", service, "-a", account, "-w"],
                                    capture_output=True, text=True, timeout=20)
@@ -79,13 +98,14 @@ def post(path: str, timeout: float = 90, payload: dict | None = None, multipart:
     key = read_key(project)
     if not key:
         raise ProviderError(0, "NO_KEY", f"OpenAI {project} project disabled: no key")
-    if CALLS["n"] >= max_calls():
+    if project == "paid" and CALLS["n"] >= max_calls():
         raise ProviderError(0, "OPENAI_CAP", f"spend guard: {max_calls()} OpenAI calls in this process", daily=True)
     model = str((payload or {}).get("model") or (multipart[0].get("model") if multipart else "") or path)
     label = PREFIX[project] + model
-    if project == "shared" and ledger.today(PREFIX["shared"])["tokens"] >= shared_budget():
+    if project == "shared" and shared_tokens_today() >= shared_budget():
         raise ProviderError(0, "SHARED_BUDGET", f"complimentary-token budget {shared_budget()} used today", daily=True)
-    CALLS["n"] += 1
+    if project == "paid":
+        CALLS["n"] += 1      # the cap guards paid calls; the shared route is guarded by its token budget
     headers = {"Authorization": f"Bearer {key}"}
     if multipart:
         fields, (fname, blob, mime) = multipart
