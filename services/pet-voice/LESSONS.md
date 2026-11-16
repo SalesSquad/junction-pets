@@ -89,6 +89,22 @@ _Updated 2026-11-15T06:32:17Z from 4 run(s), 78/78 turns ok._
   rejects the voice id), and on this free key each of the two stopped after ~8–10 calls on
   15 Nov. So one day buys about 18 designed-voice lines: 8 of the 10 crash-scene lines and 6
   A/B lines got voiced; the rest waits for the next reset. (2026-11-15)
+- **On the free key, a designed-voice scene takes two days.** After the 08:00 UTC reset on
+  16 Nov, the last crash-scene line (3.8 Flash Lite TTS) and the 3 missing prebuilt A/B lines
+  (3.8 Flash TTS) went through first try. `voice-script` resumes per turn, so a scene voiced
+  across two days needs no glue. Plan designed-voice work in ~18-line days. (2026-11-16)
+- **A voice A/B is only fair on one model.** Both sides of the six A/B pairs use
+  `gemini-3.8-flash-tts` (`--models` pins it, `speak_line(pinned=True)`), so only the voice
+  differs. The page's scene pair (designed voices on 3.8 Flash Lite TTS vs prebuilt voices on
+  Live native audio) changes voice and model together, and its setup text says so. (2026-11-16)
+- **Designed voices are not equally loud.** In the demo re-cut, the per-line segment level
+  ranged ~3x, from Aalto's quiet line to Codex. `demo/build.py` now levels each clip's voiced
+  part to one RMS; the listening page still plays raw levels. (2026-11-16)
+- **The page db keeps every rating, so ingest must be idempotent.** `db_list` returns the
+  15 Nov ties again on every read; running `ingest` twice would have counted them twice.
+  `taste.json` now keeps `ingested` (id → rating time) and skips seen ratings; re-ingesting
+  the real db left the system counts unchanged. A rating that is changed later counts as a
+  new vote. (2026-11-16)
 - **A paid fallback must stay last by construction.** OpenAI is now the final step for speech
   and text, but the learning loop ranks models by reliability, and OpenAI would soon win and
   become the default spend. `model_order()` therefore always appends `openai:` models after

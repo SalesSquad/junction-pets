@@ -1,11 +1,14 @@
 """Junction pets — demo video builder. Frames: HTML -> PNG (Playwright, 1920x1080). Video: one still per slide
 (ffmpeg, fades inside each file), concat -c copy. Audio: one track composed in numpy, muxed with -c:v copy.
 
-Usage: python3 build.py [--audio DIR] [--out DIR]
-  --audio  folder with the listening-page media (night-crash-X/Y-NNN.*, sample-<pet>.*): `listen.py build` output
-  --out    working folder (frames/, segs/, the finished junction-pets-demo.mp4)
+Usage: python3 build.py [--audio DIR] [--scene-audio DIR] [--out DIR]
+  --audio        folder with the listening-page media (night-crash-X/Y-NNN.*, sample-<pet>.*): `listen.py build` output
+  --scene-audio  folder with the scene's own voicing, NNN.mp3|wav (+ NNN.json turn receipts), e.g. a run's turns/ folder
+                 or its WAVs as MP3; without it the scene plays the page's Live prebuilt voicing (night-crash-Y-NNN)
+  --out          working folder (frames/, segs/, the finished junction-pets-demo.mp4)
 Needs ffmpeg, numpy, Playwright + Chrome (CHROME_PATH, else Playwright's own Chromium), and the Inter and
-Noto Sans CJK fonts. The committed junction-pets-demo.mp4 was built on 15 Nov 2026 from the night listening page."""
+Noto Sans CJK fonts. The committed junction-pets-demo.mp4 was built on 16 Nov 2026: night listening page +
+--scene-audio from run v2-demo-crash-0312-designed-20261115 (designed voices, Gemini 3.8 Flash Lite TTS)."""
 import argparse, html, json, os, subprocess, sys, wave
 from pathlib import Path
 import numpy as np
@@ -13,20 +16,41 @@ import numpy as np
 W, H, FPS, SR = 1920, 1080, 30, 48000
 _ap = argparse.ArgumentParser(add_help=False)
 _ap.add_argument("--audio", default=os.environ.get("PET_DEMO_AUDIO", str(Path.home() / "Library/Application Support/JunctionPetVoice/listen-work/page-night/audio")))
+_ap.add_argument("--scene-audio", default=os.environ.get("PET_DEMO_SCENE_AUDIO"))
 _ap.add_argument("--out", default=os.environ.get("PET_DEMO_OUT", "/tmp/junction-pets-demo"))
 _args, _rest = _ap.parse_known_args()
 ROOT, AUD = Path(_args.out), Path(_args.audio)
+SCENE_AUD = Path(_args.scene_audio) if _args.scene_audio else None
 FR, SEG = ROOT / "frames", ROOT / "segs"
 FR.mkdir(parents=True, exist_ok=True)
 SEG.mkdir(parents=True, exist_ok=True)
 
 
-def media(stem: str) -> Path:
+def media(stem: str, folder: Path | None = None) -> Path:
     """The page's clip in whatever format listen.py wrote (.mp3 now, .m4a before 15 Nov)."""
+    folder = folder or AUD
     for ext in ("mp3", "m4a", "wav"):
-        if (AUD / f"{stem}.{ext}").exists():
-            return AUD / f"{stem}.{ext}"
-    raise SystemExit(f"missing audio clip {stem}.* in {AUD}")
+        if (folder / f"{stem}.{ext}").exists():
+            return folder / f"{stem}.{ext}"
+    raise SystemExit(f"missing audio clip {stem}.* in {folder}")
+
+
+def scene_clip(i: int) -> Path:
+    return media(f"{i:03d}", SCENE_AUD) if SCENE_AUD else media(f"night-crash-Y-{i:03d}")
+
+
+def model_name(model: str) -> str:
+    """gemini-3.8-flash-lite-tts -> Gemini 3.8 Flash Lite TTS"""
+    return " ".join({"gemini": "Gemini", "tts": "TTS"}.get(w, w.capitalize() if w.isalpha() else w) for w in model.split("-"))
+
+
+def scene_voicing() -> str:
+    """How the scene on screen was voiced, from the turn receipts when --scene-audio has them."""
+    if not SCENE_AUD:
+        return "voiced with Gemini Live native audio"
+    models = {json.loads(f.read_text()).get("ttsModel", "") for f in SCENE_AUD.glob("*.json")}
+    models.discard("")
+    return "each pet in its own designed voice" + (f" · {', '.join(model_name(m) for m in sorted(models))}" if models else "")
 
 PETS = {
     "bahn-express": ("Bahn", "de-DE", "German", "#e85d5d", "B"),
@@ -38,7 +62,7 @@ PETS = {
 }
 CAST = list(PETS)
 
-SCENE = [  # v2 scene engine, demo-crash-0312 (text run v2, voiced with Gemini Live native audio)
+SCENE = [  # v2 scene engine, demo-crash-0312 (text run v2; voicing from --scene-audio, else the page's Live prebuilt clips)
     ("bahn-express", "Es ist 03:12. Codex hinkt hinter dem Fahrplan. Achtung.", "It's 03:12. Codex is behind schedule. Attention.", None),
     ("openai-codex", "Schedule's a rumor anyway. Hand me that stack trace.", None, None),
     ("google-deepmind", "Fascinating. What falsifies the telemetry?", None, None),
@@ -148,17 +172,19 @@ def build_slides():
         '<div class="stat">86 % of lines followed one template. Every pet sounded like the same assistant.</div></div>',
         9.4, (media("night-crash-X-000"), 0.9, 0.0, None))
     add("after", '<div class="wrap"><div class="k green">After</div><h2>Character bibles, a director, a critic and memory</h2>'
-        '<div class="lead">Same scene, same voices. New writing — every pet has a want, a flaw, a way of speaking, '
-        'opinions and relationships with the others.</div></div>', 5.2)
+        + ('<div class="lead">Same scene, new writing — every pet has a want, a flaw, a way of speaking, opinions and '
+           'relationships with the others. And now each pet speaks in a voice designed for it.</div></div>' if SCENE_AUD else
+           '<div class="lead">Same scene, same voices. New writing — every pet has a want, a flaw, a way of speaking, '
+           'opinions and relationships with the others.</div></div>'), 5.2 if not SCENE_AUD else 6.2)
     cast = "".join(f'<div class="who" style="gap:18px">{av(s, 70)}<div><div class="n" style="font-size:32px">{PETS[s][0]}</div>'
                    f'<div class="l" style="font-size:20px;margin-top:8px">{PETS[s][1]}</div></div></div>' for s in CAST)
     add("setup", '<div class="wrap"><div class="k">Scene · 03:12</div><h2>The demo crashed in front of a mentor. Judges see it at 09:00.</h2>'
         '<div class="lead">Cold pizza. A humanoid robot on its side on the floor. One laptop still open.</div>'
-        '<div class="small">Lines written in character by Gemini 3.5 Flash · voiced with Gemini Live native audio</div>'
+        f'<div class="small">Lines written in character by Gemini 3.5 Flash · {e(scene_voicing())}</div>'
         f'<div style="display:flex;gap:44px;margin-top:64px;flex-wrap:wrap">{cast}</div></div>', 6.4)
     for i, (slug, text, tr, beat) in enumerate(SCENE):
         n, code, lang, c, ini = PETS[slug]
-        f = media(f"night-crash-Y-{i:03d}")
+        f = scene_clip(i)
         d = probe(f)
         b = f'<div class="beat" style="--c:{c}">{e(beat)}</div>' if beat else ""
         body = (f'<div class="top">03:12 — the demo crashed</div><div class="wrap">{b}<div class="who">{av(slug)}<div><div class="n">{n}</div>'
@@ -245,6 +271,14 @@ def encode():
                     str(ROOT / "video.mp4")], check=True)
 
 
+def level(x, target=3500.0):
+    """Even out clip loudness (designed voices differ by ~3x): the voiced part to one RMS, never past full scale."""
+    voiced = x[np.abs(x) > 300]
+    if len(voiced) < SR // 10:
+        return x
+    return x * min(target / np.sqrt((voiced ** 2).mean()), 0.95 * 32767 / np.abs(x).max())
+
+
 def decode(f, start=0.0, dur=None):
     cmd = ["ffmpeg", "-loglevel", "error", "-ss", str(start)] + (["-t", str(dur)] if dur else []) + \
           ["-i", str(f), "-f", "s16le", "-ac", "1", "-ar", str(SR), "-"]
@@ -262,7 +296,7 @@ def audio():
     for name, _, dur, a, _ in SLIDES:
         if a:
             f, at, cs, cd = a
-            x = decode(f, cs, cd)
+            x = level(decode(f, cs, cd))
             i = int((t + at) * SR)
             track[i:i + len(x)] += x
         t += frames_to_n(dur) / FPS

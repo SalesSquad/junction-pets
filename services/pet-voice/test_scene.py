@@ -274,6 +274,10 @@ class Taste(unittest.TestCase):
                 self.assertEqual(t["pets"]["rokoko"]["liked"], ["Robotten danser."])
                 self.assertEqual(scene.voice_for("rokoko"), pv.load_voices()["rokoko"]["voice"])  # prebuilt preferred
                 self.assertIn("Robotten danser.", scene.system_prompt("rokoko", ["rokoko"], "da-DK", []))
+                again = listen.ingest([{"id": "p1", "choice": "X", "reasons": ["hauskempi"], "lines": {"p1-X-3": "up"}, "note": "Lisää tätä"}],
+                                      key, lines)
+                self.assertEqual(again["systems"]["v2"]["wins"], 1)   # the db keeps old ratings: re-ingesting must not count twice
+                self.assertEqual(again["reasons"]["hauskempi"], 1)
             finally:
                 listen.TASTE_FILE, scene.TASTE_FILE = orig_l, orig_s
 
