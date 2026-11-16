@@ -111,6 +111,13 @@ _Updated 2026-11-15T06:32:17Z from 4 run(s), 78/78 turns ok._
   check on 16 Nov: a designed-voice Danish line took 3.13 s on gemini-3.8-flash-tts; the identical repeat came from
   the cache, byte-identical, and the ledger counted one call. Tests must point `SSVOICE_HOME` at a temp folder:
   a simulated daily 429 would otherwise cool a real model for hours. (2026-11-16)
+- **OpenAI's complimentary tokens apply per organization, so check the key's org first.** The owner's enrolled org
+  turned out to be the same one that holds the existing paid fallback key (Keychain `OpenAI API Key`), found with a
+  free `GET /v1/models` sent with the `OpenAI-Organization` header. A key from another org answered
+  `mismatched_organization`. The shared route therefore points at that Keychain item, and `OPENAI_PAID_SHARES_DATA=1`
+  keeps private requests off OpenAI. Pet-voice's text-only calls (director, critic, memory) use the route after
+  free Gemini. Writer calls carry audio, so they still go to the paid route, which transcribes the audio. First
+  live call: gpt-5.4-mini, 3.95 s, 114 tokens. (2026-11-16)
 - **A paid fallback must stay last by construction.** OpenAI is now the final step for speech
   and text, but the learning loop ranks models by reliability, and OpenAI would soon win and
   become the default spend. `model_order()` therefore always appends `openai:` models after
