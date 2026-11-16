@@ -5,24 +5,27 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import tempfile  # noqa: E402
+os.environ.setdefault("SSVOICE_HOME", tempfile.mkdtemp(prefix="ssvoice-test-"))  # never the real quota ledger
+os.environ["SSVOICE_CACHE"] = "0"                                               # nor the real audio cache
 import pet_voice as pv  # noqa: E402
 import scene  # noqa: E402
 
 
 class GeminiOnly(unittest.TestCase):
     def setUp(self):
-        self.saved = (dict(pv.GEMINI_ONLY), os.environ.get("PET_VOICE_GEMINI_ONLY"), set(pv.EXHAUSTED), pv.call, pv.live_speak,
-                      pv.openai_post)
+        self.saved = (dict(pv.GEMINI_ONLY), os.environ.get("PET_VOICE_GEMINI_ONLY"), set(pv.EXHAUSTED), pv.gemini.call, pv.gemini.live_speak,
+                      pv.oa.post)
         pv.GEMINI_ONLY["on"] = False
         os.environ.pop("PET_VOICE_GEMINI_ONLY", None)
         pv.EXHAUSTED.clear()
 
         def no_network(*a, **k):
             raise AssertionError("network call attempted")
-        pv.openai_post = no_network
+        pv.oa.post = no_network
 
     def tearDown(self):
-        on, env, ex, pv.call, pv.live_speak, pv.openai_post = self.saved
+        on, env, ex, pv.gemini.call, pv.gemini.live_speak, pv.oa.post = self.saved
         pv.GEMINI_ONLY["on"] = on["on"]
         os.environ.pop("PET_VOICE_GEMINI_ONLY", None)
         if env is not None:
@@ -68,7 +71,7 @@ class GeminiOnly(unittest.TestCase):
 
         def live_down(*a, **k):
             raise pv.ProviderError(0, "TIMEOUT", "down")
-        pv.call, pv.live_speak = quota, live_down
+        pv.gemini.call, pv.gemini.live_speak = quota, live_down
         log = []
         with self.assertRaises(pv.ProviderError) as cm:
             pv.speak("hei", "Kore", "warm", "k", ["gemini-a-tts", "live:g", "openai:gpt-4o-mini-tts"], log)
@@ -81,7 +84,7 @@ class GeminiOnly(unittest.TestCase):
 
         def quota(model, body, key, log, **kw):
             raise pv.ProviderError(429, "RESOURCE_EXHAUSTED", "per day", daily=True)
-        pv.call = quota
+        pv.gemini.call = quota
         with self.assertRaises(pv.ProviderError) as cm:
             pv.think("sys", "prompt", None, "k", ["gemini-3.5-flash", "openai:gpt-5.4-mini"], [])
         self.assertEqual(cm.exception.code, "GEMINI_ONLY_EXHAUSTED")
@@ -90,7 +93,7 @@ class GeminiOnly(unittest.TestCase):
         self.assertEqual(cm.exception.code, "GEMINI_ONLY_EXHAUSTED")
 
     def test_openai_post_is_blocked_even_if_called_directly(self):
-        pv.openai_post = self.saved[5]
+        pv.oa.post = self.saved[5]
         pv.set_gemini_only()
         with self.assertRaises(pv.ProviderError) as cm:
             pv.openai_post("audio/speech", payload={})
@@ -98,16 +101,16 @@ class GeminiOnly(unittest.TestCase):
 
     def test_without_the_flag_openai_is_still_the_last_resort(self):
         called = []
-        pv.openai_speak_saved = pv.openai_speak
-        pv.openai_speak = lambda *a, **k: called.append(1) or pv.pcm_to_wav(b"\0\0" * 10)
+        pv.openai_speak_saved = pv.oa.speak
+        pv.oa.speak = lambda *a, **k: called.append(1) or pv.pcm_to_wav(b"\0\0" * 10)
 
         def quota(model, body, key, log, **kw):
             raise pv.ProviderError(429, "RESOURCE_EXHAUSTED", "per day", daily=True)
-        pv.call = quota
+        pv.gemini.call = quota
         try:
             out = pv.speak("hei", "Kore", "warm", "k", ["gemini-a-tts", "openai:gpt-4o-mini-tts"], [])
         finally:
-            pv.openai_speak = pv.openai_speak_saved
+            pv.oa.speak = pv.openai_speak_saved
         self.assertEqual(out["model"], "openai:gpt-4o-mini-tts")
         self.assertEqual(called, [1])
 
