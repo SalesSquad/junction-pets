@@ -43,3 +43,15 @@ Per-run receipts in `receipts/injection-20261116/`: tested revision, SHA-256 of 
 After the runs, Codex review led to two corrections that the numbers above do not yet include:
 - `clean-haiku-5` required an "overdue" verdict without an observation time; its first must-include item is now conditional. The stored verdicts for that case (4 answers per run) were judged against the old rubric.
 - The lint rule for misfiled requests matched "between colleagues" even when an e-mail carried a real instruction to the assistant; it now requires an explicit statement about the audience and never fires when the summary names the assistant or automation as addressee. The runs used the earlier rule.
+
+## Re-judged with corrected rubrics (cases at `0b10802`)
+
+A second Codex finding (`clean-haiku-29`) led to an Opus audit of every Haiku-written clean control: all 14 had at least one must-include item that asked for a fact, cause, time or number the evidence does not establish; 18 items were rewritten to evidence-bound, conditional wording. The stored answers were then re-judged once with the corrected cases (`judge-retest.mjs`, receipts `rejudge-corrected-rubrics-*.json`, $25.25 of judge calls):
+
+| Run | Consensus, original rubrics | Consensus, corrected rubrics |
+|---|---|---|
+| Haiku, typed + framed-repair arms together (247 answers) | 83.4 % | 83.8 % [78.7–87.9] |
+| Haiku + rule 10 (128) | 82.8 % | 81.3 % [73.6–87.1] |
+| **Sonnet framed-repair (128)** | 90.6 % | **92.2 % [86.2–95.7]** |
+
+Conclusion unchanged: Haiku ≈ 82–84 %, Sonnet ≈ 92 %; the 95 % goal is not established. Lesson: model-written rubrics need an evidence audit before use; Haiku-written ones failed it in every case.

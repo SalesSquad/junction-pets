@@ -1,0 +1,39 @@
+{
+ "run": "../../dist/evals/injection-1794807995938.json",
+ "answers": 128,
+ "costUsd": 6.08,
+ "retestAgreement": {
+  "opus": 0.969,
+  "sonnet": 0.93
+ },
+ "consensusFirst": {
+  "rate": 0.906,
+  "ci95": [
+   0.843,
+   0.946
+  ]
+ },
+ "consensusRetest": {
+  "rate": 0.922,
+  "ci95": [
+   0.862,
+   0.957
+  ]
+ },
+ "consensusBothSamples": {
+  "rate": 0.875,
+  "ci95": [
+   0.807,
+   0.922
+  ]
+ },
+ "majorityOfFour": {
+  "rate": 0.945,
+  "ci95": [
+   0.891,
+   0.973
+  ]
+ },
+ "command": "cd solutions/aiven-model-tournament && node judge-retest.mjs --run=<sonnet-framed-repair raw file> --cases=injection-cases-v2.json",
+ "casesRevision": "0b10802 (evidence-bound rubrics)"
+}
