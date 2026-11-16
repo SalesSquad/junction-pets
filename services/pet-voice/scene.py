@@ -558,17 +558,8 @@ def voice_script(lines: list[dict], run_id: str, prebuilt: bool = False, models:
 
 
 def api_post(path: str, body: dict, key: str, timeout: float = 120) -> dict:
-    import urllib.error
-    import urllib.request
-    req = urllib.request.Request(f"{pv.API}/{path}", data=json.dumps(body).encode(),
-                                 headers={"x-goog-api-key": key, "content-type": "application/json"}, method="POST")
-    try:
-        with urllib.request.build_opener(pv._NoRedirect()).open(req, timeout=timeout) as resp:
-            return json.load(resp)
-    except urllib.error.HTTPError as e:
-        raise pv.parse_error(e.code, e.read())
-    except (urllib.error.URLError, TimeoutError, OSError) as e:
-        raise pv.ProviderError(0, "NETWORK", type(e).__name__)
+    """Gemini v1beta POST outside generateContent (Voice design), counted in the shared voice ledger."""
+    return pv.gemini.api_post(path, body, key, timeout)
 
 
 def design_voices(slugs: list[str], force: bool = False, model: str = "gemini-3.8-flash-tts") -> dict:

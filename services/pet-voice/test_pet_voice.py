@@ -1,11 +1,15 @@
 """Offline checks for pet_voice (no network, no key). Run: python3 -m unittest services/pet-voice/test_pet_voice.py"""
 import json
+import os
 import struct
 import sys
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import tempfile  # noqa: E402
+os.environ.setdefault("SSVOICE_HOME", tempfile.mkdtemp(prefix="ssvoice-test-"))  # never the real quota ledger
+os.environ["SSVOICE_CACHE"] = "0"                                               # nor the real audio cache
 import pet_voice as pv  # noqa: E402
 
 
