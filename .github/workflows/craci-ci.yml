@@ -1,5 +1,8 @@
-# Owner-requested lightweight automatic checks; heavy qualification stays manual.
-# Existing credit-window flag and shutdown remain authoritative.
+# Automatic portable checks on CRACI. Heavy qualification stays manual.
+# Switches: repo variable CRACI_CREDIT_WINDOW_OPEN ('true' admits jobs before runner
+# allocation), CRACI_WINDOW_END (UTC cutoff, overrides the default below) and the
+# optional CRACI_VCPU_MINUTES_BUDGET (stops jobs once the window's usage exceeds it).
+# Optional secret CRACI_API_TOKEN: read-only CRACI API token for the usage check.
 name: CRACI automatic CI
 'on':
   pull_request:
@@ -11,14 +14,15 @@ permissions:
 concurrency:
   group: craci-auto-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+env:
+  CRACI_WINDOW_START: ${{ vars.CRACI_WINDOW_START || '2026-11-16T00:00:00Z' }}
+  CRACI_WINDOW_END: ${{ vars.CRACI_WINDOW_END || '2026-11-30T22:00:00Z' }}
 jobs:
   portable:
     name: Tests, build and dependency security
     if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
     runs-on: craci
     timeout-minutes: 15
-    env:
-      CRACI_WINDOW_END: '2026-11-15T17:00:00Z'
     steps:
       - name: Configure monitored CRACI networking
         uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
@@ -28,21 +32,38 @@ jobs:
           network: |
             default: deny
             presets: [github, npm]
-      - name: Enforce the authorized credit deadline
+            connections:
+              - tls:
+                  serverNamePatterns: [api.craci.com]
+                  ports: [443]
+      - name: Enforce the credit window and usage budget
         shell: bash
+        env:
+          CRACI_API_TOKEN: ${{ secrets.CRACI_API_TOKEN }}
+          BUDGET_MINUTES: ${{ vars.CRACI_VCPU_MINUTES_BUDGET }}
         run: |
           set -euo pipefail
           remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
           # Leave time for the entire 15-minute job and runner teardown.
-          test "$remaining" -gt 960
+          test "$remaining" -gt 960 || { echo "::error::CRACI window ended at $CRACI_WINDOW_END"; exit 1; }
+          if [ -z "$CRACI_API_TOKEN" ]; then echo "No CRACI_API_TOKEN secret: usage check skipped."; exit 0; fi
+          now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          usage=$(curl -fsS --max-time 20 -H "Authorization: Bearer $CRACI_API_TOKEN" \
+            "https://api.craci.com/v1preview1/usage?start=$CRACI_WINDOW_START&end=$now") \
+            || { echo "::warning::CRACI usage API unavailable; window check only."; exit 0; }
+          minutes=$(( $(jq -r '.total.vcpuSeconds' <<<"$usage") / 60 ))
+          echo "CRACI completed-job usage since $CRACI_WINDOW_START: $minutes vCPU-minutes (budget: ${BUDGET_MINUTES:-none})"
+          echo "### CRACI usage: $minutes vCPU-minutes since $CRACI_WINDOW_START (budget ${BUDGET_MINUTES:-none})" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$BUDGET_MINUTES" ] && [ "$minutes" -ge "$BUDGET_MINUTES" ]; then echo "::error::CRACI vCPU-minute budget spent"; exit 1; fi
       - name: Check out the event source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
-      - name: Set up Node 22
+      - name: Set up Node 22 with the npm cache
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
+          cache: npm
       - name: Record source and executor
         shell: bash
         env:
@@ -56,7 +77,7 @@ jobs:
           uname -sm
       - name: Install locked dependencies
         id: dependencies
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --prefer-offline --no-audit --no-fund
       - name: Audit production and development dependencies
         if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
         run: npm audit --audit-level=high
@@ -79,46 +100,3 @@ jobs:
           find dist/site -type f -print0 | LC_ALL=C sort -z | xargs -0 -r sha256sum -- > "$manifest"
           test -s "$manifest"
           sha256sum package-lock.json "$manifest"
-  exa-butler:
-    name: Exa Internet Butler typecheck and tests
-    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
-    runs-on: craci
-    timeout-minutes: 10
-    env:
-      CRACI_WINDOW_END: '2026-11-15T17:00:00Z'
-    steps:
-      - name: Configure monitored CRACI networking
-        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
-        with:
-          size: '2'
-          image: ubuntu-24.04
-          network: |
-            default: deny
-            presets: [github, npm]
-      - name: Enforce the authorized credit deadline
-        shell: bash
-        run: |
-          set -euo pipefail
-          remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
-          test "$remaining" -gt 660
-      - name: Check out the event source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          persist-credentials: false
-      - name: Set up Node 24
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '24'
-      - name: Install locked dependencies
-        id: dependencies
-        working-directory: pets/exa/internet-butler
-        run: npm ci --ignore-scripts
-      - name: Typecheck
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
-        working-directory: pets/exa/internet-butler
-        run: npm run typecheck
-      # No keys and no network beyond GitHub and npm: the tests use recorded and fake services.
-      - name: Run tests
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
-        working-directory: pets/exa/internet-butler
-        run: npm test

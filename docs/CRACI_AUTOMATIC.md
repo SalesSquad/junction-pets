@@ -1,4 +1,31 @@
-# Automatic CRACI checks — 15 November 2026
+# Automatic CRACI checks
+
+## Update 16 November 2026: test-credit window, usage check, leaner runs
+
+The owner supplied a new CRACI test credit (about EUR 10, free) and asked for
+leaner CI that uses the CRACI API. The earlier campaigns were tests.
+
+- **Window from variables.** `CRACI_WINDOW_END` now comes from the repository
+  variable of that name, defaulting to **30 November 2026 22:00 UTC**.
+  `CRACI_CREDIT_WINDOW_OPEN=true` still admits jobs before runner allocation.
+- **Usage check with the API.** With the secret `CRACI_API_TOKEN` (a read-only
+  token from CRACI Settings → API tokens), the portable job reads
+  `GET /v1preview1/usage` since `CRACI_WINDOW_START` (variable, default
+  16 November 00:00 UTC), writes the vCPU-minutes to the job summary and stops
+  when the optional `CRACI_VCPU_MINUTES_BUDGET` variable is reached. Without
+  the secret, or if the API is unavailable, only the window check applies. The
+  job's network policy allows `api.craci.com:443` in addition to GitHub and npm.
+  CRACI's own credit limit remains the hard stop; this check runs after runner
+  allocation.
+- **Fewer runner minutes.** The Exa Internet Butler checks moved to
+  `craci-exa.yml` and run only when `pets/exa/internet-butler/**` or that
+  workflow changes (previously on every PR and push). Both workflows use the
+  `setup-node` npm cache and `npm ci --prefer-offline --no-audit --no-fund`;
+  the separate `npm audit` gate is unchanged.
+
+Historical record of the first window follows.
+
+## 15 November 2026
 
 The owner explicitly restored automatic tests, build and dependency-security
 checks for **SalesSquad/junction-pets**. This is a fresh repository-specific
