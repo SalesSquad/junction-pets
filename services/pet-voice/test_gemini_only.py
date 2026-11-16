@@ -48,7 +48,7 @@ class GeminiOnly(unittest.TestCase):
         self.assertTrue(any(m.startswith("openai:") for m in scene.writer_order()))
         os.environ["PET_VOICE_GEMINI_ONLY"] = "1"
         self.assertTrue(pv.gemini_only())
-        self.assertEqual(scene.writer_order(), [m for m in scene.WRITERS if not m.startswith("openai:")])
+        self.assertEqual(scene.writer_order(), [m for m in scene.WRITERS if not m.startswith(("openai:", "openai-shared:"))])
 
     def test_cli_flag_before_and_after_subcommand(self):
         for argv in (["--gemini-only", "status"], ["status", "--gemini-only"]):

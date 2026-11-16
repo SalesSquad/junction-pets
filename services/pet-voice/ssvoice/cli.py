@@ -1,4 +1,4 @@
-"""python3 -m ssvoice status | say | cache-prune | vendor  (run from voice/ or with voice/ on PYTHONPATH)."""
+"""python3 -m ssvoice status | say | settings | cache-prune | vendor  (run from voice/ or with voice/ on PYTHONPATH)."""
 from __future__ import annotations
 
 import argparse
@@ -14,9 +14,29 @@ DEFAULT_TTS = ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts", "gemini-3.1-
 
 
 def cmd_status(args) -> int:
-    """Keys present (never their values), today's ledger, cooling models, cache size."""
+    """Keys present (never their values), today's ledger, cooling models, cache size, settings."""
     print(json.dumps({"ledger": ledger.summary(), "cache": cache.stats(), "geminiOnly": config.gemini_only(),
-                      "openaiKeys": {p: bool(oa.read_key(p)) for p in ("paid", "shared")}}, ensure_ascii=False, indent=1))
+                      "openaiKeys": {p: bool(oa.read_key(p)) for p in ("paid", "shared")},
+                      "openaiShared": {"tokensToday": oa.shared_tokens_today(), "budget": oa.shared_budget(),
+                                       "paidSharesData": oa.paid_shares_data()},
+                      "settings": config.settings()}, ensure_ascii=False, indent=1))
+    return 0
+
+
+def cmd_settings(args) -> int:
+    """This machine's non-secret settings: pointers to Keychain items and switches, never keys."""
+    if args.action != "show" and (not args.name or (args.action == "set" and args.value is None)):
+        raise SystemExit("usage: settings set NAME VALUE | settings unset NAME | settings show")
+    try:
+        if args.action == "set":
+            data = config.set_setting(args.name, args.value)
+        elif args.action == "unset":
+            data = config.set_setting(args.name, None)
+        else:
+            data = config.settings()
+    except ValueError as e:
+        raise SystemExit(str(e))
+    print(json.dumps({"path": str(config.settings_path()), "settings": data}, ensure_ascii=False, indent=1))
     return 0
 
 
@@ -61,6 +81,11 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--fresh", action="store_true", help="skip the cache")
     s.add_argument("--out", default="say.wav")
     s.set_defaults(fn=cmd_say)
+    st = sub.add_parser("settings", help="e.g. settings set OPENAI_SHARED_KEYCHAIN 'OpenAI API Key|openai'")
+    st.add_argument("action", choices=["show", "set", "unset"])
+    st.add_argument("name", nargs="?")
+    st.add_argument("value", nargs="?")
+    st.set_defaults(fn=cmd_settings)
     p = sub.add_parser("cache-prune")
     p.add_argument("--max-mb", type=float)
     p.set_defaults(fn=cmd_cache_prune)

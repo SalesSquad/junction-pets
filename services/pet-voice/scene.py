@@ -30,7 +30,10 @@ TASTE_FILE = HERE / "learned" / "taste.json"
 SCENE_EVIDENCE = HERE / "scene-evidence"
 # 15 Nov 02:00: both 3.5 models hit their free daily caps after ~8 text scenes; the `flash-lite-latest` alias still
 # answered in ~1 s (3.6-flash daily-capped, 3.7-flash 503, 3.8-flash and flash-latest timed out, others 404).
-WRITERS = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-flash-lite-latest", "openai:gpt-5.4-mini"]  # OpenAI = paid, last
+# Free Gemini first; then OpenAI complimentary tokens (text only: the director, critic and memory calls; a writer call
+# that carries audio skips it); paid OpenAI last.
+WRITERS = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-flash-lite-latest", "openai-shared:gpt-5.4-mini",
+           "openai:gpt-5.4-mini"]
 MOVES = ["react", "answer", "push back", "joke", "tease", "short reaction", "admit doubt", "new idea", "change the subject", "wrap up"]
 
 CRAFT = """How you talk matters more than anything else:
@@ -118,11 +121,16 @@ def gen_json(system: str, parts: list[dict], schema: dict, key: str, log: list, 
     for model in writer_order():
         if model in pv.EXHAUSTED:
             continue
-        if model.startswith("openai:"):
+        if model.startswith(("openai:", "openai-shared:")):
             audio = next((base64.b64decode(p["inlineData"]["data"]) for p in parts if "inlineData" in p), None)
             prompt = "\n".join(p["text"] for p in parts if "text" in p)
+            project, name = ("shared", model.removeprefix("openai-shared:")) if model.startswith("openai-shared:") \
+                else ("paid", model.removeprefix("openai:"))
+            if project == "shared" and audio:
+                continue    # complimentary tokens cover text only; the paid route transcribes the audio
             try:
-                data, latency = pv.openai_json(system, prompt, schema, audio, model.removeprefix("openai:"), log)
+                data, latency = (pv.openai_json(system, prompt, schema, audio, name, log) if project == "paid" else
+                                 pv.openai_json(system, prompt, schema, audio, name, log, project="shared"))
                 return data, model, round(latency, 2)
             except pv.ProviderError:
                 continue
