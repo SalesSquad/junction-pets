@@ -14,12 +14,41 @@ test('export maps each selected pet to a real entry and its browser assets', asy
     const apps = await exportApps(output);
     const catalog = JSON.parse(await readFile(join(output, 'catalog.json'), 'utf8'));
     assert.deepEqual(catalog.apps, apps);
-    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-aalto-university','junction-hostinger','junction-cala','junction-context-dev','junction-stoa','junction-mariadb','junction-astrazeneca','junction-valio-aimo']));
+    assert.deepEqual(new Set(apps.map(app => app.petSlug)), new Set(['junction-arduino','junction-intel','junction-city-of-espoo','junction-rokoko','junction-bahn-express','junction-s-pankki','junction-meta','junction-aalto-university','junction-hostinger','junction-cala','junction-context-dev','junction-stoa','junction-mariadb','junction-astrazeneca','junction-valio-aimo','junction-tieto']));
     assert.equal(apps.find(app=>app.path==='/apps/banker/index.html').petSlug,'junction-s-pankki');
     assert.equal(apps.filter(app=>app.petSlug==='junction-intel').length,2);
     assert.equal(apps.find(app=>app.petSlug==='junction-context-dev').path,'/apps/supplypulse/index.html');
 
     assert.equal(apps.filter(app=>app.petSlug==='junction-valio-aimo').length,2);
+    const tieto=join(output,'apps/earned-trust/desk');
+    const tietoHtml=await readFile(join(tieto,'index.html'),'utf8');
+    assert.match(tietoHtml,/connect-src 'none'/);assert.match(tietoHtml,/Use retained public sample/);
+    const {sampleBase64}=await import(pathToFileURL(join(tieto,'sample.mjs')).href);
+    const originalReceipt=await readFile(new URL('../../tools/earned-trust/verification/evidence/run-003/differential.json',import.meta.url));
+    assert.deepEqual(Buffer.from(sampleBase64,'base64'),originalReceipt);
+    const {importReceipt,gates,declareDecision}=await import(pathToFileURL(join(tieto,'review.mjs')).href);
+    const importedReceipt=await importReceipt(new Uint8Array(originalReceipt));
+    assert.ok(gates(importedReceipt).length>0);
+    assert.equal(declareDecision(importedReceipt,{name:'Demo reviewer',decision:'request-evidence',rationale:'Verify the reported sources.',acknowledged:true}).authentication.reviewerAuthenticated,false);
+    await assert.rejects(importReceipt(new Uint8Array(Buffer.from('{}'))),/Unsupported or altered input/);
+    const elements=new Map();
+    class Element {
+      constructor(){this.listeners={};this.dataset={};this.children=[];this.hidden=false;this.value='';this.files=[];this.textContent='';}
+      addEventListener(name,fn){this.listeners[name]=fn;}
+      append(...nodes){this.children.push(...nodes);this.firstChild=this.children[0];}
+      replaceChildren(){this.children=[];}
+      reset(){} focus(){} scrollIntoView(){}
+    }
+    const documentBefore=globalThis.document;
+    globalThis.document={getElementById:id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);},createElement:()=>new Element()};
+    try {
+      await import(pathToFileURL(join(tieto,'app.mjs')).href);
+      elements.get('example').listeners.click();
+      for(let i=0;i<100&&elements.get('review').hidden;i++)await new Promise(resolve=>setTimeout(resolve,5));
+      assert.equal(elements.get('review').hidden,false);
+      assert.match(elements.get('message').textContent,/Retained fixture bytes matched/);
+      assert.equal(elements.get('review-status').textContent,'REVIEW REQUIRED / NOT VERIFIED');
+    } finally {if(documentBefore===undefined)delete globalThis.document;else globalThis.document=documentBefore;}
     const aimoApp=apps.find(app=>app.path.includes('/aimo-trade/'));
     assert.equal(aimoApp.path,'/apps/aimo-trade/browser/dist/index.html');
     for(const asset of ['index.html','app.js','app.css','export.json','NOTICE.txt'])assert.ok((await readFile(join(output,'apps/aimo-trade/browser/dist',asset))).length>0);

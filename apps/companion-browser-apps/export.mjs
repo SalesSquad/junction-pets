@@ -11,6 +11,18 @@ function replaceOnce(text, before, after) {
   return text.replace(before, after);
 }
 function adapt(kind, file, text) {
+  if (kind === 'earned-trust' && file === 'desk/index.html') {
+    text = replaceOnce(text, 'Choose the retained public sample <strong>run-003/differential.json</strong>. Other packets and altered files are refused.', 'Use the retained public sample below or choose its original <strong>run-003/differential.json</strong> file. Other packets and altered files are refused.');
+    text = replaceOnce(text, '<button id="clear" type="button">Clear local review</button>', '<button id="example" type="button">Use retained public sample</button><button id="clear" type="button">Clear local review</button>');
+    text = replaceOnce(text, 'Choose the original fixture to begin. Nothing is stored or sent.', 'Use the retained sample or choose its original file. Nothing is stored or sent.');
+    return replaceOnce(text, 'Serve this directory on localhost; no internet connection is needed.', 'Open this page in a modern browser; no network connection is needed.');
+  }
+  if (kind === 'earned-trust' && file === 'desk/app.mjs') {
+    text = replaceOnce(text, "$('receipt').addEventListener('change', async () => {\n  clear(); const token = generation, file = $('receipt').files[0];", "async function loadReceipt(file) {\n  clear(); const token = generation;");
+    text = replaceOnce(text, "});\n$('decision-form').addEventListener('submit'", "}\n$('receipt').addEventListener('change', () => { void loadReceipt($('receipt').files[0]); });\n$('example').addEventListener('click', () => { const bytes=Uint8Array.from(atob(sampleBase64), char=>char.charCodeAt(0)); void loadReceipt(new File([bytes], 'differential.json', {type:'application/json'})); });\n$('decision-form').addEventListener('submit'");
+    return `import {sampleBase64} from './sample.mjs';\n${text}`;
+  }
+  if (kind === 'earned-trust' && file === 'desk/review.mjs') return replaceOnce(text, 'Open the desk on localhost in a modern browser.', 'Open the desk over HTTPS or localhost in a modern browser.');
   if (kind === 'proofmatch' && file === 'index.html') return replaceOnce(text, 'Works without internet through the local Node server.', 'The demo uses fictional data in this browser.');
   if (kind === 'proofmatch' && file === 'app.mjs') return replaceOnce(text, 'Offline shell cached on this localhost origin. Proposals remain in memory only.', 'Offline shell cached in this browser. Proposals remain in memory only.');
   if (kind === 'spread' && file === 'index.html') {
@@ -182,6 +194,11 @@ export async function exportApps(output) {
       const dest=join(target,'apps',app.directory,'adapter/unavailable.mjs');
       await mkdir(dirname(dest),{recursive:true});
       await writeFile(dest,await readFile(new URL('./adapters/sama-unavailable.mjs',import.meta.url)),{flag:'wx'});
+    }
+    if (app.adaptation === 'earned-trust') {
+      const bytes=await readFile(join(root,'tools/earned-trust/verification/evidence/run-003/differential.json'));
+      if(createHash('sha256').update(bytes).digest('hex')!=='cb9164598c280eafdbc677c8ad68030a1579b6a0d489add6faab5d06f1052e8e') throw new Error('Earned Trust retained public sample changed');
+      await writeFile(join(target,'apps',app.directory,'desk/sample.mjs'),`export const sampleBase64 = '${bytes.toString('base64')}';\n`,{flag:'wx'});
     }
     if (app.adaptation === 'valio-planner') {
       const base=join(target,'apps',app.directory);

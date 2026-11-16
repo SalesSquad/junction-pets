@@ -34,6 +34,9 @@ on the bundled synthetic fixture only; it has no live Wikipedia or MariaDB
 connection. Both embedded pages block outgoing connections.
 SAMA includes its existing public-data snapshot and synthetic, precomputed
 scribe examples; live model calls and online claim verification are disabled.
+Earned Trust's browser review desk includes its exact retained public sample;
+the SHA-256 allowlist is unchanged and its decisions remain unauthenticated
+demonstrations rather than real repository approvals.
 Trusted Trade's browser planner uses its original portfolio and pack-allocation
 engines with the existing fictional catalog. It cannot approve, order or pay;
 the server-side trade and approval workflow remains a separate local service.
