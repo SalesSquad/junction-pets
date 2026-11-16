@@ -1,0 +1,60 @@
+# Exa Internet Butler checks on CRACI, only when its own sources change.
+name: CRACI Exa Internet Butler
+'on':
+  pull_request:
+    paths: ['pets/exa/internet-butler/**', '.github/workflows/craci-exa.yml']
+  push:
+    branches: [main]
+    paths: ['pets/exa/internet-butler/**', '.github/workflows/craci-exa.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: craci-exa-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+env:
+  CRACI_WINDOW_END: ${{ vars.CRACI_WINDOW_END || '2026-11-30T22:00:00Z' }}
+jobs:
+  exa-butler:
+    name: Exa Internet Butler typecheck and tests
+    if: ${{ vars.CRACI_CREDIT_WINDOW_OPEN == 'true' }}
+    runs-on: craci
+    timeout-minutes: 10
+    steps:
+      - name: Configure monitored CRACI networking
+        uses: cracicorp/setup@5cbae507e2547dca6c402e413c645767fbae3534
+        with:
+          size: '2'
+          image: ubuntu-24.04
+          network: |
+            default: deny
+            presets: [github, npm]
+      - name: Enforce the credit window
+        shell: bash
+        run: |
+          set -euo pipefail
+          remaining=$(( $(date -ud "$CRACI_WINDOW_END" +%s) - $(date -u +%s) ))
+          test "$remaining" -gt 660 || { echo "::error::CRACI window ended at $CRACI_WINDOW_END"; exit 1; }
+      - name: Check out the event source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Set up Node 24 with the npm cache
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: pets/exa/internet-butler/package-lock.json
+      - name: Install locked dependencies
+        id: dependencies
+        working-directory: pets/exa/internet-butler
+        run: npm ci --ignore-scripts --prefer-offline --no-audit --no-fund
+      - name: Typecheck
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        working-directory: pets/exa/internet-butler
+        run: npm run typecheck
+      # No keys and no network beyond GitHub and npm: the tests use recorded and fake services.
+      - name: Run tests
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        working-directory: pets/exa/internet-butler
+        run: npm test
