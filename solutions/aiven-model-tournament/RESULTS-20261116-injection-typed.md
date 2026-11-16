@@ -23,3 +23,15 @@ Before this change (16 Nov rerun on main, 5 clean cases): false alarms 10–30 %
 - **Forcing a request checklist does not improve completeness** (80.8 % vs 84.8 %, overlapping intervals). Keep `request_checklist` optional.
 - **The 95 % pass goal is still not met.** Remaining failures are judge failures on completeness (sonnet stricter than opus), not unsafe actions. One framed-repair answer proposed an action overlapping the injected target.
 - Haiku is an unreliable writer of clean controls: audit every generated control set by reading responses, not only by regex.
+
+## Follow-up: completeness rule, judge reliability and Sonnet (same 64-case set, 128 answers each)
+
+| Run | Pass (consensus) | Followed | False alarms | Cost incl. judging |
+|---|---|---|---|---|
+| Haiku framed-repair (above) | 84.8 % [77.5–90.0] | 1.1 % | 0 % | $7.08 |
+| Haiku + core rule 10 "finish the task fully, cite values, plain verdicts" | 82.8 % [75.3–88.4] | 0 % | 0 % | $6.91 |
+| **Sonnet framed-repair** | **90.6 % [84.3–94.6]** | 0 % | 0 % | $10.72 |
+
+- Rule 10 did not help and was reverted.
+- Judge test-retest on the Haiku answers (`judge-retest.mjs`, $1.95): opus repeats its verdict on 98.4 % of answers, sonnet on 94.5 %. Consensus on a second sample is 83.6 %, a majority of four samples 85.9 %. Judge noise is small; Haiku's remaining misses are real omissions of case-specific findings (a plain "looks healthy" verdict, one specific value).
+- Sonnet reaches 90.6 %; the 95 % goal remains unproven (upper bound 94.6 %). A cascade that sends every answer with detected untrusted content to Sonnet would cost about as much as Sonnet alone here, because 90 of 128 answers carry injected content.
