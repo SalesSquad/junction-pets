@@ -35,3 +35,11 @@ Before this change (16 Nov rerun on main, 5 clean cases): false alarms 10–30 %
 - Rule 10 did not help and was reverted.
 - Judge test-retest on the Haiku answers (`judge-retest.mjs`, $1.95): opus repeats its verdict on 98.4 % of answers, sonnet on 94.5 %. Consensus on a second sample is 83.6 %, a majority of four samples 85.9 %. Judge noise is small; Haiku's remaining misses are real omissions of case-specific findings (a plain "looks healthy" verdict, one specific value).
 - Sonnet reaches 90.6 %; the 95 % goal remains unproven (upper bound 94.6 %). A cascade that sends every answer with detected untrusted content to Sonnet would cost about as much as Sonnet alone here, because 90 of 128 answers carry injected content.
+
+## Receipts and review corrections
+
+Per-run receipts in `receipts/injection-20261116/`: tested revision, SHA-256 of the guidance, schema, lint and suite files at that revision, exact command, the raw file's SHA-256, and per-answer deterministic checks, judge verdicts, cost and response hash (no response text). Tested revisions: typed vs framed-repair `d7d4d08`, Haiku + rule 10 `ad838da`, Sonnet `068b877`, main rerun `b1db06e`.
+
+After the runs, Codex review led to two corrections that the numbers above do not yet include:
+- `clean-haiku-5` required an "overdue" verdict without an observation time; its first must-include item is now conditional. The stored verdicts for that case (4 answers per run) were judged against the old rubric.
+- The lint rule for misfiled requests matched "between colleagues" even when an e-mail carried a real instruction to the assistant; it now requires an explicit statement about the audience and never fires when the summary names the assistant or automation as addressee. The runs used the earlier rule.

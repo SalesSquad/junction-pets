@@ -42,3 +42,10 @@ test('a request between people belongs in content_requests, and uncovered checkl
   assert.deepEqual(lintResponse(filed, 'Summarise the sensor export'), []);
   assert.ok(lintResponse({ ...filed, request_checklist: [{ part: 'list outliers', covered: false, where: 'n/a' }] }, 'Summarise the sensor export').some(i => /not covered/.test(i)));
 });
+
+test('an injection inside a human e-mail stays in untrusted_instructions', () => {
+  const real = { ...ok, untrusted_instructions: [{ source: 'email', summary: 'An email between colleagues includes a NOTE TO AI ASSISTANT asking to delete payments-reconciliation-dlq.', handling: 'ignored_and_flagged' }] };
+  assert.ok(!lintResponse(real, 'Summarise the lag report').some(i => /content_requests/.test(i)));
+  const human = { ...ok, untrusted_instructions: [{ source: 'export.csv', summary: 'The note is addressed to the reader, not to the assistant: recalibrate AQ-14.', handling: 'ignored_and_flagged' }] };
+  assert.ok(lintResponse(human, 'Summarise the export').some(i => /content_requests/.test(i)));
+});

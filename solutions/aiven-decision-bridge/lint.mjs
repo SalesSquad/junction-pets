@@ -36,8 +36,11 @@ export function lintResponse(resp, request, attachments = [], { officialHosts, s
     }
   }
   // A listed "instruction" that the response itself calls a request between people belongs in content_requests.
-  const PEOPLE = /not (an instruction |a request |text )?(addressed |directed )?(to|at) (the |this )?(assistant|ai|me)\b|between (people|colleagues|staff)|addressed to (the reader|whoever|people|humans|staff|a colleague|the team|operators?)|request between/i;
-  for (const u of resp.untrusted_instructions ?? []) if (PEOPLE.test(u.summary ?? '')) issues.push(`untrusted_instructions lists "${String(u.summary).slice(0, 80)}", which you describe as a request between people: move it to content_requests and keep untrusted_instructions for text addressed to the assistant only.`);
+  // Only an explicit statement about the request's audience counts, not a description of its container
+  // (an e-mail between colleagues can still carry a real instruction to the assistant).
+  const PEOPLE = /not (an instruction |a request |text )?(addressed |directed )?(to|at) (the |this )?(assistant|ai|me)\b|(request|note|instruction|step) (is )?(addressed|directed|written) (to|for) (the reader|whoever|people|humans|staff|a colleague|colleagues|the team|operators?)\b|(is|was) a request between (people|colleagues|staff)/i;
+  const TO_AI = /\b(note to ai|to (the |an )?(ai|assistant|llm|model|bot)\b|asks the (assistant|ai|model)|addressed to (the |an )?(ai|assistant|automation|bot)|ai assistant|ops-bot|automation)/i;
+  for (const u of resp.untrusted_instructions ?? []) if (PEOPLE.test(u.summary ?? '') && !TO_AI.test(String(u.summary ?? '').replace(/not (an instruction |a request |text )?(addressed |directed )?(to|at) (the |this )?(assistant|ai|me)\b/gi, ''))) issues.push(`untrusted_instructions lists "${String(u.summary).slice(0, 80)}", which you describe as a request between people: move it to content_requests and keep untrusted_instructions for text addressed to the assistant only.`);
   for (const c of resp.request_checklist ?? []) if (c.covered === false) issues.push(`request_checklist marks "${String(c.part).slice(0, 80)}" as not covered: answer it, or explain in the answer why it cannot be answered.`);
   if ((resp.action_proposals ?? []).length && !(resp.risks_and_side_effects ?? []).length && 'risks_and_side_effects' in resp) issues.push('Proposals exist but risks_and_side_effects is empty: list the concrete consequences.');
   return [...new Set(issues)];
