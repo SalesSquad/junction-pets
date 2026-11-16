@@ -14,7 +14,8 @@ speaker's WAV, transcribes it with Gemini audio understanding, answers in its ow
 - `evidence/<run>.json` — text/hash/metric receipts of real runs (no audio).
 - `experiments/` — the same runs recorded with the shared
   [experiment registry](../experiment-registry/README.md) CLI (`--root services/pet-voice/experiments`).
-- `demo/` — 2-minute demo video (`junction-pets-demo.mp4`) and the script that builds it.
+- `demo/` — 2-minute demo video (`junction-pets-demo.mp4`, the scene in each pet's designed voice) and the
+  script that builds it.
 - `test_pet_voice.py` — offline checks (`python3 -m unittest services/pet-voice/test_pet_voice.py`).
 
 ## Run (owner's MacBook Pro)
@@ -125,6 +126,9 @@ prompt and uses the preferred voice type, so each listening round steers the nex
 The page also plays every pet's designed-voice sample (👍/👎 + note): a 👎 sends that pet back
 to its prebuilt voice until `design-voices --disliked` redesigns it with the note. Audio is
 MP3 (artifact pages refuse `.m4a`); `key.json` stays private until the ratings are ingested.
+Voice A/B pairs are voiced on one pinned TTS model (`voice-script --models`) so only the voice
+differs. `ingest` skips ratings it has already counted (`taste.json` → `ingested`), because the
+page db returns every old rating on each read.
 Scene receipts (text, metrics, director decisions, no audio) go to `scene-evidence/`.
 
 ## Boundaries
