@@ -148,14 +148,20 @@ ambiguity/tampering, citation forgery and broad-category/refund policy.
 Injected product functions exist only in negative unit tests; the CLI always
 uses the actual unchanged product imports.
 
-The tests deliberately assert that the base product's unsafe request routing
-is recorded as a **failed scorecard**, never recast as successful qualification.
+The initial qualification milestone recorded the base product's five unsafe
+request routing defects as **failed fictional scorecard cases**. That original
+historical evidence is retained, not rewritten as successful qualification.
+A subsequent same-product, source-bound safety repair added a fail-closed
+unsupported-action guard BEFORE monetary or category interpretation. Its
+regression tests and current fictional-fixture evaluation must now pass;
+the official disjoint cohort remains UNQUALIFIED.
 In particular, the product checks category/spending words before refusing
 actions: “Pay my electricity bill now”, “Transfer money…”, “Guarantee … safe …”,
 “another customer's groceries”, and “current overdraft limit” (substring `rent`
 in `current`) return a category, summary or budget. No action actually executes,
 but the required conversational refusal is absent. These are reproducible
-out-of-scope coach defects, not permission to edit the coach here.
+historical coach defects; the new explicit #80 scope addendum authorizes the
+subsequent owned correction in src/coach.mjs, without bank actions.
 
 The report records the actual Git HEAD, clean/dirty state and SHA-256 of the
 executed coach, importer, oracle and runner. A run before the single milestone
@@ -213,3 +219,17 @@ an out-of-scope coach refusal repair. Another official qualification must also
 resolve the explicitly unqualified frozen category-coverage precondition with
 independently specified semantics/cohort; it must preserve this failed admission
 record and must not relabel the fixture evidence as sponsor evaluation.
+
+### Follow-up P1 guard (post-initial source receipt)
+
+Following the initial 30-case fixture result (25 PASS / 5 FAIL), the same
+product owner received an explicit issue #80 scope addendum and changed
+only `src/coach.mjs` plus targeted refusal tests. Imperative banking actions,
+third-party requests, live guarantees and overdraft-limit requests now return
+a source-free refusal **before** substring-based category interpretation.
+Ordinary read-only past spending and illustrated budget questions still work.
+The original 25/5 fixture finding and official 0/0/30 UNQUALIFIED receipt are
+retained as historical measurements; neither is overwritten or called a
+sponsor-approved result. The 30-question fictional fixture and new action
+regressions are rechecked on the final amended HEAD separately. Actual sponsor
+grading, mapped necessity labels, real bank data and real accounts remain absent.

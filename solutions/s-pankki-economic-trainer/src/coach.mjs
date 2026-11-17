@@ -279,6 +279,20 @@ function formatMonth(month) { return new Date(`${month}-01T00:00:00Z`).toLocaleD
 export function answerQuestion(question, rows, assumptions = {}) {
   const q = String(question ?? '').trim().toLocaleLowerCase();
   if (!q) return {type: 'refusal', title: 'Choose a question', message: 'Ask about your spending, three baskets or an illustrative spending buffer.', sources: []};
+  // An action or another person's data is NOT a spending question, even when
+  // its words also match "safe", "rent", "electricity" or "groceries".
+  // Refuse before any balance computation; neither source rows nor amounts
+  // from the current local cohort belong in such an answer.
+  const unsupportedAction = /^(?:(?:please|can you|could you|would you|i want you to|i need you to)\s+)*(?:pay|send|wire|transfer|buy|purchase|connect|withdraw|deposit|move|log\s*in|sign\s*in|authenticate)\b/.test(q)
+    || /\b(?:another|other|someone\s+else'?s)\s+customer(?:'s|s'|s)?\b/.test(q)
+    || /\b(?:another|other)\s+(?:person(?:'s)?|user(?:'s)?|bank\s+account(?:'s)?)\b/.test(q)
+    || /\b(?:guarantee|guaranteed|overdraft\s+limit|credit\s+limit)\b/.test(q)
+    || /^(?:maksa|siirrä|lähetä|osta|yhdistä|nosta)\b/u.test(q);
+  if (unsupportedAction) {
+    return {type: 'refusal', title: 'Bank actions and third-party data unavailable',
+      message: 'This local historical exercise cannot access another customer, log into a bank, initiate payments or guarantee an available balance.',
+      sources: []};
+  }
   if (/safe|voinko|turvallis|spend this week|paljonko voin|rah[aä]a.*viik/.test(q)) {
     const result = budgetCapacity(rows, assumptions);
     return {type: 'budget', title: 'Your illustrative spending room', message: `${centsToEuros(result.availableCents)} after explicit reserves. This is not a bank-confirmed available balance.`, sources: result.accountBalanceSources, result};
