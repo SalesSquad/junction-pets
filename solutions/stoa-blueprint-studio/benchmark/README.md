@@ -4,6 +4,10 @@ Work `J26-PF-STOA-M335-M3-20261114`, base
 `79d998af372c26cb05907ad9a4aa8e0662caeaf8`. Only this new directory is owned.
 M1–M2/parser/grounding engine and old tests are unchanged.
 
+Pin update 17 Nov 2026: the engine (`src/dxf.mjs`, `src/grounding.mjs`) was changed on purpose
+in #200, #325 and #346, so the source pin in `run.mjs` now names `36fda81d34c3d3104f7f6f78b9c7f97648bb7b05` (#346). Earlier
+reports remain bound to the original base above.
+
 **NO_REAL_HELDOUT_SOURCE.** One bounded ZIP-tail GET on 2026-11-14 failed with
 curl exit 6 (sponsor hostname DNS resolution). No retry, archive download,
 drawing selection, original drawing SHA or real score exists. The committed
