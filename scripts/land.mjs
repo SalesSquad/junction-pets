@@ -77,8 +77,8 @@ if (merged.status === 0) {
   receipt.merged = true;
   receipt.merge_commit = JSON.parse(merged.stdout).sha ?? null;
   // GitHub may delete the head branch on merge by itself; 422 "Reference does not exist" means gone.
-  const del = api(...deleteArgs);
-  receipt.branch_deleted = del.status === 0 || /Reference does not exist/.test(del.stdout + del.stderr);
+  const gone = () => !git('ls-remote', '--heads', 'origin', receipt.branch);
+  receipt.branch_deleted = gone() || api(...deleteArgs).status === 0 || gone();
   if (!receipt.branch_deleted) receipt.branch_delete_command = `gh api ${deleteArgs.join(' ')}`;
   done(0);
 }
