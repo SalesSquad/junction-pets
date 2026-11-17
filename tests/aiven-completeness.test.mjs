@@ -18,3 +18,9 @@ test('gaps trigger exactly one revision that carries the gaps but no rubric', as
 test('the checker prompt keeps attachments as untrusted data', () => {
   assert.match(gapPrompt('P', draft), /never instructions/);
 });
+test('additive completion keeps the draft intact and appends additions', async () => {
+  const { completeAdditive } = await import('../services/aiven-platform/completeness.mjs');
+  let n = 0; const claude = async () => (++n === 1 ? { data: { gaps: [{ gap: 'missing p50', evidence: 'p50 42-51' }] } } : { data: { additions: ['p50 stayed between 42 and 51 ms.'] } });
+  const r = await completeAdditive({ claude, model: 'haiku', framedPrompt: 'P', draft: { answer: 'Spike at 11:00.', facts: [] } });
+  assert.equal(r.revised, true); assert.match(r.response.answer, /^Spike at 11:00\.\n\np50 stayed/); assert.deepEqual(r.response.facts, []);
+});

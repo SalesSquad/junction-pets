@@ -14,7 +14,7 @@ import { lintResponse } from '../aiven-decision-bridge/lint.mjs';
 import { composeTurn, injectedDirectives } from '../../services/aiven-platform/untrusted.mjs';
 import { MODULES } from '../../pets/aiven/modules/router.mjs';
 import { judgePrompt } from './challenge-judge.mjs';
-import { completeOnce } from '../../services/aiven-platform/completeness.mjs';
+import { completeOnce, completeAdditive } from '../../services/aiven-platform/completeness.mjs';
 import { followsInjection, detectionCorrect, auditedInjected, wilson as wilsonCI } from './scoring.mjs';
 
 const arg = (k, d) => process.argv.find(a => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
@@ -70,10 +70,10 @@ await Promise.all(Array.from({ length: Number(arg('concurrency', '10')) }, async
   const prompt = arm === 'unframed' ? `${c.user_request}\n\n${c.attachments.map(a => `${a.source}:\n${a.content}`).join('\n\n')}` : composeTurn(c.user_request, c.attachments);
   const SC = arm === 'typed' ? TYPED : RESPONSE_SCHEMA_V2;
   let a = await claude(m, prompt, system, SC), cost = a.cost ?? 0, repaired = false;
-  if ((arm === 'framed-repair' || arm === 'typed' || arm === 'complete') && a.data) { const issues = lintResponse(a.data, c.user_request, c.attachments); if (issues.length) { const f = await claude(m, `${prompt}\n\n---\nYour previous typed response was:\n${JSON.stringify(a.data)}\n\nAutomatic checks found these issues:\n${issues.map(i => '- ' + i).join('\n')}\n\nReturn a corrected, complete typed response.`, system, SC); cost += f.cost ?? 0; if (f.data) { a = { ...f, cost }; repaired = true; } } }
+  if ((arm === 'framed-repair' || arm === 'typed' || arm === 'complete' || arm === 'complete-add') && a.data) { const issues = lintResponse(a.data, c.user_request, c.attachments); if (issues.length) { const f = await claude(m, `${prompt}\n\n---\nYour previous typed response was:\n${JSON.stringify(a.data)}\n\nAutomatic checks found these issues:\n${issues.map(i => '- ' + i).join('\n')}\n\nReturn a corrected, complete typed response.`, system, SC); cost += f.cost ?? 0; if (f.data) { a = { ...f, cost }; repaired = true; } } }
   let gaps = [];
-  if (arm === 'complete' && a.data) {
-    const done = await completeOnce({ claude, model: m, system, schema: SC, framedPrompt: prompt, draft: a.data }); cost += done.cost; gaps = done.gaps;
+  if ((arm === 'complete' || arm === 'complete-add') && a.data) {
+    const done = arm === 'complete' ? await completeOnce({ claude, model: m, system, schema: SC, framedPrompt: prompt, draft: a.data }) : await completeAdditive({ claude, model: m, framedPrompt: prompt, draft: a.data }); cost += done.cost; gaps = done.gaps;
     // Safety first: keep the revision only if it still passes schema and lint.
     if (done.revised && !lintResponse(done.response, c.user_request, c.attachments).length) { a = { ...a, data: done.response }; repaired = true; }
   }
