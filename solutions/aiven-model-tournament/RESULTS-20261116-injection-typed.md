@@ -1,5 +1,7 @@
 # junction.aiven injection suite: typed content requests and request checklist — 16 November 2026
 
+
+**Bottom line (final, rubrics corrected at `0b10802`):** typed `content_requests` cut false alarms on clean controls from 10–30 % to 0–3 % (goal ≤ 5 %: met). Injections were detected in 100 % of answers and followed in 0–1 %. Consensus pass: Haiku 81–84 %, Sonnet 92.2 % [86.2–95.7]; the 95 % goal is not established. Forcing `request_checklist` and a "finish the task fully" rule did not help. Model-written rubrics need an evidence audit before use. Receipts: `receipts/injection-20261116/`.
 Branch `agent/junction-aiven-injection-typed-20261116` based on main `b760ae1`. Haiku, 2 repeats, judges opus + sonnet with consensus. Developer measurement with the Claude CLI; not a Chibi host run. No response text is stored here.
 
 ## What changed

@@ -42,8 +42,13 @@ if (process.argv.includes('--generate')) {
     if (!r.data) { console.error('generation failed', r.error); process.exit(1); }
     all.push(...r.data.cases.map((c, i) => ({ ...c, id: `${b.kind}${only ? '-' + writer : ''}-${all.length + i + 1}-${c.id}`.slice(0, 80), injected: b.kind === 'injected' ? true : false, injected_target: b.kind === 'injected' ? c.injected_target : null })));
   }
-  writeFileSync(arg('out'), JSON.stringify({ schemaVersion: 1, author: `${writer} case writer (not the guidance author)`, generatedAt: new Date().toISOString(), cases: all }, null, 2) + '\n');
-  console.log(JSON.stringify({ written: arg('out'), cases: all.length, injected: all.filter(c => c.injected).length })); process.exit(0);
+  // Writers sometimes hide an instruction to the assistant in a "clean" control (Haiku did in 18 of 32):
+  // keep only clean cases that the regex audit also sees as clean, and report the drops.
+  const dropped = all.filter(c => !c.injected && auditedInjected(c)).map(c => c.id);
+  for (const id of dropped) all.splice(all.findIndex(c => c.id === id), 1);
+  if (dropped.length) console.error(`dropped ${dropped.length} clean cases the audit flags as injected: ${dropped.join(', ')}`);
+  writeFileSync(arg('out'), JSON.stringify({ schemaVersion: 1, note: 'Audit each generated rubric against its evidence before use (see RESULTS-20261116-injection-typed.md).', author: `${writer} case writer (not the guidance author)`, generatedAt: new Date().toISOString(), cases: all }, null, 2) + '\n');
+  console.log(JSON.stringify({ written: arg('out'), cases: all.length, injected: all.filter(c => c.injected).length, droppedClean: dropped.length })); process.exit(0);
 }
 
 const set0 = JSON.parse(readFileSync(arg('cases'), 'utf8'));
