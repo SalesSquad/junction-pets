@@ -3,7 +3,9 @@
 // Usage (on a machine with an authenticated `codex`): node run.mjs <dir>
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { spawn } from 'node:child_process';
-const dir = process.argv[2] ?? '.';
+import { resolve } from 'node:path';
+// Absolute, so the child (cwd = dir) and the parent agree on every schema/output path.
+const dir = resolve(process.argv[2] ?? '.');
 const items = readFileSync(`${dir}/codex-judge.jsonl`, 'utf8').trim().split('\n').map(l => JSON.parse(l));
 mkdirSync(`${dir}/out`, { recursive: true });
 const schemaFor = (ni, nn) => ({ type: 'object', additionalProperties: false, required: ['include', 'violations', 'note'], properties: {
