@@ -20,7 +20,12 @@
 >   ([schema](scripts/lanes/receipt.schema.json)). The coordinator rejects out-of-scope changes,
 >   runs each lane's checks, commits passing lanes and cherry-picks them onto one integration
 >   branch; workers never land. Example: [scripts/lanes/plan.example.json](scripts/lanes/plan.example.json).
->   `--cleanup <run id>` removes that run's local worktrees and branches.
+>   `--cleanup <run id>` removes that run's local worktrees and branches. Lanes may list `context`
+>   files (copied in read-only, never committed) and `generate` commands the coordinator runs
+>   after the agent (for example `npm run plugins:generate`).
+> - `node scripts/lanes/plan-from-fleet.mjs --below 0.5`: turns fleet-evaluation receipts into a
+>   guidance-fix lane per weak pet with a local context pack of its failed cases. Judge any such
+>   change on freshly generated, audited held-out cases before landing it.
 > - Still ask the owner first: deploy or release, production, new spending, credentials or
 >   permission changes, and deleting or merging other agents' work.
 
