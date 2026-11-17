@@ -9,7 +9,7 @@ import { parseDxf, DXF_LIMITS } from '../src/dxf.mjs';
 import { answerDrawing } from '../src/grounding.mjs';
 export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 export const PREVIEW_SHA = '4070c5f19eb921bc08e2f5a23e957086f76abcca03fafbb8b62ca30c8a60b58d';
-export const BASE = '79d998af372c26cb05907ad9a4aa8e0662caeaf8';
+export const BASE = '36fda81d34c3d3104f7f6f78b9c7f97648bb7b05';
 const here = dirname(fileURLToPath(import.meta.url));
 // System shared temp root: /private/tmp on macOS (realpath of /tmp), /tmp on Linux CI.
 export const PRIVATE_TMP = process.platform === 'darwin' ? '/private/tmp' : '/tmp';
