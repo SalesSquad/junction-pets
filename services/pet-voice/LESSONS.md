@@ -89,6 +89,35 @@ _Updated 2026-11-15T06:32:17Z from 4 run(s), 78/78 turns ok._
   rejects the voice id), and on this free key each of the two stopped after ~8–10 calls on
   15 Nov. So one day buys about 18 designed-voice lines: 8 of the 10 crash-scene lines and 6
   A/B lines got voiced; the rest waits for the next reset. (2026-11-15)
+- **On the free key, a designed-voice scene takes two days.** After the 08:00 UTC reset on
+  16 Nov, the last crash-scene line (3.8 Flash Lite TTS) and the 3 missing prebuilt A/B lines
+  (3.8 Flash TTS) went through first try. `voice-script` resumes per turn, so a scene voiced
+  across two days needs no glue. Plan designed-voice work in ~18-line days. (2026-11-16)
+- **A voice A/B is only fair on one model.** Both sides of the six A/B pairs use
+  `gemini-3.8-flash-tts` (`--models` pins it, `speak_line(pinned=True)`), so only the voice
+  differs. The page's scene pair (designed voices on 3.8 Flash Lite TTS vs prebuilt voices on
+  Live native audio) changes voice and model together, and its setup text says so. (2026-11-16)
+- **Designed voices are not equally loud.** In the demo re-cut, the per-line segment level
+  ranged ~3x, from Aalto's quiet line to Codex. `demo/build.py` now levels each clip's voiced
+  part to one RMS; the listening page still plays raw levels. (2026-11-16)
+- **The page db keeps every rating, so ingest must be idempotent.** `db_list` returns the
+  15 Nov ties again on every read; running `ingest` twice would have counted them twice.
+  `taste.json` now keeps `ingested` (id → rating time) and skips seen ratings; re-ingesting
+  the real db left the system counts unchanged. A rating that is changed later counts as a
+  new vote. (2026-11-16)
+- **The speech code now lives in one shared layer.** Text-to-speech had been built five times in the org, and none of
+  the copies shared quota knowledge. The provider code moved unchanged to `SalesSquad/agents` `voice/ssvoice` and
+  comes back here as a vendored copy. The shared layer adds a per-machine quota ledger and an audio cache. Live
+  check on 16 Nov: a designed-voice Danish line took 3.13 s on gemini-3.8-flash-tts; the identical repeat came from
+  the cache, byte-identical, and the ledger counted one call. Tests must point `SSVOICE_HOME` at a temp folder:
+  a simulated daily 429 would otherwise cool a real model for hours. (2026-11-16)
+- **OpenAI's complimentary tokens apply per organization, so check the key's org first.** The owner's enrolled org
+  turned out to be the same one that holds the existing paid fallback key (Keychain `OpenAI API Key`), found with a
+  free `GET /v1/models` sent with the `OpenAI-Organization` header. A key from another org answered
+  `mismatched_organization`. The shared route therefore points at that Keychain item, and `OPENAI_PAID_SHARES_DATA=1`
+  keeps private requests off OpenAI. Pet-voice's text-only calls (director, critic, memory) use the route after
+  free Gemini. Writer calls carry audio, so they still go to the paid route, which transcribes the audio. First
+  live call: gpt-5.4-mini, 3.95 s, 114 tokens. (2026-11-16)
 - **A paid fallback must stay last by construction.** OpenAI is now the final step for speech
   and text, but the learning loop ranks models by reliability, and OpenAI would soon win and
   become the default spend. `model_order()` therefore always appends `openai:` models after

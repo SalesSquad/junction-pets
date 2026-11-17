@@ -1,11 +1,15 @@
 """Offline checks for the scene engine (no network, no key). Run: python3 -m unittest services/pet-voice/test_scene.py"""
 import json
+import os
 import random
 import sys
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import tempfile  # noqa: E402
+os.environ.setdefault("SSVOICE_HOME", tempfile.mkdtemp(prefix="ssvoice-test-"))  # never the real quota ledger
+os.environ["SSVOICE_CACHE"] = "0"                                               # nor the real audio cache
 import pet_voice as pv  # noqa: E402
 import scene  # noqa: E402
 
@@ -165,14 +169,14 @@ class Quality(unittest.TestCase):
 
 class OpenAIFallback(unittest.TestCase):
     def setUp(self):
-        self.saved = (set(pv.EXHAUSTED), dict(pv._OPENAI_KEY), dict(pv.OPENAI_CALLS), pv.call, pv.live_speak, pv.openai_speak,
-                      pv.openai_post, pv.openai_transcribe)
+        self.saved = (set(pv.EXHAUSTED), dict(pv.oa._KEYS), dict(pv.OPENAI_CALLS), pv.gemini.call, pv.gemini.live_speak, pv.oa.speak,
+                      pv.oa.post, pv.oa.transcribe)
         pv.EXHAUSTED.clear()
 
     def tearDown(self):
-        ex, key, calls, pv.call, pv.live_speak, pv.openai_speak, pv.openai_post, pv.openai_transcribe = self.saved
+        ex, key, calls, pv.gemini.call, pv.gemini.live_speak, pv.oa.speak, pv.oa.post, pv.oa.transcribe = self.saved
         pv.EXHAUSTED.clear(); pv.EXHAUSTED.update(ex)
-        pv._OPENAI_KEY.clear(); pv._OPENAI_KEY.update(key)
+        pv.oa._KEYS.clear(); pv.oa._KEYS.update(key)
         pv.OPENAI_CALLS.clear(); pv.OPENAI_CALLS.update(calls)
 
     def test_schema_becomes_strict_json_schema(self):
@@ -193,9 +197,9 @@ class OpenAIFallback(unittest.TestCase):
     def test_speech_falls_back_to_openai_after_gemini_and_live(self):
         def no_quota(model, *a, **k):
             raise pv.ProviderError(429, "RESOURCE_EXHAUSTED", "per day", daily=True)
-        pv.call = no_quota
-        pv.live_speak = lambda *a, **k: (_ for _ in ()).throw(pv.ProviderError(0, "TIMEOUT", "live"))
-        pv.openai_speak = lambda text, voice, style, model: pv.pcm_to_wav(b"\0\0" * 2400)
+        pv.gemini.call = no_quota
+        pv.gemini.live_speak = lambda *a, **k: (_ for _ in ()).throw(pv.ProviderError(0, "TIMEOUT", "live"))
+        pv.oa.speak = lambda text, voice, style, model: pv.pcm_to_wav(b"\0\0" * 2400)
         log = []
         out = pv.speak("Hei kaikki", "Puck", "warm", "k", ["gemini-3.8-flash-tts", "live:x", "openai:gpt-4o-mini-tts"], log,
                        openai_voice=scene.openai_voice("rokoko"))
@@ -204,11 +208,11 @@ class OpenAIFallback(unittest.TestCase):
         self.assertIn(scene.openai_voice("cala"), pv.OPENAI_FEMALE)
 
     def test_no_key_or_spend_cap_means_no_call(self):
-        pv._OPENAI_KEY["key"] = None
+        pv.oa._KEYS["paid"] = None
         with self.assertRaises(pv.ProviderError) as e:
             pv.openai_post("audio/speech", payload={})
         self.assertEqual(e.exception.code, "NO_KEY")
-        pv._OPENAI_KEY["key"] = "sk-test-" + "x" * 30
+        pv.oa._KEYS["paid"] = "sk-test-" + "x" * 30
         pv.OPENAI_CALLS["n"] = pv.OPENAI_MAX_CALLS
         with self.assertRaises(pv.ProviderError) as e:
             pv.openai_post("audio/speech", payload={})
@@ -218,20 +222,34 @@ class OpenAIFallback(unittest.TestCase):
         def no_quota(model, *a, **k):
             raise pv.ProviderError(429, "RESOURCE_EXHAUSTED", "per day", daily=True)
         sent = {}
-        pv.call = no_quota
-        pv.openai_transcribe = lambda wav, model=pv.OPENAI_STT_MODEL: "Es ist 03:12."
+        pv.gemini.call = no_quota
+        pv.oa.transcribe = lambda wav, model=pv.OPENAI_STT_MODEL: "Es ist 03:12."
         def fake_post(path, timeout=90, payload=None, multipart=None):
             sent["body"] = payload
             line = {"heard": "Es ist 03:12.", "heard_language": "de-DE", "line": "Codex. Jetzt.", "voice_direction": "clipped",
                     "responds_to": "03:12", "callback": 0}
             return json.dumps({"output": [{"type": "message", "content": [{"type": "output_text", "text": json.dumps(line)}]}]}).encode()
-        pv.openai_post = fake_post
+        pv.oa.post = fake_post
         import base64
         parts = [{"inlineData": {"mimeType": "audio/wav", "data": base64.b64encode(b"RIFF").decode()}}, {"text": "Reply as Bahn."}]
         data, model, _ = scene.gen_json("sys", parts, scene.LINE_SCHEMA, "k", [])
         self.assertEqual((model, data["line"]), ("openai:gpt-5.4-mini", "Codex. Jetzt."))
         self.assertIn("Es ist 03:12.", sent["body"]["input"])
         self.assertTrue(sent["body"]["text"]["format"]["strict"])
+
+
+    def test_text_only_calls_use_complimentary_tokens_before_paid(self):
+        def no_quota(model, *a, **k):
+            raise pv.ProviderError(429, "RESOURCE_EXHAUSTED", "per day", daily=True)
+        projects = []
+
+        def fake_post(path, timeout=90, payload=None, multipart=None, project="paid"):
+            projects.append(project)
+            reply = {"next": "rokoko", "move": "tease", "why": "quiet too long"}
+            return json.dumps({"output": [{"type": "message", "content": [{"type": "output_text", "text": json.dumps(reply)}]}]}).encode()
+        pv.gemini.call, pv.oa.post = no_quota, fake_post
+        data, model, _ = scene.gen_json("sys", [{"text": "Who speaks next?"}], scene.DIRECT_SCHEMA, "k", [])
+        self.assertEqual((model, data["next"], projects), ("openai-shared:gpt-5.4-mini", "rokoko", ["shared"]))
 
 
 class VoiceSamples(unittest.TestCase):
@@ -274,6 +292,10 @@ class Taste(unittest.TestCase):
                 self.assertEqual(t["pets"]["rokoko"]["liked"], ["Robotten danser."])
                 self.assertEqual(scene.voice_for("rokoko"), pv.load_voices()["rokoko"]["voice"])  # prebuilt preferred
                 self.assertIn("Robotten danser.", scene.system_prompt("rokoko", ["rokoko"], "da-DK", []))
+                again = listen.ingest([{"id": "p1", "choice": "X", "reasons": ["hauskempi"], "lines": {"p1-X-3": "up"}, "note": "Lisää tätä"}],
+                                      key, lines)
+                self.assertEqual(again["systems"]["v2"]["wins"], 1)   # the db keeps old ratings: re-ingesting must not count twice
+                self.assertEqual(again["reasons"]["hauskempi"], 1)
             finally:
                 listen.TASTE_FILE, scene.TASTE_FILE = orig_l, orig_s
 
