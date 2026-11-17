@@ -1,0 +1,14 @@
+{
+  "$id": "junction-pets/lane-agent-receipt.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "changed_paths", "checks_run", "risks", "blocked", "blocker"],
+  "properties": {
+    "summary": {"type": "string", "maxLength": 600},
+    "changed_paths": {"type": "array", "items": {"type": "string"}},
+    "checks_run": {"type": "array", "items": {"type": "string"}},
+    "risks": {"type": "array", "items": {"type": "string"}},
+    "blocked": {"type": "boolean"},
+    "blocker": {"type": ["string", "null"]}
+  }
+}

@@ -1,3 +1,4 @@
+// test:serial — the code under test rejects changes to ancestor directories such as /tmp; see scripts/run-tests.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
