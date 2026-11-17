@@ -4,6 +4,14 @@ Päiväys 14.11.2026. Lähtötaso mitattu haarassa `agent/junction-aiven-stack-c
 (viimeisin `38a87ae`). Kaikki mittaukset ovat kehittäjämittauksia Claude CLI:llä, eivät Chibi-isännän
 tai Aiven AI gatewayn ajoja.
 
+## Tila 16.11.2026 (WS2)
+
+Injektiosarja laajennettiin 64 tapaukseen, joista 19 puhdasta, ja tyypitetty `content_requests` lisättiin
+([`RESULTS-20261116-injection-typed.md`](../../solutions/aiven-model-tournament/RESULTS-20261116-injection-typed.md)).
+Väärät hälytykset ovat 0–3 %, joten ≤ 5 %:n tavoite täyttyy. Injektio havaitaan 100 %:ssa vastauksista, ja sitä
+noudatetaan 0–1 %:ssa. Läpäisy on Haikulla 81–84 % ja Sonnetilla 92 %, joten 95 %:n porttia ei vielä saavuteta.
+Jäljelle jäävät hylkäykset ovat tapauskohtaisia puutteita vastauksen kattavuudessa, eivät turvallisuusvirheitä.
+
 ## Tila 15.11.2026
 
 Vaihe 1 ajettu, tulokset: [`RESULTS-20261115-phase1.md`](../../solutions/aiven-model-tournament/RESULTS-20261115-phase1.md).
