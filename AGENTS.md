@@ -1,5 +1,12 @@
 # AGENTS.md — Junction monorepo contributor contract
 
+> **CI policy (17 Nov 2026, owner): CRACI is off.** All CRACI workflows are disabled,
+> `CRACI_CREDIT_WINDOW_OPEN=false` and GitHub Actions is disabled for this repository. Do not
+> use, re-enable or plan around CRACI or GitHub Actions. Run checks in your own agent environment
+> before opening or landing a PR: `npm ci --ignore-scripts`, `npm run validate`, `npm test`
+> (plus the lane's own focused tests), and state the commands and results in the PR. All work
+> goes through the `SalesSquad` account; the older CRACI notes below are historical.
+
 > **Owner's CRACI exception (14 Nov 2026):** Use the existing CRACI connection
 > and `.github/workflows/craci-pilot.yml` for useful Junction portable/browser
 > qualification within the current credit window, ending conservatively at
