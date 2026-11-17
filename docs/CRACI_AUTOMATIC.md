@@ -1,5 +1,11 @@
 # Automatic CRACI checks
 
+> **Status 17 Nov 2026: CRACI is off and historical.** The owner turned CRACI off: every CRACI
+> workflow is disabled, `CRACI_CREDIT_WINDOW_OPEN=false`, and GitHub Actions is disabled for the
+> repository. Checks run in the agent's own environment (`npm ci --ignore-scripts`,
+> `npm run validate`, `npm test`); see the CI policy at the top of [AGENTS.md](../AGENTS.md).
+> Nothing below is an active instruction.
+
 ## Update 16 November 2026: test-credit window, usage check, leaner runs
 
 The owner supplied a new CRACI test credit (about EUR 10, free) and asked for
