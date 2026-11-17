@@ -39,6 +39,7 @@ def simulate(model, mode, seed, directory, capture):
     data.ctrl[:] = desired_pose(0, seed, bounds)
     mujoco.mj_forward(model, data)
     bridge = Bridge()
+    hold_target = None
     renderer = mujoco.Renderer(model, height=120, width=160) if capture else None
     try:
         with (directory / 'trace.jsonl').open('x') as stream:
@@ -61,8 +62,17 @@ def simulate(model, mode, seed, directory, capture):
                 gate = bridge.observe(camera, index, float(data.time), injection)
                 # Validate this capture BEFORE issuing the next interval's target.
                 emitted = gate['command_allowed']
+                hold_override_applied = False
                 if emitted:
+                    hold_target = None
                     data.ctrl[:] = desired_pose(index, seed, bounds)
+                else:
+                    if hold_target is None:
+                        # Controlled simulated servo hold (NOT power-off E-stop).
+                        # Previous moving command must not remain energized.
+                        hold_target = np.clip(data.qpos[:6].copy(), bounds[:, 0], bounds[:, 1])
+                        data.ctrl[:] = hold_target
+                        hold_override_applied = True
                 contacts = [{'geom1': int(c.geom1), 'geom2': int(c.geom2),
                              'distance_m': float(c.dist), 'position_m': c.pos.tolist()}
                             for c in data.contact]
@@ -70,6 +80,7 @@ def simulate(model, mode, seed, directory, capture):
                        'evidence': 'SIM_PHYSICS', 'qpos': data.qpos.tolist(), 'qvel': data.qvel.tolist(),
                        'contacts_count': int(data.ncon), 'contacts': contacts,
                        'servo_target': data.ctrl.tolist(), 'command_emitted': emitted,
+                       'hold_override_applied': hold_override_applied,
                        'camera': camera, 'injection': injection, 'bridge': gate}
                 stream.write(json.dumps(row, sort_keys=True, allow_nan=False) + '\n')
     finally:

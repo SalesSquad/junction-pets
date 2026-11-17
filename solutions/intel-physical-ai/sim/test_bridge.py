@@ -48,6 +48,7 @@ class ReplayTests(unittest.TestCase):
             row['injection']['fault'] = None
             row['bridge'] = Bridge().observe(row['camera'], i, row['physics_time_s'], row['injection'])
             row['command_emitted'] = True
+            row['hold_override_applied'] = False  # Synthetic protocol fixture, not motion evidence.
         self.save()
         self.assertTrue(verify_episode(self.episode, self.model)['sensor_replay_accepted'])
         image = self.episode / 'frames/0000.ppm'
@@ -106,6 +107,16 @@ class ReplayTests(unittest.TestCase):
         self.rows[1]['command_emitted'] = True; self.save()
         with self.assertRaises(ValueError): verify_episode(self.episode, self.model)
 
+    def test_repeated_safety_hold_override_is_denied(self):
+        self.rows[1]['hold_override_applied'] = True
+        self.save()
+        with self.assertRaises(ValueError): verify_episode(self.episode, self.model)
+
+    def test_missing_first_measured_hold_is_denied(self):
+        self.rows[0]['hold_override_applied'] = False
+        self.save()
+        with self.assertRaises(ValueError): verify_episode(self.episode, self.model)
+
     def test_changed_servo_after_stop(self):
         self.rows[1]['servo_target'][0] += .01; self.save()
         with self.assertRaises(ValueError): verify_episode(self.episode, self.model)
@@ -132,6 +143,35 @@ class ReplayTests(unittest.TestCase):
         self.assertFalse(stopped['command_allowed'])
         self.assertFalse(b.observe(good, 1, 1, clean)['command_allowed'])
         self.assertFalse(hasattr(b, 'rearm'))
+
+    def test_local_hold_never_claims_global_stop(self):
+        good = {'identity': 'wrist_cam:70', 'frame_index': 70, 'present': True,
+                'captured_at_s': 70/30, 'source': 'SIM_PHYSICS_RENDER'}
+        for fault in ('operator_local_stop', 'threshold_ambiguous'):
+            b = Bridge()
+            stopped = b.observe(good, 70, 70/30,
+                                {'source': 'SYNTHETIC_FAULT_INJECTION', 'fault': fault})
+            self.assertEqual(stopped['state'], 'LOCAL_HOLD')
+            self.assertEqual(stopped['route'], 'HOLD')
+            self.assertFalse(stopped['command_allowed'])
+            self.assertFalse(b.latched)
+            healthy = b.observe({**good, 'identity': 'wrist_cam:71', 'frame_index': 71},
+                                71, 70/30,
+                                {'source': 'SYNTHETIC_FAULT_INJECTION', 'fault': None})
+            self.assertTrue(healthy['command_allowed'])
+            self.assertEqual(healthy['state'], 'DEMO_ONLY')
+
+    def test_global_stop_remains_latched_after_sensor_recovers(self):
+        good = {'identity': 'wrist_cam:70', 'frame_index': 70, 'present': True,
+                'captured_at_s': 70/30, 'source': 'SIM_PHYSICS_RENDER'}
+        b = Bridge()
+        self.assertFalse(b.observe(good, 70, 70/30,
+                         {'source': 'SYNTHETIC_FAULT_INJECTION',
+                          'fault': 'operator_global_stop'})['command_allowed'])
+        self.assertTrue(b.latched)
+        self.assertFalse(b.observe({**good,'identity':'wrist_cam:71','frame_index':71},
+                        71,70/30,{'source':'SYNTHETIC_FAULT_INJECTION',
+                                  'fault': None})['command_allowed'])
 
     def test_no_quality_score_unknown_evidence_always_hold(self):
         good = {'identity': 'wrist_cam:0', 'frame_index': 0, 'present': True,
