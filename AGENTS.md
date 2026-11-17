@@ -3,10 +3,26 @@
 > **CI policy (17 Nov 2026, owner): CRACI is off.** All CRACI workflows are disabled,
 > `CRACI_CREDIT_WINDOW_OPEN=false` and GitHub Actions is disabled for this repository. Do not
 > use, re-enable or plan around CRACI or GitHub Actions. Run checks in your own agent environment
-> before opening or landing a PR: `npm ci --ignore-scripts`, `npm run validate`, `npm test` (serial:
-> parallel files interfered, about 1 min 50 s on 4 vCPU)
+> before opening or landing a PR: `npm ci --ignore-scripts`, `npm run validate`, `npm test`
+> (parallel runner, about 40 s on 4 vCPU; files marked `// test:serial` run alone afterwards;
+> `npm run test:serial` is the old one-at-a-time run, about 100 s)
 > (plus the lane's own focused tests), and state the commands and results in the PR. All work
 > goes through the `SalesSquad` account; the older CRACI notes below are historical.
+
+> **Fast workflow (17 Nov 2026, owner: "Toteuta kokonaisuus").** Agents land their own task PRs
+> after the local gate; the owner asked agents to handle checks and merges themselves.
+> - `npm run land` on a task branch: merges latest `origin/main` in (no rebase, no force-push),
+>   runs validate and the parallel tests, pushes, opens the PR if missing and squash-merges it
+>   pinned to the tested head. Where the cloud git proxy refuses the merge, it prints the exact
+>   pinned `gh pr merge` command to run on a host whose `gh` may merge (the Mac mini).
+> - `npm run lanes -- --plan plan.json --integrate`: parallel agent lanes (Claude Code or Codex
+>   CLI), one git worktree per lane at a pinned commit, disjoint owned paths, typed receipts
+>   ([schema](scripts/lanes/receipt.schema.json)). The coordinator rejects out-of-scope changes,
+>   runs each lane's checks, commits passing lanes and cherry-picks them onto one integration
+>   branch; workers never land. Example: [scripts/lanes/plan.example.json](scripts/lanes/plan.example.json).
+>   `--cleanup <run id>` removes that run's local worktrees and branches.
+> - Still ask the owner first: deploy or release, production, new spending, credentials or
+>   permission changes, and deleting or merging other agents' work.
 
 > **Owner's CRACI exception (14 Nov 2026):** Use the existing CRACI connection
 > and `.github/workflows/craci-pilot.yml` for useful Junction portable/browser

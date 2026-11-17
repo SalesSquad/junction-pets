@@ -1,0 +1,19 @@
+{
+  "source": "<40-char commit on origin/main>",
+  "lanes": [
+    {
+      "id": "context-dev-guidance",
+      "engine": "claude",
+      "objective": "Tighten pets/context-dev guidance so answers name the concrete next action and cite the official source. Keep the existing structure.",
+      "owned_paths": ["pets/context-dev/"],
+      "checks": ["npm run -s validate"]
+    },
+    {
+      "id": "hostinger-guidance",
+      "engine": "codex",
+      "objective": "Same goal for pets/hostinger.",
+      "owned_paths": ["pets/hostinger/"],
+      "checks": ["npm run -s validate"]
+    }
+  ]
+}
