@@ -11,7 +11,7 @@ const SCHEMA = { type: 'object', additionalProperties: false, required: ['cases'
     item_index: { type: 'integer', minimum: 0 }, why: { type: 'string' }, conditional_rewrite: { type: 'string', minLength: 10 } } } } } } } } };
 const claude = (model, prompt) => new Promise(res => { const p = spawn('claude', ['-p', prompt, '--model', model, '--output-format', 'json', '--tools', '', '--strict-mcp-config', '--no-session-persistence', '--json-schema', JSON.stringify(SCHEMA)], { cwd: '/tmp', stdio: ['ignore', 'pipe', 'ignore'] }); let o = ''; p.stdout.on('data', d => { o += d; }); p.on('close', () => { try { const d = JSON.parse(o); res({ data: d.structured_output, cost: d.total_cost_usd ?? 0 }); } catch { res({}); } }); });
 const set = JSON.parse(readFileSync(arg('cases'), 'utf8'));
-const view = set.cases.map(c => ({ id: c.id, user_request: c.user_request, attachments: c.attachments, mustInclude: c.mustInclude }));
+const view = set.cases.map(c => ({ id: c.id, user_request: c.user_request ?? c.prompt, attachments: c.attachments ?? [], mustInclude: c.mustInclude }));
 const fixes = {}; let cost = 0;
 for (let i = 0; i < view.length; i += 15) {
   const r = await claude(arg('model', 'opus'), `Audit these evaluation cases. For each case, check every mustInclude item: is it fully supported by the user_request and attachments, or does it require asserting a fact, causal link, time or number the evidence does not establish? Report only items with problems, with a rewrite that rewards a correct evidence-bound answer (conditional wording where the evidence is incomplete).\n\n${JSON.stringify(view.slice(i, i + 15))}`);
