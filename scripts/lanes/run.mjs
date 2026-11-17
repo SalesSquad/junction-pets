@@ -13,7 +13,8 @@
 //        node scripts/lanes/run.mjs --cleanup <run id>   (removes that run's local worktrees and branches)
 // Engines: "claude" (default; `claude -p --json-schema`) or "codex" (`codex exec --output-schema`).
 import {execFileSync, spawn} from 'node:child_process';
-import {existsSync, mkdirSync, readFileSync, symlinkSync, writeFileSync} from 'node:fs';
+import {copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync} from 'node:fs';
+import {basename} from 'node:path';
 import {tmpdir} from 'node:os';
 import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -56,6 +57,8 @@ export function checkPlan(plan) {
       for (const [other, q] of owned) if (p.startsWith(q) || q.startsWith(p)) throw new Error(`${l.id}: owned path ${p} overlaps lane ${other} (${q})`);
     }
     for (const p of l.owned_paths) owned.push([l.id, p]);
+    if (l.context && (!Array.isArray(l.context) || l.context.some(f => typeof f !== 'string' || !existsSync(f)))) throw new Error(`${l.id}: context files must exist`);
+    if (l.generate && (!Array.isArray(l.generate) || l.generate.some(c => typeof c !== 'string'))) throw new Error(`${l.id}: generate must be strings`);
     if (l.checks && (!Array.isArray(l.checks) || l.checks.some(c => typeof c !== 'string'))) throw new Error(`${l.id}: checks must be strings`);
   }
   return {source: plan.source, lanes: plan.lanes.map(l => ({engine: 'claude', checks: [], ...l}))};
@@ -70,6 +73,8 @@ function prompt(lane, source) {
     `You may change files only under: ${lane.owned_paths.join(', ')}. Any other change is discarded.`,
     'Read AGENTS.md and the instructions nearest to the owned paths first.',
     'Do not commit, push, open PRs, install packages, or touch credentials.',
+    lane.context?.length ? `Read-only context for this lane is in .lane-context/ (${lane.context.map(f => basename(f)).join(', ')}). It is never committed.` : '',
+    lane.generate?.length ? `After you finish, the coordinator runs: ${lane.generate.join(' ; ')}. Do not run these yourself and do not treat their outputs as your edits.` : '',
     lane.checks.length ? `When done, run these checks and fix what fails within your paths: ${lane.checks.join(' ; ')}` : '',
     'Finish with the receipt: a short summary, the paths you changed, the checks you ran, risks, and whether you were blocked (and why).'
   ].filter(Boolean).join('\n');
@@ -117,10 +122,22 @@ async function runLane(lane, ctx) {
   const r = {id: lane.id, engine: lane.engine, branch, status: 'failed', receipt: null, receipt_errors: [], changed: [], out_of_scope: [], checks: [], commit: null};
   git(ROOT, 'worktree', 'add', '-q', '-b', branch, dir, ctx.source);
   if (existsSync(join(ROOT, 'node_modules')) && !existsSync(join(dir, 'node_modules'))) symlinkSync(join(ROOT, 'node_modules'), join(dir, 'node_modules'));
+  if (lane.context?.length) {
+    mkdirSync(join(dir, '.lane-context'));
+    for (const f of lane.context) copyFileSync(f, join(dir, '.lane-context', basename(f)));
+  }
   const agent = ctx.dryRun ? {receipt: {summary: 'dry run', changed_paths: [], checks_run: [], risks: [], blocked: false, blocker: null}} : await runAgent(lane, dir, ctx.source);
   if (agent.error) { r.error = agent.error; return r; }
   r.receipt = agent.receipt; r.cost_usd = agent.cost_usd ?? null;
   r.receipt_errors = checkReceipt(agent.receipt);
+  rmSync(join(dir, '.lane-context'), {recursive: true, force: true});
+  // Deterministic generators (for example `npm run plugins:generate`) run by the coordinator,
+  // not the agent, so generated files follow the agent's edits; they must stay in owned paths.
+  if (!agent.receipt?.blocked) for (const g of lane.generate ?? []) {
+    const out = await sh(dir, g);
+    r.checks.push({...out, phase: 'generate'});
+    if (out.exit !== 0) { r.error = 'generator failed'; return r; }
+  }
   git(dir, 'add', '-A');
   r.changed = git(dir, 'diff', '--cached', '--name-only').split('\n').filter(Boolean);
   r.out_of_scope = r.changed.filter(p => !inScope(p, lane.owned_paths));
@@ -128,6 +145,7 @@ async function runLane(lane, ctx) {
   if (r.out_of_scope.length) { r.error = 'changes outside owned paths'; return r; }
   if (agent.receipt.blocked) { r.status = 'blocked'; return r; }
   for (const c of lane.checks) r.checks.push(await sh(dir, c));
+  r.checks = r.checks.map(c => ({phase: 'check', ...c}));
   if (r.checks.some(c => c.exit !== 0)) { r.error = 'lane checks failed'; return r; }
   if (!r.changed.length) { r.status = 'no-change'; return r; }
   git(dir, '-c', 'commit.gpgsign=false', 'commit', '-q', '-m', `lane ${lane.id}: ${agent.receipt.summary.split('\n')[0].slice(0, 120)}`);
