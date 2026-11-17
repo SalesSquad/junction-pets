@@ -20,9 +20,9 @@ import { wilson } from './scoring.mjs';
 const arg = (k, d) => process.argv.find(a => a.startsWith(`--${k}=`))?.split('=')[1] ?? d;
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const packs = await loadPackages(root);
-const pets = arg('pets', 'valio-aimo,s-pankki,astrazeneca').split(',');
+const pets = arg('pets', 'valio-aimo,s-pankki,astrazeneca') === 'all' ? packs.map(p => p.pet.company.slug).sort() : arg('pets', 'valio-aimo,s-pankki,astrazeneca').split(',');
 const sharedCore = readFileSync(new URL('../../services/aiven-platform/shared-core.md', import.meta.url), 'utf8');
-const dir = new URL('./pilots/', import.meta.url); mkdirSync(dir, { recursive: true });
+const dir = new URL(`./${arg('dir', 'pilots')}/`, import.meta.url); mkdirSync(dir, { recursive: true });
 const sha = s => createHash('sha256').update(s).digest('hex');
 function claude(model, prompt, system, schema) {
   const args = ['-p', prompt, '--model', model, '--max-budget-usd', '1.00', '--output-format', 'json', '--tools', '', '--strict-mcp-config', '--no-session-persistence'];

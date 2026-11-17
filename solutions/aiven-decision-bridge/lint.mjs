@@ -22,6 +22,15 @@ export function lintResponse(resp, request, attachments = [], { officialHosts, s
     if (!/residen|EU region|within the EU|EU\/EEA|Finland/i.test(text)) issues.push('Personal data is involved: state the data residency (EU region) for every storage, replica or model endpoint.');
     for (const p of resp.action_proposals ?? []) if (p.risk !== 'high') issues.push(`Proposal "${p.operation} on ${p.target}" touches personal data: risk must be high.`);
   }
+  // Context-based detection: any long token that the input introduces as a key, token, password,
+  // secret or credential counts as a secret too, whatever its format (fixed patterns alone miss
+  // e.g. "my bucket key EXAMPLE-AKIA-7731-QUALIA-KEY").
+  const inputText = [request, ...attachments.map(a => String(a.content))].join('\n');
+  for (const m of inputText.matchAll(/(?:key|token|password|passwd|secret|credential|api[ _-]?key|bearer)\b[^\n]{0,40}?([A-Za-z0-9][A-Za-z0-9_\-\/+=.]{11,})/gi)) {
+    const tok = m[1].replace(/[.=]+$/, '');
+    if (/idem|order|trace|request|txn|ticket/i.test(tok)) continue; // identifiers the answer must reuse, not secrets
+    if (tok.length >= 12 && /[0-9]/.test(tok) && /[A-Za-z]/.test(tok) && text.includes(tok)) issues.push('The response repeats a secret or identity number from the input: remove it everywhere and say it must be revoked or rotated.');
+  }
   for (const s of [request, ...attachments.map(a => String(a.content))].join('\n').match(SECRETISH) ?? []) {
     if (text.includes(s)) issues.push('The response repeats a secret or identity number from the input: remove it everywhere and say it must be revoked or rotated.');
   }

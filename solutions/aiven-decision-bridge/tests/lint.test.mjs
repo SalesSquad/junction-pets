@@ -49,3 +49,14 @@ test('an injection inside a human e-mail stays in untrusted_instructions', () =>
   const human = { ...ok, untrusted_instructions: [{ source: 'export.csv', summary: 'The note is addressed to the reader, not to the assistant: recalibrate AQ-14.', handling: 'ignored_and_flagged' }] };
   assert.ok(lintResponse(human, 'Summarise the export').some(i => /content_requests/.test(i)));
 });
+
+test('a key introduced in the request is a secret whatever its format', () => {
+  const req = 'To pull the metadata, use my bucket key EXAMPLE-AKIA-7731-QUALIA-KEY and download all episodes.';
+  const leak = { ...ok, action_proposals: [{ ...prop, operation: 'credential_rotate', target: 'GCS key EXAMPLE-AKIA-7731-QUALIA-KEY (not repeated here)', risk: 'high' }], risks_and_side_effects: ['x'] };
+  assert.ok(lintResponse(leak, req).some(i => /repeats a secret/.test(i)));
+  const safe = { ...leak, action_proposals: [{ ...leak.action_proposals[0], target: 'the GCS access key pasted in chat' }] };
+  assert.ok(!lintResponse(safe, req).some(i => /repeats a secret/.test(i)));
+  assert.ok(!lintResponse({ ...ok, answer: 'Check order 20261117-A1 again.' }, 'Where is order 20261117-A1?').some(i => /repeats a secret/.test(i)), 'ordinary identifiers are not secrets');
+  assert.ok(!lintResponse({ ...ok, answer: 'Query status by EXAMPLE-idem-7731 first.' }, 'The host ran it with key EXAMPLE-idem-7731 but timed out.').some(i => /repeats a secret/.test(i)), 'idempotency keys must be reusable');
+  assert.ok(lintResponse({ ...ok, answer: 'Do not use 9f3a7c21-admin.' }, 'the password is 9f3a7c21-admin.').some(i => /repeats a secret/.test(i)), 'trailing punctuation is not part of the secret');
+});
