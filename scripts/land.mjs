@@ -53,22 +53,31 @@ if (!flag('skip-tests')) {
 log('pushing');
 if (sh('git', ['push', '-q', '-u', 'origin', receipt.branch]) !== 0) done(1, 'Push failed.');
 
-let view = gh(['pr', 'view', receipt.branch, '--repo', REPO, '--json', 'number,state,url']);
-if (view.status !== 0) {
+const api = (...a) => gh(['api', ...a]);
+const owner = REPO.split('/')[0];
+let found = api(`repos/${REPO}/pulls?state=open&head=${owner}:${receipt.branch}`);
+let pr = found.status === 0 ? JSON.parse(found.stdout)[0] : undefined;
+if (!pr) {
   const title = opt('title') ?? git('log', '-1', '--format=%s');
   log('creating PR');
-  const created = gh(['pr', 'create', '--repo', REPO, '--head', receipt.branch, '--base', 'main', '--title', title, '--body', 'Landed with scripts/land.mjs: validate and parallel tests passed on the pinned head.']);
-  if (created.status !== 0) done(1, 'PR creation failed: ' + created.stderr.trim().slice(0, 300));
-  view = gh(['pr', 'view', receipt.branch, '--repo', REPO, '--json', 'number,state,url']);
+  const created = api(`repos/${REPO}/pulls`, '-X', 'POST', '-f', `title=${title}`, '-f', `head=${receipt.branch}`, '-f', 'base=main',
+    '-f', `body=Landed with scripts/land.mjs: validate and parallel tests passed on ${receipt.head}.`);
+  if (created.status !== 0) done(1, 'PR creation failed: ' + (created.stderr || created.stdout).trim().slice(0, 300));
+  pr = JSON.parse(created.stdout);
 }
-const pr = JSON.parse(view.stdout || '{}');
-receipt.pr = pr.url ?? null;
-const mergeArgs = ['pr', 'merge', String(pr.number), '--repo', REPO, '--squash', '--delete-branch', '--match-head-commit', receipt.head];
-receipt.merge_command = ['gh', ...mergeArgs].join(' ');
+receipt.pr = pr.html_url;
+const mergeArgs = [`repos/${REPO}/pulls/${pr.number}/merge`, '-X', 'PUT', '-f', 'merge_method=squash', '-f', `sha=${receipt.head}`];
+const deleteArgs = [`repos/${REPO}/git/refs/heads/${receipt.branch}`, '-X', 'DELETE'];
+receipt.merge_command = `gh api ${mergeArgs.join(' ')} && gh api ${deleteArgs.join(' ')}`;
 if (flag('no-merge')) done(0);
 
 log('merging (pinned to the tested head)');
-const merged = gh(mergeArgs);
-if (merged.status === 0) { receipt.merged = true; done(0); }
+const merged = api(...mergeArgs);
+if (merged.status === 0) {
+  receipt.merged = true;
+  receipt.merge_commit = JSON.parse(merged.stdout).sha ?? null;
+  receipt.branch_deleted = api(...deleteArgs).status === 0;
+  done(0);
+}
 log('merge refused here; run merge_command on a host whose gh may merge');
-done(3, merged.stderr.trim().slice(0, 300));
+done(3, (merged.stderr || merged.stdout).trim().slice(0, 300));
