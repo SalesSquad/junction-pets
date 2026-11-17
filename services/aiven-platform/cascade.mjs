@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs';
 import { RESPONSE_SCHEMA_V2 } from '../../solutions/aiven-decision-bridge/bridge.mjs';
 import { lintResponse } from '../../solutions/aiven-decision-bridge/lint.mjs';
 import { MODULES, systemFor } from '../../pets/aiven/modules/router.mjs';
-import { composeTurn } from './untrusted.mjs';
+import { composeTurn, injectedDirectives } from './untrusted.mjs';
 
 const ALL = ['core', ...Object.keys(MODULES)].map(n => readFileSync(new URL(`../../pets/aiven/modules/${n}.md`, import.meta.url), 'utf8')).join('\n\n');
 const SENSITIVE = /\b(patient|health|clinic|diagnos|henkilötunnus|hetu|personal data|gdpr|registry|salary|bank account|iban|social security)\b/i;
@@ -28,11 +28,21 @@ export function escalationReasons(response, request, issuesAfterRepair, { escala
 }
 
 // `claude(model, prompt, system, schema)` is injected so hosts and tests choose the transport.
-export async function answerWithCascade({ request, attachments = [], claude, small = 'haiku', large = 'sonnet', escalateSensitive = false, toolHeavy = false }) {
+// `largeOnInjection`: when the host itself detects an embedded instruction in the attachments,
+// answer with the large model directly (no small-model attempt). Off by default; see RESULTS.
+export async function answerWithCascade({ request, attachments = [], claude, small = 'haiku', large = 'sonnet', escalateSensitive = false, toolHeavy = false, largeOnInjection = false }) {
   const prompt = composeTurn(request, attachments);
   let cost = 0, route = small;
   const call = async (...args) => { try { return await claude(...args) ?? {}; } catch { return {}; } };
   const recordCost = result => { if (Number.isFinite(result?.cost) && result.cost >= 0) cost += result.cost; };
+  if (largeOnInjection && attachments.length && injectedDirectives(attachments.map(x => String(x.content)).join('\n')).found) {
+    const reasons = ['embedded instruction detected by the host'];
+    const big = await call(large, prompt, systemFor(request).system, RESPONSE_SCHEMA_V2); recordCost(big);
+    if (!big?.data) return { error: 'large model failed', route: large, reasons, cost };
+    const bigIssues = lintResponse(big.data, request, attachments, { schema: RESPONSE_SCHEMA_V2 });
+    if (bigIssues.length) return { error: 'large-model response failed validation', route: large, reasons, issues: bigIssues, cost };
+    return { response: big.data, route: large, reasons, cost };
+  }
   let a = await call(small, prompt, ALL, RESPONSE_SCHEMA_V2); recordCost(a);
   if (!a.data) return { error: a.error ?? 'no structured output', route, cost };
   let issues = lintResponse(a.data, request, attachments, { schema: RESPONSE_SCHEMA_V2 });
