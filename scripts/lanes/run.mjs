@@ -12,6 +12,8 @@
 // Usage: node scripts/lanes/run.mjs --plan plan.json [--concurrency 4] [--integrate] [--dry-run]
 //        node scripts/lanes/run.mjs --cleanup <run id>   (removes that run's local worktrees and branches)
 // Engines: "claude" (default; `claude -p --json-schema`) or "codex" (`codex exec --output-schema`).
+// The Codex binary comes from lane.codex_bin, else LANES_CODEX_BIN, else `codex` (for example a
+// wrapper such as `codex-plus` that sets its own CODEX_HOME for a second, owner-approved profile).
 import {execFileSync, spawn} from 'node:child_process';
 import {copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync} from 'node:fs';
 import {basename} from 'node:path';
@@ -84,7 +86,7 @@ function runAgent(lane, cwd, source) {
   const text = prompt(lane, source);
   const outFile = join(cwd, '..', `${lane.id}.receipt.json`);
   const [cmd, args] = lane.engine === 'codex'
-    ? ['codex', ['exec', '-C', cwd, '--sandbox', 'workspace-write', '--skip-git-repo-check', '--output-schema', SCHEMA_PATH, '-o', outFile, text]]
+    ? [lane.codex_bin ?? process.env.LANES_CODEX_BIN ?? 'codex', ['exec', '-C', cwd, '--sandbox', 'workspace-write', '--skip-git-repo-check', '--output-schema', SCHEMA_PATH, '-o', outFile, text]]
     : ['claude', ['-p', text, '--model', lane.model ?? 'sonnet', '--output-format', 'json', '--no-session-persistence',
         '--permission-mode', 'acceptEdits', '--max-budget-usd', String(lane.max_budget_usd ?? 3),
         '--allowedTools', 'Read,Edit,Write,Glob,Grep,Bash(node:*),Bash(npm run:*),Bash(git diff:*),Bash(git status:*)',
