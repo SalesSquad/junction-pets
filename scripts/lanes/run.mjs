@@ -15,7 +15,7 @@
 // The Codex binary comes from lane.codex_bin, else LANES_CODEX_BIN, else `codex` (for example a
 // wrapper such as `codex-plus` that sets its own CODEX_HOME for a second, owner-approved profile).
 import {execFileSync, spawn} from 'node:child_process';
-import {copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync} from 'node:fs';
+import {copyFileSync, existsSync, mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync} from 'node:fs';
 import {basename} from 'node:path';
 import {tmpdir} from 'node:os';
 import {dirname, join, resolve} from 'node:path';
@@ -169,7 +169,7 @@ async function main() {
     if (!/^\d{8}-\d{6}$/.test(id)) { console.error('--cleanup takes a run id such as 20261117-225855'); process.exit(2); }
     for (const line of git(ROOT, 'worktree', 'list', '--porcelain').split('\n')) {
       const wt = line.startsWith('worktree ') ? line.slice(9) : null;
-      if (wt && wt.startsWith(join(tmpdir(), 'lanes', id))) git(ROOT, 'worktree', 'remove', '--force', wt);
+      if (wt && [tmpdir(), realpathSync(tmpdir())].some(t => wt.startsWith(join(t, 'lanes', id) + '/'))) git(ROOT, 'worktree', 'remove', '--force', wt); // macOS lists /private/var/...
     }
     const branches = git(ROOT, 'branch', '--list', `lane/${id}/*`, `agent/lanes-${id}`, '--format=%(refname:short)').split('\n').filter(Boolean);
     if (branches.length) git(ROOT, 'branch', '-D', ...branches);
