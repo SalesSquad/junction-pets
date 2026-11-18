@@ -12,6 +12,8 @@
 // Usage: node scripts/lanes/run.mjs --plan plan.json [--concurrency 4] [--integrate] [--dry-run]
 //        node scripts/lanes/run.mjs --cleanup <run id>   (removes that run's local worktrees and branches)
 // Engines: "claude" (default; `claude -p --json-schema`) or "codex" (`codex exec --output-schema`).
+// The Codex binary comes from lane.codex_bin, else LANES_CODEX_BIN, else `codex` (for example a
+// wrapper such as `codex-plus` that sets its own CODEX_HOME for a second, owner-approved profile).
 import {execFileSync, spawn} from 'node:child_process';
 import {copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync} from 'node:fs';
 import {basename} from 'node:path';
@@ -84,7 +86,7 @@ function runAgent(lane, cwd, source) {
   const text = prompt(lane, source);
   const outFile = join(cwd, '..', `${lane.id}.receipt.json`);
   const [cmd, args] = lane.engine === 'codex'
-    ? ['codex', ['exec', '-C', cwd, '--sandbox', 'workspace-write', '--skip-git-repo-check', '--output-schema', SCHEMA_PATH, '-o', outFile, text]]
+    ? [lane.codex_bin ?? process.env.LANES_CODEX_BIN ?? 'codex', ['exec', '-C', cwd, '--sandbox', 'workspace-write', '--skip-git-repo-check', '--output-schema', SCHEMA_PATH, '-o', outFile, text]]
     : ['claude', ['-p', text, '--model', lane.model ?? 'sonnet', '--output-format', 'json', '--no-session-persistence',
         '--permission-mode', 'acceptEdits', '--max-budget-usd', String(lane.max_budget_usd ?? 3),
         '--allowedTools', 'Read,Edit,Write,Glob,Grep,Bash(node:*),Bash(npm run:*),Bash(git diff:*),Bash(git status:*)',
@@ -133,7 +135,7 @@ async function runLane(lane, ctx) {
   rmSync(join(dir, '.lane-context'), {recursive: true, force: true});
   // Deterministic generators (for example `npm run plugins:generate`) run by the coordinator,
   // not the agent, so generated files follow the agent's edits; they must stay in owned paths.
-  if (!agent.receipt?.blocked) for (const g of lane.generate ?? []) {
+  for (const g of lane.generate ?? []) {
     const out = await sh(dir, g);
     r.checks.push({...out, phase: 'generate'});
     if (out.exit !== 0) { r.error = 'generator failed'; return r; }
@@ -143,10 +145,15 @@ async function runLane(lane, ctx) {
   r.out_of_scope = r.changed.filter(p => !inScope(p, lane.owned_paths));
   if (r.receipt_errors.length) { r.error = 'receipt does not match schema'; return r; }
   if (r.out_of_scope.length) { r.error = 'changes outside owned paths'; return r; }
-  if (agent.receipt.blocked) { r.status = 'blocked'; return r; }
+  // An agent may report "blocked" only because a check needs the coordinator's generators,
+  // which run after it. With generators present the coordinator decides from its own checks
+  // and keeps the agent's blocker in the report for review.
+  const blocked = agent.receipt.blocked;
+  if (blocked && !lane.generate?.length) { r.status = 'blocked'; return r; }
   for (const c of lane.checks) r.checks.push(await sh(dir, c));
   r.checks = r.checks.map(c => ({phase: 'check', ...c}));
-  if (r.checks.some(c => c.exit !== 0)) { r.error = 'lane checks failed'; return r; }
+  if (r.checks.some(c => c.exit !== 0)) { if (blocked) r.status = 'blocked'; else r.error = 'lane checks failed'; return r; }
+  if (blocked) r.agent_blocked_overridden = true;
   if (!r.changed.length) { r.status = 'no-change'; return r; }
   git(dir, '-c', 'commit.gpgsign=false', 'commit', '-q', '-m', `lane ${lane.id}: ${agent.receipt.summary.split('\n')[0].slice(0, 120)}`);
   r.commit = git(dir, 'rev-parse', 'HEAD');
