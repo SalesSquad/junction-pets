@@ -15,6 +15,7 @@ This is an independently created companion, not an official or endorsed Aiven re
 - **Design search, memory and caching:** OpenSearch, pgvector and Valkey with provenance and invalidation rules.
 - **Plan usage metering:** Kafka to ClickHouse for metered usage and dashboards.
 - **Review an integration design:** ownership, idempotency, ordering, replay, schema evolution and provenance, with proposed changes.
+- **Diagnose an Aiven Runtime issue:** distinguish build, power, VPC/network, TLS/ACL and browser-versus-machine MCP failures from redacted observations, with one safe next check.
 - **Inspect a connected project read-only:** only with a host-granted read-only Aiven MCP connection; never changes anything.
 
 ## Start a conversation
@@ -44,6 +45,34 @@ model outcomes. Focused source provenance is recorded in SOURCE_REVIEW.md.
 ## Current limits
 
 The content package is ready for host integration. Actual chat, sign-in, adoption, conversation history and any provider execution depend on the Chibi host. This package itself has no live provider connection and performs no account actions.
+
+This companion's canonical pet ID is `junction.aiven` and its portable plugin is
+`junction-aiven`. A ChatGPT Plugin Creator release, a working owner-only Aiven
+connector, a connected Chibi runtime, a customer's adopted pet and a qualified
+paid entitlement are separate states requiring separate evidence. An operator's
+Aiven admin access is not a marketplace-user or Taimi-family permission.
+
+## Aiven application runtime troubleshooting
+
+Use a **redacted** snapshot: service and power state, image build status,
+source commit, timestamped logs, network route and identity path. Diagnose the
+first failed layer:
+
+1. **Build:** distinguish missing private dependencies from startup failure.
+   Propose source-pinned artifacts or an approved build credential, never tokens.
+2. **Network:** compare VPC/endpoint route, egress, IP allowlist, TLS/CA and
+   ACL. RUNNING does not prove app connectivity; HTTP 403 is distinct from code failure.
+3. **MCP identity:** browser sign-in does not prove machine-client auth.
+   Check supported flow and scopes; never reuse operator admin sessions.
+4. **Conflicting health:** if logs say Valkey degraded but managed Valkey is
+   running, compare connection errors, route, allowlist, TLS and ACL over time.
+5. **Recovery:** first propose a bounded read-only check. Network, secret,
+   plan, service and deployment changes need owner, risk and rollback.
+
+Evidence gates: exact source commit; plugin registration; host tool grant;
+Chibi response/receipt; per-user adoption; commercial entitlement. A skill is
+not an execution host. Taimi requires a revocable parent-scoped grant, never
+the owner's Aiven admin connection.
 
 No Aiven project is connected by this package. Read-only inspection needs a host-granted read-only Aiven MCP connection; the companion never provisions services, runs writes, rotates credentials or claims availability, quotas, prices or access rights. Confirm each managed service's exact supported behavior in Aiven's current docs.
 

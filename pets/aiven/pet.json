@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "junction.aiven",
   "slug": "junction-aiven",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "agentName": "Aiven",
   "displayName": "Aiven companion",
   "company": {
@@ -46,13 +46,13 @@
     {
       "id": "integration-design",
       "title": "Review and plan an integration design",
-      "description": "Review a proposed data flow for ownership, idempotency, ordering, replay, schema evolution and source provenance, and plan findings plus human-approved change proposals; used by other companions' solutions (for example Valio Trusted Trade).",
+      "description": "Review a proposed data flow or Aiven application runtime failure for ownership, idempotency, ordering, replay, schema evolution, build/network/auth reachability and source provenance, with human-approved change proposals; used by other companions' solutions (for example Valio Trusted Trade).",
       "kind": "planning",
       "inputs": [
-        "data-flow or integration design"
+        "data-flow or integration design, or redacted service states and build/runtime logs"
       ],
       "outputs": [
-        "integration findings and proposed changes"
+        "integration or runtime-triage findings, bounded evidence checks and proposed changes"
       ],
       "requiresConnection": false
     },

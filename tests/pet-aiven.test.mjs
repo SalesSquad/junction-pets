@@ -22,13 +22,16 @@ const authored = id => {
 test('Aiven retains v1 isolated guidance contract and focused official provenance', () => {
   validatePet(pack.pet);
   assert.equal(pack.pet.schemaVersion, 1);
-  assert.equal(pack.pet.version, '0.2.0');
+  assert.equal(pack.pet.version, '0.2.1');
   assert.equal(pack.pet.slug, 'junction-aiven');
   assert.equal(pack.pet.artIndex, 29);
   assert.equal(pack.pet.capabilities.length, 8);
   const connected = pack.pet.capabilities.filter(c => c.requiresConnection).map(c => c.id);
   assert.deepEqual(connected, ['live-stack-inspection']);
   assert.equal(pack.pet.capabilities.find(c => c.id === 'live-stack-inspection').kind, 'connection-required');
+  const integrationDesign = pack.pet.capabilities.find(c => c.id === 'integration-design');
+  assert.equal(integrationDesign.requiresConnection, false);
+  assert.match(integrationDesign.description, /runtime failure/);
   assert.equal(pack.pet.availability.runtime, 'chibi-host-required');
   assert.equal(pack.pet.availability.companyEndorsed, false);
   for (const url of Object.values(urls)) {
@@ -68,6 +71,9 @@ test('authored no-hit, irrelevant-hit and failure scenarios preserve useful reco
   const irrelevant = authored('company-source-isolation');
   const failure = authored('kafka-consumer-group-provenance');
   assert.match(empty.prompt, /zero hits/);
+  assert.match(empty.prompt, /owner-only Aiven connector/);
+  assert.ok(empty.mustInclude.some(s => /Plugin Creator registration/.test(s)));
+  assert.ok(empty.mustNotClaim.some(s => /automatically activates a Chibi pet/.test(s)));
   assert.ok(empty.mustInclude.some(s => /narrow official-docs query/.test(s)));
   assert.ok(empty.mustNotClaim.some(s => /unsupported/.test(s)));
   assert.ok(irrelevant.prompt.includes(urls.repair));
@@ -102,6 +108,9 @@ test('Aiven stack capabilities stay source-bound, read-only and honest about ava
   assert.match(pack.instructions, /account manager/);
   assert.match(pack.instructions, /early availability/);
   assert.match(pack.instructions, /Never create, update, delete or power services/);
+  assert.match(pack.instructions, /browser-versus-machine MCP access/);
+  assert.match(pack.instructions, /separate gates/);
+  assert.match(pack.story, /Aiven admin access is not a marketplace-user or Taimi-family permission/);
   assert.doesNotMatch(pack.instructions, /^You are Aiven,/m);
   assert.doesNotMatch(JSON.stringify(pack.pet.capabilities), /40% meaningful use/);
   const suite = JSON.parse(readFileSync(new URL('../pets/aiven/evals-stack.json', import.meta.url), 'utf8'));
