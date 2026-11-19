@@ -1,10 +1,7 @@
 // Metadata-only telemetry contract. Never put prompts, replies, user IDs,
 // claim tokens, tool arguments, or private context into exported attributes.
-const ALLOWED_ATTRIBUTES = new Set([
-  "gen_ai.operation.name",
-  "gen_ai.system",
-  "gen_ai.request.model",
-  "gen_ai.response.model",
+// Only numeric usage fields survive BOTH Eve's filtering and our exporter.
+export const SAFE_USAGE_ATTRIBUTES = [
   "gen_ai.usage.input_tokens",
   "gen_ai.usage.output_tokens",
   "gen_ai.usage.cache_read.input_tokens",
@@ -14,8 +11,9 @@ const ALLOWED_ATTRIBUTES = new Set([
   "agent.usage.output_tokens",
   "agent.usage.cache_read_tokens",
   "agent.usage.cost_usd",
-  "error.type",
-]);
+] as const;
+
+const ALLOWED_ATTRIBUTES = new Set<string>(SAFE_USAGE_ATTRIBUTES);
 
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
@@ -23,8 +21,8 @@ export function mayExportAttribute(key: string): boolean {
   return ALLOWED_ATTRIBUTES.has(key);
 }
 
-// Eve applies this policy to span attributes and content events before export.
-// Resource metadata, span names and links still require a collector-side review.
+// Eve applies this policy to span attributes and content events. The final
+// sanitizing exporter must independently scrub resource, names and links.
 export const metadataOnlyExportPolicy = {
   span: () => ({ redact: true as const, inputs: true, outputs: true }),
   attribute: ({ key }: { key: string }) => ({ emit: mayExportAttribute(key) }),

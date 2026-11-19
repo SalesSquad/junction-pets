@@ -9,11 +9,12 @@ contributor contract still applies when editing it inside Junction Pets.
   input, and remain proposal-only until a host-issued permission boundary exists.
 - Never add credentials, private user data, cross-tenant memory, marketplace
   entitlements, real payment operations, or implicit adoption to the starter.
-- Observability must stay disabled by default, apply the span-attribute
-  allowlist, strip input/output content and identity span attributes at source,
-  and configure only a trusted loopback collector. Before any real data,
-  enforce redirects/egress and resource-data checks at the host or collector.
-  Direct external export needs separate review. Never add keys to templates.
+- Observability stays off by default. Eve export policy and the final OTLP
+  wrapper must allow only finite numeric usage metrics, fixed resource/name,
+  and safe timing/context IDs: no content, free strings, events or links.
+  Keep synthetic Eve-filter and protobuf tests. Configure only trusted loopback
+  receivers. Before any real data, enforce redirects/egress at the host and
+  review collector privacy/retention. Never add keys to templates.
 - `maker-draft.json` is an editable **local authoring example**. Do not present
   it as a saved/published Chibi listing or a supported server import endpoint.
 - Chibi's private Rust/Cedar host remains the authority for authenticated

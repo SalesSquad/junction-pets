@@ -1,6 +1,7 @@
 import { OTLPHttpProtoTraceExporter } from "@vercel/otel";
 import { disableInstrumentation } from "eve/instrumentation";
 import { otelIntegration } from "eve/instrumentation/otel";
+import { createSafeTraceExporter } from "../safe-trace-exporter.ts";
 import {
   localOtlpTraceEndpoint,
   metadataOnlyExportPolicy,
@@ -14,6 +15,8 @@ const endpoint = localOtlpTraceEndpoint(process.env);
 export default endpoint
   ? otelIntegration({
       exportPolicy: metadataOnlyExportPolicy,
-      traceExporter: new OTLPHttpProtoTraceExporter({ url: endpoint }),
+      traceExporter: createSafeTraceExporter(
+        new OTLPHttpProtoTraceExporter({ url: endpoint }),
+      ),
     })
   : disableInstrumentation();

@@ -14,8 +14,10 @@ entitlements, remote connections, or hosted deployment**.
 | `agent/capabilities.ts` | An illustrative capability/prerequisite graph (not access grants) |
 | `agent/tools/*.ts` | Two side-effect-free typed Eve tools; the time-box tool only receives minutes, not the user's goal |
 | `agent/agent.ts` | Model choice, disabled default tools and a session continuation threshold |
-| `agent/instrumentation/local-otlp.ts` | Optional, metadata-only OpenTelemetry export through a local OTLP collector |
-| `agent/telemetry-policy.ts` | Explicit opt-in, endpoint validation and exported-attribute allowlist |
+| `agent/instrumentation/local-otlp.ts` | Optional Eve OTLP integration, disabled until explicitly enabled |
+| `agent/telemetry-policy.ts` | Local endpoint validation and numeric usage-metric allowlist |
+| `agent/safe-trace-exporter.ts` | Fail-closed OTLP sanitization: fixed resource/name/scope, no content/events/links |
+| `tests/safe-exporter.test.mjs` | Synthetic Eve filtering, sanitization and local protobuf transport checks (no model) |
 
 ## Run independently
 
@@ -65,17 +67,22 @@ exporter or run a local Phoenix receiver. Langfuse's direct ingest URL is not
 a supported starter endpoint; forwarding from a collector requires an
 independent privacy, access and infrastructure review.
 
-Eve's export policy suppresses prompt/reply content and restricts **span
-attributes** to the `agent/telemetry-policy.ts` allowlist (for example model,
-operation, token usage and error type). User messages, tool arguments, user
-IDs and conversation IDs are excluded from those span attributes. Eve does
-**not** apply that attribute filter to OTLP resource metadata, names or links:
-a collector may still receive deployment or repository metadata. This is a
-local-development building block, **not yet a verified PII-free OTLP payload**.
+Eve's first export policy strips prompt/reply content and keeps only
+**numeric token and provider-usage fields**. Our `safe-trace-exporter.ts`
+then rebuilds each span with a fixed name, resource and instrumentation
+scope; it removes events, links, status messages and arbitrary strings,
+and rejects an entire batch if its structural fields are invalid. Only
+finite, nonnegative numeric usage values and timing data survive.
+
+A synthetic test now captures the **actual local OTLP/protobuf bytes**, in
+addition to exercising Eve's filtering and the sanitizing exporter. It
+confirms that injected test secrets, deployment metadata and model strings
+are absent. OpenTelemetry trace/span IDs still exist for correlation:
+this is pseudonymous telemetry, **not a promise of complete anonymity**.
 The policy controls **export only** and does not erase Eve's durable workflow
-records or host/provider logs. Review synthetic captures of the whole payload,
-collector retention and access before using real user data or forwarding
-traces. Disable the collector to stop local export.
+records or host/provider logs. Do not process real user data until collector
+access, forwarding, retention and all relevant agent/provider paths have
+been reviewed. Disable the collector to stop local export.
 
 This hook does **not** authorize an agent action, supply a Chibi tenant ID,
 alter the Rust worker's budgets or retry logic, create a Langfuse project, or
@@ -94,10 +101,11 @@ Reported provider usage or cost is **not** a settled Chibi billing receipt.
 
 Keep the host-owned metadata counters and generic OTLP export format. Do not
 build a separate controller, workflow queue or provider-routing proxy just for
-observability. Before enabling any collector for real users, verify with
-synthetic traces that **all** exported resources, events and span attributes
-meet the privacy contract, then review tenant isolation, access, retention,
-cost and consent. The starter itself makes no such production-readiness claim.
+observability. The included tests verify one synthetic Eve span and its actual
+OTLP/protobuf bytes; broaden this check to every future tool/provider span
+shape before real users, and enforce redirect-free network egress at the host.
+Review tenant isolation, collector access, retention, cost and consent.
+The starter itself makes no production-readiness claim.
 
 ## Make it your own
 

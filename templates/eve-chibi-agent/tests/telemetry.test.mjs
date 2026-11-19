@@ -23,7 +23,7 @@ test("telemetry is explicitly opt-in and stays local", () => {
   );
 });
 
-test("external egress, embedded credentials and non-trace paths are rejected", () => {
+test("direct external URLs, embedded credentials and non-trace paths are rejected", () => {
   for (const url of [
     "https://cloud.langfuse.com/api/public/otel/v1/traces",
     "http://127.0.0.1.evil.example/v1/traces",
@@ -57,14 +57,15 @@ test("only non-content, non-identity attributes may be emitted on Eve spans", ()
   for (const key of [
     "gen_ai.usage.input_tokens",
     "gen_ai.usage.output_tokens",
-    "gen_ai.request.model",
-    "error.type",
+    "gen_ai.usage.cost",
   ]) {
     assert.equal(mayExportAttribute(key), true, key);
   }
   for (const key of [
     "gen_ai.input.messages",
     "gen_ai.output.messages",
+    "gen_ai.request.model",
+    "error.type",
     "gen_ai.conversation.id",
     "agent.run.id",
     "vercel.session_id",
