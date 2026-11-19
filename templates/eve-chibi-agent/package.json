@@ -1,0 +1,29 @@
+{
+  "name": "@chibi/eve-agent-starter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "eve dev",
+    "build": "eve build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
+    "check": "npm run test && npm run typecheck && npm run build"
+  },
+  "dependencies": {
+    "@opentelemetry/core": "2.12.1",
+    "@opentelemetry/resources": "2.12.1",
+    "@opentelemetry/sdk-trace": "2.12.1",
+    "@vercel/otel": "2.3.0",
+    "ai": "7.0.177",
+    "eve": "1.1.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "typescript": "7.0.2"
+  }
+}
