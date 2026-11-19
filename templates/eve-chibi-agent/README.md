@@ -5,6 +5,32 @@ creator template. This sample is for adults, is English-first, and can draft
 learning or creative steps. It has **no Chibi identity, memory, payments,
 entitlements, remote connections, or hosted deployment**.
 
+## License, attribution and branding
+
+The **original example code and documentation in this directory** are available
+under the [MIT License](LICENSE), copyright (c) 2026 Sales Squad Oy. You may
+copy, adapt, publish and sell forks (including closed-source products) without
+paying Sales Squad Oy or contributing changes back. When redistributing copies
+or substantial portions, **retain the copyright and MIT permission notice**.
+The MIT file here does **not** relicense other Junction Pets directories or the
+private Chibi runtime, marketplace, APIs, accounts, entitlement services or
+other backend code.
+
+The copyright license does not grant trademark, endorsement or affiliation
+rights to the **Chibi**, **Chibi.pet** or **Sales Squad** names, logos or other
+brand identifiers. Their appearance in this example is descriptive, not a
+promise that forks may market themselves as official Chibi products. Replace
+example branding with your own before distributing a branded derivative.
+No private Chibi characters, artwork, design assets, customer data, secrets or
+provider accounts are supplied or licensed by this starter.
+
+Third-party packages have **their own licenses**, not this starter's MIT
+license. See [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) for the pinned
+direct dependency inventory and upstream license sources. Retain applicable
+third-party license, attribution and `NOTICE` files if you redistribute those
+packages or bundle them in a derivative. Model, hosting and external service
+terms remain separate from software copyright permissions.
+
 ## What is included
 
 | File | Customize |
@@ -141,9 +167,10 @@ key. The host rechecks policy and revocation before every privileged call and
 reconciles uncertain effects before retry. Neither Eve's local session nor a
 template capability declaration is a Chibi permission grant.
 
-Before publishing a public template, confirm the license, onboarding UX,
-supported hosting/identity paths, real model/provider acceptance, billing and
-privacy wording. No deploy or Marketplace publication is performed here.
+Before promoting this as a production-ready template, independently confirm
+onboarding UX, supported hosting/identity paths, real model/provider
+acceptance, billing, brand usage and privacy wording. The MIT license only
+covers this example; no deploy or Marketplace publication is performed here.
 
 Useful upstream docs: [Eve getting started](https://eve.dev/docs/getting-started),
 [built-in tools](https://eve.dev/docs/concepts/built-in-tools), and

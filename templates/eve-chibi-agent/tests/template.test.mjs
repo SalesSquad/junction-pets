@@ -60,3 +60,28 @@ test("starter does not include live Chibi or provider credentials", async () => 
   assert.doesNotMatch(text, /(?:sk_(?:live|test)_|ghp_|AKIA[0-9A-Z]{16})/);
   assert.match(text, /no Chibi account/i);
 });
+
+test("MIT example keeps Chibi brand and third-party licenses outside its scope", async () => {
+  const [license, readme, inventory, manifest] = await Promise.all([
+    read("LICENSE"),
+    read("README.md"),
+    read("THIRD_PARTY_LICENSES.md"),
+    read("package.json").then(JSON.parse),
+  ]);
+  assert.match(license, /^MIT License/);
+  assert.match(license, /Copyright \(c\) 2026 Sales Squad Oy/);
+  assert.match(license, /copyright notice and this permission notice shall be included/i);
+  assert.match(readme, /does \*\*not\*\* relicense other Junction Pets directories/);
+  assert.match(readme, /does not grant trademark, endorsement or affiliation/);
+  assert.match(readme, /THIRD_PARTY_LICENSES\.md/);
+  for (const [name, version] of Object.entries({
+    ...manifest.dependencies,
+    ...manifest.devDependencies,
+  })) {
+    const entry = inventory.split("\n").find((line) => line.startsWith(`| \`${name}\``));
+    assert.ok(
+      entry?.includes(`| \`${version}\` |`),
+      `review license inventory when ${name}@${version} changes`,
+    );
+  }
+});
