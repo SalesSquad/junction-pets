@@ -1,5 +1,10 @@
 # AGENTS.md — Junction monorepo contributor contract
 
+<!-- BEGIN AGENT-RDC-ROUTE v1 -->
+**Remote Desktop Commander for all agents:** For work needing an authorized Mac, Apple SDK/signing, simulator, GUI or existing local secrets, discover the connector in this session; call `list_devices`, select an online `deviceId`, then use `read_file` to read that Mac's installed `~/.agents/skills/remote-desktop-commander/SKILL.md` and `~/.agents/rules/shared.md` (host-specific absolute paths). Never copy keys, start a second agent or assume cached Mac access; if unavailable, report the exact blocker and continue portable work.
+**Fast development first:** Use this repository's smallest risk-relevant Rust/JS/Python check or supported unsigned Debug preview before choosing a full Xcode build. Apple SDK, iOS bindings/integration, signing and device acceptance still require their real native gates. `aarch64-apple-darwin` Rust tests are not iOS simulator tests; never claim an unrun gate passed. [Shared route](https://github.com/SalesSquad/agents/blob/main/docs/project-remote-access.md).
+<!-- END AGENT-RDC-ROUTE v1 -->
+
 > **CI policy (17 Nov 2026, owner): CRACI is off.** All CRACI workflows are disabled,
 > `CRACI_CREDIT_WINDOW_OPEN=false` and GitHub Actions is disabled for this repository. Do not
 > use, re-enable or plan around CRACI or GitHub Actions. Run checks in your own agent environment
