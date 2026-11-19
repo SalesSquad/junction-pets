@@ -1,13 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,readFile,writeFile,appendFile,symlink,rm,stat} from 'node:fs/promises';
+import {mkdtemp,mkdir,readFile,writeFile,appendFile,symlink,rm,stat,realpath} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {plan} from '../cell.mjs';
 import {localHost} from './host.mjs';
 
 const authorize=async g=>({...g,permit:true,reference:'fixture-only-host'});
-const tmp=async()=>mkdtemp(join(tmpdir(),'j26-intel-host-m6-'));
+// Use the actual temp directory; macOS /tmp is a symlink rejected by O_NOFOLLOW.
+const tmp=async()=>mkdtemp(join(await realpath(tmpdir()),'j26-intel-host-m6-'));
 const fixture=seed=>{
   const r=plan(seed);
   r.episodes.forEach((e,i)=>{

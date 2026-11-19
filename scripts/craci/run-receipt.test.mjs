@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {execFileSync, spawnSync} from 'node:child_process';
-import {copyFile, link, mkdir, mkdtemp, open, readFile, readdir, rm, symlink, writeFile, appendFile} from 'node:fs/promises';
+import {copyFile, link, mkdir, mkdtemp, open, readFile, readdir, realpath, rm, symlink, writeFile, appendFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -24,7 +24,8 @@ async function commit(root) {
   return git(root, ['rev-parse', 'HEAD']);
 }
 async function fixture(t) {
-  const base = await mkdtemp(join(tmpdir(), 'craci-receipt-test-'));
+  // macOS /tmp is a symlink; the collector intentionally rejects symlinked ancestors.
+  const base = await mkdtemp(join(await realpath(tmpdir()), 'craci-receipt-test-'));
   t.after(() => rm(base, {recursive: true, force: true}));
   const source = join(base, 'source'), harness = join(base, 'harness'), evidence = join(base, 'evidence');
   await mkdir(source); await mkdir(harness);

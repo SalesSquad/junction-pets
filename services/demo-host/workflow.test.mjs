@@ -71,7 +71,7 @@ test('provider failures, malformed responses and unverified/over-limit cost stay
 });
 
 test('Python preview works without a DB, provider or Council imports', () => {
-  const output = execFileSync('python', ['services/demo-host/aiven_workflow.py', '--source-commit', 'a'.repeat(40)], {encoding: 'utf8'});
+  const output = execFileSync('python3', ['services/demo-host/aiven_workflow.py', '--source-commit', 'a'.repeat(40)], {encoding: 'utf8'});
   const result = JSON.parse(output);
   assert.equal(result.mode, 'offline-preview');
   assert.equal(result.databaseAccessed, false);
@@ -122,7 +122,7 @@ except RuntimeError as e:assert str(e)=='RESERVATION_NOT_CURRENT'
 assert results.value is None
 print('synthetic-workflow-tests-passed')
 `;
-  const result = execFileSync('python', ['-c', script], {encoding: 'utf8'});
+  const result = execFileSync('python3', ['-c', script], {encoding: 'utf8'});
   assert.match(result, /synthetic-workflow-tests-passed/);
 });
 
@@ -133,7 +133,7 @@ spec=importlib.util.spec_from_file_location('demo','services/demo-host/aiven_wor
 try:m.database_factory();raise AssertionError('missing dependency accepted')
 except RuntimeError as e:assert str(e)=='PYTHON_DEPENDENCIES_UNAVAILABLE'
 print('missing-dependency-refused')`;
-  const result = execFileSync('python', ['-S', '-c', script], {encoding: 'utf8'});
+  const result = execFileSync('python3', ['-S', '-c', script], {encoding: 'utf8'});
   assert.match(result, /missing-dependency-refused/);
 });
 
@@ -168,6 +168,6 @@ assert calls[0]['host']=='/tmp/synthetic-socket' and calls[0]['user']=='syntheti
 assert calls[0]['connect_timeout']=='5'
 print('unsafe-db-configurations-refused')
 `;
-  const result = execFileSync('python', ['-c', script], {encoding: 'utf8'});
+  const result = execFileSync('python3', ['-c', script], {encoding: 'utf8'});
   assert.match(result, /unsafe-db-configurations-refused/);
 });
