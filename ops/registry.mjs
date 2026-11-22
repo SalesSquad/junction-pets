@@ -33,7 +33,7 @@ export function expectedEnvironment(companySlug) {
     ownedPath:'pets/'+companySlug+'/',
     agentInstructions:'ops/AGENTS.md',
     runtimeInstructions:'pets/'+companySlug+'/AGENTS.md',
-    setupCommand:'npm ci --ignore-scripts',
+    setupCommand:companySlug==='verda'?'bash ops/cloud/rml1/setup.sh && npm ci --ignore-scripts':'npm ci --ignore-scripts',
     checkCommands:['npm run validate','npm test','npm run build'],
     provisioning:{state:'unprovisioned',environmentId:null,verifiedAt:null,evidenceUrl:null}
   };
