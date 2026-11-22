@@ -6,7 +6,7 @@ python3 -I "$here/check-oci-layout.py" --help >/dev/null
 echo 'rml1_local_oci_checker=available'
 
 rust=unavailable
-if [[ ${RML1_INSTALL_RUST_1_98_1:-0} == 1 ]]; then
+if [[ ${RML1_INSTALL_RUST_1_98_1:-1} == 1 ]]; then
   bash "$here/bootstrap-rust.sh"
   rust=installed
 elif command -v rustup >/dev/null || [[ -x "$HOME/.cargo/bin/rustup" ]]; then
