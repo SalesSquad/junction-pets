@@ -109,15 +109,47 @@ def verify_factory(factory_root, results):
                             ["sh", str(script), str(executable)], crate, timeout=25))
 
 
+def verify_chibi(chibi_root, output, results, count):
+    """Execute Chibi's actual source-pinned Rust market driver, not a duplicate model."""
+    if chibi_root is None:
+        return {"status": "not_run", "reason": "chibi_root_not_supplied"}
+    if not (chibi_root / "tools/ci/seeded_factory.py").is_file():
+        results.append({"name": "chibi_market_real_rust", "status": "fail",
+                        "reason": "chibi_seeded_driver_missing"})
+        return {"status": "fail", "reason": "driver_missing"}
+    sha = git_sha(chibi_root)
+    if sha is None:
+        results.append({"name": "chibi_market_real_rust", "status": "fail",
+                        "reason": "chibi_git_sha_missing"})
+        return {"status": "fail", "reason": "source_sha_missing"}
+    destination = output / "chibi-market"
+    cache = output / "chibi-cache"
+    # Chibi enforces clean HEAD, an external cache, a single-writer lock,
+    # strict fixture source checks and real scenario receipts itself.
+    # Chibi's campaign output directory must not exist before its own runner.
+    step = run_step("chibi_market_real_rust",
+                    ["python3", "tools/ci/seeded_factory.py", "--expected-head", sha,
+                     "--cache-root", str(cache), "--out", str(destination),
+                     "--lane", "market", "--campaign-start", "0",
+                     "--campaign-count", str(count)], chibi_root, timeout=900)
+    results.append(step)
+    return {"status": step["status"], "source_sha": sha,
+            "campaign_count": count, "output_dir": str(destination)}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--factory-root", type=Path, help="local checkout of SalesSquad/factory")
+    parser.add_argument("--chibi-root", type=Path, help="optional clean authorized SalesSquad/chibi checkout")
+    parser.add_argument("--chibi-market-seeds", type=int, default=10000, help="Chibi real Rust scenario count")
     parser.add_argument("--out", type=Path, required=True, help="new or existing output directory")
     parser.add_argument("--seeds", type=int, default=4096, help="4096 by default, up to 1000000")
     parser.add_argument("--workers", type=int, default=8, help="parallel Rust simulation workers (1..64)")
     args = parser.parse_args()
     if not 1 <= args.seeds <= 1_000_000 or not 1 <= args.workers <= 64:
         parser.error("seeds must be 1..1000000 and workers must be 1..64")
+    if not 1 <= args.chibi_market_seeds <= 100_000:
+        parser.error("chibi-market-seeds must be 1..100000")
     output = args.out.resolve()
     if output.is_symlink():
         parser.error("output directory cannot be a symlink")
@@ -131,6 +163,8 @@ def main():
                             ["node", "--test", "services/pet-adapters/registry.test.mjs"],
                             ROOT, timeout=240))
     verify_factory(factory, results)
+    chibi = verify_chibi(args.chibi_root.resolve() if args.chibi_root else None,
+                         output, results, args.chibi_market_seeds)
     # Never report a complete campaign when a required integration did not run.
     # A partial platform (macOS) is useful for development but not Linux acceptance.
     statuses = {r["status"] for r in results}
@@ -144,6 +178,7 @@ def main():
         "platform": platform.system().lower(),
         "simulation": simulation,
         "campaign_parameters": {"seeds": args.seeds, "workers": args.workers},
+        "chibi_integration": chibi,
         "steps": results,
         "qualified": False,
         "runtime_authorized": False,
