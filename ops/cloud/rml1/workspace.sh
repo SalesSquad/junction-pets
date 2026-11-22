@@ -52,11 +52,11 @@ if ! command -v rustup >/dev/null 2>&1; then
   echo 'RML1_WORKSPACE=BLOCKED reason=rustup_unavailable' >&2
   exit 2
 fi
-if ! rustup run 1.98.1 rustc --version | grep -Eq '^rustc 1\\.98\\.1([[:space:]]|$)'; then
+if ! rustup run 1.98.1 rustc --version | grep -Eq '^rustc 1\.98\.1([[:space:]]|$)'; then
   echo 'RML1_WORKSPACE=BLOCKED reason=rust_version_mismatch' >&2
   exit 2
 fi
-if ! rustup run 1.98.1 cargo --version | grep -Eq '^cargo 1\\.98\\.1([[:space:]]|$)'; then
+if ! rustup run 1.98.1 cargo --version | grep -Eq '^cargo 1\.98\.1([[:space:]]|$)'; then
   echo 'RML1_WORKSPACE=BLOCKED reason=cargo_version_mismatch' >&2
   exit 2
 fi
@@ -89,8 +89,8 @@ factory_head=$(git -C "$factory" rev-parse --verify HEAD) || exit 2
   echo 'RML1_WORKSPACE=BLOCKED reason=source_revision_missing' >&2
   exit 2
 }
-printf 'RML1_WORKSPACE=READY mode=%s\\n' "$mode"
-printf 'JUNCTION_ROOT=%s\\nJUNCTION_SHA=%s\\n' "$junction" "$junction_head"
-printf 'FACTORY_ROOT=%s\\nFACTORY_SHA=%s\\n' "$factory" "$factory_head"
-printf 'RUST=%s\\n' "$(rustup run 1.98.1 rustc --version)"
-printf 'RUNTIME_AUTHORIZED=false\\n'
+printf 'RML1_WORKSPACE=READY mode=%s\n' "$mode"
+printf 'JUNCTION_ROOT=%s\nJUNCTION_SHA=%s\n' "$junction" "$junction_head"
+printf 'FACTORY_ROOT=%s\nFACTORY_SHA=%s\n' "$factory" "$factory_head"
+printf 'RUST=%s\n' "$(rustup run 1.98.1 rustc --version)"
+printf 'RUNTIME_AUTHORIZED=false\n'
