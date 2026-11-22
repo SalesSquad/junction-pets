@@ -137,6 +137,35 @@ def verify_chibi(chibi_root, output, results, count):
             "campaign_count": count, "output_dir": str(destination)}
 
 
+def write_report(output, receipt):
+    steps = receipt["steps"]
+    rows = ["# RML1 development campaign", "",
+            f"Overall: **{receipt['overall'].upper()}**",
+            "Security: runtime authorization **false**; not an OCI or host attestation.",
+            "",
+            f"Junction source: \`{receipt['junction_source_sha']}\`",
+            f"Factory source: \`{receipt['factory_source_sha']}\`",
+            f"Chibi adapter: **{receipt['chibi_integration']['status']}**",
+            "",
+            "| Executed check | Status | Exit |",
+            "|---|---|---|"]
+    for step in steps:
+        rows.append(f"| {step['name']} | {step['status']} | {step.get('exit_code', '—')} |")
+    rows.extend(["", "## Synthetic simulator (not Chibi runtime)", ""])
+    summary = receipt.get("simulation")
+    if summary:
+        for key in ("scenarios", "committed", "denied", "recovered",
+                    "duplicate_prevented", "retries", "checksum"):
+            rows.append(f"- {key}: {summary.get(key)}")
+    else:
+        rows.append("No validated synthetic simulator summary.")
+    rows.extend(["", "A missing Factory or Linux canary makes overall INCOMPLETE.",
+                 "Chibi is an opt-in real Rust integration; its absence is separately declared.",
+                 "A Chibi adapter failure makes overall FAIL.",
+                 ""])
+    (output / "REPORT.md").write_text("\n".join(rows))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--factory-root", type=Path, help="local checkout of SalesSquad/factory")
@@ -186,6 +215,7 @@ def main():
         "overall": overall,
     }
     (output / "receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    write_report(output, receipt)
     print(json.dumps({"overall": receipt["overall"], "steps": [
         {"name": step["name"], "status": step["status"]} for step in results
     ], "receipt": str(output / "receipt.json"), "runtime_authorized": False}))
