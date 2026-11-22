@@ -21,13 +21,13 @@ call a Cloud publication API and does not prove the published setting changed.
 On a Linux cloud VM with Python 3 and no apt privileges, run:
 
 ```sh
-RML1_INSTALL_RUST_1_98_1=1 bash ops/cloud/rml1/setup-user.sh
+bash ops/cloud/rml1/setup-user.sh
 bash ops/cloud/rml1/verify.sh
 bash ops/cloud/rml1/test-user.sh
 bash ops/cloud/rml1/test-bootstrap-rust.sh
 ```
 
-The Rust opt-in requires non-root x86_64 Linux and uses `~/.cargo` and
+By default the rootless setup installs pinned Rust 1.98.1 on non-root x86_64 Linux; set `RML1_INSTALL_RUST_1_98_1=0` to skip Rust installation for offline OCI-only fixture checks. The Rust bootstrap uses `~/.cargo` and
 `~/.rustup`. If Rustup is absent there, the bootstrap downloads the official
 Rustup 1.29.0 installer over HTTPS and checks its pinned SHA-256 before
 execution. It installs the Rust 1.98.1 minimal profile and adds rustfmt and
