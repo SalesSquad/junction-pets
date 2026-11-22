@@ -138,8 +138,8 @@ fn parse_args() -> Result<(u64, usize, usize, Option<String>), String> {
             _ => return Err(format!("unknown argument: {flag}")),
         }
     }
-    if seeds == 0 || seeds > 65536 {
-        return Err("seeds must be in 1..=65536".into());
+    if seeds == 0 || seeds > 1_000_000 {
+        return Err("seeds must be in 1..=1000000".into());
     }
     if workers == 0 || workers > 64 {
         return Err("workers must be in 1..=64".into());
@@ -211,6 +211,17 @@ mod tests {
                 .all(|r| r.committed && r.attempts == 2)
         );
     }
+    #[test]
+    fn large_campaign_covers_one_hundred_thousand_unique_seeds() {
+        let rows = campaign(0, 100_000, 16);
+        assert_eq!(rows.len(), 100_000);
+        assert_eq!(rows[0].seed, 0);
+        assert_eq!(rows[99_999].seed, 99_999);
+        assert!(rows.windows(2).all(|pair| pair[1].seed == pair[0].seed + 1));
+        // Replay independently from a different shard count.
+        assert_eq!(rows, campaign(0, 100_000, 1));
+    }
+
     #[test]
     fn receipt_summary_contains_non_authorization() {
         let mut out = Vec::new();
