@@ -162,3 +162,10 @@ STOA_SPONSOR_DXF=/tmp/stoa-verified-sponsor-sample.dxf npm test
 ```
 
 Do not add a broad repetitive CI/test gate; these checks focus on geometry correctness, source links, negative evidence, import input bounds, HTTP privacy and sponsor source agreement.
+
+## Reuse after completion
+
+Stoa remains a completed reference project. Reusable source-evidence, review and replay code now
+has a standalone pilot in [Evidence Kit](../../services/evidence-kit/README.md), with independent
+DXF/CSV consumers and synthetic fixtures. This does not change this app's runtime or historical
+measurements.

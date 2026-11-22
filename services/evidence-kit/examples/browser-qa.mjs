@@ -1,0 +1,43 @@
+/** Optional real Chromium acceptance, not imported by the library or default Node tests. */
+import {createRequire} from 'node:module';
+import {mkdir, writeFile} from 'node:fs/promises';
+import {once} from 'node:events';
+import {resolve} from 'node:path';
+import assert from 'node:assert/strict';
+import {createDemoServer} from './serve.mjs';
+const require=createRequire(import.meta.url);
+const {chromium}=require(process.env.EVIDENCE_PLAYWRIGHT_MODULE||'playwright');
+const output=resolve(process.argv[2]||'/tmp/evidence-kit-browser-qa');await mkdir(output,{recursive:true});
+const server=createDemoServer();server.listen(0,'127.0.0.1');await once(server,'listening');
+const browser=await chromium.launch({headless:true,...(process.env.EVIDENCE_CHROMIUM?{executablePath:process.env.EVIDENCE_CHROMIUM}:{}),args:['--no-sandbox']});
+try{
+ const page=await browser.newPage({viewport:{width:1360,height:1000}}),errors=[],external=[];
+ const base=`http://127.0.0.1:${server.address().port}`;
+ page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(!r.url().startsWith(base))external.push(r.url());});
+ await page.goto(base);const widget=page.locator('evidence-review');
+ await widget.getByRole('heading',{name:'12.00 m²',exact:true}).waitFor();
+ await page.click('#table');await widget.getByRole('heading',{name:'30.30 EUR',exact:true}).waitFor();
+ await widget.getByRole('textbox',{name:'Reviewer name (locally declared)'}).fill('Synthetic browser reviewer');
+ await widget.getByRole('button',{name:'Confirm engine answer',exact:true}).click();
+ await widget.getByText(/Reviewer Synthetic browser reviewer: 30.30 EUR/).waitFor();
+ await widget.getByRole('textbox',{name:'Manual correction',exact:true}).fill('31.00 EUR');
+ await widget.getByRole('button',{name:'Record correction',exact:true}).click();
+ await widget.getByText(/Reviewer Synthetic browser reviewer: 31.00 EUR/).waitFor();
+ assert.equal(await widget.getByRole('heading').textContent(),'30.30 EUR');
+ await widget.getByRole('button',{name:'Undo',exact:true}).click();await widget.getByText(/Reviewer Synthetic browser reviewer: 30.30 EUR/).waitFor();
+ await widget.getByRole('button',{name:'Redo',exact:true}).click();await widget.getByText(/Reviewer Synthetic browser reviewer: 31.00 EUR/).waitFor();
+ const downloaded=page.waitForEvent('download');await widget.getByRole('button',{name:'Export packet',exact:true}).click();
+ const download=await downloaded;const packet=resolve(output,'packet.json');await download.saveAs(packet);
+ await page.click('#changed');await widget.getByRole('heading',{name:'32.30 EUR',exact:true}).waitFor();
+ await widget.getByText('No human review recorded.',{exact:true}).waitFor();
+ await page.locator('#restore').setInputFiles(packet);await page.getByText('Source extraction and claim replayed; historical review restored.',{exact:true}).waitFor();
+ await widget.getByText(/Reviewer Synthetic browser reviewer: 31.00 EUR/).waitFor();
+ await page.screenshot({path:resolve(output,'desktop.png'),fullPage:true});
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:resolve(output,'mobile.png'),fullPage:true});
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await page.click('#conflict');await widget.getByRole('heading',{name:'No supported answer',exact:true}).waitFor();
+ assert.equal(await widget.getByRole('button',{name:'Confirm engine answer',exact:true}).isDisabled(),true);
+ assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
+ const report={status:'pass',flows:['drawing','exact-table-total','confirmation','correction','undo-redo','export','changed-source-unreviewed','replay-restore','mobile-no-overflow','conflict-abstention'],pageErrors:0,externalRequests:0,source:'synthetic fixtures only'};
+ await writeFile(resolve(output,'report.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
+}finally{await browser.close();await new Promise(r=>server.close(r));}

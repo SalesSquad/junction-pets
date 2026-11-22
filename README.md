@@ -3,6 +3,15 @@
 **34 independently authored, versioned company companions for Junction, with one auditable monorepo and a separate Chibi runtime.** This is the public source repository [`SalesSquad/junction-pets`](https://github.com/SalesSquad/junction-pets). A companion can explain public technical documentation, inspect material supplied by its user and suggest a bounded next step. It is **not** an official company representative, endorsement, published ChatGPT agent or automatically functioning Chibi account.
 
 
+## Reusable techniques after the event
+
+[Evidence Kit](services/evidence-kit/README.md) is a standalone Node/browser reuse pilot extracted
+from Stoa: canonical source evidence, method claims, reversible review, replayable packets,
+DXF/CSV adapters and frozen synthetic cases. Start with its
+[capability inventory](services/evidence-kit/capabilities.json) and
+[adoption guide](services/evidence-kit/docs/ADOPTION.md). This does not restart Stoa or qualify
+real-data performance, physical identity or production use.
+
 ## Junction 2026 submission
 
 **This repository is our Junction 2026 submission.** It is built in three layers:

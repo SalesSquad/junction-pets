@@ -1,0 +1,43 @@
+{
+  "name": "@salessquad/evidence-kit",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./dxf": "./adapters/dxf.mjs",
+    "./csv": "./adapters/csv.mjs",
+    "./drawing": "./methods/drawing.mjs",
+    "./table": "./methods/table.mjs",
+    "./review-element": "./components/review-element.mjs",
+    "./workspace-studio": "./components/workspace-studio.mjs"
+  },
+  "files": [
+    "src",
+    "adapters",
+    "methods",
+    "components",
+    "examples",
+    "fixtures",
+    "benchmark",
+    "docs",
+    "skills",
+    "README.md",
+    "PROVENANCE.json",
+    "capabilities.json",
+    "cli.mjs"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "demo": "node examples/run.mjs",
+    "benchmark": "node benchmark/run.mjs",
+    "serve": "node examples/serve.mjs"
+  },
+  "bin": {
+    "evidence-kit": "./cli.mjs"
+  }
+}
