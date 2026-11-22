@@ -169,3 +169,7 @@ Stoa remains a completed reference project. Reusable source-evidence, review and
 has a standalone pilot in [Evidence Kit](../../services/evidence-kit/README.md), with independent
 DXF/CSV consumers and synthetic fixtures. This does not change this app's runtime or historical
 measurements.
+
+For offline PNG/PDF annotation reading, see the [raster pilot](raster/pilot/README.md).
+It reports what is printed and cites its location. On the synthetic stress suite,
+unread or ambiguous labels remain unresolved. Physical measurements require known geometry.
