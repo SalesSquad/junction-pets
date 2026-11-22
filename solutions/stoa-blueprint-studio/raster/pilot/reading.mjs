@@ -34,7 +34,7 @@ const below = (tag, area) => {
   return ay >= b && ay-b <= 2*(b-y) && Math.min(r,ar) > Math.max(x,ax);
 };
 
-export function roomAnnotation(page, room) {
+function observation(page, room) {
   const abstain = reason => ({status:'abstained', reason, citations:[]});
   const tags = page.lines.filter(line => idPattern.test(line.text));
   const matches = tags.filter(line => idPattern.exec(line.text)[1] === room);
@@ -75,4 +75,48 @@ export function checkScale(page, controls) {
   if (Math.abs(ratios[0]-ratios[1])/Math.max(...ratios) > .02) return abstain('Scale controls disagree.');
   if (axes.size !== 2) return abstain('Two orthogonal controls required.');
   return {status:'controls_agree', pixelsPerMetre:ratios[0]/2+ratios[1]/2, rasterSha256:page.rasterSha256};
+}
+
+function sourceBox(box, inverse, width, height) {
+  const [a,b,c,d,e,f] = inverse;
+  const [left,top,right,bottom] = box;
+  const corners = [[left,top],[left,bottom],[right,top],[right,bottom]];
+  const xs = corners.map(([x,y]) => a*x+b*y+c);
+  const ys = corners.map(([x,y]) => d*x+e*y+f);
+  return [Math.max(0,Math.floor(Math.min(...xs))),Math.max(0,Math.floor(Math.min(...ys))),
+    Math.min(width,Math.ceil(Math.max(...xs))),Math.min(height,Math.ceil(Math.max(...ys)))];
+}
+
+const overlaps = (a,b) => {
+  const intersection = Math.max(0,Math.min(a[2],b[2])-Math.max(a[0],b[0])) *
+    Math.max(0,Math.min(a[3],b[3])-Math.max(a[1],b[1]));
+  const area = box => (box[2]-box[0])*(box[3]-box[1]);
+  return intersection >= .5*(area(a)+area(b)-intersection) && intersection > 0;
+};
+
+export function roomAnnotation(page, room) {
+  const original = observation(page,room);
+  const candidates = original.status === 'observed' ? [original] : [];
+  for (const view of page.views ?? []) {
+    const candidate = observation({...page,lines:view.lines},room);
+    if (candidate.status !== 'observed') continue;
+    candidate.citations = candidate.citations.map(citation => ({...citation,
+      id:view.id+':'+citation.id,
+      box:sourceBox(citation.box,view.inverse,page.width,page.height)}));
+    candidates.push(candidate);
+  }
+  if (!candidates.length) return original;
+  const first = candidates[0];
+  if (candidates.some(candidate => candidate.value !== first.value ||
+      candidate.citations.some((citation,i) => !overlaps(citation.box,first.citations[i].box)))) {
+    return {status:'abstained',reason:'OCR views disagree on value or citation location.',citations:[]};
+  }
+  if (original.status === 'observed') return original;
+  // A retry must corroborate another view or the original room identifier.
+  const matchingTags = page.lines.filter(line => idPattern.exec(line.text)?.[1] === room);
+  if (matchingTags.length > 1 || (candidates.length < 2 &&
+      !matchingTags.some(line => line.confidence >= 70 && overlaps(line.box,first.citations[0].box)))) {
+    return {status:'abstained',reason:'Retry lacks corroboration for the room identifier.',citations:[]};
+  }
+  return first;
 }
