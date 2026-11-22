@@ -39,3 +39,15 @@ python3 tools/rml1-sim/integration_campaign.py --factory-root ../factory \
 Chibi checks its own exact clean source SHA, offline Cargo cache and independently checked market ledger. It requires sufficient disk headroom and may take longer on a cold Cargo build. Its output directory and source SHA are recorded separately. If the Chibi repository is missing, `chibi_integration.status=not_run`; a failing requested Chibi check makes overall FAIL. The modern published `junction-verda-rml1` contains Junction and Factory, not automatically Chibi; the command must not assume a third repository was connected. No credentials, live payment requests, production effects or untrusted R are needed.
 
 The written markdown report distinguishes source-executed tests from synthetic simulator summaries. Even a complete green developer campaign never sets `runtime_authorized=true`.
+
+## Measured model-only throughput
+
+Compile exactly once and compare fixed seed ranges across worker counts without creating additional Cargo builds:
+
+```sh
+cd tools/rml1-sim
+cargo build --offline --release
+python3 benchmark.py --seeds 100000 --repeats 3 --out /tmp/rml1-performance
+```
+
+The benchmark records wall time, scenarios/second and serial speedup for 1, 2, 4, 8 and 16 workers in `perf.json` and `PERF.md`. It validates byte-exact JSONL replay for every repetition and fails on mismatches. Generated files are deleted between worker counts to avoid unbounded disk accumulation. Results are environment-specific and describe the **synthetic simulator**, not agent model execution, Chibi's Rust market, or Factory runtime performance.
