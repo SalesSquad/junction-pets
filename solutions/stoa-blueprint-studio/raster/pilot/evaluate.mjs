@@ -5,7 +5,7 @@ import {scoreRegions} from '../../benchmark/regions.mjs';
 import {scan} from './scan.mjs';
 import {checkScale, roomAnnotation} from './reading.mjs';
 
-export async function evaluate(path) {
+export async function evaluate(path, options = {}) {
   const handle = await open(path,'r');
   const buffer = Buffer.alloc(256_001);
   let length;
@@ -18,7 +18,7 @@ export async function evaluate(path) {
   if (!Array.isArray(suite.documents) || suite.documents.length > 32) throw new Error('Invalid manifest.');
   const rows = [], regions = [], scales = [];
   for (const document of suite.documents) {
-    const page = await scan(resolve(dirname(path),document.file),document.page);
+    const page = await scan(resolve(dirname(path),document.file),document.page,options);
     if (page.sourceSha256 !== document.sha256) throw new Error('Fixture source digest mismatch.');
     if (!Array.isArray(document.queries) || document.queries.length > 50) throw new Error('Too many queries.');
     for (const query of document.queries) {
@@ -49,8 +49,8 @@ export async function evaluate(path) {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const path = process.argv[2] ?? fileURLToPath(new URL('./fixtures/suite.json',import.meta.url));
-  const report = await evaluate(path);
+  const path = process.argv.slice(2).find(arg=>arg !== '--baseline') ?? fileURLToPath(new URL('./fixtures/suite.json',import.meta.url));
+  const report = await evaluate(path,{retry:!process.argv.includes('--baseline')});
   console.log(JSON.stringify(report,null,2));
   if (report.annotation.wrong || report.rows.some(row=>row.required && !row.correct) || report.abstention.expected !== report.abstention.correct ||
       report.scales.some(row=>!row.correct) || report.regions.matched !== report.regions.predicted) process.exitCode = 1;

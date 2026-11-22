@@ -26,9 +26,14 @@ async function boundedRead(path, max) {
   } finally { await handle.close(); }
 }
 
-export async function scan(path, page = 1) {
+export async function scan(path, page = 1, options = {}) {
+  return scanBytes(await boundedRead(path,16*1024*1024),page,options);
+}
+
+export async function scanBytes(bytes, page = 1, {retry = true} = {}) {
   if (!Number.isSafeInteger(page) || page < 1 || page > 1000) throw new Error('Invalid page number.');
-  const source = await boundedRead(path,16*1024*1024);
+  if (!(bytes instanceof Uint8Array) || bytes.length > 16*1024*1024) throw new Error('Invalid source bytes.');
+  const source = Buffer.from(bytes);
   const dir = await mkdtemp(join(tmpdir(),'stoa-ocr-'));
   const png = join(dir,'page.png');
   try {
@@ -47,8 +52,43 @@ export async function scan(path, page = 1) {
     if (!width || !height || width > 4096 || height > 4096 || width*height > 8_000_000) {
       throw new Error('PNG dimensions exceed the raster budget.');
     }
-    const {stdout} = await run('tesseract',[png,'stdout','-l','eng','--psm','11','tsv'],options);
-    return {page,width,height,sourceSha256:digest(source),rasterSha256:digest(raster),lines:readLines(stdout,width,height)};
+    const recognize = async (file, w, h) => {
+      const {stdout} = await run('tesseract',[file,'stdout','-l','eng','--psm','11','tsv'],options);
+      return readLines(stdout,w,h);
+    };
+    const lines = await recognize(png,width,height);
+    const views = [];
+    const script = fileURLToPath(new URL('./transform.py',import.meta.url));
+    const file = join(dir,'retry.png');
+    if (retry) {
+      const replacements = new Map();
+      const uncertainAreas = lines.filter(line => /^\d+(?:[.,]\d+)?\s*m[?²2]$/i.test(line.text) &&
+        (line.confidence < 70 || line.text.endsWith('?')));
+      for (const line of uncertainAreas.slice(0,4)) {
+        if (line.box[2]-line.box[0] > 512 || line.box[3]-line.box[1] > 160) continue;
+        const args = [script,png,file,'0','3',...line.box.map(String)];
+        await run('python3',args,options);
+        const {stdout} = await run('tesseract',[file,'stdout','-l','eng','--psm','7','tsv'],options);
+        const width = 3*(line.box[2]-line.box[0]+8);
+        const height = 3*(line.box[3]-line.box[1]+8);
+        const reread = readLines(stdout,width,height);
+        if (reread.length === 1 && /^\d+(?:[.,]\d+)?\s*m[²2]$/i.test(reread[0].text) &&
+            reread[0].text.split(' ')[0] === line.text.split(' ')[0]) {
+          replacements.set(line.id,{...line,text:reread[0].text,confidence:reread[0].confidence});
+        }
+      }
+      if (replacements.size) views.push({id:'crop-retry',inverse:[1,0,0,0,1,0],
+        lines:lines.map(line=>replacements.get(line.id) ?? line)});
+    }
+    if (retry && width*height <= 2_000_000) {
+      for (const [angle,scale] of [[0,2],[-2,1],[2,1]]) {
+        const {stdout} = await run('python3',[script,png,file,String(angle),String(scale)],options);
+        const inverse = JSON.parse(stdout);
+        views.push({id:`rotation-${angle}-scale-${scale}`, inverse,
+          lines:await recognize(file,width*scale,height*scale)});
+      }
+    }
+    return {page,width,height,sourceSha256:digest(source),rasterSha256:digest(raster),lines,views};
   } finally { await rm(dir,{recursive:true,force:true}); }
 }
 

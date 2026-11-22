@@ -29,3 +29,13 @@ test('OCR word coordinates outside the source raster reject', () => {
   const tsv = 'header\n5\t1\t1\t1\t1\t1\t90\t10\t20\t10\t90\t101';
   assert.throws(()=>readLines(tsv,100,100),/coordinates/);
 });
+
+test('retry boxes map to the original page and conflicting readings abstain', () => {
+  const enlarged = [tag,annotation].map(line=>({...line,box:line.box.map(x=>2*x)}));
+  const view = {id:'2x',inverse:[.5,0,0,0,.5,0],lines:enlarged};
+  const input = {...page,lines:[tag],views:[view]};
+  assert.deepEqual(roomAnnotation(input,'101').citations.map(c=>c.box),[tag.box,annotation.box]);
+  const conflicting = {...view,id:'other',lines:[enlarged[0],{...enlarged[1],text:'13 m²'}]};
+  assert.equal(roomAnnotation({...input,views:[view,conflicting]},'101').status,'abstained');
+  assert.equal(roomAnnotation({...input,lines:[]},'101').status,'abstained');
+});
