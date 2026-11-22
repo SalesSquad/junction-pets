@@ -127,8 +127,12 @@ def main():
                             ["node", "--test", "services/pet-adapters/registry.test.mjs"],
                             ROOT, timeout=240))
     verify_factory(factory, results)
-    mandatory = [r for r in results if r["status"] != "not_run"]
-    passed = bool(mandatory) and all(r["status"] == "pass" for r in mandatory)
+    # Never report a complete campaign when a required integration did not run.
+    # A partial platform (macOS) is useful for development but not Linux acceptance.
+    statuses = {r["status"] for r in results}
+    overall = ("fail" if "fail" in statuses else
+               "incomplete" if "not_run" in statuses else
+               "pass" if results and statuses == {"pass"} else "fail")
     receipt = {
         "schema": "rml1.developer-integration/v1",
         "junction_source_sha": git_sha(ROOT),
@@ -139,13 +143,13 @@ def main():
         "qualified": False,
         "runtime_authorized": False,
         "generated_r_executed": False,
-        "overall": "pass" if passed else "fail",
+        "overall": overall,
     }
     (output / "receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
     print(json.dumps({"overall": receipt["overall"], "steps": [
         {"name": step["name"], "status": step["status"]} for step in results
     ], "receipt": str(output / "receipt.json"), "runtime_authorized": False}))
-    return 0 if passed else 1
+    return {"pass": 0, "fail": 1, "incomplete": 2}[overall]
 
 
 if __name__ == "__main__":
