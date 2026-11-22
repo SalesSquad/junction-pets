@@ -16,7 +16,13 @@
   "expectedRust": "1.98.1",
   "runtimeAuthorized": false,
   "publicationVerifiedForThisRevision": false,
-  "notes": "This JSON is source-owned desired configuration, not an API write to the published Codex Cloud environment. Both repositories must be selected in the published environment; rootless setup cannot fetch private Factory without authorized repository checkout. Never export tokens.",
-  "publishedRevisionObserved": 3,
-  "publishedVersionObserved": "570315c49714a633ba6c8544e8c975b9840e11baf5a8d5aa5de441e5d6cc1aa1~cecfgver_6b02eef200dc81938b5852215b94196a"
+  "notes": "Authenticated Codex Cloud UI showed Published after Save draft and Publish; reloaded UI showed both attached repositories, exact appended workspace verify line, and updated start-skill instructions. Desired installScript is a simplified future candidate; publishedInstallScriptObserved is the actual preserved Node/Eve setup with appended verification. A fresh newly-created task is still required for source-bound runtime receipt. No CLI support for this modern ccarenv id was observed; the legacy junction-verda environment is separate.",
+  "publishedUiState": "Published",
+  "publishedUiReadbackVerified": true,
+  "publishedInstallScriptObserved": "#!/usr/bin/env bash\nset -euo pipefail\ncd /workspace/junction-pets\nnode -e 'if (Number(process.versions.node.split(\".\")[0]) < 24) throw new Error(\"Node.js 24+ required\")'\nRML1_INSTALL_RUST_1_98_1=1 bash ops/cloud/rml1/setup-user.sh\nbash ops/cloud/rml1/verify.sh\nbash ops/cloud/rml1/test-user.sh\nnpm ci --ignore-scripts --no-audit --no-fund --cache /workspace/scratch/junction-pets-npm-cache\nnpm ci --prefix templates/eve-chibi-agent --ignore-scripts --no-audit --no-fund --cache /workspace/scratch/junction-pets-npm-cache\nnpm run build\nbash ops/cloud/rml1/workspace.sh verify",
+  "publishedStartSkillContains": [
+    "bash ops/cloud/rml1/workspace.sh verify",
+    "bash ops/cloud/rml1/run-campaign.sh"
+  ],
+  "freshTaskAcceptanceVerified": false
 }
