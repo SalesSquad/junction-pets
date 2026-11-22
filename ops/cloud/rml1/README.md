@@ -16,7 +16,7 @@ bash ops/cloud/rml1/setup.sh && npm ci --ignore-scripts
 The repository declaration is desired configuration only. This task does not
 call a Cloud publication API and does not prove the published setting changed.
 
-## Rootless Codex Cloud setup
+## Rootless setup for junction-verda-rml1
 
 On a Linux cloud VM with Python 3 and no apt privileges, run:
 
@@ -24,12 +24,21 @@ On a Linux cloud VM with Python 3 and no apt privileges, run:
 RML1_INSTALL_RUST_1_98_1=1 bash ops/cloud/rml1/setup-user.sh
 bash ops/cloud/rml1/verify.sh
 bash ops/cloud/rml1/test-user.sh
+bash ops/cloud/rml1/test-bootstrap-rust.sh
 ```
 
-The installer uses an existing rustup when available. It reuses an installed
-Rust 1.98.1 toolchain, or with the opt-in and sufficient disk space requests the
-minimal profile with a ten-minute timeout. Without rustup it reports Rust
-unavailable and leaves the Python checker available.
+The Rust opt-in requires non-root x86_64 Linux and uses `~/.cargo` and
+`~/.rustup`. If Rustup is absent there, the bootstrap downloads the official
+Rustup 1.29.0 installer over HTTPS and checks its pinned SHA-256 before
+execution. It installs the Rust 1.98.1 minimal profile and adds rustfmt and
+Clippy. A repeat checks all four tool versions and reuses the installation.
+A partial installation returns a nonzero exit with a
+`rml1_rust_bootstrap_error` code. Without the opt-in, the OCI checker remains
+available offline.
+
+The installer leaves shell startup files alone. For commands that discover
+Rust tools through PATH, prepend `$HOME/.cargo/bin` in the calling shell.
+See the [VM receipt](../../../docs/RML1_RUST_BOOTSTRAP_20261122.md).
 
 Inspect a caller-supplied OCI layout with:
 
