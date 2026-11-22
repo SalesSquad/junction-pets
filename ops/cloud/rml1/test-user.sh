@@ -6,6 +6,7 @@ trap 'rm -rf -- "$work"' EXIT
 
 RML1_INSTALL_RUST_1_98_1=0 bash "$here/setup-user.sh" > "$work/setup"
 grep -Fx 'rml1_local_oci_checker=available' "$work/setup"
+grep -Fx 'rml1_pinned_rust_1_98_1=unavailable' "$work/setup"
 
 python3 -I - "$here/check-oci-layout.py" "$work" <<'PY'
 import hashlib
