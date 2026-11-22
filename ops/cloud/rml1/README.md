@@ -16,6 +16,32 @@ bash ops/cloud/rml1/setup.sh && npm ci --ignore-scripts
 The repository declaration is desired configuration only. This task does not
 call a Cloud publication API and does not prove the published setting changed.
 
+## Rootless Codex Cloud setup
+
+On a Linux cloud VM with Python 3 and no apt privileges, run:
+
+```sh
+RML1_INSTALL_RUST_1_98_1=1 bash ops/cloud/rml1/setup-user.sh
+bash ops/cloud/rml1/verify.sh
+bash ops/cloud/rml1/test-user.sh
+```
+
+The installer uses an existing rustup when available. It reuses an installed
+Rust 1.98.1 toolchain, or with the opt-in and sufficient disk space requests the
+minimal profile with a ten-minute timeout. Without rustup it reports Rust
+unavailable and leaves the Python checker available.
+
+Inspect a caller-supplied OCI layout with:
+
+```sh
+python3 -I ops/cloud/rml1/check-oci-layout.py /path/to/local-oci-layout
+```
+
+The checker reads the local index and verifies the sizes and SHA-256 digests of
+its direct descriptors. Files are capped at 4 MiB each, with at most 64
+descriptors and 16 MiB of descriptor content. It does not inspect transitive
+layers or establish the provenance of a running image.
+
 ## Use
 
 ```sh
