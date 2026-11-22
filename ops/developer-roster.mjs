@@ -65,7 +65,7 @@ function expectedManifest(company) {
     ownedPath: `pets/${company}/`,
     agentInstructions: 'ops/AGENTS.md',
     runtimeInstructions: `pets/${company}/AGENTS.md`,
-    setupCommand: 'npm ci --ignore-scripts',
+    setupCommand: company === 'verda' ? 'bash ops/cloud/rml1/setup.sh && npm ci --ignore-scripts' : 'npm ci --ignore-scripts',
     checkCommands: REQUIRED_CHECKS
   };
 }

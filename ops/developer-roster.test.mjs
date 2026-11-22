@@ -27,7 +27,7 @@ function manifest(company) {
     ownedPath: `pets/${company}/`,
     agentInstructions: 'ops/AGENTS.md',
     runtimeInstructions: `pets/${company}/AGENTS.md`,
-    setupCommand: 'npm ci --ignore-scripts',
+    setupCommand: company === 'verda' ? 'bash ops/cloud/rml1/setup.sh && npm ci --ignore-scripts' : 'npm ci --ignore-scripts',
     checkCommands: ['npm run validate', 'npm test', 'npm run build'],
     provisioning: {state: 'unprovisioned', environmentId: null, verifiedAt: null, evidenceUrl: null}
   };
@@ -100,6 +100,20 @@ function boundPreflight() {
     }
   };
 }
+
+test('Verda RML1 setup is exactly scoped; shell substitutions remain invalid', () => {
+  assert.doesNotThrow(() => buildDeveloperRoster(fixture(), options()));
+  const tampered = fixture();
+  const verda = tampered.find(row => row.petSlug === 'junction-verda');
+  assert.equal(verda.setupCommand, 'bash ops/cloud/rml1/setup.sh && npm ci --ignore-scripts');
+  verda.setupCommand = 'bash ops/cloud/rml1/other.sh && npm ci --ignore-scripts';
+  assert.throws(() => buildDeveloperRoster(tampered, options()), /Invalid setupCommand in verda environment/);
+  const unrelated = fixture();
+  unrelated.find(row => row.petSlug === 'junction-hostinger').setupCommand =
+    'bash ops/cloud/rml1/setup.sh && npm ci --ignore-scripts';
+  assert.throws(() => buildDeveloperRoster(unrelated, options()),
+    /Invalid setupCommand in hostinger environment/);
+});
 
 test('34 distinct developer identities, 102 logical roles, zero live processes', () => {
   const roster = planned();
