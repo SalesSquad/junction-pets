@@ -135,3 +135,31 @@ test('frozen two-domain benchmark retains negative cases and exact citation expe
   const result = await benchmark(); assert.equal(result.correctContracts, result.cases); assert.equal(result.cases,18);
   assert.equal(result.externalRequests,0); assert.equal(result.realDataQualified,false); assert.ok(result.abstained > result.supported);
 });
+
+test('DXF room measurement refuses ambiguous or malformed geometry and signed annotations', async () => {
+  const original = (await bytes('room.dxf')).toString();
+  const ingest = source => dxfAdapter.ingest(Buffer.from(source));
+  await assert.rejects(ingest(original.replace('20\n0\n', '')), /missing its Y coordinate/);
+  for (const modified of [
+    original.replace('12 m²', '-12 m²'),
+    original.replace('12 m²', 'approx. 12 m²'),
+    original.replace('70\n1\n', '70\n1\n210\n1\n'),
+    original.replace('10\n1\n20\n1\n', '10\n0\n20\n1\n'),
+  ]) {
+    assert.equal((await measureRoom(await ingest(modified), {roomNumber: '2.01'})).status, 'abstained');
+  }
+  const offset = original.replace(/^(10|20)\n(\d+)$/gm, (_, group, value) => group + '\n' + (Number(value) + 1e8));
+  assert.equal((await measureRoom(await ingest(offset), {roomNumber: '2.01'})).value, '12.00 m²');
+});
+
+test('replay requires original bytes, an adapter bound to those bytes and a valid claim', async () => {
+  const fixture = await setup();
+  const packet = await exportPacket(fixture.dataset, fixture.claim, fixture.review);
+  const run = dataset => sumCells(dataset, tableQuery);
+  await assert.rejects(replayPacket(packet, {bytes: null, adapter: csvAdapter, run}), /original source bytes/);
+  const other = await csvAdapter.ingest(Buffer.from('label,value\na,1'));
+  const adapter = {...csvAdapter, ingest: async () => other};
+  await assert.rejects(replayPacket(packet, {bytes: fixture.bytes, adapter, run}), /different source/);
+  await assert.rejects(replayPacket(packet, {bytes: fixture.bytes, adapter: csvAdapter,
+    run: async () => ({...fixture.claim, value: 'fabricated'})}), /digest/i);
+});

@@ -23,3 +23,9 @@ guidance, not an installed tool or a permission grant. Follow the user's host/da
 From the package root: `npm test`, `npm run demo`, `npm run benchmark`,
 `node cli.mjs verify packet.json original`, `node cli.mjs replay packet.json original`.
 No model call, deployment, public release or privileged action is part of this workflow.
+
+For Stoa-derived capabilities, consult [the reuse map](../../docs/STOA-REUSE.md) before choosing
+an engine. Pin the Evidence Kit commit and record adapter/method versions. Use the current DXF
+adapter and room method (1.1 or later). Treat parsing errors and abstentions as unresolved evidence.
+Historical Stoa benchmark scores, caller-supplied extraction and packet checksums cannot qualify
+a downstream capability. Report exact citations and the evidence level separately from review.

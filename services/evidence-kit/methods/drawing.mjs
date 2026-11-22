@@ -1,12 +1,19 @@
 import {createClaim} from '../src/claim.mjs';
 import {fail, text} from '../src/json.mjs';
-const area = points => Math.abs(points.reduce((s, p, i) => {
-  const q = points[(i + 1) % points.length]; return s + p.x * q.y - q.x * p.y;
-}, 0)) / 2;
+const area = points => {
+  const origin = points[0];
+  return Math.abs(points.reduce((sum, p, i) => {
+    const q = points[(i + 1) % points.length];
+    return sum + (p.x - origin.x) * (q.y - origin.y) - (q.x - origin.x) * (p.y - origin.y);
+  }, 0)) / 2;
+};
 const inside = (p, points) => {
   let hit = false;
   for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
     const a = points[i], b = points[j];
+    const cross = (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
+    if (cross === 0 && p.x >= Math.min(a.x, b.x) && p.x <= Math.max(a.x, b.x) &&
+      p.y >= Math.min(a.y, b.y) && p.y <= Math.max(a.y, b.y)) return false;
     if ((a.y > p.y) !== (b.y > p.y) && p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x) hit = !hit;
   }
   return hit;
@@ -33,22 +40,26 @@ export async function measureRoom(dataset, {roomNumber, tolerance = .02}) {
   if (!Number.isFinite(tolerance) || tolerance <= 0 || tolerance > .02) fail('INVALID_TOLERANCE', 'Area tolerance must be in (0,0.02].');
   if (dataset.manifest().source.adapter.id !== 'ascii-dxf') fail('WRONG_ADAPTER', 'Room measurement requires the DXF adapter.');
   const entities = dataset.entities(), data = entities.map(e => e.data), factor = dataset.manifest().source.units?.toMetres;
-  const spec = {method: {id: 'room-area', version: '1.0.0', parameters: {roomNumber, tolerance}},
+  const spec = {method: {id: 'room-area', version: '1.1.0', parameters: {roomNumber, tolerance}},
     question: `Area of room ${roomNumber}`, status: 'abstained', level: 'unavailable', value: null, refs: [], checks: [], reason: ''};
   const abstain = reason => createClaim(dataset, {...spec, reason});
   if (!factor) return abstain('Missing or unsupported coordinate units.');
   const numbers = data.filter(e => e.layer === 'ROOM_TEXT' && e.text === roomNumber);
   if (numbers.length !== 1) return abstain('Room number is absent or ambiguous.');
-  const outlines = data.filter(e => e.layer === 'ROOM_OUTLINE' && e.points?.length >= 3 && !e.unsupportedGeometry &&
-    (e.closed || Math.hypot(e.points[0].x - e.points.at(-1).x, e.points[0].y - e.points.at(-1).y) < 1e-6) && inside(numbers[0], e.points));
+  const boundaries = data.filter(e => e.layer === 'ROOM_OUTLINE');
+  if (numbers[0].unsupportedGeometry || boundaries.some(e => e.unsupportedGeometry)) {
+    return abstain('Room evidence uses unsupported geometry.');
+  }
+  const outlines = boundaries.filter(e => e.points?.length >= 3 && e.closed && inside(numbers[0], e.points));
   if (outlines.length !== 1) return abstain('No unique closed straight room boundary.');
   const outline = outlines[0];
   if (!simplePolygon(outline.points)) return abstain('Boundary is degenerate, self-intersecting or exceeds the simple-polygon work budget.');
   const labels = data.filter(e => e.layer === 'ROOM_TEXT' && typeof e.text === 'string' && /\d+(?:[.,]\d+)?\s*m(?:²|2)/i.test(e.text) && inside(e, outline.points));
   if (labels.length !== 1) return abstain('No unique source area annotation.');
-  const matches = [...labels[0].text.matchAll(/\b(\d+(?:[.,]\d+)?)\s*m(?:²|2)(?!\w)/gi)];
-  if (matches.length !== 1) return abstain('Ambiguous area annotation.');
-  const stated = Number(matches[0][1].replace(',', '.')), measured = area(outline.points) * factor ** 2;
+  const annotation = labels[0];
+  const match = /^(\d+(?:[.,]\d+)?)\s*m(?:²|2)$/i.exec(annotation.text);
+  if (!match || annotation.unsupportedGeometry) return abstain('Unsupported area annotation.');
+  const stated = Number(match[1].replace(',', '.')), measured = area(outline.points) * factor ** 2;
   if (!Number.isFinite(stated) || !Number.isFinite(measured) || !(stated > 0) || Math.abs(stated - measured) / stated > tolerance) return abstain('Annotation conflicts with measured polygon area.');
   return createClaim(dataset, {...spec, status: 'supported', level: 'cross_checked', value: `${stated.toFixed(2)} m²`,
     refs: [outline, numbers[0], labels[0]].map(e => dataset.ref(e.id)),
