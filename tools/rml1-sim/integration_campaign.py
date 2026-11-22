@@ -44,7 +44,7 @@ def git_sha(path):
         return None
 
 
-def verify_simulation(folder, results):
+def verify_simulation(folder, results, seeds=4096, workers=8):
     crate = ROOT / "tools/rml1-sim"
     results.append(run_step("rust_sim_unit_tests", ["cargo", "test", "--offline"], crate))
     if results[-1]["status"] != "pass":
@@ -53,11 +53,11 @@ def verify_simulation(folder, results):
         first = Path(temporary) / "parallel.jsonl"
         second = Path(temporary) / "serial.jsonl"
         for label, workers, destination in [
-            ("rust_sim_4096_parallel", "8", first),
-            ("rust_sim_4096_serial_replay", "1", second),
+            ("rust_sim_parallel", str(workers), first),
+            ("rust_sim_serial_replay", "1", second),
         ]:
             results.append(run_step(label, ["cargo", "run", "--offline", "--release", "--",
-                                            "--seeds", "4096", "--workers", workers,
+                                            "--seeds", str(seeds), "--workers", workers,
                                             "--output", str(destination)], crate))
             if results[-1]["status"] != "pass":
                 return None
@@ -65,9 +65,9 @@ def verify_simulation(folder, results):
         rows = lhs.splitlines()
         try:
             summary = json.loads(rows[-1])
-            valid = (lhs == rhs and len(rows) == 4097 and
+            valid = (lhs == rhs and len(rows) == seeds + 1 and
                      summary["kind"] == "summary" and
-                     summary["scenarios"] == 4096 and
+                     summary["scenarios"] == seeds and
                      summary["runtime_authorized"] is False and
                      all(json.loads(row)["runtime_authorized"] is False for row in rows[:-1]))
         except (ValueError, IndexError, KeyError, TypeError):
@@ -113,14 +113,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--factory-root", type=Path, help="local checkout of SalesSquad/factory")
     parser.add_argument("--out", type=Path, required=True, help="new or existing output directory")
+    parser.add_argument("--seeds", type=int, default=4096, help="4096 by default, up to 1000000")
+    parser.add_argument("--workers", type=int, default=8, help="parallel Rust simulation workers (1..64)")
     args = parser.parse_args()
+    if not 1 <= args.seeds <= 1_000_000 or not 1 <= args.workers <= 64:
+        parser.error("seeds must be 1..1000000 and workers must be 1..64")
     output = args.out.resolve()
     if output.is_symlink():
         parser.error("output directory cannot be a symlink")
     output.mkdir(parents=True, exist_ok=True)
     factory = args.factory_root.resolve() if args.factory_root else None
     results = []
-    simulation = verify_simulation(output, results)
+    simulation = verify_simulation(output, results, seeds=args.seeds, workers=args.workers)
     # This is the existing live fixture suite, which invokes all 34 actual offline analyzers.
     # A passing Node test process is NOT provider connectivity or Chibi host authorization.
     results.append(run_step("junction_34_real_offline_capability_fixtures",
@@ -139,6 +143,7 @@ def main():
         "factory_source_sha": git_sha(factory) if factory else None,
         "platform": platform.system().lower(),
         "simulation": simulation,
+        "campaign_parameters": {"seeds": args.seeds, "workers": args.workers},
         "steps": results,
         "qualified": False,
         "runtime_authorized": False,
