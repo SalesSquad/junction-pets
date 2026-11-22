@@ -12,7 +12,7 @@
   "requiredHost": "linux/amd64 non-root",
   "installScript": "bash ops/cloud/rml1/workspace.sh setup && npm ci --ignore-scripts",
   "startSkill": "bash ops/cloud/rml1/workspace.sh verify",
-  "acceptanceCommand": "bash ops/cloud/rml1/workspace.sh verify && python3 tools/rml1-sim/integration_campaign.py --factory-root \"${RML1_FACTORY_ROOT:?set absolute Factory checkout path}\" --out /tmp/rml1-integration",
+  "acceptanceCommand": "bash ops/cloud/rml1/run-campaign.sh",
   "expectedRust": "1.98.1",
   "runtimeAuthorized": false,
   "publicationVerifiedForThisRevision": false,
