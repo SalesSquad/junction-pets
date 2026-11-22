@@ -51,3 +51,20 @@ python3 benchmark.py --seeds 100000 --repeats 3 --out /tmp/rml1-performance
 ```
 
 The benchmark records wall time, scenarios/second and serial speedup for 1, 2, 4, 8 and 16 workers in `perf.json` and `PERF.md`. It validates byte-exact JSONL replay for every repetition and fails on mismatches. Generated files are deleted between worker counts to avoid unbounded disk accumulation. Results are environment-specific and describe the **synthetic simulator**, not agent model execution, Chibi's Rust market, or Factory runtime performance.
+
+## Cross-environment receipt reconciliation (source-only)
+
+The modern Codex Cloud `junction-verda-rml1` environment and the separate `chibi-pro` environment may execute independently. Use `reconcile_evidence.py` to compare their actual exported machine-readable evidence *without* asserting the same host, signing authority, privileged sandbox, or production runtime. It accepts an existing Junction `receipt.json` and Chibi `tools/ci/seeded_factory.py` `result.json`. Both must be exact source-pinned.
+
+```sh
+python3 tools/rml1-sim/reconcile_evidence.py \
+  --junction /private/receipts/junction/receipt.json \
+  --junction-sha FULL_40_HEX_JUNCTION_HEAD \
+  --chibi /private/receipts/chibi/result.json \
+  --chibi-sha FULL_40_HEX_CHIBI_HEAD \
+  --out /private/receipts/reconciled.json
+```
+
+The reconciler validates Junction's 100,000 simulated seeds and actual 34-agent registry checks, Chibi's independently executed minimum 10,000-seed Rust market campaign, source SHAs, scenario counts, signed-off exclusion of live egress and external credentials, and exact market trace SHA shape. A Factory source check + fixed benign canary must also have passed in the **same Junction Linux developer receipt** to produce `coverage=pass`. Absent Chibi or Factory keeps `coverage=incomplete` and exits 2; falsified authority, unexpected source, incomplete output or contradictory states are rejected with exit 1.
+
+This is **untrusted development evidence**, not independently signed host attestation. A complete developer coverage result always says `authenticated_host_evidence=false`, `qualified=false`, and `runtime_authorized=false`. If Cloud tasks produce no downloadable receipts, do not fabricate them or treat a mere task READY state as test proof.
