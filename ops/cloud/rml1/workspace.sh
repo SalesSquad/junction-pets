@@ -36,6 +36,19 @@ find_factory() {
   return 1
 }
 
+if ! factory=$(find_factory); then
+  echo 'RML1_WORKSPACE=INCOMPLETE reason=factory_checkout_missing required_repo=SalesSquad/factory' >&2
+  exit 2
+fi
+if [[ ! -d "$junction/.git" && ! -f "$junction/.git" ]]; then
+  echo 'RML1_WORKSPACE=BLOCKED reason=junction_git_checkout_missing' >&2
+  exit 2
+fi
+if [[ ! -d "$factory/.git" && ! -f "$factory/.git" ]]; then
+  echo 'RML1_WORKSPACE=BLOCKED reason=factory_git_checkout_missing' >&2
+  exit 2
+fi
+
 if [[ "$mode" == setup ]]; then
   # The published setup must run on a non-root Linux x86_64 worker.
   # In particular it cannot silently succeed without the pinned toolchain.
@@ -67,19 +80,6 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 if ! command -v python3 >/dev/null 2>&1; then
   echo 'RML1_WORKSPACE=BLOCKED reason=python_unavailable' >&2
-  exit 2
-fi
-
-if ! factory=$(find_factory); then
-  echo 'RML1_WORKSPACE=INCOMPLETE reason=factory_checkout_missing required_repo=SalesSquad/factory' >&2
-  exit 2
-fi
-if [[ ! -d "$junction/.git" && ! -f "$junction/.git" ]]; then
-  echo 'RML1_WORKSPACE=BLOCKED reason=junction_git_checkout_missing' >&2
-  exit 2
-fi
-if [[ ! -d "$factory/.git" && ! -f "$factory/.git" ]]; then
-  echo 'RML1_WORKSPACE=BLOCKED reason=factory_git_checkout_missing' >&2
   exit 2
 fi
 
