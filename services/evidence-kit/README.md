@@ -93,3 +93,5 @@ Start with [adoption](docs/ADOPTION.md), [contract](docs/CONTRACT.md),
 [capabilities](capabilities.json), [agent workflow](skills/evidence-workflow/SKILL.md) and
 [qualification](docs/QUALIFICATION.md). Extraction/design pins are in [PROVENANCE.json](PROVENANCE.json).
 The Stoa app and private Valmet systems are not modified or executed by this runtime package.
+
+See [the Stoa reuse map](docs/STOA-REUSE.md) for other capabilities and their adoption checks.

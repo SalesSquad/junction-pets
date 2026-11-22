@@ -30,11 +30,14 @@ export async function openPacket(input, {expectedPacketSha256 = null, sourceByte
       sourceBytesMatched: sourceBytes !== null, extractionReplayed: false, authenticity: 'not-authenticated'})};
 }
 export async function replayPacket(input, {bytes, adapter, run}) {
-  const opened = await openPacket(input, {sourceBytes: bytes});
+  if (!(bytes instanceof Uint8Array)) fail('SOURCE_REQUIRED', 'Replay requires the original source bytes.');
+  const original = new Uint8Array(bytes);
+  const opened = await openPacket(input, {sourceBytes: original});
   const source = opened.dataset.manifest().source;
   if (adapter.id !== source.adapter.id) fail('WRONG_ADAPTER', 'Replay adapter differs from the source adapter.');
-  const current = await adapter.ingest(bytes, {filename: source.filename, frame: source.frame, rights: source.rights});
-  const claim = await run(current);
+  const current = await adapter.ingest(original, {filename: source.filename, frame: source.frame, rights: source.rights, expectedSha256: source.sha256});
+  if (current.manifest().source.sha256 !== source.sha256) fail('SOURCE_MISMATCH', 'Replay adapter returned a different source.');
+  const claim = await validateClaim(current, await run(current));
   const sameGeneration = current.manifest().generation === opened.dataset.manifest().generation;
   const sameClaim = claim.claimSha256 === opened.claim.claimSha256;
   return {dataset: current, claim, historical: opened,
