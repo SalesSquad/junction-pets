@@ -39,3 +39,18 @@ This actually runs the existing 34-pet fixture suite, Rust simulation and Factor
 `ops/environments/junction-verda-rml1.json` is a desired configuration declaration. GitHub commits **do not** republish a Cloud environment. Edit the installed environment's setup script and start skill in the Codex Cloud environment panel, verify the new setup, and use **Publish/Republish**. Only a fresh task plus checked source SHAs proves the published revision is active. Do not change the old `ops/environments/verda.json` legacy environment or the separate Pro/Plus CLI profiles.
 
 The earlier modern environment already proved Rust 1.98.1 and both source checkouts; its fixed PIDFD probe has separately encountered a `cgroup_path_invalid` refusal. That refusal is a diagnostic result and must not be rewritten as a successful security qualification.
+
+## Simulation Lab V2 campaign knobs
+
+The published environment's existing run command can now target a larger source-bound campaign without modifying the environment settings:
+
+```sh
+cd /workspace/junction-pets
+RML1_CAMPAIGN_SEEDS=100000 RML1_CAMPAIGN_WORKERS=16 \
+  RML1_CAMPAIGN_OUTPUT=/tmp/rml1-100k \
+  bash ops/cloud/rml1/run-campaign.sh
+```
+
+The default remains a lower-cost 4096-seed run. Setting `RML1_CHIBI_ROOT` to an **already present, clean, authorized** `SalesSquad/chibi` checkout also runs Chibi's actual offline Rust market simulation. An optional `RML1_CHIBI_MARKET_SEEDS` sets its count (default 10000). The modern environment has only the Junction and Factory repositories selected, so **do not imply Chibi has executed or is installed** unless explicitly connected or provided. The script never clones private repositories or accesses provider credentials.
+
+Outputs: JSONL deterministic synthetic outcomes, integration JSON receipt, Markdown report and optional independent Chibi campaign evidence. A missing required Factory or Linux broker test yields `INCOMPLETE`; Chibi's optional absence is separately recorded as `not_run`. This remains development-only, with runtime authorization false.
