@@ -1,0 +1,216 @@
+{
+  "payload": {
+    "schema": "stoa.evidence-packet/v1",
+    "source": {
+      "revision": "b98c65f13f2643babb41eaecb1c8b6f81d5485f493dc39105254256bbd5d005d",
+      "sha256": "b98c65f13f2643babb41eaecb1c8b6f81d5485f493dc39105254256bbd5d005d",
+      "sourceKind": "user_import",
+      "synthetic": null,
+      "filename": "room.dxf",
+      "format": "ASCII DXF",
+      "units": "meters"
+    },
+    "engine": {
+      "sha256": "9ea3934c737ccd3856012169e9c19ccb827540ce0b1fbef4de0f2599f53e854f",
+      "files": {
+        "evidence.mjs": "b02b793df323436d589bfb34db7fafe050f1151fb90b67296dcc6c48f6a5ef86",
+        "review.mjs": "9573bb9f478aa9648eaf06685eb52aa0b565d460134af57916cf055478f351fc",
+        "revisions.mjs": "1727b55cbb365216982ea4b061f066491228e60778658733299c02cafdef2c16",
+        "assignment.mjs": "2ef24b0f7e247604d7eb4ef597014c548e3da512403f96d2ca2aafd6db9012be",
+        "server.mjs": "8578dc6a61e5738c549a120e68502198e65a005ec0001f3c2ab203adb552afb1",
+        "dxf.mjs": "b1fa87e133e4179c82a14e647333b9f06455a23c7973e5f79c5dcccbc572ecc4",
+        "grounding.mjs": "30fd035ec01f3c1fb9dd72ba2252b1f47f164360e024b8fcb36e4e4e640ccb72",
+        "quantities.mjs": "091befcc6171a0891097d918909b27655b437ec73933cc98f76cdf2e12678d1f",
+        "ifc.mjs": "2cd9613061b19c7a83fcb431ac22a61f0fc7c2add430da315363675fc77f7d01",
+        "ifc-qa.mjs": "dab7889fb4360f38d6d1caeef32d852424434e74bb7c9c129fcf5462ab66b169"
+      },
+      "identity": "actual-source-bytes",
+      "authenticity": "not-signed"
+    },
+    "question": "What is the area of room 2.01?",
+    "result": {
+      "evidenceLevel": "cross_checked",
+      "method": "dxf.annotation-geometry-agreement/v1",
+      "status": "supported",
+      "answer": "12.00 m²",
+      "explanation": "Room 2.01: the area annotation and measured closed polygon agree (computed 12.00 m²). Select the citation to inspect the exact boundary and both labels.",
+      "metric": {
+        "type": "area",
+        "value": 12,
+        "unit": "m²",
+        "tolerancePercent": 2
+      },
+      "evidence": [
+        {
+          "entityId": "e1",
+          "layer": "ROOM_OUTLINE",
+          "kind": "LWPOLYLINE",
+          "detail": "Measured closed room outline"
+        },
+        {
+          "entityId": "e2",
+          "layer": "ROOM_TEXT",
+          "kind": "TEXT",
+          "detail": "Room identifier 2.01"
+        },
+        {
+          "entityId": "e3",
+          "layer": "ROOM_TEXT",
+          "kind": "TEXT",
+          "detail": "Source area label 12 m²"
+        }
+      ],
+      "source": {
+        "revision": "b98c65f13f2643babb41eaecb1c8b6f81d5485f493dc39105254256bbd5d005d",
+        "sha256": "b98c65f13f2643babb41eaecb1c8b6f81d5485f493dc39105254256bbd5d005d",
+        "sourceKind": "user_import",
+        "synthetic": null,
+        "filename": "room.dxf",
+        "format": "ASCII DXF",
+        "units": "meters"
+      },
+      "inference": "deterministic; no external model",
+      "provenance": {
+        "sourceRevision": "b98c65f13f2643babb41eaecb1c8b6f81d5485f493dc39105254256bbd5d005d",
+        "engineSha256": "9ea3934c737ccd3856012169e9c19ccb827540ce0b1fbef4de0f2599f53e854f",
+        "method": "dxf.annotation-geometry-agreement/v1",
+        "independentVerification": false
+      }
+    },
+    "evidence": [
+      {
+        "id": "e1",
+        "type": "LWPOLYLINE",
+        "layer": "ROOM_OUTLINE",
+        "points": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 3
+          },
+          {
+            "x": 0,
+            "y": 3
+          }
+        ],
+        "closed": true
+      },
+      {
+        "id": "e2",
+        "type": "TEXT",
+        "layer": "ROOM_TEXT",
+        "x": 1,
+        "y": 1,
+        "text": "2.01"
+      },
+      {
+        "id": "e3",
+        "type": "TEXT",
+        "layer": "ROOM_TEXT",
+        "x": 2,
+        "y": 2,
+        "text": "12 m²"
+      }
+    ],
+    "review": {
+      "sourceRevision": "b98c65f13f2643babb41eaecb1c8b6f81d5485f493dc39105254256bbd5d005d",
+      "answerId": "a84672b6-17ba-47da-ab95-e674980d9cc0",
+      "revision": 1,
+      "current": {
+        "status": "confirmed",
+        "answer": "12.00 m²",
+        "entityIds": [
+          "e1",
+          "e2",
+          "e3"
+        ],
+        "note": "Authored fixture; no independent review.",
+        "reviewer": "Synthetic legacy reviewer",
+        "independentVerification": false
+      },
+      "events": [
+        {
+          "revision": 1,
+          "operationId": "synthetic-legacy-confirm",
+          "kind": "confirm",
+          "reviewer": "Synthetic legacy reviewer",
+          "state": {
+            "status": "confirmed",
+            "answer": "12.00 m²",
+            "entityIds": [
+              "e1",
+              "e2",
+              "e3"
+            ],
+            "note": "Authored fixture; no independent review.",
+            "reviewer": "Synthetic legacy reviewer",
+            "independentVerification": false
+          }
+        }
+      ],
+      "canUndo": true,
+      "canRedo": false,
+      "reviewerIdentity": "locally-declared",
+      "independentVerification": false
+    },
+    "reviewerEvidence": [
+      {
+        "id": "e1",
+        "type": "LWPOLYLINE",
+        "layer": "ROOM_OUTLINE",
+        "points": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 3
+          },
+          {
+            "x": 0,
+            "y": 3
+          }
+        ],
+        "closed": true
+      },
+      {
+        "id": "e2",
+        "type": "TEXT",
+        "layer": "ROOM_TEXT",
+        "x": 1,
+        "y": 1,
+        "text": "2.01"
+      },
+      {
+        "id": "e3",
+        "type": "TEXT",
+        "layer": "ROOM_TEXT",
+        "x": 2,
+        "y": 2,
+        "text": "12 m²"
+      }
+    ],
+    "limits": [
+      "Hash integrity is not source authenticity or independent verification.",
+      "Reviewer identity is locally declared, not authenticated.",
+      "Selected source excerpts may be subject to the original source licence."
+    ]
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "sha256": "8af1b0e7a1bca0989ed22686e0654f312eda8b5ee5902c6a9c09d8218733c186",
+    "signed": false
+  }
+}

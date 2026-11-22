@@ -1,0 +1,45 @@
+{
+  "schema": "evidence-kit.provenance/v1",
+  "baseCommit": "0410fb091289976cee189bea86d5c25c22ec4252",
+  "extractions": [
+    {
+      "path": "adapters/dxf-parser.mjs",
+      "sourcePath": "solutions/stoa-blueprint-studio/src/dxf.mjs",
+      "sourceGitBlob": "4fda7d451509f3e5355139ab810b6a8dbb36f774",
+      "changes": [
+        "UTF-8 byte counting uses TextEncoder for Node/browser portability.",
+        "Reject incomplete DXF group pairs rather than discard trailing data.",
+        "Retain source group-5 entity handles; positional IDs remain explicitly source-scoped."
+      ]
+    },
+    {
+      "path": "src/assignment.mjs",
+      "sourcePath": "solutions/stoa-blueprint-studio/src/assignment.mjs",
+      "sourceGitBlob": "043929c7fc3efa2af40cd7115abafdcbb82c9c01",
+      "changes": []
+    }
+  ],
+  "designSources": [
+    {
+      "repository": "SalesSquad/valmethack",
+      "commit": "c86c02f78df8871215f42bfa885220bfcd106904",
+      "use": "Canonical source resolution; design only, no code/data copied."
+    },
+    {
+      "repository": "SalesSquad/valmet-truth-engine",
+      "commit": "21f2cc44bb3d05aeebf481a7a5e5c3f878a1222e",
+      "use": "Review lineage and bounded matching; design only, no code/data copied."
+    },
+    {
+      "repository": "SalesSquad/proofscape",
+      "commit": "055c2e224bae47feda737ddd96d8fb4d4b4e4694",
+      "use": "Existing source-review research; no PDF module or dependencies copied."
+    }
+  ],
+  "historicalFixture": {
+    "file": "fixtures/legacy-stoa-v1.json",
+    "sha256": "a516f73be2e6a7f6790f54aae32ad496eefb194931bf3377e2deb0ff2df7a799",
+    "producer": "Public Stoa /api/export-evidence at base commit, using newly authored CC0 room.dxf; no sponsor input.",
+    "identity": "Synthetic reviewer declaration, not independently verified."
+  }
+}

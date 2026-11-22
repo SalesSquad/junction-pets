@@ -1,0 +1,374 @@
+{
+  "schema": "evidence-kit.synthetic-suite/v1",
+  "licence": "CC0-1.0",
+  "description": "Independently authored rectangular geometry and literal cost rows. Synthetic mechanics only, no sponsor or private Valmet content.",
+  "files": {
+    "room.dxf": "b98c65f13f2643babb41eaecb1c8b6f81d5485f493dc39105254256bbd5d005d",
+    "room-revised.dxf": "ce573a0aaeb0d39a869603d7a156984e922fa9819129f320f466607f41a7bc40",
+    "room-unknown-units.dxf": "a38f00adcb0a89dee51f3a90e7642c37044b709e3c28a89bbb5ee4811d17f091",
+    "room-open.dxf": "bce93de230be9110e2df8819e55a432ac3aa72ab43971a0249d8380e49665347",
+    "room-conflict.dxf": "5d633d3cf5b5599945a98f0950648d2b710249c0f2f628ef961fbd87f263036b",
+    "room-duplicate.dxf": "7df656b3f63e473989068efe2f27257205edf188e664c3ed8e0fda159d257633",
+    "room-curved.dxf": "639553bc04a631a9678ff5b5e88d0d2bcc4fbe9285b1b8a3d2a5286dc472d73f",
+    "room-missing.dxf": "887e94c7ce32a981916253ba252ac065a043a241882c99932552eb8d6b49d13c",
+    "costs.csv": "699af24b9416f412650db5b5469b37f588485d5d7e91c123b16a0f104f65d309",
+    "costs-mixed.csv": "f73fcf864f18a23c548c1f1145d5da57d7c5eb20da2c129f392bce6ca39408ea",
+    "costs-missing.csv": "63fa58017522995778c01e6205994b417b97a127de0769b1b8361ff5d585f6a2",
+    "costs-conflict.csv": "713a766ba76edb351ad20549d3d927660f1044de1b66e14b23cd285ad98bd435",
+    "costs-locale.csv": "f23aa21254ff886e1a154b13523ffe9b75afeb3ca40bd12271e9baffe6ce79f9",
+    "costs-formula.csv": "c61ec9c3a0f7d41817e600142640b7fdabf45b4158b6eb23115467adfa5fa928",
+    "costs-wrong-total-unit.csv": "a80779f54ffb2644e6398a503b5656047af2b080b758081f1d342d5bdf2b8816",
+    "costs-revised.csv": "3e06538a024c67a92c15410693531699d45ec701b1936d051f93665c5e508ad0"
+  },
+  "cases": [
+    {
+      "id": "room.dxf",
+      "file": "room.dxf",
+      "adapter": "dxf",
+      "query": {
+        "roomNumber": "2.01"
+      },
+      "expected": {
+        "status": "supported",
+        "value": "12.00 m\u00b2",
+        "ids": [
+          "e1",
+          "e2",
+          "e3"
+        ]
+      }
+    },
+    {
+      "id": "room-revised.dxf",
+      "file": "room-revised.dxf",
+      "adapter": "dxf",
+      "query": {
+        "roomNumber": "2.01"
+      },
+      "expected": {
+        "status": "supported",
+        "value": "15.00 m\u00b2",
+        "ids": [
+          "e1",
+          "e2",
+          "e3"
+        ]
+      }
+    },
+    {
+      "id": "room-unknown-units.dxf",
+      "file": "room-unknown-units.dxf",
+      "adapter": "dxf",
+      "query": {
+        "roomNumber": "2.01"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "room-open.dxf",
+      "file": "room-open.dxf",
+      "adapter": "dxf",
+      "query": {
+        "roomNumber": "2.01"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "room-conflict.dxf",
+      "file": "room-conflict.dxf",
+      "adapter": "dxf",
+      "query": {
+        "roomNumber": "2.01"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "room-duplicate.dxf",
+      "file": "room-duplicate.dxf",
+      "adapter": "dxf",
+      "query": {
+        "roomNumber": "2.01"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "room-curved.dxf",
+      "file": "room-curved.dxf",
+      "adapter": "dxf",
+      "query": {
+        "roomNumber": "2.01"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "room-missing.dxf",
+      "file": "room-missing.dxf",
+      "adapter": "dxf",
+      "query": {
+        "roomNumber": "2.01"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "costs.csv",
+      "file": "costs.csv",
+      "adapter": "csv",
+      "query": {
+        "valueIds": [
+          "r2c2",
+          "r3c2"
+        ],
+        "unitIds": [
+          "r2c3",
+          "r3c3"
+        ],
+        "expectedUnit": "EUR",
+        "statedTotalId": "r4c2",
+        "statedUnitId": "r4c3"
+      },
+      "expected": {
+        "status": "supported",
+        "value": "30.30 EUR",
+        "ids": [
+          "r2c2",
+          "r3c2",
+          "r2c3",
+          "r3c3",
+          "r4c2",
+          "r4c3"
+        ]
+      }
+    },
+    {
+      "id": "costs-mixed.csv",
+      "file": "costs-mixed.csv",
+      "adapter": "csv",
+      "query": {
+        "valueIds": [
+          "r2c2",
+          "r3c2"
+        ],
+        "unitIds": [
+          "r2c3",
+          "r3c3"
+        ],
+        "expectedUnit": "EUR",
+        "statedTotalId": "r4c2",
+        "statedUnitId": "r4c3"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "costs-missing.csv",
+      "file": "costs-missing.csv",
+      "adapter": "csv",
+      "query": {
+        "valueIds": [
+          "r2c2",
+          "r3c2"
+        ],
+        "unitIds": [
+          "r2c3",
+          "r3c3"
+        ],
+        "expectedUnit": "EUR",
+        "statedTotalId": "r4c2",
+        "statedUnitId": "r4c3"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "costs-conflict.csv",
+      "file": "costs-conflict.csv",
+      "adapter": "csv",
+      "query": {
+        "valueIds": [
+          "r2c2",
+          "r3c2"
+        ],
+        "unitIds": [
+          "r2c3",
+          "r3c3"
+        ],
+        "expectedUnit": "EUR",
+        "statedTotalId": "r4c2",
+        "statedUnitId": "r4c3"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "costs-locale.csv",
+      "file": "costs-locale.csv",
+      "adapter": "csv",
+      "query": {
+        "valueIds": [
+          "r2c2",
+          "r3c2"
+        ],
+        "unitIds": [
+          "r2c3",
+          "r3c3"
+        ],
+        "expectedUnit": "EUR",
+        "statedTotalId": "r4c2",
+        "statedUnitId": "r4c3"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "costs-formula.csv",
+      "file": "costs-formula.csv",
+      "adapter": "csv",
+      "query": {
+        "valueIds": [
+          "r2c2",
+          "r3c2"
+        ],
+        "unitIds": [
+          "r2c3",
+          "r3c3"
+        ],
+        "expectedUnit": "EUR",
+        "statedTotalId": "r4c2",
+        "statedUnitId": "r4c3"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "costs-wrong-total-unit.csv",
+      "file": "costs-wrong-total-unit.csv",
+      "adapter": "csv",
+      "query": {
+        "valueIds": [
+          "r2c2",
+          "r3c2"
+        ],
+        "unitIds": [
+          "r2c3",
+          "r3c3"
+        ],
+        "expectedUnit": "EUR",
+        "statedTotalId": "r4c2",
+        "statedUnitId": "r4c3"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    },
+    {
+      "id": "costs-revised.csv",
+      "file": "costs-revised.csv",
+      "adapter": "csv",
+      "query": {
+        "valueIds": [
+          "r2c2",
+          "r3c2"
+        ],
+        "unitIds": [
+          "r2c3",
+          "r3c3"
+        ],
+        "expectedUnit": "EUR",
+        "statedTotalId": "r4c2",
+        "statedUnitId": "r4c3"
+      },
+      "expected": {
+        "status": "supported",
+        "value": "32.30 EUR",
+        "ids": [
+          "r2c2",
+          "r3c2",
+          "r2c3",
+          "r3c3",
+          "r4c2",
+          "r4c3"
+        ]
+      }
+    },
+    {
+      "id": "derived-total",
+      "file": "costs.csv",
+      "adapter": "csv",
+      "query": {
+        "valueIds": [
+          "r2c2",
+          "r3c2"
+        ],
+        "unitIds": [
+          "r2c3",
+          "r3c3"
+        ],
+        "expectedUnit": "EUR"
+      },
+      "expected": {
+        "status": "supported",
+        "value": "30.30 EUR",
+        "ids": [
+          "r2c2",
+          "r3c2",
+          "r2c3",
+          "r3c3"
+        ]
+      }
+    },
+    {
+      "id": "absent-room",
+      "file": "room.dxf",
+      "adapter": "dxf",
+      "query": {
+        "roomNumber": "9.99"
+      },
+      "expected": {
+        "status": "abstained",
+        "value": null,
+        "ids": []
+      }
+    }
+  ]
+}
