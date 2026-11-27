@@ -28,4 +28,4 @@ Check prior issues, pull requests, source material and verified results before r
 
 ## Land a change
 
-From a clean task branch, install the locked dependencies with `npm ci --ignore-scripts` and run `npm run land`. The project helper validates the current source, runs the parallel test suite and squash-merges the PR pinned to its tested head. GitHub Actions and the historical CRACI workflows listed above are disabled. See [the active contributor contract](../../AGENTS.md) and [the landing helper](../../scripts/land.mjs).
+From a clean task branch, install the locked dependencies with `npm ci --ignore-scripts` and `npm ci --ignore-scripts --prefix templates/eve-chibi-agent`, then run `npm run land`. The project helper validates the current source, runs the parallel test suite and squash-merges the PR pinned to its tested head. GitHub Actions and the historical CRACI workflows listed above are disabled. See [the active contributor contract](../../AGENTS.md) and [the landing helper](../../scripts/land.mjs).
