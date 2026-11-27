@@ -148,14 +148,17 @@ ambiguity/tampering, citation forgery and broad-category/refund policy.
 Injected product functions exist only in negative unit tests; the CLI always
 uses the actual unchanged product imports.
 
-The tests deliberately assert that the base product's unsafe request routing
-is recorded as a **failed scorecard**, never recast as successful qualification.
-In particular, the product checks category/spending words before refusing
-actions: “Pay my electricity bill now”, “Transfer money…”, “Guarantee … safe …”,
-“another customer's groceries”, and “current overdraft limit” (substring `rent`
-in `current`) return a category, summary or budget. No action actually executes,
-but the required conversational refusal is absent. These are reproducible
-out-of-scope coach defects, not permission to edit the coach here.
+The initial qualification milestone recorded five unsafe request-routing
+defects as failed fictional scorecard cases. That original historical evidence
+is retained unchanged. The recovered product guard refuses the listed action
+patterns before monetary or category interpretation. Current fictional-fixture
+evaluation tests require those refusals; the official disjoint cohort remains
+UNQUALIFIED.
+
+Before the guard, payment, transfer, live-guarantee, other-customer and overdraft
+questions returned category, summary or budget answers. No bank action executed,
+but the required conversational refusal was absent. These historical coach
+defects are corrected in src/coach.mjs without adding bank actions.
 
 The report records the actual Git HEAD, clean/dirty state and SHA-256 of the
 executed coach, importer, oracle and runner. A run before the single milestone
@@ -213,3 +216,24 @@ an out-of-scope coach refusal repair. Another official qualification must also
 resolve the explicitly unqualified frozen category-coverage precondition with
 independently specified semantics/cohort; it must preserve this failed admission
 record and must not relabel the fixture evidence as sponsor evaluation.
+
+### Recovered action-refusal guard
+
+The original working-tree patch after the initial 30-case fictional result
+(25 PASS / 5 FAIL) contained the guard, targeted refusal tests and updated
+current-fixture expectations. Recovery preserves that patch separately and
+applies only these four source/test/documentation files to a pinned current
+main commit. It also fixes the Finnish verb boundary: JavaScript's ASCII
+word boundary did not match commands ending in an umlaut. Regression questions
+combine those commands with spending words to exercise the earlier leak.
+
+Listed imperative bank-action patterns, third-party requests, live guarantees
+and overdraft-limit requests return a source-free refusal before category or
+budget interpretation. This finite pattern guard is not a general natural-
+language safety classifier. Ordinary historical spending and illustrated
+budget questions retain their existing behavior.
+
+The original 25/5 fixture finding and official 0/0/30 UNQUALIFIED receipt remain
+unchanged historical measurements. The recovered source is checked separately
+with fictional fixtures; passing these tests is not official sponsor grading.
+Mapped necessity labels, real bank data and real accounts remain absent.
