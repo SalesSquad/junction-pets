@@ -87,6 +87,27 @@ function assertSuppressedPluginProof(plugin){
   assert.equal(plugin.verification,'source-file-only-no-install-proof');
 }
 
+test('pet roster isolates the named RML1 toolchain profile and rejects malformed or unknown files',async t=>{
+  const tmp=await fixtureRoot();
+  t.after(()=>rm(tmp,{recursive:true,force:true}));
+  const folder=join(tmp,'ops/environments');
+  const profileName='junction-verda-rml1.json';
+  const profile={schemaVersion:1,provider:'codex-cloud',desiredName:'junction-verda-rml1',
+    primaryRepository:REPOSITORY,repositories:[REPOSITORY],runtimeAuthorized:false};
+  await writeFile(join(folder,profileName),JSON.stringify(profile));
+  const manifests=await loadEnvironmentManifests(tmp);
+  assert.equal(manifests.length,34);
+  assert.equal(manifests.filter(m=>m.petSlug==='junction-verda').length,1);
+  await writeFile(join(folder,'unknown.json'),JSON.stringify(profile));
+  await assert.rejects(loadEnvironmentManifests(tmp),/Unknown environment manifest/);
+  await unlink(join(folder,'unknown.json'));
+  await writeFile(join(folder,profileName),JSON.stringify({...profile,petSlug:'junction-verda'}));
+  await assert.rejects(loadEnvironmentManifests(tmp),/Invalid Verda RML1 toolchain profile/);
+  await unlink(join(folder,profileName));
+  await writeFile(join(folder,'verda.json'),JSON.stringify({petSlug:42}));
+  await assert.rejects(loadEnvironmentManifests(tmp),/Manifest filename\/identity mismatch/);
+});
+
 test('34 individually scoped Codex Cloud declarations cover exact package roster',async()=>{
   const packs=await loadPackages(root),envs=await loadEnvironmentManifests(root);
   assert.equal(packs.length,34);
