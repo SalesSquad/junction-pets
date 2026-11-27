@@ -152,8 +152,24 @@ export function validateRegistry(packs,manifests) {
 export async function loadEnvironmentManifests(root){
   const dir=resolve(root,'ops/environments');
   const filenames=(await readdir(dir)).filter(name=>name.endsWith('.json')).sort();
-  const manifests=await Promise.all(filenames.map(name=>jsonFile(resolve(dir,name))));
-  for(let i=0;i<filenames.length;i++)required(filenames[i]===manifests[i].petSlug.slice('junction-'.length)+'.json','Manifest filename/identity mismatch: '+filenames[i]);
+  const records=await Promise.all(filenames.map(name=>jsonFile(resolve(dir,name))));
+  const manifests=[];
+  for(const [index,name] of filenames.entries()){
+    const record=records[index];
+    if(name==='junction-verda-rml1.json'){
+      // RML1's separately documented toolchain profile shares this directory with the pet roster.
+      required(record?.schemaVersion===1 && record.provider===CLOUD_PROVIDER &&
+        record.desiredName==='junction-verda-rml1' && record.primaryRepository===REPOSITORY &&
+        Array.isArray(record.repositories) && record.repositories.includes(REPOSITORY) &&
+        typeof record.runtimeAuthorized==='boolean' && !Object.hasOwn(record,'petSlug') &&
+        !Object.hasOwn(record,'agentId'),'Invalid Verda RML1 toolchain profile');
+      continue;
+    }
+    const company=name.slice(0,-'.json'.length);
+    required(EXPECTED_COMPANIES.includes(company),'Unknown environment manifest: '+name);
+    required(record?.petSlug==='junction-'+company,'Manifest filename/identity mismatch: '+name);
+    manifests.push(validateEnvironment(record,company));
+  }
   return manifests;
 }
 
