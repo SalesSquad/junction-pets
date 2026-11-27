@@ -1,5 +1,9 @@
 # AGENTS.md — Junction monorepo contributor contract
 
+<!-- agent-layout:entry:v1 -->
+Read the [project agent guide](docs/agent/README.md) for ownership, implementation paths, checks and research handoff.
+<!-- agent-layout:entry:end sha256=60ce9be3bafb1a943322cf7408e80073d1a46ad240d13fa86437f6a760d408c3 -->
+
 <!-- BEGIN AGENT-RDC-ROUTE v1 -->
 **Remote Desktop Commander for all agents:** For work needing an authorized Mac, Apple SDK/signing, simulator, GUI or existing local secrets, discover the connector in this session; call `list_devices`, select an online `deviceId`, then use `read_file` to read that Mac's installed `~/.agents/skills/remote-desktop-commander/SKILL.md` and `~/.agents/rules/shared.md` (host-specific absolute paths). Never copy keys, start a second agent or assume cached Mac access; if unavailable, report the exact blocker and continue portable work.
 **Fast development first:** Use this repository's smallest risk-relevant Rust/JS/Python check or supported unsigned Debug preview before choosing a full Xcode build. Apple SDK, iOS bindings/integration, signing and device acceptance still require their real native gates. `aarch64-apple-darwin` Rust tests are not iOS simulator tests; never claim an unrun gate passed. [Shared route](https://github.com/SalesSquad/agents/blob/main/docs/project-remote-access.md).
